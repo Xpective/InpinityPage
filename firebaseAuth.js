@@ -19,3 +19,8 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
+
+document.getElementById('loginButton').addEventListener('click', function(event) {
+  event.preventDefault(); // Verhindert das Standardverhalten des Links
+  signInWithGoogle();    // Ruft die Firebase-Authentifizierungsfunktion auf
+});
