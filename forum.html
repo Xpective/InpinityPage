@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+
+<body class="forum-page">
+    <!-- Header-Bereich -->
+    <header>
+        <nav>
+            <ul>
+                <li><a href="index.html">Startseite</a></li>
+                <li><a href="features.html">Features & Tools</a></li>
+                <li><a href="forum.html">Community</a></li>
+                <li><a href="contact.html">Kontakt</a></li>
+            </ul>
+        </nav>
+        <div id="walletStatus"></div>
+    </header>
+
+    <!-- Hauptinhalt -->
+    <main>
+        <!-- Forum Header -->
+        <section id="forum-header">
+            <h1>Community & Forum</h1>
+            <p>Tauschen Sie sich aus, stellen Sie Fragen und teilen Sie Ihr Wissen mit anderen Entwicklern!</p>
+            <div id="search-area">
+                <input type="text" id="search-input" placeholder="Suchen...">
+                <button id="search-button" class="forum-button primary">Suchen</button>
+            </div>
+        </section>
+
+        <!-- Aktionsschaltflächen -->
+        <section class="action-buttons">
+            <button class="forum-button primary">Neues Thema erstellen</button>
+            <button class="forum-button secondary">Antworten</button>
+        </section>
+
+        <!-- Forum-Kategorien -->
+        <section id="forum-categories">
+            <div class="category">
+                <h2>Allgemeine Diskussion</h2>
+                <p>Teilen Sie Gedanken, Ideen und allgemeine Fragen über Spieleentwicklung und mehr.</p>
+                <!--<div class="post-rating">
+                    <button class="upvote">🔺</button>
+                    <span class="rating-count">0</span>
+                    <button class="downvote">🔻</button>
+                </div>-->
+                <button class="mark-solution">Als Lösung markieren</button>
+            </div>
+            
+            <div class="category">
+                <h2>Technische Hilfe</h2>
+                <p>Suchen Sie technische Unterstützung oder haben Sie Lösungen? Dies ist Ihr Bereich.</p>
+                <!--<div class="post-rating">
+                    <button class="upvote">🔺</button>
+                    <span class="rating-count">0</span>
+                    <button class="downvote">🔻</button>
+                </div>-->
+                <button class="mark-solution">Als Lösung markieren</button>
+            </div>
+            
+            <div class="category">
+                <h2>Projekt-Showcase</h2>
+                <p>Stellen Sie Ihr aktuelles Projekt vor und erhalten Sie Feedback von der Community.</p>
+                <!--<div class="post-rating">
+                    <button class="upvote">🔺</button>
+                    <span class="rating-count">0</span>
+                    <button class="downvote">🔻</button>
+                </div>-->
+            </div>
+        </section>
+
+        <!-- Suchergebnisse -->
+        <section id="search-results">
+            <!-- Die Suchergebnisse werden hier dynamisch eingefügt -->
+        </section>
+        <script src="path/to/your/firebaseAuth.js"></script>
+
+    </main>
+
+    <!-- Footer-Bereich -->
+    <footer>
+        <p>&copy; 2023 Inpinity. Alle Rechte vorbehalten.</p>
+    </footer>
+</body>
+</html>

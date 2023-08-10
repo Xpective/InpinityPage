@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+    <link rel="stylesheet" href="styles.css">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kontakt</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="contact-page">
+    <header>
+        <nav>
+            <ul>
+                <li><a href="index.html">Startseite</a></li>
+                <li><a href="features.html">Features & Tools</a></li>
+                <li><a href="forum.html">Community</a></li>
+                <li><a href="contact.html">Kontakt</a></li>
+                <div id="walletStatus"></div>
+            </ul>
+        </nav>
+    </header>
+
+    <div id="hero" class="contact-container">
+        <h1>Kontakt</h1>
+        <p>Füllen Sie das folgende Formular aus, um uns zu kontaktieren.</p>
+    </div>
+
+    <div class="contact-container">
+        <form action="submit_form.php" method="POST">
+    
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+    
+            <div class="form-group">
+                <label for="email">E-Mail:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+    
+            <div class="form-group">
+                <label for="message">Nachricht:</label>
+                <textarea id="message" name="message" rows="4" required></textarea>
+            </div>
+    
+            <button class="cta-button" type="submit">Senden</button>
+        </form>
+    </div>
+    
+    <script src="path/to/your/firebaseAuth.js"></script>
+
+    <footer>
+        <p>&copy; 2023 Inpinity. Alle Rechte vorbehalten.</p>
+    </footer>
+</body>
+</html>

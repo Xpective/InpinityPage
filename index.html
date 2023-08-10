@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+    <link rel="stylesheet" href="styles.css">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inpinity - Tools for Game Developers</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="main.js" defer></script>
+    <!-- Firebase App (die Kern-Firebase-SDK) wird immer benötigt und muss zuerst gelistet sein -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+
+<!-- Fügen Sie die Firebase-Produkte hinzu, die Sie verwenden möchten -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+
+</head>
+
+<body>
+    <script>
+    function signInWithGoogle() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+    
+      firebase.auth().signInWithPopup(provider)
+        .then((result) => {
+          console.log('Erfolgreich angemeldet:', result.user);
+          // Weiterleiten oder weitere Aktionen durchführen
+        })
+        .catch((error) => {
+          console.error('Fehler bei der Anmeldung:', error);
+        });
+    }
+    </script>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="index.html">Startseite</a></li>
+                <li><a href="features.html">Features & Tools</a></li>
+                <li><a href="forum.html">Community</a></li>
+                <li><a href="contact.html">Kontakt</a></li>
+                <div id="walletStatus"></div>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="hero">
+            <h1>Entwickeln Sie Spiele effizienter mit Inpinity.</h1>
+            <p>Die beste Plattform für Game-Entwickler. Erstellen, Teilen, Wachsen.</p>
+            <a href="#signup" class="cta-button" onclick="signInWithGoogle()">Jetzt starten</a>
+            <button id="connectWallet">Wallet verbinden</button>
+        </section>
+        <section id="features">
+            <h2>Features</h2>
+            
+            <!-- Features der Plattform werden hier aufgelistet -->
+        </section>
+        <script src="path/to/your/firebaseAuth.js"></script>
+    </main>
+    <footer>
+        <p>&copy; 2023 Inpinity. Alle Rechte vorbehalten.</p>
+    </footer>
+</body>
+</html>
