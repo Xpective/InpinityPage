@@ -1,0 +1,339 @@
+body {
+    font-family: 'Poppins', sans-serif;
+    background: url('logo-01.jpg') no-repeat center center fixed;
+    background-size: cover;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Schwarzer Textschatten für bessere Lesbarkeit */
+    margin: 0;
+    padding: 0;
+}
+
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+header {
+    background-color: rgb(101, 52, 103);
+    padding: 20px 0;
+}
+
+nav {
+    max-width: 1200px;
+    margin: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#logo {
+    max-width: 150px;
+}
+
+nav ul {
+    list-style-type: none;
+    display: flex;
+    gap: 20px;
+}
+
+nav li a {
+    text-decoration: none;
+    color: white;
+    font-weight: 500;
+    padding: 8px 16px;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+nav li a:hover {
+    background-color: rgb(166, 139, 175);
+    border-color: white;
+}
+
+#hero {
+    max-width: 1200px;
+    margin: 100px auto;
+    text-align: center;
+}
+
+#hero h1 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+}
+
+#hero p {
+    font-size: 1.2em;
+    margin-bottom: 40px;
+}
+
+.cta-button {
+    background-color: rgb(30, 131, 170);
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.cta-button:hover {
+    background-color: rgb(20, 100, 140);
+}
+
+footer {
+    padding: 20px 0;
+    background-color: rgb(101, 52, 103);
+    text-align: center;
+    color: white;
+}
+/* Features & Tools Seite */
+
+#features-intro {
+    text-align: center;
+    margin: 60px 0;
+}
+
+#features-intro h1 {
+    font-size: 2.5em;
+}
+
+#tools-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.tool {
+    background-color: rgba(233, 231, 237, 0.8);
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.tool:hover {
+    transform: scale(1.05);
+}
+
+.tool h2 {
+    font-size: 1.8em;
+    margin-bottom: 15px;
+}
+
+.tool p {
+    font-size: 1.2em;
+    margin-bottom: 20px;
+}
+/* Forum Header */
+#forum-header {
+    text-align: center;
+    background-color: rgb(101, 52, 103);
+    color: rgb(233, 231, 237);
+    padding: 40px 0;
+}
+
+#forum-header h1 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+}
+
+#forum-header p {
+    font-size: 1.4em;
+}
+
+/* Forum Categories */
+#forum-categories {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+.category {
+    background-color: rgba(73, 40, 88, 0.7);
+    border: 1px solid rgba(73, 40, 88, 0.2);
+    border-radius: 10px;
+    padding: 20px;
+    transition: transform 0.3s ease;
+}
+
+.category:hover {
+    transform: scale(1.05);
+}
+
+.category h2 {
+    font-size: 1.8em;
+    color: rgb(239, 239, 239);
+    text-shadow: 2px 2px 2px rgb(0, 0, 0); /* Hinzugefügt */
+    margin-bottom: 10px;
+}
+
+.category p {
+    font-size: 1.2em;
+    color: rgb(239, 239, 239); /* von rgb(204, 203, 205) zu Weiß geändert */
+    text-shadow: 1px 1px 1px rgb(0, 0, 0); /* Hinzugefügt */
+}
+
+.forum-button {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background-color 0.7s ease;
+    cursor: pointer;
+}
+
+.forum-button.primary {
+    background-color: rgb(30, 131, 170);
+    color: white;
+}
+
+.forum-button.primary:hover {
+    background-color: rgb(20, 100, 140);
+}
+
+.forum-button.secondary {
+    background-color: rgba(233, 231, 237, 0.8);
+    color: rgb(73, 40, 88);
+}
+
+.forum-button.secondary:hover {
+    background-color: rgba(233, 231, 237, 0.6);
+}
+#connectWallet {
+    background-color: rgb(30, 131, 170);
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+}
+
+#connectWallet:hover {
+    background-color: rgb(20, 100, 140);
+}
+
+#walletStatus {
+    font-size: 14px;
+    margin-left: 10px;
+    color: white;
+}
+@media (max-width: 768px) {
+    nav ul {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+/* Styles für Handys */
+@media (max-width: 480px) {
+    nav ul {
+        gap: 5px;
+    }
+    #hero {
+        max-width: 90%;
+        margin: 50px auto;
+    }
+
+    img {
+    max-width: 100%;
+    height: auto;
+}
+.full-width-logo {
+    background-image: url('logo-01.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    height: 200px;
+}
+/* Contact page styles */
+/* Contact page styles */
+.contact-body {
+    background-image: url('logo-01.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    color: white;
+}
+
+.contact-container,
+#hero {
+    background-color: rgba(255, 255, 255, 0.8); /* Halbtransparenter weißer Hintergrund */
+    border-radius: 10px; /* Abgerundete Ecken */
+    padding: 20px; /* Innenabstand */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Leichter Schatten */
+    margin: 20px auto; /* Zentriert das Formular horizontal */
+    max-width: 600px; /* Maximale Breite des Formulars */
+}
+
+form label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: rgb(73, 40, 88); /* Farbanpassung für bessere Lesbarkeit */
+}
+
+form input, form textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid rgba(73, 40, 88, 0.6); /* Halbtransparenter Rand */
+    border-radius: 5px;
+    margin-bottom: 15px;
+    background-color: rgba(255, 255, 255, 0.7); /* Halbtransparenter weißer Hintergrund */
+}
+
+.cta-button {
+    background-color: rgb(30, 131, 170);
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.cta-button:hover {
+    background-color: rgb(20, 100, 140);
+}
+.form-group {
+    margin-bottom: 25px;  /* Erhöhen des Abstands zwischen den Formularelementen */
+}
+
+form label {
+    font-weight: bold;  /* Setzt die Schriftart der Labels auf fett */
+    display: block;    /* Stellt sicher, dass die Labels als Blockelemente angezeigt werden */
+    margin-bottom: 10px;  /* Fügt Abstand unter dem Label hinzu */
+}
+
+form input, form textarea {
+    width: 100%;
+    padding: 15px;  /* Erhöht die Polsterung innerhalb der Eingabefelder */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;  /* Erhöht die Schriftgröße in den Eingabefeldern */
+}
+.upvote, .downvote {
+    color: rgb(8, 230, 75); /* Oder jede andere Farbe, die zu Ihrem Design passt */
+    font-size: 20px; /* Oder jede andere gewünschte Größe */
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.upvote:hover, .downvote:hover {
+    color: rgb(252, 0, 0);
+}
+
+}

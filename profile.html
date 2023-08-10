@@ -1,0 +1,39 @@
+<link rel="stylesheet" href="styles.css">
+
+<section id="user-profile">
+    <div class="profile-header">
+        <img src="path-to-user-profile-image.jpg" alt="Benutzerprofilbild" id="user-profile-image">
+        <h2 id="username">Benutzername</h2>
+    </div>
+    <div class="profile-info">
+        <p><strong>Beitrittsdatum:</strong> Datum</p>
+        <p><strong>Beitragsanzahl:</strong> Anzahl</p>
+        <p><strong>Über mich:</strong> Eine kurze Beschreibung über den Benutzer.</p>
+    </div>
+    <button class="forum-button primary" id="edit-profile">Profil bearbeiten</button>
+</section>
+<section id="edit-user-profile" style="display:none;">
+    <h2>Profil bearbeiten</h2>
+    <form action="path-to-backend-function" method="POST">
+        <div class="form-group">
+            <label for="edit-username">Benutzername:</label>
+            <input type="text" id="edit-username" name="username" value="Benutzername">
+        </div>
+        <div class="form-group">
+            <label for="edit-description">Über mich:</label>
+            <textarea id="edit-description" name="description">Beschreibung hier</textarea>
+        </div>
+        <div class="form-group">
+            <label for="edit-profile-image">Profilbild ändern:</label>
+            <input type="file" id="edit-profile-image" name="profileImage">
+        </div>
+        <button type="submit" class="forum-button primary">Änderungen speichern</button>
+    </form>
+</section>
+
+<script>
+    document.getElementById('edit-profile').addEventListener('click', function() {
+        document.getElementById('user-profile').style.display = 'none';
+        document.getElementById('edit-user-profile').style.display = 'block';
+    });
+</script>
