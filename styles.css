@@ -1,3 +1,10 @@
+:root {
+    --main-bg-color: rgb(101, 52, 103);
+    --cta-color: rgb(30, 131, 170);
+    --text-color: #333;
+    --button-hover-color: #555;
+}
+
 body {
     font-family: 'Poppins', sans-serif;
     background: url('logo-01.jpg') no-repeat center center fixed;
