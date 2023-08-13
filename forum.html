@@ -1,93 +1,148 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Community</title>
+    <title>Inpinity - Forum</title>
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 
-
-<body class="forum-page">
-    <!-- Header-Bereich -->
+<body>
     <header>
         <nav>
             <ul>
                 <li><a href="index.html">Startseite</a></li>
-                <li><a href="features.html">Features & Tools</a></li>
-                <li><a href="forum.html">Community</a></li>
+                <li><a href="features.html">Features</a></li>
+                <li><a href="forum.html">Forum</a></li>
                 <li><a href="contact.html">Kontakt</a></li>
+                <div id="walletStatus"></div>
             </ul>
         </nav>
-        <div id="walletStatus"></div>
     </header>
 
-    <!-- Hauptinhalt -->
     <main>
-        <!-- Forum Header -->
-        <section id="forum-header">
-            <h1>Community & Forum</h1>
-            <p>Tauschen Sie sich aus, stellen Sie Fragen und teilen Sie Ihr Wissen mit anderen Entwicklern!</p>
-            <div id="search-area">
-                <input type="text" id="search-input" placeholder="Suchen...">
-                <button id="search-button" class="forum-button primary">Suchen</button>
-            </div>
+        <!-- Search function -->
+        <section id="forum-search">
+            <h2>Forum durchsuchen</h2>
+            <form>
+                <input type="text" id="searchQuery" placeholder="Suchen..." required>
+                <button type="submit" class="button">Suchen</button>
+            </form>
         </section>
 
-        <!-- Aktionsschaltflächen -->
-        <section class="action-buttons">
-            <button class="forum-button primary">Neues Thema erstellen</button>
-            <button class="forum-button secondary">Antworten</button>
-        </section>
-
-        <!-- Forum-Kategorien -->
+        <!-- Forum Categories & Topics -->
         <section id="forum-categories">
-            <div class="category">
-                <h2>Allgemeine Diskussion</h2>
-                <p>Teilen Sie Gedanken, Ideen und allgemeine Fragen über Spieleentwicklung und mehr.</p>
-                <!--<div class="post-rating">
-                    <button class="upvote">🔺</button>
-                    <span class="rating-count">0</span>
-                    <button class="downvote">🔻</button>
-                </div>-->
-                <button class="mark-solution">Als Lösung markieren</button>
-            </div>
-            
-            <div class="category">
-                <h2>Technische Hilfe</h2>
-                <p>Suchen Sie technische Unterstützung oder haben Sie Lösungen? Dies ist Ihr Bereich.</p>
-                <!--<div class="post-rating">
-                    <button class="upvote">🔺</button>
-                    <span class="rating-count">0</span>
-                    <button class="downvote">🔻</button>
-                </div>-->
-                <button class="mark-solution">Als Lösung markieren</button>
-            </div>
-            
-            <div class="category">
-                <h2>Projekt-Showcase</h2>
-                <p>Stellen Sie Ihr aktuelles Projekt vor und erhalten Sie Feedback von der Community.</p>
-                <!--<div class="post-rating">
-                    <button class="upvote">🔺</button>
-                    <span class="rating-count">0</span>
-                    <button class="downvote">🔻</button>
-                </div>-->
-            </div>
+            <h2>Forum-Kategorien</h2>
+            <ul>
+                <li><a href="#">Allgemeine Diskussion</a></li>
+                <li><a href="#">Technische Hilfe</a></li>
+                <li><a href="#">Neue Features</a></li>
+                <!-- ... other categories ... -->
+            </ul>
         </section>
 
-        <!-- Suchergebnisse -->
-        <section id="search-results">
-            <!-- Die Suchergebnisse werden hier dynamisch eingefügt -->
+        <!-- Latest Posts -->
+        <section id="latest-posts">
+            <h2>Neueste Beiträge</h2>
+            <ul>
+                <li><a href="#">Wie kann ich mein Konto sichern?</a></li>
+                <li><a href="#">Neue Features im letzten Update</a></li>
+                <li><a href="#">Feedback zum Design</a></li>
+                <!-- ... other latest posts ... -->
+            </ul>
         </section>
-        <script src="path/to/your/firebaseAuth.js"></script>
 
+        <!-- Registration & Login -->
+        <section id="forum-auth">
+            <h2>Registrieren oder Anmelden</h2>
+            <p>Um Beiträge zu erstellen oder zu antworten, <a href="#">registrieren</a> Sie sich oder <a href="#">melden Sie sich an</a>.</p>
+        </section>
+
+        <!-- Rules & Guidelines -->
+        <section id="forum-rules">
+            <h2>Regeln und Richtlinien</h2>
+            <p>Bitte beachten Sie die <a href="#">Forumregeln</a> bevor Sie einen Beitrag erstellen oder antworten.</p>
+        </section>
+
+        <!-- User Ratings - Placeholder -->
+        <section id="user-ratings">
+            <h2>Top bewertete Beiträge</h2>
+            <ul>
+                <li><a href="#">Hilfreicher Beitrag über Sicherheit</a></li>
+                <li><a href="#">Wie man das Beste aus Inpinity herausholt</a></li>
+                <!-- ... other top-rated posts ... -->
+            </ul>
+        </section>
+
+        <!-- Post Filters - Placeholder -->
+        <section id="post-filters">
+            <h2>Filter</h2>
+            <button class="button">Neueste</button>
+            <button class="button">Beliebteste</button>
+            <button class="button">Unbeantwortet</button>
+        </section>
+
+        <!-- Sticky Posts - Placeholder -->
+        <section id="sticky-posts">
+            <h2>Wichtige Beiträge</h2>
+            <ul>
+                <li><a href="#">Forumregeln und Richtlinien</a></li>
+                <li><a href="#">Wie man Inpinity optimal nutzt</a></li>
+                <!-- ... other sticky posts ... -->
+            </ul>
+        </section>
+
+        <!-- Notifications - Placeholder -->
+        <section id="notifications">
+            <h2>Benachrichtigungen</h2>
+            <p><a href="#">Klicken Sie hier</a>, um Benachrichtigungen zu abonnieren.</p>
+        </section>
+
+        <!-- Profile Pictures & Signatures - Placeholder -->
+        <section id="user-profile">
+            <h2>Benutzerprofile</h2>
+            <div class="user">
+                <img src="path/to/profile-image.jpg" alt="Benutzerbild">
+                <p>Benutzername</p>
+                <p>Signatur des Benutzers hier...</p>
+            </div>
+            <!-- ... other user profiles ... -->
+        </section>
+
+        <!-- Private Messages - Placeholder -->
+        <section id="private-messages">
+            <h2>Private Nachrichten</h2>
+            <p><a href="#">Klicken Sie hier</a>, um Ihre privaten Nachrichten zu sehen.</p>
+        </section>
+
+        <!-- Topic Subscriptions - Placeholder -->
+        <section id="topic-subscriptions">
+            <h2>Themen-Abonnements</h2>
+            <p><a href="#">Klicken Sie hier</a>, um Ihre abonnierten Themen zu sehen.</p>
+        </section>
+
+        <!-- User Groups & Roles - Placeholder -->
+        <section id="user-groups">
+            <h2>Benutzergruppen</h2>
+            <ul>
+                <li>Neumitglieder - können Beiträge lesen und erstellen.</li>
+                <li>Mitglieder - können Beiträge lesen, erstellen und bearbeiten.</li>
+                <li>Moderatoren - können Beiträge löschen und verschieben.</li>
+                <li>Administratoren - haben vollen Zugriff auf das Forum.</li>
+            </ul>
+        </section>
+
+        <!-- Spam & Abuse Protection - Placeholder -->
+        <section id="spam-protection">
+            <h2>Spam- und Missbrauchsschutz</h2>
+            <p>Unser Forum hat automatische Mechanismen, um Spam zu erkennen und zu verhindern. Wenn Sie einen Beitrag sehen, der gegen die Regeln verstößt, <a href="#">melden Sie ihn bitte</a>.</p>
+        </section>
     </main>
 
-    <!-- Footer-Bereich -->
     <footer>
         <p>&copy; 2023 Inpinity. Alle Rechte vorbehalten.</p>
     </footer>
 </body>
+
 </html>
