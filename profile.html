@@ -1,46 +1,72 @@
-<link rel="stylesheet" href="styles.css">
+<!DOCTYPE html>
+<html lang="en">
 
-<section id="user-profile">
-    <div class="profile-header">
-        <img src="path-to-user-profile-image.jpg" alt="Benutzerprofilbild" id="user-profile-image">
-        <h2 id="username">Benutzername</h2>
-    </div>
-    <div class="profile-info">
-        <p><strong>Beitrittsdatum:</strong> Datum</p>
-        <p><strong>Beitragsanzahl:</strong> Anzahl</p>
-        <p><strong>Über mich:</strong> Eine kurze Beschreibung über den Benutzer.</p>
-    </div>
-    <button class="forum-button primary" id="edit-profile">Profil bearbeiten</button>
-</section>
-<section id="edit-user-profile" style="display:none;">
-    <h2>Profil bearbeiten</h2>
-    <form action="path-to-backend-function" method="POST">
-        <div class="form-group">
-            <label for="edit-username">Benutzername:</label>
-            <input type="text" id="edit-username" name="username" value="Benutzername">
-        </div>
-        <div class="form-group">
-            <label for="edit-description">Über mich:</label>
-            <textarea id="edit-description" name="description">Beschreibung hier</textarea>
-        </div>
-        <div class="form-group">
-            <label for="edit-profile-image">Profilbild ändern:</label>
-            <input type="file" id="edit-profile-image" name="profileImage">
-        </div>
-        <button type="submit" class="forum-button primary">Änderungen speichern</button>
-    </form>
-    <form action="register.php" method="post">
-        Benutzername: <input type="text" name="username" required><br>
-        E-Mail: <input type="email" name="email" required><br>
-        Passwort: <input type="password" name="password" required><br>
-        <input type="submit" value="Registrieren">
-    </form>
-    
-</section>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inpinity - Benutzerprofil</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
 
-<script>
-    document.getElementById('edit-profile').addEventListener('click', function() {
-        document.getElementById('user-profile').style.display = 'none';
-        document.getElementById('edit-user-profile').style.display = 'block';
-    });
-</script>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="index.html">Startseite</a></li>
+                <li><a href="features.html">Features</a></li>
+                <li><a href="forum.html">Forum</a></li>
+                <li><a href="contact.html">Kontakt</a></li>
+                <div id="walletStatus"></div>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="user-profile">
+            <h1>Benutzerprofil</h1>
+            <form id="profileForm">
+                <!-- Avatar section -->
+                <div class="profile-field">
+                    <img src="path/to/user-avatar.png" alt="Benutzer Avatar" id="userAvatar">
+                    <input type="file" id="avatarUpload"> <!-- Option to upload a new avatar -->
+                </div>
+                
+                <!-- User details section -->
+                <div class="profile-field">
+                    <label for="username">Benutzername:</label>
+                    <input type="text" id="username" required>
+                </div>
+                
+                <div class="profile-field">
+                    <label for="email">E-Mail:</label>
+                    <input type="email" id="email" required>
+                </div>
+
+                <div class="profile-field">
+                    <label for="currentPassword">Aktuelles Passwort:</label>
+                    <input type="password" id="currentPassword">
+                </div>
+                
+                <div class="profile-field">
+                    <label for="newPassword">Neues Passwort:</label>
+                    <input type="password" id="newPassword">
+                </div>
+
+                <div class="profile-field">
+                    <label for="confirmPassword">Passwort bestätigen:</label>
+                    <input type="password" id="confirmPassword">
+                </div>
+
+                <button type="submit" class="button">Änderungen speichern</button>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2023 Inpinity. Alle Rechte vorbehalten.</p>
+    </footer>
+
+    <script src="path/to/your/firebaseAuth.js"></script>
+</body>
+
+</html>
