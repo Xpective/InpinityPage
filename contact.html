@@ -1,58 +1,160 @@
 <!DOCTYPE html>
 <html lang="en">
-    <link rel="stylesheet" href="styles.css">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kontakt</title>
+    <title>Inpinity - Kontakt</title>
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="contact-page">
+
+<body>
     <header>
         <nav>
             <ul>
                 <li><a href="index.html">Startseite</a></li>
-                <li><a href="features.html">Features & Tools</a></li>
-                <li><a href="forum.html">Community</a></li>
+                <li><a href="features.html">Features</a></li>
+                <li><a href="forum.html">Forum</a></li>
                 <li><a href="contact.html">Kontakt</a></li>
                 <div id="walletStatus"></div>
             </ul>
         </nav>
     </header>
 
-    <div id="hero" class="contact-container">
-        <h1>Kontakt</h1>
-        <p>Füllen Sie das folgende Formular aus, um uns zu kontaktieren.</p>
-    </div>
+    <main>
+        <section id="contact-form">
+            <h1>Kontaktieren Sie uns</h1>
+            <form>
+                <div class="contact-field">
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" required>
+                </div>
+                
+                <div class="contact-field">
+                    <label for="email">E-Mail:</label>
+                    <input type="email" id="email" required>
+                </div>
 
-    <div class="contact-container">
-        <form action="submit_form.php" method="POST">
-    
-            <div class="form-group">
-                <label for="name">Name:</label>
-                <input type="text" id="name" name="name" required>
-            </div>
-    
-            <div class="form-group">
-                <label for="email">E-Mail:</label>
-                <input type="email" id="email" name="email" required>
-            </div>
-    
-            <div class="form-group">
-                <label for="message">Nachricht:</label>
-                <textarea id="message" name="message" rows="4" required></textarea>
-            </div>
-    
-            <button class="cta-button" type="submit">Senden</button>
-        </form>
-    </div>
-    
-    <script src="path/to/your/firebaseAuth.js"></script>
+                <div class="contact-field">
+                    <label for="subject">Betreff:</label>
+                    <input type="text" id="subject" required>
+                </div>
+
+                <div class="contact-field">
+                    <label for="message">Nachricht:</label>
+                    <textarea id="message" rows="5" required></textarea>
+                </div>
+
+                <!-- CAPTCHA can be added here for spam prevention -->
+
+                <button type="submit" class="button">Senden</button>
+            </form>
+        </section>
+
+        <section id="contact-info">
+            <h2>Kontaktinformationen</h2>
+            <p>Telefon: +123456789</p>
+            <p>E-Mail: info@inpinity.com</p>
+            <address>
+                Inpinity Corp,<br>
+                123 Inpinity Street,<br>
+                Berlin, Germany
+            </address>
+        </section>
+
+        <section id="social-media">
+            <h2>Folgen Sie uns</h2>
+            <a href="#">Facebook</a>
+            <a href="#">Twitter</a>
+            <a href="#">Instagram</a>
+            <!-- ... other social media links ... -->
+        </section>
+
+        <section id="faq">
+            <h2>Häufig gestellte Fragen (FAQ)</h2>
+            <details>
+                <summary>Wie kann ich mein Passwort zurücksetzen?</summary>
+                <p>Um Ihr Passwort zurückzusetzen, klicken Sie auf "Passwort vergessen" auf der Anmeldeseite und folgen Sie den Anweisungen.</p>
+            </details>
+            <!-- ... more FAQs can be added ... -->
+        </section>
+    </main>
 
     <footer>
         <p>&copy; 2023 Inpinity. Alle Rechte vorbehalten.</p>
     </footer>
 </body>
+
 </html>
+<!-- Interactive Map - Placeholder (Requires actual map integration) -->
+        <section id="location-map">
+            <h2>Unser Standort</h2>
+            <div id="interactiveMap" style="width: 100%; height: 400px; background-color: #e0e0e0;">
+                <!-- Placeholder for interactive map -->
+                <p>Interaktive Karte hier...</p>
+            </div>
+        </section>
+
+        <!-- Live Chat - Placeholder (Requires actual chat integration) -->
+        <section id="live-chat">
+            <h2>Chatte mit uns</h2>
+            <div id="chatBox" style="width: 100%; height: 400px; background-color: #f5f5f5;">
+                <!-- Placeholder for live chat -->
+                <p>Live-Chat-Widget hier...</p>
+            </div>
+        </section>
+
+        <!-- Feedback option -->
+        <section id="feedback">
+            <h2>Gib uns Feedback</h2>
+            <form>
+                <div class="contact-field">
+                    <label for="feedbackMessage">Deine Meinung:</label>
+                    <textarea id="feedbackMessage" rows="5" required></textarea>
+                </div>
+                <button type="submit" class="button">Feedback senden</button>
+            </form>
+        </section>
+
+        <!-- Response Time -->
+        <section id="response-time">
+            <p>Wir bemühen uns, alle Anfragen innerhalb von 24 Stunden zu beantworten.</p>
+        </section>
+
+        <!-- Privacy Notice -->
+        <section id="privacy-notice">
+            <p>Wir nehmen den Schutz Ihrer Daten ernst. Erfahren Sie mehr in unserer <a href="path/to/privacy-policy.html">Datenschutzerklärung</a>.</p>
+        </section>
+
+        <!-- Contact Alternatives -->
+        <section id="contact-alternatives">
+            <h2>Weitere Kontaktmöglichkeiten</h2>
+            <p>Skype: unser_skype_name</p>
+            <p>WhatsApp: +1234567890</p>
+            <!-- ... other contact methods ... -->
+        </section>
+
+        <!-- Testimonials - Placeholder (Actual testimonials can be added) -->
+        <section id="testimonials">
+            <h2>Was unsere Kunden sagen</h2>
+            <blockquote>
+                <p>"Diese Plattform ist fantastisch! Ich habe so viel gelernt und die Unterstützung ist erstklassig!"</p>
+                <footer>- Zufriedener Kunde</footer>
+            </blockquote>
+            <!-- ... more testimonials ... -->
+        </section>
+
+        <!-- Dynamic FAQ - Placeholder (Requires actual searchable database) -->
+        <section id="dynamic-faq">
+            <h2>Häufig gestellte Fragen (FAQ)</h2>
+            <input type="search" id="faqSearch" placeholder="Suche nach Fragen...">
+            <!-- Placeholder for dynamic FAQ search results -->
+            <div id="faqResults">
+                <details>
+                    <summary>Wie kann ich mein Passwort zurücksetzen?</summary>
+                    <p>Um Ihr Passwort zurückzusetzen, klicken Sie auf "Passwort vergessen" auf der Anmeldeseite und folgen Sie den Anweisungen.</p>
+                </details>
+                <!-- ... more FAQs can be added ... -->
+            </div>
+        </section>
+    </main>
