@@ -22,6 +22,7 @@ async function connectWallet() {
         };
     }
 }
+
 async function getEthBalance(address) {
     if (window.ethereum) {
         try {
@@ -43,8 +44,12 @@ document.addEventListener('DOMContentLoaded', function () {
     walletButton.addEventListener('click', async () => {
         const walletResponse = await connectWallet();
         if (walletResponse.address) {
+            // Abrufen des Ether-Saldos für die Adresse
             const balance = await getEthBalance(walletResponse.address);
-            document.querySelector('.wallet-address').textContent = 'Wallet Connected: ' + walletResponse.address + ' | Saldo: ' + balance + ' ETH';
+            // Anzeigen der Wallet-Adresse und des Saldos
+            document.querySelector('.wallet-address').textContent = 'Wallet Connected: ' + walletResponse.address;
+            // Hier fügen wir den Saldo ein
+            document.querySelector('.wallet-balance').textContent = 'Saldo: ' + balance + ' ETH';
         } else {
             alert(walletResponse.status);
         }
