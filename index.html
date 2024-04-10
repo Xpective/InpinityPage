@@ -89,6 +89,7 @@
                     }
                 </style>
                 <script>
+                    
                     // JavaScript to Change the Theme based on Dot Click
                     document.querySelector('.themeDots .dot.light').addEventListener('click', function() {
                         document.body.setAttribute('data-theme', 'light');
@@ -102,7 +103,7 @@
                         document.body.setAttribute('data-theme', 'basic');
                     });
                 </script>
-
+                <script defer src="/wallet.js"></script>
 
             </ul>
         </nav>
@@ -114,9 +115,9 @@
                 <h1>Entwickeln Sie Spiele effizienter mit Inpinity.</h1>
                 <h2> beste Plattform für Game-Entwickler. Erstellen, Teilen, Wachsen.</p></h2></div>
             <div class="button-wrapper">    
-                <p></p><a class="cta-button" href="#">Jetzt starten</a>
-                <p></p><a class="cta-button" href="#">Wallet verbinden</a>
+            <a class="cta-button wallet-connect" href="#">Wallet verbinden</a>
             </div>
+            <div class="wallet-address"></div>
         </section>
         <section>
             <h2 class="hero-title">Scrollen Sie um mehr zu erfahren</h2>
