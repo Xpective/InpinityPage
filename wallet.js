@@ -22,6 +22,53 @@ async function connectWallet() {
         };
     }
 }
+// Dieses Beispiel verwendet Web3.js 1.x
+// Stelle sicher, dass Web3 korrekt initialisiert wurde, wie im vorherigen Schritt beschrieben
+
+async function getBalance(token, address) {
+    let web3;
+    if (token === 'ETH') {
+        web3 = new Web3(window.ethereum);
+    } else if (token === 'BNB') {
+        web3 = new Web3(new Web3.providers.HttpProvider('https://bsc-dataseed.binance.org/'));
+    } else if (token === 'MATIC') {
+        web3 = new Web3(new Web3.providers.HttpProvider('https://rpc-mainnet.maticvigil.com/'));
+    } else {
+        return;
+    }
+
+    try {
+        const balance = await web3.eth.getBalance(address);
+        const formattedBalance = web3.utils.fromWei(balance, 'ether');
+        return formattedBalance;
+    } catch (error) {
+        console.error(`Fehler beim Abrufen des Saldos für ${token}:`, error);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const walletButton = document.querySelector('.cta-button.wallet-connect');
+    walletButton.addEventListener('click', async () => {
+        const walletResponse = await connectWallet();
+        if (walletResponse.address) {
+            document.getElementById('wallet-address').textContent = walletResponse.address;
+            
+            // ETH Saldo
+            const ethBalance = await getBalance('ETH', walletResponse.address);
+            document.getElementById('eth-balance').textContent = ethBalance;
+            
+            // BNB Saldo
+            const bnbBalance = await getBalance('BNB', walletResponse.address);
+            document.getElementById('bnb-balance').textContent = bnbBalance;
+            
+            // MATIC Saldo
+            const maticBalance = await getBalance('MATIC', walletResponse.address);
+            document.getElementById('matic-balance').textContent = maticBalance;
+        } else {
+            alert(walletResponse.status);
+        }
+    });
+});
 
 async function getEthBalance(address) {
     if (window.ethereum) {
