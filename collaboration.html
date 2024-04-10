@@ -15,7 +15,6 @@
     <link rel="stylesheet" href="css/color.css">
     <link rel="icon" type="image/png" href="favicon.webp">
     <script src="https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js"></script>
-    <script defer src="main.js"></script>
 </head>
 
 <body>
@@ -29,78 +28,13 @@
                 <li><a aria-label="Zusammenarbeit" href="collaboration.html">Zusammenarbeit</a></li>
                 <li><a aria-label="Registrieren" href="register.html">Registrieren</a></li>
                 <li><a aria-label="Über uns" href="about.html">Über uns</a></li>
-                <div class="themeDots">
-                    <div class="dot light" title="Light Theme"></div>
-                    <div class="dot dark" title="Dark Theme"></div>
-                    <div class="dot basic" title="Basic Theme"></div>
-                </div>
-                <style>
-                    .themeDots .dot {
-                        display: inline-block;
-                        width: 20px;
-                        height: 20px;
-                        border-radius: 50%;
-                        margin: 5px;
-                        cursor: pointer;
-                        transition: transform 0.2s;
-                    }
-                
-                    .themeDots .dot.light {
-                        background-color: #FFFFFF; /* White for Light Theme */
-                    }
-                
-                    .themeDots .dot.dark {
-                        background-color: #000000; /* Black for Dark Theme */
-                    }
-                
-                    .themeDots .dot.basic {
-                        background-color: var(--quinary-color); /* Gold color for Basic Theme */
-                    }
-                
-                    .themeDots .dot:hover {
-                        transform: scale(1.2);
-                    }
-                </style>
-                <script>
-                    
-                    // JavaScript to Change the Theme based on Dot Click
-                    document.querySelector('.themeDots .dot.light').addEventListener('click', function() {
-                        document.body.setAttribute('data-theme', 'light');
-                    });
-                
-                    document.querySelector('.themeDots .dot.dark').addEventListener('click', function() {
-                        document.body.setAttribute('data-theme', 'dark');
-                    });
-                
-                    document.querySelector('.themeDots .dot.basic').addEventListener('click', function() {
-                        document.body.setAttribute('data-theme', 'basic');
-                    });
-                </script>
-                <script defer src="/wallet.js"></script>
-                <button id="generateNft">NFT generieren</button>
-<div id="nftResult"></div>
-<script>
-document.getElementById('generateNft').addEventListener('click', function() {
-    fetch('https://nft.s-plat.workers.dev/', { // Die URL Ihres Workers einfügen
-        method: 'POST', // Anpassen basierend auf Ihrem Worker-Setup
-    })
-    .then(response => response.json())
-    .then(data => {
-        // Hier Ihren Code einfügen, um den NFT und Metadaten anzuzeigen
-        const nftResultDiv = document.getElementById('nftResult');
-        // Nehmen wir an, dass `data` die URL zum Bild und Metadaten enthält
-        nftResultDiv.innerHTML = `
-          <img src="${data.imageUrl}" alt="Generierter NFT" />
-          <pre>${JSON.stringify(data.metadata, null, 2)}</pre>
-        `;
-    })
-    .catch((error) => {
-        console.error('Fehler:', error);
-    });
-});
-</script>
             </ul>
         </nav>
+        <div class="themeDots">
+            <div class="dot light" title="Light Theme"></div>
+            <div class="dot dark" title="Dark Theme"></div>
+            <div class="dot basic" title="Basic Theme"></div>
+        </div>
     </header>
     <main>
         <section class="hero">
@@ -126,16 +60,39 @@ document.getElementById('generateNft').addEventListener('click', function() {
         </section>
     </main>
     
-<footer>
-    <p>© 2023 Inpinity. Alle Rechte vorbehalten.</p>
-    <div class="footer-links">
-        <a href="privacypolicy.html">Datenschutzrichtlinien</a>
-        <a href="termsofuse.html">Nutzungsbedingungen</a>
-        <a href="contact.html">Kontakt</a>
-    </div>
-</footer>
+    <footer>
+        <p>© 2023 Inpinity. Alle Rechte vorbehalten.</p>
+        <div class="footer-links">
+            <a href="privacypolicy.html">Datenschutzrichtlinien</a>
+            <a href="termsofuse.html">Nutzungsbedingungen</a>
+            <a href="contact.html">Kontakt</a>
+        </div>
+    </footer>
+    
+    <script defer src="main.js"></script>
+    <script defer src="/wallet.js"></script>
+    <button id="generateNft">NFT generieren</button>
+    <div id="nftResult"></div>
     <script>
-        // JavaScript für spezifische Interaktivität der Seite, falls benötigt
+        document.getElementById('generateNft').addEventListener('click', function() {
+            fetch('https://nft.s-plat.workers.dev/', { // Die URL Ihres Workers einfügen
+                method:'POST', // Anpassen basierend auf Ihrem Worker-Setup
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                const nftResultDiv = document.getElementById('nftResult');
+                nftResultDiv.innerHTML = `
+                    <img src="${data.imageUrl}" alt="Generierter NFT" style="max-width:100%;"/>
+                    <pre>${JSON.stringify(data.metadata, null, 2)}</pre>
+                `;
+            })
+            .catch((error) => {
+                console.error('Fehler:', error);
+            });
+        });
     </script>
 </body>
 
