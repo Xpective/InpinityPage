@@ -22,14 +22,31 @@ async function connectWallet() {
         };
     }
 }
+async function getEthBalance(address) {
+    if (window.ethereum) {
+        try {
+            const balance = await window.ethereum.request({
+                method: 'eth_getBalance',
+                params: [address, 'latest']
+            });
+            const ethBalance = window.web3.utils.fromWei(balance, 'ether');
+            return ethBalance;
+        } catch (err) {
+            console.error(err);
+            return 'Fehler beim Abrufen des Saldos';
+        }
+    }
+}
 
 document.addEventListener('DOMContentLoaded', function () {
     const walletButton = document.querySelector('.cta-button.wallet-connect');
     walletButton.addEventListener('click', async () => {
         const walletResponse = await connectWallet();
-        alert(walletResponse.status);
         if (walletResponse.address) {
-            document.querySelector('.wallet-address').textContent = 'Wallet Connected: ' + walletResponse.address;
+            const balance = await getEthBalance(walletResponse.address);
+            document.querySelector('.wallet-address').textContent = 'Wallet Connected: ' + walletResponse.address + ' | Saldo: ' + balance + ' ETH';
+        } else {
+            alert(walletResponse.status);
         }
     });
 });
