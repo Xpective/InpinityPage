@@ -77,7 +77,23 @@
                     });
                 </script>
                 <script defer src="/wallet.js"></script>
-
+                <button id="generateNft">NFT generieren</button>
+<div id="nftResult"></div>
+<script>
+document.getElementById('generateNft').addEventListener('click', function() {
+    fetch('https://your-worker.your-subdomain.workers.dev', { // Die URL Ihres Workers einfügen
+        method: 'POST', // Anpassen basierend auf Ihrem Worker-Setup
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Hier Ihren Code einfügen, um den NFT und Metadaten anzuzeigen
+        console.log(data);
+    })
+    .catch((error) => {
+        console.error('Fehler:', error);
+    });
+});
+</script>
             </ul>
         </nav>
     </header>
