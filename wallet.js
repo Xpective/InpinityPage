@@ -20,6 +20,40 @@ async function switchToBinanceSmartChain() {
         console.error('Fehler beim Wechseln des Netzwerks:', error);
     }
 }
+async function switchToPolygon() {
+    try {
+        await window.ethereum.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: '0x89' }], // Chain ID für Polygon Mainnet
+        });
+    } catch (error) {
+        // Behandlung des Fehlers, wenn das Netzwerk nicht gewechselt werden kann
+        // Zum Beispiel, wenn das Polygon-Netzwerk nicht im Wallet des Benutzers konfiguriert ist
+        console.error('Fehler beim Wechseln des Netzwerks zu Polygon:', error);
+
+        // Optional: Füge das Polygon-Netzwerk zum Wallet hinzu, falls es noch nicht konfiguriert ist
+        if (error.code === 4902) {
+            try {
+                await window.ethereum.request({
+                    method: 'wallet_addEthereumChain',
+                    params: [{
+                        chainId: '0x89',
+                        chainName: 'Polygon Mainnet',
+                        nativeCurrency: {
+                            name: 'Polygon',
+                            symbol: 'MATIC', // Symbol von Polygon
+                            decimals: 18,
+                        },
+                        rpcUrls: ['https://polygon-rpc.com/'], // RPC URL von Polygon
+                        blockExplorerUrls: ['https://polygonscan.com/'], // Block Explorer URL
+                    }],
+                });
+            } catch (addError) {
+                console.error('Fehler beim Hinzufügen des Polygon-Netzwerks:', addError);
+            }
+        }
+    }
+}
 
 // Ähnlich für Polygon (MATIC) mit der entsprechenden chainId
 // Funktion zum Verbinden des Wallets
