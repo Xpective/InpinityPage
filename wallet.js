@@ -22,14 +22,13 @@ async function connectWallet() {
     }
 }
 
-// Diese Funktion aktualisiert die UI nach dem erfolgreichen Verbinden des Wallets
-function updateUIAfterWalletConnected(address) {
+async function updateUIAfterWalletConnected(address) {
     document.getElementById('wallet-address').textContent = address || "Nicht verbunden";
-    // Ruft den Saldo für ETH ab und aktualisiert die UI entsprechend
-    getBalance('ETH', address).then(balance => {
-        document.getElementById('eth-balance').textContent = balance + ' ETH';
-    });
-    // Für BNB und MATIC müssen entsprechende Netzwerkwechsel und Abfragen hinzugefügt werden
+    const tokens = ['ETH', 'BNB', 'MATIC'];
+    for (const token of tokens) {
+        const balance = await getBalance(token, address);
+        document.getElementById(`${token.toLowerCase()}-balance`).textContent = `${balance} ${token}`;
+    }
 }
 
 async function getBalance(token, address) {
@@ -37,11 +36,15 @@ async function getBalance(token, address) {
         console.error("Token nicht unterstützt");
         return 'Token nicht unterstützt';
     }
-
-    // Der Netzwerkwechsel für BNB und MATIC wird hier notwendig
-    const chainId = token === 'ETH' ? '0x1' : token === 'BNB' ? '0x38' : '0x89';
-    await switchNetwork(chainId);
     
+    const networkIds = {
+        'ETH': '0x1',
+        'BNB': '0x38',
+        'MATIC': '0x89'
+    };
+    
+    await switchNetwork(networkIds[token]);
+
     try {
         const balance = await web3.eth.getBalance(address);
         return web3.utils.fromWei(balance, 'ether');
@@ -59,7 +62,21 @@ async function switchNetwork(chainId) {
         });
     } catch (error) {
         if (error.code === 4902) {
-            alert("Das benötigte Netzwerk ist nicht in MetaMask konfiguriert. Bitte füge es manuell hinzu.");
+            try {
+                // Versuch, das Netzwerk hinzuzufügen, falls es nicht vorhanden ist
+                // Diese Funktionalität kann je nach Anwendungsfall erweitert werden
+                await window.ethereum.request({
+                    method: 'wallet_addEthereumChain',
+                    params: [
+                        {
+                            chainId: chainId,
+                            // Weitere Parameter für das Netzwerk können hier hinzugefügt werden
+                        },
+                    ],
+                });
+            } catch (addError) {
+                console.error(`Fehler beim Hinzufügen des Netzwerks: ${addError.message}`);
+            }
         } else {
             console.error(`Fehler beim Wechseln des Netzwerks: ${error.message}`);
         }
