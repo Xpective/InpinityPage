@@ -1,20 +1,159 @@
+/* Grundlegende Stil-Definitionen */
 :root {
-    --main-bg-color: rgb(101, 52, 103);
-    --cta-color: rgb(30, 131, 170);
-    --text-color: #333;
-    --button-hover-color: #555;
+    --primary-color: #452554;
+    --primary-color-transparent: rgba(69, 37, 84, 0.5);
+    --secondary-color: #7967A1;
+    --tertiary-color: #E8E2E6;
+    --quaternary-color: #F8F1FA;
+    --quaternary-color-transparento5: rgba(248, 241, 250, 0.5);
+    --quaternary-color-transparento25:  rgba(248, 241, 250, 0.25);
+    --quinary-color: #1b82aa;
+    --quinary-color-transparent: rgba(27, 130, 170, 0.5); 
+    --complementary-primary: #badaab;
+    --background-color: #452554;
+    --text-color: hsl(0, 0%, 100%);
+
+    --font-size-base: 16px;
+    --font-size-large: calc(1.618 * var(--font-size-base));
+    --font-size-xlarge: calc(1.618 * var(--font-size-large));
+    --font-size-xxlarge: 67.77px;
+    --font-size-zxlarge: 109.66px;
+    --font-size-small: calc(var(--font-size-base) / 1.618);
+    --font-size-xsmall: calc(var(--font-size-small) / 1.618);
+    --font-size-xxsmall: 6.11px;
+    /* Abstände basierend auf Phi */
+    --space-base: 1rem;
+    --space-large: 1.618rem;
+    --space-xlarge: 2.618rem;
+    --space-xxlarge: 4.236rem;
+    --space-zxlarge: 6.854rem;
+    --space-small: 0.618rem;
+    --space-xsmall: 0.382rem;
+    --space-xxsmall: 0.236rem;
+    --padding-base: var(--space-base);
+    --padding-large: var(--space-large);
+    --padding-xlarge: var(--space-xlarge);
+    --padding-small: var(--space-small);
+    --padding-xsmall: var(--space-xsmall);
+    --padding-xxsmall: var(--space-xxsmall);  /* New value based on Phi */
+    --zindex-base: 10;
+    --zindex-large: 16;
+    --zindex-xlarge: 26;
+    --zindex-xxlarge: 42;
+    --zindex-zxlarge: 69;
+    /* Maximale Containerbreite basierend auf Phi */
+    --max-width-base: 960px;
+    --max-width-large: 1553px;
+    --font-family: 'Poppins', var(--font-family);
+        /* Hellmodus*/
+    [data-theme="light"] {
+        --primary-color: #878556;
+        --secondary-color: #d3c6b2;
+        --tertiary-color: #ffffff;
+        --quaternary-color: #ffffff;
+        --quinary-color: #dd4f8c;
+        --complementary-primary: #fbfbff;
+        --background-color: #F0F0F0;  /* Ein sehr heller Grauton */
+        --text-color: #000000;}
+    }
+        /* Dunkel-Modus */
+    [data-theme="dark"] {
+        --primary-color: #050107;
+        --secondary-color: #332554;
+        --tertiary-color: #9b788f;
+        --quaternary-color: #a484ad;
+        --quinary-color: #00435d;
+        --complementary-primary: #658d52;
+        --background-color: #452554;
+        --text-color: #FFFFFF;
+    }
+
+
+@keyframes slideDown {
+    0% {
+        opacity: 0;
+        transform: translateY(-21%); /* Fibonacci: 21 */
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+@keyframes titleGlow1 {
+    0% {
+        filter: drop-shadow(2px 2px 4px var(--secondary-color)) drop-shadow(-2px -2px 4px var(--tertiary-color));
+    }
+    100% {
+        filter: drop-shadow(0 0 10px var(--secondary-color)) drop-shadow(0 0 20px var(--tertiary-color)) drop-shadow(0 0 30px var(--quaternary-color));
+    }
 }
 
-body {
+@keyframes zoomIn {
+    from {
+        transform: scale(0.9);
+        opacity: 0.5;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes titleGlow {
+    0% {
+        text-shadow: 2px 2px 4px var(--secondary-color), -2px -2px 4px var(--tertiary-color);
+    }
+    100% {
+        text-shadow: 0 0 10px var(--secondary-color), 0 0 20px var(--tertiary-color), 0 0 30px var(--quaternary-color);
+    }
+}
+@keyframes popUp {
+    0% {
+        transform: scale(0.95); /* Startet leicht verkleinert */
+        opacity: 0.5; /* Startet halbtransparent */
+    }
+    100% {
+        transform: scale(1.1); /* Geht zur normalen Größe zurück */
+        opacity: 1; /* Wird vollständig sichtbar */
+    }
+}
+@keyframes pulsate {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+body, html {
     font-family: 'Poppins', sans-serif;
-    background: url('logo-01.jpg') no-repeat center center fixed;
-    background-size: cover;
-    color: white;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Schwarzer Textschatten für bessere Lesbarkeit */
-    margin: 0;
-    padding: 0;
+    height: 100%;
+   
+    background-color: var(--background-color);
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center center;
+    color: var(--text-color);
+    text-shadow: 2px 2px 4px var(--color-7);
+    margin: var(--space-small);
+    padding: var(--padding-xxsmall);
+    padding-left: var(--space-medium);
+    padding-right: var(--space-medium);
+    height: 100vh;
+    justify-content: center;
 }
 
+main {
+    min-height: absolute;
+    font-family: 'Poppins', sans-serif;
+    padding-left: var(--space-xsmall);
+    padding-right: var(--space-xsmall);
+    justify-content: center;
+}
 
 img {
     max-width: 100%;
@@ -22,132 +161,398 @@ img {
 }
 
 header {
-    background-color: rgb(101, 52, 103);
-    padding: 20px 0;
-}
+    font-family: 'Poppins', sans-serif;
+    
+    top: 0;
+    
+    width: 90%;
+    
+    background-color: var(--background-color);}
 
 nav {
-    max-width: 1200px;
-    margin: auto;
+    font-family: 'Poppins', sans-serif;
+    max-width: 95%;
+    background-color: var(--background-color);
+    margin: var(--space-small);
     display: flex;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     justify-content: space-between;
     align-items: center;
-}
-
-#logo {
-    max-width: 150px;
+    padding-left: var(--space-xsmall);
+    padding-right: var(--space-xsmall);
 }
 
 nav ul {
+    font-family: 'Poppins', sans-serif;
     list-style-type: none;
     display: flex;
-    gap: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    justify-content: center;
+    padding: var(--padding-base);
+    padding-left: var(--space-medium);
+    padding-right: var(--space-medium);
+    
+}
+
+nav li {
+    
+    flex-grow: 1;           /* Erlaubt dem Element zu wachsen */
+    flex-shrink: 1;         /* Erlaubt dem Element zu schrumpfen */
+    flex-basis: auto;       /* Setzt eine automatische Basisbreite */
 }
 
 nav li a {
+    font-family: 'Poppins', sans-serif;
     text-decoration: none;
     color: white;
     font-weight: 500;
-    padding: 8px 16px;
+    padding: var(--padding-base);
     border: 2px solid transparent;
     border-radius: 8px;
     transition: all 0.3s ease;
+    display: block;         /* Damit es die gesamte Fläche des Elternelements ausfüllt */
 }
 
 nav li a:hover {
-    background-color: rgb(166, 139, 175);
-    border-color: white;
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--quinary-color);
+    border-color: var(--quaternary-color);
+}
+nav li button {
+    font-family: 'Poppins', sans-serif;
+    text-decoration: none;
+    color: white;
+    font-weight: 500;
+    padding: var(--padding-base);
+    border: 2px solid transparent;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    display: block;
+    background: transparent; /* Setzen Sie den Button-Hintergrund auf transparent */
+            /* Damit es die gesamte Fläche des Elternelements ausfüllt */
+    padding-left: var(--space-xsmall);
+    padding-right: var(--space-xsmall);
+
+        }
+nav li button:hover {
+    background-color: var(--quinary-color);
+    border-color: var(--quaternary-color);
+    padding-left: var(--space-xxsmall);
+    padding-right: var(--space-xxsmall);
+}
+.logo-container {
+    margin-top: var(--padding-small);
+    margin-left: var(--space-xlarge);
+    margin-right: var(--space-xlarge);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    width: 77%; /* nimmt die gesamte Breite des Elternelements ein */
+    min-width: 369px;
+    height: 30vh;
+    position: fixed;
+    
+    z-index: var(--zindex-base);
+}
+
+.logo-image, .logo-glow {
+    width: 100%;
+    object-fit: contain;
+    position: absolute;
+    top: 0;
+    
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-width: 400px;
+}
+
+.logo-image {
+    z-index: 2;
+    animation: titleGlow1 3.69s infinite alternate, 
+               zoomEffect 3s infinite, 
+               pulsate 3.69s infinite;
+}
+
+.logo-glow {
+    z-index: 1;
+    filter: blur(8px);
+    opacity: 0.6;
+    animation: pulseate 3s infinite;
+}
+
+.hero-container {
+    display: flex;
+    justify-content: center;  /* Horizontale Zentrierung */
+    align-items: center;      /* Vertikale Zentrierung */
+    height: 100vh;  /* Nimmt den gesamten Bildschirm in der Höhe ein */
+    width: 100%;    /* Nimmt die gesamte Breite ein */
 }
 
 #hero {
-    max-width: 1200px;
-    margin: 100px auto;
-    text-align: center;
+    
+    display: flex;
+    justify-content: center;  /* Horizontale Zentrierung */
+    align-items: center; 
+    background-repeat: no-repeat;
+    position: relative;
+    background-size: cover;
+    background-position: center;
+    margin-left: var(--space-xlarge);
+    margin-right: var(--space-xlarge);
+    
 }
-
+#hero::before {
+    display: flex;
+    justify-content: center;  /* Horizontale Zentrierung */
+    align-items: center; 
+    background-repeat: no-repeat;
+    position: relative;
+    background-size: cover;
+    background-position: center;
+    margin-left: var(--space-xlarge);
+    margin-right: var(--space-xlarge);
+    
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 3;
+    
+    background-size: cover;
+   
+}
+section {
+    text-align: center; /* Zentriert den Text und die Inhalte innerhalb der Section */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Fügt einen leichten Schatten hinzu */
+    padding: var(--space-xlarge); /* Fügt einen Abstand von 2,618rem an allen Seiten hinzu */
+    border-radius: 5px var(--complementary-primary); /* Rundet die Ecken der Schattenbox leicht ab */
+    animation: popUp 3.69s forwards; /* Wendet die "popUp"-Animation mit einer Dauer von 0,5 Sekunden an */
+    margin: var(--space-xxsmall);
+    padding-left: var(--space-xxlarge);
+    padding-right: var(--space-xxlarge);
+}
+.hero-title {
+    font-family: 'Poppins', sans-serif;
+    position: center;
+    z-index: 1;
+    font-size: 4rem; /* Größere Schriftgröße */
+    color: var(--primary-color);
+    text-shadow: 2px 2px 4px var(--secondary-color), -2px -2px 4px var(--tertiary-color);
+    animation: titleGlow 3.69s infinite alternate;
+    background-position: center; /* Zentriert den Hintergrund */
+    background-repeat: no-repeat; /* Verhindert das Wiederholen des Hintergrundbildes */
+    background-size: contain; 
+    align-items: center;  /* Zentriert den Text vertikal */
+   
+    padding: var(--space-base);
+}
 #hero h1 {
-    font-size: 2.5em;
-    margin-bottom: 20px;
+    font-family: 'Poppins', sans-serif;
+    font-size: var(--font-size-xxlarge);
+    margin-bottom: var(--space-xlarge);
 }
 
 #hero p {
-    font-size: 1.2em;
-    margin-bottom: 40px;
+    font-family: 'Poppins', sans-serif;
+    font-size: var(--space-xsmall);
+    margin-bottom: var(--space-xlarge);
 }
-
 .cta-button {
-    background-color: rgb(30, 131, 170);
+    font-family: 'Poppins', sans-serif;
+    border-radius: 12px;
+    padding: var(--padding-xxsmall  );
+    font-size: var(--space-small);
+    background-color: var(--quinary-color);
+    z-index: 1000;
     color: white;
-    padding: 12px 24px;
     border: none;
-    border-radius: 8px;
     font-weight: 700;
     text-decoration: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     transition: background-color 0.3s ease;
+    padding-left: var(--space-xsmall);
+    padding-right: var(--space-xsmall);
 }
 
 .cta-button:hover {
-    background-color: rgb(20, 100, 140);
+    background-color: var(--background-color);
+    border-color: var(--secondary-color);
+    background-color: var(--tertiary-color);
+    z-index: var(--zindex-large);
+    animation: pulsate 3.69 infinite;
+    transform: scale(1.0309016994374927);
 }
 
-footer {
-    padding: 20px 0;
-    background-color: rgb(101, 52, 103);
-    text-align: center;
-    color: white;
-   
+.button-wrapper {
+    
+    justify-content: center;  /* Zentriert die Kinder horizontal */
+    align-items: center;      /* Zentriert die Kinder vertikal */
+    height: 20vh;            /* Nimmt die volle Höhe des Viewports ein */
+    padding: var(--padding-xlarge);
+    background: var(--primary-color-transparent) ;
+    border-radius: 25px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    margin-top:var(--padding-xlarge) ;
+    
 }
+/* Stil für den Button-Container */
+.button-container {
+    max-width: 777px;
+    width: 100%;
+    height: 77vh; /*
+    /* Hintergrundfarbe mit Transparenz */
+    background-color: var(--quinary-color-transparent) 0.2; 
+    /* Abstand zwischen dem Rand des Containers und seinem Inhalt */
+    padding: var(--space-large); 
+    /* Abrundung der Ecken des Containers */
+    border-radius: 10px; 
+    /* Schatten um den Container herum */
+    box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2), -3px -3px 10px rgba(255, 255, 255, 0.5); 
+    /* Abstand zwischen dem Button-Container und anderen Elementen */
+    margin: var(--space-xxlarge); 
+    /* Flexbox verwendet, um Kinder innerhalb zu organisieren */
+    display: flex; 
+    /* Zentriert die Kinder horizontal */
+    justify-content: center; 
+    /* Zentriert die Kinder vertikal */
+    align-items: center; 
+    /* Abstand zwischen Kindern */
+    gap: var(--space-xxlarge); 
+    /* Animation beim Laden des Containers */
+    animation: zoomIn 0.5s ease-out; 
+}
+
+
+
 /* Features & Tools Seite */
-
 #features-intro {
+    font-family: 'Poppins', sans-serif;
     text-align: center;
-    margin: 60px 0;
+    margin: var(--space-xlarge) 0;
+    font-size: var(--font-size-xlarge);
+    padding-right: var(--space-xxsmall);
+    padding-left: var(--space-xlarge);
 }
 
 #features-intro h1 {
-    font-size: 2.5em;
+    margin-top: var(--space-medium);
+    padding-top: var(--space-medium);
+    font-family: 'Poppins', sans-serif;
+    text-align: center;
+    font-size: var(--font-size-zxlarge);
+}
+#features-intro h2 {
+    margin-top: var(--space-medium);
+    padding-top: var(--space-medium);
+    font-family: 'Poppins', sans-serif;
+    text-align: center;
+    font-size: var(--font-size-);
+}
+
+#tools-wrapper {
+    font-family: 'Poppins', sans-serif;
+    color: var(--text-color);
+    text-align: center;
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+    overflow-x: hidden;      /* Verhindert horizontales Scrollen */
+    overflow-y: auto;        /* Erlaubt vertikales Scrollen */
+    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.2);
+    background-color: var(--quaternary-color);
+    border-radius: 10px;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    padding: var(--padding-small);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-left: var(--space-xsmall);
+    padding-right: var(--space-xsmall);
+    
 }
 
 #tools-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 40px;
-    max-width: 1200px;
-    margin: 0 auto;
+    display: flex;  
+    flex-direction: column; 
+    align-items: center;
+    justify-content: center; /* Zentriert die Tools innerhalb des Wrappers */
+    white-space: nowrap;
+    padding-left: var(--space-xxlarge);
+    padding-right: var(--space-xxlarge);
+}
+
+.tools-slider {
+    display: flex;  
+    flex-direction: column; 
+    align-items: center;
+    justify-content: center;
+    
+    width: 100%;
+    padding-left: var(--space-xsmall);
+    padding-right: var(--space-xsmall);
+}
+
+.tools-container {
+    color: var(--text-color);
+    display: flex;
+    flex-direction: column;  /* Setzt die Tools untereinander */
+    transition: transform 0.5s cubic-bezier(0.77, 0, 0.175, 1);
+    padding-left: var(--space-medium);
+    padding-right: var(--space-medium);
 }
 
 .tool {
-    background-color: rgba(233, 231, 237, 0.8);
+    width: 1024px; /* Für Desktop-Version */
+    height: 768px;
+    color: var(--primary-color);
+    background: var(--quaternary-color-transparento5);
+    margin: var(--font-size-small);
+    transition: transform 0.5s cubic-bezier(0.77, 0, 0.175, 1);
+    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.1), 
+                inset 2px 2px 5px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 10px;
-    padding: 20px;
     text-align: center;
-    transition: transform 0.3s ease;
+    margin: var(--space-small);
+    padding: var(--space-small);
+    padding-left: var(--space-xsmall);
+    padding-right: var(--space-xsmall);
 }
 
 .tool:hover {
     transform: scale(1.05);
+    box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.2), /* Erhöhter Außenschatten */
+                inset 3px 3px 8px rgba(0, 0, 0, 0.2); /* Erhöhter Innenschatten */
 }
 
+
 .tool h2 {
-    font-size: 1.8em;
-    margin-bottom: 15px;
+    font-size: var(--font-size-base);
+    
 }
 
 .tool p {
     font-size: 1.2em;
-    margin-bottom: 20px;
+    padding: var(--padding-small);
 }
+
 /* Forum Header */
 #forum-header {
     text-align: center;
-    background-color: rgb(101, 52, 103);
-    color: rgb(233, 231, 237);
-    padding: 40px 0;
+    background-color: var(--primary-color-transparent);
+    color: var(--text-color);
+    padding: var(--padding-large);
 }
 
 #forum-header h1 {
-    font-size: 2.5em;
-    margin-bottom: 20px;
+    font-size: var(--font-size-xlarge);
+    margin-bottom: var(--space-xsmall);
 }
 
 #forum-header p {
@@ -156,192 +561,584 @@ footer {
 
 /* Forum Categories */
 #forum-categories {
+    color: var(--text-color);
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    justify-content: center;
+    align-items: center;
+    grid-template-columns: 1fr;
     gap: 30px;
-    max-width: 1200px;
-    margin: 40px auto;
-    padding: 20px;
+    
+    margin: var(--space-xxlarge);
+    padding: var(--padding-large);
 }
 
 .category {
-    background-color: rgba(73, 40, 88, 0.7);
-    border: 1px solid rgba(73, 40, 88, 0.2);
-    border-radius: 10px;
-    padding: 20px;
-    transition: transform 0.3s ease;
+    background-color: var(--background-color);
+    border: 1px solid var(--complementary-primary);
+    border-radius: 20px;
+    margin-top: var(--space-small);
+    padding: var(--padding-large);
+    margin: var(--space-xsmall);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;  /* Hinzugefügt für einen sanften Schattenübergang */
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.15);  /* Grundschatten */
 }
 
 .category:hover {
-    transform: scale(1.05);
+    margin: var(--space-base);
+    padding: var(--space-xsmall);
+    transform: scale(1.0309016994374927);
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);  /* Hover-Schatten */
 }
 
 .category h2 {
-    font-size: 1.8em;
-    color: rgb(239, 239, 239);
-    text-shadow: 2px 2px 2px rgb(0, 0, 0); /* Hinzugefügt */
-    margin-bottom: 10px;
+    font-size: var(--font-size-large);
+    color: var(--text-color);
+    text-shadow: 1px 2px 2px var(--complementary-primary);
+    margin-bottom: 10rem;
 }
 
 .category p {
-    font-size: 1.2em;
-    color: rgb(239, 239, 239); /* von rgb(204, 203, 205) zu Weiß geändert */
-    text-shadow: 1px 1px 1px rgb(0, 0, 0); /* Hinzugefügt */
+    font-size: var(--font-size-base);
+    color: var(--text-color);
+    text-shadow: 1px 1px 1px var(--color-11);
+    margin: var(--space-small);
+    margin-bottom: var(--font-size-base);
 }
 
 .forum-button {
-    padding: 12px 24px;
+    padding: var(--padding-base);
     border: none;
     border-radius: 8px;
     font-weight: 700;
     text-decoration: none;
-    transition: background-color 0.7s ease;
+    transition: background-color 0.7s ease, transform 0.3s ease;
     cursor: pointer;
 }
 
 .forum-button.primary {
-    background-color: rgb(30, 131, 170);
+    background-color: var(--tertiary-color);
     color: white;
 }
 
 .forum-button.primary:hover {
-    background-color: rgb(20, 100, 140);
+    background-color: var(--tertiary-color);
+    transform: scale(1.0309016994374927);
 }
 
 .forum-button.secondary {
-    background-color: rgba(233, 231, 237, 0.8);
-    color: rgb(73, 40, 88);
+    background-color: var(--quaternary-color);
+    color: var(--primary-color);
 }
 
 .forum-button.secondary:hover {
-    background-color: rgba(233, 231, 237, 0.6);
+    background-color: var(--tertiary-color);
 }
+
+
 #connectWallet {
-    background-color: rgb(30, 131, 170);
+    background-color: var(--background-color);
     color: white;
-    padding: 12px 24px;
+    padding: var(--padding-xlarge);
     border: none;
     border-radius: 8px;
     font-weight: 700;
     text-decoration: none;
     transition: background-color 0.3s ease;
-    cursor: pointer;
+    
 }
-
 #connectWallet:hover {
-    background-color: rgb(20, 100, 140);
+    background-color: var(--secondary-color);
 }
 
-#walletStatus {
-    font-size: 14px;
-    margin-left: 10px;
-    color: white;
-}
-@media (max-width: 768px) {
-    nav ul {
-        flex-direction: column;
-        gap: 10px;
-    }
-}
-
-/* Styles für Handys */
-@media (max-width: 480px) {
-    nav ul {
-        gap: 5px;
-    }
-    #hero {
-        max-width: 90%;
-        margin: 50px auto;
-    }
-
-    img {
-    max-width: 100%;
-    height: auto;
-}
-.full-width-logo {
-    background-image: url('logo-01.jpg');
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
-    height: 200px;
-}
-/* Contact page styles */
-/* Contact page styles */
-.contact-body {
-    background-image: url('logo-01.jpg');
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-    color: white;
-}
-
-.contact-container,
-#hero {
-    background-color: rgba(255, 255, 255, 0.8); /* Halbtransparenter weißer Hintergrund */
-    border-radius: 10px; /* Abgerundete Ecken */
-    padding: 20px; /* Innenabstand */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Leichter Schatten */
-    margin: 20px auto; /* Zentriert das Formular horizontal */
-    max-width: 600px; /* Maximale Breite des Formulars */
-}
 
 form label {
     display: block;
     font-weight: bold;
-    margin-bottom: 5px;
-    color: rgb(73, 40, 88); /* Farbanpassung für bessere Lesbarkeit */
+    margin-bottom: 1.618rem; /* Anwendung des Fibonacci-Verhältnisses */
+    color: var(black); /* Farbanpassung für bessere Lesbarkeit */
 }
 
-form input, form textarea {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid rgba(73, 40, 88, 0.6); /* Halbtransparenter Rand */
-    border-radius: 5px;
-    margin-bottom: 15px;
-    background-color: rgba(255, 255, 255, 0.7); /* Halbtransparenter weißer Hintergrund */
-}
 
-.cta-button {
-    background-color: rgb(30, 131, 170);
-    color: white;
-    padding: 12px 24px;
-    border: none;
-    border-radius: 8px;
-    font-weight: 700;
-    text-decoration: none;
-    transition: background-color 0.3s ease;
-}
 
-.cta-button:hover {
-    background-color: rgb(20, 100, 140);
-}
 .form-group {
-    margin-bottom: 25px;  /* Erhöhen des Abstands zwischen den Formularelementen */
-}
-
-form label {
-    font-weight: bold;  /* Setzt die Schriftart der Labels auf fett */
-    display: block;    /* Stellt sicher, dass die Labels als Blockelemente angezeigt werden */
-    margin-bottom: 10px;  /* Fügt Abstand unter dem Label hinzu */
-}
-
-form input, form textarea {
-    width: 100%;
-    padding: 15px;  /* Erhöht die Polsterung innerhalb der Eingabefelder */
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 16px;  /* Erhöht die Schriftgröße in den Eingabefeldern */
+    margin-bottom: 2.618rem;  /* Erhöhen des Abstands zwischen den Formularelementen */
 }
 .upvote, .downvote {
-    color: rgb(8, 230, 75); /* Oder jede andere Farbe, die zu Ihrem Design passt */
-    font-size: 20px; /* Oder jede andere gewünschte Größe */
+    color: var(--color-12); /* Oder jede andere Farbe, die zu Ihrem Design passt */
+    font-size: 20rem; /* Oder jede andere gewünschte Größe */
     background: none;
     border: none;
-    cursor: pointer;
+    
 }
-
 .upvote:hover, .downvote:hover {
-    color: rgb(252, 0, 0);
+    color: var(--color-20);
+}
+summary.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Sie können auch min-height hinzufügen, um sicherzustellen, dass er den gesamten Bildschirm einnimmt, falls dies gewünscht ist */
+    min-height: 100vh;
+}
+/* Spezieller Stil für den "summary"-Bereich, wenn er fokussiert wird */
+summary:focus {
+    /* Kein Standard-Rahmen um den fokussierten Bereich */
+    outline: none;
+    /* Schatten um den fokussierten Bereich */
+    box-shadow: 0 0 10px var(--complementary-primary); 
 }
 
+/* Spezieller Stil für den "summary"-Bereich, wenn er schwebt */
+summary:hover {
+    /* Verschiebt das Element leicht nach oben und vergrößert es */
+    transform: translateY(-5rem) scale(1.05); 
+    /* Schatten um den schwebenden Bereich */
+    box-shadow: 0 10rem 20rem rgba(0, 0, 0, 0.2); 
 }
+
+/* Stil für den Pseudo-Element-Zustand "nach" des "summary"-Bereichs */
+summary::after {
+    /* Positionierung relativ zum "summary"-Bereich */
+    position: absolute;
+    /* Platzierung des Pseudo-Elements innerhalb des "summary"-Bereichs */
+    
+    /* Glatter Übergangseffekt */
+    transition: transform 3.69; 
+}
+
+/* Grundstil für den "summary"-Bereich */
+summary {
+    min-width: 369px;
+    width: 100%;
+    display: flex;  /* Aktiviert Flexbox */
+    flex-direction: column; 
+    align-items: center;
+    justify-content: center;
+    padding: var(--padding-large); 
+    font-family: 'Poppins', sans-serif;
+    font-weight: bold;
+    background-color: var(--quinary-color-transparent);
+    color: var(--tertiary-color); 
+    border-radius: 5px; 
+    transition: transform 3.69s ease-in-out; 
+    animation: pulsate 6.888s infinite; 
+    position: relative;
+    margin-left: var(--space-large);
+    margin-right: var(--space-xlarge);
+}
+
+details {
+    max-width: 777px !important;
+    min-width: 369px;
+    width: 100%;
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.3s ease-in-out;
+    background-color: var(--primary-color-transparent);
+    color: var(--text-color);
+    display: flex;
+    flex-direction: column;  /* Neu hinzugefügt, um den Inhalt vertikal zu stapeln */
+    margin: var(--space-medium);
+    justify-content: center;
+    align-items: center;
+    padding: var(--padding-large);
+}
+
+details.logo-container{
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Sie können auch min-height hinzufügen, um sicherzustellen, dass er den gesamten Bildschirm einnimmt, falls dies gewünscht ist */
+    min-height: 100vh;
+}
+details:hover {
+    min-width: 369px;
+    transform: translateY(-1rem) scale(1.05);
+    /* Schattenfarbe basierend auf der Hauptfarbe */
+    box-shadow: 0 4px 12px rgba(var(--primary-color), 0.4);
+    margin: var(--space-medium);
+    padding: var(--padding-large); 
+    padding-left: var(--space-base);
+    padding-right: var(--space-base);
+
+}
+
+details[open] {
+    min-width: 369px;
+    /* Schattenfarbe basierend auf der Hauptfarbe, wenn das Element geöffnet ist */
+    box-shadow: 0 4px 12px rgba(var(--primary-color), 0.6);
+    animation: slideDown 1.618 ease-in-out;
+    padding-left: var(--space-base);
+    padding-right: var(--space-base);
+    padding: var(--padding-large); 
+
+
+}
+
+details.sticky {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+    background-color: var(--tertiary-color)
+}
+
+details p, details blockquote {
+    font-size: var(--font-size-base);
+    padding: var(--padding-large); 
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    margin: var(--space-medium) ;
+    padding-left: var(--space-base);
+    padding-right: var(--space-base);
+}
+
+.parent-of-submit {
+    
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    margin-right: var(--space-xxsmall);
+    margin-left: var(--space-xxsmall);
+    
+}
+
+input[type="submit"] {
+    
+    font-family: 'Poppins', sans-serif;
+    border-radius: 12px;
+    padding: 15px 35px 15;
+    font-size: var(--font-size-large);
+    background-color: var(--quinary-color);
+    margin-bottom: 20vh;
+    color: white;
+    border: none;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s ease;
+    
+                 /* Aktiviert Flexbox */
+    justify-content: center;
+    margin-right: var(--space-xxsmall);
+    margin-left: var(--space-xxsmall);
+
+}
+
+input[type="text"],
+input[type="email"] {
+    width: 90%;
+    padding: var(--padding-small);
+    margin: var(--space-small);
+    margin-bottom: var(--space-base);
+}
+
+textarea {
+    width: 90%;       /* Breite entsprechend den Eingabefeldern */
+    height: 50px;
+    padding: var(--padding-small);
+    margin: var(--space-small);
+    margin-bottom: var(--space-base);
+    
+}
+#message {
+    width: 90%;  /* Breite entsprechend den Eingabefeldern */
+    height: 150px;  /* Sie können die Höhe nach Bedarf ändern */
+    padding: var(--padding-small);
+    margin: var(--space-small);
+    margin-bottom: var(--space-base);
+    font-family: 'Poppins', sans-serif;  /* Falls Sie die gleiche Schriftart wie die anderen Eingabeelemente verwenden möchten */
+}
+
+
+footer {
+    display: flex;             /* Aktiviert Flexbox */
+    flex-direction: column;   /* Kinder werden vertikal gestapelt */
+    justify-content: center;  /* Zentriert Kinder vertikal */
+    align-items: center;      /* Zentriert Kinder horizontal */
+    height: 10vh;            /* Beispielhöhe für den Footer */
+    background-color:var(--primary-color);  /* Dunkelgrauer Hintergrund */
+    margin-bottom: var(--font-size-small);
+    margin-top: var(--space-xlarge);
+    color: #fff;              /* Weißer Text */
+}
+footer p {
+    margin-bottom: 10px; /* Abstand zwischen dem Text und den Links */
+}
+
+.footer-links {
+     /* Zentriert die Links horizontal */
+    gap: 10px;
+                    /* Gibt einen Abstand zwischen den Links */
+}
+
+.footer-links a {
+    display: flex; /* Aktiviert Flexbox */
+    color: var(--quinary-color);            /* Weißer Link-Text */
+    text-decoration: none;    /* Keine Unterstreichung */
+}
+
+.footer-links a:hover {
+    text-decoration: underline; /* Unterstreichung beim Darüberfahren */
+}
+
+
+/* Die allgemeinen Stile (für Desktop und größere Ansichten) sind bereits definiert, also beginnen wir direkt mit den Media Queries */
+
+/* Media Query für iPhone und ähnliche Smartphones */
+@media only screen and (max-width: 768px) {
+    /* Fügen Sie hier die spezifischen Stile für den iPhone-Bildschirm hinzu. 
+       Sie können die Eigenschaften und Werte anpassen, um besser zum Design Ihrer Website zu passen. */
+
+    body, html {
+        /* Anpassungen für den Body und HTML */
+        padding: var(--padding-small);
+        margin: var(--space-xsmall);
+    }
+
+    nav {
+        /* Anpassungen für die Navigation */
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: var(--padding-small);
+    }
+
+    nav ul {
+        flex-direction: column;
+        padding: var(--padding-small);
+    }
+
+    nav li a {
+        padding: var(--padding-xsmall);
+    }
+
+    #hero {
+        height: 300px;
+    }
+
+    .hero-title {
+        font-size: var(--font-size-large);
+    }
+
+    #hero h1 {
+        font-size: var(--space-xxsmall);
+    }
+
+    #hero p {
+        font-size: var(--space-xxsmall);
+    }
+
+    .cta-button {
+        font-size: var(--space-xxsmall);
+        justify-content: center;
+        align-items: center;
+        padding: var(--padding-small);
+        padding-bottom: var(--space-xxsmall);
+        
+    }
+
+    
+
+    .tool h2, .tool p {
+        font-size: 1em;
+        margin: var(--space-xxlarge);
+    }
+    header {
+        width: 100%;
+        padding: var(--padding-small);
+    }
+
+    /* Anpassungen für nav */
+    nav {
+        flex-wrap: wrap;
+        padding: var(--padding-small);
+    }
+
+    nav ul {
+        flex-direction: column;
+    }
+
+    nav li {
+        margin: var(--space-xsmall) 0;
+    }
+
+    #features-intro h1 {
+        font-size: var(--space-base);
+    }
+
+    #tools-wrapper {
+        max-width: 70%;
+        padding: var(--padding-small);
+        padding-left: var(--space-xxlarge);
+        padding-right: var(--space-xxlarge);
+    }
+
+    .tool {
+        width: 80%;
+        margin: var(--space-small);
+    }
+
+    /* Forum Header Anpassungen */
+    #forum-header h1 {
+        font-size: var(--space-large);
+    }
+
+    #forum-header p {
+        font-size: var(--space-base);
+    }
+
+    /* Forum Categories Anpassungen */
+    #forum-categories {
+        gap: var(--space-large);
+        margin: var(--space-xlarge) 0;
+    }
+
+    .category h2 {
+        font-size: var(--space-large);
+        margin-bottom: var(--space-base);
+    }
+
+    .category p {
+        font-size: var(--space-small);
+    }
+    #hero {
+        height: 300px;
+    }
+
+    .hero-title {
+        font-size: var(--font-size-xlarge);
+        padding: var(--space-xsmall);
+    }
+
+    #hero h1 {
+        font-size: var(--font-size-small);
+    }
+
+    #hero p {
+        font-size: var(--font-size-small);
+    }
+
+    .cta-button {
+        padding: var(--padding-small);
+        font-size: var(--space-base);
+        padding-bottom: var(--space-xxsmall);
+        margin-top: var(--space-medium);
+    }
+
+    button-wrapper {
+        max-width: 369px;
+        height: auto;
+        padding: var(--padding-base);
+        ;
+        font-size: var(--font-size-large);  /* Beispielwert für eine größere Schrift */
+    }
+    
+    .button-container {
+        max-width: 369px;
+        margin: var(--space-large);
+        padding: var(--space-medium);
+        font-size: var(--font-size-xlarge);  /* Beispielwert für eine größere Schrift */
+    }
+
+
+    footer {
+        padding: var(--padding-base);
+        margin-top: var(--font-size-small);
+        margin-bottom: var(--space-xxsmall);
+    }
+
+    #features-intro {
+        margin: var(--space-large) 0;
+    }
+
+    .tool {
+        width: 369px ;
+        height: 800px;
+    }
+
+    #forum-header h1 {
+        margin-bottom: var(--space-large);
+    }
+
+    #forum-categories {
+        margin: var(--space-large) 0;
+    }
+    .category {
+        padding: var(--padding-base);
+    }
+
+    .category h2 {
+        font-size: 1.5em;
+        margin-bottom: var(--space-base);
+    }
+
+    .category p {
+        font-size: 1em;
+    }
+
+    .forum-button {
+        padding: var(--padding-small);
+        font-size: 1em;
+    }
+    .logo-container, .logo-image, .logo-glow {
+        min-width: auto;
+    }
+
+    input[type="submit"] {
+                   /* Aktiviert Flexbox */
+        
+        width: 90%;
+       
+        margin-left: var(--space-xxsmall);
+        margin-right: var(--space-xxsmall);
+    }
+    /* Sonstige Anpassungen */
+   
+
+    .logo-image, .logo-glow {
+        min-width: 200px;
+    }
+    #connectWallet {
+        padding: var(--padding-base);
+    }
+
+    
+
+    textarea {
+        width: 100%; /* Nimmt die volle Breite des Containers ein */
+        height: 120px; /* Etwas kleinere Höhe für das Textfeld */
+        margin-left: var(--padding-xxsmall);
+        margin-right: var(var(--padding-small));
+    }
+
+    .form-group {
+        margin-bottom: var(--space-base);
+    }
+
+    .upvote, .downvote {
+        font-size: 1.5em;
+    }
+
+    details {
+        flex-direction: column;
+        padding: var(--padding-base);
+        margin: var(--space-small);
+        min-width: auto;
+        padding-left: var(--space-xsmall);
+        padding-right: var(--space-xsmall);
+    }
+
+    summary {
+        flex-direction: column;
+        padding: var(--padding-base);
+        margin: var(--space-xxsmall);
+        min-width: 369px;
+        padding-left: var(--space-xsmall);
+        padding-right: var(--space-xsmall);
+    }
+    
+}
+    /* Weitere spezifische Stilanpassungen für kleine Bildschirme... */
+

@@ -1,54 +1,136 @@
-
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta content="Inpinity - Tools und Ressourcen für Game Design und Entwicklung." name="description" />
+    <title>Inpinity - Startseite</title>
+    <link rel="stylesheet" href="css/base.css"  />
+    <link rel="stylesheet" href="css/layout.css"  />
+    <link rel="stylesheet" href="css/animations.css"  />
+    <link rel="stylesheet" href="css/dark.css"  />
+    <link rel="stylesheet" href="css/light.css"  />
+    <link rel="stylesheet" href="css/responsive.css"  />
+    <link rel="stylesheet" href="css/color.css" />
+    <script defer="" src="main.js"></script>
+    <link rel="icon" type="image/png" href="favicon.webp">
+    <meta content="Inpinity, Game Design, Game Entwicklung, Plattform, Zusammenarbeit, Forum, Tools, GameDesign, AI Developement, Games of future,programming, programs, python gui," name="keywords">
+    <meta content="Inpinity Team" name="Xpective">
+    <meta property="og:title" content="Inpinity - Die Community für Game Design und Programmierung">
+    <meta property="og:description" content="Tauschen Sie Designs, Wissen und Erfahrungen im Bereich der Programmierung und des Game Designs aus. Werden Sie Teil einer wachsenden Gemeinschaft, die sich auf die Unreal Engine und viele andere Technologien spezialisiert hat.">
+    <meta property="og:image" content="logo_background.jpg">
+    <meta property="og:url" content="inpinity.online, www.inpinity.online, https://www.inpinity.online, https://inpinity.online">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kontakt</title>
-    <link rel="stylesheet" href="base.css">
-    <link rel="stylesheet" href="layout.css">
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="logo_background.webp">
+    <meta name="twitter:site" content="@https://x.com/inpinity1?s=21&t=-FyWwqonfIU7u9houJoQAw">
+    <meta name="twitter:creator" content="@Inpinity1">
+    
+    <!-- Weitere Tags -->
+    <meta name="theme-color" content="#FarbcodeIhrerWebsite">
+    <meta name="robots" content="index,follow">
 </head>
 <body>
-    <div class="container">
-        <h1>Kontaktieren Sie uns</h1>
-        
-        <!-- Kontaktformular -->
-        <div class="contact-form">
-            <form action="/submit_contact" method="post">
-                <label for="name">Name:</label>
-                <input type="text" id="name" name="name" required>
+    <header>
+        <nav>
+            <ul>
+                <li><a aria-label="Startseite" href="index.html">Startseite</a></li>
+                <li><a aria-label="Dienstleistungen" href="services.html">Dienstleistungen</a></li>
+                <li><a aria-label="Game" href="game.html">Game</a></li>
+                <li><a aria-label="Forum" href="forum.html">Forum</a></li>
+                <li><a aria-label="Zusammenarbeit" href="collaboration.html">Zusammenarbeit</a></li>
+                <li><a aria-label="Registrieren" href="register.html">Registrieren</a></li>
+                <li><a aria-label="Über uns" href="about.html">Über uns</a></li>
+                <div class="themeDots">
+                    <div class="dot light" title="Light Theme"></div>
+                    <div class="dot dark" title="Dark Theme"></div>
+                    <div class="dot basic" title="Basic Theme"></div>
+                </div>
+                <style>
+                    .themeDots .dot {
+                        display: inline-block;
+                        width: 20px;
+                        height: 20px;
+                        border-radius: 50%;
+                        margin: 5px;
+                        cursor: pointer;
+                        transition: transform 0.2s;
+                    }
                 
-                <label for="email">E-Mail:</label>
-                <input type="email" id="email" name="email" required>
+                    .themeDots .dot.light {
+                        background-color: #FFFFFF; /* White for Light Theme */
+                    }
                 
-                <label for="subject">Betreff:</label>
-                <input type="text" id="subject" name="subject" required>
+                    .themeDots .dot.dark {
+                        background-color: #000000; /* Black for Dark Theme */
+                    }
                 
-                <label for="message">Nachricht:</label>
-                <textarea id="message" name="message" rows="5" required></textarea>
+                    .themeDots .dot.basic {
+                        background-color: var(--quinary-color); /* Gold color for Basic Theme */
+                    }
                 
-                <button type="submit">Nachricht senden</button>
-            </form>
-        </div>
-        
-        <!-- Weitere Kontaktinformationen -->
-        <div class="additional-contact-info">
-            <h2>Weitere Kontaktmöglichkeiten</h2>
-            <p>Telefon: +49 123 456 7890</p>
-            <p>Adresse: Straße, Stadt, PLZ, Land</p>
-        </div>
-        
-        <!-- Anfahrtsbeschreibung oder Karte (optional) -->
-        <!-- <div class="location-map">
-            Hier könnte eine Karte oder Anfahrtsbeschreibung eingefügt werden.
-        </div> -->
-        
-        <!-- FAQ oder Hinweise vor der Kontaktaufnahme -->
-        <div class="contact-faq">
-            <h2>Bevor Sie uns kontaktieren:</h2>
-            <p>Bitte überprüfen Sie unsere <a href="faq.html">FAQ</a>, vielleicht finden Sie dort bereits die Antwort auf Ihre Frage.</p>
-        </div>
-    </div>
+                    .themeDots .dot:hover {
+                        transform: scale(1.2);
+                    }
+                </style>
+                <script>
+                    // JavaScript to Change the Theme based on Dot Click
+                    document.querySelector('.themeDots .dot.light').addEventListener('click', function() {
+                        document.body.setAttribute('data-theme', 'light');
+                    });
+                
+                    document.querySelector('.themeDots .dot.dark').addEventListener('click', function() {
+                        document.body.setAttribute('data-theme', 'dark');
+                    });
+                
+                    document.querySelector('.themeDots .dot.basic').addEventListener('click', function() {
+                        document.body.setAttribute('data-theme', 'basic');
+                    });
+                </script>
+            
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <h1>Kontakt</h1>
+
+<h2>Wir freuen uns von Ihnen zu hören!</h2>
+<p>Wenn Sie Fragen, Anmerkungen oder Anfragen haben, zögern Sie nicht, uns zu kontaktieren. Füllen Sie einfach das untenstehende Formular aus oder nutzen Sie unsere Kontaktinformationen.</p>
+
+<h2>Kontaktformular</h2>
+<form action="submit_form.php" method="post">
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name" required><br><br>
+
+    <label for="email">E-Mail:</label>
+    <input type="email" id="email" name="email" required><br><br>
+
+    <label for="subject">Betreff:</label>
+    <input type="text" id="subject" name="subject"><br><br>
+
+    <label for="message">Nachricht:</label><br>
+    <textarea id="message" name="message" rows="4" required></textarea><br><br>
+
+    <input type="submit" value="Senden">
+</form>
+
+
+
+<h2>Folgen Sie uns auf Social Media</h2>
+<p>
+    <a href="#">Facebook</a> | 
+    <a href="https://x.com/inpinity1?s=21&t=-FyWwqonfIU7u9houJoQAw">Twitter</a> | 
+    <a href="#">LinkedIn</a>
+</p>
+
+    </main>
+    <footer>
+        <p>© 2023 Inpinity. Alle Rechte vorbehalten.</p>
+            <a href="privacypolicy.html">Datenschutzrichtlinien</a>
+            <a href="termsofuse.html">Nutzungsbedingungen</a>
+            <a href="contact.html">Kontakt</a>
+    </footer>
 </body>
 </html>

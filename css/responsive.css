@@ -1,0 +1,294 @@
+    /* Media Query für iPhone und ähnliche Smartphones */
+@media only screen and (max-width: 768px) {
+    /* Fügen Sie hier die spezifischen Stile für den iPhone-Bildschirm hinzu. 
+       Sie können die Eigenschaften und Werte anpassen, um besser zum Design Ihrer Website zu passen. */
+
+    body, html {
+        /* Anpassungen für den Body und HTML */
+        width: 90%;
+        padding: var(--padding-small);
+        margin: var(--space-xsmall);
+        margin-right: var(--space-medium);
+        margin-left: var(--space-medium);
+    }
+
+    nav {
+        /* Anpassungen für die Navigation */
+        width: 90%;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: var(--padding-large);
+        margin: var(--space-large);
+    }
+
+    nav ul {
+        width: 90%;
+        flex-direction: column;
+        padding: var(--padding-small);
+    }
+
+    nav li a {
+        width: 90%;
+        padding: var(--padding-xsmall);
+    }
+
+    #hero {
+        width: 90%;
+        margin-bottom:var(--padding-small) ;
+        margin-right: var(--space-medium);
+        margin-left: var(--space-medium);
+    }
+
+    .hero-title {
+        font-size: var(--font-size-large);
+        width: 90%;
+    }
+
+    #hero h1 {
+        width: 90%;
+        font-size: var(--space-xxsmall);
+    }
+
+    #hero p {
+        width: 90%;
+        font-size: var(--space-xxsmall);
+    }
+
+    .cta-button {
+        width: 90%;
+        font-size: var(--space-xxsmall);
+        justify-content: center;
+        align-items: center;
+        padding: var(--padding-small);
+        padding-bottom: var(--space-xxsmall);
+    }
+
+
+    .tool h2, .tool p {
+        font-size: 1em;
+        margin: var(--space-xxlarge);
+    }
+    header {
+        width: 90%;
+        padding: var(--padding-small);
+        margin-left: var(--space-large);
+        margin-right: var(--space-large);
+    }
+
+    /* Anpassungen für nav */
+    nav {
+        width: 90%;
+        flex-wrap: wrap;
+        padding: var(--padding-small);
+        margin-left: var(--space-medium);   
+        margin-right: var(--space-medium);
+        padding-left: var(--padding-base);
+        padding-right: var(--padding-large);
+    }
+
+    nav ul {
+        width: 90%;
+        flex-direction: column;
+        margin: var(--space-base);
+        padding: var(--space-base);
+        margin-right: var(--space-medium);
+        margin-left: var(--space-medium);
+    }
+
+    nav li {
+        width: 90%;
+        margin-left: var(--space-xlarge);
+        margin-right: var(--space-xlarge);
+        margin-top: var(--space-medium);
+    }
+
+    #features-intro h1 {
+        width: 80%;
+        font-size: var(--space-base);
+        margin-right: var(--space-xxsmall);
+        margin-left: var(--space-xxsmall);
+        padding-left: var(--padding-large) ;
+        padding-right: var(--padding-large);
+
+    }
+
+    #tools-wrapper {
+        max-width: 70%;
+        padding: var(--padding-small);
+        padding-left: var(--space-xxlarge);
+        padding-right: var(--space-xxlarge);
+    }
+
+    .tool {
+        width: 80%;
+        margin: var(--space-small);
+    }
+
+    /* Forum Header Anpassungen */
+    #forum-header h1 {
+        font-size: var(--space-large);
+    }
+
+    #forum-header p {
+        font-size: var(--space-base);
+    }
+
+    /* Forum Categories Anpassungen */
+    #forum-categories {
+        gap: var(--space-large);
+        margin: var(--space-xlarge) 0;
+    }
+
+    .category h2 {
+        font-size: var(--space-large);
+        margin-bottom: var(--space-base);
+    }
+
+    .category p {
+        font-size: var(--space-small);
+    }
+    #hero {
+        width: 90%;
+    }
+
+    .hero-title {
+        width: 90%;
+        font-size: var(--font-size-xlarge);
+        padding: var(--space-xsmall);
+    }
+
+    #hero h1 {
+        width: 90%;
+        font-size: var(--font-size-small);
+    }
+
+    #hero p {
+        width: 90%;
+        font-size: var(--font-size-small);
+    }
+
+    .cta-button {
+        padding: var(--padding-small);
+        font-size: var(--space-base);
+        padding-bottom: var(--space-xxsmall);
+        margin-top: var(--space-medium);
+    }
+
+    button-wrapper {
+        max-width: 369px;
+        height: auto;
+        padding: var(--padding-base);
+        ;
+        font-size: var(--font-size-large);  /* Beispielwert für eine größere Schrift */
+    }
+    
+    .button-container {
+        max-width: 369px;
+        margin: var(--space-large);
+        padding: var(--space-medium);
+        font-size: var(--font-size-xlarge);  /* Beispielwert für eine größere Schrift */
+    }
+
+
+    footer {
+        padding: var(--padding-base);
+        margin-top: var(--font-size-small);
+        margin-bottom: var(--space-xxsmall);
+    }
+
+    #features-intro {
+        width: 90%;
+        margin: var(--space-large) 0;
+    }
+
+    .tool {
+        width: 369px ;
+        height: 800px;
+    }
+
+    #forum-header h1 {
+        margin-bottom: var(--space-large);
+    }
+
+    #forum-categories {
+        margin: var(--space-large) 0;
+    }
+    .category {
+        padding: var(--padding-base);
+    }
+
+    .category h2 {
+        font-size: 1.5em;
+        margin-bottom: var(--space-base);
+    }
+
+    .category p {
+        font-size: 1em;
+    }
+
+    .forum-button {
+        padding: var(--padding-small);
+        font-size: 1em;
+    }
+    .logo-container, .logo-image, .logo-glow {
+        min-width: auto;
+    }
+
+    input[type="submit"] {
+                   /* Aktiviert Flexbox */
+        
+        width: 90%;
+       
+        margin-left: var(--space-xxsmall);
+        margin-right: var(--space-xxsmall);
+    }
+    /* Sonstige Anpassungen */
+   
+
+    .logo-image, .logo-glow {
+        width: 90%;
+        min-width: 200px;
+    }
+    #connectWallet {
+        padding: var(--padding-base);
+    }
+
+    
+
+    textarea {
+        width: 100%; /* Nimmt die volle Breite des Containers ein */
+        height: 120px; /* Etwas kleinere Höhe für das Textfeld */
+        margin-left: var(--padding-xxsmall);
+        margin-right: var(var(--padding-small));
+    }
+
+    .form-group {
+        margin-bottom: var(--space-base);
+    }
+
+    .upvote, .downvote {
+        font-size: 1.5em;
+    }
+
+    details {
+        flex-direction: column;
+        ;
+        margin: var(--space-small);
+        min-width: auto;
+        padding-left: var(--space-xsmall);
+        padding-right: var(--space-xsmall);
+    }
+
+    summary {
+        flex-direction: column;
+        
+        margin: var(--space-xxsmall);
+        
+        padding-left: var(--space-xsmall);
+        padding-right: var(--space-xsmall);
+    }
+    
+}
+    /* Weitere spezifische Stilanpassungen für kleine Bildschirme... */
+

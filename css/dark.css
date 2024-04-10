@@ -1,0 +1,27 @@
+:root {
+--primary-color: #452554;
+--primary-color-transparent: rgba(69, 37, 84, 0.5);
+--secondary-color: #7967A1;
+--tertiary-color: #E8E2E6;
+--quaternary-color: #F8F1FA;
+--quaternary-color-transparent05: rgba(248, 241, 250, 0.5);
+--quaternary-color-transparent025:  rgba(248, 241, 250, 0.25);
+--quinary-color: #1b82aa;
+--quinary-color-transparent: rgba(27, 130, 170, 0.5);
+--complementary-primary: #badaab;
+--background-color: #452554;
+--text-color: hsl(0, 0%, 100%);
+
+
+    /* Dunkel-Modus */
+[data-theme="dark"] {
+--primary-color: #050107;
+--secondary-color: #332554;
+--tertiary-color: #9b788f;
+--quaternary-color: #a484ad;
+--quinary-color: #00435d;
+--complementary-primary: #658d52;
+--background-color: #291333;
+--text-color: #FFFFFF;
+    }
+}

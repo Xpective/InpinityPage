@@ -1,0 +1,14 @@
+[data-theme="basic"] {
+    --primary-color: #452554;
+    --primary-color-transparent: rgba(69, 37, 84, 0.5);
+    --secondary-color: #7967A1;
+    --tertiary-color: #E8E2E6;
+    --quaternary-color: #F8F1FA;
+    --quaternary-color-transparent05: rgba(248, 241, 250, 0.5);
+    --quaternary-color-transparent025: rgba(248, 241, 250, 0.25);
+    --quinary-color: #1b82aa;
+    --quinary-color-transparent: rgba(27, 130, 170, 0.5);
+    --complementary-primary: #badaab;
+    --background-color: #452554;
+    --text-color: hsl(0, 0%, 100%);
+}

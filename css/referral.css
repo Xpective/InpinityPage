@@ -1,0 +1,110 @@
+
+/* Base styles derived from layout.css and using predefined variables from base.css */
+:root {
+    /* Grundlegende Stil-Definitionen */
+
+--primary-color: #452554;
+--primary-color-transparent: rgba(69, 37, 84, 0.5);
+--secondary-color: #7967A1;
+--tertiary-color: #E8E2E6;
+--quaternary-color: #F8F1FA;
+--quaternary-color-transparento5: rgba(248, 241, 250, 0.5);
+--quaternary-color-transparento25:  rgba(248, 241, 250, 0.25);
+--quinary-color: #1b82aa;
+--quinary-color-transparent: rgba(27, 130, 170, 0.5); 
+--complementary-primary: #badaab;
+--background-color: #452554;
+--text-color: hsl(0, 0%, 100%);
+
+--font-size-base: 16px;
+--font-size-large: calc(1.618 * var(--font-size-base));
+--font-size-xlarge: calc(1.618 * var(--font-size-large));
+--font-size-xxlarge: 67.77px;
+--font-size-zxlarge: 109.66px;
+--font-size-small: calc(var(--font-size-base) / 1.618);
+--font-size-xsmall: calc(var(--font-size-small) / 1.618);
+--font-size-xxsmall: 6.11px;
+
+    /* Abstände basierend auf Phi */
+--space-base: 1rem;
+--space-large: 1.618rem;
+--space-xlarge: 2.618rem;
+--space-xxlarge: 4.236rem;
+--space-zxlarge: 6.854rem;
+--space-small: 0.618rem;
+--space-xsmall: 0.382rem;
+--space-xxsmall: 0.236rem;
+
+--padding-base: var(--space-base);
+--padding-large: var(--space-large);
+--padding-xlarge: var(--space-xlarge);
+--padding-small: var(--space-small);
+--padding-xsmall: var(--space-xsmall);
+--padding-xxsmall: var(--space-xxsmall);  /* New value based on Phi */
+--zindex-base: 10;
+--zindex-large: 16;
+--zindex-xlarge: 26;
+--zindex-xxlarge: 42;
+--zindex-zxlarge: 69;
+
+    /* Maximale Containerbreite basierend auf Phi */
+--max-width-base: 960px;
+--max-width-large: 1553px;
+
+    /* Schriftart */
+--font-family: 'Poppins', sans-serif; /* Extracting the root variables from base.css */
+}
+
+body {
+    font-family: var(--font-family);
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+.container {
+    width: 80%;
+    margin: auto;
+    overflow: hidden;
+}
+
+/* Styling for referral registration form */
+.referral-form {
+    background-color: var(--tertiary-color);
+    padding: var(--padding-base);
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    margin: var(--space-large) 0;
+}
+
+.referral-form label {
+    display: block;
+    margin-bottom: var(--space-small);
+}
+
+.referral-form input[type="text"],
+.referral-form input[type="email"],
+.referral-form input[type="password"] {
+    width: 100%;
+    padding: var(--padding-base);
+    margin-bottom: var(--space-base);
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.referral-form button[type="submit"] {
+    display: block;
+    width: 100%;
+    padding: var(--padding-base);
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.referral-form button[type="submit"]:hover {
+    background-color: var(--secondary-color);
+}
