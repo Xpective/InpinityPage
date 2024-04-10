@@ -1,0 +1,50 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Private Nachrichten</title>
+    <link rel="stylesheet" href="base.css">
+    <link rel="stylesheet" href="layout.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Private Nachrichten</h1>
+        
+        <!-- Inbox: Liste von Konversationen -->
+        <div class="inbox">
+            <h2>Inbox</h2>
+            <ul>
+                <li><a href="#conversation1">Konversation mit Benutzer123</a></li>
+                <li><a href="#conversation2">Konversation mit Benutzer456</a></li>
+                <!-- Weitere Konversationen hier -->
+            </ul>
+        </div>
+        
+        <!-- Konversationsansicht für eine spezifische Konversation -->
+        <div class="conversation" id="conversation1">
+            <h2>Konversation mit Benutzer123</h2>
+            
+            <!-- Einzelne Nachricht in der Konversation -->
+            <div class="message">
+                <p><strong>Benutzer123:</strong> Hallo! Wie geht es Ihnen?</p>
+            </div>
+            
+            <!-- Einzelne Nachricht in der Konversation -->
+            <div class="message">
+                <p><strong>Sie:</strong> Mir geht es gut, danke! Und Ihnen?</p>
+            </div>
+            
+            <!-- Formular zum Senden einer Nachricht -->
+            <form action="/send_message" method="post">
+                <textarea id="message_content" name="message_content" rows="3" required placeholder="Ihre Nachricht..."></textarea>
+                <button type="submit">Senden</button>
+            </form>
+        </div>
+        
+        <!-- Weitere Konversationsansichten würden hier folgen -->
+    </div>
+</body>
+</html>

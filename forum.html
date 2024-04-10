@@ -1,148 +1,170 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta content="Inpinity - Tools und Ressourcen für Game Design und Entwicklung." name="description" />
+    <title>Inpinity - Startseite</title>
+    <link rel="stylesheet" href="css/base.css"  />
+    <link rel="stylesheet" href="css/layout.css"  />
+    <link rel="stylesheet" href="css/animations.css"  />
+    <link rel="stylesheet" href="css/dark.css"  />
+    <link rel="stylesheet" href="css/light.css"  />
+    <link rel="stylesheet" href="css/responsive.css"  />
+    <link rel="stylesheet" href="css/color.css" />
+    <script defer="" src="main.js"></script>
+    <link rel="icon" type="image/png" href="favicon.webp">
+    <meta content="Inpinity, Game Design, Game Entwicklung, Plattform, Zusammenarbeit, Forum, Tools, GameDesign, AI Developement, Games of future,programming, programs, python gui," name="keywords">
+    <meta content="Inpinity Team" name="Xpective">
+    <meta property="og:title" content="Inpinity - Die Community für Game Design und Programmierung">
+    <meta property="og:description" content="Tauschen Sie Designs, Wissen und Erfahrungen im Bereich der Programmierung und des Game Designs aus. Werden Sie Teil einer wachsenden Gemeinschaft, die sich auf die Unreal Engine und viele andere Technologien spezialisiert hat.">
+    <meta property="og:image" content="logo_background.jpg">
+    <meta property="og:url" content="inpinity.online, www.inpinity.online, https://www.inpinity.online, https://inpinity.online">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inpinity - Forum</title>
-    <link rel="stylesheet" href="styles.css">
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="logo_background.webp">
+    <meta name="twitter:site" content="@https://x.com/inpinity1?s=21&t=-FyWwqonfIU7u9houJoQAw">
+    <meta name="twitter:creator" content="@Inpinity1">
+    
+    <!-- Weitere Tags -->
+    <meta name="theme-color" content="#FarbcodeIhrerWebsite">
+    <meta name="robots" content="index,follow">
 </head>
 
-<body>
+<body class="forum-page">
+    <!-- Header-Bereich -->
     <header>
         <nav>
             <ul>
-                <li><a href="index.html">Startseite</a></li>
-                <li><a href="features.html">Features</a></li>
-                <li><a href="forum.html">Forum</a></li>
-                <li><a href="contact.html">Kontakt</a></li>
-                <div id="walletStatus"></div>
+                <li><a aria-label="Startseite" href="index.html">Startseite</a></li>
+                <li><a aria-label="Dienstleistungen" href="features.html">Features</a></li>
+                <li><a aria-label="Game" href="game.html">Game</a></li>
+                <li><a aria-label="Forum" href="forum.html">Forum</a></li>
+                <li><a aria-label="Zusammenarbeit" href="collaboration.html">Zusammenarbeit</a></li>
+                <li><a aria-label="Registrieren" href="register.html">Registrieren</a></li>
+                <li><a aria-label="Über uns" href="about.html">Über uns</a></li>
+                <div class="themeDots">
+                    <div class="dot light" title="Light Theme"></div>
+                    <div class="dot dark" title="Dark Theme"></div>
+                    <div class="dot basic" title="Basic Theme"></div>
+                </div>
+                <style>
+                    .themeDots .dot {
+                        display: inline-block;
+                        width: 20px;
+                        height: 20px;
+                        border-radius: 50%;
+                        margin: 5px;
+                        cursor: pointer;
+                        transition: transform 0.2s;
+                    }
+                
+                    .themeDots .dot.light {
+                        background-color: #FFFFFF; /* White for Light Theme */
+                    }
+                
+                    .themeDots .dot.dark {
+                        background-color: #000000; /* Black for Dark Theme */
+                    }
+                
+                    .themeDots .dot.basic {
+                        background-color: var(--quinary-color); /* Gold color for Basic Theme */
+                    }
+                
+                    .themeDots .dot:hover {
+                        transform: scale(1.2);
+                    }
+                </style>
+                <script>
+                    // JavaScript to Change the Theme based on Dot Click
+                    document.querySelector('.themeDots .dot.light').addEventListener('click', function() {
+                        document.body.setAttribute('data-theme', 'light');
+                    });
+                
+                    document.querySelector('.themeDots .dot.dark').addEventListener('click', function() {
+                        document.body.setAttribute('data-theme', 'dark');
+                    });
+                
+                    document.querySelector('.themeDots .dot.basic').addEventListener('click', function() {
+                        document.body.setAttribute('data-theme', 'basic');
+                    });
+                </script>
             </ul>
         </nav>
+        <div id="walletStatus"></div>
     </header>
 
+    <!-- Hauptinhalt -->
     <main>
-        <!-- Search function -->
-        <section id="forum-search">
-            <h2>Forum durchsuchen</h2>
-            <form>
-                <input type="text" id="searchQuery" placeholder="Suchen..." required>
-                <button type="submit" class="button">Suchen</button>
-            </form>
-        </section>
-
-        <!-- Forum Categories & Topics -->
-        <section id="forum-categories">
-            <h2>Forum-Kategorien</h2>
-            <ul>
-                <li><a href="#">Allgemeine Diskussion</a></li>
-                <li><a href="#">Technische Hilfe</a></li>
-                <li><a href="#">Neue Features</a></li>
-                <!-- ... other categories ... -->
-            </ul>
-        </section>
-
-        <!-- Latest Posts -->
-        <section id="latest-posts">
-            <h2>Neueste Beiträge</h2>
-            <ul>
-                <li><a href="#">Wie kann ich mein Konto sichern?</a></li>
-                <li><a href="#">Neue Features im letzten Update</a></li>
-                <li><a href="#">Feedback zum Design</a></li>
-                <!-- ... other latest posts ... -->
-            </ul>
-        </section>
-
-        <!-- Registration & Login -->
-        <section id="forum-auth">
-            <h2>Registrieren oder Anmelden</h2>
-            <p>Um Beiträge zu erstellen oder zu antworten, <a href="#">registrieren</a> Sie sich oder <a href="#">melden Sie sich an</a>.</p>
-        </section>
-
-        <!-- Rules & Guidelines -->
-        <section id="forum-rules">
-            <h2>Regeln und Richtlinien</h2>
-            <p>Bitte beachten Sie die <a href="#">Forumregeln</a> bevor Sie einen Beitrag erstellen oder antworten.</p>
-        </section>
-
-        <!-- User Ratings - Placeholder -->
-        <section id="user-ratings">
-            <h2>Top bewertete Beiträge</h2>
-            <ul>
-                <li><a href="#">Hilfreicher Beitrag über Sicherheit</a></li>
-                <li><a href="#">Wie man das Beste aus Inpinity herausholt</a></li>
-                <!-- ... other top-rated posts ... -->
-            </ul>
-        </section>
-
-        <!-- Post Filters - Placeholder -->
-        <section id="post-filters">
-            <h2>Filter</h2>
-            <button class="button">Neueste</button>
-            <button class="button">Beliebteste</button>
-            <button class="button">Unbeantwortet</button>
-        </section>
-
-        <!-- Sticky Posts - Placeholder -->
-        <section id="sticky-posts">
-            <h2>Wichtige Beiträge</h2>
-            <ul>
-                <li><a href="#">Forumregeln und Richtlinien</a></li>
-                <li><a href="#">Wie man Inpinity optimal nutzt</a></li>
-                <!-- ... other sticky posts ... -->
-            </ul>
-        </section>
-
-        <!-- Notifications - Placeholder -->
-        <section id="notifications">
-            <h2>Benachrichtigungen</h2>
-            <p><a href="#">Klicken Sie hier</a>, um Benachrichtigungen zu abonnieren.</p>
-        </section>
-
-        <!-- Profile Pictures & Signatures - Placeholder -->
-        <section id="user-profile">
-            <h2>Benutzerprofile</h2>
-            <div class="user">
-                <img src="path/to/profile-image.jpg" alt="Benutzerbild">
-                <p>Benutzername</p>
-                <p>Signatur des Benutzers hier...</p>
+        <!-- Forum Header -->
+        <section id="forum-header">
+            <h1 class="hero-title">Community & Forum</h1>
+            <p>Tauschen Sie sich aus, stellen Sie Fragen und teilen Sie Ihr Wissen mit anderen Entwicklern!</p>
+            <div id="search-area">
+                <input type="text" id="search-input" placeholder="Suchen...">
+                <!--button id="search-button" class="forum-button primary">Suchen</button>
             </div>
-            <!-- ... other user profiles ... -->
         </section>
 
-        <!-- Private Messages - Placeholder -->
-        <section id="private-messages">
-            <h2>Private Nachrichten</h2>
-            <p><a href="#">Klicken Sie hier</a>, um Ihre privaten Nachrichten zu sehen.</p>
+        <!-- Aktionsschaltflächen -->
+        <section class="action-buttons">
+            <button class="forum-button primary">Neues Thema erstellen</button>
+            <button class="forum-button secondary">Antworten</button>
         </section>
 
-        <!-- Topic Subscriptions - Placeholder -->
-        <section id="topic-subscriptions">
-            <h2>Themen-Abonnements</h2>
-            <p><a href="#">Klicken Sie hier</a>, um Ihre abonnierten Themen zu sehen.</p>
+        <!-- Forum-Kategorien -->
+        <section id="forum-categories">
+            <div class="category">
+                <h2>Allgemeine Diskussion</h2>
+                <p>Teilen Sie Gedanken, Ideen und allgemeine Fragen über Spieleentwicklung und mehr.</p>
+                <!--<div class="post-rating">
+                    <button class="upvote">🔺</button>
+                    <span class="rating-count">0</span>
+                    <button class="downvote">🔻</button>
+                </div>-->
+              
+            </div>
+            
+            <div class="category">
+                <h2>Technische Hilfe</h2>
+                <p>Suchen Sie technische Unterstützung oder haben Sie Lösungen? Dies ist Ihr Bereich.</p>
+                <!--<div class="post-rating">
+                    <button class="upvote">🔺</button>
+                    <span class="rating-count">0</span>
+                    <button class="downvote">🔻</button>
+                
+                <button class="mark-solution">Als Lösung markieren</button></div>-->
+            </div>
+            
+            <div class="category">
+                <h2>Projekt-Showcase</h2>
+                <p>Stellen Sie Ihr aktuelles Projekt vor und erhalten Sie Feedback von der Community.</p>
+                <!--<div class="post-rating">
+                    <button class="upvote">🔺</button>
+                    <span class="rating-count">0</span>
+                    <button class="downvote">🔻</button>
+                </div>-->
+            </div>
         </section>
 
-        <!-- User Groups & Roles - Placeholder -->
-        <section id="user-groups">
-            <h2>Benutzergruppen</h2>
-            <ul>
-                <li>Neumitglieder - können Beiträge lesen und erstellen.</li>
-                <li>Mitglieder - können Beiträge lesen, erstellen und bearbeiten.</li>
-                <li>Moderatoren - können Beiträge löschen und verschieben.</li>
-                <li>Administratoren - haben vollen Zugriff auf das Forum.</li>
-            </ul>
+        <!-- Suchergebnisse -->
+        <section id="search-results">
+            <!-- Die Suchergebnisse werden hier dynamisch eingefügt -->
         </section>
+        <script src="path/to/your/firebaseAuth.js"></script>
 
-        <!-- Spam & Abuse Protection - Placeholder -->
-        <section id="spam-protection">
-            <h2>Spam- und Missbrauchsschutz</h2>
-            <p>Unser Forum hat automatische Mechanismen, um Spam zu erkennen und zu verhindern. Wenn Sie einen Beitrag sehen, der gegen die Regeln verstößt, <a href="#">melden Sie ihn bitte</a>.</p>
-        </section>
     </main>
 
+    <!-- Footer-Bereich -->
     <footer>
-        <p>&copy; 2023 Inpinity. Alle Rechte vorbehalten.</p>
+        <p>© 2023 Inpinity. Alle Rechte vorbehalten.</p>
+             <div class="footer-links">
+                <a href="privacypolicy.html">Datenschutzrichtlinien</a>
+                <a href="termsofuse.html">Nutzungsbedingungen</a>
+                <a href="contact.html">Kontakt</a>
+            </div>
     </footer>
 </body>
-
 </html>
