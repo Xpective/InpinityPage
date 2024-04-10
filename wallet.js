@@ -26,6 +26,7 @@ async function connectWallet() {
 async function getEthBalance(address) {
     if (window.ethereum) {
         try {
+            const web3 = new
             const balance = await window.ethereum.request({
                 method: 'eth_getBalance',
                 params: [address, 'latest']
