@@ -10,7 +10,18 @@ function initializeWeb3() {
         console.error("MetaMask ist nicht installiert");
     }
 }
+async function switchToBinanceSmartChain() {
+    try {
+        await window.ethereum.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: '0x38' }], // 0x38 ist die Chain ID für Binance Smart Chain Mainnet
+        });
+    } catch (error) {
+        console.error('Fehler beim Wechseln des Netzwerks:', error);
+    }
+}
 
+// Ähnlich für Polygon (MATIC) mit der entsprechenden chainId
 // Funktion zum Verbinden des Wallets
 async function connectWallet() {
     try {
