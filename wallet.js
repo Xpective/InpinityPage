@@ -25,15 +25,29 @@ async function switchNetwork(chainId) {
 }
 
 // Wallet-Verbindung
-async function connectWallet() {
+async function connectWalletFallback() {
     try {
+        // Neue Methode
         const addressArray = await window.ethereum.request({ method: "eth_requestAccounts" });
         updateUIAfterWalletConnected(addressArray[0]);
         return addressArray[0];
-    } catch (err) {
-        alert(`Fehler beim Verbinden des Wallets: ${err.message}`);
-        console.error("Fehler beim Verbinden des Wallets:", err);
-        return null;
+    } catch (error) {
+        // Fallback auf die ältere Methode, falls die neue Methode nicht funktioniert
+        if (error.code === -32601) {
+            try {
+                const addressArray = await window.ethereum.enable();
+                updateUIAfterWalletConnected(addressArray[0]);
+                return addressArray[0];
+            } catch (fallbackError) {
+                alert(`Fehler beim Verbinden des Wallets: ${fallbackError.message}`);
+                console.error("Fehler beim Verbinden des Wallets:", fallbackError);
+                return null;
+            }
+        } else {
+            alert(`Fehler beim Verbinden des Wallets: ${error.message}`);
+            console.error("Fehler beim Verbinden des Wallets:", error);
+            return null;
+        }
     }
 }
 
