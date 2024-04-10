@@ -81,13 +81,18 @@
 <div id="nftResult"></div>
 <script>
 document.getElementById('generateNft').addEventListener('click', function() {
-    fetch('https://nft.s-plat.workers.dev/' //Die URL Ihres Workers einfügen
+    fetch('https://nft.s-plat.workers.dev/', { // Die URL Ihres Workers einfügen
         method: 'POST', // Anpassen basierend auf Ihrem Worker-Setup
     })
     .then(response => response.json())
     .then(data => {
         // Hier Ihren Code einfügen, um den NFT und Metadaten anzuzeigen
-        console.log(data);
+        const nftResultDiv = document.getElementById('nftResult');
+        // Nehmen wir an, dass `data` die URL zum Bild und Metadaten enthält
+        nftResultDiv.innerHTML = `
+          <img src="${data.imageUrl}" alt="Generierter NFT" />
+          <pre>${JSON.stringify(data.metadata, null, 2)}</pre>
+        `;
     })
     .catch((error) => {
         console.error('Fehler:', error);
