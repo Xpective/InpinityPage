@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="de">
-
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
@@ -15,6 +14,8 @@
     <link rel="stylesheet" href="css/color.css">
     <link rel="icon" type="image/png" href="favicon.webp">
     <script src="https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.6.0/jszip.min.js"></script>
+
 </head>
 
 <body>
@@ -54,23 +55,44 @@
                 <li>Eigene Projekte starten und Mitstreiter finden</li>
             </ul>
         </section>
-               <section>
+        <section>
             <h2>Erstelle dein eigenes NFT</h2>
-            <canvas id="nftCanvas" width="350" height="350" style="border:1px solid #000;"></canvas>
-            <button onclick="generateNFT()">NFT generieren</button>
+            <input type="file" id="zipFile" accept=".zip" />
+            <canvas id="nftCanvas" width="400" height="400" style="border:1px solid #000;"></canvas>
             <script>
-                function generateNFT() {
+                document.getElementById('zipFile').addEventListener('change', function() {
+                    const file = this.files[0];
+                    if (file) {
+                        generateNFT(file);
+                    }
+                });
+
+                async function generateNFT(zipFile) {
+                    const jsZip = new JSZip();
+                    const zipContents = await jsZip.loadAsync(zipFile);
                     const canvas = document.getElementById('nftCanvas');
                     const ctx = canvas.getContext('2d');
 
                     ctx.clearRect(0, 0, canvas.width, canvas.height); // Canvas leeren
-                    // Beispiel: Generiere einen einfachen Kreis als NFT
-                    ctx.fillStyle = `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`;
-                    ctx.beginPath();
-                    ctx.arc(200, 200, 100, 0, Math.PI * 2, true);
-                    ctx.fill();
 
-                    // Füge hier zusätzliche Schritte hinzu, um komplexere NFTs zu generieren
+                    // Festlegen der Reihenfolge der Layer
+                    const layerOrder = ['background', 'eyes', 'body', 'mouth', 'ears', 'hair', 'hat', 'details'];
+
+                    // Durch jeden Layer iterieren und die entsprechenden Bilder zeichnen
+                    for (const layer of layerOrder) {
+                        for (const [path, file] of Object.entries(zipContents.files)) {
+                            if (!file.dir && path.startsWith(`${layer}/`) && path.endsWith('.png')) {
+                                const fileData = await file.async("blob");
+                                const imgUrl = URL.createObjectURL(fileData);
+                                const img = new Image();
+                                img.src = imgUrl;
+                                await new Promise((resolve) => img.onload = resolve);
+                                ctx.drawImage(img, 0, 0, canvas.width, canvas.height); // Bild zum Canvas hinzufügen
+                                URL.revokeObjectURL(imgUrl); // Nicht mehr benötigte URLs aufräumen
+                                break; // Annahme, dass nur ein Bild pro Layer verwendet wird.
+                            }
+                        }
+                    }
                 }
             </script>
         </section>
