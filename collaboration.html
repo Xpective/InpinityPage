@@ -54,6 +54,29 @@
                 <li>Eigene Projekte starten und Mitstreiter finden</li>
             </ul>
         </section>
+               <section>
+            <h2>Erstelle dein eigenes NFT</h2>
+            <canvas id="nftCanvas" width="350" height="350" style="border:1px solid #000;"></canvas>
+            <button onclick="generateNFT()">NFT generieren</button>
+            <script>
+                function generateNFT() {
+                    const canvas = document.getElementById('nftCanvas');
+                    const ctx = canvas.getContext('2d');
+
+                    ctx.clearRect(0, 0, canvas.width, canvas.height); // Canvas leeren
+                    // Beispiel: Generiere einen einfachen Kreis als NFT
+                    ctx.fillStyle = `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`;
+                    ctx.beginPath();
+                    ctx.arc(200, 200, 100, 0, Math.PI * 2, true);
+                    ctx.fill();
+
+                    // Füge hier zusätzliche Schritte hinzu, um komplexere NFTs zu generieren
+                }
+            </script>
+        </section>
+    
+    <script defer src="main.js"></script>
+    <script defer src="/wallet.js"></script>
         <section>
             <h2>Kontakt für Zusammenarbeit</h2>
             <!-- Kontaktformular oder Informationen -->
@@ -69,31 +92,6 @@
         </div>
     </footer>
     
-    <script defer src="main.js"></script>
-    <script defer src="/wallet.js"></script>
-    <button id="generateNft">NFT generieren</button>
-    <div id="nftResult"></div>
-    <script>
-        document.getElementById('generateNft').addEventListener('click', function() {
-            fetch('https://nft.s-plat.workers.dev/', { // Die URL Ihres Workers einfügen
-                method:'POST', // Anpassen basierend auf Ihrem Worker-Setup
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-            })
-            .then(response => response.json())
-            .then(data => {
-                const nftResultDiv = document.getElementById('nftResult');
-                nftResultDiv.innerHTML = `
-                    <img src="${data.imageUrl}" alt="Generierter NFT" style="max-width:100%;"/>
-                    <pre>${JSON.stringify(data.metadata, null, 2)}</pre>
-                `;
-            })
-            .catch((error) => {
-                console.error('Fehler:', error);
-            });
-        });
-    </script>
 </body>
 
 </html>
