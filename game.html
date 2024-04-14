@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="utf-8" />
+    <title>Inpinity - Game</title>
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+    <link rel="stylesheet" href="css/animations.css" />
+    <link rel="stylesheet" href="css/dark.css" />
+    <link rel="stylesheet" href="css/light.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+    <link rel="stylesheet" href="css/color.css" />
+    <link rel="icon" type="image/png" href="favicon.webp">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #000;
+        }
+
+        #pingPongCanvas {
+            background: #222;
+            display: block; /* prevents scrollbar */
+            width: 100%; /* Ensures full width */
+            height: 80vh; /* Use 80% of the screen height */
+        }
+
+        .building-notice {
+            color: white;
+            margin-top: 20px;
+            font-size: 24px;
+        }
+    </style>
+    <script defer src="https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js"></script>
+    <script defer src="main.js"></script>
+</head>
+<body>
+    <header>
+        <!-- Simple navigation for demonstration -->
+        <nav>
+            <ul>
+                <li><a href="index.html">Startseite</a></li>
+                <li><a href="game.html">Game</a></li>
+                <li><a href="forum.html">Forum</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <div class="building-notice">Bitte Geduld, wir bauen an der Seite.</div>
+        <canvas id="pingPongCanvas"></canvas>
+        <script>
+            const canvas = document.getElementById('pingPongCanvas');
+            const ctx = canvas.getContext('2d');
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight * 0.8; // 80% of viewport height
+
+            let ball = {
+                x: canvas.width / 2,
+                y: canvas.height / 2,
+                radius: 10,
+                deltaX: 5,
+                deltaY: 5
+            };
+
+            let paddle = {
+                width: 100,
+                height: 20,
+                x: canvas.width / 2 - 50,
+                y: canvas.height - 30
+            };
+
+            function drawBall() {
+                ctx.beginPath();
+                ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI*2);
+                ctx.fillStyle = "#FFF";
+                ctx.fill();
+                ctx.closePath();
+            }
+
+            function drawPaddle() {
+                ctx.beginPath();
+                ctx.rect(paddle.x, paddle.y, paddle.width, paddle.height);
+                ctx.fillStyle = "#FFF";
+                ctx.fill();
+                ctx.closePath();
+            }
+
+            function updateGame() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                drawBall();
+                drawPaddle();
+
+                ball.x += ball.deltaX;
+                ball.y += ball.deltaY;
+
+                if (ball.y + ball.deltaY < ball.radius || ball.y + ball.deltaY > canvas.height - ball.radius) {
+                    ball.deltaY = -ball.deltaY;
+                }
+                if (ball.x + ball.deltaX < ball.radius || ball.x + ball.deltaX > canvas.width - ball.radius) {
+                    ball.deltaX = -ball.deltaX;
+                }
+
+                requestAnimationFrame(updateGame);
+            }
+
+            canvas.addEventListener('touchmove', function(e) {
+                let touchX = e.touches[0].clientX;
+                paddle.x = touchX - paddle.width / 2;
+            });
+
+            updateGame();
+        </script>
+    </main>
+    <footer>
+        <p>© 2023 Inpinity. Alle Rechte vorbehalten.</p>
+    </footer>
+</body>
+</html>
