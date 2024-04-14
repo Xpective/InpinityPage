@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Punkte Fangen Spiel</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        #gameArea {
+            position: relative;
+            width: 600px;
+            height: 600px;
+            background-color: #f0f0f0;
+            overflow: hidden;
+        }
+        .point {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-color: red;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameArea">
+        <div id="score">Punkte: 0</div>
+    </div>
+    <script>
+        const gameArea = document.getElementById('gameArea');
+        const scoreDisplay = document.getElementById('score');
+        let score = 0;
+
+        gameArea.addEventListener('click', function(event) {
+            if (event.target.className === 'point') {
+                score++;
+                event.target.remove();
+                createPoint();
+            } else {
+                score = 0; // Punkte zurücksetzen, wenn daneben geklickt wird
+            }
+            scoreDisplay.textContent = 'Punkte: ' + score;
+        });
+
+        function createPoint() {
+            const point = document.createElement('div');
+            point.className = 'point';
+            point.style.top = Math.random() * (gameArea.clientHeight - 30) + 'px';
+            point.style.left = Math.random() * (gameArea.clientWidth - 30) + 'px';
+            gameArea.appendChild(point);
+        }
+
+        // Erstelle den ersten Punkt beim Laden
+        createPoint();
+    </script>
+</body>
+</html>
