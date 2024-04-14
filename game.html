@@ -26,7 +26,9 @@
             background: #222;
             display: block; /* prevents scrollbar */
             width: 100%; /* Ensures full width */
-            height: 80vh; /* Use 80% of the screen height */
+            max-width: 800px; /* Limit canvas size */
+            height: 80vh; /* Use 80% of the viewport height */
+            border: 1px solid #FFF; /* Add border for visibility */
         }
 
         .score-board {
@@ -37,8 +39,6 @@
             font-size: 24px;
         }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js"></script>
-    <script defer src="main.js"></script>
 </head>
 <body>
     <header>
@@ -50,150 +50,147 @@
             </ul>
         </nav>
     </header>
-    <main>
+    <main style="flex: 1 0 auto; width: 100%; display: flex; justify-content: center; align-items: center;">
         <div class="score-board" id="score">Score: 0</div>
         <canvas id="pingPongCanvas"></canvas>
-        <script>
-            const canvas = document.getElementById('pingPongCanvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight * 0.8; // 80% of viewport height
-
-            let score = 0;
-            let gameActive = true;
-            let npcSpeed = 4; // Geschwindigkeit des NPC-Schlägers
-            let holes = [{
-                x: Math.random() * (canvas.width - 50) + 25,
-                radius: 50
-            }];
-
-            let ball = {
-                x: canvas.width / 2,
-                y: canvas.height - 30,
-                radius: 10,
-                deltaX: 5,
-                deltaY: -5,
-                color: "#FFF"
-            };
-
-            let paddle = {
-                width: 100,
-                height: 20,
-                x: canvas.width / 2 - 50,
-                y: canvas.height - 30
-            };
-
-            let npcPaddle = {
-                width: 100,
-                height: 20,
-                x: canvas.width / 2 - 50,
-                y: 30
-            };
-
-            function drawBall() {
-                ctx.beginPath();
-                ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-                ctx.fillStyle = ball.color;
-                ctx.fill();
-                ctx.closePath();
-            }
-
-            function drawPaddle() {
-                ctx.beginPath();
-                ctx.rect(paddle.x, paddle.y, paddle.width, paddle.height);
-                ctx.fillStyle = "#FFF";
-                ctx.fill();
-                ctx.closePath();
-            }
-
-            function drawNpcPaddle() {
-                ctx.beginPath();
-                ctx.rect(npcPaddle.x, npcPaddle.y, npcPaddle.width, npcPaddle.height);
-                ctx.fillStyle = "#FF6347"; // Tomatenrot für den NPC-Schläger
-                ctx.fill();
-                ctx.closePath();
-            }
-
-            function drawHoles() {
-                holes.forEach(hole => {
-                    ctx.beginPath();
-                    ctx.arc(hole.x, 25, hole.radius, 0, Math.PI * 2);
-                    ctx.stroke();
-                    ctx.closePath();
-                });
-            }
-
-            function updateGame() {
-                if (!gameActive) return;
-
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                draw Ball();
-                drawPaddle();
-                drawNpcPaddle();
-                drawHoles();
-                document.getElementById('score').innerText = `Score: ${score}`;
-
-                // Ballbewegung
-                ball.x += ball.deltaX;
-                ball.y += ball.deltaY;
-
-                // Wandkollisionen
-                if (ball.x - ball.radius < 0 || ball.x + ball.radius > canvas.width) {
-                    ball.deltaX = -ball.deltaX;
-                }
-
-                // Ball passiert den Spieler-Schläger (Game Over)
-                if (ball.y + ball.radius > canvas.height) {
-                    gameActive = false;
-                    alert("Game Over!");
-                    return;
-                }
-
-                // Ball trifft Spieler-Schläger
-                if (ball.y + ball.radius > paddle.y && ball.x > paddle.x && ball.x < paddle.x + paddle.width) {
-                    ball.deltaY = -ball.deltaY;
-                }
-
-                // Ball trifft NPC-Schläger
-                if (ball.y - ball.radius < npcPaddle.y + npcPaddle.height && ball.x > npcPaddle.x && ball.x < npcPaddle.x + npcPaddle.width) {
-                    ball.deltaY = -ball.deltaY;
-                }
-
-                // NPC Schlägerbewegung
-                if (npcPaddle.x + npcPaddle.width / 2 < ball.x) {
-                    npcPaddle.x += npcSpeed;
-                } else if (npcPaddle.x + npcPaddle.width / 2 > ball.x) {
-                    npcPaddle.x -= npcSpeed;
-                }
-
-                // Ball durch Löcher
-                holes.forEach((hole, index) => {
-                    if (Math.sqrt((ball.x - hole.x) ** 2 + (ball.y - 25) ** 2) < hole.radius + ball.radius) {
-                        score += 10;
-                        ball.color = "#" + ((1 << 24) * Math.random() | 0).toString(16); // Farbänderung der Kugel
-                        holes.splice(index, 1); // Loch entfernen
-                        if (holes.length < 10) {
-                            holes.push({
-                                x: Math.random() * (canvas.width - 50) + 25,
-                                radius: 50
-                            }); // Neues Loch hinzufügen
-                        }
-                    }
-                });
-
-                requestAnimationFrame(updateGame);
-            }
-
-            canvas.addEventListener('touchmove', function(e) {
-                let touchX = e.touches[0].clientX;
-                paddle.x = touchX - paddle.width / 2;
-            });
-
-            updateGame();
-        </script>
     </main>
-    <footer>
+    <footer style="flex-shrink: 0; width: 100%; text-align: center;">
         <p>© 2023 Inpinity. Alle Rechte vorbehalten.</p>
     </footer>
+    <script>
+        const canvas = document.getElementById('pingPongCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = Math.min(window.innerWidth, 800); // Limit width to 800px
+        canvas.height = window.innerHeight * 0.8; // 80% of viewport height
+
+        let score = 0;
+        let gameActive = true;
+        let npcSpeed = 4; // Geschwindigkeit des NPC-Schlägers
+        let holes = [{ x: Math.random() * (canvas.width - 50) + 25, radius: 50 }];
+
+        let ball = {
+            x: canvas.width / 2,
+            y: canvas.height - 30,
+            radius: 10,
+            deltaX: 5,
+            deltaY: -5,
+            color: "#FFF"
+        };
+
+        let paddle = {
+            width: 100,
+            height: 20,
+            x: canvas.width / 2 - 50,
+            y: canvas.height - 30
+        };
+
+        let npcPaddle = {
+            width: 100,
+            height: 20,
+            x: canvas.width / 2 - 50,
+            y: 30
+        };
+
+        function drawBall() {
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+            ctx.fillStyle = ball.color;
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        function drawPaddle() {
+            ctx.beginPath();
+            ctx.rect(paddle.x, paddle.y, paddle.width, paddle.height);
+            ctx.fillStyle = "#FFF";
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        function drawNpcPaddle() {
+            ctx.beginPath();
+            ctx.rect(npcPaddle.x, npcPaddle.y, npcPaddle.width, npcPaddle.height
+                        ctx.fillStyle = "#FF6347"; // Tomatenrot für den NPC-Schläger
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        function drawHoles() {
+            holes.forEach(hole => {
+                ctx.beginPath();
+                ctx.arc(hole.x, 25, hole.radius, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.closePath();
+            });
+        }
+
+        function updateGame() {
+            if (!gameActive) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawBall();
+            drawPaddle();
+            drawNpcPaddle();
+            drawHoles();
+            document.getElementById('score').innerText = `Score: ${score}`;
+
+            // Ballbewegung
+            ball.x += ball.deltaX;
+            ball.y += ball.deltaY;
+
+            // Wandkollisionen
+            if (ball.x - ball.radius < 0 || ball.x + ball.radius > canvas.width) {
+                ball.deltaX = -ball.deltaX;
+            }
+
+            // Ball passiert den Spieler-Schläger (Game Over)
+            if (ball.y + ball.radius > canvas.height) {
+                gameActive = false;
+                alert("Game Over!");
+                return;
+            }
+
+            // Ball trifft Spieler-Schläger
+            if (ball.y + ball.radius > paddle.y && ball.x > paddle.x && ball.x < paddle.x + paddle.width) {
+                ball.deltaY = -ball.deltaY;
+            }
+
+            // Ball trifft NPC-Schläger
+            if (ball.y - ball.radius < npcPaddle.y + npcPaddle.height && ball.x > npcPaddle.x && ball.x < npcPaddle.x + npcPaddle.width) {
+                ball.deltaY = -ball.deltaY;
+            }
+
+            // NPC Schlägerbewegung
+            if (npcPaddle.x + npcPaddle.width / 2 < ball.x) {
+                npcPaddle.x += npcSpeed;
+            } else if (npcPaddle.x + npcPaddle.width / 2 > ball.x) {
+                npcPaddle.x -= npcSpeed;
+            }
+
+            // Ball durch Löcher
+            holes.forEach((hole, index) => {
+                if (Math.sqrt((ball.x - hole.x) ** 2 + (ball.y - 25) ** 2) < hole.radius + ball.radius) {
+                    score += 10;
+                    ball.color = "#" + ((1 << 24) * Math.random() | 0).toString(16); // Farbänderung der Kugel
+                    holes.splice(index, 1); // Loch entfernen
+                    if (holes.length < 10) {
+                        holes.push({
+                            x: Math.random() * (canvas.width - 50) + 25,
+                            radius: 50
+                        }); // Neues Loch hinzufügen
+                    }
+                }
+            });
+
+            requestAnimationFrame(updateGame);
+        }
+
+        canvas.addEventListener('touchmove', function(e) {
+            let touchX = e.touches[0].clientX;
+            paddle.x = touchX - paddle.width / 2;
+        });
+
+        updateGame();
+    </script>
 </body>
 </html>
