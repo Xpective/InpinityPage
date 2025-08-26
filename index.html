@@ -1,191 +1,156 @@
 <!DOCTYPE html>
 <html lang="de">
-
 <head>
-    <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <meta content="Inpinity - Tools und Ressourcen für Game Design und Entwicklung." name="description" />
-    <title>Inpinity - Startseite</title>
-    <link rel="stylesheet" href="css/base.css"  />
-    <link rel="stylesheet" href="css/layout.css"  />
-    <link rel="stylesheet" href="css/animations.css"  />
-    <link rel="stylesheet" href="css/dark.css"  />
-    <link rel="stylesheet" href="css/light.css"  />
-    <link rel="stylesheet" href="css/responsive.css"  />
-    <link rel="stylesheet" href="css/color.css" />
-    <link rel="stylesheet" href="css/adapted_about_us.css" />
-    <link rel="stylesheet" href="css/adapted_advertisements.css" />
-    <link rel="stylesheet" href="css/adapted_combined.css"/>
-    <link rel="stylesheet" href="css/adapted_comunity_guidelines.css" />
-    <link rel="stylesheet" href="css/adapted_course_feedback.css" />
-    <link rel="stylesheet" href="css/adapted_mft_marketplace.css"/>
-    <link rel="stylesheet" href="css/adapted_profile.css"/>
-    <link rel="stylesheet" href="css/combined_latest.css"/>
-    <link rel="stylesheet" href="css/gamification.css" />
-    <link rel="stylesheet" href="css/referral.css"/>
-    
-    <script src="https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js"></script>
-    <script defer src="main.js"></script>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <meta content="Inpinity - Tools und Ressourcen für Game Design und Entwicklung." name="description" />
+  <title>Inpinity - Startseite</title>
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/dark.css" />
+  <link rel="stylesheet" href="css/light.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+  <link rel="stylesheet" href="css/color.css" />
+  <link rel="stylesheet" href="css/adapted_about_us.css" />
+  <link rel="stylesheet" href="css/adapted_advertisements.css" />
+  <link rel="stylesheet" href="css/adapted_combined.css"/>
+  <link rel="stylesheet" href="css/adapted_comunity_guidelines.css" />
+  <link rel="stylesheet" href="css/adapted_course_feedback.css" />
+  <link rel="stylesheet" href="css/adapted_mft_marketplace.css"/>
+  <link rel="stylesheet" href="css/adapted_profile.css"/>
+  <link rel="stylesheet" href="css/combined_latest.css"/>
+  <link rel="stylesheet" href="css/gamification.css" />
+  <link rel="stylesheet" href="css/referral.css"/>
 
+  <!-- main.js lassen wir drin, falls du es brauchst -->
+  <script defer src="main.js"></script>
 
-    <link rel="icon" type="image/png" href="favicon.webp">
-    <meta content="Inpinity, Game Design, Game Entwicklung, Plattform, Zusammenarbeit, Forum, Tools, GameDesign, AI Developement, Games of future,programming, programs, python gui," name="keywords">
-    <meta content="Inpinity Team" name="Xpective">
-    <meta property="og:title" content="Inpinity - Die Community für Game Design und Programmierung">
-    <meta property="og:description" content="Tauschen Sie Designs, Wissen und Erfahrungen im Bereich der Programmierung und des Game Designs aus. Werden Sie Teil einer wachsenden Gemeinschaft, die sich auf die Unreal Engine und viele andere Technologien spezialisiert hat.">
-    <meta property="og:image" content="logo_background.jpg">
-    <meta property="og:url" content="inpinity.online, www.inpinity.online, https://www.inpinity.online, https://inpinity.online">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- Twitter Cards -->
-    <meta name="twitter:card" content="logo_background.webp">
-    <meta name="twitter:site" content="@https://x.com/inpinity1?s=21&t=-FyWwqonfIU7u9houJoQAw">
-    <meta name="twitter:creator" content="@Inpinity1">
-    
-    <!-- Weitere Tags -->
-    <meta name="theme-color" content="#FarbcodeIhrerWebsite">
-    <meta name="robots" content="index,follow">
+  <link rel="icon" type="image/png" href="favicon.webp">
+  <meta content="Inpinity, Game Design, Game Entwicklung, Plattform, Zusammenarbeit, Forum, Tools, GameDesign, AI Developement, Games of future,programming, programs, python gui," name="keywords">
+  <meta content="Inpinity Team" name="Xpective">
+  <meta property="og:title" content="Inpinity - Die Community für Game Design und Programmierung">
+  <meta property="og:description" content="Tauschen Sie Designs, Wissen und Erfahrungen im Bereich der Programmierung und des Game Designs aus. Werden Sie Teil einer wachsenden Gemeinschaft, die sich auf die Unreal Engine und viele andere Technologien spezialisiert hat.">
+  <meta property="og:image" content="logo_background.jpg">
+  <meta property="og:url" content="https://inpinity.online">
+  <!-- Twitter Cards -->
+  <meta name="twitter:card" content="logo_background.webp">
+  <meta name="twitter:site" content="@https://x.com/inpinity1?s=21&t=-FyWwqonfIU7u9houJoQAw">
+  <meta name="twitter:creator" content="@Inpinity1">
+  <!-- Weitere Tags -->
+  <meta name="theme-color" content="#FarbcodeIhrerWebsite">
+  <meta name="robots" content="index,follow">
 </head>
 
 <body>
-    <!-- Navigation Bar -->
-    <header>
-        <nav>
-            <ul>
-                <li><a aria-label="Startseite" href="index.html">Startseite</a></li>
-                <li><a aria-label="Dienstleistungen" href="features.html">Features</a></li>
-                <li><a aria-label="Game" href="game.html">Game</a></li>
-                <li><a aria-label="Forum" href="forum.html">Forum</a></li>
-                <li><a aria-label="Zusammenarbeit" href="collaboration.html">Zusammenarbeit</a></li>
-                <li><a aria-label="Registrieren" href="register.html">Registrieren</a></li>
-                <li><a aria-label="Über uns" href="about.html">Über uns</a></li>
-                <div class="themeDots">
-                    <div class="dot light" title="Light Theme"></div>
-                    <div class="dot dark" title="Dark Theme"></div>
-                    <div class="dot basic" title="Basic Theme"></div>
-                </div>
-                <style>
-                    .themeDots .dot {
-                        display: inline-block;
-                        width: 20px;
-                        height: 20px;
-                        border-radius: 50%;
-                        margin: 5px;
-                        cursor: pointer;
-                        transition: transform 0.2s;
-                    }
-                
-                    .themeDots .dot.light {
-                        background-color: #FFFFFF; /* White for Light Theme */
-                    }
-                
-                    .themeDots .dot.dark {
-                        background-color: #000000; /* Black for Dark Theme */
-                    }
-                
-                    .themeDots .dot.basic {
-                        background-color: var(--quinary-color); /* Gold color for Basic Theme */
-                    }
-                
-                    .themeDots .dot:hover {
-                        transform: scale(1.2);
-                    }
-                </style>
-                <script>
-                    
-                    // JavaScript to Change the Theme based on Dot Click
-                    document.querySelector('.themeDots .dot.light').addEventListener('click', function() {
-                        document.body.setAttribute('data-theme', 'light');
-                    });
-                
-                    document.querySelector('.themeDots .dot.dark').addEventListener('click', function() {
-                        document.body.setAttribute('data-theme', 'dark');
-                    });
-                
-                    document.querySelector('.themeDots .dot.basic').addEventListener('click', function() {
-                        document.body.setAttribute('data-theme', 'basic');
-                    });
-                </script>
-                <script defer src="/wallet.js"></script>
+  <!-- Navigation Bar -->
+  <header>
+    <nav>
+      <ul>
+        <li><a aria-label="Startseite" href="index.html">Startseite</a></li>
+        <li><a aria-label="Dienstleistungen" href="features.html">Features</a></li>
+        <li><a aria-label="Game" href="game.html">Game</a></li>
+        <li><a aria-label="Forum" href="forum.html">Forum</a></li>
+        <li><a aria-label="Zusammenarbeit" href="collaboration.html">Zusammenarbeit</a></li>
+        <li><a aria-label="Registrieren" href="register.html">Registrieren</a></li>
+        <li><a aria-label="Über uns" href="about.html">Über uns</a></li>
 
-            </ul>
-        </nav>
-    </header>
-    <main>
-        <body>
-        <section>
-            <div class="hero">
-    <h1>Entwickeln Sie Spiele effizienter mit Inpinity.</h1>
-    <h2>Die beste Plattform für Game-Entwickler. Erstellen, Teilen, Wachsen.</h2>
+        <div class="themeDots">
+          <div class="dot light" title="Light Theme"></div>
+          <div class="dot dark" title="Dark Theme"></div>
+          <div class="dot basic" title="Basic Theme"></div>
         </div>
-        <div class="button-wrapper">    
-            <button class="cta-button wallet-connect" aria-label="Verbinde dein Wallet">Wallet verbinden</button>
-        </div>
-        <div id="wallet-info" class="wallet-info">
-            <p>Wallet-Adresse: <span id="wallet-address">-</span></p>
-            <p>ETH Saldo: <span id="eth-balance">-</span> ETH</p>
-        
-        </div>
-        </section>
-        <section>
-            <h2 class="hero-title">Scrollen Sie um mehr zu erfahren</h2>
-        </section>
-        <section>
-            <div class="logo-container">
-                <img src="logo3.webp" class="logo-image" alt="Logo">
-                <img src="logo_transparent.webp" class="logo-image logo-glow" alt="Logo">
-            </div>
-        </section>
-        
-        <section></section>
-            
-        
-        
-            <details>
-                <summary>Willkommen bei Inpinity</summary>
-                <p>Vereinen, Erschaffen, Erleben. Inpinity ist nicht nur eine Plattform, sondern ein Zuhause für visionäre Game-Designer und Entwickler. Wir glauben an die Macht der Gemeinschaft und daran, dass wir gemeinsam Welten erschaffen können, die über das hinausgehen, was wir uns vorstellen können.</p>
-            </details>
-            <details>
-                <summary>Unsere Vision</summary>
-                <p>Wir träumen von einer Spielwelt, die von den kreativen Köpfen der Zukunft gestaltet wird. Eine Welt, in der jede Idee, jeder Charakter und jedes Abenteuer das Ergebnis einer leidenschaftlichen Gemeinschaft ist.</p>
-            </details>
-            <details>
-                <summary>Warum Inpinity?</summary>
-                <p>Gemeinschaft: Bei uns steht die Gemeinschaft an erster Stelle. Arbeiten Sie zusammen, teilen Sie Ideen und wachsen Sie mit anderen talentierten Individuen.</p>
-                <p>Ressourcen: Wir bieten Tools, Ressourcen und Unterstützung, um Ihre Vision in die Realität umzusetzen.</p>
-                <p>Erfahrung: Tauschen Sie Erfahrungen aus, lernen Sie von Branchenexperten und werden Sie Teil eines ständig wachsenden Netzwerks.</p>
-            </details>
-            <details>
-                <summary>Mach mit!</summary>
-                <p>Ob Sie ein erfahrener Entwickler oder ein Neuling in der Welt des Game-Designs sind, bei Inpinity ist Platz für alle. Werden Sie heute noch Mitglied und beginnen Sie Ihr Abenteuer mit uns!</p>
-            </details>
-            <details>
-                <summary>Testimonials</summary>
-                <blockquote>"Inpinity hat mir die Plattform und die Gemeinschaft geboten, die ich brauchte, um mein Spielprojekt wirklich in Gang zu bringen. Die Zusammenarbeit mit anderen hier war eine unglaubliche Erfahrung!" - Max Mustermann</blockquote>
-            </details>
-            <details>
-                <summary>Kontakt</summary>
-                <p>Haben Sie Fragen oder möchten Sie mehr über uns erfahren? Kontaktieren Sie uns und lassen Sie uns in Verbindung bleiben!</p>
-                <form action="#" id="contact-form" method="post">
-                    <label for="name">Name:</label>
-                    <input id="name" name="name" required="True" type="text"/>
-                    <label for="email">E-Mail:</label>
-                    <input id="email" name="email" required="True" type="email"/>
-                    <label for="message">Nachricht:</label>
-                    <textarea id="message" name="message" required="True"></textarea>
-                    <input type="submit" value="Senden"/>
-                </form>
-            </details>
-       
-    </div>
-</body>
-</main>
-<footer>
+
+        <style>
+          .themeDots .dot{display:inline-block;width:20px;height:20px;border-radius:50%;margin:5px;cursor:pointer;transition:transform .2s}
+          .themeDots .dot.light{background-color:#FFF}
+          .themeDots .dot.dark{background-color:#000}
+          .themeDots .dot.basic{background-color:var(--quinary-color)}
+          .themeDots .dot:hover{transform:scale(1.2)}
+        </style>
+        <script>
+          document.addEventListener('DOMContentLoaded',()=>{
+            document.querySelector('.themeDots .dot.light')?.addEventListener('click',()=>document.body.setAttribute('data-theme','light'));
+            document.querySelector('.themeDots .dot.dark')?.addEventListener('click',()=>document.body.setAttribute('data-theme','dark'));
+            document.querySelector('.themeDots .dot.basic')?.addEventListener('click',()=>document.body.setAttribute('data-theme','basic'));
+          });
+        </script>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section>
+      <div class="hero">
+        <h1>Entwickeln Sie Spiele effizienter mit Inpinity.</h1>
+        <h2>Die beste Plattform für Game-Entwickler. Erstellen, Teilen, Wachsen.</h2>
+      </div>
+
+      <!-- HIER: statt Wallet-Connect ein Link zum Token-Bereich -->
+      <div class="button-wrapper">
+        <a class="cta-button" href="https://inpinity.online/token/" aria-label="Zum INPI Token (Presale & Claim)" rel="noopener">
+          Zum INPI&nbsp;Token (Presale &amp; Claim)
+        </a>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="hero-title">Scrollen Sie um mehr zu erfahren</h2>
+    </section>
+
+    <section>
+      <div class="logo-container">
+        <img src="logo3.webp" class="logo-image" alt="Logo">
+        <img src="logo_transparent.webp" class="logo-image logo-glow" alt="Logo">
+      </div>
+    </section>
+
+    <section></section>
+
+    <details>
+      <summary>Willkommen bei Inpinity</summary>
+      <p>Vereinen, Erschaffen, Erleben. Inpinity ist nicht nur eine Plattform, sondern ein Zuhause für visionäre Game-Designer und Entwickler. Wir glauben an die Macht der Gemeinschaft und daran, dass wir gemeinsam Welten erschaffen können, die über das hinausgehen, was wir uns vorstellen können.</p>
+    </details>
+    <details>
+      <summary>Unsere Vision</summary>
+      <p>Wir träumen von einer Spielwelt, die von den kreativen Köpfen der Zukunft gestaltet wird. Eine Welt, in der jede Idee, jeder Charakter und jedes Abenteuer das Ergebnis einer leidenschaftlichen Gemeinschaft ist.</p>
+    </details>
+    <details>
+      <summary>Warum Inpinity?</summary>
+      <p>Gemeinschaft: Bei uns steht die Gemeinschaft an erster Stelle. Arbeiten Sie zusammen, teilen Sie Ideen und wachsen Sie mit anderen talentierten Individuen.</p>
+      <p>Ressourcen: Wir bieten Tools, Ressourcen und Unterstützung, um Ihre Vision in die Realität umzusetzen.</p>
+      <p>Erfahrung: Tauschen Sie Erfahrungen aus, lernen Sie von Branchenexperten und werden Sie Teil eines ständig wachsenden Netzwerks.</p>
+    </details>
+    <details>
+      <summary>Mach mit!</summary>
+      <p>Ob Sie ein erfahrener Entwickler oder ein Neuling in der Welt des Game-Designs sind, bei Inpinity ist Platz für alle. Werden Sie heute noch Mitglied und beginnen Sie Ihr Abenteuer mit uns!</p>
+    </details>
+    <details>
+      <summary>Testimonials</summary>
+      <blockquote>"Inpinity hat mir die Plattform und die Gemeinschaft geboten, die ich brauchte, um mein Spielprojekt wirklich in Gang zu bringen. Die Zusammenarbeit mit anderen hier war eine unglaubliche Erfahrung!" - Max Mustermann</blockquote>
+    </details>
+    <details>
+      <summary>Kontakt</summary>
+      <p>Haben Sie Fragen oder möchten Sie mehr über uns erfahren? Kontaktieren Sie uns und lassen Sie uns in Verbindung bleiben!</p>
+      <form action="#" id="contact-form" method="post">
+        <label for="name">Name:</label>
+        <input id="name" name="name" required type="text"/>
+        <label for="email">E-Mail:</label>
+        <input id="email" name="email" required type="email"/>
+        <label for="message">Nachricht:</label>
+        <textarea id="message" name="message" required></textarea>
+        <input type="submit" value="Senden"/>
+      </form>
+    </details>
+  </main>
+
+  <footer>
     <p>© 2023 Inpinity. Alle Rechte vorbehalten.</p>
     <div class="footer-links">
-        <a href="privacypolicy.html">Datenschutzrichtlinien</a>
-        <a href="termsofuse.html">Nutzungsbedingungen</a>
-        <a href="contact.html">Kontakt</a>
+      <a href="privacypolicy.html">Datenschutzrichtlinien</a>
+      <a href="termsofuse.html">Nutzungsbedingungen</a>
+      <a href="contact.html">Kontakt</a>
     </div>
-</footer>
+  </footer>
+</body>
 </html>
