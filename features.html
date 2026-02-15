@@ -1,11 +1,10 @@
 <!DOCTYPE html>
-<html lang="de">
-
+<html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <meta content="Inpinity - Tools und Ressourcen für Game Design und Entwicklung." name="description" />
-    <title>Inpinity - Startseite</title>
+    <meta content="Inpinity - Features and tools for game design, blockchain integration, and community collaboration." name="description" />
+    <title>Inpinity - Features</title>
     <link rel="stylesheet" href="css/base.css" />
     <link rel="stylesheet" href="css/layout.css" />
     <link rel="stylesheet" href="css/animations.css" />
@@ -13,65 +12,171 @@
     <link rel="stylesheet" href="css/light.css" />
     <link rel="stylesheet" href="css/responsive.css" />
     <link rel="stylesheet" href="css/color.css" />
+    <link rel="stylesheet" href="css/adapted_about_us.css" />
+    <link rel="stylesheet" href="css/adapted_advertisements.css" />
+    <link rel="stylesheet" href="css/adapted_combined.css"/>
+    <link rel="stylesheet" href="css/adapted_comunity_guidelines.css" />
+    <link rel="stylesheet" href="css/adapted_course_feedback.css" />
+    <link rel="stylesheet" href="css/adapted_mft_marketplace.css"/>
+    <link rel="stylesheet" href="css/adapted_profile.css"/>
+    <link rel="stylesheet" href="css/combined_latest.css"/>
+    <link rel="stylesheet" href="css/gamification.css" />
+    <link rel="stylesheet" href="css/referral.css"/>
     <script defer src="main.js"></script>
     <link rel="icon" type="image/png" href="favicon.webp">
-    <meta content="Inpinity, Game Design, Game Entwicklung, Plattform, Zusammenarbeit, Forum, Tools, GameDesign, AI Developement, Games of future,programming, programs, python gui," name="keywords">
-    <meta content="Inpinity Team" name="Xpective">
-    <meta property="og:title" content="Inpinity - Die Community für Game Design und Programmierung">
-    <meta property="og:description" content="Tauschen Sie Designs, Wissen und Erfahrungen im Bereich der Programmierung und des Game Designs aus. Werden Sie Teil einer wachsenden Gemeinschaft, die sich auf die Unreal Engine und viele andere Technologien spezialisiert hat.">
+    <meta name="keywords" content="Inpinity, Game Design, Game Development, Platform, Collaboration, Forum, Tools, GameDesign, AI Development, Games of future, programming, programs, python gui">
+    <meta name="author" content="Xpective">
+    <meta property="og:title" content="Inpinity - Features">
+    <meta property="og:description" content="Explore the powerful tools and features of Inpinity: staking, NFT generator, $ADVERT advertising, and more.">
     <meta property="og:image" content="logo_background.jpg">
-    <meta property="og:url" content="inpinity.online, www.inpinity.online, https://www.inpinity.online, https://inpinity.online">
-
-    <!-- Twitter Cards -->
+    <meta property="og:url" content="https://inpinity.online/features.html">
     <meta name="twitter:card" content="logo_background.webp">
-    <meta name="twitter:site" content="@https://x.com/inpinity1?s=21&t=-FyWwqonfIU7u9houJoQAw">
+    <meta name="twitter:site" content="@unxpective">
     <meta name="twitter:creator" content="@Inpinity1">
-    
-    <!-- Weitere Tags -->
     <meta name="theme-color" content="#FarbcodeIhrerWebsite">
     <meta name="robots" content="index,follow">
-
     <style>
-        .themeDots .dot {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            margin: 5px;
+        /* Tool card styling */
+        .tools-slider {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        .tools-container {
+            flex: 1 1 300px;
+            max-width: 350px;
+        }
+        .tool {
+            background: #1a1a1a;
+            border: 1px solid gold;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
             cursor: pointer;
+        }
+        .tool:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 15px gold;
+        }
+        .tool h2 {
+            color: gold;
+            margin-bottom: 1rem;
+        }
+        .tool p {
+            color: #ccc;
+            margin-bottom: 1.5rem;
+        }
+        .xbutton {
+            background: gold;
+            color: black;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .xbutton:hover {
+            background: #ffd700;
+        }
+        /* Modal (hidden by default) */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: #222;
+            border: 2px solid gold;
+            border-radius: 8px;
+            padding: 2rem;
+            max-width: 400px;
+            text-align: center;
+            color: white;
+        }
+        .modal-content h2 {
+            color: gold;
+        }
+        .modal-content .close {
+            margin-top: 1rem;
+            background: gold;
+            color: black;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .guestbook-cta {
+            text-align: center;
+            margin: 3rem 0;
+        }
+        .guestbook-link {
+            display: inline-block;
+            background: gold;
+            color: black;
+            padding: 0.75rem 2rem;
+            border-radius: 40px;
+            font-weight: bold;
+            text-decoration: none;
+            font-size: 1.2rem;
             transition: transform 0.2s;
         }
-
-        .themeDots .dot.light {
-            background-color: #FFFFFF; /* White for Light Theme */
+        .guestbook-link:hover {
+            transform: scale(1.05);
         }
-
-        .themeDots .dot.dark {
-            background-color: #000000; /* Black for Dark Theme */
+        .partners-section {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 2rem 0;
+            padding: 1rem;
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
         }
-
-        .themeDots .dot.basic {
-            background-color: var(--quinary-color); /* Gold color for Basic Theme */
+        .partner-item a {
+            padding: 0.5rem 1rem;
+            background: #2a2a2a;
+            border: 1px solid gold;
+            border-radius: 40px;
+            color: gold;
+            text-decoration: none;
         }
-
-        .themeDots .dot:hover {
-            transform: scale(1.2);
+        .partner-item a:hover {
+            background: gold;
+            color: black;
         }
     </style>
 </head>
-
 <body>
-    <!-- Navigation Bar -->
     <header>
         <nav>
             <ul>
-                <li><a aria-label="Startseite" href="index.html">Startseite</a></li>
-                <li><a aria-label="Dienstleistungen" href="features.html">Features</a></li>
+                <li><a aria-label="Home" href="index.html">Home</a></li>
+                <li><a aria-label="Features" href="features.html">Features</a></li>
                 <li><a aria-label="Game" href="game.html">Game</a></li>
                 <li><a aria-label="Forum" href="forum.html">Forum</a></li>
-                <li><a aria-label="Zusammenarbeit" href="collaboration.html">Zusammenarbeit</a></li>
-                <li><a aria-label="Registrieren" href="register.html">Registrieren</a></li>
-                <li><a aria-label="Über uns" href="about.html">Über uns</a></li>
+                <li><a aria-label="Collaboration" href="collaboration.html">Collaboration</a></li>
+                <li><a aria-label="Register" href="register.html">Register</a></li>
+                <li><a aria-label="About" href="about.html">About</a></li>
+                <li><a aria-label="Whitepaper" href="https://github.com/Xpective/InpinityPage/raw/3923cf22782286d60574c8ae9b92e693cb314215/Inpinity%20Whitepaper%20.pdf" target="_blank" rel="noopener">Whitepaper</a></li>
+                <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
+                <li><a aria-label="Guestbook" href="guestbook.html">Guestbook</a></li>
+                <li><a aria-label="Advertising" href="advertising.html">Advertising</a></li>
+                <li><a aria-label="Profile" href="profile.html">Profile</a></li>
                 <div class="themeDots">
                     <div class="dot light" title="Light Theme"></div>
                     <div class="dot dark" title="Dark Theme"></div>
@@ -79,79 +184,174 @@
                 </div>
             </ul>
         </nav>
+        <style>
+            .themeDots .dot {
+                display: inline-block;
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                margin: 5px;
+                cursor: pointer;
+                transition: transform 0.2s;
+            }
+            .themeDots .dot.light { background-color: #FFFFFF; }
+            .themeDots .dot.dark { background-color: #000000; }
+            .themeDots .dot.basic { background-color: var(--quinary-color); }
+            .themeDots .dot:hover { transform: scale(1.2); }
+        </style>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                document.querySelector('.themeDots .dot.light')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'light'));
+                document.querySelector('.themeDots .dot.dark')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'dark'));
+                document.querySelector('.themeDots .dot.basic')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'basic'));
+            });
+        </script>
     </header>
+
     <main>
-        <section>
-            <h1 class="hero-title">Unsere Tools & Features</h1>
-        </section>
-        <section id="features-intro">
-            <h2>Entdecken Sie die leistungsstarken Werkzeuge und Dienste, die Inpinity bietet, um Ihre Spieleentwicklung zu unterstützen.</h2>
+        <section class="hero">
+            <h1 class="hero-title">🚀 Inpinity Features</h1>
+            <h2>Discover powerful tools that blend game development with blockchain technology.</h2>
         </section>
 
+        <!-- Partners Section -->
+        <div class="partners-section">
+            <div class="partner-item"><a href="https://base.org/" target="_blank">⚡ Base L2</a></div>
+            <div class="partner-item"><a href="https://www.toshimart.xyz/" target="_blank">🛒 ToshiMart</a></div>
+            <div class="partner-item"><a href="https://uniswap.org/" target="_blank">🦄 Uniswap</a></div>
+        </div>
+
+        <!-- Feature Cards -->
         <div class="tools-slider">
-            <div class="tools-container" id="tools-scroll-container1">
-                    <div class="tool" onclick="focusTool(this)">
-                    <h2>Python GUI-Tools</h2>
-                    <p>Verwenden Sie unsere integrierten Python GUI-Tools, um Ihre Spieleentwicklung zu beschleunigen. Keine Installation erforderlich.</p>
-                    <button class="xbutton" >Mehr erfahren</button>
+            <!-- Card 1: Staking Dashboard -->
+            <div class="tools-container">
+                <div class="tool" onclick="showModal('stakingModal')">
+                    <h2>📈 Staking Dashboard</h2>
+                    <p>Stake your $INPI tokens and earn passive rewards. Track your APY and rewards in real time.</p>
+                    <button class="xbutton">Learn More</button>
                 </div>
             </div>
-            <div class="modal" id="constructionModal1">
-                <div class="modal-content">
-                    <h2>Under Construction</h2>
-                    <p>Wir arbeiten an etwas Großartigem. Bald verfügbar!</p>
+
+            <!-- Card 2: NFT Generator (based on previous ZIP upload) -->
+            <div class="tools-container">
+                <div class="tool" onclick="showModal('nftModal')">
+                    <h2>🎨 NFT Generator</h2>
+                    <p>Upload layered PNGs and instantly generate unique NFTs – ready to be minted on Base.</p>
+                    <button class="xbutton">Try Generator</button>
                 </div>
             </div>
-            <div class="tools-container" id="tools-scroll-container2">
-                <div class="tool" onclick="focusTool(this)">
-                <h2>Asset-Generator</h2>
-                <p>Erstellen Sie schnell und einfach Spiel-Assets mit unserem benutzerfreundlichen Asset-Generator.</p>
-                <button class="xbutton" onclick="doSomething()">Mehr erfahren</button>
-            </div>
-            <div class="modal" id="constructionModal2">
-                <div class="modal-content">
-                    <h2>Under Construction</h2>
-                    <p>Wir arbeiten an etwas Großartigem. Bald verfügbar!</p>
+
+            <!-- Card 3: $ADVERT Advertising Portal -->
+            <div class="tools-container">
+                <div class="tool" onclick="showModal('advertModal')">
+                    <h2>📢 $ADVERT Portal</h2>
+                    <p>Use your $ADVERT tokens to place banner ads, promoted content, and reach our gaming community.</p>
+                    <button class="xbutton">Advertise</button>
                 </div>
             </div>
-            <div class="tools-container" id="tools-scroll-container3">
-                <div class="tool" onclick="focusTool(this)">
-                    <h2>PNG-Erstellung</h2>
-                    <p>Konvertieren und erstellen Sie PNG-Bilder direkt auf unserer Plattform. Einfach und effizient.</p>
-                    <button class="xbutton" onclick="doSomething()">Mehr erfahren</button>
+
+            <!-- Card 4: Wallet Analytics -->
+            <div class="tools-container">
+                <div class="tool" onclick="showModal('walletModal')">
+                    <h2>👛 Wallet Analytics</h2>
+                    <p>Connect your wallet to view your $INPI and ETH balances, transaction history, and token holdings.</p>
+                    <button class="xbutton">Check Wallet</button>
                 </div>
             </div>
-            <div class="modal" id="constructionModal3">
-                <div class="modal-content">
-                    <h2>Under Construction</h2>
-                    <p>Wir arbeiten an etwas Großartigem. Bald verfügbar!</p>
+
+            <!-- Card 5: Pregame Demo -->
+            <div class="tools-container">
+                <div class="tool" onclick="window.location.href='game.html'">
+                    <h2>🎮 Pregame Demo</h2>
+                    <p>Play our mini‑game, earn scores, and support the development of the full Inpinity game.</p>
+                    <button class="xbutton">Play Now</button>
+                </div>
+            </div>
+
+            <!-- Card 6: Collaboration Hub -->
+            <div class="tools-container">
+                <div class="tool" onclick="window.location.href='collaboration.html'">
+                    <h2>🤝 Collaboration Hub</h2>
+                    <p>Find teammates, share projects, and co‑create the future of gaming with the community.</p>
+                    <button class="xbutton">Join Hub</button>
                 </div>
             </div>
         </div>
+
+        <!-- Modals (hidden by default) -->
+        <div id="stakingModal" class="modal">
+            <div class="modal-content">
+                <h2>Staking Dashboard</h2>
+                <p>🔥 Coming in Q2 2026! Stake your $INPI and earn rewards. Stay tuned.</p>
+                <button class="close" onclick="hideModal('stakingModal')">Close</button>
+            </div>
+        </div>
+
+        <div id="nftModal" class="modal">
+            <div class="modal-content">
+                <h2>NFT Generator</h2>
+                <p>🧪 This tool is in beta. Upload a ZIP with layers (background, eyes, body, etc.) to preview your NFT. Full minting on Base coming soon.</p>
+                <button class="close" onclick="hideModal('nftModal')">Close</button>
+            </div>
+        </div>
+
+        <div id="advertModal" class="modal">
+            <div class="modal-content">
+                <h2>$ADVERT Portal</h2>
+                <p>📅 Planned for Q2 2027. Earn $ADVERT by holding $INPI and use it to promote your projects.</p>
+                <button class="close" onclick="hideModal('advertModal')">Close</button>
+            </div>
+        </div>
+
+        <div id="walletModal" class="modal">
+            <div class="modal-content">
+                <h2>Wallet Analytics</h2>
+                <p>🔌 Connect your wallet on the <a href="profile.html" style="color:gold;">Profile page</a> to see your balances and transaction history.</p>
+                <button class="close" onclick="hideModal('walletModal')">Close</button>
+            </div>
+        </div>
+
+        <!-- Guestbook Call-to-Action -->
+        <div class="guestbook-cta">
+            <h2>✍️ Leave your mark</h2>
+            <p>Sign our guestbook – your message will soon be immortalized on the Base blockchain.</p>
+            <a href="guestbook.html" class="guestbook-link">📖 Go to Guestbook</a>
+        </div>
     </main>
+
     <footer>
-        <p>© 2023 Inpinity. Alle Rechte vorbehalten.</p>
+        <p>© 2026 Inpinity. All rights reserved. Working with <a href="https://base.org/" target="_blank" style="color: gold;">Base</a>, <a href="https://www.toshimart.xyz/" target="_blank" style="color: gold;">ToshiMart</a> and <a href="https://uniswap.org/" target="_blank" style="color: gold;">Uniswap</a>.</p>
         <div class="footer-links">
-            <a href="privacypolicy.html">Datenschutzrichtlinien</a>
-            <a href="termsofuse.html">Nutzungsbedingungen</a>
-            <a href="contact.html">Kontakt</a>
+            <a href="privacypolicy.html">Privacy Policy</a>
+            <a href="termsofuse.html">Terms of Use</a>
+            <a href="contact.html">Contact</a>
+            <a href="faq.html">FAQ</a>
+            <a href="guestbook.html">Guestbook</a>
+            <a href="advertising.html">Advertising</a>
+            <a href="profile.html">Profile</a>
         </div>
     </footer>
 
     <script>
-        // JavaScript to Change the Theme based on Dot Click
-        document.querySelector('.themeDots .dot.light').addEventListener('click', function() {
-            document.body.setAttribute('data-theme', 'light');
-        });
+        // Theme switcher is already in header
 
-        document.querySelector('.themeDots .dot.dark').addEventListener('click', function() {
-            document.body.setAttribute('data-theme', 'dark');
-        });
+        // Modal functions
+        function showModal(id) {
+            document.getElementById(id).classList.add('active');
+        }
 
-        document.querySelector('.themeDots .dot.basic').addEventListener('click', function() {
-            document.body.setAttribute('data-theme', 'basic');
+        function hideModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        // Close modal when clicking outside content (optional)
+        window.addEventListener('click', (e) => {
+            document.querySelectorAll('.modal').forEach(modal => {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
         });
     </script>
 </body>
-
 </html>
