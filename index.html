@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-  <meta content="Inpinity - Tools and resources for game design and development." name="description" />
+  <meta content="Inpinity - Tools and resources for game design and development, powered by blockchain." name="description" />
   <title>Inpinity - Home</title>
   <link rel="stylesheet" href="css/base.css" />
   <link rel="stylesheet" href="css/layout.css" />
@@ -27,19 +27,50 @@
   <script defer src="main.js"></script>
 
   <link rel="icon" type="image/png" href="favicon.webp">
-  <meta content="Inpinity, Game Design, Game Development, Platform, Collaboration, Forum, Tools, GameDesign, AI Development, Games of future, programming, programs, python gui" name="keywords">
+  <meta content="Inpinity, Game Design, Game Development, Platform, Collaboration, Forum, Tools, GameDesign, AI Development, Games of future, programming, programs, python gui, Base, ToshiMart, Uniswap" name="keywords">
   <meta content="Inpinity Team" name="Xpective">
-  <meta property="og:title" content="Inpinity - The Community for Game Design and Programming">
-  <meta property="og:description" content="Exchange designs, knowledge and experience in programming and game design. Become part of a growing community specializing in Unreal Engine and many other technologies.">
+  <meta property="og:title" content="Inpinity - The Community for Game Design and Blockchain">
+  <meta property="og:description" content="Exchange designs, knowledge and experience in programming and game design. Become part of a growing community building the future of gaming on Base.">
   <meta property="og:image" content="logo_background.jpg">
   <meta property="og:url" content="https://inpinity.online">
   <!-- Twitter Cards -->
   <meta name="twitter:card" content="logo_background.webp">
-  <meta name="twitter:site" content="@https://x.com/inpinity1?s=21&t=-FyWwqonfIU7u9houJoQAw">
+  <meta name="twitter:site" content="@unxpective">
   <meta name="twitter:creator" content="@Inpinity1">
   <!-- Additional Tags -->
   <meta name="theme-color" content="#FarbcodeIhrerWebsite">
   <meta name="robots" content="index,follow">
+
+  <style>
+    /* Partners section styling */
+    .partners-section {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      margin: 2rem auto;
+      padding: 1rem;
+      background: rgba(0,0,0,0.3);
+      border-radius: 12px;
+      max-width: 900px;
+    }
+    .partner-item a {
+      display: inline-block;
+      padding: 0.5rem 1.5rem;
+      background: #2a2a2a;
+      border: 1px solid gold;
+      border-radius: 40px;
+      color: gold;
+      text-decoration: none;
+      font-weight: bold;
+      transition: all 0.2s;
+    }
+    .partner-item a:hover {
+      background: gold;
+      color: black;
+      transform: scale(1.05);
+    }
+  </style>
 </head>
 
 <body>
@@ -48,14 +79,17 @@
     <nav>
       <ul>
         <li><a aria-label="Home" href="index.html">Home</a></li>
-        <li><a aria-label="Services" href="features.html">Services</a></li>
+        <li><a aria-label="Features" href="features.html">Features</a></li>
         <li><a aria-label="Game" href="game.html">Game</a></li>
         <li><a aria-label="Forum" href="forum.html">Forum</a></li>
         <li><a aria-label="Collaboration" href="collaboration.html">Collaboration</a></li>
         <li><a aria-label="Register" href="register.html">Register</a></li>
-        <li><a aria-label="About us" href="about.html">About</a></li>
-        <!-- New Whitepaper link -->
+        <li><a aria-label="About" href="about.html">About</a></li>
         <li><a aria-label="Whitepaper" href="https://github.com/Xpective/InpinityPage/raw/3923cf22782286d60574c8ae9b92e693cb314215/Inpinity%20Whitepaper%20.pdf" target="_blank" rel="noopener">Whitepaper</a></li>
+        <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
+        <li><a aria-label="Guestbook" href="guestbook.html">Guestbook</a></li>
+        <li><a aria-label="Advertising" href="advertising.html">Advertising</a></li>
+        <li><a aria-label="Profile" href="profile.html">Profile</a></li>
 
         <div class="themeDots">
           <div class="dot light" title="Light Theme"></div>
@@ -88,11 +122,20 @@
         <h2>The best platform for game developers. Create, Share, Grow.</h2>
       </div>
 
-      <!-- Token button (unchanged) -->
+      <!-- Token button -->
       <div class="button-wrapper">
         <a class="cta-button" href="https://inpinity.online/token/" aria-label="Go to INPI Token (Presale & Claim)" rel="noopener">
           Go to INPI Token (Presale &amp; Claim)
         </a>
+      </div>
+    </section>
+
+    <!-- Partners Section -->
+    <section>
+      <div class="partners-section">
+        <div class="partner-item"><a href="https://base.org/" target="_blank" rel="noopener">⚡ Base L2</a></div>
+        <div class="partner-item"><a href="https://www.toshimart.xyz/" target="_blank" rel="noopener">🛒 ToshiMart</a></div>
+        <div class="partner-item"><a href="https://uniswap.org/" target="_blank" rel="noopener">🦄 Uniswap</a></div>
       </div>
     </section>
 
@@ -106,8 +149,6 @@
         <img src="logo_transparent.webp" class="logo-image logo-glow" alt="Logo">
       </div>
     </section>
-
-    <section></section>
 
     <details>
       <summary>Welcome to Inpinity</summary>
@@ -147,11 +188,15 @@
   </main>
 
   <footer>
-    <p>© 2026 Inpinity. All rights reserved.</p>
+    <p>© 2026 Inpinity. All rights reserved. Working with <a href="https://base.org/" target="_blank" rel="noopener" style="color: gold;">Base</a>, <a href="https://www.toshimart.xyz/" target="_blank" rel="noopener" style="color: gold;">ToshiMart</a> and <a href="https://uniswap.org/" target="_blank" rel="noopener" style="color: gold;">Uniswap</a>.</p>
     <div class="footer-links">
       <a href="privacypolicy.html">Privacy Policy</a>
       <a href="termsofuse.html">Terms of Use</a>
       <a href="contact.html">Contact</a>
+      <a href="faq.html">FAQ</a>
+      <a href="guestbook.html">Guestbook</a>
+      <a href="advertising.html">Advertising</a>
+      <a href="profile.html">Profile</a>
     </div>
   </footer>
 </body>
