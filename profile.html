@@ -1,97 +1,524 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inpinity - Benutzerprofil</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Inpinity - Profile</title>
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+    <link rel="stylesheet" href="css/animations.css" />
+    <link rel="stylesheet" href="css/dark.css" />
+    <link rel="stylesheet" href="css/light.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+    <link rel="stylesheet" href="css/color.css" />
+    <link rel="stylesheet" href="css/adapted_about_us.css" />
+    <link rel="stylesheet" href="css/adapted_advertisements.css" />
+    <link rel="stylesheet" href="css/adapted_combined.css"/>
+    <link rel="stylesheet" href="css/adapted_comunity_guidelines.css" />
+    <link rel="stylesheet" href="css/adapted_course_feedback.css" />
+    <link rel="stylesheet" href="css/adapted_mft_marketplace.css"/>
+    <link rel="stylesheet" href="css/adapted_profile.css"/>
+    <link rel="stylesheet" href="css/combined_latest.css"/>
+    <link rel="stylesheet" href="css/gamification.css" />
+    <link rel="stylesheet" href="css/referral.css"/>
+    <script defer src="main.js"></script>
+    <link rel="icon" type="image/png" href="favicon.webp">
+    <meta name="keywords" content="Inpinity, Game Design, Game Development, Platform, Collaboration, Forum, Tools, GameDesign, AI Development, Games of future, programming, programs, python gui, profile, wallet">
+    <meta name="author" content="Xpective">
+    <meta property="og:title" content="Inpinity - Profile">
+    <meta property="og:description" content="Manage your Inpinity profile, connect your wallet, and view your $INPI and ETH balances.">
+    <meta property="og:image" content="logo_background.jpg">
+    <meta property="og:url" content="https://inpinity.online/profile.html">
+    <meta name="twitter:card" content="logo_background.webp">
+    <meta name="twitter:site" content="@unxpective">
+    <meta name="twitter:creator" content="@Inpinity1">
+    <meta name="theme-color" content="#FarbcodeIhrerWebsite">
+    <meta name="robots" content="index,follow">
+    <!-- Ethers.js for blockchain interaction -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
+    <style>
+        /* Profile page specific styles */
+        .wallet-section {
+            background: #1a1a1a;
+            border: 1px solid gold;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            text-align: center;
+        }
+        .wallet-connect-btn {
+            background: gold;
+            color: black;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 40px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .wallet-connect-btn:hover {
+            transform: scale(1.05);
+        }
+        .wallet-info {
+            margin-top: 1rem;
+            color: #ccc;
+        }
+        .wallet-info p {
+            margin: 0.5rem 0;
+        }
+        .wallet-address {
+            font-family: monospace;
+            background: #333;
+            padding: 0.3rem 0.5rem;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        .balance {
+            font-weight: bold;
+            color: gold;
+        }
+        .profile-field {
+            margin: 1.5rem 0;
+        }
+        .profile-field label {
+            display: block;
+            margin-bottom: 0.3rem;
+            color: gold;
+        }
+        .profile-field input[type="text"],
+        .profile-field input[type="email"],
+        .profile-field input[type="password"],
+        .profile-field input[type="file"] {
+            width: 100%;
+            padding: 0.7rem;
+            background: #222;
+            border: 1px solid #444;
+            border-radius: 4px;
+            color: white;
+        }
+        .profile-field input[type="checkbox"] {
+            margin-right: 0.5rem;
+        }
+        #userAvatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 2px solid gold;
+            object-fit: cover;
+            margin-bottom: 1rem;
+        }
+        .button {
+            background: gold;
+            color: black;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-right: 1rem;
+        }
+        .button.danger {
+            background: #ff4444;
+            color: white;
+        }
+        .partners-section {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 2rem 0;
+            padding: 1rem;
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+        }
+        .partner-item a {
+            padding: 0.5rem 1rem;
+            background: #2a2a2a;
+            border: 1px solid gold;
+            border-radius: 40px;
+            color: gold;
+            text-decoration: none;
+        }
+        .partner-item a:hover {
+            background: gold;
+            color: black;
+        }
+    </style>
 </head>
-
 <body>
     <header>
         <nav>
             <ul>
-                <li><a href="index.html">Startseite</a></li>
-                <li><a href="features.html">Features</a></li>
-                <li><a href="forum.html">Forum</a></li>
-                <li><a href="contact.html">Kontakt</a></li>
-                <div id="walletStatus"></div>
+                <li><a aria-label="Home" href="index.html">Home</a></li>
+                <li><a aria-label="Services" href="services.html">Services</a></li>
+                <li><a aria-label="Game" href="game.html">Game</a></li>
+                <li><a aria-label="Forum" href="forum.html">Forum</a></li>
+                <li><a aria-label="Collaboration" href="collaboration.html">Collaboration</a></li>
+                <li><a aria-label="Register" href="register.html">Register</a></li>
+                <li><a aria-label="About" href="about.html">About</a></li>
+                <li><a aria-label="Whitepaper" href="https://github.com/Xpective/InpinityPage/raw/3923cf22782286d60574c8ae9b92e693cb314215/Inpinity%20Whitepaper%20.pdf" target="_blank" rel="noopener">Whitepaper</a></li>
+                <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
+                <li><a aria-label="Guestbook" href="guestbook.html">Guestbook</a></li>
+                <li><a aria-label="Advertising" href="advertising.html">Advertising</a></li>
+                <li><a aria-label="Profile" href="profile.html">Profile</a></li>
+                <div class="themeDots">
+                    <div class="dot light" title="Light Theme"></div>
+                    <div class="dot dark" title="Dark Theme"></div>
+                    <div class="dot basic" title="Basic Theme"></div>
+                </div>
             </ul>
         </nav>
+        <style>
+            .themeDots .dot {
+                display: inline-block;
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                margin: 5px;
+                cursor: pointer;
+                transition: transform 0.2s;
+            }
+            .themeDots .dot.light { background-color: #FFFFFF; }
+            .themeDots .dot.dark { background-color: #000000; }
+            .themeDots .dot.basic { background-color: var(--quinary-color); }
+            .themeDots .dot:hover { transform: scale(1.2); }
+        </style>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                document.querySelector('.themeDots .dot.light')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'light'));
+                document.querySelector('.themeDots .dot.dark')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'dark'));
+                document.querySelector('.themeDots .dot.basic')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'basic'));
+            });
+        </script>
     </header>
 
-    <main>
-        <section id="user-profile">
-            <h1>Benutzerprofil</h1>
-            <form id="profileForm">
-                <!-- Avatar section -->
-                <div class="profile-field">
-                    <img src="path/to/user-avatar.png" alt="Benutzer Avatar" id="userAvatar">
-                    <input type="file" id="avatarUpload"> <!-- Option to upload a new avatar -->
-                </div>
-                
-                <!-- User details section -->
-                <div class="profile-field">
-                    <label for="username">Benutzername:</label>
-                    <input type="text" id="username" required>
-                </div>
-                
-                <div class="profile-field">
-                    <label for="email">E-Mail:</label>
-                    <input type="email" id="email" required>
-                </div>
+    <main class="container">
+        <h1>👤 Your Profile</h1>
 
-                <div class="profile-field">
-                    <label for="currentPassword">Aktuelles Passwort:</label>
-                    <input type="password" id="currentPassword">
-                </div>
-                
-                <div class="profile-field">
-                    <label for="newPassword">Neues Passwort:</label>
-                    <input type="password" id="newPassword">
-                </div>
+        <!-- Partners Section (optional) -->
+        <div class="partners-section">
+            <div class="partner-item"><a href="https://base.org/" target="_blank">⚡ Base L2</a></div>
+            <div class="partner-item"><a href="https://www.toshimart.xyz/" target="_blank">🛒 ToshiMart</a></div>
+            <div class="partner-item"><a href="https://uniswap.org/" target="_blank">🦄 Uniswap</a></div>
+        </div>
 
-                <div class="profile-field">
-                    <label for="confirmPassword">Passwort bestätigen:</label>
-                    <input type="password" id="confirmPassword">
-                </div>
-
-                <button type="submit" class="button">Änderungen speichern</button>
-            </form>
+        <!-- Wallet Connection & Balances -->
+        <section class="wallet-section" id="walletSection">
+            <h2>🔌 Wallet Connection</h2>
+            <div id="walletStatus">
+                <button id="connectWalletBtn" class="wallet-connect-btn">Connect Wallet</button>
+            </div>
+            <div id="walletInfo" style="display: none;" class="wallet-info">
+                <p>Connected: <span id="walletAddress" class="wallet-address"></span></p>
+                <p>ETH Balance: <span id="ethBalance" class="balance">0</span></p>
+                <p>$INPI Balance: <span id="inpiBalance" class="balance">0</span></p>
+                <button id="disconnectWalletBtn" class="wallet-connect-btn" style="background: #666;">Disconnect</button>
+            </div>
         </section>
-        <section id="notification-settings">
-    <h2>Benachrichtigungseinstellungen</h2>
-    <div class="profile-field">
-        <label for="emailNotifications">E-Mail Benachrichtigungen:</label>
-        <input type="checkbox" id="emailNotifications">
-    </div>
-    
-    <div class="profile-field">
-        <label for="smsNotifications">SMS Benachrichtigungen:</label>
-        <input type="checkbox" id="smsNotifications">
-    </div>
-</section>
-<section id="two-factor-authentication">
-    <h2>Zwei-Faktor-Authentifizierung</h2>
-    <div class="profile-field">
-        <label for="enable2FA">Zwei-Faktor-Authentifizierung aktivieren:</label>
-        <input type="checkbox" id="enable2FA">
-    </div>
-</section>
-<section id="account-deletion">
-    <h2>Account löschen</h2>
-    <p>Wenn Sie Ihren Account löschen, werden alle Ihre Daten dauerhaft entfernt und können nicht wiederhergestellt werden.</p>
-    <button id="deleteAccount" class="button">Account löschen</button>
-</section>
 
+        <!-- Profile Form -->
+        <form id="profileForm">
+            <h2>✏️ Profile Information</h2>
+
+            <!-- Avatar -->
+            <div class="profile-field">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%23333'/%3E%3Ctext x='50' y='70' font-size='50' text-anchor='middle' fill='gold' font-family='Arial'%3E👤%3C/text%3E%3C/svg%3E" alt="Avatar" id="userAvatar">
+                <label for="avatarUpload">Change Avatar:</label>
+                <input type="file" id="avatarUpload" accept="image/png, image/jpeg, image/gif">
+            </div>
+
+            <!-- Username -->
+            <div class="profile-field">
+                <label for="username">Username:</label>
+                <input type="text" id="username" placeholder="Your display name" required>
+            </div>
+
+            <!-- Email -->
+            <div class="profile-field">
+                <label for="email">Email (optional):</label>
+                <input type="email" id="email" placeholder="your@email.com">
+            </div>
+
+            <!-- Bio / Short description -->
+            <div class="profile-field">
+                <label for="bio">Bio:</label>
+                <textarea id="bio" rows="3" style="width:100%; background:#222; border:1px solid #444; color:white; padding:0.5rem;" placeholder="Tell others about yourself..."></textarea>
+            </div>
+
+            <!-- Notification Settings -->
+            <h2>🔔 Notification Settings</h2>
+            <div class="profile-field">
+                <label>
+                    <input type="checkbox" id="emailNotifications">
+                    Receive email notifications
+                </label>
+            </div>
+            <div class="profile-field">
+                <label>
+                    <input type="checkbox" id="pushNotifications">
+                    Receive push notifications (browser)
+                </label>
+            </div>
+
+            <!-- Two-Factor Authentication (UI only) -->
+            <h2>🔐 Two-Factor Authentication</h2>
+            <div class="profile-field">
+                <label>
+                    <input type="checkbox" id="enable2FA">
+                    Enable 2FA (coming soon)
+                </label>
+            </div>
+
+            <!-- Account Deletion -->
+            <h2>⚠️ Danger Zone</h2>
+            <div class="profile-field">
+                <p>Deleting your account will remove all locally stored profile data. Blockchain data remains.</p>
+                <button type="button" id="deleteAccount" class="button danger">Delete Account</button>
+            </div>
+
+            <!-- Save Changes -->
+            <div style="margin-top:2rem;">
+                <button type="submit" class="button">💾 Save Changes</button>
+                <button type="button" id="resetForm" class="button" style="background:#666;">↻ Reset</button>
+            </div>
+        </form>
+
+        <!-- Guestbook link -->
+        <div style="text-align:center; margin:3rem 0;">
+            <a href="guestbook.html" class="guestbook-link">📖 Sign the Guestbook</a>
+        </div>
     </main>
 
     <footer>
-        <p>&copy; 2023 Inpinity. Alle Rechte vorbehalten.</p>
+        <p>© 2026 Inpinity. All rights reserved. Working with <a href="https://base.org/" target="_blank" style="color: gold;">Base</a>, <a href="https://www.toshimart.xyz/" target="_blank" style="color: gold;">ToshiMart</a> and <a href="https://uniswap.org/" target="_blank" style="color: gold;">Uniswap</a>.</p>
+        <div class="footer-links">
+            <a href="privacypolicy.html">Privacy Policy</a>
+            <a href="termsofuse.html">Terms of Use</a>
+            <a href="contact.html">Contact</a>
+            <a href="faq.html">FAQ</a>
+            <a href="guestbook.html">Guestbook</a>
+            <a href="advertising.html">Advertising</a>
+            <a href="profile.html">Profile</a>
+        </div>
     </footer>
 
-    <script src="path/to/your/firebaseAuth.js"></script>
-</body>
+    <script>
+        (function() {
+            // ========== Configuration ==========
+            const INPI_CONTRACT_ADDRESS = '0x15ac8e2c38f0c644123e61011e7113de56038453';
+            // Minimal ERC-20 ABI for balanceOf
+            const INPI_ABI = [
+                "function balanceOf(address owner) view returns (uint256)",
+                "function decimals() view returns (uint8)",
+                "function symbol() view returns (string)"
+            ];
 
+            // ========== DOM Elements ==========
+            const connectBtn = document.getElementById('connectWalletBtn');
+            const disconnectBtn = document.getElementById('disconnectWalletBtn');
+            const walletInfoDiv = document.getElementById('walletInfo');
+            const walletStatusDiv = document.getElementById('walletStatus');
+            const walletAddressSpan = document.getElementById('walletAddress');
+            const ethBalanceSpan = document.getElementById('ethBalance');
+            const inpiBalanceSpan = document.getElementById('inpiBalance');
+
+            const profileForm = document.getElementById('profileForm');
+            const usernameInput = document.getElementById('username');
+            const emailInput = document.getElementById('email');
+            const bioTextarea = document.getElementById('bio');
+            const emailNotifCheck = document.getElementById('emailNotifications');
+            const pushNotifCheck = document.getElementById('pushNotifications');
+            const enable2FACheck = document.getElementById('enable2FA');
+            const avatarUpload = document.getElementById('avatarUpload');
+            const userAvatarImg = document.getElementById('userAvatar');
+            const deleteAccountBtn = document.getElementById('deleteAccount');
+            const resetFormBtn = document.getElementById('resetForm');
+
+            // ========== State ==========
+            let provider, signer, userAddress = null;
+            let ethBalance = '0', inpiBalance = '0';
+
+            // ========== Helper Functions ==========
+            function formatBalance(balance, decimals = 18) {
+                return (Number(balance) / 10 ** decimals).toLocaleString(undefined, { maximumFractionDigits: 2 });
+            }
+
+            async function updateBalances(address) {
+                if (!provider || !address) return;
+                try {
+                    // ETH balance
+                    const balanceWei = await provider.getBalance(address);
+                    ethBalance = ethers.formatEther(balanceWei);
+                    ethBalanceSpan.textContent = ethBalance + ' ETH';
+
+                    // INPI balance
+                    const contract = new ethers.Contract(INPI_CONTRACT_ADDRESS, INPI_ABI, provider);
+                    const inpiWei = await contract.balanceOf(address);
+                    const decimals = await contract.decimals();
+                    inpiBalance = formatBalance(inpiWei.toString(), decimals);
+                    inpiBalanceSpan.textContent = inpiBalance + ' $INPI';
+                } catch (err) {
+                    console.error('Balance fetch error:', err);
+                    ethBalanceSpan.textContent = 'Error';
+                    inpiBalanceSpan.textContent = 'Error';
+                }
+            }
+
+            // Load profile data from localStorage (keyed by address)
+            function loadProfileData(address) {
+                if (!address) return;
+                const key = `profile_${address.toLowerCase()}`;
+                const data = JSON.parse(localStorage.getItem(key) || '{}');
+                usernameInput.value = data.username || '';
+                emailInput.value = data.email || '';
+                bioTextarea.value = data.bio || '';
+                emailNotifCheck.checked = data.emailNotifications || false;
+                pushNotifCheck.checked = data.pushNotifications || false;
+                enable2FACheck.checked = data.twoFA || false;
+                if (data.avatar) {
+                    userAvatarImg.src = data.avatar;
+                } else {
+                    // default avatar
+                    userAvatarImg.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%23333'/%3E%3Ctext x='50' y='70' font-size='50' text-anchor='middle' fill='gold' font-family='Arial'%3E👤%3C/text%3E%3C/svg%3E";
+                }
+            }
+
+            // Save profile data
+            function saveProfileData(address) {
+                if (!address) return;
+                const key = `profile_${address.toLowerCase()}`;
+                const data = {
+                    username: usernameInput.value,
+                    email: emailInput.value,
+                    bio: bioTextarea.value,
+                    emailNotifications: emailNotifCheck.checked,
+                    pushNotifications: pushNotifCheck.checked,
+                    twoFA: enable2FACheck.checked,
+                    avatar: userAvatarImg.src
+                };
+                localStorage.setItem(key, JSON.stringify(data));
+                alert('Profile saved locally!');
+            }
+
+            // Clear profile data for current address
+            function deleteProfileData(address) {
+                if (!address) return;
+                const key = `profile_${address.toLowerCase()}`;
+                localStorage.removeItem(key);
+                // Reset form to defaults
+                usernameInput.value = '';
+                emailInput.value = '';
+                bioTextarea.value = '';
+                emailNotifCheck.checked = false;
+                pushNotifCheck.checked = false;
+                enable2FACheck.checked = false;
+                userAvatarImg.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%23333'/%3E%3Ctext x='50' y='70' font-size='50' text-anchor='middle' fill='gold' font-family='Arial'%3E👤%3C/text%3E%3C/svg%3E";
+            }
+
+            // ========== Wallet Connection ==========
+            async function connectWallet() {
+                if (typeof window.ethereum === 'undefined') {
+                    alert('MetaMask or another Web3 wallet is not installed.');
+                    return;
+                }
+                try {
+                    provider = new ethers.BrowserProvider(window.ethereum);
+                    await provider.send("eth_requestAccounts", []);
+                    signer = await provider.getSigner();
+                    userAddress = await signer.getAddress();
+                    walletAddressSpan.textContent = userAddress;
+                    walletInfoDiv.style.display = 'block';
+                    connectBtn.style.display = 'none';
+                    await updateBalances(userAddress);
+                    loadProfileData(userAddress);
+                } catch (err) {
+                    console.error(err);
+                    alert('Connection failed.');
+                }
+            }
+
+            function disconnectWallet() {
+                userAddress = null;
+                provider = null;
+                signer = null;
+                walletInfoDiv.style.display = 'none';
+                connectBtn.style.display = 'inline-block';
+                // Clear displayed balances
+                ethBalanceSpan.textContent = '0';
+                inpiBalanceSpan.textContent = '0';
+                // Optionally clear form? Better to disable or show guest mode.
+                // We'll clear profile fields.
+                usernameInput.value = '';
+                emailInput.value = '';
+                bioTextarea.value = '';
+                emailNotifCheck.checked = false;
+                pushNotifCheck.checked = false;
+                enable2FACheck.checked = false;
+                userAvatarImg.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%23333'/%3E%3Ctext x='50' y='70' font-size='50' text-anchor='middle' fill='gold' font-family='Arial'%3E👤%3C/text%3E%3C/svg%3E";
+            }
+
+            // ========== Event Listeners ==========
+            connectBtn.addEventListener('click', connectWallet);
+            disconnectBtn.addEventListener('click', disconnectWallet);
+
+            // Avatar upload
+            avatarUpload.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        userAvatarImg.src = ev.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Save form
+            profileForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                if (!userAddress) {
+                    alert('Please connect your wallet first.');
+                    return;
+                }
+                saveProfileData(userAddress);
+            });
+
+            // Delete account
+            deleteAccountBtn.addEventListener('click', () => {
+                if (!userAddress) {
+                    alert('No wallet connected.');
+                    return;
+                }
+                if (confirm('Are you sure? All local profile data will be permanently deleted.')) {
+                    deleteProfileData(userAddress);
+                }
+            });
+
+            // Reset form (without saving)
+            resetFormBtn.addEventListener('click', () => {
+                if (userAddress) {
+                    loadProfileData(userAddress); // reload saved
+                } else {
+                    // clear all
+                    usernameInput.value = '';
+                    emailInput.value = '';
+                    bioTextarea.value = '';
+                    emailNotifCheck.checked = false;
+                    pushNotifCheck.checked = false;
+                    enable2FACheck.checked = false;
+                    userAvatarImg.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%23333'/%3E%3Ctext x='50' y='70' font-size='50' text-anchor='middle' fill='gold' font-family='Arial'%3E👤%3C/text%3E%3C/svg%3E";
+                }
+            });
+
+            // Check if already connected (e.g., page reload)
+            window.addEventListener('load', async () => {
+                if (window.ethereum && window.ethereum.selectedAddress) {
+                    // Auto-connect
+                    await connectWallet();
+                }
+            });
+        })();
+    </script>
+</body>
 </html>
