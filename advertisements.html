@@ -1,45 +1,262 @@
-
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Werbung</title>
-    <link rel="stylesheet" href="base.css">
-    <link rel="stylesheet" href="layout.css">
-    <link rel="stylesheet" href="additional_styles.css">
+    <title>Inpinity - Advertising</title>
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+    <link rel="stylesheet" href="css/animations.css" />
+    <link rel="stylesheet" href="css/dark.css" />
+    <link rel="stylesheet" href="css/light.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+    <link rel="stylesheet" href="css/color.css" />
+    <link rel="stylesheet" href="css/adapted_about_us.css" />
+    <link rel="stylesheet" href="css/adapted_advertisements.css" />
+    <link rel="stylesheet" href="css/adapted_combined.css"/>
+    <link rel="stylesheet" href="css/adapted_comunity_guidelines.css" />
+    <link rel="stylesheet" href="css/adapted_course_feedback.css" />
+    <link rel="stylesheet" href="css/adapted_mft_marketplace.css"/>
+    <link rel="stylesheet" href="css/adapted_profile.css"/>
+    <link rel="stylesheet" href="css/combined_latest.css"/>
+    <link rel="stylesheet" href="css/gamification.css" />
+    <link rel="stylesheet" href="css/referral.css"/>
+    <script defer src="main.js"></script>
+    <link rel="icon" type="image/png" href="favicon.webp">
+    <meta name="keywords" content="Inpinity, Game Design, Game Development, Platform, Collaboration, Forum, Tools, GameDesign, AI Development, Games of future, programming, programs, python gui, advertising, ADVERT token">
+    <meta name="author" content="Xpective">
+    <meta property="og:title" content="Inpinity - Advertising">
+    <meta property="og:description" content="Advertise in the Inpinity ecosystem using the $ADVERT sub-token. Reach game developers and blockchain enthusiasts.">
+    <meta property="og:image" content="logo_background.jpg">
+    <meta property="og:url" content="https://inpinity.online/advertising.html">
+    <meta name="twitter:card" content="logo_background.webp">
+    <meta name="twitter:site" content="@unxpective">
+    <meta name="twitter:creator" content="@Inpinity1">
+    <meta name="theme-color" content="#FarbcodeIhrerWebsite">
+    <meta name="robots" content="index,follow">
+    <style>
+        /* Advertising page specific styles */
+        .ad-section {
+            margin: 2rem 0;
+        }
+        .ad-example {
+            background: #2a2a2a;
+            border: 1px solid gold;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 2rem 0;
+        }
+        .ad-placeholder {
+            background: #333;
+            border: 2px dashed gold;
+            color: gold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            text-align: center;
+            margin: 1rem 0;
+        }
+        .banner-ad .ad-placeholder {
+            width: 100%;
+            height: 120px;
+            background: linear-gradient(45deg, #444, #222);
+        }
+        .sidebar-ad {
+            float: right;
+            width: 300px;
+            margin: 0 0 1rem 1rem;
+        }
+        .sidebar-ad .ad-placeholder {
+            width: 100%;
+            height: 250px;
+        }
+        .inline-ad .ad-placeholder {
+            width: 100%;
+            height: 90px;
+        }
+        .popup-ad {
+            display: none; /* In a real scenario this would be a modal */
+        }
+        .token-info {
+            background: #1a1a1a;
+            border-left: 4px solid gold;
+            padding: 1rem;
+            margin: 2rem 0;
+        }
+        .clearfix::after {
+            content: "";
+            clear: both;
+            display: table;
+        }
+        .guestbook-link {
+            display: inline-block;
+            margin: 1rem 0;
+            padding: 0.75rem 1.5rem;
+            background: gold;
+            color: black;
+            font-weight: bold;
+            border-radius: 40px;
+            text-decoration: none;
+            transition: transform 0.2s;
+        }
+        .guestbook-link:hover {
+            transform: scale(1.05);
+        }
+        .partners-section {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            border: 1px solid #444;
+        }
+        .partner-item a {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: #2a2a2a;
+            border: 1px solid gold;
+            border-radius: 40px;
+            color: gold;
+            text-decoration: none;
+        }
+        .partner-item a:hover {
+            background: gold;
+            color: black;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Werbung</h1>
-        
-        <!-- Bannerwerbung -->
-        <div class="banner-ad">
-            <img src="path_to_banner_ad.jpg" alt="Banner Werbung">
-        </div>
-        
-        <!-- Seitenleistenwerbung -->
-        <div class="sidebar-ad">
-            <img src="path_to_sidebar_ad.jpg" alt="Seitenleisten Werbung">
-        </div>
-        
-        <!-- Inhalt der Seite -->
-        <div class="content">
-            <p>Dies ist der Hauptinhalt der Seite. Hier können Artikel, Beiträge oder andere Inhalte platziert werden.</p>
-            
-            <!-- Inline-Werbung -->
-            <div class="inline-ad">
-                <img src="path_to_inline_ad.jpg" alt="Inline Werbung">
+    <header>
+        <nav>
+            <ul>
+                <li><a aria-label="Home" href="index.html">Home</a></li>
+                <li><a aria-label="Services" href="services.html">Services</a></li>
+                <li><a aria-label="Game" href="game.html">Game</a></li>
+                <li><a aria-label="Forum" href="forum.html">Forum</a></li>
+                <li><a aria-label="Collaboration" href="collaboration.html">Collaboration</a></li>
+                <li><a aria-label="Register" href="register.html">Register</a></li>
+                <li><a aria-label="About" href="about.html">About</a></li>
+                <li><a aria-label="Whitepaper" href="https://github.com/Xpective/InpinityPage/raw/3923cf22782286d60574c8ae9b92e693cb314215/Inpinity%20Whitepaper%20.pdf" target="_blank" rel="noopener">Whitepaper</a></li>
+                <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
+                <li><a aria-label="Guestbook" href="guestbook.html">Guestbook</a></li>
+                <li><a aria-label="Advertising" href="advertising.html">Advertising</a></li>
+                <div class="themeDots">
+                    <div class="dot light" title="Light Theme"></div>
+                    <div class="dot dark" title="Dark Theme"></div>
+                    <div class="dot basic" title="Basic Theme"></div>
+                </div>
+            </ul>
+        </nav>
+        <style>
+            .themeDots .dot {
+                display: inline-block;
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                margin: 5px;
+                cursor: pointer;
+                transition: transform 0.2s;
+            }
+            .themeDots .dot.light { background-color: #FFFFFF; }
+            .themeDots .dot.dark { background-color: #000000; }
+            .themeDots .dot.basic { background-color: var(--quinary-color); }
+            .themeDots .dot:hover { transform: scale(1.2); }
+        </style>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                document.querySelector('.themeDots .dot.light')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'light'));
+                document.querySelector('.themeDots .dot.dark')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'dark'));
+                document.querySelector('.themeDots .dot.basic')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'basic'));
+            });
+        </script>
+    </header>
+
+    <main class="container">
+        <h1>📢 Advertising on Inpinity</h1>
+
+        <!-- Partners Section -->
+        <div class="partners-section">
+            <div class="partner-item">
+                <a href="https://base.org/" target="_blank" rel="noopener">⚡ Base L2</a>
             </div>
-            
-            <p>Weiterer Inhalt der Seite...</p>
+            <div class="partner-item">
+                <a href="https://www.toshimart.xyz/" target="_blank" rel="noopener">🛒 ToshiMart</a>
+            </div>
+            <div class="partner-item">
+                <a href="https://uniswap.org/" target="_blank" rel="noopener">🦄 Uniswap</a>
+            </div>
         </div>
-        
-        <!-- Pop-up-Werbung (hier nur repräsentiert, in der Realität würde es als ein modales Fenster erscheinen) -->
-        <div class="popup-ad">
-            <img src="path_to_popup_ad.jpg" alt="Pop-up Werbung">
+
+        <!-- Token Info -->
+        <div class="token-info">
+            <h2>💰 The $ADVERT Sub‑Token</h2>
+            <p><strong>$ADVERT</strong> is the dedicated advertising token of the Inpinity ecosystem. It is earned by holding and using <strong>$INPI</strong> tokens. Advertisers can spend $ADVERT to place ads across our platforms – including banner ads, sidebar placements, inline content, and more. This creates a sustainable, circular economy between gamers, developers, and advertisers.</p>
+            <p>Learn more in our <a href="https://github.com/Xpective/InpinityPage/raw/3923cf22782286d60574c8ae9b92e693cb314215/Inpinity%20Whitepaper%20.pdf" target="_blank" rel="noopener" style="color: gold;">Whitepaper</a>.</p>
         </div>
-    </div>
+
+        <!-- Example Ad Placements (Demo) -->
+        <h2>📺 Ad Placement Examples</h2>
+        <p>Below are mockups of how ads could appear on Inpinity pages. Actual placements will be available once the $ADVERT token is live (Q2 2027).</p>
+
+        <!-- Banner Ad -->
+        <div class="ad-example">
+            <h3>1. Banner Ad (Top of page)</h3>
+            <div class="banner-ad">
+                <div class="ad-placeholder">Your Banner Ad Here – 728x90</div>
+            </div>
+        </div>
+
+        <!-- Sidebar + Inline Example -->
+        <div class="ad-example clearfix">
+            <h3>2. Sidebar Ad (Right) + Inline Ad</h3>
+            <div class="sidebar-ad">
+                <div class="ad-placeholder">Sidebar Ad<br>300x250</div>
+            </div>
+            <div class="content">
+                <p>This is the main content area. Articles, tutorials, and community posts would appear here. As you can see, the sidebar ad floats to the right, seamlessly integrating with the page layout.</p>
+                <div class="inline-ad">
+                    <div class="ad-placeholder">Inline Ad – 468x60</div>
+                </div>
+                <p>More content flows around the ad, demonstrating how native advertising can feel organic within the Inpinity experience.</p>
+            </div>
+        </div>
+
+        <!-- Pop-up Ad (Note) -->
+        <div class="ad-example">
+            <h3>3. Pop‑up / Modal Ad</h3>
+            <p>Pop‑up ads are generally not recommended, but can be used sparingly for important announcements. In a real implementation, they would appear as a modal overlay. Below is a static representation.</p>
+            <div class="popup-ad">
+                <div class="ad-placeholder" style="width:400px; height:300px; margin:0 auto;">Pop‑up Ad Mockup</div>
+            </div>
+            <p style="text-align:center; font-style:italic;">(Pop‑ups are disabled in this demo.)</p>
+        </div>
+
+        <!-- Call to action: Guestbook -->
+        <div style="text-align: center; margin: 3rem 0;">
+            <h2>✍️ Support the vision</h2>
+            <p>While you're here, leave your mark in our Guestbook – your message will eventually be recorded on the Base blockchain.</p>
+            <a href="guestbook.html" class="guestbook-link">📖 Go to Guestbook</a>
+        </div>
+
+        <!-- Additional info -->
+        <p style="text-align: center;">For advertising inquiries, please contact <a href="mailto:xpective@inpinity.online">xpective@inpinity.online</a> or join our <a href="https://discord.gg/95yj6Eg6" target="_blank" rel="noopener">Discord</a>.</p>
+    </main>
+
+    <footer>
+        <p>© 2026 Inpinity. All rights reserved. Working with <a href="https://base.org/" target="_blank" rel="noopener" style="color: gold;">Base</a>, <a href="https://www.toshimart.xyz/" target="_blank" rel="noopener" style="color: gold;">ToshiMart</a> and <a href="https://uniswap.org/" target="_blank" rel="noopener" style="color: gold;">Uniswap</a>.</p>
+        <div class="footer-links">
+            <a href="privacypolicy.html">Privacy Policy</a>
+            <a href="termsofuse.html">Terms of Use</a>
+            <a href="contact.html">Contact</a>
+            <a href="faq.html">FAQ</a>
+            <a href="guestbook.html">Guestbook</a>
+            <a href="advertising.html">Advertising</a>
+        </div>
+    </footer>
 </body>
 </html>
