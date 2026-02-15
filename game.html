@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>Inpinity - Game</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Inpinity - Pregame Demo</title>
     <link rel="stylesheet" href="css/base.css" />
     <link rel="stylesheet" href="css/layout.css" />
     <link rel="stylesheet" href="css/animations.css" />
@@ -10,33 +11,106 @@
     <link rel="stylesheet" href="css/light.css" />
     <link rel="stylesheet" href="css/responsive.css" />
     <link rel="stylesheet" href="css/color.css" />
-    <link rel="icon" type="image/png" href="favicon.webp">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/adapted_about_us.css" />
+    <link rel="stylesheet" href="css/adapted_advertisements.css" />
+    <link rel="stylesheet" href="css/adapted_combined.css"/>
+    <link rel="stylesheet" href="css/adapted_comunity_guidelines.css" />
+    <link rel="stylesheet" href="css/adapted_course_feedback.css" />
+    <link rel="stylesheet" href="css/adapted_mft_marketplace.css"/>
+    <link rel="stylesheet" href="css/adapted_profile.css"/>
+    <link rel="stylesheet" href="css/combined_latest.css"/>
+    <link rel="stylesheet" href="css/gamification.css" />
+    <link rel="stylesheet" href="css/referral.css"/>
+    <script defer src="main.js"></script>
+    <link rel="icon" type="image/png" href="favicon.webp" />
+    <meta name="keywords" content="Inpinity, Game Design, Game Development, Platform, Collaboration, Forum, Tools, GameDesign, AI Development, Games of future, programming, programs, python gui" />
+    <meta name="author" content="Xpective" />
+    <meta property="og:title" content="Inpinity - Pregame Demo" />
+    <meta property="og:description" content="Play the Inpinity pregame demo and support the development of the real game with $INPI tokens." />
+    <meta property="og:image" content="logo_background.jpg" />
+    <meta property="og:url" content="https://inpinity.online/game.html" />
+    <meta name="twitter:card" content="logo_background.webp" />
+    <meta name="twitter:site" content="@unxpective" />
+    <meta name="twitter:creator" content="@Inpinity1" />
     <style>
-        body, html {
-            height: 100%;
-            margin: 0;
+        /* Additional game page styling */
+        .game-container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            background-color: #000;
+            justify-content: center;
+            width: 100%;
+            padding: 1rem;
         }
-
         #pingPongCanvas {
             background: #222;
             display: block;
             width: 100%;
             max-width: 800px;
-            height: 80vh;
-            border: 1px solid #FFF;
+            height: auto;
+            aspect-ratio: 800 / 600;
+            border: 2px solid var(--quinary-color, gold);
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(255,215,0,0.3);
+            touch-action: none; /* prevent scrolling while touching canvas */
         }
-
         .score-board {
             color: white;
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            font-size: 24px;
+            font-size: 2rem;
+            margin: 1rem 0;
+            text-shadow: 0 0 10px gold;
+        }
+        .info-panel {
+            background: rgba(0,0,0,0.7);
+            border: 1px solid gold;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem auto;
+            max-width: 800px;
+            text-align: center;
+            color: #eee;
+        }
+        .info-panel h2 {
+            color: gold;
+            margin-top: 0;
+        }
+        .wallet-address {
+            background: #111;
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 1.1rem;
+            word-break: break-all;
+            border: 1px solid #444;
+            margin: 0.5rem 0;
+        }
+        .donate-button {
+            background: gold;
+            color: black;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 1rem 0;
+        }
+        .donate-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px gold;
+        }
+        .footnote {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-top: 1rem;
+        }
+        a {
+            color: gold;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -44,149 +118,259 @@
     <header>
         <nav>
             <ul>
-                <li><a href="index.html">Startseite</a></li>
-                <li><a href="game.html">Game</a></li>
-                <li><a href="forum.html">Forum</a></li>
+                <li><a aria-label="Home" href="index.html">Home</a></li>
+                <li><a aria-label="Services" href="services.html">Services</a></li>
+                <li><a aria-label="Game" href="game.html">Game</a></li>
+                <li><a aria-label="Forum" href="forum.html">Forum</a></li>
+                <li><a aria-label="Collaboration" href="collaboration.html">Collaboration</a></li>
+                <li><a aria-label="Register" href="register.html">Register</a></li>
+                <li><a aria-label="About us" href="about.html">About</a></li>
+                <li><a aria-label="Whitepaper" href="https://github.com/Xpective/InpinityPage/raw/3923cf22782286d60574c8ae9b92e693cb314215/Inpinity%20Whitepaper%20.pdf" target="_blank" rel="noopener">Whitepaper</a></li>
+                <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
+                <div class="themeDots">
+                    <div class="dot light" title="Light Theme"></div>
+                    <div class="dot dark" title="Dark Theme"></div>
+                    <div class="dot basic" title="Basic Theme"></div>
+                </div>
             </ul>
         </nav>
-    </header>
-    <main style="flex: 1 0 auto; width: 100%; display: flex; justify-content: center; align-items: center;">
-        <div class="score-board" id="score">Score: 0</div>
-        <canvas id="pingPongCanvas"></canvas>
-    </main>
-    <footer style="flex-shrink: 0; width: 100%; text-align: center;">
-        <p>© 2023 Inpinity. Alle Rechte vorbehalten.</p>
-    </footer>
-    <script>
-            document.addEventListener("DOMContentLoaded", function() {
-    const canvas = document.getElementById('pingPongCanvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = Math.min(window.innerWidth, 800); // Limit width to 800px
-    canvas.height = window.innerHeight * 0.8; // 80% of viewport height
-
-    let score = 0;
-    let gameActive = true;
-    let npcSpeed = 4; // Geschwindigkeit des NPC-Schlägers
-    let holes = [{
-        x: Math.random() * (canvas.width - 50) + 25,
-        radius: 50
-    }];
-
-    let ball = {
-        x: canvas.width / 2,
-        y: canvas.height / 2,
-        radius: 10,
-        deltaX: 5,
-        deltaY: 5,
-        color: "#FFF"
-    };
-
-    let paddle = {
-        width: 100,
-        height: 20,
-        x: canvas.width / 2 - 50,
-        y: canvas.height - 30
-    };
-
-    let npcPaddle = {
-        width: 100,
-        height: 20,
-        x: canvas.width / 2 - 50,
-        y: 30
-    };
-
-    function drawBall() {
-        ctx.beginPath();
-        ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-        ctx.fillStyle = ball.color;
-        ctx.fill();
-        ctx.closePath();
-    }
-
-    function drawPaddle() {
-        ctx.beginPath();
-        ctx.rect(paddle.x, paddle.y, paddle.width, paddle.height);
-        ctx.fillStyle = "#FFF";
-        ctx.fill();
-        ctx.closePath();
-    }
-
-    function drawNpcPaddle() {
-        ctx.beginPath();
-        ctx.rect(npcPaddle.x, npcPaddle.y, npcPaddle.width, npcPaddle.height);
-        ctx.fillStyle = "#FF6347"; // Tomatenrot für den NPC-Schläger
-        ctx.fill();
-        ctx.closePath();
-    }
-
-    function drawHoles() {
-        holes.forEach(hole => {
-            ctx.beginPath();
-            ctx.arc(hole.x, 25, hole.radius, 0, Math.PI * 2);
-            ctx.stroke();
-            ctx.closePath();
-        });
-    }
-
-    function updateGame() {
-        if (!gameActive) return;
-
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        drawBall();
-        drawPaddle();
-        drawNpcPaddle();
-        drawHoles();
-        document.getElementById('score').innerText = `Score: ${score}`;
-
-        ball.x += ball.deltaX;
-        ball.y += ball.deltaY;
-
-        if (ball.x - ball.radius < 0 || ball.x + ball.radius > canvas.width) {
-            ball.deltaX = -ball.deltaX;
-        }
-
-        if (ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height) {
-            ball.deltaY = -ball.deltaY;
-        }
-
-        if (ball.y + ball.radius > paddle.y && ball.x > paddle.x && ball.x < paddle.x + paddle.width) {
-            ball.deltaY = -ball.deltaY;
-        }
-
-        if (ball.y - ball.radius < npcPaddle.y + npcPaddle.height && ball.x > npcPaddle.x && ball.x < npcPaddle.x + npcPaddle.width) {
-            ball.deltaY = -ball.deltaY;
-        }
-
-        if (npcPaddle.x + npcPaddle.width / 2 < ball.x) {
-            npcPaddle.x += npcSpeed;
-        } else if (npcPaddle.x + npcPaddle.width / 2 > ball.x) {
-            npcPaddle.x -= npcSpeed;
-        }
-
-        holes.forEach((hole, index) => {
-            if (Math.sqrt((ball.x - hole.x) ** 2 + (ball.y - 25) ** 2) < hole.radius + ball.radius) {
-                score += 10;
-                ball.color = "#" + ((1 << 24) * Math.random() | 0).toString(16);
-                holes.splice(index, 1);
-                if (holes.length < 10) {
-                    holes.push({
-                        x: Math.random() * (canvas.width - 50) + 25,
-                        radius: 50
-                    });
-                }
+        <style>
+            .themeDots .dot {
+                display: inline-block;
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                margin: 5px;
+                cursor: pointer;
+                transition: transform 0.2s;
             }
+            .themeDots .dot.light { background-color: #FFFFFF; }
+            .themeDots .dot.dark { background-color: #000000; }
+            .themeDots .dot.basic { background-color: var(--quinary-color); }
+            .themeDots .dot:hover { transform: scale(1.2); }
+        </style>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                document.querySelector('.themeDots .dot.light')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'light'));
+                document.querySelector('.themeDots .dot.dark')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'dark'));
+                document.querySelector('.themeDots .dot.basic')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'basic'));
+            });
+        </script>
+    </header>
+
+    <main class="game-container">
+        <h1 style="color: gold; text-align: center;">⚡ Inpinity Pregame ⚡</h1>
+        <p style="text-align: center; color: #ccc; max-width: 600px;">
+            This is a <strong>pregame demo</strong> – a taste of what’s coming!<br>
+            Play, have fun, and support the development of the <strong>real Inpinity game</strong> by donating $INPI tokens.
+        </p>
+
+        <!-- Score display integrated above canvas -->
+        <div class="score-board" id="score">Score: 0</div>
+
+        <!-- Canvas for the game -->
+        <canvas id="pingPongCanvas"></canvas>
+
+        <!-- Donation / Support Panel -->
+        <div class="info-panel">
+            <h2>🎮 Support the Real Game Development</h2>
+            <p>
+                Every <strong>$INPI token</strong> you send helps the team (Xpective) build the full gaming experience.<br>
+                Donations are added directly to the <strong>sale liquidity</strong>, ensuring a healthy ecosystem for the upcoming marketplace, NFTs, and in-game utilities.
+            </p>
+            <div style="margin: 1rem 0;">
+                <p><strong>Team Donation Wallet (send $INPI here):</strong></p>
+                <div class="wallet-address">0xcbc1cf1159b4db5b407684fde0e9e635e9e3726f</div>
+                <p><small>(ERC-20 / BSC – always verify the address)</small></p>
+            </div>
+            <div style="margin: 1rem 0;">
+                <p><strong>$INPI Token Contract:</strong></p>
+                <div class="wallet-address">0x15ac8e2c38f0c644123e61011e7113de56038453</div>
+            </div>
+            <button class="donate-button" onclick="alert('Please send $INPI tokens to the team wallet above. Thank you for your support!')">
+                ❤️ Donate $INPI
+            </button>
+            <p class="footnote">
+                Your support fuels the full game, NFT integration, and the $ADVERT sub-token ecosystem.<br>
+                Together we build the future of gaming!
+            </p>
+        </div>
+
+        <!-- Optional: additional info links -->
+        <p style="text-align: center;">
+            <a href="whitepaper.html" target="_blank">📄 Read the Whitepaper</a> &nbsp;|&nbsp;
+            <a href="https://discord.gg/95yj6Eg6" target="_blank" rel="noopener">💬 Join Discord</a>
+        </p>
+    </main>
+
+    <footer>
+        <p>© 2026 Inpinity. All rights reserved.</p>
+        <div class="footer-links">
+            <a href="privacypolicy.html">Privacy Policy</a>
+            <a href="termsofuse.html">Terms of Use</a>
+            <a href="contact.html">Contact</a>
+            <a href="faq.html">FAQ</a>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const canvas = document.getElementById('pingPongCanvas');
+            const ctx = canvas.getContext('2d');
+
+            // Set canvas size dynamically, maintaining aspect ratio
+            const maxWidth = 800;
+            const containerWidth = Math.min(window.innerWidth * 0.9, maxWidth);
+            canvas.width = containerWidth;
+            canvas.height = containerWidth * 0.75; // 4:3 aspect ratio
+
+            let score = 0;
+            let gameActive = true;
+            let npcSpeed = 4; // Speed of NPC paddle
+            let holes = [{
+                x: Math.random() * (canvas.width - 50) + 25,
+                radius: 50
+            }];
+
+            let ball = {
+                x: canvas.width / 2,
+                y: canvas.height / 2,
+                radius: 10,
+                deltaX: 5,
+                deltaY: 5,
+                color: "#FFF"
+            };
+
+            let paddle = {
+                width: 100,
+                height: 20,
+                x: canvas.width / 2 - 50,
+                y: canvas.height - 30
+            };
+
+            let npcPaddle = {
+                width: 100,
+                height: 20,
+                x: canvas.width / 2 - 50,
+                y: 30
+            };
+
+            function drawBall() {
+                ctx.beginPath();
+                ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+                ctx.fillStyle = ball.color;
+                ctx.fill();
+                ctx.closePath();
+            }
+
+            function drawPaddle() {
+                ctx.beginPath();
+                ctx.rect(paddle.x, paddle.y, paddle.width, paddle.height);
+                ctx.fillStyle = "#FFF";
+                ctx.fill();
+                ctx.closePath();
+            }
+
+            function drawNpcPaddle() {
+                ctx.beginPath();
+                ctx.rect(npcPaddle.x, npcPaddle.y, npcPaddle.width, npcPaddle.height);
+                ctx.fillStyle = "#FF6347"; // Tomato red for NPC paddle
+                ctx.fill();
+                ctx.closePath();
+            }
+
+            function drawHoles() {
+                holes.forEach(hole => {
+                    ctx.beginPath();
+                    ctx.arc(hole.x, 25, hole.radius, 0, Math.PI * 2);
+                    ctx.strokeStyle = "rgba(255,215,0,0.5)";
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    ctx.closePath();
+                });
+            }
+
+            function updateGame() {
+                if (!gameActive) return;
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                drawBall();
+                drawPaddle();
+                drawNpcPaddle();
+                drawHoles();
+                document.getElementById('score').innerText = `Score: ${score}`;
+
+                ball.x += ball.deltaX;
+                ball.y += ball.deltaY;
+
+                // Wall collisions
+                if (ball.x - ball.radius < 0 || ball.x + ball.radius > canvas.width) {
+                    ball.deltaX = -ball.deltaX;
+                }
+                if (ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height) {
+                    ball.deltaY = -ball.deltaY;
+                }
+
+                // Player paddle collision
+                if (ball.y + ball.radius > paddle.y && 
+                    ball.x > paddle.x && 
+                    ball.x < paddle.x + paddle.width) {
+                    ball.deltaY = -ball.deltaY;
+                }
+
+                // NPC paddle collision
+                if (ball.y - ball.radius < npcPaddle.y + npcPaddle.height && 
+                    ball.x > npcPaddle.x && 
+                    ball.x < npcPaddle.x + npcPaddle.width) {
+                    ball.deltaY = -ball.deltaY;
+                }
+
+                // NPC AI
+                if (npcPaddle.x + npcPaddle.width / 2 < ball.x) {
+                    npcPaddle.x += npcSpeed;
+                } else if (npcPaddle.x + npcPaddle.width / 2 > ball.x) {
+                    npcPaddle.x -= npcSpeed;
+                }
+                // Keep NPC paddle inside canvas
+                npcPaddle.x = Math.max(0, Math.min(canvas.width - npcPaddle.width, npcPaddle.x));
+
+                // Hole collision (scoring)
+                holes.forEach((hole, index) => {
+                    const dist = Math.sqrt((ball.x - hole.x) ** 2 + (ball.y - 25) ** 2);
+                    if (dist < hole.radius + ball.radius) {
+                        score += 10;
+                        ball.color = "#" + ((1 << 24) * Math.random() | 0).toString(16).padStart(6, '0');
+                        holes.splice(index, 1);
+                        if (holes.length < 10) {
+                            holes.push({
+                                x: Math.random() * (canvas.width - 50) + 25,
+                                radius: 50
+                            });
+                        }
+                    }
+                });
+
+                requestAnimationFrame(updateGame);
+            }
+
+            // Mouse / touch control
+            canvas.addEventListener('mousemove', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const relativeX = (mouseX / rect.width) * canvas.width;
+                paddle.x = Math.max(0, Math.min(canvas.width - paddle.width, relativeX - paddle.width / 2));
+            });
+
+            canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                const rect = canvas.getBoundingClientRect();
+                const touchX = e.touches[0].clientX - rect.left;
+                const relativeX = (touchX / rect.width) * canvas.width;
+                paddle.x = Math.max(0, Math.min(canvas.width - paddle.width, relativeX - paddle.width / 2));
+            });
+
+            updateGame();
         });
-
-        requestAnimationFrame(updateGame);
-    }
-
-    canvas.addEventListener('touchmove', function(e) {
-        let touchX = e.touches[0].clientX;
-        paddle.x = touchX - paddle.width / 2;
-    });
-
-    updateGame();
-});
-</script>
+    </script>
 </body>
 </html>
