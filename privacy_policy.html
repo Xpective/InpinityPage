@@ -1,53 +1,202 @@
-
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Datenschutzerklärung</title>
-    <link rel="stylesheet" href="base.css">
-    <link rel="stylesheet" href="layout.css">
+    <title>Inpinity - Privacy Policy</title>
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+    <link rel="stylesheet" href="css/animations.css" />
+    <link rel="stylesheet" href="css/dark.css" />
+    <link rel="stylesheet" href="css/light.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+    <link rel="stylesheet" href="css/color.css" />
+    <link rel="stylesheet" href="css/adapted_about_us.css" />
+    <link rel="stylesheet" href="css/adapted_advertisements.css" />
+    <link rel="stylesheet" href="css/adapted_combined.css"/>
+    <link rel="stylesheet" href="css/adapted_comunity_guidelines.css" />
+    <link rel="stylesheet" href="css/adapted_course_feedback.css" />
+    <link rel="stylesheet" href="css/adapted_mft_marketplace.css"/>
+    <link rel="stylesheet" href="css/adapted_profile.css"/>
+    <link rel="stylesheet" href="css/combined_latest.css"/>
+    <link rel="stylesheet" href="css/gamification.css" />
+    <link rel="stylesheet" href="css/referral.css"/>
+    <script defer src="main.js"></script>
+    <link rel="icon" type="image/png" href="favicon.webp">
+    <meta name="keywords" content="Inpinity, Game Design, Game Development, Platform, Collaboration, Forum, Tools, GameDesign, AI Development, Games of future, programming, programs, python gui">
+    <meta name="author" content="Xpective">
+    <meta property="og:title" content="Inpinity - Privacy Policy">
+    <meta property="og:description" content="Privacy Policy of Inpinity – how we handle your data.">
+    <meta property="og:image" content="logo_background.jpg">
+    <meta property="og:url" content="https://inpinity.online/privacypolicy.html">
+    <meta name="twitter:card" content="logo_background.webp">
+    <meta name="twitter:site" content="@unxpective">
+    <meta name="twitter:creator" content="@Inpinity1">
+    <meta name="theme-color" content="#FarbcodeIhrerWebsite">
+    <meta name="robots" content="index,follow">
+    <style>
+        /* Additional styling for privacy policy */
+        .privacy-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: rgba(20, 20, 20, 0.8);
+            border-radius: 8px;
+            border: 1px solid var(--quinary-color, gold);
+            box-shadow: 0 0 20px rgba(255,215,0,0.2);
+            color: #eee;
+        }
+        .privacy-container h1 {
+            color: gold;
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
+        }
+        .privacy-container h2 {
+            color: gold;
+            border-bottom: 1px solid #444;
+            padding-bottom: 0.5rem;
+            margin-top: 2rem;
+        }
+        .privacy-container p {
+            line-height: 1.6;
+            margin: 1rem 0;
+        }
+        .privacy-container ul {
+            margin: 1rem 0;
+            padding-left: 2rem;
+        }
+        .privacy-container li {
+            margin: 0.5rem 0;
+        }
+        .privacy-container a {
+            color: gold;
+            text-decoration: underline;
+        }
+        .last-updated {
+            text-align: right;
+            font-style: italic;
+            color: #aaa;
+            margin-top: 2rem;
+            border-top: 1px solid #444;
+            padding-top: 1rem;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Datenschutzerklärung</h1>
-        
-        <!-- Welche Daten gesammelt werden -->
-        <div class="data-collected">
-            <h2>Welche Daten wir sammeln</h2>
-            <p>Wir sammeln Daten wie Name, E-Mail, IP-Adresse und weitere Informationen, die Sie uns bei der Registrierung oder Nutzung unserer Dienste zur Verfügung stellen.</p>
+    <header>
+        <nav>
+            <ul>
+                <li><a aria-label="Home" href="index.html">Home</a></li>
+                <li><a aria-label="Services" href="services.html">Services</a></li>
+                <li><a aria-label="Game" href="game.html">Game</a></li>
+                <li><a aria-label="Forum" href="forum.html">Forum</a></li>
+                <li><a aria-label="Collaboration" href="collaboration.html">Collaboration</a></li>
+                <li><a aria-label="Register" href="register.html">Register</a></li>
+                <li><a aria-label="About" href="about.html">About</a></li>
+                <li><a aria-label="Whitepaper" href="https://github.com/Xpective/InpinityPage/raw/3923cf22782286d60574c8ae9b92e693cb314215/Inpinity%20Whitepaper%20.pdf" target="_blank" rel="noopener">Whitepaper</a></li>
+                <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
+                <div class="themeDots">
+                    <div class="dot light" title="Light Theme"></div>
+                    <div class="dot dark" title="Dark Theme"></div>
+                    <div class="dot basic" title="Basic Theme"></div>
+                </div>
+            </ul>
+        </nav>
+        <style>
+            .themeDots .dot {
+                display: inline-block;
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                margin: 5px;
+                cursor: pointer;
+                transition: transform 0.2s;
+            }
+            .themeDots .dot.light { background-color: #FFFFFF; }
+            .themeDots .dot.dark { background-color: #000000; }
+            .themeDots .dot.basic { background-color: var(--quinary-color); }
+            .themeDots .dot:hover { transform: scale(1.2); }
+        </style>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                document.querySelector('.themeDots .dot.light')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'light'));
+                document.querySelector('.themeDots .dot.dark')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'dark'));
+                document.querySelector('.themeDots .dot.basic')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'basic'));
+            });
+        </script>
+    </header>
+
+    <main>
+        <div class="privacy-container">
+            <h1>Privacy Policy</h1>
+            <p>Last Updated: February 15, 2026</p>
+            
+            <p>At Inpinity, we value your privacy and are committed to protecting your personal data. This privacy policy explains how we collect, use, and safeguard your information when you visit our website or use our services.</p>
+
+            <h2>1. Data We Collect</h2>
+            <p>We may collect the following types of information:</p>
+            <ul>
+                <li><strong>Personal Identification Information:</strong> Name, email address, and any other information you voluntarily provide when registering or contacting us.</li>
+                <li><strong>Technical Data:</strong> IP address, browser type, device information, and usage data collected via cookies and similar technologies.</li>
+                <li><strong>Blockchain Data:</strong> If you connect a wallet, we may access your public wallet address and transaction history solely for authentication and token-related features.</li>
+            </ul>
+
+            <h2>2. How We Use Your Data</h2>
+            <p>We use your data for the following purposes:</p>
+            <ul>
+                <li>To provide and maintain our services, including the forum, game demos, and community features.</li>
+                <li>To communicate with you about updates, security alerts, and support.</li>
+                <li>To improve our website and user experience through analytics.</li>
+                <li>To comply with legal obligations and enforce our terms of use.</li>
+            </ul>
+
+            <h2>3. Data Sharing and Disclosure</h2>
+            <p>We do not sell, trade, or rent your personal data to third parties. We may share anonymized aggregated data for analytical purposes. We may disclose your information if required by law or to protect our rights and safety.</p>
+
+            <h2>4. Data Storage and Security</h2>
+            <p>Your data is stored on secure servers with industry-standard encryption. While we implement reasonable security measures, no method of transmission over the internet is 100% secure. You use our services at your own risk.</p>
+
+            <h2>5. Your Rights</h2>
+            <p>Depending on your jurisdiction, you may have the right to:</p>
+            <ul>
+                <li>Access the personal data we hold about you.</li>
+                <li>Request correction or deletion of your data.</li>
+                <li>Object to or restrict processing.</li>
+                <li>Withdraw consent at any time (where processing is based on consent).</li>
+            </ul>
+            <p>To exercise your rights, please contact us at <a href="mailto:xpective@inpinity.online">xpective@inpinity.online</a>.</p>
+
+            <h2>6. Cookies and Tracking</h2>
+            <p>We use cookies and similar technologies to enhance your experience, analyze site traffic, and personalize content. You can control cookies through your browser settings. Continued use of our website constitutes consent to our cookie policy.</p>
+
+            <h2>7. Third-Party Links</h2>
+            <p>Our website may contain links to external sites (e.g., Discord, Twitter). We are not responsible for the privacy practices of those sites. We encourage you to review their policies.</p>
+
+            <h2>8. Children's Privacy</h2>
+            <p>Our services are not directed to individuals under 13. We do not knowingly collect data from children. If you become aware that a child has provided us with data, please contact us.</p>
+
+            <h2>9. Changes to This Policy</h2>
+            <p>We may update this privacy policy from time to time. We will notify you of significant changes by posting the new policy on this page with an updated effective date.</p>
+
+            <h2>10. Contact Us</h2>
+            <p>If you have questions about this privacy policy or our data practices, please email us at <a href="mailto:xpective@inpinity.online">xpective@inpinity.online</a> or reach out via our <a href="contact.html">Contact page</a>.</p>
+
+            <div class="last-updated">
+                Last updated: February 15, 2026
+            </div>
         </div>
-        
-        <!-- Wie die Daten verwendet werden -->
-        <div class="data-use">
-            <h2>Wie wir Ihre Daten verwenden</h2>
-            <p>Die gesammelten Daten werden verwendet, um Ihnen unsere Dienste zur Verfügung zu stellen, Sie über wichtige Änderungen zu informieren und um unsere Website zu verbessern.</p>
+    </main>
+
+    <footer>
+        <p>© 2026 Inpinity. All rights reserved.</p>
+        <div class="footer-links">
+            <a href="privacypolicy.html">Privacy Policy</a>
+            <a href="termsofuse.html">Terms of Use</a>
+            <a href="contact.html">Contact</a>
+            <a href="faq.html">FAQ</a>
         </div>
-        
-        <!-- Datenweitergabe -->
-        <div class="data-sharing">
-            <h2>Datenweitergabe</h2>
-            <p>Wir teilen Ihre Daten nicht mit Dritten, es sei denn, dies ist gesetzlich vorgeschrieben oder für die Erbringung unserer Dienste notwendig.</p>
-        </div>
-        
-        <!-- Datenspeicherung und -schutz -->
-        <div class="data-storage">
-            <h2>Datenspeicherung und -schutz</h2>
-            <p>Ihre Daten werden sicher auf unseren Servern gespeichert und durch moderne Sicherheitsmaßnahmen geschützt.</p>
-        </div>
-        
-        <!-- Rechte des Benutzers -->
-        <div class="user-rights">
-            <h2>Ihre Rechte</h2>
-            <p>Sie haben das Recht, auf Ihre Daten zuzugreifen, sie zu ändern oder zu löschen. Kontaktieren Sie uns, um diese Rechte auszuüben.</p>
-        </div>
-        
-        <!-- Cookies und Tracking -->
-        <div class="cookies-tracking">
-            <h2>Cookies und Tracking</h2>
-            <p>Unsere Website verwendet Cookies, um Ihr Benutzererlebnis zu verbessern. Durch die Nutzung unserer Website stimmen Sie der Verwendung von Cookies zu.</p>
-        </div>
-    </div>
+    </footer>
 </body>
 </html>
