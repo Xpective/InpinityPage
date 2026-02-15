@@ -1,54 +1,191 @@
-
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Über uns</title>
-    <link rel="stylesheet" href="base.css">
-    <link rel="stylesheet" href="layout.css">
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta content="Inpinity - Tools and resources for game design and development." name="description" />
+    <title>Inpinity - About Us</title>
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+    <link rel="stylesheet" href="css/animations.css" />
+    <link rel="stylesheet" href="css/dark.css" />
+    <link rel="stylesheet" href="css/light.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+    <link rel="stylesheet" href="css/color.css" />
+    <link rel="stylesheet" href="css/adapted_about_us.css" />
+    <link rel="stylesheet" href="css/adapted_advertisements.css" />
+    <link rel="stylesheet" href="css/adapted_combined.css"/>
+    <link rel="stylesheet" href="css/adapted_comunity_guidelines.css" />
+    <link rel="stylesheet" href="css/adapted_course_feedback.css" />
+    <link rel="stylesheet" href="css/adapted_mft_marketplace.css"/>
+    <link rel="stylesheet" href="css/adapted_profile.css"/>
+    <link rel="stylesheet" href="css/combined_latest.css"/>
+    <link rel="stylesheet" href="css/gamification.css" />
+    <link rel="stylesheet" href="css/referral.css"/>
+
+    <script defer src="main.js"></script>
+    <link rel="icon" type="image/png" href="favicon.webp">
+    <meta name="keywords" content="Inpinity, Game Design, Game Development, Platform, Collaboration, Forum, Tools, GameDesign, AI Development, Games of future, programming, programs, python gui">
+    <meta name="author" content="Xpective">
+    <meta property="og:title" content="Inpinity - The Community for Game Design and Programming">
+    <meta property="og:description" content="Exchange designs, knowledge and experience in programming and game design. Become part of a growing community specializing in Unreal Engine and many other technologies.">
+    <meta property="og:image" content="logo_background.jpg">
+    <meta property="og:url" content="https://inpinity.online">
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="logo_background.webp">
+    <meta name="twitter:site" content="@unxpective">
+    <meta name="twitter:creator" content="@Inpinity1">
+    <meta name="theme-color" content="#FarbcodeIhrerWebsite">
+    <meta name="robots" content="index,follow">
+
+    <style>
+        /* TV Styles */
+        #tv-container {
+            position: relative;
+            width: 80%;
+            max-width: 600px;
+            height: 60vh;
+            background-color: black;
+            overflow: hidden;
+            margin: 2rem auto;
+            border: 2px solid var(--quinary-color, gold);
+            border-radius: 8px;
+        }
+        #tv-image {
+            position: absolute;
+            z-index: 2;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('tv.webp');
+            background-size: cover;
+            background-position: center;
+            pointer-events: none;
+        }
+        #screen {
+            position: absolute;
+            bottom: 30%;
+            left: 10%;
+            right: 30%;
+            top: 10%;
+            z-index: 0;
+            background-color: black;
+            overflow: hidden;
+        }
+        #scrolling-text {
+            color: white;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            padding: 5%;
+            position: absolute;
+            bottom: 0;
+            width: 90%;
+            animation: scroll 36.9s linear infinite;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        @keyframes scroll {
+            0% { bottom: -600%; }
+            100% { bottom: 100%; }
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Über uns</h1>
-        
-        <!-- Geschichte -->
-        <div class="history">
-            <h2>Geschichte</h2>
-            <p>Unsere Website wurde im Jahr XXXX gegründet und hat sich seitdem stetig weiterentwickelt...</p>
+    <header>
+        <nav>
+            <ul>
+                <li><a aria-label="Home" href="index.html">Home</a></li>
+                <li><a aria-label="Services" href="services.html">Services</a></li>
+                <li><a aria-label="Game" href="game.html">Game</a></li>
+                <li><a aria-label="Forum" href="forum.html">Forum</a></li>
+                <li><a aria-label="Collaboration" href="collaboration.html">Collaboration</a></li>
+                <li><a aria-label="Register" href="register.html">Register</a></li>
+                <li><a aria-label="About" href="about.html">About</a></li>
+                <li><a aria-label="Whitepaper" href="https://github.com/Xpective/InpinityPage/raw/3923cf22782286d60574c8ae9b92e693cb314215/Inpinity%20Whitepaper%20.pdf" target="_blank" rel="noopener">Whitepaper</a></li>
+                <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
+                <div class="themeDots">
+                    <div class="dot light" title="Light Theme"></div>
+                    <div class="dot dark" title="Dark Theme"></div>
+                    <div class="dot basic" title="Basic Theme"></div>
+                </div>
+            </ul>
+        </nav>
+        <style>
+            .themeDots .dot {
+                display: inline-block;
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                margin: 5px;
+                cursor: pointer;
+                transition: transform 0.2s;
+            }
+            .themeDots .dot.light { background-color: #FFFFFF; }
+            .themeDots .dot.dark { background-color: #000000; }
+            .themeDots .dot.basic { background-color: var(--quinary-color); }
+            .themeDots .dot:hover { transform: scale(1.2); }
+        </style>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                // Theme switcher
+                document.querySelector('.themeDots .dot.light')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'light'));
+                document.querySelector('.themeDots .dot.dark')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'dark'));
+                document.querySelector('.themeDots .dot.basic')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'basic'));
+            });
+        </script>
+    </header>
+
+    <main style="display: flex; justify-content: center; align-items: center; min-height: 70vh;">
+        <div id="tv-container">
+            <div id="tv-image"></div>
+            <div id="screen">
+                <div id="scrolling-text">
+                    <strong>About Inpinity.Online</strong><br><br>
+                    Welcome to Inpinity.Online,<br>
+                    where ideas come to life and communities flourish.<br>
+                    Just like a tiny seed that grows into a majestic<br>
+                    tree through collective effort,<br>
+                    Inpinity.Online began as a mere idea. But ideas...<br><br>
+                    much like seeds, need nurturing and constant<br>
+                    care to thrive.<br><br><br>
+                    In the realm of Inpinity,<br>
+                    distinctions of nationality, origin, race, or religion fade away.<br>
+                    Here, you're invited to be a part of something greater<br>
+                    – a collaborative journey of development.<br><br>
+                    Together,<br>
+                    we're embarking on a quest to transform our shared visions into reality.<br>
+                    Let's connect, learn, and grow alongside one another.<br><br>
+                    This platform is a haven for those with an inventive spirit,<br>
+                    ready to embark on colossal projects we collectively conceive.<br>
+                    As we stand at the dawn of this endeavor,<br>
+                    it's the year 0 for Inpinity,<br>
+                    even though the concept has long dwelled in our thoughts.<br><br>
+                    The seed has been sown, and now it's time for it to flourish.<br><br>
+                    I am excited to introduce "Inpinity" to you all.<br><br>
+                    It's an honor to be part of something grand,<br>
+                    to share this sense of community with you.<br>
+                    I have faith that this project will prosper and succeed.<br><br>
+                    The coming years hold boundless opportunities for growth, development, and innovation.<br>
+                    From programming and artificial intelligence to automation, robotics, cloud technologies, and cybersecurity<br>
+                    – all crucial components in the ever-evolving landscape of technology.<br>
+                    Our special focus on game design makes Inpinity.Online the perfect platform for anyone intrigued by this realm.<br>
+                    United, we have the power to achieve greatness.<br>
+                    As we strive for new heights, even Elon's rockets might find a renewed purpose.<br>
+                    September 2023 marks the beginning of an exciting journey.
+                </div>
+            </div>
         </div>
-        
-        <!-- Mission und Vision -->
-        <div class="mission-vision">
-            <h2>Mission und Vision</h2>
-            <p>Unsere Mission ist es, XYZ zu bieten. Unsere Vision für die Zukunft ist...</p>
+    </main>
+
+    <footer>
+        <p>© 2026 Inpinity. All rights reserved.</p>
+        <div class="footer-links">
+            <a href="privacypolicy.html">Privacy Policy</a>
+            <a href="termsofuse.html">Terms of Use</a>
+            <a href="contact.html">Contact</a>
+            <a href="faq.html">FAQ</a>
         </div>
-        
-        <!-- Team -->
-        <div class="team">
-            <h2>Unser Team</h2>
-            <p>Hier könnten Informationen und Bilder von Teammitgliedern oder Schlüsselpersonen präsentiert werden.</p>
-        </div>
-        
-        <!-- Meilensteine -->
-        <div class="milestones">
-            <h2>Meilensteine</h2>
-            <p>2020: Launch der Website</p>
-            <p>2021: Erreichen von 10.000 Benutzern</p>
-            <!-- Weitere Meilensteine könnten hier hinzugefügt werden -->
-        </div>
-        
-        <!-- Kontaktinformationen -->
-        <div class="contact-info">
-            <h2>Kontakt</h2>
-            <p>Für weitere Fragen oder Informationen besuchen Sie bitte unsere <a href="contact.html">Kontaktseite</a>.</p>
-        </div>
-        
-        <!-- Bilder oder Videos (optional) -->
-        <!-- <div class="media">
-            Hier könnten Bilder oder Videos eingefügt werden, die die Geschichte oder das Team in Aktion zeigen.
-        </div> -->
-    </div>
+    </footer>
 </body>
 </html>
