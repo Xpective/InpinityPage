@@ -1,50 +1,362 @@
-
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Private Nachrichten</title>
-    <link rel="stylesheet" href="base.css">
-    <link rel="stylesheet" href="layout.css">
+    <title>Inpinity - Guestbook</title>
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+    <link rel="stylesheet" href="css/animations.css" />
+    <link rel="stylesheet" href="css/dark.css" />
+    <link rel="stylesheet" href="css/light.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+    <link rel="stylesheet" href="css/color.css" />
+    <link rel="stylesheet" href="css/adapted_about_us.css" />
+    <link rel="stylesheet" href="css/adapted_advertisements.css" />
+    <link rel="stylesheet" href="css/adapted_combined.css"/>
+    <link rel="stylesheet" href="css/adapted_comunity_guidelines.css" />
+    <link rel="stylesheet" href="css/adapted_course_feedback.css" />
+    <link rel="stylesheet" href="css/adapted_mft_marketplace.css"/>
+    <link rel="stylesheet" href="css/adapted_profile.css"/>
+    <link rel="stylesheet" href="css/combined_latest.css"/>
+    <link rel="stylesheet" href="css/gamification.css" />
+    <link rel="stylesheet" href="css/referral.css"/>
+    <script defer src="main.js"></script>
+    <link rel="icon" type="image/png" href="favicon.webp">
+    <meta name="keywords" content="Inpinity, Game Design, Game Development, Platform, Collaboration, Forum, Tools, GameDesign, AI Development, Games of future, programming, programs, python gui">
+    <meta name="author" content="Xpective">
+    <meta property="og:title" content="Inpinity - Guestbook">
+    <meta property="og:description" content="Leave your mark – sign the Inpinity guestbook with your message and wallet address.">
+    <meta property="og:image" content="logo_background.jpg">
+    <meta property="og:url" content="https://inpinity.online/guestbook.html">
+    <meta name="twitter:card" content="logo_background.webp">
+    <meta name="twitter:site" content="@unxpective">
+    <meta name="twitter:creator" content="@Inpinity1">
+    <meta name="theme-color" content="#FarbcodeIhrerWebsite">
+    <meta name="robots" content="index,follow">
+    <style>
+        /* Guestbook specific styles */
+        .guestbook-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: rgba(20, 20, 20, 0.8);
+            border-radius: 8px;
+            border: 1px solid var(--quinary-color, gold);
+            box-shadow: 0 0 20px rgba(255,215,0,0.2);
+            color: #eee;
+        }
+        .guestbook-container h1 {
+            color: gold;
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
+        }
+        .guestbook-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .guestbook-form label {
+            font-weight: bold;
+            color: gold;
+        }
+        .guestbook-form input, 
+        .guestbook-form textarea {
+            padding: 0.75rem;
+            border-radius: 4px;
+            border: 1px solid #444;
+            background: #222;
+            color: white;
+            font-size: 1rem;
+        }
+        .guestbook-form input:focus, 
+        .guestbook-form textarea:focus {
+            outline: none;
+            border-color: gold;
+            box-shadow: 0 0 5px gold;
+        }
+        .guestbook-form button {
+            background: gold;
+            color: black;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 1rem;
+        }
+        .guestbook-form button:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 15px gold;
+        }
+        .entries-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid gold;
+            padding-bottom: 0.5rem;
+            margin: 2rem 0 1rem;
+        }
+        .entries-header h2 {
+            color: gold;
+            margin: 0;
+        }
+        .clear-btn {
+            background: transparent;
+            border: 1px solid #ff4444;
+            color: #ff4444;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: background 0.2s;
+        }
+        .clear-btn:hover {
+            background: #ff4444;
+            color: black;
+        }
+        .guestbook-entry {
+            background: #1a1a1a;
+            border-left: 4px solid gold;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+        .guestbook-entry .name {
+            font-weight: bold;
+            color: gold;
+        }
+        .guestbook-entry .wallet {
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: #aaa;
+            word-break: break-all;
+        }
+        .guestbook-entry .message {
+            margin: 0.5rem 0;
+            white-space: pre-wrap;
+        }
+        .guestbook-entry .timestamp {
+            font-size: 0.7rem;
+            color: #666;
+            text-align: right;
+        }
+        .info-note {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 4px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            color: #ccc;
+            font-size: 0.9rem;
+        }
+        .info-note strong {
+            color: gold;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Private Nachrichten</h1>
-        
-        <!-- Inbox: Liste von Konversationen -->
-        <div class="inbox">
-            <h2>Inbox</h2>
+    <header>
+        <nav>
             <ul>
-                <li><a href="#conversation1">Konversation mit Benutzer123</a></li>
-                <li><a href="#conversation2">Konversation mit Benutzer456</a></li>
-                <!-- Weitere Konversationen hier -->
+                <li><a aria-label="Home" href="index.html">Home</a></li>
+                <li><a aria-label="Services" href="services.html">Services</a></li>
+                <li><a aria-label="Game" href="game.html">Game</a></li>
+                <li><a aria-label="Forum" href="forum.html">Forum</a></li>
+                <li><a aria-label="Collaboration" href="collaboration.html">Collaboration</a></li>
+                <li><a aria-label="Register" href="register.html">Register</a></li>
+                <li><a aria-label="About" href="about.html">About</a></li>
+                <li><a aria-label="Whitepaper" href="https://github.com/Xpective/InpinityPage/raw/3923cf22782286d60574c8ae9b92e693cb314215/Inpinity%20Whitepaper%20.pdf" target="_blank" rel="noopener">Whitepaper</a></li>
+                <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
+                <li><a aria-label="Guestbook" href="guestbook.html">Guestbook</a></li>
+                <div class="themeDots">
+                    <div class="dot light" title="Light Theme"></div>
+                    <div class="dot dark" title="Dark Theme"></div>
+                    <div class="dot basic" title="Basic Theme"></div>
+                </div>
             </ul>
-        </div>
-        
-        <!-- Konversationsansicht für eine spezifische Konversation -->
-        <div class="conversation" id="conversation1">
-            <h2>Konversation mit Benutzer123</h2>
+        </nav>
+        <style>
+            .themeDots .dot {
+                display: inline-block;
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                margin: 5px;
+                cursor: pointer;
+                transition: transform 0.2s;
+            }
+            .themeDots .dot.light { background-color: #FFFFFF; }
+            .themeDots .dot.dark { background-color: #000000; }
+            .themeDots .dot.basic { background-color: var(--quinary-color); }
+            .themeDots .dot:hover { transform: scale(1.2); }
+        </style>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                document.querySelector('.themeDots .dot.light')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'light'));
+                document.querySelector('.themeDots .dot.dark')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'dark'));
+                document.querySelector('.themeDots .dot.basic')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'basic'));
+            });
+        </script>
+    </header>
+
+    <main>
+        <div class="guestbook-container">
+            <h1>📖 Inpinity Guestbook</h1>
             
-            <!-- Einzelne Nachricht in der Konversation -->
-            <div class="message">
-                <p><strong>Benutzer123:</strong> Hallo! Wie geht es Ihnen?</p>
+            <div class="info-note">
+                <strong>✍️ Leave your mark!</strong> Sign the guestbook with your name, a message, and optionally your wallet address. 
+                This is a public wall where the community can share thoughts, support, or just say hello. 
+                All entries are stored locally in your browser for now (demo mode). In the future, entries will be permanently recorded on the blockchain (Base L2) with your signature.
             </div>
-            
-            <!-- Einzelne Nachricht in der Konversation -->
-            <div class="message">
-                <p><strong>Sie:</strong> Mir geht es gut, danke! Und Ihnen?</p>
-            </div>
-            
-            <!-- Formular zum Senden einer Nachricht -->
-            <form action="/send_message" method="post">
-                <textarea id="message_content" name="message_content" rows="3" required placeholder="Ihre Nachricht..."></textarea>
-                <button type="submit">Senden</button>
+
+            <!-- Form to add new entry -->
+            <form id="guestbookForm" class="guestbook-form">
+                <label for="name">Your Name / Pseudonym *</label>
+                <input type="text" id="name" name="name" required placeholder="e.g. GameDev123">
+
+                <label for="wallet">Your Wallet Address (optional, e.g. on Base)</label>
+                <input type="text" id="wallet" name="wallet" placeholder="0x... or ENS">
+
+                <label for="message">Your Message *</label>
+                <textarea id="message" name="message" rows="4" required placeholder="Write something..."></textarea>
+
+                <button type="submit">💾 Sign Guestbook</button>
             </form>
+
+            <!-- Entries display -->
+            <div class="entries-header">
+                <h2>📝 Recent Signatures</h2>
+                <button id="clearEntries" class="clear-btn">Clear all (demo)</button>
+            </div>
+            <div id="entriesList" class="entries-list">
+                <!-- Entries will be injected via JavaScript -->
+            </div>
         </div>
-        
-        <!-- Weitere Konversationsansichten würden hier folgen -->
-    </div>
+    </main>
+
+    <footer>
+        <p>© 2026 Inpinity. All rights reserved.</p>
+        <div class="footer-links">
+            <a href="privacypolicy.html">Privacy Policy</a>
+            <a href="termsofuse.html">Terms of Use</a>
+            <a href="contact.html">Contact</a>
+            <a href="faq.html">FAQ</a>
+            <a href="guestbook.html">Guestbook</a>
+        </div>
+    </footer>
+
+    <script>
+        (function() {
+            // LocalStorage key
+            const STORAGE_KEY = 'inpinity_guestbook';
+
+            // Load entries from localStorage or initialize with some sample entries
+            let entries = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [
+                {
+                    name: 'Xpective Team',
+                    wallet: '0xcbc1cf1159b4db5b407684fde0e9e635e9e3726f',
+                    message: 'Welcome to Inpinity! We are building the future of gaming. Leave your mark! 🚀',
+                    timestamp: new Date().toISOString()
+                }
+            ];
+
+            // Save entries to localStorage
+            function saveEntries() {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+            }
+
+            // Render entries in the DOM
+            function renderEntries() {
+                const list = document.getElementById('entriesList');
+                if (!list) return;
+
+                if (entries.length === 0) {
+                    list.innerHTML = '<p style="text-align: center; color: #aaa;">No entries yet. Be the first to sign!</p>';
+                    return;
+                }
+
+                // Sort by timestamp descending (newest first)
+                const sorted = [...entries].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+                list.innerHTML = sorted.map(entry => {
+                    const date = new Date(entry.timestamp).toLocaleString();
+                    const walletDisplay = entry.wallet ? `<div class="wallet">${entry.wallet}</div>` : '';
+                    return `
+                        <div class="guestbook-entry">
+                            <div class="name">${escapeHtml(entry.name)}</div>
+                            ${walletDisplay}
+                            <div class="message">${escapeHtml(entry.message).replace(/\n/g, '<br>')}</div>
+                            <div class="timestamp">${escapeHtml(date)}</div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // Simple escape to prevent XSS
+            function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            // Handle form submission
+            document.getElementById('guestbookForm')?.addEventListener('submit', (e) => {
+                e.preventDefault();
+
+                const nameInput = document.getElementById('name');
+                const walletInput = document.getElementById('wallet');
+                const messageInput = document.getElementById('message');
+
+                const name = nameInput.value.trim();
+                const wallet = walletInput.value.trim();
+                const message = messageInput.value.trim();
+
+                if (!name || !message) {
+                    alert('Please provide at least a name and a message.');
+                    return;
+                }
+
+                // Optional: simple wallet address validation (just length check)
+                if (wallet && !wallet.match(/^(0x[a-fA-F0-9]{40}|[^.]+\.eth)$/)) {
+                    alert('Wallet address does not look like a valid Ethereum address or ENS. Please check or leave empty.');
+                    return;
+                }
+
+                const newEntry = {
+                    name: name,
+                    wallet: wallet || '',
+                    message: message,
+                    timestamp: new Date().toISOString()
+                };
+
+                entries.push(newEntry);
+                saveEntries();
+                renderEntries();
+
+                // Clear form
+                nameInput.value = '';
+                walletInput.value = '';
+                messageInput.value = '';
+            });
+
+            // Clear all entries (for demo)
+            document.getElementById('clearEntries')?.addEventListener('click', () => {
+                if (confirm('Are you sure? This will permanently delete all guestbook entries (local demo only).')) {
+                    entries = [];
+                    saveEntries();
+                    renderEntries();
+                }
+            });
+
+            // Initial render
+            renderEntries();
+        })();
+    </script>
 </body>
 </html>
