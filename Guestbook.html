@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inpinity - Guestbook</title>
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+    <link rel="stylesheet" href="css/animations.css" />
+    <link rel="stylesheet" href="css/dark.css" />
+    <link rel="stylesheet" href="css/light.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+    <link rel="stylesheet" href="css/color.css" />
+    <link rel="stylesheet" href="css/adapted_about_us.css" />
+    <link rel="stylesheet" href="css/adapted_advertisements.css" />
+    <link rel="stylesheet" href="css/adapted_combined.css"/>
+    <link rel="stylesheet" href="css/adapted_comunity_guidelines.css" />
+    <link rel="stylesheet" href="css/adapted_course_feedback.css" />
+    <link rel="stylesheet" href="css/adapted_mft_marketplace.css"/>
+    <link rel="stylesheet" href="css/adapted_profile.css"/>
+    <link rel="stylesheet" href="css/combined_latest.css"/>
+    <link rel="stylesheet" href="css/gamification.css" />
+    <link rel="stylesheet" href="css/referral.css"/>
+    <script defer src="main.js"></script>
+    <!-- Ethers.js for wallet interaction -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
+    <link rel="icon" type="image/png" href="favicon.webp">
+    <meta name="keywords" content="Inpinity, Game Design, Game Development, Platform, Collaboration, Forum, Tools, GameDesign, AI Development, Games of future, programming, programs, python gui, guestbook, INPI token">
+    <meta name="author" content="Xpective">
+    <meta property="og:title" content="Inpinity - Guestbook">
+    <meta property="og:description" content="Leave your immortal mark – sign the guestbook with a small INPI fee to support development.">
+    <meta property="og:image" content="logo_background.jpg">
+    <meta property="og:url" content="https://inpinity.online/guestbook.html">
+    <meta name="twitter:card" content="logo_background.webp">
+    <meta name="twitter:site" content="@unxpective">
+    <meta name="twitter:creator" content="@Inpinity1">
+    <meta name="theme-color" content="#FarbcodeIhrerWebsite">
+    <meta name="robots" content="index,follow">
+    <style>
+        /* Guestbook specific styles - enhanced */
+        .guestbook-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: rgba(20, 20, 20, 0.9);
+            border-radius: 8px;
+            border: 1px solid var(--quinary-color, gold);
+            box-shadow: 0 0 20px rgba(255,215,0,0.3);
+            color: #eee;
+        }
+        .guestbook-container h1 {
+            color: gold;
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
+        }
+        .partners-section {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            border: 1px solid #444;
+        }
+        .partner-item {
+            text-align: center;
+        }
+        .partner-item a {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: #2a2a2a;
+            border: 1px solid gold;
+            border-radius: 40px;
+            color: gold;
+            font-weight: bold;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .partner-item a:hover {
+            background: gold;
+            color: black;
+            transform: scale(1.05);
+        }
+        .wallet-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: #1a1a1a;
+            border-radius: 8px;
+        }
+        .wallet-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .connect-wallet-btn {
+            background: gold;
+            color: black;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .connect-wallet-btn:hover {
+            transform: scale(1.05);
+        }
+        .wallet-details {
+            background: #222;
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            border: 1px solid gold;
+            color: gold;
+            font-size: 0.9rem;
+        }
+        .guestbook-form {
+            background: #1a1a1a;
+            border: 1px solid gold;
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+        .guestbook-form h2 {
+            color: gold;
+            margin-top: 0;
+        }
+        .form-group {
+            margin: 1.5rem 0;
+        }
+        .form-group label {
+            display: block;
+            color: gold;
+            margin-bottom: 0.5rem;
+        }
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            background: #222;
+            border: 1px solid #444;
+            border-radius: 4px;
+            color: white;
+            font-size: 1rem;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: gold;
+            box-shadow: 0 0 5px gold;
+        }
+        .fee-notice {
+            background: #2a2a2a;
+            border-left: 4px solid gold;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            color: #ccc;
+        }
+        .fee-notice strong {
+            color: gold;
+        }
+        .submit-btn {
+            background: gold;
+            color: black;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+        .submit-btn:hover:not(:disabled) {
+            transform: scale(1.02);
+            box-shadow: 0 0 15px gold;
+        }
+        .submit-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        .entries-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid gold;
+            padding-bottom: 0.5rem;
+            margin: 2rem 0 1rem;
+        }
+        .entries-header h2 {
+            color: gold;
+            margin: 0;
+        }
+        .clear-btn {
+            background: transparent;
+            border: 1px solid #ff4444;
+            color: #ff4444;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: background 0.2s;
+        }
+        .clear-btn:hover {
+            background: #ff4444;
+            color: black;
+        }
+        .guestbook-entry {
+            background: #1a1a1a;
+            border-left: 4px solid gold;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+            position: relative;
+        }
+        .guestbook-entry.paid {
+            border-left-color: #00ff00;
+        }
+        .guestbook-entry .name {
+            font-weight: bold;
+            color: gold;
+        }
+        .guestbook-entry .wallet {
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: #aaa;
+            word-break: break-all;
+        }
+        .guestbook-entry .message {
+            margin: 0.5rem 0;
+            white-space: pre-wrap;
+        }
+        .guestbook-entry .timestamp {
+            font-size: 0.7rem;
+            color: #666;
+            text-align: right;
+        }
+        .paid-badge {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: #00ff00;
+            color: black;
+            padding: 0.2rem 0.5rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+        .info-note {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 4px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            color: #ccc;
+            font-size: 0.9rem;
+        }
+        .info-note strong {
+            color: gold;
+        }
+        .balance-warning {
+            color: #ffaa00;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a aria-label="Home" href="index.html">Home</a></li>
+                <li><a aria-label="Features" href="features.html">Features</a></li>
+                <li><a aria-label="Game" href="game.html">Game</a></li>
+                <li><a aria-label="Forum" href="forum.html">Forum</a></li>
+                <li><a aria-label="Collaboration" href="collaboration.html">Collaboration</a></li>
+                <li><a aria-label="Register" href="register.html">Register</a></li>
+                <li><a aria-label="About" href="about.html">About</a></li>
+                <li><a aria-label="Whitepaper" href="https://github.com/Xpective/InpinityPage/raw/3923cf22782286d60574c8ae9b92e693cb314215/Inpinity%20Whitepaper%20.pdf" target="_blank" rel="noopener">Whitepaper</a></li>
+                <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
+                <li><a aria-label="Guestbook" href="guestbook.html">Guestbook</a></li>
+                <li><a aria-label="Advertising" href="advertising.html">Advertising</a></li>
+                <li><a aria-label="Profile" href="profile.html">Profile</a></li>
+                <div class="themeDots">
+                    <div class="dot light" title="Light Theme"></div>
+                    <div class="dot dark" title="Dark Theme"></div>
+                    <div class="dot basic" title="Basic Theme"></div>
+                </div>
+            </ul>
+        </nav>
+        <style>
+            .themeDots .dot {
+                display: inline-block;
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                margin: 5px;
+                cursor: pointer;
+                transition: transform 0.2s;
+            }
+            .themeDots .dot.light { background-color: #FFFFFF; }
+            .themeDots .dot.dark { background-color: #000000; }
+            .themeDots .dot.basic { background-color: var(--quinary-color); }
+            .themeDots .dot:hover { transform: scale(1.2); }
+        </style>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                document.querySelector('.themeDots .dot.light')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'light'));
+                document.querySelector('.themeDots .dot.dark')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'dark'));
+                document.querySelector('.themeDots .dot.basic')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'basic'));
+            });
+        </script>
+    </header>
+
+    <main>
+        <div class="guestbook-container">
+            <h1>📖 Immortal Guestbook</h1>
+
+            <!-- Partners Section -->
+            <div class="partners-section">
+                <div class="partner-item"><a href="https://base.org/" target="_blank" rel="noopener">⚡ Base L2</a></div>
+                <div class="partner-item"><a href="https://www.toshimart.xyz/" target="_blank" rel="noopener">🛒 ToshiMart</a></div>
+                <div class="partner-item"><a href="https://uniswap.org/" target="_blank" rel="noopener">🦄 Uniswap</a></div>
+            </div>
+
+            <!-- Wallet Connection Bar -->
+            <div class="wallet-bar">
+                <div class="wallet-info">
+                    <button id="connectWalletBtn" class="connect-wallet-btn">🔌 Connect Wallet</button>
+                    <span id="walletStatus" class="wallet-details" style="display: none;"></span>
+                </div>
+                <div id="balanceInfo" style="display: none;">
+                    <span class="wallet-details">INPI: <span id="inpiBalance">0</span></span>
+                </div>
+            </div>
+
+            <!-- Info Note -->
+            <div class="info-note">
+                <strong>✍️ Leave your immortal mark!</strong> To prevent spam and support development, each guestbook entry requires a small fee of <strong>1 $INPI</strong>. This fee goes directly to the team wallet and helps fund the future of Inpinity. Your entry will be forever recorded on the Base blockchain in the next version. 
+                <span style="color: gold;">Be part of history!</span>
+            </div>
+
+            <!-- Entry Form -->
+            <div class="guestbook-form">
+                <h2>Sign the Guestbook</h2>
+                <form id="guestbookForm">
+                    <div class="form-group">
+                        <label for="name">Your Name / Pseudonym *</label>
+                        <input type="text" id="name" required placeholder="e.g. GameDev123">
+                    </div>
+                    <div class="form-group">
+                        <label for="wallet">Your Wallet Address (optional, for display)</label>
+                        <input type="text" id="walletInput" placeholder="0x... or ENS">
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Your Message *</label>
+                        <textarea id="message" rows="4" required placeholder="Write something... (this will be on-chain soon!)"></textarea>
+                    </div>
+
+                    <div class="fee-notice">
+                        <strong>⚠️ Fee: 1 $INPI</strong> will be deducted from your wallet. Make sure you have at least 1 $INPI and are connected to the correct network (Base / Ethereum).
+                    </div>
+
+                    <button type="submit" id="submitEntryBtn" class="submit-btn" disabled>💾 Sign Guestbook (1 $INPI fee)</button>
+                </form>
+            </div>
+
+            <!-- Entries List -->
+            <div class="entries-header">
+                <h2>📝 Immortal Signatures</h2>
+                <button id="clearEntries" class="clear-btn">Clear all (demo)</button>
+            </div>
+            <div id="entriesList" class="entries-list">
+                <!-- Entries will be injected via JavaScript -->
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>© 2026 Inpinity. All rights reserved. Working with <a href="https://base.org/" target="_blank" rel="noopener" style="color: gold;">Base</a>, <a href="https://www.toshimart.xyz/" target="_blank" rel="noopener" style="color: gold;">ToshiMart</a> and <a href="https://uniswap.org/" target="_blank" rel="noopener" style="color: gold;">Uniswap</a>.</p>
+        <div class="footer-links">
+            <a href="privacypolicy.html">Privacy Policy</a>
+            <a href="termsofuse.html">Terms of Use</a>
+            <a href="contact.html">Contact</a>
+            <a href="faq.html">FAQ</a>
+            <a href="guestbook.html">Guestbook</a>
+            <a href="advertising.html">Advertising</a>
+            <a href="profile.html">Profile</a>
+        </div>
+    </footer>
+
+    <script>
+        (function() {
+            // ========== Configuration ==========
+            const INPI_CONTRACT_ADDRESS = '0x15ac8e2c38f0c644123e61011e7113de56038453';
+            const TEAM_WALLET = '0xcbc1cf1159b4db5b407684fde0e9e635e9e3726f';
+            const REQUIRED_FEE = 1; // 1 INPI
+
+            // Minimal ERC-20 ABI for balanceOf and transfer
+            const INPI_ABI = [
+                "function balanceOf(address owner) view returns (uint256)",
+                "function decimals() view returns (uint8)",
+                "function symbol() view returns (string)",
+                "function transfer(address to, uint amount) returns (bool)"
+            ];
+
+            // ========== DOM Elements ==========
+            const connectBtn = document.getElementById('connectWalletBtn');
+            const walletStatus = document.getElementById('walletStatus');
+            const balanceInfo = document.getElementById('balanceInfo');
+            const inpiBalanceSpan = document.getElementById('inpiBalance');
+            const submitBtn = document.getElementById('submitEntryBtn');
+            const guestbookForm = document.getElementById('guestbookForm');
+            const nameInput = document.getElementById('name');
+            const walletInput = document.getElementById('walletInput');
+            const messageInput = document.getElementById('message');
+            const clearBtn = document.getElementById('clearEntries');
+            const entriesList = document.getElementById('entriesList');
+
+            // ========== State ==========
+            let provider, signer, userAddress = null;
+            let inpiContract;
+            let userBalance = 0;
+
+            // LocalStorage key for entries
+            const STORAGE_KEY = 'inpinity_guestbook_paid';
+
+            // Load entries from localStorage
+            let entries = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [
+                {
+                    name: 'Xpective Team',
+                    wallet: '0xcbc1cf1159b4db5b407684fde0e9e635e9e3726f',
+                    message: 'Welcome to the Immortal Guestbook! Support us with 1 INPI to leave your mark. 🚀',
+                    timestamp: new Date().toISOString(),
+                    paid: true
+                }
+            ];
+
+            // ========== Helper Functions ==========
+            function saveEntries() {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+            }
+
+            function formatAddress(address) {
+                if (!address) return '';
+                return address.substring(0, 6) + '...' + address.substring(address.length - 4);
+            }
+
+            function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            function renderEntries() {
+                if (!entriesList) return;
+                if (entries.length === 0) {
+                    entriesList.innerHTML = '<p style="text-align: center; color: #aaa;">No entries yet. Be the first to sign!</p>';
+                    return;
+                }
+
+                const sorted = [...entries].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+                entriesList.innerHTML = sorted.map(entry => {
+                    const date = new Date(entry.timestamp).toLocaleString();
+                    const walletDisplay = entry.wallet ? `<div class="wallet">${escapeHtml(entry.wallet)}</div>` : '';
+                    const paidClass = entry.paid ? 'paid' : '';
+                    const paidBadge = entry.paid ? '<span class="paid-badge">✅ PAID</span>' : '';
+                    return `
+                        <div class="guestbook-entry ${paidClass}">
+                            ${paidBadge}
+                            <div class="name">${escapeHtml(entry.name)}</div>
+                            ${walletDisplay}
+                            <div class="message">${escapeHtml(entry.message).replace(/\n/g, '<br>')}</div>
+                            <div class="timestamp">${escapeHtml(date)}</div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // ========== Wallet & Balance ==========
+            async function connectWallet() {
+                if (typeof window.ethereum === 'undefined') {
+                    alert('MetaMask or another Web3 wallet is not installed.');
+                    return;
+                }
+                try {
+                    provider = new ethers.BrowserProvider(window.ethereum);
+                    await provider.send("eth_requestAccounts", []);
+                    signer = await provider.getSigner();
+                    userAddress = await signer.getAddress();
+
+                    // Display wallet status
+                    walletStatus.textContent = `Connected: ${formatAddress(userAddress)}`;
+                    walletStatus.style.display = 'inline-block';
+                    connectBtn.textContent = '✅ Connected';
+                    connectBtn.disabled = true;
+
+                    // Get INPI contract
+                    inpiContract = new ethers.Contract(INPI_CONTRACT_ADDRESS, INPI_ABI, signer);
+
+                    // Fetch balance
+                    await updateBalance();
+
+                    // Enable submit button if balance >= fee
+                    checkBalanceAndEnable();
+
+                } catch (err) {
+                    console.error(err);
+                    alert('Connection failed.');
+                }
+            }
+
+            async function updateBalance() {
+                if (!inpiContract || !userAddress) return;
+                try {
+                    const balanceWei = await inpiContract.balanceOf(userAddress);
+                    const decimals = await inpiContract.decimals();
+                    userBalance = Number(ethers.formatUnits(balanceWei, decimals));
+                    inpiBalanceSpan.textContent = userBalance.toFixed(2);
+                    balanceInfo.style.display = 'inline-block';
+                } catch (err) {
+                    console.error('Balance fetch error:', err);
+                    inpiBalanceSpan.textContent = '?';
+                }
+            }
+
+            function checkBalanceAndEnable() {
+                if (userAddress && userBalance >= REQUIRED_FEE) {
+                    submitBtn.disabled = false;
+                } else {
+                    submitBtn.disabled = true;
+                }
+            }
+
+            // ========== Handle Form Submission with Fee ==========
+            async function handleSubmit(e) {
+                e.preventDefault();
+
+                const name = nameInput.value.trim();
+                const wallet = walletInput.value.trim();
+                const message = messageInput.value.trim();
+
+                if (!name || !message) {
+                    alert('Please provide name and message.');
+                    return;
+                }
+
+                if (!userAddress) {
+                    alert('Please connect your wallet first.');
+                    return;
+                }
+
+                if (userBalance < REQUIRED_FEE) {
+                    alert(`Insufficient INPI balance. You need at least ${REQUIRED_FEE} INPI.`);
+                    return;
+                }
+
+                // Simulate payment: In a real app, you would call contract.transfer(TEAM_WALLET, fee)
+                // For demo, we just check balance and pretend payment succeeded.
+                try {
+                    // Optional: Actually try to send tokens (commented out for demo safety)
+                    /*
+                    const feeWei = ethers.parseUnits(REQUIRED_FEE.toString(), await inpiContract.decimals());
+                    const tx = await inpiContract.transfer(TEAM_WALLET, feeWei);
+                    await tx.wait();
+                    */
+
+                    // For demo, we just show an alert and proceed
+                    alert(`Demo: Payment of ${REQUIRED_FEE} INPI would be sent to ${TEAM_WALLET}. In production, this would be a real transaction.`);
+
+                    // After successful payment, add entry
+                    const newEntry = {
+                        name: name,
+                        wallet: wallet || userAddress, // if user didn't provide, use connected wallet
+                        message: message,
+                        timestamp: new Date().toISOString(),
+                        paid: true
+                    };
+
+                    entries.push(newEntry);
+                    saveEntries();
+                    renderEntries();
+
+                    // Clear form
+                    nameInput.value = '';
+                    walletInput.value = '';
+                    messageInput.value = '';
+
+                    // Update balance (if we had sent tokens, balance would decrease)
+                    // For demo, we just fetch again
+                    await updateBalance();
+                    checkBalanceAndEnable();
+
+                } catch (err) {
+                    console.error(err);
+                    alert('Payment failed. Please try again.');
+                }
+            }
+
+            // ========== Clear entries (demo) ==========
+            clearBtn.addEventListener('click', () => {
+                if (confirm('Are you sure? This will permanently delete all guestbook entries (local demo only).')) {
+                    entries = [];
+                    saveEntries();
+                    renderEntries();
+                }
+            });
+
+            // ========== Event Listeners ==========
+            connectBtn.addEventListener('click', connectWallet);
+            guestbookForm.addEventListener('submit', handleSubmit);
+
+            // Initial render
+            renderEntries();
+
+            // Auto-connect if previously connected
+            window.addEventListener('load', async () => {
+                if (window.ethereum && window.ethereum.selectedAddress) {
+                    await connectWallet();
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
