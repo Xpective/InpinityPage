@@ -1,11 +1,12 @@
+```html
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <meta content="Inpinity - Tools und Ressourcen für Game Design und Entwicklung." name="description" />
-    <title>Inpinity - Startseite</title>
+    <meta content="Inpinity - Tools and resources for game design and development." name="description" />
+    <title>Inpinity - Contact</title>
     <link rel="stylesheet" href="css/base.css"  />
     <link rel="stylesheet" href="css/layout.css"  />
     <link rel="stylesheet" href="css/animations.css"  />
@@ -15,12 +16,12 @@
     <link rel="stylesheet" href="css/color.css" />
     <script defer="" src="main.js"></script>
     <link rel="icon" type="image/png" href="favicon.webp">
-    <meta content="Inpinity, Game Design, Game Entwicklung, Plattform, Zusammenarbeit, Forum, Tools, GameDesign, AI Developement, Games of future,programming, programs, python gui," name="keywords">
+    <meta content="Inpinity, Game Design, Game Development, Platform, Collaboration, Forum, Tools, GameDesign, AI Development, Games of future, programming, programs, python gui" name="keywords">
     <meta content="Inpinity Team" name="Xpective">
-    <meta property="og:title" content="Inpinity - Die Community für Game Design und Programmierung">
-    <meta property="og:description" content="Tauschen Sie Designs, Wissen und Erfahrungen im Bereich der Programmierung und des Game Designs aus. Werden Sie Teil einer wachsenden Gemeinschaft, die sich auf die Unreal Engine und viele andere Technologien spezialisiert hat.">
+    <meta property="og:title" content="Inpinity - The Community for Game Design and Programming">
+    <meta property="og:description" content="Exchange designs, knowledge and experience in programming and game design. Become part of a growing community specializing in Unreal Engine and many other technologies.">
     <meta property="og:image" content="logo_background.jpg">
-    <meta property="og:url" content="inpinity.online, www.inpinity.online, https://www.inpinity.online, https://inpinity.online">
+    <meta property="og:url" content="https://inpinity.online">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Twitter Cards -->
@@ -28,7 +29,7 @@
     <meta name="twitter:site" content="@https://x.com/inpinity1?s=21&t=-FyWwqonfIU7u9houJoQAw">
     <meta name="twitter:creator" content="@Inpinity1">
     
-    <!-- Weitere Tags -->
+    <!-- Additional Tags -->
     <meta name="theme-color" content="#FarbcodeIhrerWebsite">
     <meta name="robots" content="index,follow">
 </head>
@@ -36,13 +37,14 @@
     <header>
         <nav>
             <ul>
-                <li><a aria-label="Startseite" href="index.html">Startseite</a></li>
-                <li><a aria-label="Dienstleistungen" href="services.html">Dienstleistungen</a></li>
+                <li><a aria-label="Home" href="index.html">Home</a></li>
+                <li><a aria-label="Services" href="services.html">Services</a></li>
                 <li><a aria-label="Game" href="game.html">Game</a></li>
                 <li><a aria-label="Forum" href="forum.html">Forum</a></li>
-                <li><a aria-label="Zusammenarbeit" href="collaboration.html">Zusammenarbeit</a></li>
-                <li><a aria-label="Registrieren" href="register.html">Registrieren</a></li>
-                <li><a aria-label="Über uns" href="about.html">Über uns</a></li>
+                <li><a aria-label="Collaboration" href="collaboration.html">Collaboration</a></li>
+                <li><a aria-label="Register" href="register.html">Register</a></li>
+                <li><a aria-label="About us" href="about.html">About</a></li>
+                <li><a aria-label="Whitepaper" href="https://github.com/Xpective/InpinityPage/raw/3923cf22782286d60574c8ae9b92e693cb314215/Inpinity%20Whitepaper%20.pdf" target="_blank" rel="noopener">Whitepaper</a></li>
                 <div class="themeDots">
                     <div class="dot light" title="Light Theme"></div>
                     <div class="dot dark" title="Dark Theme"></div>
@@ -77,16 +79,18 @@
                 </style>
                 <script>
                     // JavaScript to Change the Theme based on Dot Click
-                    document.querySelector('.themeDots .dot.light').addEventListener('click', function() {
-                        document.body.setAttribute('data-theme', 'light');
-                    });
-                
-                    document.querySelector('.themeDots .dot.dark').addEventListener('click', function() {
-                        document.body.setAttribute('data-theme', 'dark');
-                    });
-                
-                    document.querySelector('.themeDots .dot.basic').addEventListener('click', function() {
-                        document.body.setAttribute('data-theme', 'basic');
+                    document.addEventListener('DOMContentLoaded', function() {
+                        document.querySelector('.themeDots .dot.light')?.addEventListener('click', function() {
+                            document.body.setAttribute('data-theme', 'light');
+                        });
+                    
+                        document.querySelector('.themeDots .dot.dark')?.addEventListener('click', function() {
+                            document.body.setAttribute('data-theme', 'dark');
+                        });
+                    
+                        document.querySelector('.themeDots .dot.basic')?.addEventListener('click', function() {
+                            document.body.setAttribute('data-theme', 'basic');
+                        });
                     });
                 </script>
             
@@ -94,43 +98,79 @@
         </nav>
     </header>
     <main>
-        <h1>Kontakt</h1>
+        <h1>Contact</h1>
 
-<h2>Wir freuen uns von Ihnen zu hören!</h2>
-<p>Wenn Sie Fragen, Anmerkungen oder Anfragen haben, zögern Sie nicht, uns zu kontaktieren. Füllen Sie einfach das untenstehende Formular aus oder nutzen Sie unsere Kontaktinformationen.</p>
+        <h2>We’d love to hear from you!</h2>
+        <p>If you have any questions, comments, or inquiries, feel free to contact us. Simply fill out the form below or use our contact information.</p>
 
-<h2>Kontaktformular</h2>
-<form action="submit_form.php" method="post">
-    <label for="name">Name:</label>
-    <input type="text" id="name" name="name" required><br><br>
+        <!-- Contact Information (like in whitepaper) -->
+        <h2>Contact Information</h2>
+        <table style="width: auto; border-collapse: collapse; margin-bottom: 2rem;">
+            <tr>
+                <td style="padding: 8px; font-weight: bold;">Email:</td>
+                <td style="padding: 8px;"><a href="mailto:xpective@inpinity.online">xpective@inpinity.online</a></td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; font-weight: bold;">Discord:</td>
+                <td style="padding: 8px;"><a href="https://discord.gg/95yj6Eg6" target="_blank" rel="noopener">https://discord.gg/95yj6Eg6</a></td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; font-weight: bold;">Twitter:</td>
+                <td style="padding: 8px;"><a href="https://twitter.com/unxpective" target="_blank" rel="noopener">@unxpective</a></td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; font-weight: bold;">Telegram:</td>
+                <td style="padding: 8px;"><a href="https://t.me/+1hl5Ou-pGChhYmUy" target="_blank" rel="noopener">https://t.me/+1hl5Ou-pGChhYmUy</a></td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; font-weight: bold;">GitHub:</td>
+                <td style="padding: 8px;"><a href="https://github.com/Xpective" target="_blank" rel="noopener">Xpective</a></td>
+            </tr>
+        </table>
 
-    <label for="email">E-Mail:</label>
-    <input type="email" id="email" name="email" required><br><br>
+        <h2>Contact Form</h2>
+        <form action="submit_form.php" method="post">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required><br><br>
 
-    <label for="subject">Betreff:</label>
-    <input type="text" id="subject" name="subject"><br><br>
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required><br><br>
 
-    <label for="message">Nachricht:</label><br>
-    <textarea id="message" name="message" rows="4" required></textarea><br><br>
+            <label for="subject">Subject:</label>
+            <input type="text" id="subject" name="subject"><br><br>
 
-    <input type="submit" value="Senden">
-</form>
+            <label for="message">Message:</label><br>
+            <textarea id="message" name="message" rows="4" required></textarea><br><br>
 
+            <input type="submit" value="Send">
+        </form>
 
-
-<h2>Folgen Sie uns auf Social Media</h2>
-<p>
-    <a href="#">Facebook</a> | 
-    <a href="https://x.com/inpinity1?s=21&t=-FyWwqonfIU7u9houJoQAw">Twitter</a> | 
-    <a href="#">LinkedIn</a>
-</p>
-
+        <h2>Follow us on Social Media</h2>
+        <p>
+            <a href="https://twitter.com/unxpective" target="_blank" rel="noopener">Twitter</a> | 
+            <a href="https://discord.gg/95yj6Eg6" target="_blank" rel="noopener">Discord</a> | 
+            <a href="https://t.me/+1hl5Ou-pGChhYmUy" target="_blank" rel="noopener">Telegram</a> |
+            <a href="https://github.com/Xpective" target="_blank" rel="noopener">GitHub</a>
+        </p>
     </main>
     <footer>
-        <p>© 2023 Inpinity. Alle Rechte vorbehalten.</p>
-            <a href="privacypolicy.html">Datenschutzrichtlinien</a>
-            <a href="termsofuse.html">Nutzungsbedingungen</a>
-            <a href="contact.html">Kontakt</a>
+        <p>© 2026 Inpinity. All rights reserved.</p>
+        <a href="privacypolicy.html">Privacy Policy</a>
+        <a href="termsofuse.html">Terms of Use</a>
+        <a href="contact.html">Contact</a>
     </footer>
 </body>
 </html>
+```
+
+Änderungen im Überblick:
+
+· Sprache: Komplett auf Englisch umgestellt.
+· Navigation: Whitepaper-Link hinzugefügt.
+· Kontaktdaten: Tabelle mit E-Mail, Discord, Twitter, Telegram, GitHub – basierend auf den Angaben aus dem Whitepaper.
+· Social Media Links: Entsprechend aktualisiert (Facebook entfernt, da nicht genannt; Twitter auf @unxpective gesetzt).
+· Footer: Jahr auf 2026, Links übersetzt.
+· Meta-Tags: Englisch und auf die aktuellen Daten angepasst.
+· Formular: Action bleibt submit_form.php (muss ggf. angepasst werden).
+
+Die Kontaktdaten sind nun übersichtlich und entsprechen dem Stil des Whitepapers.
