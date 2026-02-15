@@ -1,44 +1,290 @@
-
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FAQ - Häufig gestellte Fragen</title>
-    <link rel="stylesheet" href="base.css">
-    <link rel="stylesheet" href="layout.css">
+    <title>Inpinity - FAQ</title>
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+    <link rel="stylesheet" href="css/animations.css" />
+    <link rel="stylesheet" href="css/dark.css" />
+    <link rel="stylesheet" href="css/light.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+    <link rel="stylesheet" href="css/color.css" />
+    <link rel="stylesheet" href="css/adapted_about_us.css" />
+    <link rel="stylesheet" href="css/adapted_advertisements.css" />
+    <link rel="stylesheet" href="css/adapted_combined.css"/>
+    <link rel="stylesheet" href="css/adapted_comunity_guidelines.css" />
+    <link rel="stylesheet" href="css/adapted_course_feedback.css" />
+    <link rel="stylesheet" href="css/adapted_mft_marketplace.css"/>
+    <link rel="stylesheet" href="css/adapted_profile.css"/>
+    <link rel="stylesheet" href="css/combined_latest.css"/>
+    <link rel="stylesheet" href="css/gamification.css" />
+    <link rel="stylesheet" href="css/referral.css"/>
+    <script defer src="main.js"></script>
+    <link rel="icon" type="image/png" href="favicon.webp">
+    <meta content="Inpinity, Game Design, Game Development, Platform, Collaboration, Forum, Tools, GameDesign, AI Development, Games of future, programming, programs, python gui" name="keywords">
+    <meta content="Inpinity Team" name="Xpective">
+    <meta property="og:title" content="Inpinity - FAQ">
+    <meta property="og:description" content="Frequently asked questions about Inpinity, the $INPI token, staking, gaming, and community.">
+    <meta property="og:image" content="logo_background.jpg">
+    <meta property="og:url" content="https://inpinity.online/faq.html">
+    <meta name="twitter:card" content="logo_background.webp">
+    <meta name="twitter:site" content="@unxpective">
+    <meta name="twitter:creator" content="@Inpinity1">
+    <meta name="theme-color" content="#FarbcodeIhrerWebsite">
+    <meta name="robots" content="index,follow">
+    <style>
+        /* Additional FAQ styling */
+        .faq-search {
+            margin: 2rem 0;
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+        .faq-search input {
+            flex: 1;
+            max-width: 400px;
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .faq-search button {
+            padding: 0.5rem 1rem;
+            background-color: var(--primary-color, #0066cc);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .faq-section {
+            margin-bottom: 2rem;
+        }
+        .faq-section h2 {
+            border-bottom: 2px solid var(--quinary-color, gold);
+            padding-bottom: 0.5rem;
+            margin-top: 2rem;
+        }
+        details.faq-item {
+            margin: 1rem 0;
+            padding: 0.5rem;
+            background-color: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            border-left: 4px solid var(--quinary-color, gold);
+        }
+        details.faq-item summary {
+            font-weight: bold;
+            cursor: pointer;
+            list-style: none;
+            display: flex;
+            align-items: center;
+        }
+        details.faq-item summary::-webkit-details-marker {
+            display: none;
+        }
+        details.faq-item summary::before {
+            content: "▶";
+            margin-right: 0.5rem;
+            transition: transform 0.2s;
+            color: var(--quinary-color, gold);
+        }
+        details.faq-item[open] summary::before {
+            transform: rotate(90deg);
+        }
+        .faq-answer {
+            margin-top: 1rem;
+            padding-left: 1.5rem;
+        }
+        .faq-answer a {
+            color: var(--quinary-color, gold);
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>FAQ - Häufig gestellte Fragen</h1>
+    <header>
+        <nav>
+            <ul>
+                <li><a aria-label="Home" href="index.html">Home</a></li>
+                <li><a aria-label="Services" href="services.html">Services</a></li>
+                <li><a aria-label="Game" href="game.html">Game</a></li>
+                <li><a aria-label="Forum" href="forum.html">Forum</a></li>
+                <li><a aria-label="Collaboration" href="collaboration.html">Collaboration</a></li>
+                <li><a aria-label="Register" href="register.html">Register</a></li>
+                <li><a aria-label="About us" href="about.html">About</a></li>
+                <li><a aria-label="Whitepaper" href="https://github.com/Xpective/InpinityPage/raw/3923cf22782286d60574c8ae9b92e693cb314215/Inpinity%20Whitepaper%20.pdf" target="_blank" rel="noopener">Whitepaper</a></li>
+                <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
+                <div class="themeDots">
+                    <div class="dot light" title="Light Theme"></div>
+                    <div class="dot dark" title="Dark Theme"></div>
+                    <div class="dot basic" title="Basic Theme"></div>
+                </div>
+            </ul>
+        </nav>
+        <style>
+            .themeDots .dot {
+                display: inline-block;
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                margin: 5px;
+                cursor: pointer;
+                transition: transform 0.2s;
+            }
+            .themeDots .dot.light { background-color: #FFFFFF; }
+            .themeDots .dot.dark { background-color: #000000; }
+            .themeDots .dot.basic { background-color: var(--quinary-color); }
+            .themeDots .dot:hover { transform: scale(1.2); }
+        </style>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                document.querySelector('.themeDots .dot.light')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'light'));
+                document.querySelector('.themeDots .dot.dark')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'dark'));
+                document.querySelector('.themeDots .dot.basic')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'basic'));
+            });
+        </script>
+    </header>
+
+    <main class="container">
+        <h1>FAQ - Frequently Asked Questions</h1>
         
-        <!-- Suchfeld -->
+        <!-- Search Bar (visual only) -->
         <div class="faq-search">
-            <input type="text" placeholder="Suche nach einer Frage...">
-            <button type="submit">Suchen</button>
+            <input type="text" placeholder="Search for a question..." aria-label="Search">
+            <button type="button">Search</button>
         </div>
         
-        <!-- Fragen & Antworten -->
+        <!-- General Questions -->
         <div class="faq-section">
-            <h2>Allgemeine Fragen</h2>
+            <h2>General Questions</h2>
             
-            <div class="faq-item">
-                <p class="faq-question">Wie erstelle ich einen neuen Thread?</p>
+            <details class="faq-item">
+                <summary class="faq-question">What is Inpinity?</summary>
                 <div class="faq-answer">
-                    <p>Klicken Sie auf die Schaltfläche "Neuer Thread" und folgen Sie den Anweisungen auf dem Bildschirm.</p>
+                    <p>Inpinity is a decentralized ecosystem bridging blockchain technology, gaming, and digital advertising. It's a community-driven platform for game developers and enthusiasts to create, share, and grow. The native token $INPI powers staking, governance, in-game utilities, and more. For details, check our <a href="https://github.com/Xpective/InpinityPage/raw/3923cf22782286d60574c8ae9b92e693cb314215/Inpinity%20Whitepaper%20.pdf" target="_blank" rel="noopener">whitepaper</a>.</p>
                 </div>
-            </div>
+            </details>
             
-            <div class="faq-item">
-                <p class="faq-question">Wie ändere ich meine Benutzereinstellungen?</p>
+            <details class="faq-item">
+                <summary class="faq-question">How can I join the community?</summary>
                 <div class="faq-answer">
-                    <p>Gehen Sie zu "Mein Profil" und klicken Sie auf "Einstellungen".</p>
+                    <p>You can join our Discord server: <a href="https://discord.gg/95yj6Eg6" target="_blank" rel="noopener">https://discord.gg/95yj6Eg6</a>, follow us on Twitter <a href="https://twitter.com/unxpective" target="_blank" rel="noopener">@unxpective</a>, or join our Telegram group: <a href="https://t.me/+1hl5Ou-pGChhYmUy" target="_blank" rel="noopener">https://t.me/+1hl5Ou-pGChhYmUy</a>. All links are also available on our <a href="contact.html">Contact page</a>.</p>
                 </div>
-            </div>
+            </details>
             
-            <!-- Weitere Fragen und Antworten können hier hinzugefügt werden -->
+            <details class="faq-item">
+                <summary class="faq-question">Where can I find the whitepaper?</summary>
+                <div class="faq-answer">
+                    <p>The Inpinity whitepaper is available on GitHub: <a href="https://github.com/Xpective/InpinityPage/raw/3923cf22782286d60574c8ae9b92e693cb314215/Inpinity%20Whitepaper%20.pdf" target="_blank" rel="noopener">Download PDF</a>. You can also access it via the "Whitepaper" link in the navigation menu.</p>
+                </div>
+            </details>
         </div>
-    </div>
+        
+        <!-- Token & Staking -->
+        <div class="faq-section">
+            <h2>Token & Staking</h2>
+            
+            <details class="faq-item">
+                <summary class="faq-question">What is the $INPI token?</summary>
+                <div class="faq-answer">
+                    <p>$INPI is the native utility token of Inpinity. Total supply is 1 billion tokens. It is used for staking, governance, rewards, in-game purchases, and will generate the $ADVERT sub-token for advertising utilities. Contract address: <code>0x15ac8e2c38f0c644123e61011e7113de56038453</code>.</p>
+                </div>
+            </details>
+            
+            <details class="faq-item">
+                <summary class="faq-question">How can I buy $INPI?</summary>
+                <div class="faq-answer">
+                    <p>During the initial launch (Q1 2026), $INPI will be available via our presale page: <a href="https://inpinity.online/token/" target="_blank" rel="noopener">https://inpinity.online/token/</a>. After that, it will be listed on decentralized exchanges (DEXs) like Uniswap. Keep an eye on our announcements for official contract addresses to avoid scams.</p>
+                </div>
+            </details>
+            
+            <details class="faq-item">
+                <summary class="faq-question">When does staking launch?</summary>
+                <div class="faq-answer">
+                    <p>Staking is scheduled for Q2 2026. You will be able to stake your $INPI tokens to earn passive rewards. More details will be released closer to the launch.</p>
+                </div>
+            </details>
+            
+            <details class="faq-item">
+                <summary class="faq-question">What is "Judgment Day"?</summary>
+                <div class="faq-answer">
+                    <p>"Judgment Day" is a key milestone event that unlocks the team & advisor tokens (20% of supply). Until then, those tokens are fully locked to ensure trust and long-term commitment. The exact definition of Judgment Day will be communicated to the community (e.g., reaching a certain number of holders, launching the game, etc.).</p>
+                </div>
+            </details>
+            
+            <details class="faq-item">
+                <summary class="faq-question">How do I stake my tokens?</summary>
+                <div class="faq-answer">
+                    <p>Once staking is live (Q2 2026), you will need to connect your wallet (e.g., MetaMask) to the Inpinity dApp and choose a staking period. Rewards accumulate based on the amount and duration staked. Step-by-step guides will be provided.</p>
+                </div>
+            </details>
+        </div>
+        
+        <!-- Game & NFTs -->
+        <div class="faq-section">
+            <h2>Game & NFTs</h2>
+            
+            <details class="faq-item">
+                <summary class="faq-question">What games are available?</summary>
+                <div class="faq-answer">
+                    <p>The first mini-game is planned for Q4 2026. A full-fledged game with NFT integration will follow. Stay tuned for updates on our social channels.</p>
+                </div>
+            </details>
+            
+            <details class="faq-item">
+                <summary class="faq-question">How do I get NFTs?</summary>
+                <div class="faq-answer">
+                    <p>The first NFT collection "Inpinity Genesis" will be introduced in Q4 2026. Holders of $INPI may get exclusive minting rights. NFTs will be tradeable on our upcoming marketplace (Q1 2027).</p>
+                </div>
+            </details>
+            
+            <details class="faq-item">
+                <summary class="faq-question">Can I use NFTs in the game?</summary>
+                <div class="faq-answer">
+                    <p>Yes, by Q3 2027, NFTs will have full in-game utility (playable characters, skins, power-ups). More details will be revealed as development progresses.</p>
+                </div>
+            </details>
+        </div>
+        
+        <!-- Community & Support -->
+        <div class="faq-section">
+            <h2>Community & Support</h2>
+            
+            <details class="faq-item">
+                <summary class="faq-question">How do I join the Discord?</summary>
+                <div class="faq-answer">
+                    <p>Use this invite link: <a href="https://discord.gg/95yj6Eg6" target="_blank" rel="noopener">https://discord.gg/95yj6Eg6</a>. Introduce yourself and explore channels for game design, development, and token discussions.</p>
+                </div>
+            </details>
+            
+            <details class="faq-item">
+                <summary class="faq-question">How can I contribute to the project?</summary>
+                <div class="faq-answer">
+                    <p>We welcome developers, designers, and content creators. Join our Discord and check the "contributions" channel. You can also participate in governance once it's live (Q2 2026) and suggest improvements.</p>
+                </div>
+            </details>
+            
+            <details class="faq-item">
+                <summary class="faq-question">I have an issue – who do I contact?</summary>
+                <div class="faq-answer">
+                    <p>For support, please email us at <a href="mailto:xpective@inpinity.online">xpective@inpinity.online</a> or reach out in our Discord support channel.</p>
+                </div>
+            </details>
+        </div>
+        
+        <!-- Additional contact reminder -->
+        <p style="text-align: center; margin-top: 2rem;">Still have questions? Visit our <a href="contact.html">Contact page</a> or email <a href="mailto:xpective@inpinity.online">xpective@inpinity.online</a>.</p>
+    </main>
+    
+    <footer>
+        <p>© 2026 Inpinity. All rights reserved.</p>
+        <div class="footer-links">
+            <a href="privacypolicy.html">Privacy Policy</a>
+            <a href="termsofuse.html">Terms of Use</a>
+            <a href="contact.html">Contact</a>
+            <a href="faq.html">FAQ</a>
+        </div>
+    </footer>
 </body>
 </html>
