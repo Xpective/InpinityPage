@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta content="Inpinity - Zusammenarbeit im Bereich Game Design und Entwicklung." name="description">
-    <title>Inpinity - Zusammenarbeit</title>
+    <meta content="Inpinity - Collaboration in game design and development." name="description">
+    <title>Inpinity - Collaboration</title>
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/animations.css">
@@ -12,53 +12,181 @@
     <link rel="stylesheet" href="css/light.css">
     <link rel="stylesheet" href="css/responsive.css">
     <link rel="stylesheet" href="css/color.css">
+    <link rel="stylesheet" href="css/adapted_about_us.css" />
+    <link rel="stylesheet" href="css/adapted_advertisements.css" />
+    <link rel="stylesheet" href="css/adapted_combined.css"/>
+    <link rel="stylesheet" href="css/adapted_comunity_guidelines.css" />
+    <link rel="stylesheet" href="css/adapted_course_feedback.css" />
+    <link rel="stylesheet" href="css/adapted_mft_marketplace.css"/>
+    <link rel="stylesheet" href="css/adapted_profile.css"/>
+    <link rel="stylesheet" href="css/combined_latest.css"/>
+    <link rel="stylesheet" href="css/gamification.css" />
+    <link rel="stylesheet" href="css/referral.css"/>
     <link rel="icon" type="image/png" href="favicon.webp">
     <script src="https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.6.0/jszip.min.js"></script>
-
+    <meta name="keywords" content="Inpinity, Game Design, Game Development, Platform, Collaboration, Forum, Tools, GameDesign, AI Development, Games of future, programming, programs, python gui">
+    <meta name="author" content="Xpective">
+    <meta property="og:title" content="Inpinity - Collaboration">
+    <meta property="og:description" content="Collaborate with game developers, designers, and blockchain innovators. Join our ecosystem with Base, ToshiMart, and Uniswap.">
+    <meta property="og:image" content="logo_background.jpg">
+    <meta property="og:url" content="https://inpinity.online/collaboration.html">
+    <meta name="twitter:card" content="logo_background.webp">
+    <meta name="twitter:site" content="@unxpective">
+    <meta name="twitter:creator" content="@Inpinity1">
+    <meta name="theme-color" content="#FarbcodeIhrerWebsite">
+    <meta name="robots" content="index,follow">
+    <style>
+        /* Partners section */
+        .partners-section {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            border: 1px solid #444;
+        }
+        .partner-item {
+            text-align: center;
+            flex: 1 1 200px;
+        }
+        .partner-item a {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: #2a2a2a;
+            border: 1px solid gold;
+            border-radius: 40px;
+            color: gold;
+            font-weight: bold;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .partner-item a:hover {
+            background: gold;
+            color: black;
+            transform: scale(1.05);
+        }
+        .partner-item p {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: #ccc;
+        }
+        .guestbook-link {
+            display: inline-block;
+            margin: 2rem auto;
+            padding: 1rem 2rem;
+            background: gold;
+            color: black;
+            font-weight: bold;
+            border-radius: 40px;
+            text-decoration: none;
+            font-size: 1.2rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+        .guestbook-link:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px gold;
+        }
+    </style>
 </head>
-
 <body>
     <header>
         <nav>
             <ul>
-                <li><a aria-label="Startseite" href="index.html">Startseite</a></li>
-                <li><a aria-label="Dienstleistungen" href="features.html">Features</a></li>
+                <li><a aria-label="Home" href="index.html">Home</a></li>
+                <li><a aria-label="Services" href="services.html">Services</a></li>
                 <li><a aria-label="Game" href="game.html">Game</a></li>
                 <li><a aria-label="Forum" href="forum.html">Forum</a></li>
-                <li><a aria-label="Zusammenarbeit" href="collaboration.html">Zusammenarbeit</a></li>
-                <li><a aria-label="Registrieren" href="register.html">Registrieren</a></li>
-                <li><a aria-label="Über uns" href="about.html">Über uns</a></li>
+                <li><a aria-label="Collaboration" href="collaboration.html">Collaboration</a></li>
+                <li><a aria-label="Register" href="register.html">Register</a></li>
+                <li><a aria-label="About" href="about.html">About</a></li>
+                <li><a aria-label="Whitepaper" href="https://github.com/Xpective/InpinityPage/raw/3923cf22782286d60574c8ae9b92e693cb314215/Inpinity%20Whitepaper%20.pdf" target="_blank" rel="noopener">Whitepaper</a></li>
+                <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
+                <li><a aria-label="Guestbook" href="guestbook.html">Guestbook</a></li>
+                <div class="themeDots">
+                    <div class="dot light" title="Light Theme"></div>
+                    <div class="dot dark" title="Dark Theme"></div>
+                    <div class="dot basic" title="Basic Theme"></div>
+                </div>
             </ul>
         </nav>
-        <div class="themeDots">
-            <div class="dot light" title="Light Theme"></div>
-            <div class="dot dark" title="Dark Theme"></div>
-            <div class="dot basic" title="Basic Theme"></div>
-        </div>
+        <style>
+            .themeDots .dot {
+                display: inline-block;
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                margin: 5px;
+                cursor: pointer;
+                transition: transform 0.2s;
+            }
+            .themeDots .dot.light { background-color: #FFFFFF; }
+            .themeDots .dot.dark { background-color: #000000; }
+            .themeDots .dot.basic { background-color: var(--quinary-color); }
+            .themeDots .dot:hover { transform: scale(1.2); }
+        </style>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                document.querySelector('.themeDots .dot.light')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'light'));
+                document.querySelector('.themeDots .dot.dark')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'dark'));
+                document.querySelector('.themeDots .dot.basic')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'basic'));
+            });
+        </script>
     </header>
     <main>
         <section class="hero">
-            <h1>Entfesseln Sie das Potenzial der Zusammenarbeit.</h1>
-            <h2>Verbinden. Teilen. Wachsen.</h2>
+            <h1>Unlock the power of collaboration.</h1>
+            <h2>Connect. Share. Grow.</h2>
         </section>
+
+        <!-- Partners Section -->
         <section>
-            <p>In der Welt des Game-Designs und der Entwicklung ist Zusammenarbeit der Schlüssel zum Erfolg. Bei Inpinity glauben wir daran, eine Plattform zu bieten, die es Kreativen ermöglicht, zusammenzukommen, Ideen auszutauschen und gemeinsam zu wachsen. Hier sind einige Wege, wie Sie mitmachen können:</p>
-            <!-- Inhalt spezifisch zur Zusammenarbeit -->
+            <h2 style="text-align: center; color: gold;">Our Ecosystem Partners</h2>
+            <div class="partners-section">
+                <div class="partner-item">
+                    <a href="https://base.org/" target="_blank" rel="noopener">⚡ Base L2</a>
+                    <p>Scalable & secure L2</p>
+                </div>
+                <div class="partner-item">
+                    <a href="https://www.toshimart.xyz/" target="_blank" rel="noopener">🛒 ToshiMart</a>
+                    <p>Base native marketplace</p>
+                </div>
+                <div class="partner-item">
+                    <a href="https://uniswap.org/" target="_blank" rel="noopener">🦄 Uniswap</a>
+                    <p>Decentralized liquidity</p>
+                </div>
+            </div>
+            <p style="text-align: center; max-width: 700px; margin: 1rem auto;">
+                Inpinity is proud to collaborate with <strong>Base, ToshiMart, and Uniswap</strong> to bring you a seamless, secure, and community-driven ecosystem. 
+                These partnerships ensure deep liquidity, low‑cost transactions, and a robust foundation for our gaming and NFT platforms.
+            </p>
         </section>
-        <!-- Weitere Abschnitte spezifisch zur Zusammenarbeit -->
+
         <section>
-            <h2>Wie Sie teilnehmen können</h2>
+            <p>In the world of game design and development, collaboration is the key to success. At Inpinity, we believe in providing a platform that empowers creatives to come together, exchange ideas, and grow collectively. Here are some ways you can get involved:</p>
+        </section>
+
+        <section>
+            <h2>How to participate</h2>
             <ul>
-                <li>Projekte teilen und Feedback erhalten</li>
-                <li>Bei bestehenden Projekten mitwirken</li>
-                <li>Eigene Projekte starten und Mitstreiter finden</li>
+                <li>Share projects and receive feedback</li>
+                <li>Contribute to existing projects</li>
+                <li>Start your own projects and find collaborators</li>
             </ul>
         </section>
+
+        <!-- NFT creation section (unchanged) -->
         <section>
-            <h2>Erstelle dein eigenes NFT</h2>
+            <h2>Create your own NFT</h2>
+            <p>Upload a ZIP file containing layer folders (background, eyes, body, mouth, ears, hair, hat, details) with PNG images. A unique NFT will be generated.</p>
             <input type="file" id="zipFile" accept=".zip" />
-            <canvas id="nftCanvas" width="350" height="350" style="border:1px solid #000;"></canvas>
+            <canvas id="nftCanvas" width="350" height="350" style="border:1px solid gold; display: block; margin: 1rem auto;"></canvas>
             <script>
                 document.getElementById('zipFile').addEventListener('change', function() {
                     const file = this.files[0];
@@ -73,12 +201,12 @@
                     const canvas = document.getElementById('nftCanvas');
                     const ctx = canvas.getContext('2d');
 
-                    ctx.clearRect(0, 0, canvas.width, canvas.height); // Canvas leeren
+                    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
 
-                    // Festlegen der Reihenfolge der Layer
+                    // Define layer order
                     const layerOrder = ['background', 'eyes', 'body', 'mouth', 'ears', 'hair', 'hat', 'details'];
 
-                    // Durch jeden Layer iterieren und die entsprechenden Bilder zeichnen
+                    // Iterate through each layer and draw corresponding images
                     for (const layer of layerOrder) {
                         for (const [path, file] of Object.entries(zipContents.files)) {
                             if (!file.dir && path.startsWith(`${layer}/`) && path.endsWith('.png')) {
@@ -87,33 +215,41 @@
                                 const img = new Image();
                                 img.src = imgUrl;
                                 await new Promise((resolve) => img.onload = resolve);
-                                ctx.drawImage(img, 0, 0, canvas.width, canvas.height); // Bild zum Canvas hinzufügen
-                                URL.revokeObjectURL(imgUrl); // Nicht mehr benötigte URLs aufräumen
-                                break; // Annahme, dass nur ein Bild pro Layer verwendet wird.
+                                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                                URL.revokeObjectURL(imgUrl);
+                                break; // Assume only one image per layer
                             }
                         }
                     }
                 }
             </script>
         </section>
-    
-    <script defer src="main.js"></script>
-    <script defer src="/wallet.js"></script>
+
+        <!-- Link to Guestbook -->
+        <section style="text-align: center; margin: 3rem 0;">
+            <h2>Leave your mark</h2>
+            <p>Visit our <strong>Guestbook</strong> to sign your name, share a message, and become part of the Inpinity history – soon to be recorded on the Base blockchain.</p>
+            <a href="guestbook.html" class="guestbook-link">📖 Go to Guestbook</a>
+        </section>
+
         <section>
-            <h2>Kontakt für Zusammenarbeit</h2>
-            <!-- Kontaktformular oder Informationen -->
+            <h2>Contact for collaboration</h2>
+            <p>If you're interested in partnering with us or have a project idea, reach out at <a href="mailto:xpective@inpinity.online">xpective@inpinity.online</a> or join our <a href="https://discord.gg/95yj6Eg6" target="_blank" rel="noopener">Discord</a>.</p>
         </section>
     </main>
     
     <footer>
-        <p>© 2023 Inpinity. Alle Rechte vorbehalten.</p>
+        <p>© 2026 Inpinity. All rights reserved. Working with <a href="https://base.org/" target="_blank" rel="noopener" style="color: gold;">Base</a>, <a href="https://www.toshimart.xyz/" target="_blank" rel="noopener" style="color: gold;">ToshiMart</a> and <a href="https://uniswap.org/" target="_blank" rel="noopener" style="color: gold;">Uniswap</a>.</p>
         <div class="footer-links">
-            <a href="privacypolicy.html">Datenschutzrichtlinien</a>
-            <a href="termsofuse.html">Nutzungsbedingungen</a>
-            <a href="contact.html">Kontakt</a>
+            <a href="privacypolicy.html">Privacy Policy</a>
+            <a href="termsofuse.html">Terms of Use</a>
+            <a href="contact.html">Contact</a>
+            <a href="faq.html">FAQ</a>
+            <a href="guestbook.html">Guestbook</a>
         </div>
     </footer>
     
+    <script defer src="main.js"></script>
+    <script defer src="/wallet.js"></script>
 </body>
-
 </html>
