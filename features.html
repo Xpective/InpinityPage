@@ -159,6 +159,18 @@
             background: gold;
             color: black;
         }
+        .warning-note {
+            background: #332211;
+            border: 1px solid #ffaa00;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 2rem auto;
+            max-width: 800px;
+            text-align: center;
+        }
+        .warning-note a {
+            color: gold;
+        }
     </style>
 </head>
 <body>
@@ -209,15 +221,19 @@
     </header>
 
     <main>
+        <!-- Warning about ToshiMart -->
+        <div class="warning-note">
+            <p>⚠️ <strong>Important Update:</strong> We have withdrawn from ToshiMart due to phishing concerns. Our new INPI token is <code>0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</code>. All official contracts are listed on our <a href="index.html">homepage</a>. Do not interact with the old token or ToshiMart pools.</p>
+        </div>
+
         <section class="hero">
             <h1 class="hero-title">🚀 Inpinity Features</h1>
             <h2>Discover powerful tools that blend game development with blockchain technology.</h2>
         </section>
 
-        <!-- Partners Section -->
+        <!-- Partners Section (ToshiMart entfernt) -->
         <div class="partners-section">
             <div class="partner-item"><a href="https://base.org/" target="_blank">⚡ Base L2</a></div>
-            <div class="partner-item"><a href="https://www.toshimart.xyz/" target="_blank">🛒 ToshiMart</a></div>
             <div class="partner-item"><a href="https://uniswap.org/" target="_blank">🦄 Uniswap</a></div>
         </div>
 
@@ -282,7 +298,7 @@
         <div id="stakingModal" class="modal">
             <div class="modal-content">
                 <h2>Staking Dashboard</h2>
-                <p>🔥 Coming in Q2 2026! Stake your $INPI and earn rewards. Stay tuned.</p>
+                <p>🔥 Coming in Q2 2026! Stake your $INPI (new token) and earn rewards. Stay tuned.</p>
                 <button class="close" onclick="hideModal('stakingModal')">Close</button>
             </div>
         </div>
@@ -298,7 +314,7 @@
         <div id="advertModal" class="modal">
             <div class="modal-content">
                 <h2>$ADVERT Portal</h2>
-                <p>📅 Planned for Q2 2027. Earn $ADVERT by holding $INPI and use it to promote your projects.</p>
+                <p>📅 Planned for Q2 2027. Earn $ADVERT by holding $INPI (new token) and use it to promote your projects.</p>
                 <button class="close" onclick="hideModal('advertModal')">Close</button>
             </div>
         </div>
@@ -306,7 +322,7 @@
         <div id="walletModal" class="modal">
             <div class="modal-content">
                 <h2>Wallet Analytics</h2>
-                <p>🔌 Connect your wallet on the <a href="profile.html" style="color:gold;">Profile page</a> to see your balances and transaction history.</p>
+                <p>🔌 Connect your wallet on the <a href="profile.html" style="color:gold;">Profile page</a> to see your balances and transaction history. Make sure you're using the new INPI token.</p>
                 <button class="close" onclick="hideModal('walletModal')">Close</button>
             </div>
         </div>
@@ -320,7 +336,7 @@
     </main>
 
     <footer>
-        <p>© 2026 Inpinity. All rights reserved. Working with <a href="https://base.org/" target="_blank" style="color: gold;">Base</a>, <a href="https://www.toshimart.xyz/" target="_blank" style="color: gold;">ToshiMart</a> and <a href="https://uniswap.org/" target="_blank" style="color: gold;">Uniswap</a>.</p>
+        <p>© 2026 Inpinity. All rights reserved. Working with <a href="https://base.org/" target="_blank" style="color: gold;">Base</a> and <a href="https://uniswap.org/" target="_blank" style="color: gold;">Uniswap</a>.</p>
         <div class="footer-links">
             <a href="privacypolicy.html">Privacy Policy</a>
             <a href="termsofuse.html">Terms of Use</a>
