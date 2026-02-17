@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 
@@ -14,7 +13,17 @@
     <link rel="stylesheet" href="css/light.css"  />
     <link rel="stylesheet" href="css/responsive.css"  />
     <link rel="stylesheet" href="css/color.css" />
-    <script defer="" src="main.js"></script>
+    <link rel="stylesheet" href="css/adapted_about_us.css" />
+    <link rel="stylesheet" href="css/adapted_advertisements.css" />
+    <link rel="stylesheet" href="css/adapted_combined.css"/>
+    <link rel="stylesheet" href="css/adapted_comunity_guidelines.css" />
+    <link rel="stylesheet" href="css/adapted_course_feedback.css" />
+    <link rel="stylesheet" href="css/adapted_mft_marketplace.css"/>
+    <link rel="stylesheet" href="css/adapted_profile.css"/>
+    <link rel="stylesheet" href="css/combined_latest.css"/>
+    <link rel="stylesheet" href="css/gamification.css" />
+    <link rel="stylesheet" href="css/referral.css"/>
+    <script defer src="main.js"></script>
     <link rel="icon" type="image/png" href="favicon.webp">
     <meta content="Inpinity, Game Design, Game Development, Platform, Collaboration, Forum, Tools, GameDesign, AI Development, Games of future, programming, programs, python gui" name="keywords">
     <meta content="Inpinity Team" name="Xpective">
@@ -26,12 +35,27 @@
 
     <!-- Twitter Cards -->
     <meta name="twitter:card" content="logo_background.webp">
-    <meta name="twitter:site" content="@https://x.com/inpinity1?s=21&t=-FyWwqonfIU7u9houJoQAw">
+    <meta name="twitter:site" content="@unxpective">
     <meta name="twitter:creator" content="@Inpinity1">
     
     <!-- Additional Tags -->
     <meta name="theme-color" content="#FarbcodeIhrerWebsite">
     <meta name="robots" content="index,follow">
+
+    <style>
+        .warning-note {
+            background: #332211;
+            border: 1px solid #ffaa00;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 2rem auto;
+            max-width: 800px;
+            text-align: center;
+        }
+        .warning-note a {
+            color: gold;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -45,6 +69,10 @@
                 <li><a aria-label="Register" href="register.html">Register</a></li>
                 <li><a aria-label="About us" href="about.html">About</a></li>
                 <li><a aria-label="Whitepaper" href="https://github.com/Xpective/InpinityPage/raw/3923cf22782286d60574c8ae9b92e693cb314215/Inpinity%20Whitepaper%20.pdf" target="_blank" rel="noopener">Whitepaper</a></li>
+                <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
+                <li><a aria-label="Guestbook" href="guestbook.html">Guestbook</a></li>
+                <li><a aria-label="Advertising" href="advertising.html">Advertising</a></li>
+                <li><a aria-label="Profile" href="profile.html">Profile</a></li>
                 <div class="themeDots">
                     <div class="dot light" title="Light Theme"></div>
                     <div class="dot dark" title="Dark Theme"></div>
@@ -62,15 +90,15 @@
                     }
                 
                     .themeDots .dot.light {
-                        background-color: #FFFFFF; /* White for Light Theme */
+                        background-color: #FFFFFF;
                     }
                 
                     .themeDots .dot.dark {
-                        background-color: #000000; /* Black for Dark Theme */
+                        background-color: #000000;
                     }
                 
                     .themeDots .dot.basic {
-                        background-color: var(--quinary-color); /* Gold color for Basic Theme */
+                        background-color: var(--quinary-color);
                     }
                 
                     .themeDots .dot:hover {
@@ -78,7 +106,6 @@
                     }
                 </style>
                 <script>
-                    // JavaScript to Change the Theme based on Dot Click
                     document.addEventListener('DOMContentLoaded', function() {
                         document.querySelector('.themeDots .dot.light')?.addEventListener('click', function() {
                             document.body.setAttribute('data-theme', 'light');
@@ -93,17 +120,21 @@
                         });
                     });
                 </script>
-            
             </ul>
         </nav>
     </header>
     <main>
+        <!-- Warning about ToshiMart -->
+        <div class="warning-note">
+            <p>⚠️ <strong>Important Update:</strong> We have withdrawn from ToshiMart due to phishing concerns. Our new INPI token is <code>0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</code>. All official contracts are listed on our <a href="index.html">homepage</a>. Do not interact with the old token or ToshiMart pools.</p>
+        </div>
+
         <h1>Contact</h1>
 
         <h2>We’d love to hear from you!</h2>
         <p>If you have any questions, comments, or inquiries, feel free to contact us. Simply fill out the form below or use our contact information.</p>
 
-        <!-- Contact Information (like in whitepaper) -->
+        <!-- Contact Information -->
         <h2>Contact Information</h2>
         <table style="width: auto; border-collapse: collapse; margin-bottom: 2rem;">
             <tr>
@@ -154,23 +185,16 @@
         </p>
     </main>
     <footer>
-        <p>© 2026 Inpinity. All rights reserved.</p>
-        <a href="privacypolicy.html">Privacy Policy</a>
-        <a href="termsofuse.html">Terms of Use</a>
-        <a href="contact.html">Contact</a>
+        <p>© 2026 Inpinity. All rights reserved. Working with <a href="https://base.org/" target="_blank" rel="noopener" style="color: gold;">Base</a> and <a href="https://uniswap.org/" target="_blank" rel="noopener" style="color: gold;">Uniswap</a>.</p>
+        <div class="footer-links">
+            <a href="privacypolicy.html">Privacy Policy</a>
+            <a href="termsofuse.html">Terms of Use</a>
+            <a href="contact.html">Contact</a>
+            <a href="faq.html">FAQ</a>
+            <a href="guestbook.html">Guestbook</a>
+            <a href="advertising.html">Advertising</a>
+            <a href="profile.html">Profile</a>
+        </div>
     </footer>
 </body>
 </html>
-```
-
-Änderungen im Überblick:
-
-· Sprache: Komplett auf Englisch umgestellt.
-· Navigation: Whitepaper-Link hinzugefügt.
-· Kontaktdaten: Tabelle mit E-Mail, Discord, Twitter, Telegram, GitHub – basierend auf den Angaben aus dem Whitepaper.
-· Social Media Links: Entsprechend aktualisiert (Facebook entfernt, da nicht genannt; Twitter auf @unxpective gesetzt).
-· Footer: Jahr auf 2026, Links übersetzt.
-· Meta-Tags: Englisch und auf die aktuellen Daten angepasst.
-· Formular: Action bleibt submit_form.php (muss ggf. angepasst werden).
-
-Die Kontaktdaten sind nun übersichtlich und entsprechen dem Stil des Whitepapers.
