@@ -272,6 +272,18 @@
             color: #ffaa00;
             font-weight: bold;
         }
+        .warning-note {
+            background: #332211;
+            border: 1px solid #ffaa00;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 2rem auto;
+            max-width: 800px;
+            text-align: center;
+        }
+        .warning-note a {
+            color: gold;
+        }
     </style>
 </head>
 <body>
@@ -322,13 +334,17 @@
     </header>
 
     <main>
+        <!-- Warning about ToshiMart -->
+        <div class="warning-note">
+            <p>⚠️ <strong>Important Update:</strong> We have withdrawn from ToshiMart due to phishing concerns. Our new INPI token is <code>0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</code>. All official contracts are listed on our <a href="index.html">homepage</a>. Do not interact with the old token or ToshiMart pools.</p>
+        </div>
+
         <div class="guestbook-container">
             <h1>📖 Immortal Guestbook</h1>
 
-            <!-- Partners Section -->
+            <!-- Partners Section (ToshiMart removed) -->
             <div class="partners-section">
                 <div class="partner-item"><a href="https://base.org/" target="_blank" rel="noopener">⚡ Base L2</a></div>
-                <div class="partner-item"><a href="https://www.toshimart.xyz/" target="_blank" rel="noopener">🛒 ToshiMart</a></div>
                 <div class="partner-item"><a href="https://uniswap.org/" target="_blank" rel="noopener">🦄 Uniswap</a></div>
             </div>
 
@@ -345,7 +361,7 @@
 
             <!-- Info Note -->
             <div class="info-note">
-                <strong>✍️ Leave your immortal mark!</strong> To prevent spam and support development, each guestbook entry requires a small fee of <strong>1 $INPI</strong>. This fee goes directly to the team wallet and helps fund the future of Inpinity. Your entry will be forever recorded on the Base blockchain in the next version. 
+                <strong>✍️ Leave your immortal mark!</strong> To prevent spam and support development, each guestbook entry requires a small fee of <strong>1 $INPI</strong> (new token). This fee goes directly to the team wallet and helps fund the future of Inpinity. Your entry will be forever recorded on the Base blockchain in the next version. 
                 <span style="color: gold;">Be part of history!</span>
             </div>
 
@@ -367,7 +383,8 @@
                     </div>
 
                     <div class="fee-notice">
-                        <strong>⚠️ Fee: 1 $INPI</strong> will be deducted from your wallet. Make sure you have at least 1 $INPI and are connected to the correct network (Base / Ethereum).
+                        <strong>⚠️ Fee: 1 $INPI</strong> (new token) will be deducted from your wallet. Make sure you have at least 1 $INPI and are connected to the correct network (Base / Ethereum).<br>
+                        Old INPI token (<code>0x15ac...</code>) is not accepted.
                     </div>
 
                     <button type="submit" id="submitEntryBtn" class="submit-btn" disabled>💾 Sign Guestbook (1 $INPI fee)</button>
@@ -386,7 +403,7 @@
     </main>
 
     <footer>
-        <p>© 2026 Inpinity. All rights reserved. Working with <a href="https://base.org/" target="_blank" rel="noopener" style="color: gold;">Base</a>, <a href="https://www.toshimart.xyz/" target="_blank" rel="noopener" style="color: gold;">ToshiMart</a> and <a href="https://uniswap.org/" target="_blank" rel="noopener" style="color: gold;">Uniswap</a>.</p>
+        <p>© 2026 Inpinity. All rights reserved. Working with <a href="https://base.org/" target="_blank" rel="noopener" style="color: gold;">Base</a> and <a href="https://uniswap.org/" target="_blank" rel="noopener" style="color: gold;">Uniswap</a>.</p>
         <div class="footer-links">
             <a href="privacypolicy.html">Privacy Policy</a>
             <a href="termsofuse.html">Terms of Use</a>
@@ -401,7 +418,7 @@
     <script>
         (function() {
             // ========== Configuration ==========
-            const INPI_CONTRACT_ADDRESS = '0x15ac8e2c38f0c644123e61011e7113de56038453';
+            const INPI_CONTRACT_ADDRESS = '0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D'; // new token
             const TEAM_WALLET = '0xcbc1cf1159b4db5b407684fde0e9e635e9e3726f';
             const REQUIRED_FEE = 1; // 1 INPI
 
