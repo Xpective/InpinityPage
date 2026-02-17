@@ -23,26 +23,21 @@
   <link rel="stylesheet" href="css/gamification.css" />
   <link rel="stylesheet" href="css/referral.css"/>
 
-  <!-- main.js remains if needed -->
   <script defer src="main.js"></script>
-
   <link rel="icon" type="image/png" href="favicon.webp">
-  <meta content="Inpinity, Game Design, Game Development, Platform, Collaboration, Forum, Tools, GameDesign, AI Development, Games of future, programming, programs, python gui, Base, ToshiMart, Uniswap" name="keywords">
+  <meta content="Inpinity, Game Design, Game Development, Platform, Collaboration, Forum, Tools, GameDesign, AI Development, Games of future, programming, programs, python gui, Base, Uniswap" name="keywords">
   <meta content="Inpinity Team" name="Xpective">
   <meta property="og:title" content="Inpinity - The Community for Game Design and Blockchain">
   <meta property="og:description" content="Exchange designs, knowledge and experience in programming and game design. Become part of a growing community building the future of gaming on Base.">
   <meta property="og:image" content="logo_background.jpg">
   <meta property="og:url" content="https://inpinity.online">
-  <!-- Twitter Cards -->
   <meta name="twitter:card" content="logo_background.webp">
   <meta name="twitter:site" content="@unxpective">
   <meta name="twitter:creator" content="@Inpinity1">
-  <!-- Additional Tags -->
   <meta name="theme-color" content="#FarbcodeIhrerWebsite">
   <meta name="robots" content="index,follow">
 
   <style>
-    /* Partners section styling */
     .partners-section {
       display: flex;
       justify-content: center;
@@ -70,11 +65,112 @@
       color: black;
       transform: scale(1.05);
     }
+
+    /* Tokenomics section */
+    .tokenomics-section {
+      max-width: 1000px;
+      margin: 3rem auto;
+      padding: 2rem;
+      background: #1a1a1a;
+      border: 1px solid gold;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(255,215,0,0.2);
+    }
+    .tokenomics-section h2 {
+      color: gold;
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 2rem;
+    }
+    .token-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    .token-card {
+      background: #222;
+      border-left: 4px solid gold;
+      padding: 1.2rem;
+      border-radius: 8px;
+    }
+    .token-card h3 {
+      color: gold;
+      margin-top: 0;
+      margin-bottom: 0.8rem;
+      font-size: 1.3rem;
+    }
+    .token-card p {
+      margin: 0.3rem 0;
+      color: #ccc;
+    }
+    .token-card .address {
+      font-family: monospace;
+      background: #111;
+      padding: 0.3rem 0.5rem;
+      border-radius: 4px;
+      word-break: break-all;
+      color: #aaa;
+      border: 1px solid #333;
+    }
+    .tokenomics-chart {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 2rem;
+      margin: 2rem 0 1rem;
+    }
+    .chart-item {
+      text-align: center;
+      min-width: 120px;
+    }
+    .chart-item .percent {
+      font-size: 2rem;
+      font-weight: bold;
+      color: gold;
+      line-height: 1.2;
+    }
+    .chart-item .label {
+      color: #ccc;
+      font-size: 0.9rem;
+    }
+    .presale-status {
+      background: #2a2a2a;
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 2rem 0 1rem;
+      text-align: center;
+    }
+    .presale-status .live-badge {
+      background: #00aa00;
+      color: white;
+      padding: 0.2rem 1rem;
+      border-radius: 20px;
+      font-weight: bold;
+      display: inline-block;
+      margin-bottom: 0.5rem;
+    }
+    .presale-status .time-info {
+      color: gold;
+      font-weight: bold;
+    }
+    .warning-box {
+      background: #332211;
+      border: 1px solid #ffaa00;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+      text-align: center;
+    }
+    .warning-box h3 {
+      color: #ffaa00;
+      margin-top: 0;
+    }
   </style>
 </head>
 
 <body>
-  <!-- Navigation Bar -->
   <header>
     <nav>
       <ul>
@@ -122,7 +218,6 @@
         <h2>The best platform for game developers. Create, Share, Grow.</h2>
       </div>
 
-      <!-- Token button -->
       <div class="button-wrapper">
         <a class="cta-button" href="https://inpinity.online/token/" aria-label="Go to INPI Token (Presale & Claim)" rel="noopener">
           Go to INPI Token (Presale &amp; Claim)
@@ -130,13 +225,70 @@
       </div>
     </section>
 
-    <!-- Partners Section -->
+    <!-- Partners Section (ToshiMart entfernt) -->
     <section>
       <div class="partners-section">
         <div class="partner-item"><a href="https://base.org/" target="_blank" rel="noopener">⚡ Base L2</a></div>
-        <div class="partner-item"><a href="https://www.toshimart.xyz/" target="_blank" rel="noopener">🛒 ToshiMart</a></div>
         <div class="partner-item"><a href="https://uniswap.org/" target="_blank" rel="noopener">🦄 Uniswap</a></div>
       </div>
+    </section>
+
+    <!-- Hinweis zu ToshiMart -->
+    <section>
+      <div class="warning-box">
+        <h3>⚠️ Important Update Regarding ToshiMart</h3>
+        <p>We have withdrawn our collaboration with ToshiMart due to <strong>phishing suspicions</strong> on their platform. The old INPI token (address <code>0x15ac8e2c38f0c644123e61011e7113de56038453</code>) and any pools associated with ToshiMart are no longer safe. Please do not interact with ToshiMart or the old token. All official Inpinity contracts are listed below.</p>
+      </div>
+    </section>
+
+    <!-- New Tokenomics & Ecosystem Section -->
+    <section class="tokenomics-section">
+      <h2>📊 Our Tokenomics & Ecosystem Contracts</h2>
+
+      <div class="tokenomics-chart">
+        <div class="chart-item"><span class="percent">20%</span><div class="label">Liquidity (Locked till 3033)</div></div>
+        <div class="chart-item"><span class="percent">10%</span><div class="label">Team (Vesting)</div></div>
+        <div class="chart-item"><span class="percent">15%</span><div class="label">Staking</div></div>
+        <div class="chart-item"><span class="percent">5%</span><div class="label">Events & Drops</div></div>
+        <div class="chart-item"><span class="percent">50%</span><div class="label">Reserve & Ecosystem</div></div>
+      </div>
+
+      <div class="presale-status">
+        <span class="live-badge">🔴 PRESALE LIVE</span>
+        <p>Until <span class="time-info">March 5, 2026, 20:20 UTC</span><br>
+        Rate: <strong>10 INPI per 1 ETH</strong> | Min: 0.01 ETH | Max: 2 ETH</p>
+      </div>
+
+      <div class="token-grid">
+        <div class="token-card">
+          <h3>🪙 INPI Token (New)</h3>
+          <p><strong>Address:</strong></p>
+          <div class="address">0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</div>
+          <p>Total Supply: 1,000,000,000 INPI<br>Decimals: 18</p>
+        </div>
+        <div class="token-card">
+          <h3>📈 Presale</h3>
+          <p><strong>Address:</strong></p>
+          <div class="address">0xBdca2af387F13E3d371c1786c333c28E6a3b32e3</div>
+          <p><a href="https://basescan.org/address/0xBdca2af387F13E3d371c1786c333c28E6a3b32e3#code" target="_blank" style="color:gold;">Verified on BaseScan</a></p>
+        </div>
+        <div class="token-card">
+          <h3>⏳ Team Vesting</h3>
+          <p><strong>Address:</strong></p>
+          <div class="address">0x504b505Bd60C6A660A0ED38519eD6e17d8A9fc14</div>
+          <p>Cliff 1 year, vesting 3 years</p>
+        </div>
+        <div class="token-card">
+          <h3>⚡ Staking</h3>
+          <p><strong>Address:</strong></p>
+          <div class="address">0xF8c74E4fEe036C91228268E804f83eD8f55a6524</div>
+          <p>Reward rate: 1.585e18 per second (150M over 3 years)</p>
+        </div>
+      </div>
+
+      <p style="text-align:center; margin-top:2rem;">
+        ⚠️ The old INPI token (<code>0x15ac8e2c38f0c644123e61011e7113de56038453</code>) is deprecated. Do not use it.
+      </p>
     </section>
 
     <section>
@@ -188,7 +340,7 @@
   </main>
 
   <footer>
-    <p>© 2026 Inpinity. All rights reserved. Working with <a href="https://base.org/" target="_blank" rel="noopener" style="color: gold;">Base</a>, <a href="https://www.toshimart.xyz/" target="_blank" rel="noopener" style="color: gold;">ToshiMart</a> and <a href="https://uniswap.org/" target="_blank" rel="noopener" style="color: gold;">Uniswap</a>.</p>
+    <p>© 2026 Inpinity. All rights reserved. Working with <a href="https://base.org/" target="_blank" rel="noopener" style="color: gold;">Base</a> and <a href="https://uniswap.org/" target="_blank" rel="noopener" style="color: gold;">Uniswap</a>.</p>
     <div class="footer-links">
       <a href="privacypolicy.html">Privacy Policy</a>
       <a href="termsofuse.html">Terms of Use</a>
