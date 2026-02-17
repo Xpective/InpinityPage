@@ -89,6 +89,18 @@
             0% { bottom: -600%; }
             100% { bottom: 100%; }
         }
+        .warning-note {
+            background: #332211;
+            border: 1px solid #ffaa00;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 2rem auto;
+            max-width: 800px;
+            text-align: center;
+        }
+        .warning-note a {
+            color: gold;
+        }
     </style>
 </head>
 <body>
@@ -104,6 +116,9 @@
                 <li><a aria-label="About" href="about.html">About</a></li>
                 <li><a aria-label="Whitepaper" href="https://github.com/Xpective/InpinityPage/raw/3923cf22782286d60574c8ae9b92e693cb314215/Inpinity%20Whitepaper%20.pdf" target="_blank" rel="noopener">Whitepaper</a></li>
                 <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
+                <li><a aria-label="Guestbook" href="guestbook.html">Guestbook</a></li>
+                <li><a aria-label="Advertising" href="advertising.html">Advertising</a></li>
+                <li><a aria-label="Profile" href="profile.html">Profile</a></li>
                 <div class="themeDots">
                     <div class="dot light" title="Light Theme"></div>
                     <div class="dot dark" title="Dark Theme"></div>
@@ -128,13 +143,17 @@
         </style>
         <script>
             document.addEventListener('DOMContentLoaded', () => {
-                // Theme switcher
                 document.querySelector('.themeDots .dot.light')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'light'));
                 document.querySelector('.themeDots .dot.dark')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'dark'));
                 document.querySelector('.themeDots .dot.basic')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'basic'));
             });
         </script>
     </header>
+
+    <!-- Optional: Kurze Warnung oberhalb des TVs -->
+    <div class="warning-note">
+        <p>⚠️ <strong>Important:</strong> We have withdrawn from ToshiMart due to phishing concerns. Our new INPI token is <code>0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</code>. All official contracts are listed on our <a href="index.html">homepage</a>. Do not interact with the old token or ToshiMart pools.</p>
+    </div>
 
     <main style="display: flex; justify-content: center; align-items: center; min-height: 70vh;">
         <div id="tv-container">
@@ -172,19 +191,32 @@
                     Our special focus on game design makes Inpinity.Online the perfect platform for anyone intrigued by this realm.<br>
                     United, we have the power to achieve greatness.<br>
                     As we strive for new heights, even Elon's rockets might find a renewed purpose.<br>
-                    September 2023 marks the beginning of an exciting journey.
+                    September 2023 marked the beginning of an exciting journey.<br><br>
+                    ---<br>
+                    <span style="color: gold;">Recent Update (Feb 2026):</span><br>
+                    We have withdrawn our collaboration with ToshiMart due to phishing suspicions.<br>
+                    A new, independent INPI token has been launched on Base, with fully transparent tokenomics:<br>
+                    • 20% Liquidity (locked till 3033)<br>
+                    • 10% Team (vesting)<br>
+                    • 15% Staking<br>
+                    • 5% Events & Drops<br>
+                    • 50% Reserve & Ecosystem<br><br>
+                    All official contracts are verifiable on BaseScan. We now operate solely on Base and Uniswap.
                 </div>
             </div>
         </div>
     </main>
 
     <footer>
-        <p>© 2026 Inpinity. All rights reserved.</p>
+        <p>© 2026 Inpinity. All rights reserved. Working with <a href="https://base.org/" target="_blank" style="color: gold;">Base</a> and <a href="https://uniswap.org/" target="_blank" style="color: gold;">Uniswap</a>.</p>
         <div class="footer-links">
             <a href="privacypolicy.html">Privacy Policy</a>
             <a href="termsofuse.html">Terms of Use</a>
             <a href="contact.html">Contact</a>
             <a href="faq.html">FAQ</a>
+            <a href="guestbook.html">Guestbook</a>
+            <a href="advertising.html">Advertising</a>
+            <a href="profile.html">Profile</a>
         </div>
     </footer>
 </body>
