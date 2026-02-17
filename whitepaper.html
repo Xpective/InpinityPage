@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <meta content="Inpinity - Official Whitepaper" name="description" />
+  <title>Inpinity - Whitepaper</title>
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/dark.css" />
+  <link rel="stylesheet" href="css/light.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+  <link rel="stylesheet" href="css/color.css" />
+  <link rel="stylesheet" href="css/adapted_about_us.css" />
+  <link rel="stylesheet" href="css/adapted_advertisements.css" />
+  <link rel="stylesheet" href="css/adapted_combined.css"/>
+  <link rel="stylesheet" href="css/adapted_comunity_guidelines.css" />
+  <link rel="stylesheet" href="css/adapted_course_feedback.css" />
+  <link rel="stylesheet" href="css/adapted_mft_marketplace.css"/>
+  <link rel="stylesheet" href="css/adapted_profile.css"/>
+  <link rel="stylesheet" href="css/combined_latest.css"/>
+  <link rel="stylesheet" href="css/gamification.css" />
+  <link rel="stylesheet" href="css/referral.css"/>
+  <script defer src="main.js"></script>
+  <link rel="icon" type="image/png" href="favicon.webp">
+  <meta content="Inpinity, Game Design, Game Development, Platform, Collaboration, Forum, Tools, GameDesign, AI Development, Games of future, programming, programs, python gui" name="keywords">
+  <meta content="Inpinity Team" name="Xpective">
+  <meta property="og:title" content="Inpinity - Whitepaper">
+  <meta property="og:description" content="Official Whitepaper of Inpinity – a decentralized gaming ecosystem on Base.">
+  <meta property="og:image" content="logo_background.jpg">
+  <meta property="og:url" content="https://inpinity.online/whitepaper.html">
+  <meta name="twitter:card" content="logo_background.webp">
+  <meta name="twitter:site" content="@unxpective">
+  <meta name="twitter:creator" content="@Inpinity1">
+  <meta name="theme-color" content="#FarbcodeIhrerWebsite">
+  <meta name="robots" content="index,follow">
+  <style>
+    /* Whitepaper specific styling */
+    .whitepaper-container {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background: rgba(20,20,20,0.9);
+      border: 1px solid gold;
+      border-radius: 8px;
+      color: #eee;
+      line-height: 1.6;
+    }
+    .whitepaper-container h1, .whitepaper-container h2, .whitepaper-container h3 {
+      color: gold;
+      margin-top: 2rem;
+    }
+    .whitepaper-container h1:first-of-type {
+      margin-top: 0;
+      text-align: center;
+      font-size: 2.5rem;
+    }
+    .whitepaper-container table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+    }
+    .whitepaper-container th, .whitepaper-container td {
+      border: 1px solid #444;
+      padding: 0.5rem;
+      text-align: left;
+    }
+    .whitepaper-container th {
+      background: #222;
+      color: gold;
+    }
+    .whitepaper-container a {
+      color: gold;
+      text-decoration: underline;
+    }
+    .whitepaper-container .warning-note {
+      background: #332211;
+      border: 1px solid #ffaa00;
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 1rem 0;
+    }
+    .whitepaper-container .version {
+      text-align: right;
+      font-style: italic;
+      color: #aaa;
+      border-top: 1px solid #444;
+      padding-top: 1rem;
+      margin-top: 2rem;
+    }
+    .whitepaper-container ul {
+      margin: 1rem 0;
+      padding-left: 2rem;
+    }
+    .whitepaper-container li {
+      margin: 0.5rem 0;
+    }
+    .whitepaper-container .address {
+      font-family: monospace;
+      background: #111;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      color: #ccc;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <ul>
+        <li><a aria-label="Home" href="index.html">Home</a></li>
+        <li><a aria-label="Features" href="features.html">Features</a></li>
+        <li><a aria-label="Game" href="game.html">Game</a></li>
+        <li><a aria-label="Forum" href="forum.html">Forum</a></li>
+        <li><a aria-label="Collaboration" href="collaboration.html">Collaboration</a></li>
+        <li><a aria-label="Register" href="register.html">Register</a></li>
+        <li><a aria-label="About" href="about.html">About</a></li>
+        <li><a aria-label="Whitepaper" href="whitepaper.html">Whitepaper</a></li>
+        <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
+        <li><a aria-label="Guestbook" href="guestbook.html">Guestbook</a></li>
+        <li><a aria-label="Advertising" href="advertising.html">Advertising</a></li>
+        <li><a aria-label="Profile" href="profile.html">Profile</a></li>
+        <li><a aria-label="Staking" href="staking.html">Staking</a></li>
+        <div class="themeDots">
+          <div class="dot light" title="Light Theme"></div>
+          <div class="dot dark" title="Dark Theme"></div>
+          <div class="dot basic" title="Basic Theme"></div>
+        </div>
+      </ul>
+    </nav>
+    <style>
+      .themeDots .dot {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        margin: 5px;
+        cursor: pointer;
+        transition: transform 0.2s;
+      }
+      .themeDots .dot.light { background-color: #FFFFFF; }
+      .themeDots .dot.dark { background-color: #000000; }
+      .themeDots .dot.basic { background-color: var(--quinary-color); }
+      .themeDots .dot:hover { transform: scale(1.2); }
+    </style>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        document.querySelector('.themeDots .dot.light')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'light'));
+        document.querySelector('.themeDots .dot.dark')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'dark'));
+        document.querySelector('.themeDots .dot.basic')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'basic'));
+      });
+    </script>
+  </header>
+
+  <main>
+    <div class="whitepaper-container">
+      <h1>Whitepaper: Inpinity</h1>
+      <p class="version"><strong>Version 2.0 – February 2026</strong></p>
+
+      <h2>1. Introduction</h2>
+      <p>Inpinity is more than just another cryptocurrency token. We are a decentralized ecosystem bridging the gap between <strong>blockchain technology, gaming, and digital advertising</strong>. After a necessary migration away from a compromised launch partner (ToshiMart), we have re-established Inpinity on a foundation of complete transparency and community trust. Our goal is to create a sustainable and interactive platform where users can not only play but also earn rewards and actively participate in the project's governance.</p>
+      <p>Founded by the <strong>"Xpective"</strong> team, Inpinity combines innovation with a community-first approach. The token <strong>$INPI</strong> (new contract) is the core of this universe.</p>
+
+      <h2>2. Project Overview</h2>
+      <table>
+        <tr><th>Project Name</th><td>Inpinity</td></tr>
+        <tr><th>Token Ticker</th><td>$INPI</td></tr>
+        <tr><th>Blockchain</th><td>Base (Ethereum L2)</td></tr>
+        <tr><th>Contract Address (NEW)</th><td class="address">0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</td></tr>
+        <tr><th>Old Contract (Deprecated)</th><td class="address">0x15ac8e2c38f0c644123e61011e7113de56038453</td></tr>
+        <tr><th>Official Website</th><td><a href="https://inpinity.online">https://inpinity.online</a></td></tr>
+        <tr><th>Community</th><td>Twitter: <a href="https://twitter.com/unxpective">@unxpective</a><br>Discord: <a href="https://discord.gg/95yj6Eg6">https://discord.gg/95yj6Eg6</a><br>Telegram: <a href="https://t.me/+1hl5Ou-pGChhYmUy">https://t.me/+1hl5Ou-pGChhYmUy</a></td></tr>
+        <tr><th>Development</th><td>GitHub: <a href="https://github.com/Xpective">Xpective</a></td></tr>
+      </table>
+
+      <h2>3. Tokenomics</h2>
+      <p>The economic model of Inpinity is designed for long-term growth and stability. The total supply is fixed at <strong>1,000,000,000 (1 billion) $INPI</strong>.</p>
+
+      <h3>3.1 Supply Distribution</h3>
+      <table>
+        <tr><th>Category</th><th>Percentage</th><th>Amount ($INPI)</th><th>Description</th></tr>
+        <tr><td>Liquidity</td><td>20%</td><td>200,000,000</td><td>Locked until <strong>23 October 3033</strong> in a time‑lock contract.</td></tr>
+        <tr><td>Team & Advisors</td><td>10%</td><td>100,000,000</td><td>Vesting: 1‑year cliff, then linear over 3 years.</td></tr>
+        <tr><td>Staking Rewards</td><td>15%</td><td>150,000,000</td><td>Reserved for staking incentives.</td></tr>
+        <tr><td>Events & Airdrops</td><td>5%</td><td>50,000,000</td><td>For community growth, marketing, and giveaways.</td></tr>
+        <tr><td>Reserve & Ecosystem</td><td>50%</td><td>500,000,000</td><td>Held by the team for future development, partnerships, and strategic initiatives. (150M of this will be sold in the presale – see section 4.)</td></tr>
+      </table>
+
+      <h3>3.2 Locks and Transparency</h3>
+      <ul>
+        <li><strong>Liquidity (20%)</strong>: The LP tokens from the initial Uniswap V4 pool will be locked in a dedicated smart contract until <strong>23 October 3033</strong>, guaranteeing that no one can remove the liquidity before that date.</li>
+        <li><strong>Team Tokens (10%)</strong>: Subject to a vesting schedule with a 1‑year cliff and 3‑year linear release. This ensures alignment with long‑term project success.</li>
+        <li><strong>Staking Rewards</strong>: The 150M tokens allocated for staking are held in the staking contract and will be distributed over time according to the reward rate.</li>
+        <li><strong>Reserve</strong>: The remaining 50% is under multisig control and will be used transparently for the growth of the ecosystem (e.g., additional liquidity, exchange listings, grants).</li>
+      </ul>
+
+      <h2>4. Presale & Migration</h2>
+      <p>Due to the security breach at our former partner ToshiMart, we have migrated to a new token contract. A presale of <strong>150,000,000 $INPI</strong> (from the reserve) is being conducted from <strong>26 February 2026, 20:20 UTC</strong> to <strong>5 March 2026, 20:20 UTC</strong>. The rate is <strong>10 INPI per 1 ETH</strong>, with a minimum contribution of 0.01 ETH and a maximum of 2 ETH per wallet. After the presale ends, participants can claim their tokens, and the liquidity pool will be created on Uniswap V4 and locked until 3033.</p>
+      <p><strong>Presale contract (verified):</strong> <span class="address">0xBdca2af387F13E3d371c1786c333c28E6a3b32e3</span></p>
+
+      <h2>5. Roadmap</h2>
+      <table>
+        <tr><th>Quarter</th><th>Milestone</th></tr>
+        <tr><td>Q1 2026</td><td>Genesis: Token launch (new contract), presale, community building, smart contract audit (in progress).</td></tr>
+        <tr><td>Q2 2026</td><td>Staking Launch: Users can stake $INPI to earn passive rewards. First exchange listings, introduction of governance.</td></tr>
+        <tr><td>Q3 2026</td><td>Website Upgrade & Partnerships: Enhanced dashboard, strategic alliances in gaming.</td></tr>
+        <tr><td>Q4 2026</td><td>Gamification: First mini‑game release, "Inpinity Genesis" NFT collection.</td></tr>
+        <tr><td>Q1 2027</td><td>Marketplace: Decentralized NFT marketplace, on‑chain governance.</td></tr>
+        <tr><td>Q2 2027</td><td>$ADVERT Sub‑Token: Earnable by holding $INPI, used for advertising in the ecosystem.</td></tr>
+        <tr><td>Q3 2027</td><td>NFT In‑Game Utility: NFTs gain full functionality in the main game (playable characters, skins, etc.).</td></tr>
+        <tr><td>Q4 2027</td><td>Community‑Driven: Open for proposals and further development.</td></tr>
+      </table>
+
+      <h2>6. Utilities: The Power of $INPI</h2>
+      <ol>
+        <li><strong>Staking</strong>: Lock your tokens and earn a share of the 150M reward pool.</li>
+        <li><strong>Governance</strong>: Vote on proposals that shape the future of the platform.</li>
+        <li><strong>Rewards</strong>: Active community members receive $INPI for contributions.</li>
+        <li><strong>Exclusive Access</strong>: Holders get access to private channels, beta tests, and exclusive NFTs.</li>
+        <li><strong>In‑Game Currency</strong>: Use $INPI to buy items, enter tournaments, and earn rewards.</li>
+        <li><strong>Transaction Medium</strong>: Primary currency on the upcoming NFT marketplace.</li>
+        <li><strong>Economic Driver</strong>: Holding $INPI generates the $ADVERT sub‑token, used for advertising within the ecosystem.</li>
+      </ol>
+
+      <h2>7. Ecosystem Partners</h2>
+      <ul>
+        <li><strong>Base</strong>: Scalable, secure L2 blockchain where Inpinity operates.</li>
+        <li><strong>Uniswap</strong>: Decentralized exchange providing liquidity and trading.</li>
+      </ul>
+      <p>We have <strong>terminated</strong> all relations with ToshiMart due to phishing concerns. Our new contracts are independent and fully controlled by the Inpinity team.</p>
+
+      <h2>8. Team</h2>
+      <p><strong>Xpective</strong> – A dedicated team of developers, blockchain enthusiasts, and visionaries who believe that the future of gaming must be decentralized and community‑driven. The team places the highest value on transparency and long‑term value creation.</p>
+
+      <h2>9. Security and Legal</h2>
+      <ul>
+        <li><strong>Audit</strong>: The new token and associated contracts have been or will be audited by a reputable third party (in progress).</li>
+        <li><strong>Legal</strong>: This whitepaper is for informational purposes only and does not constitute financial advice. Potential investors should conduct their own research and understand the risks associated with cryptocurrency investments.</li>
+      </ul>
+
+      <div class="version">Version 2.0 – February 2026</div>
+    </div>
+  </main>
+
+  <footer>
+    <p>© 2026 Inpinity. All rights reserved. Working with <a href="https://base.org/" target="_blank" rel="noopener" style="color: gold;">Base</a> and <a href="https://uniswap.org/" target="_blank" rel="noopener" style="color: gold;">Uniswap</a>.</p>
+    <div class="footer-links">
+      <a href="privacypolicy.html">Privacy Policy</a>
+      <a href="termsofuse.html">Terms of Use</a>
+      <a href="contact.html">Contact</a>
+      <a href="faq.html">FAQ</a>
+      <a href="guestbook.html">Guestbook</a>
+      <a href="advertising.html">Advertising</a>
+      <a href="profile.html">Profile</a>
+      <a href="staking.html">Staking</a>
+      <a href="whitepaper.html">Whitepaper</a>
+    </div>
+  </footer>
+</body>
+</html>
