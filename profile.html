@@ -144,6 +144,32 @@
             background: gold;
             color: black;
         }
+        .warning-note {
+            background: #332211;
+            border: 1px solid #ffaa00;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 2rem auto;
+            max-width: 800px;
+            text-align: center;
+        }
+        .warning-note a {
+            color: gold;
+        }
+        .guestbook-link {
+            display: inline-block;
+            margin: 1rem 0;
+            padding: 0.75rem 1.5rem;
+            background: gold;
+            color: black;
+            font-weight: bold;
+            border-radius: 40px;
+            text-decoration: none;
+            transition: transform 0.2s;
+        }
+        .guestbook-link:hover {
+            transform: scale(1.05);
+        }
     </style>
 </head>
 <body>
@@ -151,7 +177,7 @@
         <nav>
             <ul>
                 <li><a aria-label="Home" href="index.html">Home</a></li>
-                <li><a aria-label="Services" href="services.html">Services</a></li>
+                <li><a aria-label="Features" href="features.html">Features</a></li>
                 <li><a aria-label="Game" href="game.html">Game</a></li>
                 <li><a aria-label="Forum" href="forum.html">Forum</a></li>
                 <li><a aria-label="Collaboration" href="collaboration.html">Collaboration</a></li>
@@ -194,12 +220,16 @@
     </header>
 
     <main class="container">
+        <!-- Warning about ToshiMart -->
+        <div class="warning-note">
+            <p>⚠️ <strong>Important Update:</strong> We have withdrawn from ToshiMart due to phishing concerns. Our new INPI token is <code>0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</code>. All official contracts are listed on our <a href="index.html">homepage</a>. Do not interact with the old token or ToshiMart pools.</p>
+        </div>
+
         <h1>👤 Your Profile</h1>
 
-        <!-- Partners Section (optional) -->
+        <!-- Partners Section (ToshiMart removed) -->
         <div class="partners-section">
             <div class="partner-item"><a href="https://base.org/" target="_blank">⚡ Base L2</a></div>
-            <div class="partner-item"><a href="https://www.toshimart.xyz/" target="_blank">🛒 ToshiMart</a></div>
             <div class="partner-item"><a href="https://uniswap.org/" target="_blank">🦄 Uniswap</a></div>
         </div>
 
@@ -291,7 +321,7 @@
     </main>
 
     <footer>
-        <p>© 2026 Inpinity. All rights reserved. Working with <a href="https://base.org/" target="_blank" style="color: gold;">Base</a>, <a href="https://www.toshimart.xyz/" target="_blank" style="color: gold;">ToshiMart</a> and <a href="https://uniswap.org/" target="_blank" style="color: gold;">Uniswap</a>.</p>
+        <p>© 2026 Inpinity. All rights reserved. Working with <a href="https://base.org/" target="_blank" style="color: gold;">Base</a> and <a href="https://uniswap.org/" target="_blank" style="color: gold;">Uniswap</a>.</p>
         <div class="footer-links">
             <a href="privacypolicy.html">Privacy Policy</a>
             <a href="termsofuse.html">Terms of Use</a>
@@ -306,7 +336,7 @@
     <script>
         (function() {
             // ========== Configuration ==========
-            const INPI_CONTRACT_ADDRESS = '0x15ac8e2c38f0c644123e61011e7113de56038453';
+            const INPI_CONTRACT_ADDRESS = '0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D'; // new token
             // Minimal ERC-20 ABI for balanceOf
             const INPI_ABI = [
                 "function balanceOf(address owner) view returns (uint256)",
