@@ -28,7 +28,7 @@
     <meta name="keywords" content="Inpinity, Game Design, Game Development, Platform, Collaboration, Forum, Tools, GameDesign, AI Development, Games of future, programming, programs, python gui">
     <meta name="author" content="Xpective">
     <meta property="og:title" content="Inpinity - Collaboration">
-    <meta property="og:description" content="Collaborate with game developers, designers, and blockchain innovators. Join our ecosystem with Base, ToshiMart, and Uniswap.">
+    <meta property="og:description" content="Collaborate with game developers, designers, and blockchain innovators. Join our ecosystem with Base and Uniswap.">
     <meta property="og:image" content="logo_background.jpg">
     <meta property="og:url" content="https://inpinity.online/collaboration.html">
     <meta name="twitter:card" content="logo_background.webp">
@@ -93,6 +93,19 @@
             transform: scale(1.05);
             box-shadow: 0 0 15px gold;
         }
+        /* Warning box */
+        .warning-note {
+            background: #332211;
+            border: 1px solid #ffaa00;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 2rem auto;
+            max-width: 800px;
+            text-align: center;
+        }
+        .warning-note a {
+            color: gold;
+        }
     </style>
 </head>
 <body>
@@ -109,6 +122,8 @@
                 <li><a aria-label="Whitepaper" href="https://github.com/Xpective/InpinityPage/raw/3923cf22782286d60574c8ae9b92e693cb314215/Inpinity%20Whitepaper%20.pdf" target="_blank" rel="noopener">Whitepaper</a></li>
                 <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
                 <li><a aria-label="Guestbook" href="guestbook.html">Guestbook</a></li>
+                <li><a aria-label="Advertising" href="advertising.html">Advertising</a></li>
+                <li><a aria-label="Profile" href="profile.html">Profile</a></li>
                 <div class="themeDots">
                     <div class="dot light" title="Light Theme"></div>
                     <div class="dot dark" title="Dark Theme"></div>
@@ -145,7 +160,12 @@
             <h2>Connect. Share. Grow.</h2>
         </section>
 
-        <!-- Partners Section -->
+        <!-- Warning about ToshiMart -->
+        <div class="warning-note">
+            <p>⚠️ <strong>Important Update:</strong> We have withdrawn from ToshiMart due to phishing concerns. Our new INPI token is <code>0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</code>. All official contracts are listed on our <a href="index.html">homepage</a>. Do not interact with the old token or ToshiMart pools.</p>
+        </div>
+
+        <!-- Partners Section (updated) -->
         <section>
             <h2 style="text-align: center; color: gold;">Our Ecosystem Partners</h2>
             <div class="partners-section">
@@ -154,16 +174,12 @@
                     <p>Scalable & secure L2</p>
                 </div>
                 <div class="partner-item">
-                    <a href="https://www.toshimart.xyz/" target="_blank" rel="noopener">🛒 ToshiMart</a>
-                    <p>Base native marketplace</p>
-                </div>
-                <div class="partner-item">
                     <a href="https://uniswap.org/" target="_blank" rel="noopener">🦄 Uniswap</a>
                     <p>Decentralized liquidity</p>
                 </div>
             </div>
             <p style="text-align: center; max-width: 700px; margin: 1rem auto;">
-                Inpinity is proud to collaborate with <strong>Base, ToshiMart, and Uniswap</strong> to bring you a seamless, secure, and community-driven ecosystem. 
+                Inpinity is proud to collaborate with <strong>Base</strong> and <strong>Uniswap</strong> to bring you a seamless, secure, and community-driven ecosystem. 
                 These partnerships ensure deep liquidity, low‑cost transactions, and a robust foundation for our gaming and NFT platforms.
             </p>
         </section>
@@ -239,13 +255,15 @@
     </main>
     
     <footer>
-        <p>© 2026 Inpinity. All rights reserved. Working with <a href="https://base.org/" target="_blank" rel="noopener" style="color: gold;">Base</a>, <a href="https://www.toshimart.xyz/" target="_blank" rel="noopener" style="color: gold;">ToshiMart</a> and <a href="https://uniswap.org/" target="_blank" rel="noopener" style="color: gold;">Uniswap</a>.</p>
+        <p>© 2026 Inpinity. All rights reserved. Working with <a href="https://base.org/" target="_blank" rel="noopener" style="color: gold;">Base</a> and <a href="https://uniswap.org/" target="_blank" rel="noopener" style="color: gold;">Uniswap</a>.</p>
         <div class="footer-links">
             <a href="privacypolicy.html">Privacy Policy</a>
             <a href="termsofuse.html">Terms of Use</a>
             <a href="contact.html">Contact</a>
             <a href="faq.html">FAQ</a>
             <a href="guestbook.html">Guestbook</a>
+            <a href="advertising.html">Advertising</a>
+            <a href="profile.html">Profile</a>
         </div>
     </footer>
     
