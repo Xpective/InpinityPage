@@ -112,6 +112,45 @@
         a:hover {
             text-decoration: underline;
         }
+        .warning-note {
+            background: #332211;
+            border: 1px solid #ffaa00;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 2rem auto;
+            max-width: 800px;
+            text-align: center;
+        }
+        .warning-note a {
+            color: gold;
+        }
+        .partners-section {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin: 2rem auto;
+            padding: 1rem;
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            max-width: 600px;
+        }
+        .partner-item a {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            background: #2a2a2a;
+            border: 1px solid gold;
+            border-radius: 40px;
+            color: gold;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .partner-item a:hover {
+            background: gold;
+            color: black;
+            transform: scale(1.05);
+        }
     </style>
 </head>
 <body>
@@ -119,14 +158,17 @@
         <nav>
             <ul>
                 <li><a aria-label="Home" href="index.html">Home</a></li>
-                <li><a aria-label="Services" href="services.html">Services</a></li>
+                <li><a aria-label="Features" href="features.html">Features</a></li>
                 <li><a aria-label="Game" href="game.html">Game</a></li>
                 <li><a aria-label="Forum" href="forum.html">Forum</a></li>
                 <li><a aria-label="Collaboration" href="collaboration.html">Collaboration</a></li>
                 <li><a aria-label="Register" href="register.html">Register</a></li>
-                <li><a aria-label="About us" href="about.html">About</a></li>
+                <li><a aria-label="About" href="about.html">About</a></li>
                 <li><a aria-label="Whitepaper" href="https://github.com/Xpective/InpinityPage/raw/3923cf22782286d60574c8ae9b92e693cb314215/Inpinity%20Whitepaper%20.pdf" target="_blank" rel="noopener">Whitepaper</a></li>
                 <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
+                <li><a aria-label="Guestbook" href="guestbook.html">Guestbook</a></li>
+                <li><a aria-label="Advertising" href="advertising.html">Advertising</a></li>
+                <li><a aria-label="Profile" href="profile.html">Profile</a></li>
                 <div class="themeDots">
                     <div class="dot light" title="Light Theme"></div>
                     <div class="dot dark" title="Dark Theme"></div>
@@ -159,10 +201,21 @@
     </header>
 
     <main class="game-container">
+        <!-- Warning about ToshiMart -->
+        <div class="warning-note">
+            <p>⚠️ <strong>Important Update:</strong> We have withdrawn from ToshiMart due to phishing concerns. Our new INPI token is <code>0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</code>. All official contracts are listed on our <a href="index.html">homepage</a>. Do not interact with the old token or ToshiMart pools.</p>
+        </div>
+
+        <!-- Partners Section (ToshiMart removed) -->
+        <div class="partners-section">
+            <div class="partner-item"><a href="https://base.org/" target="_blank">⚡ Base L2</a></div>
+            <div class="partner-item"><a href="https://uniswap.org/" target="_blank">🦄 Uniswap</a></div>
+        </div>
+
         <h1 style="color: gold; text-align: center;">⚡ Inpinity Pregame ⚡</h1>
         <p style="text-align: center; color: #ccc; max-width: 600px;">
             This is a <strong>pregame demo</strong> – a taste of what’s coming!<br>
-            Play, have fun, and support the development of the <strong>real Inpinity game</strong> by donating $INPI tokens.
+            Play, have fun, and support the development of the <strong>real Inpinity game</strong> by donating $INPI tokens (new contract).
         </p>
 
         <!-- Score display integrated above canvas -->
@@ -181,11 +234,12 @@
             <div style="margin: 1rem 0;">
                 <p><strong>Team Donation Wallet (send $INPI here):</strong></p>
                 <div class="wallet-address">0xcbc1cf1159b4db5b407684fde0e9e635e9e3726f</div>
-                <p><small>(ERC-20 / BSC – always verify the address)</small></p>
+                <p><small>(Base / Ethereum – always verify the address)</small></p>
             </div>
             <div style="margin: 1rem 0;">
-                <p><strong>$INPI Token Contract:</strong></p>
-                <div class="wallet-address">0x15ac8e2c38f0c644123e61011e7113de56038453</div>
+                <p><strong>$INPI Token Contract (new):</strong></p>
+                <div class="wallet-address">0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</div>
+                <p><small>Old token (0x15ac...) is deprecated – do not use.</small></p>
             </div>
             <button class="donate-button" onclick="alert('Please send $INPI tokens to the team wallet above. Thank you for your support!')">
                 ❤️ Donate $INPI
@@ -204,12 +258,15 @@
     </main>
 
     <footer>
-        <p>© 2026 Inpinity. All rights reserved.</p>
+        <p>© 2026 Inpinity. All rights reserved. Working with <a href="https://base.org/" target="_blank" style="color: gold;">Base</a> and <a href="https://uniswap.org/" target="_blank" style="color: gold;">Uniswap</a>.</p>
         <div class="footer-links">
             <a href="privacypolicy.html">Privacy Policy</a>
             <a href="termsofuse.html">Terms of Use</a>
             <a href="contact.html">Contact</a>
             <a href="faq.html">FAQ</a>
+            <a href="guestbook.html">Guestbook</a>
+            <a href="advertising.html">Advertising</a>
+            <a href="profile.html">Profile</a>
         </div>
     </footer>
 
@@ -226,18 +283,26 @@
 
             let score = 0;
             let gameActive = true;
-            let npcSpeed = 4; // Speed of NPC paddle
-            let holes = [{
-                x: Math.random() * (canvas.width - 50) + 25,
-                radius: 50
-            }];
+            let baseBallSpeed = 5;          // base speed
+            let ballSpeed = baseBallSpeed;   // current speed (will increase)
+            let npcBaseSpeed = 4;
+            let npcSpeed = npcBaseSpeed;
+
+            // start with 3 holes
+            let holes = [];
+            for (let i = 0; i < 3; i++) {
+                holes.push({
+                    x: Math.random() * (canvas.width - 50) + 25,
+                    radius: 50
+                });
+            }
 
             let ball = {
                 x: canvas.width / 2,
                 y: canvas.height / 2,
                 radius: 10,
-                deltaX: 5,
-                deltaY: 5,
+                deltaX: ballSpeed,
+                deltaY: ballSpeed,
                 color: "#FFF"
             };
 
@@ -340,8 +405,19 @@
                     if (dist < hole.radius + ball.radius) {
                         score += 10;
                         ball.color = "#" + ((1 << 24) * Math.random() | 0).toString(16).padStart(6, '0');
+
+                        // Increase speed every 50 points
+                        if (score % 50 === 0) {
+                            ballSpeed = baseBallSpeed + Math.floor(score / 50) * 0.5;
+                            // adjust ball direction speed (keep sign)
+                            ball.deltaX = ball.deltaX > 0 ? ballSpeed : -ballSpeed;
+                            ball.deltaY = ball.deltaY > 0 ? ballSpeed : -ballSpeed;
+                            npcSpeed = npcBaseSpeed + Math.floor(score / 50) * 0.3;
+                        }
+
                         holes.splice(index, 1);
-                        if (holes.length < 10) {
+                        // keep at least 3 holes
+                        while (holes.length < 3) {
                             holes.push({
                                 x: Math.random() * (canvas.width - 50) + 25,
                                 radius: 50
