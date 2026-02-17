@@ -150,6 +150,18 @@
             background: gold;
             color: black;
         }
+        .warning-note {
+            background: #332211;
+            border: 1px solid #ffaa00;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 2rem auto;
+            max-width: 800px;
+            text-align: center;
+        }
+        .warning-note a {
+            color: gold;
+        }
     </style>
 </head>
 <body>
@@ -160,4 +172,215 @@
                 <li><a aria-label="Features" href="features.html">Features</a></li>
                 <li><a aria-label="Game" href="game.html">Game</a></li>
                 <li><a aria-label="Forum" href="forum.html">Forum</a></li>
-                <li><a aria-label="
+                <li><a aria-label="Collaboration" href="collaboration.html">Collaboration</a></li>
+                <li><a aria-label="Register" href="register.html">Register</a></li>
+                <li><a aria-label="About" href="about.html">About</a></li>
+                <li><a aria-label="Whitepaper" href="https://github.com/Xpective/InpinityPage/raw/3923cf22782286d60574c8ae9b92e693cb314215/Inpinity%20Whitepaper%20.pdf" target="_blank" rel="noopener">Whitepaper</a></li>
+                <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
+                <li><a aria-label="Guestbook" href="guestbook.html">Guestbook</a></li>
+                <li><a aria-label="Advertising" href="advertising.html">Advertising</a></li>
+                <li><a aria-label="Profile" href="profile.html">Profile</a></li>
+                <div class="themeDots">
+                    <div class="dot light" title="Light Theme"></div>
+                    <div class="dot dark" title="Dark Theme"></div>
+                    <div class="dot basic" title="Basic Theme"></div>
+                </div>
+            </ul>
+        </nav>
+        <style>
+            .themeDots .dot {
+                display: inline-block;
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                margin: 5px;
+                cursor: pointer;
+                transition: transform 0.2s;
+            }
+            .themeDots .dot.light { background-color: #FFFFFF; }
+            .themeDots .dot.dark { background-color: #000000; }
+            .themeDots .dot.basic { background-color: var(--quinary-color); }
+            .themeDots .dot:hover { transform: scale(1.2); }
+        </style>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                document.querySelector('.themeDots .dot.light')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'light'));
+                document.querySelector('.themeDots .dot.dark')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'dark'));
+                document.querySelector('.themeDots .dot.basic')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'basic'));
+            });
+        </script>
+    </header>
+
+    <main>
+        <!-- Warning about ToshiMart -->
+        <div class="warning-note">
+            <p>⚠️ <strong>Important Update:</strong> We have withdrawn from ToshiMart due to phishing concerns. Our new INPI token is <code>0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</code>. All official contracts are listed on our <a href="index.html">homepage</a>. Do not interact with the old token or ToshiMart pools.</p>
+        </div>
+
+        <!-- Partners Section (ToshiMart removed) -->
+        <div class="partners-section">
+            <div class="partner-item"><a href="https://base.org/" target="_blank">⚡ Base L2</a></div>
+            <div class="partner-item"><a href="https://uniswap.org/" target="_blank">🦄 Uniswap</a></div>
+        </div>
+
+        <div class="register-container">
+            <h1>📝 Register with Inpinity</h1>
+
+            <!-- Wallet Connection Section -->
+            <div class="wallet-section">
+                <button id="connectWalletBtn" class="connect-wallet-btn">🔌 Connect Wallet</button>
+                <div id="walletInfo" class="wallet-info" style="display: none;">
+                    Connected: <span id="walletAddress" class="address"></span>
+                </div>
+            </div>
+
+            <!-- Registration Form -->
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="username">Username *</label>
+                    <input type="text" id="username" required placeholder="e.g., GameMaster">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email (optional)</label>
+                    <input type="email" id="email" placeholder="your@email.com">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password *</label>
+                    <input type="password" id="password" required placeholder="********">
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password *</label>
+                    <input type="password" id="confirmPassword" required placeholder="********">
+                </div>
+                <button type="submit" id="registerBtn" class="register-btn">✅ Register</button>
+            </form>
+
+            <div class="login-link">
+                Already have an account? <a href="profile.html">Go to Profile</a>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>© 2026 Inpinity. All rights reserved. Working with <a href="https://base.org/" target="_blank" rel="noopener" style="color: gold;">Base</a> and <a href="https://uniswap.org/" target="_blank" rel="noopener" style="color: gold;">Uniswap</a>.</p>
+        <div class="footer-links">
+            <a href="privacypolicy.html">Privacy Policy</a>
+            <a href="termsofuse.html">Terms of Use</a>
+            <a href="contact.html">Contact</a>
+            <a href="faq.html">FAQ</a>
+            <a href="guestbook.html">Guestbook</a>
+            <a href="advertising.html">Advertising</a>
+            <a href="profile.html">Profile</a>
+        </div>
+    </footer>
+
+    <script>
+        (function() {
+            // ========== Configuration ==========
+            const INPI_CONTRACT_ADDRESS = '0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D'; // new token
+
+            // ========== DOM Elements ==========
+            const connectBtn = document.getElementById('connectWalletBtn');
+            const walletInfo = document.getElementById('walletInfo');
+            const walletAddressSpan = document.getElementById('walletAddress');
+            const registerForm = document.getElementById('registerForm');
+            const usernameInput = document.getElementById('username');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const confirmInput = document.getElementById('confirmPassword');
+            const registerBtn = document.getElementById('registerBtn');
+
+            // ========== State ==========
+            let provider, signer, userAddress = null;
+
+            // Helper: format address
+            function formatAddress(address) {
+                if (!address) return '';
+                return address.substring(0, 6) + '...' + address.substring(address.length - 4);
+            }
+
+            // Connect wallet
+            async function connectWallet() {
+                if (typeof window.ethereum === 'undefined') {
+                    alert('MetaMask or another Web3 wallet is not installed.');
+                    return;
+                }
+                try {
+                    provider = new ethers.BrowserProvider(window.ethereum);
+                    await provider.send("eth_requestAccounts", []);
+                    signer = await provider.getSigner();
+                    userAddress = await signer.getAddress();
+                    walletAddressSpan.textContent = formatAddress(userAddress) + ' (' + userAddress + ')';
+                    walletInfo.style.display = 'block';
+                    connectBtn.textContent = '✅ Wallet Connected';
+                    connectBtn.disabled = true;
+                } catch (err) {
+                    console.error(err);
+                    alert('Connection failed.');
+                }
+            }
+
+            // Handle registration
+            function registerUser(e) {
+                e.preventDefault();
+
+                // Basic validation
+                const username = usernameInput.value.trim();
+                const email = emailInput.value.trim();
+                const password = passwordInput.value.trim();
+                const confirm = confirmInput.value.trim();
+
+                if (!username) {
+                    alert('Username is required.');
+                    return;
+                }
+                if (password.length < 6) {
+                    alert('Password must be at least 6 characters.');
+                    return;
+                }
+                if (password !== confirm) {
+                    alert('Passwords do not match.');
+                    return;
+                }
+                if (!userAddress) {
+                    alert('Please connect your wallet first.');
+                    return;
+                }
+
+                // Simulate password hashing (client-side, just for demo)
+                const fakeHash = btoa(password + 'salt'); // not secure, just for demonstration
+
+                // Create user object
+                const userData = {
+                    username: username,
+                    email: email,
+                    wallet: userAddress,
+                    passwordHash: fakeHash,
+                    registeredAt: new Date().toISOString()
+                };
+
+                // Store in localStorage (keyed by wallet address)
+                const key = 'user_' + userAddress.toLowerCase();
+                localStorage.setItem(key, JSON.stringify(userData));
+
+                // Also store current session (which wallet is logged in)
+                localStorage.setItem('currentWallet', userAddress.toLowerCase());
+
+                alert('Registration successful! Redirecting to profile...');
+                window.location.href = 'profile.html';
+            }
+
+            // Event listeners
+            connectBtn.addEventListener('click', connectWallet);
+            registerForm.addEventListener('submit', registerUser);
+
+            // Pre-fill if already connected? (optional)
+            window.addEventListener('load', async () => {
+                if (window.ethereum && window.ethereum.selectedAddress) {
+                    await connectWallet();
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
