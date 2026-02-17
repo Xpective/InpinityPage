@@ -128,6 +128,18 @@
             background: gold;
             color: black;
         }
+        .warning-note {
+            background: #332211;
+            border: 1px solid #ffaa00;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 2rem auto;
+            max-width: 800px;
+            text-align: center;
+        }
+        .warning-note a {
+            color: gold;
+        }
     </style>
 </head>
 <body>
@@ -145,6 +157,7 @@
                 <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
                 <li><a aria-label="Guestbook" href="guestbook.html">Guestbook</a></li>
                 <li><a aria-label="Advertising" href="advertising.html">Advertising</a></li>
+                <li><a aria-label="Profile" href="profile.html">Profile</a></li>
                 <div class="themeDots">
                     <div class="dot light" title="Light Theme"></div>
                     <div class="dot dark" title="Dark Theme"></div>
@@ -179,13 +192,15 @@
     <main class="container">
         <h1>📢 Advertising on Inpinity</h1>
 
-        <!-- Partners Section -->
+        <!-- Hinweis zu ToshiMart (wie auf anderen Seiten) -->
+        <div class="warning-note">
+            <p>⚠️ <strong>Important Update:</strong> We have withdrawn from ToshiMart due to phishing concerns. Our new INPI token is <code>0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</code>. All official contracts are listed on our <a href="index.html">homepage</a>. Do not interact with the old token or ToshiMart pools.</p>
+        </div>
+
+        <!-- Partners Section (ToshiMart entfernt) -->
         <div class="partners-section">
             <div class="partner-item">
                 <a href="https://base.org/" target="_blank" rel="noopener">⚡ Base L2</a>
-            </div>
-            <div class="partner-item">
-                <a href="https://www.toshimart.xyz/" target="_blank" rel="noopener">🛒 ToshiMart</a>
             </div>
             <div class="partner-item">
                 <a href="https://uniswap.org/" target="_blank" rel="noopener">🦄 Uniswap</a>
@@ -195,7 +210,7 @@
         <!-- Token Info -->
         <div class="token-info">
             <h2>💰 The $ADVERT Sub‑Token</h2>
-            <p><strong>$ADVERT</strong> is the dedicated advertising token of the Inpinity ecosystem. It is earned by holding and using <strong>$INPI</strong> tokens. Advertisers can spend $ADVERT to place ads across our platforms – including banner ads, sidebar placements, inline content, and more. This creates a sustainable, circular economy between gamers, developers, and advertisers.</p>
+            <p><strong>$ADVERT</strong> is the dedicated advertising token of the Inpinity ecosystem. It is earned by holding and using <strong>$INPI</strong> tokens (new INPI contract: <code>0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</code>). Advertisers can spend $ADVERT to place ads across our platforms – including banner ads, sidebar placements, inline content, and more. This creates a sustainable, circular economy between gamers, developers, and advertisers.</p>
             <p>Learn more in our <a href="https://github.com/Xpective/InpinityPage/raw/3923cf22782286d60574c8ae9b92e693cb314215/Inpinity%20Whitepaper%20.pdf" target="_blank" rel="noopener" style="color: gold;">Whitepaper</a>.</p>
         </div>
 
@@ -248,7 +263,7 @@
     </main>
 
     <footer>
-        <p>© 2026 Inpinity. All rights reserved. Working with <a href="https://base.org/" target="_blank" rel="noopener" style="color: gold;">Base</a>, <a href="https://www.toshimart.xyz/" target="_blank" rel="noopener" style="color: gold;">ToshiMart</a> and <a href="https://uniswap.org/" target="_blank" rel="noopener" style="color: gold;">Uniswap</a>.</p>
+        <p>© 2026 Inpinity. All rights reserved. Working with <a href="https://base.org/" target="_blank" rel="noopener" style="color: gold;">Base</a> and <a href="https://uniswap.org/" target="_blank" rel="noopener" style="color: gold;">Uniswap</a>.</p>
         <div class="footer-links">
             <a href="privacypolicy.html">Privacy Policy</a>
             <a href="termsofuse.html">Terms of Use</a>
@@ -256,6 +271,7 @@
             <a href="faq.html">FAQ</a>
             <a href="guestbook.html">Guestbook</a>
             <a href="advertising.html">Advertising</a>
+            <a href="profile.html">Profile</a>
         </div>
     </footer>
 </body>
