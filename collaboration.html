@@ -23,8 +23,6 @@
     <link rel="stylesheet" href="css/gamification.css" />
     <link rel="stylesheet" href="css/referral.css"/>
     <link rel="icon" type="image/png" href="favicon.webp">
-    <script src="https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.6.0/jszip.min.js"></script>
     <meta name="keywords" content="Inpinity, Game Design, Game Development, Platform, Collaboration, Forum, Tools, GameDesign, AI Development, Games of future, programming, programs, python gui">
     <meta name="author" content="Xpective">
     <meta property="og:title" content="Inpinity - Collaboration & Genesis Program">
@@ -205,6 +203,17 @@
         .genesis-note a:hover {
             text-decoration: underline;
         }
+        #form-result {
+            text-align: center;
+            margin-top: 1rem;
+            font-weight: bold;
+        }
+        .success-message {
+            color: #00aa00;
+        }
+        .error-message {
+            color: #ff4444;
+        }
     </style>
 </head>
 <body>
@@ -350,7 +359,7 @@
             <p>If you're interested in partnering with us or have a project idea, reach out at <a href="mailto:xpective@inpinity.online">xpective@inpinity.online</a> or join our <a href="https://discord.gg/95yj6Eg6" target="_blank" rel="noopener">Discord</a>.</p>
         </section>
 
-        <!-- 🚀 GENESIS PROGRAM SECTION mit Olivenöl-Bild -->
+        <!-- 🚀 GENESIS PROGRAM SECTION mit Olivenöl-Bild und Forminit-Formular -->
         <div class="genesis-section">
             <div class="genesis-image">
                 <img src="https://raw.githubusercontent.com/Xpective/InpinityPage/refs/heads/main/img/Inpioil.PNG" alt="Platinpinity Olivenöl – exklusive Belohnung">
@@ -368,31 +377,38 @@
                 </p>
             </div>
 
-            <form class="genesis-form" action="https://formspree.io/f/xreaylap" method="POST">
-                <input type="hidden" name="_subject" value="Neue Genesis-Anmeldung">
+            <!-- Forminit-Formular -->
+            <form id="genesisForm" class="genesis-form">
+                <!-- Sender-Block Felder -->
+                <label for="firstName">First name</label>
+                <input type="text" id="firstName" name="fi-sender-firstName" required placeholder="John">
 
+                <label for="lastName">Last name</label>
+                <input type="text" id="lastName" name="fi-sender-lastName" required placeholder="Doe">
+
+                <label for="email">Email address</label>
+                <input type="email" id="email" name="fi-sender-email" required placeholder="john@example.com">
+
+                <!-- Weitere Felder als Field Blocks -->
                 <label for="wallet">Your wallet address (0x...)</label>
-                <input type="text" id="wallet" name="wallet" required pattern="0x[a-fA-F0-9]{40}" placeholder="0x...">
-
-                <label for="email">Your email address</label>
-                <input type="email" id="email" name="email" required placeholder="you@example.com">
-
-                <label for="fullname">Your full name (for shipping)</label>
-                <input type="text" id="fullname" name="fullname" required placeholder="John Doe">
+                <input type="text" id="wallet" name="fi-text-wallet" required pattern="0x[a-fA-F0-9]{40}" placeholder="0x...">
 
                 <label for="address">Shipping address (street, city, postal code, country)</label>
-                <textarea id="address" name="address" required rows="3" placeholder="Street, 12345 City, Country"></textarea>
+                <textarea id="address" name="fi-sender-address" required rows="3" placeholder="Street, 12345 City, Country"></textarea>
 
                 <div class="genesis-checkbox">
-                    <input type="checkbox" id="privacy" name="privacy" value="accepted" required>
+                    <input type="checkbox" id="privacy" name="fi-checkbox-privacy" value="accepted" required>
                     <label for="privacy">I have read and agree to the <a href="/privacypolicy.html" target="_blank" style="color:gold;">Privacy Policy</a>.</label>
                 </div>
 
-                <!-- Honeypot gegen Spam -->
+                <!-- Honeypot gegen Spam (optional) -->
                 <input type="text" name="_gotcha" style="display:none;">
 
                 <button type="submit" class="genesis-button">📬 Submit application</button>
             </form>
+
+            <!-- Ergebnisnachricht -->
+            <p id="form-result"></p>
 
             <p class="genesis-note">
                 * Only the first 50 registrations qualify. You will receive a confirmation email with further instructions.<br>
@@ -414,7 +430,33 @@
         </div>
     </footer>
     
-    <script defer src="main.js"></script>
-    <script defer src="/wallet.js"></script>
+    <!-- Forminit SDK -->
+    <script src="https://forminit.com/sdk/v1/forminit.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const forminit = new Forminit();
+            const FORM_ID = '7ktpdl3xza8'; // Die Form-ID aus der Aufgabe
+            
+            const form = document.getElementById('genesisForm');
+            const resultEl = document.getElementById('form-result');
+            
+            form.addEventListener('submit', async function(event) {
+                event.preventDefault();
+                
+                // FormData aus dem Formular erstellen – die Feldnamen haben bereits das fi- Präfix
+                const formData = new FormData(form);
+                
+                const { data, redirectUrl, error } = await forminit.submit(FORM_ID, formData);
+                
+                if (error) {
+                    resultEl.innerHTML = `<span class="error-message">❌ ${error.message}</span>`;
+                    return;
+                }
+                
+                resultEl.innerHTML = '<span class="success-message">✅ Application submitted successfully! You will receive a confirmation email soon.</span>';
+                form.reset();
+            });
+        });
+    </script>
 </body>
 </html>
