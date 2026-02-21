@@ -222,6 +222,12 @@
       height: 60px;
       width: auto;
     }
+    /* Kleines Token-Logo in der Karte */
+    .token-logo-small {
+      height: 32px;
+      width: auto;
+      margin-right: 10px;
+    }
   </style>
 </head>
 
@@ -270,11 +276,8 @@
   <main>
     <section>
       <div class="hero">
-        <!-- Logo eingefügt -->
-        <div class="logo-container">
-          <img src="img/logo32.svg" class="logo-svg" alt="Inpinity Logo">
-          <h1>Develop games more efficiently with Inpinity.</h1>
-        </div>
+        <!-- Das allgemeine Logo (nicht das Token-Logo) kann hier bleiben, wenn gewünscht. Wir haben es entfernt, da der Benutzer es nicht oben wollte. -->
+        <h1>Develop games more efficiently with Inpinity.</h1>
         <h2>The best platform for game developers. Create, Share, Grow.</h2>
       </div>
 
@@ -316,7 +319,11 @@
       <!-- Nur relevante Token-Karten (ohne alte Tokens) -->
       <div class="token-grid">
         <div class="token-card">
-          <h3>🪙 INPI Token (New)</h3>
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+            <!-- INPI Logo direkt neben dem Token-Namen -->
+            <img src="img/Logo200.svg" alt="INPI Logo" class="token-logo-small">
+            <h3 style="margin:0;">🪙 INPI Token (New)</h3>
+          </div>
           <p><strong>Address:</strong></p>
           <div class="address">0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</div>
           <p>Total Supply: 1,000,000,000 INPI<br>Decimals: 18</p>
