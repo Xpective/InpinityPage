@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="Inpinity - Collaboration in game design and development." name="description">
-    <title>Inpinity - Collaboration</title>
+    <title>Inpinity - Collaboration & Genesis Program</title>
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/animations.css">
@@ -27,9 +27,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.6.0/jszip.min.js"></script>
     <meta name="keywords" content="Inpinity, Game Design, Game Development, Platform, Collaboration, Forum, Tools, GameDesign, AI Development, Games of future, programming, programs, python gui">
     <meta name="author" content="Xpective">
-    <meta property="og:title" content="Inpinity - Collaboration">
-    <meta property="og:description" content="Collaborate with game developers, designers, and blockchain innovators. Join our ecosystem with Base and Uniswap.">
-    <meta property="og:image" content="logo_background.jpg">
+    <meta property="og:title" content="Inpinity - Collaboration & Genesis Program">
+    <meta property="og:description" content="Collaborate with game developers, designers, and blockchain innovators. Join our Genesis Program for exclusive rewards.">
+    <meta property="og:image" content="https://raw.githubusercontent.com/Xpective/InpinityPage/refs/heads/main/img/Inpioil.PNG">
     <meta property="og:url" content="https://inpinity.online/collaboration.html">
     <meta name="twitter:card" content="logo_background.webp">
     <meta name="twitter:site" content="@unxpective">
@@ -106,6 +106,105 @@
         .warning-note a {
             color: gold;
         }
+        /* Genesis-Programm spezifisches Styling */
+        .genesis-section {
+            max-width: 800px;
+            margin: 4rem auto;
+            padding: 2rem;
+            background: #1a1a1a;
+            border: 2px solid gold;
+            border-radius: 16px;
+            box-shadow: 0 0 30px rgba(255,215,0,0.2);
+        }
+        .genesis-image {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .genesis-image img {
+            max-width: 250px;
+            height: auto;
+            border-radius: 12px;
+            border: 3px solid gold;
+            box-shadow: 0 0 20px rgba(255,215,0,0.3);
+        }
+        .genesis-title {
+            color: gold;
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        .genesis-subtitle {
+            text-align: center;
+            color: #ccc;
+            margin-bottom: 2rem;
+            font-size: 1.2rem;
+        }
+        .genesis-form label {
+            display: block;
+            color: gold;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+        .genesis-form input:not([type="checkbox"]),
+        .genesis-form textarea {
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 1.2rem;
+            background: #222;
+            border: 1px solid #444;
+            border-radius: 6px;
+            color: white;
+            font-size: 1rem;
+        }
+        .genesis-form input:focus,
+        .genesis-form textarea:focus {
+            outline: none;
+            border-color: gold;
+            box-shadow: 0 0 5px gold;
+        }
+        .genesis-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .genesis-checkbox input {
+            width: auto;
+        }
+        .genesis-checkbox label {
+            color: #ccc;
+            font-weight: normal;
+            margin: 0;
+        }
+        .genesis-button {
+            background: gold;
+            color: black;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 40px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+        }
+        .genesis-button:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 15px gold;
+        }
+        .genesis-note {
+            text-align: center;
+            color: #aaa;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+        .genesis-note a {
+            color: gold;
+            text-decoration: none;
+        }
+        .genesis-note a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -165,7 +264,7 @@
             <p>⚠️ <strong>Important Update:</strong> We have withdrawn from ToshiMart due to phishing concerns. Our new INPI token is <code>0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</code>. All official contracts are listed on our <a href="index.html">homepage</a>. Do not interact with the old token or ToshiMart pools.</p>
         </div>
 
-        <!-- Partners Section (updated) -->
+        <!-- Partners Section -->
         <section>
             <h2 style="text-align: center; color: gold;">Our Ecosystem Partners</h2>
             <div class="partners-section">
@@ -217,12 +316,10 @@
                     const canvas = document.getElementById('nftCanvas');
                     const ctx = canvas.getContext('2d');
 
-                    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                    // Define layer order
                     const layerOrder = ['background', 'eyes', 'body', 'mouth', 'ears', 'hair', 'hat', 'details'];
 
-                    // Iterate through each layer and draw corresponding images
                     for (const layer of layerOrder) {
                         for (const [path, file] of Object.entries(zipContents.files)) {
                             if (!file.dir && path.startsWith(`${layer}/`) && path.endsWith('.png')) {
@@ -233,7 +330,7 @@
                                 await new Promise((resolve) => img.onload = resolve);
                                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                                 URL.revokeObjectURL(imgUrl);
-                                break; // Assume only one image per layer
+                                break;
                             }
                         }
                     }
@@ -252,6 +349,56 @@
             <h2>Contact for collaboration</h2>
             <p>If you're interested in partnering with us or have a project idea, reach out at <a href="mailto:xpective@inpinity.online">xpective@inpinity.online</a> or join our <a href="https://discord.gg/95yj6Eg6" target="_blank" rel="noopener">Discord</a>.</p>
         </section>
+
+        <!-- 🚀 GENESIS PROGRAM SECTION mit Olivenöl-Bild -->
+        <div class="genesis-section">
+            <div class="genesis-image">
+                <img src="https://raw.githubusercontent.com/Xpective/InpinityPage/refs/heads/main/img/Inpioil.PNG" alt="Platinpinity Olivenöl – exklusive Belohnung">
+            </div>
+            <h2 class="genesis-title">🌟 Genesis Member Program</h2>
+            <p class="genesis-subtitle">Be one of the first 50 supporters and secure your share of real‑world rewards</p>
+
+            <div style="background: #2a2a2a; border-left: 4px solid gold; padding: 1rem; margin-bottom: 2rem; border-radius: 0 8px 8px 0;">
+                <p style="margin:0; color:#ccc;">
+                    <strong>🎁 Your reward package:</strong><br>
+                    • 14,400 INPI instant bonus<br>
+                    • 1 liter premium cold‑pressed olive oil (after 6 months)<br>
+                    • 2nd liter after 12 months (total 3 liters)<br>
+                    • Option to stay in the pool and receive olive oil every year 🌿
+                </p>
+            </div>
+
+            <form class="genesis-form" action="https://formspree.io/f/xreaylap" method="POST">
+                <input type="hidden" name="_subject" value="Neue Genesis-Anmeldung">
+
+                <label for="wallet">Your wallet address (0x...)</label>
+                <input type="text" id="wallet" name="wallet" required pattern="0x[a-fA-F0-9]{40}" placeholder="0x...">
+
+                <label for="email">Your email address</label>
+                <input type="email" id="email" name="email" required placeholder="you@example.com">
+
+                <label for="fullname">Your full name (for shipping)</label>
+                <input type="text" id="fullname" name="fullname" required placeholder="John Doe">
+
+                <label for="address">Shipping address (street, city, postal code, country)</label>
+                <textarea id="address" name="address" required rows="3" placeholder="Street, 12345 City, Country"></textarea>
+
+                <div class="genesis-checkbox">
+                    <input type="checkbox" id="privacy" name="privacy" value="accepted" required>
+                    <label for="privacy">I have read and agree to the <a href="/privacypolicy.html" target="_blank" style="color:gold;">Privacy Policy</a>.</label>
+                </div>
+
+                <!-- Honeypot gegen Spam -->
+                <input type="text" name="_gotcha" style="display:none;">
+
+                <button type="submit" class="genesis-button">📬 Submit application</button>
+            </form>
+
+            <p class="genesis-note">
+                * Only the first 50 registrations qualify. You will receive a confirmation email with further instructions.<br>
+                <a href="/privacypolicy.html">Privacy policy</a> – <a href="/termsofuse.html">Terms</a>
+            </p>
+        </div>
     </main>
     
     <footer>
