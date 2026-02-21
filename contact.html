@@ -55,6 +55,17 @@
         .warning-note a {
             color: gold;
         }
+        /* Erfolgs-/Fehlermeldung Styling */
+        #form-result {
+            margin-top: 1rem;
+            font-weight: bold;
+        }
+        .success-message {
+            color: #00aa00;
+        }
+        .error-message {
+            color: #ff4444;
+        }
     </style>
 </head>
 <body>
@@ -160,21 +171,34 @@
         </table>
 
         <h2>Contact Form</h2>
-        <form action="submit_form.php" method="post">
-            <label for="name">Name:</label>
-            <input type="text" id="name" name="name" required><br><br>
+        <!-- Forminit-Formular – beachte die fi- Präfixe -->
+        <form id="contact-form" class="genesis-form" style="max-width:600px; margin-bottom:2rem;">
+            <!-- Sender-Block: Vorname und Nachname (getrennt) -->
+            <label for="firstName">First name *</label>
+            <input type="text" id="firstName" name="fi-sender-firstName" required style="width:100%; padding:0.5rem; margin-bottom:1rem; background:#222; border:1px solid #444; color:white;">
 
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required><br><br>
+            <label for="lastName">Last name *</label>
+            <input type="text" id="lastName" name="fi-sender-lastName" required style="width:100%; padding:0.5rem; margin-bottom:1rem; background:#222; border:1px solid #444; color:white;">
 
-            <label for="subject">Subject:</label>
-            <input type="text" id="subject" name="subject"><br><br>
+            <label for="email">Email *</label>
+            <input type="email" id="email" name="fi-sender-email" required style="width:100%; padding:0.5rem; margin-bottom:1rem; background:#222; border:1px solid #444; color:white;">
 
-            <label for="message">Message:</label><br>
-            <textarea id="message" name="message" rows="4" required></textarea><br><br>
+            <!-- Betreff als Text-Feld (field block) -->
+            <label for="subject">Subject</label>
+            <input type="text" id="subject" name="fi-text-subject" style="width:100%; padding:0.5rem; margin-bottom:1rem; background:#222; border:1px solid #444; color:white;">
 
-            <input type="submit" value="Send">
+            <!-- Nachricht als Text-Feld (field block) -->
+            <label for="message">Message *</label>
+            <textarea id="message" name="fi-text-message" rows="4" required style="width:100%; padding:0.5rem; margin-bottom:1rem; background:#222; border:1px solid #444; color:white;"></textarea>
+
+            <!-- Optional: Honeypot gegen Spam (versteckt) -->
+            <input type="text" name="_gotcha" style="display:none;">
+
+            <button type="submit" style="background:gold; color:black; padding:0.75rem 1.5rem; border:none; border-radius:4px; font-weight:bold; cursor:pointer;">Send Message</button>
         </form>
+
+        <!-- Platz für Erfolgs-/Fehlermeldung -->
+        <p id="form-result"></p>
 
         <h2>Follow us on Social Media</h2>
         <p>
@@ -196,5 +220,34 @@
             <a href="profile.html">Profile</a>
         </div>
     </footer>
+
+    <!-- Forminit SDK einbinden -->
+    <script src="https://forminit.com/sdk/v1/forminit.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const forminit = new Forminit();
+            const FORM_ID = '7ktpdl3xza8'; // gleiche Form-ID wie beim Genesis-Programm
+
+            const form = document.getElementById('contact-form');
+            const resultEl = document.getElementById('form-result');
+
+            form.addEventListener('submit', async function(event) {
+                event.preventDefault();
+
+                // FormData aus dem Formular erstellen – enthält alle fi- Felder
+                const formData = new FormData(form);
+
+                const { data, redirectUrl, error } = await forminit.submit(FORM_ID, formData);
+
+                if (error) {
+                    resultEl.innerHTML = `<span class="error-message">❌ ${error.message}</span>`;
+                    return;
+                }
+
+                resultEl.innerHTML = '<span class="success-message">✅ Message sent successfully! We will get back to you soon.</span>';
+                form.reset();
+            });
+        });
+    </script>
 </body>
 </html>
