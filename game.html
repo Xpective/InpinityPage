@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Inpinity - Pregame Demo</title>
+    <title>Inpinity - Pregame Demo: Code Breaker</title>
     <link rel="stylesheet" href="css/base.css" />
     <link rel="stylesheet" href="css/layout.css" />
     <link rel="stylesheet" href="css/animations.css" />
@@ -25,8 +25,8 @@
     <link rel="icon" type="image/png" href="favicon.webp" />
     <meta name="keywords" content="Inpinity, Game Design, Game Development, Platform, Collaboration, Forum, Tools, GameDesign, AI Development, Games of future, programming, programs, python gui" />
     <meta name="author" content="Xpective" />
-    <meta property="og:title" content="Inpinity - Pregame Demo" />
-    <meta property="og:description" content="Play the Inpinity pregame demo and support the development of the real game with $INPI tokens." />
+    <meta property="og:title" content="Inpinity - Pregame Demo: Code Breaker" />
+    <meta property="og:description" content="Play the Inpinity pregame demo – a blockchain-themed puzzle game. Support development with $INPI tokens." />
     <meta property="og:image" content="logo_background.jpg" />
     <meta property="og:url" content="https://inpinity.online/game.html" />
     <meta name="twitter:card" content="logo_background.webp" />
@@ -42,8 +42,8 @@
             width: 100%;
             padding: 1rem;
         }
-        #pingPongCanvas {
-            background: #222;
+        #gameCanvas {
+            background: #1a1a2a;
             display: block;
             width: 100%;
             max-width: 800px;
@@ -52,7 +52,8 @@
             border: 2px solid var(--quinary-color, gold);
             border-radius: 8px;
             box-shadow: 0 0 20px rgba(255,215,0,0.3);
-            touch-action: none; /* prevent scrolling while touching canvas */
+            touch-action: none;
+            cursor: crosshair;
         }
         .score-board {
             color: white;
@@ -124,6 +125,19 @@
         .warning-note a {
             color: gold;
         }
+        .presale-note {
+            background: rgba(255,215,0,0.1);
+            border: 1px solid gold;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 2rem auto;
+            max-width: 800px;
+            text-align: center;
+        }
+        .presale-note a {
+            color: gold;
+            font-weight: bold;
+        }
         .partners-section {
             display: flex;
             justify-content: center;
@@ -151,6 +165,18 @@
             color: black;
             transform: scale(1.05);
         }
+        .game-instruction {
+            background: #2a2a2a;
+            border-left: 4px solid var(--primary-cyan);
+            padding: 1rem;
+            margin: 2rem 0;
+            border-radius: 0 8px 8px 0;
+            text-align: left;
+        }
+        .game-instruction h3 {
+            color: var(--primary-cyan);
+            margin-top: 0;
+        }
     </style>
 </head>
 <body>
@@ -164,11 +190,12 @@
                 <li><a aria-label="Collaboration" href="collaboration.html">Collaboration</a></li>
                 <li><a aria-label="Register" href="register.html">Register</a></li>
                 <li><a aria-label="About" href="about.html">About</a></li>
-                <li><a aria-label="Whitepaper" href="https://github.com/Xpective/InpinityPage/raw/3923cf22782286d60574c8ae9b92e693cb314215/Inpinity%20Whitepaper%20.pdf" target="_blank" rel="noopener">Whitepaper</a></li>
+                <li><a aria-label="Whitepaper" href="whitepaper.html">Whitepaper</a></li>
                 <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
                 <li><a aria-label="Guestbook" href="guestbook.html">Guestbook</a></li>
                 <li><a aria-label="Advertising" href="advertising.html">Advertising</a></li>
                 <li><a aria-label="Profile" href="profile.html">Profile</a></li>
+                <li><a aria-label="Staking" href="staking.html">Staking</a></li>
                 <div class="themeDots">
                     <div class="dot light" title="Light Theme"></div>
                     <div class="dot dark" title="Dark Theme"></div>
@@ -206,30 +233,43 @@
             <p>⚠️ <strong>Important Update:</strong> We have withdrawn from ToshiMart due to phishing concerns. Our new INPI token is <code>0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</code>. All official contracts are listed on our <a href="index.html">homepage</a>. Do not interact with the old token or ToshiMart pools.</p>
         </div>
 
-        <!-- Partners Section (ToshiMart removed) -->
+        <!-- Presale Note -->
+        <div class="presale-note">
+            <p>🔥 <strong>PRESALE LIVE NOW:</strong> 2,000,000 INPI per 1 ETH until March 25, 2026. <a href="https://inpinity.online/token/">👉 Join the Presale</a></p>
+        </div>
+
+        <!-- Partners Section -->
         <div class="partners-section">
             <div class="partner-item"><a href="https://base.org/" target="_blank">⚡ Base L2</a></div>
             <div class="partner-item"><a href="https://uniswap.org/" target="_blank">🦄 Uniswap</a></div>
         </div>
 
-        <h1 style="color: gold; text-align: center;">⚡ Inpinity Pregame ⚡</h1>
+        <h1 style="color: gold; text-align: center;">⚡ Inpinity: Code Breaker ⚡</h1>
         <p style="text-align: center; color: #ccc; max-width: 600px;">
-            This is a <strong>pregame demo</strong> – a taste of what’s coming!<br>
-            Play, have fun, and support the development of the <strong>real Inpinity game</strong> by donating $INPI tokens (new contract).
+            This <strong>pregame demo</strong> gives you a taste of blockchain-themed gameplay.<br>
+            Catch the data packets (golden rings) to score points and support development!
         </p>
 
-        <!-- Score display integrated above canvas -->
+        <!-- Score display -->
         <div class="score-board" id="score">Score: 0</div>
 
-        <!-- Canvas for the game -->
-        <canvas id="pingPongCanvas"></canvas>
+        <!-- Game Canvas -->
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- Game Instructions -->
+        <div class="game-instruction">
+            <h3>🎮 How to Play</h3>
+            <p><strong>Move your mouse or finger</strong> left/right to control the collector paddle at the bottom. <strong>Golden rings</strong> (data packets) appear at the top – catch them with your paddle to earn points. Each catch increases your score by 10. The game speeds up as you progress!</p>
+            <p><span style="color: gold;">Every 50 points</span> – the speed increases, and the collector's AI opponent gets faster too. How long can you keep up?</p>
+            <p><small>This is a simplified demo. The full Inpinity game will feature blockchain integration, NFT assets, and a rich gaming economy.</small></p>
+        </div>
 
         <!-- Donation / Support Panel -->
         <div class="info-panel">
             <h2>🎮 Support the Real Game Development</h2>
             <p>
                 Every <strong>$INPI token</strong> you send helps the team (Xpective) build the full gaming experience.<br>
-                Donations are added directly to the <strong>sale liquidity</strong>, ensuring a healthy ecosystem for the upcoming marketplace, NFTs, and in-game utilities.
+                Donations are added directly to the <strong>development fund</strong> and support our roadmap.
             </p>
             <div style="margin: 1rem 0;">
                 <p><strong>Team Donation Wallet (send $INPI here):</strong></p>
@@ -250,9 +290,9 @@
             </p>
         </div>
 
-        <!-- Optional: additional info links -->
+        <!-- Additional info links -->
         <p style="text-align: center;">
-            <a href="whitepaper.html" target="_blank">📄 Read the Whitepaper</a> &nbsp;|&nbsp;
+            <a href="whitepaper.html">📄 Read the Whitepaper</a> &nbsp;|&nbsp;
             <a href="https://discord.gg/95yj6Eg6" target="_blank" rel="noopener">💬 Join Discord</a>
         </p>
     </main>
@@ -267,15 +307,17 @@
             <a href="guestbook.html">Guestbook</a>
             <a href="advertising.html">Advertising</a>
             <a href="profile.html">Profile</a>
+            <a href="staking.html">Staking</a>
+            <a href="whitepaper.html">Whitepaper</a>
         </div>
     </footer>
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            const canvas = document.getElementById('pingPongCanvas');
+            const canvas = document.getElementById('gameCanvas');
             const ctx = canvas.getContext('2d');
 
-            // Set canvas size dynamically, maintaining aspect ratio
+            // Set canvas size dynamically
             const maxWidth = 800;
             const containerWidth = Math.min(window.innerWidth * 0.9, maxWidth);
             canvas.width = containerWidth;
@@ -283,144 +325,161 @@
 
             let score = 0;
             let gameActive = true;
-            let baseBallSpeed = 5;          // base speed
-            let ballSpeed = baseBallSpeed;   // current speed (will increase)
-            let npcBaseSpeed = 4;
+            let baseBallSpeed = 4;
+            let ballSpeed = baseBallSpeed;
+            let npcBaseSpeed = 3;
             let npcSpeed = npcBaseSpeed;
 
-            // start with 3 holes
-            let holes = [];
+            // Data packets (rings) – start with 3
+            let rings = [];
             for (let i = 0; i < 3; i++) {
-                holes.push({
-                    x: Math.random() * (canvas.width - 50) + 25,
-                    radius: 50
+                rings.push({
+                    x: Math.random() * (canvas.width - 60) + 30,
+                    y: 30 + Math.random() * 50,
+                    radius: 25 + Math.random() * 15,
+                    speedX: (Math.random() - 0.5) * ballSpeed * 1.5,
+                    speedY: ballSpeed * (0.5 + Math.random() * 0.5),
+                    color: `hsl(${Math.random() * 30 + 45}, 100%, 60%)` // golden tones
                 });
             }
 
-            let ball = {
-                x: canvas.width / 2,
-                y: canvas.height / 2,
-                radius: 10,
-                deltaX: ballSpeed,
-                deltaY: ballSpeed,
-                color: "#FFF"
-            };
-
+            // Collector paddle (player)
             let paddle = {
                 width: 100,
                 height: 20,
                 x: canvas.width / 2 - 50,
-                y: canvas.height - 30
+                y: canvas.height - 40
             };
 
-            let npcPaddle = {
-                width: 100,
+            // AI opponent (data interceptor) – visual element only
+            let aiPaddle = {
+                width: 80,
                 height: 20,
-                x: canvas.width / 2 - 50,
-                y: 30
+                x: canvas.width / 2 - 40,
+                y: 20
             };
 
-            function drawBall() {
-                ctx.beginPath();
-                ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-                ctx.fillStyle = ball.color;
-                ctx.fill();
-                ctx.closePath();
-            }
-
-            function drawPaddle() {
-                ctx.beginPath();
-                ctx.rect(paddle.x, paddle.y, paddle.width, paddle.height);
-                ctx.fillStyle = "#FFF";
-                ctx.fill();
-                ctx.closePath();
-            }
-
-            function drawNpcPaddle() {
-                ctx.beginPath();
-                ctx.rect(npcPaddle.x, npcPaddle.y, npcPaddle.width, npcPaddle.height);
-                ctx.fillStyle = "#FF6347"; // Tomato red for NPC paddle
-                ctx.fill();
-                ctx.closePath();
-            }
-
-            function drawHoles() {
-                holes.forEach(hole => {
+            function drawRings() {
+                rings.forEach(ring => {
                     ctx.beginPath();
-                    ctx.arc(hole.x, 25, hole.radius, 0, Math.PI * 2);
-                    ctx.strokeStyle = "rgba(255,215,0,0.5)";
+                    ctx.arc(ring.x, ring.y, ring.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = ring.color;
+                    ctx.shadowColor = 'gold';
+                    ctx.shadowBlur = 15;
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                    ctx.strokeStyle = '#fff';
                     ctx.lineWidth = 2;
                     ctx.stroke();
                     ctx.closePath();
                 });
             }
 
+            function drawPaddle() {
+                ctx.beginPath();
+                ctx.rect(paddle.x, paddle.y, paddle.width, paddle.height);
+                ctx.fillStyle = "#FFF";
+                ctx.shadowColor = 'cyan';
+                ctx.shadowBlur = 15;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.closePath();
+            }
+
+            function drawAiPaddle() {
+                ctx.beginPath();
+                ctx.rect(aiPaddle.x, aiPaddle.y, aiPaddle.width, aiPaddle.height);
+                ctx.fillStyle = "#FF6347";
+                ctx.shadowColor = 'gold';
+                ctx.shadowBlur = 10;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.closePath();
+            }
+
+            function drawBackground() {
+                // Draw subtle grid lines for "cyber" effect
+                ctx.strokeStyle = '#2a2a4a';
+                ctx.lineWidth = 1;
+                for (let i = 0; i < canvas.width; i += 50) {
+                    ctx.beginPath();
+                    ctx.moveTo(i, 0);
+                    ctx.lineTo(i, canvas.height);
+                    ctx.strokeStyle = '#2a2a4a';
+                    ctx.stroke();
+                }
+                for (let i = 0; i < canvas.height; i += 50) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, i);
+                    ctx.lineTo(canvas.width, i);
+                    ctx.strokeStyle = '#2a2a4a';
+                    ctx.stroke();
+                }
+            }
+
             function updateGame() {
                 if (!gameActive) return;
 
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                drawBall();
+                drawBackground();
+                drawRings();
                 drawPaddle();
-                drawNpcPaddle();
-                drawHoles();
+                drawAiPaddle();
                 document.getElementById('score').innerText = `Score: ${score}`;
 
-                ball.x += ball.deltaX;
-                ball.y += ball.deltaY;
+                // Update ring positions
+                rings.forEach(ring => {
+                    ring.x += ring.speedX;
+                    ring.y += ring.speedY;
 
-                // Wall collisions
-                if (ball.x - ball.radius < 0 || ball.x + ball.radius > canvas.width) {
-                    ball.deltaX = -ball.deltaX;
-                }
-                if (ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height) {
-                    ball.deltaY = -ball.deltaY;
-                }
+                    // Bounce off side walls
+                    if (ring.x - ring.radius < 0 || ring.x + ring.radius > canvas.width) {
+                        ring.speedX = -ring.speedX;
+                    }
 
-                // Player paddle collision
-                if (ball.y + ball.radius > paddle.y && 
-                    ball.x > paddle.x && 
-                    ball.x < paddle.x + paddle.width) {
-                    ball.deltaY = -ball.deltaY;
-                }
+                    // Bounce off top (but keep within play area)
+                    if (ring.y - ring.radius < 0) {
+                        ring.speedY = -ring.speedY;
+                        ring.y = ring.radius;
+                    }
 
-                // NPC paddle collision
-                if (ball.y - ball.radius < npcPaddle.y + npcPaddle.height && 
-                    ball.x > npcPaddle.x && 
-                    ball.x < npcPaddle.x + npcPaddle.width) {
-                    ball.deltaY = -ball.deltaY;
-                }
+                    // If ring passes bottom, respawn at top
+                    if (ring.y + ring.radius > canvas.height) {
+                        ring.y = 20 + Math.random() * 50;
+                        ring.x = Math.random() * (canvas.width - 60) + 30;
+                        ring.speedY = Math.abs(ring.speedY);
+                    }
+                });
 
-                // NPC AI
-                if (npcPaddle.x + npcPaddle.width / 2 < ball.x) {
-                    npcPaddle.x += npcSpeed;
-                } else if (npcPaddle.x + npcPaddle.width / 2 > ball.x) {
-                    npcPaddle.x -= npcSpeed;
+                // AI movement (simple following)
+                if (aiPaddle.x + aiPaddle.width / 2 < paddle.x) {
+                    aiPaddle.x += npcSpeed * 0.5;
+                } else {
+                    aiPaddle.x -= npcSpeed * 0.5;
                 }
-                // Keep NPC paddle inside canvas
-                npcPaddle.x = Math.max(0, Math.min(canvas.width - npcPaddle.width, npcPaddle.x));
+                aiPaddle.x = Math.max(0, Math.min(canvas.width - aiPaddle.width, aiPaddle.x));
 
-                // Hole collision (scoring)
-                holes.forEach((hole, index) => {
-                    const dist = Math.sqrt((ball.x - hole.x) ** 2 + (ball.y - 25) ** 2);
-                    if (dist < hole.radius + ball.radius) {
+                // Collision detection: paddle with rings
+                rings.forEach((ring, index) => {
+                    const dist = Math.sqrt((ring.x - (paddle.x + paddle.width/2)) ** 2 + (ring.y - paddle.y) ** 2);
+                    if (dist < ring.radius + paddle.height/2 && ring.y + ring.radius > paddle.y) {
+                        // Score!
                         score += 10;
-                        ball.color = "#" + ((1 << 24) * Math.random() | 0).toString(16).padStart(6, '0');
+                        ring.color = `hsl(${Math.random() * 30 + 45}, 100%, 60%)`;
 
-                        // Increase speed every 50 points
+                        // Respawn ring at top
+                        ring.y = 20 + Math.random() * 50;
+                        ring.x = Math.random() * (canvas.width - 60) + 30;
+                        ring.speedY = Math.abs(ring.speedY);
+
+                        // Increase difficulty every 50 points
                         if (score % 50 === 0) {
-                            ballSpeed = baseBallSpeed + Math.floor(score / 50) * 0.5;
-                            // adjust ball direction speed (keep sign)
-                            ball.deltaX = ball.deltaX > 0 ? ballSpeed : -ballSpeed;
-                            ball.deltaY = ball.deltaY > 0 ? ballSpeed : -ballSpeed;
-                            npcSpeed = npcBaseSpeed + Math.floor(score / 50) * 0.3;
-                        }
-
-                        holes.splice(index, 1);
-                        // keep at least 3 holes
-                        while (holes.length < 3) {
-                            holes.push({
-                                x: Math.random() * (canvas.width - 50) + 25,
-                                radius: 50
+                            ballSpeed = baseBallSpeed + Math.floor(score / 50) * 0.3;
+                            npcSpeed = npcBaseSpeed + Math.floor(score / 50) * 0.2;
+                            // Speed up all rings
+                            rings.forEach(r => {
+                                r.speedX = r.speedX > 0 ? ballSpeed * 1.2 : -ballSpeed * 1.2;
+                                r.speedY = ballSpeed * (0.7 + Math.random() * 0.5);
                             });
                         }
                     }
