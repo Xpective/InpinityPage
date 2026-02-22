@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inpinity - Advertising</title>
+    <title>Inpinity - Advertising & Future Vision</title>
     <link rel="stylesheet" href="css/base.css" />
     <link rel="stylesheet" href="css/layout.css" />
     <link rel="stylesheet" href="css/animations.css" />
@@ -140,6 +140,19 @@
         .warning-note a {
             color: gold;
         }
+        .presale-note {
+            background: rgba(255,215,0,0.1);
+            border: 1px solid gold;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 2rem auto;
+            max-width: 800px;
+            text-align: center;
+        }
+        .presale-note a {
+            color: gold;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -153,11 +166,12 @@
                 <li><a aria-label="Collaboration" href="collaboration.html">Collaboration</a></li>
                 <li><a aria-label="Register" href="register.html">Register</a></li>
                 <li><a aria-label="About" href="about.html">About</a></li>
-                <li><a aria-label="Whitepaper" href="https://github.com/Xpective/InpinityPage/raw/3923cf22782286d60574c8ae9b92e693cb314215/Inpinity%20Whitepaper%20.pdf" target="_blank" rel="noopener">Whitepaper</a></li>
+                <li><a aria-label="Whitepaper" href="whitepaper.html">Whitepaper</a></li>
                 <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
                 <li><a aria-label="Guestbook" href="guestbook.html">Guestbook</a></li>
                 <li><a aria-label="Advertising" href="advertising.html">Advertising</a></li>
                 <li><a aria-label="Profile" href="profile.html">Profile</a></li>
+                <li><a aria-label="Staking" href="staking.html">Staking</a></li>
                 <div class="themeDots">
                     <div class="dot light" title="Light Theme"></div>
                     <div class="dot dark" title="Dark Theme"></div>
@@ -192,12 +206,17 @@
     <main class="container">
         <h1>📢 Advertising on Inpinity</h1>
 
-        <!-- Hinweis zu ToshiMart (wie auf anderen Seiten) -->
+        <!-- Hinweis zu ToshiMart -->
         <div class="warning-note">
             <p>⚠️ <strong>Important Update:</strong> We have withdrawn from ToshiMart due to phishing concerns. Our new INPI token is <code>0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</code>. All official contracts are listed on our <a href="index.html">homepage</a>. Do not interact with the old token or ToshiMart pools.</p>
         </div>
 
-        <!-- Partners Section (ToshiMart entfernt) -->
+        <!-- Presale-Hinweis (neu) -->
+        <div class="presale-note">
+            <p>🔥 <strong>PRESALE LIVE NOW:</strong> 2,000,000 INPI per 1 ETH until March 25, 2026. Don't miss this opportunity! <a href="https://inpinity.online/token/">👉 Join the Presale</a></p>
+        </div>
+
+        <!-- Partners Section -->
         <div class="partners-section">
             <div class="partner-item">
                 <a href="https://base.org/" target="_blank" rel="noopener">⚡ Base L2</a>
@@ -211,7 +230,14 @@
         <div class="token-info">
             <h2>💰 The $ADVERT Sub‑Token</h2>
             <p><strong>$ADVERT</strong> is the dedicated advertising token of the Inpinity ecosystem. It is earned by holding and using <strong>$INPI</strong> tokens (new INPI contract: <code>0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</code>). Advertisers can spend $ADVERT to place ads across our platforms – including banner ads, sidebar placements, inline content, and more. This creates a sustainable, circular economy between gamers, developers, and advertisers.</p>
-            <p>Learn more in our <a href="https://github.com/Xpective/InpinityPage/raw/3923cf22782286d60574c8ae9b92e693cb314215/Inpinity%20Whitepaper%20.pdf" target="_blank" rel="noopener" style="color: gold;">Whitepaper</a>.</p>
+            <p>Learn more in our <a href="whitepaper.html" target="_blank" rel="noopener" style="color: gold;">Whitepaper</a>.</p>
+        </div>
+
+        <!-- Staking Info (neu) -->
+        <div class="token-info" style="border-left-color: var(--primary-cyan);">
+            <h2>⚡ Staking is Live</h2>
+            <p>Earn passive rewards by staking your $INPI tokens. Current reward rate: <strong>~0.00475 INPI per second</strong> (≈150,000 INPI per year, designed to last over 1,000 years).</p>
+            <p><a href="staking.html" style="color: gold;">👉 Go to Staking Dashboard</a></p>
         </div>
 
         <!-- Example Ad Placements (Demo) -->
@@ -272,6 +298,8 @@
             <a href="guestbook.html">Guestbook</a>
             <a href="advertising.html">Advertising</a>
             <a href="profile.html">Profile</a>
+            <a href="staking.html">Staking</a>
+            <a href="whitepaper.html">Whitepaper</a>
         </div>
     </footer>
 </body>
