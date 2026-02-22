@@ -171,6 +171,26 @@
         .warning-note a {
             color: gold;
         }
+        .presale-note {
+            background: rgba(255,215,0,0.1);
+            border: 1px solid gold;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 2rem auto;
+            max-width: 800px;
+            text-align: center;
+        }
+        .presale-note a {
+            color: gold;
+            font-weight: bold;
+        }
+        .staking-info {
+            background: #2a2a2a;
+            border-left: 4px solid var(--primary-cyan);
+            padding: 1rem;
+            margin: 2rem 0;
+            border-radius: 0 8px 8px 0;
+        }
     </style>
 </head>
 <body>
@@ -184,11 +204,12 @@
                 <li><a aria-label="Collaboration" href="collaboration.html">Collaboration</a></li>
                 <li><a aria-label="Register" href="register.html">Register</a></li>
                 <li><a aria-label="About" href="about.html">About</a></li>
-                <li><a aria-label="Whitepaper" href="https://github.com/Xpective/InpinityPage/raw/3923cf22782286d60574c8ae9b92e693cb314215/Inpinity%20Whitepaper%20.pdf" target="_blank" rel="noopener">Whitepaper</a></li>
+                <li><a aria-label="Whitepaper" href="whitepaper.html">Whitepaper</a></li>
                 <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
                 <li><a aria-label="Guestbook" href="guestbook.html">Guestbook</a></li>
                 <li><a aria-label="Advertising" href="advertising.html">Advertising</a></li>
                 <li><a aria-label="Profile" href="profile.html">Profile</a></li>
+                <li><a aria-label="Staking" href="staking.html">Staking</a></li>
                 <div class="themeDots">
                     <div class="dot light" title="Light Theme"></div>
                     <div class="dot dark" title="Dark Theme"></div>
@@ -226,15 +247,27 @@
             <p>⚠️ <strong>Important Update:</strong> We have withdrawn from ToshiMart due to phishing concerns. Our new INPI token is <code>0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</code>. All official contracts are listed on our <a href="index.html">homepage</a>. Do not interact with the old token or ToshiMart pools.</p>
         </div>
 
+        <!-- Presale Note (NEW) -->
+        <div class="presale-note">
+            <p>🔥 <strong>PRESALE LIVE NOW:</strong> 2,000,000 INPI per 1 ETH until March 25, 2026. Don't miss this opportunity! <a href="https://inpinity.online/token/">👉 Join the Presale</a></p>
+        </div>
+
         <section class="hero">
             <h1 class="hero-title">🚀 Inpinity Features</h1>
             <h2>Discover powerful tools that blend game development with blockchain technology.</h2>
         </section>
 
-        <!-- Partners Section (ToshiMart entfernt) -->
+        <!-- Partners Section -->
         <div class="partners-section">
             <div class="partner-item"><a href="https://base.org/" target="_blank">⚡ Base L2</a></div>
             <div class="partner-item"><a href="https://uniswap.org/" target="_blank">🦄 Uniswap</a></div>
+        </div>
+
+        <!-- Staking Info (NEW) -->
+        <div class="staking-info">
+            <h3 style="color: var(--primary-cyan); margin-top: 0;">⚡ Staking is Live – Earn Passive Rewards</h3>
+            <p>Stake your $INPI tokens and earn rewards continuously. Current reward rate: <strong>~0.00475 INPI per second</strong> (≈150,000 INPI per year, designed to last over 1,000 years).</p>
+            <p><a href="staking.html" style="color: gold;">👉 Go to Staking Dashboard</a></p>
         </div>
 
         <!-- Feature Cards -->
@@ -243,17 +276,17 @@
             <div class="tools-container">
                 <div class="tool" onclick="showModal('stakingModal')">
                     <h2>📈 Staking Dashboard</h2>
-                    <p>Stake your $INPI tokens and earn passive rewards. Track your APY and rewards in real time.</p>
-                    <button class="xbutton">Learn More</button>
+                    <p>Stake your $INPI tokens and earn passive rewards. Current rate: ~0.00475 INPI/sec.</p>
+                    <button class="xbutton" onclick="window.location.href='staking.html';">Go to Staking</button>
                 </div>
             </div>
 
-            <!-- Card 2: NFT Generator (based on previous ZIP upload) -->
+            <!-- Card 2: NFT Generator -->
             <div class="tools-container">
                 <div class="tool" onclick="showModal('nftModal')">
                     <h2>🎨 NFT Generator</h2>
                     <p>Upload layered PNGs and instantly generate unique NFTs – ready to be minted on Base.</p>
-                    <button class="xbutton">Try Generator</button>
+                    <button class="xbutton" onclick="showModal('nftModal')">Try Generator</button>
                 </div>
             </div>
 
@@ -262,16 +295,16 @@
                 <div class="tool" onclick="showModal('advertModal')">
                     <h2>📢 $ADVERT Portal</h2>
                     <p>Use your $ADVERT tokens to place banner ads, promoted content, and reach our gaming community.</p>
-                    <button class="xbutton">Advertise</button>
+                    <button class="xbutton" onclick="showModal('advertModal')">Learn More</button>
                 </div>
             </div>
 
             <!-- Card 4: Wallet Analytics -->
             <div class="tools-container">
-                <div class="tool" onclick="showModal('walletModal')">
+                <div class="tool" onclick="window.location.href='profile.html'">
                     <h2>👛 Wallet Analytics</h2>
                     <p>Connect your wallet to view your $INPI and ETH balances, transaction history, and token holdings.</p>
-                    <button class="xbutton">Check Wallet</button>
+                    <button class="xbutton">Go to Profile</button>
                 </div>
             </div>
 
@@ -284,21 +317,22 @@
                 </div>
             </div>
 
-            <!-- Card 6: Collaboration Hub -->
+            <!-- Card 6: Collaboration Hub & Genesis Program -->
             <div class="tools-container">
                 <div class="tool" onclick="window.location.href='collaboration.html'">
                     <h2>🤝 Collaboration Hub</h2>
-                    <p>Find teammates, share projects, and co‑create the future of gaming with the community.</p>
+                    <p>Find teammates, share projects, and join our exclusive Genesis Program for real‑world rewards (olive oil!).</p>
                     <button class="xbutton">Join Hub</button>
                 </div>
             </div>
         </div>
 
-        <!-- Modals (hidden by default) -->
+        <!-- Modals (updated with current information) -->
         <div id="stakingModal" class="modal">
             <div class="modal-content">
                 <h2>Staking Dashboard</h2>
-                <p>🔥 Coming in Q2 2026! Stake your $INPI (new token) and earn rewards. Stay tuned.</p>
+                <p>✅ Staking is LIVE! Stake your $INPI tokens and earn rewards. Current reward rate: ~0.00475 INPI per second (≈150,000 INPI/year). The staking contract is verified and holds 150M INPI for rewards.</p>
+                <p><a href="staking.html" style="color:gold;">👉 Go to Staking Dashboard</a></p>
                 <button class="close" onclick="hideModal('stakingModal')">Close</button>
             </div>
         </div>
@@ -306,7 +340,8 @@
         <div id="nftModal" class="modal">
             <div class="modal-content">
                 <h2>NFT Generator</h2>
-                <p>🧪 This tool is in beta. Upload a ZIP with layers (background, eyes, body, etc.) to preview your NFT. Full minting on Base coming soon.</p>
+                <p>🧪 This tool is in beta. Upload a ZIP with layers (background, eyes, body, etc.) to preview your NFT. Full minting on Base coming soon. Genesis NFT collection planned for Q4 2026.</p>
+                <p><a href="collaboration.html#nft" style="color:gold;">Try the Generator</a></p>
                 <button class="close" onclick="hideModal('nftModal')">Close</button>
             </div>
         </div>
@@ -314,7 +349,8 @@
         <div id="advertModal" class="modal">
             <div class="modal-content">
                 <h2>$ADVERT Portal</h2>
-                <p>📅 Planned for Q2 2027. Earn $ADVERT by holding $INPI (new token) and use it to promote your projects.</p>
+                <p>📅 Planned for Q2 2027. Earn $ADVERT by holding $INPI and use it to promote your projects. This will create a sustainable circular economy between gamers, developers, and advertisers.</p>
+                <p>Learn more in our <a href="whitepaper.html" style="color:gold;">Whitepaper</a>.</p>
                 <button class="close" onclick="hideModal('advertModal')">Close</button>
             </div>
         </div>
@@ -322,7 +358,7 @@
         <div id="walletModal" class="modal">
             <div class="modal-content">
                 <h2>Wallet Analytics</h2>
-                <p>🔌 Connect your wallet on the <a href="profile.html" style="color:gold;">Profile page</a> to see your balances and transaction history. Make sure you're using the new INPI token.</p>
+                <p>🔌 Connect your wallet on the <a href="profile.html" style="color:gold;">Profile page</a> to see your balances and transaction history. Make sure you're using the new INPI token: <code style="font-size:0.8rem;">0x232F...7d0D</code></p>
                 <button class="close" onclick="hideModal('walletModal')">Close</button>
             </div>
         </div>
@@ -330,7 +366,7 @@
         <!-- Guestbook Call-to-Action -->
         <div class="guestbook-cta">
             <h2>✍️ Leave your mark</h2>
-            <p>Sign our guestbook – your message will soon be immortalized on the Base blockchain.</p>
+            <p>Sign our guestbook – your message will soon be immortalized on the Base blockchain. Be part of Inpinity history!</p>
             <a href="guestbook.html" class="guestbook-link">📖 Go to Guestbook</a>
         </div>
     </main>
@@ -345,6 +381,8 @@
             <a href="guestbook.html">Guestbook</a>
             <a href="advertising.html">Advertising</a>
             <a href="profile.html">Profile</a>
+            <a href="staking.html">Staking</a>
+            <a href="whitepaper.html">Whitepaper</a>
         </div>
     </footer>
 
