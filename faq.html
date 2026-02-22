@@ -112,6 +112,27 @@
         .warning-note a {
             color: gold;
         }
+        .presale-note {
+            background: rgba(255,215,0,0.1);
+            border: 1px solid gold;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 2rem auto;
+            max-width: 800px;
+            text-align: center;
+        }
+        .presale-note a {
+            color: gold;
+            font-weight: bold;
+        }
+        .token-address {
+            font-family: monospace;
+            background: #111;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            color: #ccc;
+            word-break: break-all;
+        }
     </style>
 </head>
 <body>
@@ -119,17 +140,18 @@
         <nav>
             <ul>
                 <li><a aria-label="Home" href="index.html">Home</a></li>
-                <li><a aria-label="Services" href="services.html">Services</a></li>
+                <li><a aria-label="Features" href="features.html">Features</a></li>
                 <li><a aria-label="Game" href="game.html">Game</a></li>
                 <li><a aria-label="Forum" href="forum.html">Forum</a></li>
                 <li><a aria-label="Collaboration" href="collaboration.html">Collaboration</a></li>
                 <li><a aria-label="Register" href="register.html">Register</a></li>
-                <li><a aria-label="About us" href="about.html">About</a></li>
-                <li><a aria-label="Whitepaper" href="https://github.com/Xpective/InpinityPage/raw/3923cf22782286d60574c8ae9b92e693cb314215/Inpinity%20Whitepaper%20.pdf" target="_blank" rel="noopener">Whitepaper</a></li>
+                <li><a aria-label="About" href="about.html">About</a></li>
+                <li><a aria-label="Whitepaper" href="whitepaper.html">Whitepaper</a></li>
                 <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
                 <li><a aria-label="Guestbook" href="guestbook.html">Guestbook</a></li>
                 <li><a aria-label="Advertising" href="advertising.html">Advertising</a></li>
                 <li><a aria-label="Profile" href="profile.html">Profile</a></li>
+                <li><a aria-label="Staking" href="staking.html">Staking</a></li>
                 <div class="themeDots">
                     <div class="dot light" title="Light Theme"></div>
                     <div class="dot dark" title="Dark Theme"></div>
@@ -167,6 +189,11 @@
             <p>⚠️ <strong>Important Update:</strong> We have withdrawn from ToshiMart due to phishing concerns. Our new INPI token is <code>0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</code>. All official contracts are listed on our <a href="index.html">homepage</a>. Do not interact with the old token or ToshiMart pools.</p>
         </div>
 
+        <!-- Presale Note (NEW) -->
+        <div class="presale-note">
+            <p>🔥 <strong>PRESALE LIVE NOW:</strong> 2,000,000 INPI per 1 ETH until March 25, 2026. Don't miss this opportunity! <a href="https://inpinity.online/token/">👉 Join the Presale</a></p>
+        </div>
+
         <h1>FAQ - Frequently Asked Questions</h1>
         
         <!-- Search Bar (visual only) -->
@@ -182,21 +209,21 @@
             <details class="faq-item">
                 <summary class="faq-question">What is Inpinity?</summary>
                 <div class="faq-answer">
-                    <p>Inpinity is a decentralized ecosystem bridging blockchain technology, gaming, and digital advertising. It's a community-driven platform for game developers and enthusiasts to create, share, and grow. The native token $INPI powers staking, governance, in-game utilities, and more. For details, check our <a href="https://github.com/Xpective/InpinityPage/raw/3923cf22782286d60574c8ae9b92e693cb314215/Inpinity%20Whitepaper%20.pdf" target="_blank" rel="noopener">whitepaper</a>.</p>
+                    <p>Inpinity is a decentralized ecosystem bridging blockchain technology, gaming, and digital advertising. It's a community-driven platform for game developers and enthusiasts to create, share, and grow. The native token $INPI powers staking, governance, in-game utilities, and more. After migrating from a compromised launch partner (ToshiMart), we have re-established Inpinity with fully independent, verified contracts on Base. For details, check our <a href="whitepaper.html" target="_blank" rel="noopener">whitepaper</a>.</p>
                 </div>
             </details>
             
             <details class="faq-item">
                 <summary class="faq-question">How can I join the community?</summary>
                 <div class="faq-answer">
-                    <p>You can join our Discord server: <a href="https://discord.gg/95yj6Eg6" target="_blank" rel="noopener">https://discord.gg/95yj6Eg6</a>, follow us on Twitter <a href="https://twitter.com/unxpective" target="_blank" rel="noopener">@unxpective</a>, or join our Telegram group: <a href="https://t.me/+1hl5Ou-pGChhYmUy" target="_blank" rel="noopener">https://t.me/+1hl5Ou-pGChhYmUy</a>. All links are also available on our <a href="contact.html">Contact page</a>.</p>
+                    <p>You can join our Discord server: <a href="https://discord.gg/95yj6Eg6" target="_blank" rel="noopener">https://discord.gg/95yj6Eg6</a>, follow us on Twitter <a href="https://twitter.com/unxpective" target="_blank" rel="noopener">@unxpective</a>, or join our Telegram group: <a href="https://t.me/+1hl5Ou-pGChhYmUy" target="_blank" rel="noopener">https://t.me/+1hl5Ou-pGChhYmUy</a>. All links are also available on our <a href="contact.html">Contact page</a>. We also have a <a href="guestbook.html">Guestbook</a> where you can leave your mark!</p>
                 </div>
             </details>
             
             <details class="faq-item">
                 <summary class="faq-question">Where can I find the whitepaper?</summary>
                 <div class="faq-answer">
-                    <p>The Inpinity whitepaper is available on GitHub: <a href="https://github.com/Xpective/InpinityPage/raw/3923cf22782286d60574c8ae9b92e693cb314215/Inpinity%20Whitepaper%20.pdf" target="_blank" rel="noopener">Download PDF</a>. You can also access it via the "Whitepaper" link in the navigation menu.</p>
+                    <p>The Inpinity whitepaper is available directly on our website: <a href="whitepaper.html">whitepaper.html</a>. It contains detailed information about our tokenomics, roadmap, and vision. You can also access it via the "Whitepaper" link in the navigation menu.</p>
                 </div>
             </details>
         </div>
@@ -208,61 +235,85 @@
             <details class="faq-item">
                 <summary class="faq-question">What is the $INPI token?</summary>
                 <div class="faq-answer">
-                    <p>$INPI is the native utility token of Inpinity. Total supply is 1 billion tokens. It is used for staking, governance, rewards, in-game purchases, and will generate the $ADVERT sub-token for advertising utilities. <strong>New contract address:</strong> <code>0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</code> (the old address <code>0x15ac8e2c38f0c644123e61011e7113de56038453</code> is deprecated due to ToshiMart issues).</p>
+                    <p>$INPI is the native utility token of Inpinity. Total supply is fixed at <strong>1 billion tokens</strong>. It is used for staking, governance, rewards, in-game purchases, and will generate the $ADVERT sub-token for advertising utilities. <strong>New contract address:</strong> <code class="token-address">0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</code> (the old address <code>0x15ac8e2c38f0c644123e61011e7113de56038453</code> is deprecated due to ToshiMart issues).</p>
                 </div>
             </details>
             
             <details class="faq-item">
                 <summary class="faq-question">How can I buy $INPI?</summary>
                 <div class="faq-answer">
-                    <p>We are currently conducting a presale! Visit <a href="https://inpinity.online/token/" target="_blank" rel="noopener">https://inpinity.online/token/</a> to participate. The presale runs until March 5, 2026, 20:20 UTC. After that, $INPI will be listed on Uniswap (Base network). Always verify the contract address from our official channels.</p>
+                    <p>We are currently conducting a public presale! Visit <a href="https://inpinity.online/token/" target="_blank" rel="noopener">https://inpinity.online/token/</a> to participate. The presale offers <strong>2,000,000 INPI per 1 ETH</strong> and runs until <strong>March 25, 2026, 20:20 UTC</strong>. Minimum contribution is 0.01 ETH, maximum is 2 ETH. After the presale ends, participants can claim their tokens, and the liquidity pool will be created on Uniswap V4 and locked until 3033.</p>
+                    <p><strong>Presale contract (verified):</strong> <code class="token-address">0x0A650932cf2b5EB04ccA16E8836Ec2323C046C6b</code></p>
                 </div>
             </details>
             
             <details class="faq-item">
-                <summary class="faq-question">When does staking launch?</summary>
+                <summary class="faq-question">Is staking live? How does it work?</summary>
                 <div class="faq-answer">
-                    <p>Staking is scheduled for Q2 2026. The staking contract is already deployed at <code>0xF8c74E4fEe036C91228268E804f83eD8f55a6524</code> and will be activated soon. You will be able to stake your $INPI tokens to earn passive rewards.</p>
+                    <p>✅ <strong>Staking is LIVE!</strong> The staking contract is deployed at <code class="token-address">0xF8c74E4fEe036C91228268E804f83eD8f55a6524</code> and currently holds 150,000,000 INPI for rewards. The current reward rate is <strong>~0.00475 INPI per second</strong> (≈150,000 INPI per year), which is designed to last over 1,000 years, ensuring ultra‑long‑term sustainability.</p>
+                    <p>To stake, connect your wallet to the <a href="staking.html">Staking Dashboard</a>, approve the contract, and enter the amount you wish to stake. Rewards accumulate continuously and can be claimed at any time.</p>
+                </div>
+            </details>
+            
+            <details class="faq-item">
+                <summary class="faq-question">What are the tokenomics of $INPI?</summary>
+                <div class="faq-answer">
+                    <p>Total supply is 1,000,000,000 INPI, distributed as follows:</p>
+                    <ul>
+                        <li><strong>20% (200M):</strong> Liquidity – locked until 23 October 3033 in a dedicated LPLock contract (<code>0x89e1372bE50443B9311A6D1Be9C8682Af970E4F3</code>).</li>
+                        <li><strong>10% (100M):</strong> Team – vesting with 1‑year cliff and 3‑year linear release.</li>
+                        <li><strong>15% (150M):</strong> Staking rewards – currently active in the staking contract.</li>
+                        <li><strong>5% (50M):</strong> Events & Airdrops – for community growth and marketing.</li>
+                        <li><strong>50% (500M):</strong> Reserve & Ecosystem – held by the team for future development, partnerships, and strategic initiatives (150M of this is sold in the presale).</li>
+                    </ul>
+                    <p>All contracts are verified on BaseScan. More details in our <a href="whitepaper.html">whitepaper</a>.</p>
                 </div>
             </details>
             
             <details class="faq-item">
                 <summary class="faq-question">What is "Judgment Day"?</summary>
                 <div class="faq-answer">
-                    <p>"Judgment Day" is a key milestone event that unlocks the team & advisor tokens (20% of supply). Until then, those tokens are fully locked to ensure trust and long-term commitment. The exact definition of Judgment Day will be communicated to the community (e.g., reaching a certain number of holders, launching the game, etc.).</p>
-                </div>
-            </details>
-            
-            <details class="faq-item">
-                <summary class="faq-question">How do I stake my tokens?</summary>
-                <div class="faq-answer">
-                    <p>Once staking is live (Q2 2026), you will need to connect your wallet (e.g., MetaMask) to the Inpinity dApp and choose a staking period. Rewards accumulate based on the amount and duration staked. Step-by-step guides will be provided.</p>
+                    <p>"Judgment Day" is a key milestone event that unlocks the team & advisor tokens (10% of supply). Until then, those tokens are subject to a 1‑year cliff and 3‑year vesting. The exact definition of Judgment Day will be communicated to the community (e.g., reaching a certain number of holders, launching the game, or other significant achievements). This ensures long-term commitment and trust.</p>
                 </div>
             </details>
         </div>
         
-        <!-- Game & NFTs -->
+        <!-- Game, NFTs & Real-World Rewards -->
         <div class="faq-section">
-            <h2>Game & NFTs</h2>
+            <h2>Game, NFTs & Real-World Rewards</h2>
             
             <details class="faq-item">
                 <summary class="faq-question">What games are available?</summary>
                 <div class="faq-answer">
-                    <p>The first mini-game is planned for Q4 2026. A full-fledged game with NFT integration will follow. Stay tuned for updates on our social channels.</p>
+                    <p>We currently have a <a href="game.html">Pregame Demo</a> – a simple game that gives you a taste of what's coming. The full-fledged game "Inpinity: The Forge" is in active development, with a playable demo targeted for Q4 2026. It will feature blockchain integration, NFT assets, and an in-game token economy.</p>
                 </div>
             </details>
             
             <details class="faq-item">
                 <summary class="faq-question">How do I get NFTs?</summary>
                 <div class="faq-answer">
-                    <p>The first NFT collection "Inpinity Genesis" will be introduced in Q4 2026. Holders of $INPI may get exclusive minting rights. NFTs will be tradeable on our upcoming marketplace (Q1 2027).</p>
+                    <p>The first NFT collection "Inpinity Genesis" will be introduced in Q4 2026. Holders of $INPI may get exclusive minting rights. You can also experiment with our <a href="collaboration.html">NFT Generator</a> (in beta) by uploading layered PNGs to preview unique combinations. NFTs will be tradeable on our upcoming marketplace (Q1 2027).</p>
+                </div>
+            </details>
+            
+            <details class="faq-item">
+                <summary class="faq-question">What is the Genesis Program with olive oil rewards?</summary>
+                <div class="faq-answer">
+                    <p>We're launching an exclusive <strong>Genesis Program</strong> for the first 50 supporters who contribute to the project. Participants will receive:</p>
+                    <ul>
+                        <li>14,400 INPI instant bonus</li>
+                        <li>1 liter of premium cold‑pressed olive oil (after 6 months)</li>
+                        <li>A second liter after 12 months (total 3 liters)</li>
+                        <li>Option to stay in the pool and receive olive oil every year 🌿</li>
+                    </ul>
+                    <p>This program bridges digital and real-world rewards. Check the <a href="collaboration.html">Collaboration page</a> for details and to apply (whitelist, first‑come first‑served).</p>
                 </div>
             </details>
             
             <details class="faq-item">
                 <summary class="faq-question">Can I use NFTs in the game?</summary>
                 <div class="faq-answer">
-                    <p>Yes, by Q3 2027, NFTs will have full in-game utility (playable characters, skins, power-ups). More details will be revealed as development progresses.</p>
+                    <p>Yes, by Q3 2027, NFTs will have full in-game utility as playable characters, skins, power-ups, and more. The exact mechanics will be revealed as development progresses. Our vision is to create an interoperable asset ecosystem.</p>
                 </div>
             </details>
         </div>
@@ -274,21 +325,28 @@
             <details class="faq-item">
                 <summary class="faq-question">How do I join the Discord?</summary>
                 <div class="faq-answer">
-                    <p>Use this invite link: <a href="https://discord.gg/95yj6Eg6" target="_blank" rel="noopener">https://discord.gg/95yj6Eg6</a>. Introduce yourself and explore channels for game design, development, and token discussions.</p>
+                    <p>Use this invite link: <a href="https://discord.gg/95yj6Eg6" target="_blank" rel="noopener">https://discord.gg/95yj6Eg6</a>. Introduce yourself and explore channels for game design, development, token discussions, and the exclusive Genesis Program channel for whitelisted members.</p>
                 </div>
             </details>
             
             <details class="faq-item">
                 <summary class="faq-question">How can I contribute to the project?</summary>
                 <div class="faq-answer">
-                    <p>We welcome developers, designers, and content creators. Join our Discord and check the "contributions" channel. You can also participate in governance once it's live (Q2 2026) and suggest improvements.</p>
+                    <p>We welcome developers, designers, and content creators. Join our Discord and check the "contributions" channel. You can also participate in governance once it's live (planned for Q2 2026) and suggest improvements. If you're a developer, check out our <a href="https://github.com/Xpective" target="_blank">GitHub</a>.</p>
                 </div>
             </details>
             
             <details class="faq-item">
                 <summary class="faq-question">I have an issue – who do I contact?</summary>
                 <div class="faq-answer">
-                    <p>For support, please email us at <a href="mailto:xpective@inpinity.online">xpective@inpinity.online</a> or reach out in our Discord support channel.</p>
+                    <p>For support, please email us at <a href="mailto:xpective@inpinity.online">xpective@inpinity.online</a> or reach out in our Discord support channel. For urgent matters, you can also contact us via Telegram or Twitter. We aim to respond within 24 hours.</p>
+                </div>
+            </details>
+            
+            <details class="faq-item">
+                <summary class="faq-question">What about ToshiMart? Is the old token safe?</summary>
+                <div class="faq-answer">
+                    <p><strong>No, the old token is deprecated and should not be used.</strong> We withdrew our collaboration with ToshiMart due to phishing concerns. The new INPI token (<code>0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</code>) is the only official token. All old pools and contracts associated with ToshiMart are no longer safe. Please see the warning at the top of this page.</p>
                 </div>
             </details>
         </div>
@@ -307,6 +365,8 @@
             <a href="guestbook.html">Guestbook</a>
             <a href="advertising.html">Advertising</a>
             <a href="profile.html">Profile</a>
+            <a href="staking.html">Staking</a>
+            <a href="whitepaper.html">Whitepaper</a>
         </div>
     </footer>
 </body>
