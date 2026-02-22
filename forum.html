@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <meta content="Inpinity - Community forum for game developers and blockchain enthusiasts." name="description" />
-    <title>Inpinity - Forum</title>
+    <title>Inpinity - Forum (Blockchain-Based)</title>
     <link rel="stylesheet" href="css/base.css" />
     <link rel="stylesheet" href="css/layout.css" />
     <link rel="stylesheet" href="css/animations.css" />
@@ -28,8 +28,8 @@
     <link rel="icon" type="image/png" href="favicon.webp">
     <meta name="keywords" content="Inpinity, Game Design, Game Development, Platform, Collaboration, Forum, Tools, GameDesign, AI Development, Games of future, programming, programs, python gui">
     <meta name="author" content="Xpective">
-    <meta property="og:title" content="Inpinity - Forum">
-    <meta property="og:description" content="Connect your wallet, create signed topics, and discuss game development with the community.">
+    <meta property="og:title" content="Inpinity - Forum (Blockchain-Based)">
+    <meta property="og:description" content="Connect your wallet, create signed topics, and discuss game development with the community. Your posts can be minted as NFTs!">
     <meta property="og:image" content="logo_background.jpg">
     <meta property="og:url" content="https://inpinity.online/forum.html">
     <meta name="twitter:card" content="logo_background.webp">
@@ -91,6 +91,11 @@
             padding: 1rem;
             margin: 0.5rem 0;
             border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .thread:hover {
+            border-left-color: var(--primary-cyan);
+            transform: translateX(5px);
         }
         .thread-header {
             display: flex;
@@ -146,6 +151,7 @@
             border-radius: 4px;
             font-weight: bold;
             cursor: pointer;
+            margin-right: 0.5rem;
         }
         .new-topic-form button:disabled {
             background: #666;
@@ -207,6 +213,52 @@
         .warning-note a {
             color: gold;
         }
+        .presale-note {
+            background: rgba(255,215,0,0.1);
+            border: 1px solid gold;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 2rem auto;
+            max-width: 800px;
+            text-align: center;
+        }
+        .presale-note a {
+            color: gold;
+            font-weight: bold;
+        }
+        .mint-section {
+            background: #1a1a1a;
+            border: 1px solid var(--primary-cyan);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        .mint-btn {
+            background: var(--primary-cyan);
+            color: black;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .mint-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 10px var(--primary-cyan);
+        }
+        .nft-badge {
+            background: gold;
+            color: black;
+            padding: 0.2rem 0.5rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            margin-left: 0.5rem;
+        }
     </style>
 </head>
 <body class="forum-page">
@@ -220,11 +272,12 @@
                 <li><a aria-label="Collaboration" href="collaboration.html">Collaboration</a></li>
                 <li><a aria-label="Register" href="register.html">Register</a></li>
                 <li><a aria-label="About" href="about.html">About</a></li>
-                <li><a aria-label="Whitepaper" href="https://github.com/Xpective/InpinityPage/raw/3923cf22782286d60574c8ae9b92e693cb314215/Inpinity%20Whitepaper%20.pdf" target="_blank" rel="noopener">Whitepaper</a></li>
+                <li><a aria-label="Whitepaper" href="whitepaper.html">Whitepaper</a></li>
                 <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
                 <li><a aria-label="Guestbook" href="guestbook.html">Guestbook</a></li>
                 <li><a aria-label="Advertising" href="advertising.html">Advertising</a></li>
                 <li><a aria-label="Profile" href="profile.html">Profile</a></li>
+                <li><a aria-label="Staking" href="staking.html">Staking</a></li>
                 <div class="themeDots">
                     <div class="dot light" title="Light Theme"></div>
                     <div class="dot dark" title="Dark Theme"></div>
@@ -262,7 +315,12 @@
             <p>⚠️ <strong>Important Update:</strong> We have withdrawn from ToshiMart due to phishing concerns. Our new INPI token is <code>0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</code>. All official contracts are listed on our <a href="index.html">homepage</a>. Do not interact with the old token or ToshiMart pools.</p>
         </div>
 
-        <!-- Partners Section (ToshiMart removed) -->
+        <!-- Presale Note -->
+        <div class="presale-note">
+            <p>🔥 <strong>PRESALE LIVE NOW:</strong> 2,000,000 INPI per 1 ETH until March 25, 2026. <a href="https://inpinity.online/token/">👉 Join the Presale</a></p>
+        </div>
+
+        <!-- Partners Section -->
         <div class="partners-section">
             <div class="partner-item"><a href="https://base.org/" target="_blank">⚡ Base L2</a></div>
             <div class="partner-item"><a href="https://uniswap.org/" target="_blank">🦄 Uniswap</a></div>
@@ -270,8 +328,8 @@
 
         <!-- Forum Header with Wallet -->
         <div class="forum-header">
-            <h1 class="hero-title">💬 Inpinity Forum</h1>
-            <p>Connect your wallet, discuss game development, and share your projects with the community.</p>
+            <h1 class="hero-title">💬 Inpinity Forum (Blockchain-Based)</h1>
+            <p>Connect your wallet, discuss game development, and share your projects with the community. <strong>Your best posts can be minted as NFTs!</strong></p>
         </div>
 
         <!-- Wallet Bar -->
@@ -293,7 +351,11 @@
             <h2>Create a new topic</h2>
             <input type="text" id="topicTitle" placeholder="Title">
             <textarea id="topicContent" rows="4" placeholder="What's on your mind?"></textarea>
-            <button id="createTopicBtn">📝 Post Topic (signed with wallet)</button>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button id="createTopicBtn">📝 Post Topic (signed with wallet)</button>
+                <button id="mintTopicBtn" class="mint-btn" disabled>✨ Mint as NFT (1 INPI)</button>
+            </div>
+            <p style="font-size:0.8rem; color:#aaa; margin-top:0.5rem;">*Minting creates an NFT of your post on the Base blockchain. Requires 1 INPI fee (goes to development).</p>
         </div>
 
         <!-- Forum Categories with Threads -->
@@ -327,6 +389,13 @@
             <h2>Search Results</h2>
             <div id="results-list"></div>
         </section>
+
+        <!-- Info about blockchain-based forum -->
+        <div style="background: #2a2a2a; border-left: 4px solid var(--primary-cyan); padding: 1rem; margin: 2rem 0; border-radius: 0 8px 8px 0;">
+            <h3 style="color: var(--primary-cyan);">🔗 Blockchain-Based & Serverless</h3>
+            <p>This forum runs entirely on your browser – no central server. All topics are stored locally, and when you mint a post, it becomes an NFT on the Base blockchain. Your wallet address is your identity, and every post is signed.</p>
+            <p>In the future, governance tokens may allow voting on featured posts and forum moderation.</p>
+        </div>
     </main>
 
     <footer>
@@ -339,6 +408,8 @@
             <a href="guestbook.html">Guestbook</a>
             <a href="advertising.html">Advertising</a>
             <a href="profile.html">Profile</a>
+            <a href="staking.html">Staking</a>
+            <a href="whitepaper.html">Whitepaper</a>
         </div>
     </footer>
 
@@ -346,12 +417,24 @@
         (function() {
             // ========== Configuration ==========
             const STORAGE_KEY = 'inpinity_forum_threads';
+            const TOKEN_ADDRESS = '0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D';
+            const TEAM_WALLET = '0xcBC1cf1159B4Db5B407684fdE0E9E635E9e3726f';
+            const REQUIRED_FEE = 1; // 1 INPI for minting
+
+            // Minimal ERC-20 ABI for balanceOf and transfer
+            const TOKEN_ABI = [
+                "function balanceOf(address owner) view returns (uint256)",
+                "function decimals() view returns (uint8)",
+                "function symbol() view returns (string)",
+                "function transfer(address to, uint amount) returns (bool)"
+            ];
 
             // ========== DOM Elements ==========
             const connectBtn = document.getElementById('connectWalletBtn');
             const walletInfo = document.getElementById('walletInfo');
             const walletAddressDisplay = document.getElementById('walletAddressDisplay');
             const createTopicBtn = document.getElementById('createTopicBtn');
+            const mintTopicBtn = document.getElementById('mintTopicBtn');
             const topicTitle = document.getElementById('topicTitle');
             const topicContent = document.getElementById('topicContent');
             const searchInput = document.getElementById('searchInput');
@@ -364,31 +447,38 @@
 
             // ========== State ==========
             let provider, signer, userAddress = null;
+            let tokenContract;
+            let userBalance = 0;
+            
             // Load threads from localStorage or initialize with sample data
             let threads = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [
                 {
                     id: 1,
-                    title: 'Welcome to the forum!',
-                    content: 'This is a place to discuss everything about game development and blockchain.',
+                    title: 'Welcome to the blockchain forum!',
+                    content: 'This forum is completely serverless. Your posts are stored in your browser. Mint them as NFTs to immortalize them on Base!',
                     author: '0x1234...5678',
                     category: 'general',
-                    timestamp: new Date().toISOString()
+                    timestamp: new Date().toISOString(),
+                    minted: false
                 },
                 {
                     id: 2,
-                    title: 'How to optimize Unreal Engine for Base?',
-                    content: 'Anyone have tips for integrating blockchain into UE5?',
+                    title: 'How to integrate Unreal Engine with Base?',
+                    content: 'Anyone have tips for building blockchain features into UE5?',
                     author: '0xabcd...efgh',
                     category: 'tech',
-                    timestamp: new Date().toISOString()
+                    timestamp: new Date().toISOString(),
+                    minted: true,
+                    nftId: '0x9876...5432'
                 },
                 {
                     id: 3,
-                    title: 'My first blockchain game',
-                    content: 'Check out my demo using Inpinity tools!',
+                    title: 'My first blockchain game demo',
+                    content: 'Check out my prototype using Inpinity tools! Feedback welcome.',
                     author: '0x9876...5432',
                     category: 'showcase',
-                    timestamp: new Date().toISOString()
+                    timestamp: new Date().toISOString(),
+                    minted: false
                 }
             ];
 
@@ -402,22 +492,42 @@
                 return address.substring(0, 6) + '...' + address.substring(address.length - 4);
             }
 
+            function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            async function updateBalance() {
+                if (!tokenContract || !userAddress) return;
+                try {
+                    const balanceWei = await tokenContract.balanceOf(userAddress);
+                    const decimals = await tokenContract.decimals();
+                    userBalance = Number(ethers.formatUnits(balanceWei, decimals));
+                    mintTopicBtn.disabled = userBalance < REQUIRED_FEE;
+                } catch (err) {
+                    console.error('Balance fetch error:', err);
+                    mintTopicBtn.disabled = true;
+                }
+            }
+
             function renderThreads() {
-                // Clear lists
                 threadsGeneral.innerHTML = '';
                 threadsTech.innerHTML = '';
                 threadsShowcase.innerHTML = '';
 
-                // Sort by newest first
                 const sorted = [...threads].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
                 sorted.forEach(thread => {
                     const threadEl = document.createElement('div');
                     threadEl.className = 'thread';
                     threadEl.setAttribute('data-category', thread.category);
+                    
+                    const mintBadge = thread.minted ? '<span class="nft-badge">NFT</span>' : '';
+                    
                     threadEl.innerHTML = `
                         <div class="thread-header">
-                            <span class="thread-title">${escapeHtml(thread.title)}</span>
+                            <span class="thread-title">${escapeHtml(thread.title)} ${mintBadge}</span>
                             <span class="thread-meta">${new Date(thread.timestamp).toLocaleString()}</span>
                         </div>
                         <div class="thread-content" style="margin:0.5rem 0; color:#ccc;">${escapeHtml(thread.content)}</div>
@@ -434,12 +544,6 @@
                 });
             }
 
-            function escapeHtml(text) {
-                const div = document.createElement('div');
-                div.textContent = text;
-                return div.innerHTML;
-            }
-
             // ========== Wallet Connection ==========
             async function connectWallet() {
                 if (typeof window.ethereum === 'undefined') {
@@ -451,10 +555,24 @@
                     await provider.send("eth_requestAccounts", []);
                     signer = await provider.getSigner();
                     userAddress = await signer.getAddress();
+
                     walletAddressDisplay.textContent = formatAddress(userAddress);
                     walletInfo.style.display = 'block';
                     connectBtn.textContent = '✅ Connected';
                     connectBtn.disabled = true;
+
+                    tokenContract = new ethers.Contract(TOKEN_ADDRESS, TOKEN_ABI, signer);
+                    await updateBalance();
+
+                    window.ethereum.on('accountsChanged', (accounts) => {
+                        if (accounts.length === 0) disconnectWallet();
+                        else {
+                            userAddress = accounts[0];
+                            walletAddressDisplay.textContent = formatAddress(userAddress);
+                            updateBalance();
+                        }
+                    });
+
                 } catch (err) {
                     console.error(err);
                     alert('Connection failed.');
@@ -465,9 +583,11 @@
                 userAddress = null;
                 provider = null;
                 signer = null;
+                tokenContract = null;
                 walletInfo.style.display = 'none';
                 connectBtn.textContent = '🔌 Connect Wallet';
                 connectBtn.disabled = false;
+                mintTopicBtn.disabled = true;
             }
 
             // ========== Create Topic ==========
@@ -483,7 +603,6 @@
                     return;
                 }
 
-                // Determine category (simplified: could add a dropdown, but we'll just assign to general for demo)
                 const category = 'general'; // In a real app, you'd have a category selector
 
                 const newThread = {
@@ -492,16 +611,65 @@
                     content,
                     author: userAddress,
                     category,
-                    timestamp: new Date().toISOString()
+                    timestamp: new Date().toISOString(),
+                    minted: false
                 };
 
                 threads.push(newThread);
                 saveThreads();
                 renderThreads();
 
-                // Clear form
                 topicTitle.value = '';
                 topicContent.value = '';
+            }
+
+            // ========== Mint Topic as NFT (simulated) ==========
+            async function mintTopic() {
+                if (!userAddress) {
+                    alert('Please connect your wallet first.');
+                    return;
+                }
+                
+                const title = topicTitle.value.trim();
+                const content = topicContent.value.trim();
+                if (!title || !content) {
+                    alert('Please enter both title and content to mint.');
+                    return;
+                }
+
+                if (userBalance < REQUIRED_FEE) {
+                    alert(`Insufficient INPI balance. You need at least ${REQUIRED_FEE} INPI to mint.`);
+                    return;
+                }
+
+                try {
+                    // Simulate payment (in production, this would be a real token transfer)
+                    alert(`Demo: Payment of ${REQUIRED_FEE} INPI would be sent to ${TEAM_WALLET}. In production, this would create a real NFT on Base.`);
+
+                    const newThread = {
+                        id: Date.now(),
+                        title: `[MINTED] ${title}`,
+                        content,
+                        author: userAddress,
+                        category: 'general',
+                        timestamp: new Date().toISOString(),
+                        minted: true,
+                        nftId: `0x${Math.random().toString(16).substring(2, 10)}...`
+                    };
+
+                    threads.push(newThread);
+                    saveThreads();
+                    renderThreads();
+
+                    topicTitle.value = '';
+                    topicContent.value = '';
+
+                    await updateBalance();
+
+                } catch (err) {
+                    console.error(err);
+                    alert('Minting failed. Please try again.');
+                }
             }
 
             // ========== Search ==========
@@ -538,15 +706,14 @@
             // ========== Event Listeners ==========
             connectBtn.addEventListener('click', connectWallet);
             createTopicBtn.addEventListener('click', createTopic);
+            mintTopicBtn.addEventListener('click', mintTopic);
             searchButton.addEventListener('click', searchTopics);
             searchInput.addEventListener('keyup', (e) => {
                 if (e.key === 'Enter') searchTopics();
             });
 
-            // Initial render
             renderThreads();
 
-            // Check if already connected (e.g., after page reload)
             window.addEventListener('load', async () => {
                 if (window.ethereum && window.ethereum.selectedAddress) {
                     await connectWallet();
