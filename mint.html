@@ -311,7 +311,7 @@
         // === CONFIG ===
         const NFT_ADDRESS = "0x3642D604b4c112fddAc09FABfb233e4996f65BCd";
         const INPI_ADDRESS = "0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D";
-        const WORKER_URL = "inpinity-worker-v2.s-plat.workers.dev";
+        const WORKER_URL = "https://inpinity-worker-v2.s-plat.workers.dev";
         const MAX_ROW = 99; // Phase 1
 
         // === ABI ===
@@ -472,13 +472,6 @@
                 console.log('Phi proof formatted:', phiProofFormatted);
                 console.log('Pi proof length:', piProofFormatted.length);
                 console.log('Phi proof length:', phiProofFormatted.length);
-
-                // Optional: Leaf-Vergleich
-                const computedPiLeaf = ethers.utils.keccak256(
-                ethers.utils.solidityPack(['uint256', 'uint256', 'uint8'], [row, col, proofs.pi.digit])
-                );
-                console.log('Computed Pi leaf:', computedPiLeaf);
-                console.log('Provided Pi leaf:', proofs.pi.leaf);
 
                 // 4. Send reveal transaction (with manual gas limit to avoid estimation issues)
                 msgDiv.innerHTML = '<span class="success">⏳ Sending reveal transaction...</span>';
