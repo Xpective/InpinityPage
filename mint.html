@@ -595,7 +595,13 @@
             } catch (e) {
                 console.error('Mint error:', e);
                 let errorMsg = e.message;
-                if (e.error && e.error.message) errorMsg = e.error.message;
+                // Try to parse revert reason
+                if (e.error && e.error.data) {
+                    try {
+                        const reason = ethers.utils.toUtf8String('0x' + e.error.data.slice(138));
+                        errorMsg = reason;
+                    } catch {}
+                }
                 msgDiv.innerHTML = '<span class="error">❌ ' + errorMsg + '</span>';
             }
         }
