@@ -10,242 +10,371 @@
             padding: 0;
             box-sizing: border-box;
         }
+
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #0a0a2a 0%, #1a1a3a 100%);
-            color: white;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(145deg, #0c0c24 0%, #1b1b3a 100%);
+            color: #fff;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 1.5rem;
         }
+
         .container {
-            max-width: 800px;
+            max-width: 900px;
             width: 100%;
-            background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(10px);
-            border-radius: 30px;
-            padding: 40px;
-            border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            background: rgba(20, 20, 40, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 2.5rem;
+            padding: 2.5rem 2rem;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            box-shadow: 0 25px 40px -15px rgba(0, 0, 0, 0.5);
         }
+
         h1 {
-            font-size: 3em;
+            font-size: 3rem;
             text-align: center;
-            margin-bottom: 10px;
+            margin-bottom: 0.5rem;
             background: linear-gradient(135deg, #4a90e2, #d4af37);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 1px;
         }
+
         .subtitle {
             text-align: center;
-            font-size: 1.2em;
-            color: #888;
-            margin-bottom: 30px;
+            font-size: 1.2rem;
+            color: #aaa;
+            margin-bottom: 2rem;
+            border-bottom: 1px dashed #334;
+            padding-bottom: 1rem;
         }
+
         .wallet-section {
-            background: rgba(0,0,0,0.3);
-            border-radius: 20px;
-            padding: 20px;
-            margin-bottom: 30px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 2rem;
+            padding: 1.5rem 2rem;
+            margin-bottom: 2rem;
             display: flex;
+            flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
+            border: 1px solid #2a2a4a;
         }
+
         .wallet-info {
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 0.3rem;
         }
+
         .wallet-status {
-            color: #888;
-            font-size: 0.9em;
+            color: #9a9ac0;
+            font-size: 0.9rem;
         }
+
         .wallet-address {
-            font-family: monospace;
+            font-family: 'Roboto Mono', monospace;
             color: #4a90e2;
+            background: #0e0e1f;
+            padding: 0.3rem 0.8rem;
+            border-radius: 2rem;
+            border: 1px solid #2a2a5a;
         }
+
         .balance {
-            font-size: 1.2em;
-            font-weight: bold;
+            font-size: 1.4rem;
+            font-weight: 600;
+            background: linear-gradient(145deg, #d4af37, #f0e68c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
+
         button {
-            background: linear-gradient(135deg, #4a90e2, #d4af37);
+            background: linear-gradient(135deg, #3a5f8b, #b8860b);
             color: white;
             border: none;
-            padding: 12px 24px;
-            border-radius: 12px;
-            font-size: 1em;
-            font-weight: bold;
+            padding: 0.8rem 2rem;
+            border-radius: 3rem;
+            font-size: 1.1rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+            border: 1px solid rgba(255, 215, 0, 0.3);
         }
+
         button:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(74,144,226,0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px -8px #b8860b80;
+            filter: brightness(1.1);
         }
+
         button:disabled {
-            opacity: 0.5;
+            opacity: 0.4;
             cursor: not-allowed;
+            filter: grayscale(60%);
         }
+
         .mint-section, .reveal-section {
-            background: rgba(0,0,0,0.3);
-            border-radius: 20px;
-            padding: 30px;
-            margin-top: 30px;
+            background: rgba(10, 10, 25, 0.6);
+            border-radius: 2rem;
+            padding: 2rem;
+            margin-top: 2rem;
+            border: 1px solid #2a2a5a;
+            backdrop-filter: blur(4px);
         }
+
+        h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #d4af37;
+            border-left: 5px solid #4a90e2;
+            padding-left: 1rem;
+        }
+
         .stats {
             display: grid;
-            grid-template-columns: repeat(3,1fr);
-            gap: 20px;
-            margin: 30px 0;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.2rem;
+            margin-bottom: 2rem;
         }
+
         .stat {
-            background: rgba(255,255,255,0.1);
-            border-radius: 15px;
-            padding: 15px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 1.5rem;
+            padding: 1.2rem 1rem;
+            text-align: center;
+            border: 1px solid #3a3a6a;
         }
+
         .stat-label {
-            color: #888;
-            font-size: 0.9em;
-            margin-bottom: 5px;
+            color: #aaa;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.4rem;
         }
+
         .stat-value {
-            font-size: 1.5em;
-            font-weight: bold;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #d4af37;
         }
+
         .price-section {
-            margin: 30px 0;
-            padding: 20px;
-            background: rgba(0,0,0,0.2);
-            border-radius: 15px;
+            background: #0a0a20;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
         }
+
         .price-option {
             display: flex;
             align-items: center;
-            gap: 20px;
-            margin: 15px 0;
-            padding: 15px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 10px;
+            gap: 1.5rem;
+            margin: 1rem 0;
+            padding: 1rem 1.5rem;
+            background: #14142e;
+            border-radius: 2rem;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: background 0.2s, border 0.2s;
+            border: 1px solid transparent;
         }
+
         .price-option:hover {
-            background: rgba(255,255,255,0.1);
+            background: #1e1e3e;
+            border-color: #d4af37;
         }
+
         .price-option input[type="radio"] {
-            width: 20px;
-            height: 20px;
+            width: 1.3rem;
+            height: 1.3rem;
+            accent-color: #d4af37;
         }
+
         .price-details {
             flex: 1;
         }
+
         .price-title {
-            font-weight: bold;
-            margin-bottom: 5px;
+            font-weight: 600;
+            font-size: 1.2rem;
+            color: #e0e0ff;
         }
+
         .price-value {
             color: #d4af37;
+            font-weight: 500;
+            margin-top: 0.2rem;
         }
+
         .coordinates {
-            margin: 20px 0;
             display: flex;
-            gap: 10px;
-            align-items: center;
             flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+            margin: 2rem 0;
         }
-        .coordinates input {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
-            color: white;
-            padding: 10px;
-            border-radius: 8px;
-            width: 100px;
-        }
-        .random-btn {
-            background: #d4af37;
-            color: #0a0a2a;
-            padding: 8px 16px;
-            border-radius: 20px;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .mint-button {
-            background: linear-gradient(135deg, #d4af37, #4a90e2);
-            font-size: 1.5em;
-            padding: 20px 40px;
-            margin: 20px 0;
-            width: 100%;
-        }
-        .my-mints {
-            margin-top: 30px;
-            text-align: left;
-        }
-        .my-mints h3 {
-            margin-bottom: 15px;
-            color: #d4af37;
-        }
-        .mint-item {
-            background: rgba(255,255,255,0.05);
-            padding: 10px;
-            border-radius: 8px;
-            margin: 5px 0;
+
+        .coordinates label {
             display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #14142e;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            border: 1px solid #3a3a6a;
+        }
+
+        .coordinates input {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.1rem;
+            width: 80px;
+            text-align: center;
+            outline: none;
+            border-bottom: 2px solid #4a90e2;
+        }
+
+        .random-btn {
+            background: #2a2a5a;
+            border: 1px solid #d4af37;
+            color: #d4af37;
+            padding: 0.6rem 1.5rem;
+            border-radius: 2rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .random-btn:hover {
+            background: #3a3a7a;
+            color: white;
+        }
+
+        .mint-button {
+            background: linear-gradient(145deg, #d4af37, #b8860b);
+            font-size: 1.8rem;
+            padding: 1.2rem 2rem;
+            width: 100%;
+            border-radius: 3rem;
+            font-weight: 700;
+            margin: 1rem 0;
+            border: none;
+            box-shadow: 0 8px 20px #b8860b40;
+        }
+
+        .my-mints {
+            margin-top: 2rem;
+        }
+
+        .my-mints h3 {
+            color: #d4af37;
+            margin-bottom: 1rem;
+            font-size: 1.4rem;
+        }
+
+        .mint-item {
+            background: #1a1a36;
+            border-radius: 2rem;
+            padding: 1rem 1.5rem;
+            margin: 0.8rem 0;
+            display: flex;
+            flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
+            border: 1px solid #3a3a6a;
         }
+
         .reveal-btn {
-            background: #d4af37;
-            color: #0a0a2a;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.9em;
+            background: #4a90e2;
+            color: white;
             border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 2rem;
+            font-weight: 600;
             cursor: pointer;
+            transition: 0.2s;
         }
+
+        .reveal-btn:hover {
+            background: #6aafe0;
+            transform: scale(1.02);
+        }
+
         .footer {
-            margin-top: 30px;
+            margin-top: 2rem;
             text-align: center;
             color: #888;
-            font-size: 0.9em;
+            font-size: 0.9rem;
         }
+
         .footer a {
             color: #d4af37;
             text-decoration: none;
+            border-bottom: 1px dotted;
         }
+
         .error {
             color: #ff6b6b;
-            margin: 10px 0;
+            background: #2a1a1a;
+            padding: 0.8rem 1.5rem;
+            border-radius: 2rem;
+            margin: 0.5rem 0;
+            border: 1px solid #ff6b6b;
         }
+
         .success {
             color: #51cf66;
-            margin: 10px 0;
+            background: #1a2a1a;
+            padding: 0.8rem 1.5rem;
+            border-radius: 2rem;
+            margin: 0.5rem 0;
+            border: 1px solid #51cf66;
+        }
+
+        .debug-log {
+            background: #0a0a10;
+            border-radius: 1rem;
+            padding: 1rem;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.8rem;
+            color: #b0b0ff;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #2a2a5a;
+            margin-top: 1rem;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🏗️ INPINITY</h1>
-        <div class="subtitle">The Pi-Phi Pyramid on Base</div>
-        
+        <div class="subtitle">The Pi-Phi Pyramid · Base Mainnet</div>
+
         <div class="wallet-section">
             <div class="wallet-info">
-                <div class="wallet-status" id="walletStatus">Wallet: not connected</div>
-                <div class="wallet-address" id="walletAddress"></div>
+                <div class="wallet-status" id="walletStatus">🔴 Wallet not connected</div>
+                <div class="wallet-address" id="walletAddress">—</div>
             </div>
             <div class="balance" id="walletBalance">—</div>
             <button id="connectWallet">Connect Wallet</button>
         </div>
-        
+
         <div class="mint-section">
-            <h2>✨ Mint a Block</h2>
+            <h2>⛏️ Mint a Block</h2>
             <div class="stats">
                 <div class="stat">
                     <div class="stat-label">Available</div>
-                    <div class="stat-value" id="available">—</div>
+                    <div class="stat-value" id="available">10,000</div>
                 </div>
                 <div class="stat">
                     <div class="stat-label">Your Blocks</div>
@@ -256,38 +385,38 @@
                     <div class="stat-value" id="priceEth">0.003</div>
                 </div>
             </div>
-            
+
             <div class="price-section">
-                <h3>Payment Method</h3>
-                <div class="price-option" onclick="selectPayment('eth')">
-                    <input type="radio" name="payment" id="payEth" checked>
+                <h3 style="color:#d4af37; margin-bottom:1rem;">💎 Payment method</h3>
+                <div class="price-option" onclick="document.getElementById('payEth').click()">
+                    <input type="radio" name="payment" id="payEth" checked onclick="selectPayment('eth')">
                     <div class="price-details">
                         <div class="price-title">Only ETH</div>
                         <div class="price-value">0.003 ETH</div>
                     </div>
                 </div>
-                <div class="price-option" onclick="selectPayment('inpi')">
-                    <input type="radio" name="payment" id="payInpi">
+                <div class="price-option" onclick="document.getElementById('payInpi').click()">
+                    <input type="radio" name="payment" id="payInpi" onclick="selectPayment('inpi')">
                     <div class="price-details">
                         <div class="price-title">Only INPI</div>
                         <div class="price-value">30 INPI</div>
                     </div>
                 </div>
-                <div class="price-option" onclick="selectPayment('mixed')">
-                    <input type="radio" name="payment" id="payMixed">
+                <div class="price-option" onclick="document.getElementById('payMixed').click()">
+                    <input type="radio" name="payment" id="payMixed" onclick="selectPayment('mixed')">
                     <div class="price-details">
                         <div class="price-title">Mixed (50/50)</div>
                         <div class="price-value">0.0015 ETH + 15 INPI</div>
                     </div>
                 </div>
             </div>
-            
+
             <div class="coordinates">
-                <label>Row: <input type="number" id="row" min="0" max="99" value="0"></label>
-                <label>Col: <input type="number" id="col" min="0" max="198" value="0"></label>
-                <button id="randomBlockBtn" class="random-btn">🎲 Random Free Block</button>
+                <label>Row <input type="number" id="row" min="0" max="99" value="0"></label>
+                <label>Col <input type="number" id="col" min="0" max="198" value="0"></label>
+                <button id="randomBlockBtn" class="random-btn">🎲 Random free block</button>
             </div>
-            
+
             <button class="mint-button" id="mintBtn" disabled>🚀 Mint your Block</button>
             <div id="mintMessage"></div>
         </div>
@@ -295,26 +424,28 @@
         <div class="reveal-section">
             <h2>🔓 Reveal Blocks</h2>
             <div id="unrevealedList" class="my-mints">
-                <p>Connect wallet to see your unrevealed blocks.</p>
+                <p style="color:#aaa; text-align:center;">Connect wallet to see your unrevealed blocks.</p>
             </div>
             <div id="revealMessage"></div>
+            <div id="debugLog" class="debug-log">[Debug] Console output will appear here.</div>
         </div>
-        
+
         <div class="footer">
-            <p>10,000 blocks in Phase 1 | 5 hidden Diamond blocks | <a href="https://basescan.org/address/0x35263645aD3C1e4351a5b234C683BAF243b9854F" target="_blank">Contract verified</a></p>
+            <p>10,000 blocks in Phase 1 · 5 hidden Diamond blocks</p>
+            <p>📄 <a href="https://basescan.org/address/0x35263645aD3C1e4351a5b234C683BAF243b9854F" target="_blank">Contract 0x3526...9854F</a></p>
             <p>⚡ INPI/ETH Pool: <a href="https://www.geckoterminal.com/de/base/pools/0x2da60979434c607e283ad7956bdcd21b83fa756fa156ef45f996e2b34d2e12a8" target="_blank">GeckoTerminal</a></p>
         </div>
     </div>
-    
+
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
     <script>
-        // === CONFIG ===
+        // ==================== CONFIG ====================
         const NFT_ADDRESS = "0x35263645aD3C1e4351a5b234C683BAF243b9854F";
         const INPI_ADDRESS = "0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D";
         const WORKER_URL = "https://inpinity-worker-final.s-plat.workers.dev";
         const MAX_ROW = 99; // Phase 1
 
-        // === ABI ===
+        // ==================== ABI ====================
         const NFT_ABI = [
             "function mintWithETH(uint256 row, uint256 col) payable",
             "function mintWithINPI(uint256 row, uint256 col) external",
@@ -334,11 +465,11 @@
             "function allowance(address owner, address spender) view returns (uint256)"
         ];
 
-        // === STATE ===
+        // ==================== STATE ====================
         let provider, signer, nftContract, inpiContract, userAddress;
         let selectedPayment = 'eth';
 
-        // === UI HELPERS ===
+        // ==================== UI HELPERS ====================
         function selectPayment(type) {
             selectedPayment = type;
             document.getElementById('payEth').checked = (type === 'eth');
@@ -346,16 +477,36 @@
             document.getElementById('payMixed').checked = (type === 'mixed');
         }
 
-        // === WALLET CONNECTION ===
+        function debugLog(message, data = null) {
+            const logDiv = document.getElementById('debugLog');
+            let line = `[${new Date().toLocaleTimeString()}] ${message}`;
+            if (data) {
+                if (typeof data === 'object') {
+                    try {
+                        line += ' ' + JSON.stringify(data).substring(0, 200);
+                    } catch (e) {
+                        line += ' ' + String(data);
+                    }
+                } else {
+                    line += ' ' + data;
+                }
+            }
+            logDiv.innerHTML = line + '\n' + logDiv.innerHTML;
+            console.log(message, data);
+        }
+
+        // ==================== WALLET ====================
         async function connectWallet() {
-            if (!window.ethereum) return alert('Please install MetaMask!');
+            if (!window.ethereum) {
+                alert('Please install MetaMask!');
+                return;
+            }
             try {
                 provider = new ethers.providers.Web3Provider(window.ethereum);
                 await provider.send("eth_requestAccounts", []);
                 signer = provider.getSigner();
                 userAddress = await signer.getAddress();
 
-                // Switch to Base Mainnet
                 const network = await provider.getNetwork();
                 if (network.chainId !== 8453) {
                     try {
@@ -382,13 +533,13 @@
                 nftContract = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
                 inpiContract = new ethers.Contract(INPI_ADDRESS, INPI_ABI, signer);
 
-                document.getElementById('walletStatus').innerHTML = 'Wallet: connected';
+                document.getElementById('walletStatus').innerHTML = '🟢 Wallet connected';
                 document.getElementById('walletAddress').innerHTML = userAddress.slice(0,6) + '...' + userAddress.slice(-4);
                 document.getElementById('mintBtn').disabled = false;
 
                 await updateBalances();
                 await loadUnrevealedBlocks();
-                await updateAvailableCount();
+                debugLog('Wallet connected', userAddress);
             } catch (e) {
                 console.error(e);
                 alert('Connection error: ' + e.message);
@@ -401,26 +552,21 @@
             document.getElementById('walletBalance').innerHTML = parseFloat(ethers.utils.formatEther(ethBalance)).toFixed(4) + ' ETH';
         }
 
-        async function updateAvailableCount() {
-            // In a real scenario, you'd fetch totalSupply and subtract minted count.
-            document.getElementById('available').innerHTML = '10,000'; // static for Phase 1
-        }
-
-        // === LOAD UNREVEALED BLOCKS ===
+        // ==================== UNREVEALED BLOCKS ====================
         async function loadUnrevealedBlocks() {
             const listDiv = document.getElementById('unrevealedList');
             if (!userAddress || !nftContract) {
-                listDiv.innerHTML = '<p>Please connect your wallet first.</p>';
+                listDiv.innerHTML = '<p style="color:#aaa;">Please connect your wallet first.</p>';
                 return;
             }
 
             const balance = await nftContract.balanceOf(userAddress);
             if (balance.toNumber() === 0) {
-                listDiv.innerHTML = '<p>You don’t own any blocks yet.</p>';
+                listDiv.innerHTML = '<p style="color:#aaa;">You don’t own any blocks yet.</p>';
                 return;
             }
 
-            let html = '<h3>Not yet revealed:</h3>';
+            let html = '<h3>🔓 Not yet revealed</h3>';
             for (let i = 0; i < balance; i++) {
                 const tokenId = await nftContract.tokenOfOwnerByIndex(userAddress, i);
                 const data = await nftContract.blockData(tokenId);
@@ -435,30 +581,30 @@
             if (html.includes('Reveal')) {
                 listDiv.innerHTML = html;
             } else {
-                listDiv.innerHTML = '<p>All your blocks are already revealed.</p>';
+                listDiv.innerHTML = '<p style="color:#aaa;">All your blocks are already revealed.</p>';
             }
         }
 
-        // === REVEAL BLOCK ===
+        // ==================== REVEAL ====================
         window.revealBlock = async function(tokenId) {
             const msgDiv = document.getElementById('revealMessage');
+            const debugDiv = document.getElementById('debugLog');
             msgDiv.innerHTML = '<span class="success">⏳ Loading block coordinates...</span>';
-            
+            debugLog(`Reveal started for token #${tokenId}`);
+
             try {
-                // 1. Get actual coordinates from contract (reliable)
                 const pos = await nftContract.getBlockPosition(tokenId);
                 const row = pos.row.toNumber();
                 const col = pos.col.toNumber();
-                console.log(`🔍 Revealing Block #${tokenId} at (R${row}, P${col})`);
+                debugLog(`Coordinates: (${row}, ${col})`);
 
-                // 2. Load proofs from worker for these coordinates
-                msgDiv.innerHTML = '<span class="success">⏳ Loading proofs from worker...</span>';
+                msgDiv.innerHTML = '<span class="success">⏳ Fetching proofs from worker...</span>';
                 const response = await fetch(`${WORKER_URL}/api/get-proof?row=${row}&col=${col}`);
-                if (!response.ok) throw new Error('Proofs not found');
+                if (!response.ok) throw new Error(`Worker error ${response.status}`);
                 const proofs = await response.json();
-                console.log('📦 Proofs loaded:', proofs);
+                debugLog('Proofs received', proofs);
 
-                // 3. Format proofs: from { left/right: hash } to array of 0x-prefixed strings
+                // Format proofs
                 const formatProof = (arr) => {
                     if (!Array.isArray(arr)) throw new Error('Invalid proof array');
                     return arr.map(item => {
@@ -468,12 +614,29 @@
                 };
                 const piProofFormatted = formatProof(proofs.pi.proof);
                 const phiProofFormatted = formatProof(proofs.phi.proof);
-                console.log('Pi proof formatted:', piProofFormatted);
-                console.log('Phi proof formatted:', phiProofFormatted);
-                console.log('Pi proof length:', piProofFormatted.length);
-                console.log('Phi proof length:', phiProofFormatted.length);
 
-                // 4. Send reveal transaction (with manual gas limit to avoid estimation issues)
+                // Compute leaves for debug
+                const computedPiLeaf = ethers.utils.keccak256(
+                    ethers.utils.solidityPack(['uint256', 'uint256', 'uint8'], [row, col, proofs.pi.digit])
+                );
+                const computedPhiLeaf = ethers.utils.keccak256(
+                    ethers.utils.solidityPack(['uint256', 'uint256', 'uint8'], [row, col, proofs.phi.digit])
+                );
+                const providedPiLeaf = proofs.pi.leaf.startsWith('0x') ? proofs.pi.leaf : '0x' + proofs.pi.leaf;
+                const providedPhiLeaf = proofs.phi.leaf.startsWith('0x') ? proofs.phi.leaf : '0x' + proofs.phi.leaf;
+
+                debugLog('Computed Pi leaf: ' + computedPiLeaf);
+                debugLog('Provided Pi leaf: ' + providedPiLeaf);
+                debugLog('Computed Phi leaf: ' + computedPhiLeaf);
+                debugLog('Provided Phi leaf: ' + providedPhiLeaf);
+
+                if (computedPiLeaf !== providedPiLeaf) {
+                    throw new Error('Pi leaf mismatch! Proofs may be incorrect.');
+                }
+                if (computedPhiLeaf !== providedPhiLeaf) {
+                    throw new Error('Phi leaf mismatch! Proofs may be incorrect.');
+                }
+
                 msgDiv.innerHTML = '<span class="success">⏳ Sending reveal transaction...</span>';
                 const tx = await nftContract.revealBlock(
                     tokenId,
@@ -481,19 +644,21 @@
                     phiProofFormatted,
                     proofs.pi.digit,
                     proofs.phi.digit,
-                    { gasLimit: 300000 } // safe gas limit
+                    { gasLimit: 300000 }
                 );
+                debugLog('Transaction sent', tx.hash);
                 await tx.wait();
-                
                 msgDiv.innerHTML = '<span class="success">✅ Block successfully revealed! 🎉</span>';
-                await loadUnrevealedBlocks(); // refresh list
+                debugLog('Reveal confirmed');
+                await loadUnrevealedBlocks();
             } catch (e) {
-                console.error('Reveal error:', e);
+                console.error(e);
                 msgDiv.innerHTML = '<span class="error">❌ ' + e.message + '</span>';
+                debugLog('Reveal error', e.message);
             }
         };
 
-        // === RANDOM FREE BLOCK FINDER ===
+        // ==================== RANDOM FREE BLOCK ====================
         async function findRandomFreeBlock() {
             if (!nftContract) {
                 alert('Please connect wallet first.');
@@ -508,24 +673,25 @@
                 try {
                     const owner = await nftContract.ownerOf(tokenId);
                     if (owner === ethers.constants.AddressZero) {
-                        // free block
                         document.getElementById('row').value = row;
                         document.getElementById('col').value = col;
                         document.getElementById('mintMessage').innerHTML = '<span class="success">✅ Free block found! You can mint it now.</span>';
+                        debugLog(`Random free block: (${row}, ${col})`);
                         return;
                     }
                 } catch (e) {
-                    // ownerOf reverts if token doesn't exist → free
+                    // ownerOf reverts -> token not minted -> free
                     document.getElementById('row').value = row;
                     document.getElementById('col').value = col;
                     document.getElementById('mintMessage').innerHTML = '<span class="success">✅ Free block found! You can mint it now.</span>';
+                    debugLog(`Random free block: (${row}, ${col}) (not minted)`);
                     return;
                 }
             }
-            document.getElementById('mintMessage').innerHTML = '<span class="error">❌ Could not find a free block after many attempts. Try manually.</span>';
+            document.getElementById('mintMessage').innerHTML = '<span class="error">❌ Could not find a free block. Try manually.</span>';
         }
 
-        // === MINT FUNCTION ===
+        // ==================== MINT ====================
         async function mint() {
             const row = parseInt(document.getElementById('row').value);
             const col = parseInt(document.getElementById('col').value);
@@ -535,9 +701,9 @@
 
             const msgDiv = document.getElementById('mintMessage');
             msgDiv.innerHTML = '<span class="success">⏳ Preparing mint...</span>';
+            debugLog(`Mint attempt at (${row}, ${col})`);
 
             try {
-                // Check if block is already minted
                 const tokenId = row * 2048 + col;
                 try {
                     const owner = await nftContract.ownerOf(tokenId);
@@ -546,7 +712,7 @@
                         return;
                     }
                 } catch (e) {
-                    // ownerOf reverts → good, free to mint
+                    // good, not minted
                 }
 
                 let tx;
@@ -556,13 +722,11 @@
                     });
                 } else if (selectedPayment === 'inpi') {
                     const amount = ethers.utils.parseEther("30");
-                    // Check balance
                     const inpiBal = await inpiContract.balanceOf(userAddress);
                     if (inpiBal.lt(amount)) {
                         msgDiv.innerHTML = '<span class="error">❌ Insufficient INPI balance.</span>';
                         return;
                     }
-                    // Approve
                     const allowance = await inpiContract.allowance(userAddress, NFT_ADDRESS);
                     if (allowance.lt(amount)) {
                         msgDiv.innerHTML = '<span class="success">⏳ Approving INPI...</span>';
@@ -587,31 +751,37 @@
                     tx = await nftContract.mintMixed(row, col, { value: ethAmount });
                 }
 
-                msgDiv.innerHTML = '<span class="success">⏳ Transaction sent, waiting for confirmation...</span>';
+                msgDiv.innerHTML = '<span class="success">⏳ Transaction sent...</span>';
+                debugLog('Mint tx sent', tx.hash);
                 await tx.wait();
                 msgDiv.innerHTML = '<span class="success">✅ Block minted! 🎉</span>';
+                debugLog('Mint confirmed');
                 await updateBalances();
                 await loadUnrevealedBlocks();
             } catch (e) {
-                console.error('Mint error:', e);
+                console.error(e);
                 let errorMsg = e.message;
                 if (e.error && e.error.data) {
                     try {
-                        const reason = ethers.utils.toUtf8String('0x' + e.error.data.slice(138));
-                        errorMsg = reason;
+                        const data = e.error.data;
+                        if (data.startsWith('0x08c379a0')) {
+                            errorMsg = ethers.utils.toUtf8String('0x' + data.slice(138));
+                        } else if (data.startsWith('0xfb8f41b2')) {
+                            errorMsg = "INPI transfer failed (insufficient balance or allowance)";
+                        }
                     } catch {}
                 }
                 msgDiv.innerHTML = '<span class="error">❌ ' + errorMsg + '</span>';
+                debugLog('Mint error', errorMsg);
             }
         }
 
-        // === EVENT LISTENERS ===
+        // ==================== EVENT LISTENERS ====================
         document.getElementById('connectWallet').addEventListener('click', connectWallet);
         document.getElementById('mintBtn').addEventListener('click', mint);
         document.getElementById('randomBlockBtn').addEventListener('click', findRandomFreeBlock);
         window.selectPayment = selectPayment;
 
-        // Auto-connect if previously authorized
         if (window.ethereum && window.ethereum.selectedAddress) {
             connectWallet();
         }
