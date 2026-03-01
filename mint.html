@@ -468,6 +468,17 @@
                 };
                 const piProofFormatted = formatProof(proofs.pi.proof);
                 const phiProofFormatted = formatProof(proofs.phi.proof);
+                console.log('Pi proof formatted:', piProofFormatted);
+                console.log('Phi proof formatted:', phiProofFormatted);
+                console.log('Pi proof length:', piProofFormatted.length);
+                console.log('Phi proof length:', phiProofFormatted.length);
+
+                // Optional: Leaf-Vergleich
+                const computedPiLeaf = ethers.utils.keccak256(
+                ethers.utils.solidityPack(['uint256', 'uint256', 'uint8'], [row, col, proofs.pi.digit])
+                );
+                console.log('Computed Pi leaf:', computedPiLeaf);
+                console.log('Provided Pi leaf:', proofs.pi.leaf);
 
                 // 4. Send reveal transaction (with manual gas limit to avoid estimation issues)
                 msgDiv.innerHTML = '<span class="success">⏳ Sending reveal transaction...</span>';
