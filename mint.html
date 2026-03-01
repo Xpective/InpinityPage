@@ -595,7 +595,6 @@
             } catch (e) {
                 console.error('Mint error:', e);
                 let errorMsg = e.message;
-                // Try to parse revert reason (common for "token already minted")
                 if (e.error && e.error.data) {
                     try {
                         const reason = ethers.utils.toUtf8String('0x' + e.error.data.slice(138));
