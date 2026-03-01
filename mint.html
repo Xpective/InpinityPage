@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>INPINITY - Die Pi-Phi Pyramide</title>
+    <title>INPINITY – The Pi-Phi Pyramid</title>
     <style>
         * {
             margin: 0;
@@ -151,6 +151,10 @@
         }
         .coordinates {
             margin: 20px 0;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
         }
         .coordinates input {
             background: rgba(255,255,255,0.1);
@@ -159,13 +163,22 @@
             padding: 10px;
             border-radius: 8px;
             width: 100px;
-            margin: 0 10px;
+        }
+        .random-btn {
+            background: #d4af37;
+            color: #0a0a2a;
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
         }
         .mint-button {
             background: linear-gradient(135deg, #d4af37, #4a90e2);
             font-size: 1.5em;
             padding: 20px 40px;
             margin: 20px 0;
+            width: 100%;
         }
         .my-mints {
             margin-top: 30px;
@@ -216,89 +229,92 @@
 <body>
     <div class="container">
         <h1>🏗️ INPINITY</h1>
-        <div class="subtitle">Die Pi-Phi Pyramide auf Base</div>
+        <div class="subtitle">The Pi-Phi Pyramid on Base</div>
         
         <div class="wallet-section">
             <div class="wallet-info">
-                <div class="wallet-status" id="walletStatus">Wallet: nicht verbunden</div>
+                <div class="wallet-status" id="walletStatus">Wallet: not connected</div>
                 <div class="wallet-address" id="walletAddress"></div>
             </div>
             <div class="balance" id="walletBalance">—</div>
-            <button id="connectWallet">Wallet verbinden</button>
+            <button id="connectWallet">Connect Wallet</button>
         </div>
         
         <div class="mint-section">
-            <h2>✨ Block minten</h2>
+            <h2>✨ Mint a Block</h2>
             <div class="stats">
                 <div class="stat">
-                    <div class="stat-label">Verfügbar</div>
+                    <div class="stat-label">Available</div>
                     <div class="stat-value" id="available">—</div>
                 </div>
                 <div class="stat">
-                    <div class="stat-label">Deine Blöcke</div>
+                    <div class="stat-label">Your Blocks</div>
                     <div class="stat-value" id="userBlocks">0</div>
                 </div>
                 <div class="stat">
-                    <div class="stat-label">Preis (ETH)</div>
+                    <div class="stat-label">Price (ETH)</div>
                     <div class="stat-value" id="priceEth">0.003</div>
                 </div>
             </div>
             
             <div class="price-section">
-                <h3>Wahl der Bezahlung</h3>
+                <h3>Payment Method</h3>
                 <div class="price-option" onclick="selectPayment('eth')">
                     <input type="radio" name="payment" id="payEth" checked>
                     <div class="price-details">
-                        <div class="price-title">Nur ETH</div>
-                        <div class="price-value" id="ethOnlyPrice">0.003 ETH</div>
+                        <div class="price-title">Only ETH</div>
+                        <div class="price-value">0.003 ETH</div>
                     </div>
                 </div>
                 <div class="price-option" onclick="selectPayment('inpi')">
                     <input type="radio" name="payment" id="payInpi">
                     <div class="price-details">
-                        <div class="price-title">Nur INPI</div>
-                        <div class="price-value" id="inpiOnlyPrice">30 INPI</div>
+                        <div class="price-title">Only INPI</div>
+                        <div class="price-value">30 INPI</div>
                     </div>
                 </div>
                 <div class="price-option" onclick="selectPayment('mixed')">
                     <input type="radio" name="payment" id="payMixed">
                     <div class="price-details">
                         <div class="price-title">Mixed (50/50)</div>
-                        <div class="price-value" id="mixedPrice">0.0015 ETH + 15 INPI</div>
+                        <div class="price-value">0.0015 ETH + 15 INPI</div>
                     </div>
                 </div>
             </div>
             
             <div class="coordinates">
-                <label>Reihe: <input type="number" id="row" min="0" max="99" value="0"></label>
-                <label>Position: <input type="number" id="col" min="0" value="0"></label>
+                <label>Row: <input type="number" id="row" min="0" max="99" value="0"></label>
+                <label>Col: <input type="number" id="col" min="0" max="198" value="0"></label>
+                <button id="randomBlockBtn" class="random-btn">🎲 Random Free Block</button>
             </div>
             
-            <button class="mint-button" id="mintBtn" disabled>🚀 Mint deinen Block</button>
+            <button class="mint-button" id="mintBtn" disabled>🚀 Mint your Block</button>
             <div id="mintMessage"></div>
         </div>
 
         <div class="reveal-section">
-            <h2>🔓 Blöcke revealen</h2>
+            <h2>🔓 Reveal Blocks</h2>
             <div id="unrevealedList" class="my-mints">
-                <p>Verbinde Wallet, um deine unrevealed Blöcke zu sehen.</p>
+                <p>Connect wallet to see your unrevealed blocks.</p>
             </div>
             <div id="revealMessage"></div>
         </div>
         
         <div class="footer">
-            <p>10.000 Blöcke in Phase 1 | 5 Diamant-Blöcke versteckt | <a href="https://basescan.org/address/0x067295023b2d5Fa563b3ffAC1C28D584e153447f" target="_blank">Contract verifiziert</a></p>
+            <p>10,000 blocks in Phase 1 | 5 hidden Diamond blocks | <a href="https://basescan.org/address/0x067295023b2d5Fa563b3ffAC1C28D584e153447f" target="_blank">Contract verified</a></p>
+            <p>⚡ INPI/ETH Pool: <a href="https://www.geckoterminal.com/de/base/pools/0x2da60979434c607e283ad7956bdcd21b83fa756fa156ef45f996e2b34d2e12a8" target="_blank">GeckoTerminal</a></p>
         </div>
     </div>
     
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
     <script>
-        // Contract Adressen
+        // === CONFIG ===
         const NFT_ADDRESS = "0x067295023b2d5Fa563b3ffAC1C28D584e153447f";
         const INPI_ADDRESS = "0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D";
         const WORKER_URL = "https://inpinity-worker.s-plat.workers.dev";
+        const MAX_ROW = 99; // Phase 1
 
-        // ABI (minimal für mint & reveal)
+        // === ABI ===
         const NFT_ABI = [
             "function mintWithETH(uint256 row, uint256 col) payable",
             "function mintWithINPI(uint256 row, uint256 col) external",
@@ -308,20 +324,21 @@
             "function tokenOfOwnerByIndex(address owner, uint256 index) view returns (uint256)",
             "function getBlockPosition(uint256 tokenId) view returns (uint256 row, uint256 col)",
             "function blockData(uint256) view returns (uint8 piDigit, uint8 phiDigit, uint256 row, uint256 col, bool revealed, uint256 farmingEndTime)",
-            "function revealBlock(uint256 tokenId, bytes32[] piProof, bytes32[] phiProof, uint8 piDigit, uint8 phiProofDigit) external",
+            "function revealBlock(uint256 tokenId, bytes32[] piProof, bytes32[] phiProof, uint8 piDigit, uint8 phiDigit) external",
             "function MINT_PRICE_ETH() view returns (uint256)",
             "function MINT_PRICE_INPI() view returns (uint256)"
         ];
-
         const INPI_ABI = [
             "function approve(address spender, uint256 amount) returns (bool)",
-            "function allowance(address owner, address spender) view returns (uint256)",
-            "function balanceOf(address account) view returns (uint256)"
+            "function balanceOf(address account) view returns (uint256)",
+            "function allowance(address owner, address spender) view returns (uint256)"
         ];
 
+        // === STATE ===
         let provider, signer, nftContract, inpiContract, userAddress;
         let selectedPayment = 'eth';
 
+        // === UI HELPERS ===
         function selectPayment(type) {
             selectedPayment = type;
             document.getElementById('payEth').checked = (type === 'eth');
@@ -329,15 +346,16 @@
             document.getElementById('payMixed').checked = (type === 'mixed');
         }
 
+        // === WALLET CONNECTION ===
         async function connectWallet() {
-            if (!window.ethereum) return alert('Bitte installiere MetaMask!');
+            if (!window.ethereum) return alert('Please install MetaMask!');
             try {
                 provider = new ethers.providers.Web3Provider(window.ethereum);
                 await provider.send("eth_requestAccounts", []);
                 signer = provider.getSigner();
                 userAddress = await signer.getAddress();
 
-                // Netzwerk auf Base Mainnet prüfen/wechseln
+                // Switch to Base Mainnet
                 const network = await provider.getNetwork();
                 if (network.chainId !== 8453) {
                     try {
@@ -357,22 +375,23 @@
                                     blockExplorerUrls: ['https://basescan.org']
                                 }]
                             });
-                        }
+                        } else throw switchError;
                     }
                 }
 
                 nftContract = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
                 inpiContract = new ethers.Contract(INPI_ADDRESS, INPI_ABI, signer);
 
-                document.getElementById('walletStatus').innerHTML = 'Wallet: verbunden';
+                document.getElementById('walletStatus').innerHTML = 'Wallet: connected';
                 document.getElementById('walletAddress').innerHTML = userAddress.slice(0,6) + '...' + userAddress.slice(-4);
                 document.getElementById('mintBtn').disabled = false;
 
                 await updateBalances();
                 await loadUnrevealedBlocks();
+                await updateAvailableCount();
             } catch (e) {
                 console.error(e);
-                alert('Fehler: ' + e.message);
+                alert('Connection error: ' + e.message);
             }
         }
 
@@ -382,26 +401,27 @@
             document.getElementById('walletBalance').innerHTML = parseFloat(ethers.utils.formatEther(ethBalance)).toFixed(4) + ' ETH';
         }
 
-        async function loadProofs(row, col) {
-            const res = await fetch(`${WORKER_URL}/api/get-proof?row=${row}&col=${col}`);
-            if (!res.ok) throw new Error('Proofs nicht gefunden');
-            return res.json();
+        // === FETCH AVAILABLE BLOCKS (simplified – you could fetch total supply from contract) ===
+        async function updateAvailableCount() {
+            // For now we just show a placeholder – could be improved by querying totalSupply and subtracting minted.
+            document.getElementById('available').innerHTML = '10,000'; // static for Phase 1
         }
 
+        // === LOAD UNREVEALED BLOCKS FOR USER ===
         async function loadUnrevealedBlocks() {
             const listDiv = document.getElementById('unrevealedList');
             if (!userAddress || !nftContract) {
-                listDiv.innerHTML = '<p>Bitte zuerst Wallet verbinden.</p>';
+                listDiv.innerHTML = '<p>Please connect your wallet first.</p>';
                 return;
             }
 
             const balance = await nftContract.balanceOf(userAddress);
             if (balance.toNumber() === 0) {
-                listDiv.innerHTML = '<p>Du hast noch keine Blöcke.</p>';
+                listDiv.innerHTML = '<p>You don’t own any blocks yet.</p>';
                 return;
             }
 
-            let html = '<h3>Noch nicht revealed:</h3>';
+            let html = '<h3>Not yet revealed:</h3>';
             for (let i = 0; i < balance; i++) {
                 const tokenId = await nftContract.tokenOfOwnerByIndex(userAddress, i);
                 const data = await nftContract.blockData(tokenId);
@@ -409,49 +429,114 @@
                     const pos = await nftContract.getBlockPosition(tokenId);
                     html += `<div class="mint-item">
                         <span>Block #${tokenId} (R${pos.row}, P${pos.col})</span>
-                        <button class="reveal-btn" onclick="revealBlock(${tokenId}, ${pos.row}, ${pos.col})">🔓 Revealen</button>
+                        <button class="reveal-btn" onclick="revealBlock(${tokenId}, ${pos.row}, ${pos.col})">🔓 Reveal</button>
                     </div>`;
                 }
             }
-            if (html.includes('Revealen')) {
+            if (html.includes('Reveal')) {
                 listDiv.innerHTML = html;
             } else {
-                listDiv.innerHTML = '<p>Alle deine Blöcke sind bereits revealed.</p>';
+                listDiv.innerHTML = '<p>All your blocks are already revealed.</p>';
             }
         }
 
+        // === REVEAL BLOCK WITH PROPER PROOF FORMATTING ===
         window.revealBlock = async function(tokenId, row, col) {
             const msgDiv = document.getElementById('revealMessage');
-            msgDiv.innerHTML = '<span class="success">⏳ Lade Proofs...</span>';
+            msgDiv.innerHTML = '<span class="success">⏳ Loading proofs...</span>';
             try {
-                const proofs = await loadProofs(row, col);
-                msgDiv.innerHTML = '<span class="success">⏳ Sende Reveal-Transaktion...</span>';
+                const response = await fetch(`${WORKER_URL}/api/get-proof?row=${row}&col=${col}`);
+                if (!response.ok) throw new Error('Proofs not found');
+                const proofs = await response.json();
+
+                // Convert proofs from { left/right: hash } to flat array of 0x-prefixed strings
+                const formatProof = (arr) => {
+                    if (!Array.isArray(arr)) throw new Error('Invalid proof array');
+                    return arr.map(item => {
+                        const hash = item.left ? item.left : item.right;
+                        return hash.startsWith('0x') ? hash : '0x' + hash;
+                    });
+                };
+
+                const piProofFormatted = formatProof(proofs.pi.proof);
+                const phiProofFormatted = formatProof(proofs.phi.proof);
+
+                msgDiv.innerHTML = '<span class="success">⏳ Sending reveal transaction...</span>';
                 const tx = await nftContract.revealBlock(
                     tokenId,
-                    proofs.pi.proof,
-                    proofs.phi.proof,
+                    piProofFormatted,
+                    phiProofFormatted,
                     proofs.pi.digit,
                     proofs.phi.digit
                 );
                 await tx.wait();
-                msgDiv.innerHTML = '<span class="success">✅ Block erfolgreich revealed! 🎉</span>';
+                msgDiv.innerHTML = '<span class="success">✅ Block successfully revealed! 🎉</span>';
                 await loadUnrevealedBlocks();
             } catch (e) {
+                console.error(e);
                 msgDiv.innerHTML = '<span class="error">❌ ' + e.message + '</span>';
             }
         };
 
+        // === RANDOM FREE BLOCK FINDER ===
+        async function findRandomFreeBlock() {
+            if (!nftContract) {
+                alert('Please connect wallet first.');
+                return;
+            }
+            // We'll try a few random positions and check if they are minted.
+            // This is a simple approach; for production you'd want to maintain a list.
+            const MAX_ATTEMPTS = 50;
+            for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+                const row = Math.floor(Math.random() * (MAX_ROW + 1));
+                const maxCol = 2 * row;
+                const col = Math.floor(Math.random() * (maxCol + 1));
+                const tokenId = row * 2048 + col; // formula as per contract
+                try {
+                    const owner = await nftContract.ownerOf(tokenId);
+                    if (owner === ethers.constants.AddressZero) {
+                        // Found free block
+                        document.getElementById('row').value = row;
+                        document.getElementById('col').value = col;
+                        document.getElementById('mintMessage').innerHTML = '<span class="success">✅ Free block found! You can mint it now.</span>';
+                        return;
+                    }
+                } catch (e) {
+                    // If ownerOf reverts, the block doesn't exist (shouldn't happen) or is not minted.
+                    // In ERC721, ownerOf reverts if token doesn't exist. So we treat that as free.
+                    document.getElementById('row').value = row;
+                    document.getElementById('col').value = col;
+                    document.getElementById('mintMessage').innerHTML = '<span class="success">✅ Free block found! You can mint it now.</span>';
+                    return;
+                }
+            }
+            document.getElementById('mintMessage').innerHTML = '<span class="error">❌ Could not find a free block after many attempts. Try manually.</span>';
+        }
+
+        // === MINT FUNCTION WITH BETTER ERROR HANDLING ===
         async function mint() {
             const row = parseInt(document.getElementById('row').value);
             const col = parseInt(document.getElementById('col').value);
-            if (row < 0 || row > 99 || col < 0 || col > 2*row) {
-                return alert('Ungültige Koordinaten!');
+            if (row < 0 || row > MAX_ROW || col < 0 || col > 2*row) {
+                return alert('Invalid coordinates!');
             }
 
             const msgDiv = document.getElementById('mintMessage');
-            msgDiv.innerHTML = '<span class="success">⏳ Sende Mint-Transaktion...</span>';
+            msgDiv.innerHTML = '<span class="success">⏳ Preparing mint...</span>';
 
             try {
+                // Check if block is already minted
+                const tokenId = row * 2048 + col;
+                try {
+                    const owner = await nftContract.ownerOf(tokenId);
+                    if (owner !== ethers.constants.AddressZero) {
+                        msgDiv.innerHTML = '<span class="error">❌ This block is already minted!</span>';
+                        return;
+                    }
+                } catch (e) {
+                    // OwnerOf reverts if token doesn't exist → good, free to mint
+                }
+
                 let tx;
                 if (selectedPayment === 'eth') {
                     tx = await nftContract.mintWithETH(row, col, {
@@ -459,28 +544,63 @@
                     });
                 } else if (selectedPayment === 'inpi') {
                     const amount = ethers.utils.parseEther("30");
-                    await inpiContract.approve(NFT_ADDRESS, amount);
+                    // Check INPI balance
+                    const inpiBal = await inpiContract.balanceOf(userAddress);
+                    if (inpiBal.lt(amount)) {
+                        msgDiv.innerHTML = '<span class="error">❌ Insufficient INPI balance.</span>';
+                        return;
+                    }
+                    // Approve
+                    const allowance = await inpiContract.allowance(userAddress, NFT_ADDRESS);
+                    if (allowance.lt(amount)) {
+                        msgDiv.innerHTML = '<span class="success">⏳ Approving INPI...</span>';
+                        const approveTx = await inpiContract.approve(NFT_ADDRESS, amount);
+                        await approveTx.wait();
+                    }
                     tx = await nftContract.mintWithINPI(row, col);
-                } else {
-                    tx = await nftContract.mintMixed(row, col, {
-                        value: ethers.utils.parseEther("0.0015")
-                    });
+                } else { // mixed
+                    const ethAmount = ethers.utils.parseEther("0.0015");
+                    const inpiAmount = ethers.utils.parseEther("15");
+                    // Check INPI balance
+                    const inpiBal = await inpiContract.balanceOf(userAddress);
+                    if (inpiBal.lt(inpiAmount)) {
+                        msgDiv.innerHTML = '<span class="error">❌ Insufficient INPI balance for mixed payment.</span>';
+                        return;
+                    }
+                    // Approve
+                    const allowance = await inpiContract.allowance(userAddress, NFT_ADDRESS);
+                    if (allowance.lt(inpiAmount)) {
+                        msgDiv.innerHTML = '<span class="success">⏳ Approving INPI...</span>';
+                        const approveTx = await inpiContract.approve(NFT_ADDRESS, inpiAmount);
+                        await approveTx.wait();
+                    }
+                    tx = await nftContract.mintMixed(row, col, { value: ethAmount });
                 }
+
+                msgDiv.innerHTML = '<span class="success">⏳ Transaction sent, waiting for confirmation...</span>';
                 await tx.wait();
-                msgDiv.innerHTML = '<span class="success">✅ Block gemintet! 🎉</span>';
+                msgDiv.innerHTML = '<span class="success">✅ Block minted! 🎉</span>';
                 await updateBalances();
                 await loadUnrevealedBlocks();
+                // Optionally update available count if we had dynamic supply
             } catch (e) {
-                msgDiv.innerHTML = '<span class="error">❌ ' + e.message + '</span>';
+                console.error(e);
+                let errorMsg = e.message;
+                if (e.error && e.error.message) errorMsg = e.error.message;
+                msgDiv.innerHTML = '<span class="error">❌ ' + errorMsg + '</span>';
             }
         }
 
+        // === EVENT LISTENERS ===
         document.getElementById('connectWallet').addEventListener('click', connectWallet);
         document.getElementById('mintBtn').addEventListener('click', mint);
+        document.getElementById('randomBlockBtn').addEventListener('click', findRandomFreeBlock);
         window.selectPayment = selectPayment;
 
-        // Automatisch verbinden falls schon autorisiert
-        if (window.ethereum && window.ethereum.selectedAddress) connectWallet();
+        // Auto-connect if previously authorized
+        if (window.ethereum && window.ethereum.selectedAddress) {
+            connectWallet();
+        }
     </script>
 </body>
 </html>
