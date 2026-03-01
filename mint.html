@@ -473,6 +473,18 @@
                 console.log('Pi proof length:', piProofFormatted.length);
                 console.log('Phi proof length:', phiProofFormatted.length);
 
+                // Leaf-Vergleich (debug)
+                const computedPiLeaf = ethers.utils.keccak256(
+                    ethers.utils.solidityPack(['uint256', 'uint256', 'uint8'], [row, col, proofs.pi.digit])
+                );
+                console.log('Computed Pi leaf:', computedPiLeaf);
+                console.log('Provided Pi leaf:', proofs.pi.leaf);
+                const computedPhiLeaf = ethers.utils.keccak256(
+                    ethers.utils.solidityPack(['uint256', 'uint256', 'uint8'], [row, col, proofs.phi.digit])
+                );
+                console.log('Computed Phi leaf:', computedPhiLeaf);
+                console.log('Provided Phi leaf:', proofs.phi.leaf);
+
                 // 4. Send reveal transaction (with manual gas limit to avoid estimation issues)
                 msgDiv.innerHTML = '<span class="success">⏳ Sending reveal transaction...</span>';
                 const tx = await nftContract.revealBlock(
@@ -595,7 +607,7 @@
             } catch (e) {
                 console.error('Mint error:', e);
                 let errorMsg = e.message;
-                // Try to parse revert reason
+                // Try to parse revert reason (common for "token already minted")
                 if (e.error && e.error.data) {
                     try {
                         const reason = ethers.utils.toUtf8String('0x' + e.error.data.slice(138));
