@@ -370,16 +370,15 @@
             // ==================== KONFIGURATION ====================
             const SUBGRAPH_URL = "https://api.studio.thegraph.com/query/1743108/inpinity/version/latest";
             const API_KEY = "059bc2832dfe50597009e556898d4ba6";
-            const NFT_CONTRACT = "0x277a0D5864293C78d7387C54B48c35D5E9578Ab1";
-            const BASE_BLOCK_SIZE = 24; // etwas größer für bessere Sichtbarkeit
+            const BASE_BLOCK_SIZE = 24;
 
             // ==================== GLOBALE VARIABLEN ====================
             let provider, signer, userAddress = null;
-            let tokens = [];                // Array [tokenId] -> { owner, revealed, farmActive }
+            // tokens als Objekt: key = tokenId (als String) -> { owner, revealed, farmActive }
+            let tokens = {};
             let farms = new Map();           // tokenId -> active
             let protections = new Map();     // tokenId -> active
             let selectedTokenId = null;
-            let loading = true;
 
             // Canvas & UI
             const canvas = document.getElementById('pyramidCanvas');
@@ -403,7 +402,6 @@
 
             // ==================== DATEN VOM SUBGRAPH LADEN ====================
             async function loadData() {
-                loading = true;
                 const query = `
                 {
                     tokens(first: 10000) {
@@ -434,51 +432,39 @@
                     const json = await response.json();
                     if (json.errors) {
                         console.error('Subgraph errors:', json.errors);
-                        // Fehler im Debug-Log ausgeben (falls vorhanden)
-                        if (document.getElementById('debugLog')) {
-                            document.getElementById('debugLog').innerHTML = JSON.stringify(json.errors);
-                        }
                         return;
                     }
                     const data = json.data;
 
-                    // Tokens initialisieren (ID 1..10000)
-                    tokens = new Array(10001).fill(null);
+                    // Tokens als Objekt speichern
+                    tokens = {};
                     if (data.tokens) {
                         data.tokens.forEach(t => {
-                            const id = parseInt(t.id);
-                            if (id >= 1 && id <= 10000) {
-                                tokens[id] = {
-                                    owner: t.owner ? t.owner.id : null,
-                                    revealed: t.revealed || false,
-                                    farmActive: t.farm ? t.farm.active : false
-                                };
-                            }
+                            const tokenId = t.id; // als String
+                            tokens[tokenId] = {
+                                owner: t.owner ? t.owner.id : null,
+                                revealed: t.revealed || false,
+                                farmActive: t.farm ? t.farm.active : false
+                            };
                         });
                     }
 
                     // Farms
                     farms.clear();
                     if (data.farms) {
-                        data.farms.forEach(f => {
-                            farms.set(f.id, f.active);
-                        });
+                        data.farms.forEach(f => farms.set(f.id, f.active));
                     }
 
                     // Protections
                     protections.clear();
                     if (data.protections) {
-                        data.protections.forEach(p => {
-                            protections.set(p.id, p.active);
-                        });
+                        data.protections.forEach(p => protections.set(p.id, p.active));
                     }
 
-                    console.log('Daten geladen, tokens:', tokens.filter(t => t !== null).length);
+                    console.log('Daten geladen, Anzahl Tokens:', Object.keys(tokens).length);
+                    drawPyramid();
                 } catch (err) {
                     console.error('Fehler beim Laden der Subgraph-Daten:', err);
-                } finally {
-                    loading = false;
-                    drawPyramid();
                 }
             }
 
@@ -495,28 +481,25 @@
 
                 const blockSize = BASE_BLOCK_SIZE;
 
-                // Alle 100 Reihen durchgehen (1-basiert)
-                for (let row = 1; row <= 100; row++) {
-                    const blocksInRow = 2 * row - 1; // 1,3,5,...,199
-                    const y = (row - 1) * blockSize; // y-Koordinate (oben beginnend)
+                // Alle 100 Reihen durchgehen (0-basiert)
+                for (let row = 0; row < 100; row++) {
+                    const blocksInRow = 2 * row + 1; // 1,3,5,...,199
+                    const y = row * blockSize;
 
                     // Für jede Spalte (0-basiert) in dieser Reihe
                     for (let col = 0; col < blocksInRow; col++) {
-                        // Token-ID berechnen: Summe der vorherigen Reihen + col + 1
-                        const sumPrev = (row - 1) * (row - 1); // (r-1)^2 ist Summe der vorherigen ungeraden Zahlen
-                        const tokenId = sumPrev + col + 1;
-                        if (tokenId > 10000) continue;
+                        // Token-ID berechnen: row * 2048 + col
+                        const tokenId = (row * 2048 + col).toString();
+                        const token = tokens[tokenId];
 
-                        // Zentrierte x-Koordinate: Spalte relativ zur Mitte, wobei die Mitte bei (row-1) liegt
-                        const midCol = row - 1; // Index der mittleren Spalte (0-basiert)
-                        const x = (col - midCol) * blockSize;
+                        // Zentrierte x-Koordinate: Spalte relativ zur Mitte (Mitte bei row)
+                        const x = (col - row) * blockSize;
 
                         // Farbe bestimmen
                         let fillColor = '#3a4048'; // grau (nicht geminted)
                         let strokeColor = null;
                         let lineWidth = 0;
 
-                        const token = tokens[tokenId];
                         if (token && token.owner) {
                             if (token.revealed) {
                                 fillColor = '#c9a959'; // gold
@@ -524,7 +507,7 @@
                                 fillColor = '#2e7d5e'; // grün
                             }
                             // Schutz prüfen
-                            if (protections.get(tokenId.toString())?.active) {
+                            if (protections.get(tokenId)?.active) {
                                 strokeColor = '#9b59b6';
                                 lineWidth = 3;
                             } else if (token.farmActive) {
@@ -571,27 +554,20 @@
                 const rect = canvas.getBoundingClientRect();
                 const mouseX = (e.clientX - rect.left - offsetX) / scale;
                 const mouseY = (e.clientY - rect.top - offsetY) / scale;
-
-                // Block finden
                 const blockSize = BASE_BLOCK_SIZE;
-                let found = null;
-                for (let row = 1; row <= 100; row++) {
-                    const y = (row - 1) * blockSize;
-                    if (mouseY < y - 5 || mouseY > y + blockSize + 5) continue;
-                    const midCol = row - 1;
-                    const minX = -midCol * blockSize;
-                    const maxX = midCol * blockSize + blockSize;
-                    if (mouseX < minX - 5 || mouseX > maxX + 5) continue;
 
-                    // Spalte berechnen
-                    const col = Math.round((mouseX / blockSize) + midCol);
-                    if (col >= 0 && col < 2*row - 1) {
-                        const sumPrev = (row - 1) * (row - 1);
-                        const tokenId = sumPrev + col + 1;
-                        if (tokenId >= 1 && tokenId <= 10000) {
-                            found = tokenId;
-                            break;
-                        }
+                let found = null;
+                for (let row = 0; row < 100; row++) {
+                    const y = row * blockSize;
+                    if (mouseY < y - 5 || mouseY > y + blockSize + 5) continue;
+                    const minX = -row * blockSize;
+                    const maxX = (row + 1) * blockSize; // letzte Spalte bei col = 2*row hat x = row
+                    if (mouseX < minX - 5 || mouseX > maxX + 5) continue;
+                    const col = Math.round((mouseX / blockSize) + row);
+                    if (col >= 0 && col <= 2 * row) {
+                        const tokenId = (row * 2048 + col).toString();
+                        found = tokenId;
+                        break;
                     }
                 }
 
@@ -602,7 +578,7 @@
                         text += `Owner: ${shortenAddress(token.owner)}<br>`;
                         text += `Status: ${token.revealed ? 'Revealed' : 'Minted'}`;
                         if (token.farmActive) text += ' · Farming';
-                        if (protections.get(found.toString())?.active) text += ' · Protected';
+                        if (protections.get(found)?.active) text += ' · Protected';
                     } else {
                         text += 'Not minted';
                     }
@@ -621,20 +597,16 @@
                 const mouseY = (e.clientY - rect.top - offsetY) / scale;
                 const blockSize = BASE_BLOCK_SIZE;
 
-                for (let row = 1; row <= 100; row++) {
-                    const y = (row - 1) * blockSize;
+                for (let row = 0; row < 100; row++) {
+                    const y = row * blockSize;
                     if (mouseY < y || mouseY > y + blockSize) continue;
-                    const midCol = row - 1;
-                    const col = Math.round((mouseX / blockSize) + midCol);
-                    if (col >= 0 && col < 2*row - 1) {
-                        const sumPrev = (row - 1) * (row - 1);
-                        const tokenId = sumPrev + col + 1;
-                        if (tokenId >= 1 && tokenId <= 10000) {
-                            selectedTokenId = tokenId;
-                            updateSidebar(tokenId);
-                            drawPyramid(); // um Selektion zu markieren
-                            break;
-                        }
+                    const col = Math.round((mouseX / blockSize) + row);
+                    if (col >= 0 && col <= 2 * row) {
+                        const tokenId = (row * 2048 + col).toString();
+                        selectedTokenId = tokenId;
+                        updateSidebar(tokenId);
+                        drawPyramid(); // um Selektion zu markieren (optional)
+                        break;
                     }
                 }
             }
@@ -643,13 +615,12 @@
                 const token = tokens[tokenId];
                 let html = '';
                 if (token && token.owner) {
-                    const ownerShort = shortenAddress(token.owner);
                     html = `
                         <div class="detail-row"><span class="detail-label">Block #</span><span class="detail-value">${tokenId}</span></div>
-                        <div class="detail-row"><span class="detail-label">Owner</span><span class="detail-value">${ownerShort}</span></div>
+                        <div class="detail-row"><span class="detail-label">Owner</span><span class="detail-value">${shortenAddress(token.owner)}</span></div>
                         <div class="detail-row"><span class="detail-label">Revealed</span><span class="detail-value">${token.revealed ? '✅' : '❌'}</span></div>
                         <div class="detail-row"><span class="detail-label">Farming</span><span class="detail-value">${token.farmActive ? 'Active' : 'Inactive'}</span></div>
-                        <div class="detail-row"><span class="detail-label">Protection</span><span class="detail-value">${protections.get(tokenId.toString())?.active ? '✅' : '❌'}</span></div>
+                        <div class="detail-row"><span class="detail-label">Protection</span><span class="detail-value">${protections.get(tokenId)?.active ? '✅' : '❌'}</span></div>
                     `;
                 } else {
                     html = `<p style="color: #98a9b9; text-align: center;">Block #${tokenId} is not minted.</p>`;
@@ -665,7 +636,7 @@
                     signer = await provider.getSigner();
                     userAddress = await signer.getAddress();
                     document.getElementById('walletAddress').innerText = shortenAddress(userAddress);
-                    drawPyramid();
+                    drawPyramid(); // neu zeichnen, um weißen Rand für eigene Blöcke zu zeigen
                 } catch (err) {
                     console.error(err);
                 }
@@ -681,14 +652,13 @@
                 const mouseY = e.clientY - rect.top;
                 const worldX = (mouseX - offsetX) / scale;
                 const worldY = (mouseY - offsetY) / scale;
-                scale = Math.max(0.2, Math.min(5, scale * delta)); // Begrenzung
+                scale = Math.max(0.2, Math.min(5, scale * delta));
                 offsetX = mouseX - worldX * scale;
                 offsetY = mouseY - worldY * scale;
                 drawPyramid();
             }
 
             function handlePinch(e) {
-                // Für Touch-Geräte: zwei Finger Zoom
                 if (e.touches.length === 2) {
                     e.preventDefault();
                     const dist = Math.hypot(
@@ -724,7 +694,6 @@
             let isDraggingPanel = false;
             let dragStartX, dragStartY, panelStartLeft, panelStartTop;
 
-            // Verschieben per Drag
             dragHandle.addEventListener('mousedown', (e) => {
                 isDraggingPanel = true;
                 dragStartX = e.clientX;
@@ -750,7 +719,6 @@
                 legendPanel.style.transition = '';
             });
 
-            // Resize per Handle
             let isResizing = false;
             resizeHandle.addEventListener('mousedown', (e) => {
                 isResizing = true;
@@ -760,7 +728,7 @@
             window.addEventListener('mousemove', (e) => {
                 if (!isResizing) return;
                 const rect = legendPanel.getBoundingClientRect();
-                const newWidth = rect.right - e.clientX; // da Handle links
+                const newWidth = rect.right - e.clientX;
                 if (newWidth > 200 && newWidth < 500) {
                     legendPanel.style.width = newWidth + 'px';
                     legendPanel.style.right = 'auto';
@@ -771,7 +739,6 @@
                 isResizing = false;
             });
 
-            // Einklappen / Ausklappen
             collapseBtn.addEventListener('click', () => {
                 if (legendContent.classList.contains('collapsed')) {
                     legendContent.classList.remove('collapsed');
@@ -782,7 +749,6 @@
                 }
             });
 
-            // Position zurücksetzen
             resetPosBtn.addEventListener('click', () => {
                 legendPanel.style.left = 'auto';
                 legendPanel.style.top = '20px';
