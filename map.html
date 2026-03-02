@@ -2,52 +2,63 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inpinity Pyramid Map</title>
-    <!-- Google Fonts für elegante Typografie -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>INPINITY – Pyramid Map</title>
+    <link rel="icon" type="image/png" href="favicon.webp" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
 
         body {
             font-family: 'Inter', sans-serif;
-            background: #0a0c0f;
-            color: #e0e0e0;
+            background: #0b0e12;
+            color: #eef2f6;
             overflow: hidden;
             height: 100vh;
             display: flex;
             flex-direction: column;
         }
 
-        /* Header */
+        /* Header mit Glas-Effekt */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1rem 2rem;
-            background: rgba(20, 25, 30, 0.95);
-            backdrop-filter: blur(8px);
-            border-bottom: 1px solid #2a2e35;
-            z-index: 10;
+            padding: 0.8rem 2rem;
+            background: rgba(20, 28, 36, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(212, 175, 55, 0.25);
+            z-index: 20;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
         }
 
         .logo h1 {
             font-weight: 600;
-            font-size: 1.5rem;
-            letter-spacing: 1px;
-            background: linear-gradient(135deg, #f5e7c8, #c9a959);
+            font-size: 1.7rem;
+            letter-spacing: 0.5px;
+            background: linear-gradient(135deg, #f5e7c8, #d4af37);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
         .logo span {
             font-size: 0.9rem;
-            color: #8a8f99;
-            margin-left: 0.5rem;
+            color: #98a2b3;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.2rem 0.8rem;
+            border-radius: 40px;
+            border: 1px solid #2f3e4c;
         }
 
         .wallet {
@@ -57,43 +68,50 @@
         }
 
         .wallet button {
-            background: #2d4a3e;
-            border: 1px solid #3b6b54;
-            color: #e0e0e0;
-            padding: 0.6rem 1.2rem;
-            border-radius: 30px;
+            background: linear-gradient(145deg, #1e3a3a, #1f4a3a);
+            border: 1px solid #3b8b6b;
+            color: #f0f4fa;
+            padding: 0.5rem 1.5rem;
+            border-radius: 40px;
             font-weight: 600;
+            font-size: 0.95rem;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: 0.2s;
+            box-shadow: 0 2px 6px rgba(0, 40, 30, 0.5);
         }
 
         .wallet button:hover {
-            background: #3b6b54;
-            border-color: #5a8f72;
+            background: #2e6d5e;
+            border-color: #d4af37;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(212, 175, 55, 0.3);
         }
 
         #walletAddress {
-            color: #b9c9d9;
+            background: #1a232c;
+            padding: 0.4rem 1.2rem;
+            border-radius: 40px;
             font-size: 0.9rem;
-            background: #1e2429;
-            padding: 0.4rem 1rem;
-            border-radius: 20px;
-            border: 1px solid #2f363e;
+            border: 1px solid #2f4b5c;
+            color: #bcd0e0;
         }
 
-        /* Hauptcontainer: Canvas + Sidebar */
+        /* Hauptbereich */
         .main {
-            display: flex;
             flex: 1;
+            display: flex;
+            position: relative;
             overflow: hidden;
         }
 
+        /* Canvas-Container – zentriert */
         .canvas-container {
             flex: 1;
             position: relative;
-            background: #101316;
+            background: #0f1318;
             overflow: hidden;
             cursor: grab;
+            touch-action: none; /* Für Touch-Gesten */
         }
 
         .canvas-container canvas {
@@ -105,131 +123,203 @@
         /* Tooltip */
         .tooltip {
             position: absolute;
-            background: rgba(20, 25, 30, 0.95);
-            border: 1px solid #3e4a5a;
-            border-radius: 8px;
-            padding: 0.6rem 1rem;
-            font-size: 0.85rem;
+            background: rgba(20, 30, 40, 0.95);
+            backdrop-filter: blur(6px);
+            border: 1px solid #d4af37;
+            border-radius: 16px;
+            padding: 0.75rem 1.2rem;
+            font-size: 0.9rem;
             pointer-events: none;
-            color: #d0d8e0;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-            backdrop-filter: blur(4px);
+            color: #ecf3fa;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
             z-index: 100;
             transition: opacity 0.15s;
             opacity: 0;
-            max-width: 220px;
-            border-left: 3px solid #c9a959;
+            max-width: 260px;
+            border-left: 4px solid #d4af37;
+            line-height: 1.5;
         }
 
         .tooltip span {
-            color: #f5e7c8;
+            color: #d4af37;
             font-weight: 600;
         }
 
-        /* Sidebar */
-        .sidebar {
-            width: 320px;
-            background: #141a20;
-            border-left: 1px solid #2a2e35;
-            padding: 1.5rem;
-            overflow-y: auto;
-            box-shadow: -4px 0 10px rgba(0,0,0,0.3);
-            z-index: 5;
+        /* Sidebar / Legende – verschiebbar und einklappbar */
+        .legend-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 300px;
+            background: rgba(20, 28, 38, 0.9);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 24px;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            z-index: 15;
+            transition: width 0.2s ease, right 0.2s ease;
+            resize: horizontal;
+            overflow: hidden;
+            cursor: move; /* für Drag */
+            user-select: none;
         }
 
-        .sidebar h2 {
+        .legend-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #2a3a48;
+            cursor: move;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 24px 24px 0 0;
+        }
+
+        .legend-header h3 {
             font-size: 1.2rem;
-            margin-bottom: 1.5rem;
+            color: #d4af37;
             font-weight: 600;
-            color: #c9a959;
             letter-spacing: 0.5px;
-            border-bottom: 1px solid #2f363e;
-            padding-bottom: 0.5rem;
         }
 
-        .sidebar .block-detail {
-            background: #1e2429;
-            border-radius: 12px;
-            padding: 1rem;
-            border: 1px solid #2f363e;
+        .legend-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .legend-controls button {
+            background: transparent;
+            border: 1px solid #3a5060;
+            color: #d4af37;
+            width: 30px;
+            height: 30px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 1.1rem;
+        }
+
+        .legend-controls button:hover {
+            background: #d4af37;
+            color: #0b0e12;
+            border-color: #d4af37;
+        }
+
+        .legend-content {
+            padding: 1.2rem 1.5rem;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .legend-content.collapsed {
+            max-height: 0;
+            padding: 0 1.5rem;
+            overflow: hidden;
+        }
+
+        .detail-card {
+            background: #1b2630;
+            border-radius: 20px;
+            padding: 1.2rem;
+            border: 1px solid #2a3f4a;
+            margin-bottom: 1.5rem;
         }
 
         .detail-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 0.75rem;
+            margin-bottom: 0.7rem;
             font-size: 0.95rem;
         }
 
         .detail-label {
-            color: #8a8f99;
+            color: #98a9b9;
         }
 
         .detail-value {
             font-weight: 600;
-            color: #f0f0f0;
-        }
-
-        .rarity-badge {
-            display: inline-block;
-            padding: 0.2rem 0.8rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            background: #2d2d2d;
-        }
-
-        .rarity-0 { background: #7f8c8d; } /* bronze */
-        .rarity-1 { background: #95a5a6; } /* silver */
-        .rarity-2 { background: #f1c40f; color: #1e1e1e; } /* gold */
-        .rarity-3 { background: #e67e22; } /* platinum */
-        .rarity-4 { background: #9b59b6; } /* diamond */
-
-        .legend {
-            margin-top: 2rem;
-            border-top: 1px solid #2f363e;
-            padding-top: 1rem;
+            color: #f0f4fa;
         }
 
         .legend-item {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 0.5rem;
+            gap: 0.8rem;
+            margin-bottom: 0.8rem;
+            font-size: 0.95rem;
         }
 
         .color-box {
-            width: 20px;
-            height: 20px;
-            border-radius: 4px;
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.4);
         }
 
         .color-gray { background: #3a4048; }
         .color-green { background: #2e7d5e; }
         .color-gold { background: #c9a959; }
-        .border-blue { border: 2px solid #3498db; }
-        .border-purple { border: 2px solid #9b59b6; }
-        .border-white { border: 2px solid #ffffff; }
-
-        .status-badge {
-            font-size: 0.8rem;
-            padding: 0.2rem 0.6rem;
-            border-radius: 12px;
-            background: #2d3748;
-        }
+        .border-blue { border: 3px solid #3498db; box-sizing: border-box; }
+        .border-purple { border: 3px solid #9b59b6; }
+        .border-white { border: 3px solid #ffffff; }
 
         .footer-note {
-            margin-top: 2rem;
+            margin-top: 1.5rem;
             font-size: 0.8rem;
-            color: #5f6a7a;
+            color: #6f7c8a;
             text-align: center;
+            border-top: 1px dashed #2a3f4a;
+            padding-top: 1rem;
+        }
+
+        /* Resize Handle */
+        .legend-panel .resize-handle {
+            position: absolute;
+            left: -5px;
+            top: 0;
+            bottom: 0;
+            width: 10px;
+            cursor: ew-resize;
+            background: transparent;
+        }
+
+        /* Mobile Optimierung */
+        @media (max-width: 600px) {
+            .header {
+                padding: 0.6rem 1rem;
+            }
+            .logo h1 {
+                font-size: 1.2rem;
+            }
+            .logo span {
+                display: none;
+            }
+            .wallet button {
+                padding: 0.4rem 1rem;
+                font-size: 0.8rem;
+            }
+            #walletAddress {
+                display: none;
+            }
+            .legend-panel {
+                width: 90%;
+                right: 5%;
+                top: 70px;
+                max-width: 320px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="header">
         <div class="logo">
-            <h1>INPINITY <span>Pyramid Map</span></h1>
+            <h1>INPINITY</h1>
+            <span>Pyramid Map</span>
         </div>
         <div class="wallet">
             <div id="walletAddress">Not connected</div>
@@ -243,46 +333,54 @@
             <div class="tooltip" id="tooltip"></div>
         </div>
 
-        <div class="sidebar" id="sidebar">
-            <h2>🔷 Block Details</h2>
-            <div class="block-detail" id="blockDetail">
-                <p style="color: #8a8f99; text-align: center;">Click on a block to see details</p>
+        <!-- Verschiebbare Legende / Sidebar -->
+        <div class="legend-panel" id="legendPanel">
+            <div class="resize-handle" id="resizeHandle"></div>
+            <div class="legend-header" id="dragHandle">
+                <h3>🔷 Block Details & Legend</h3>
+                <div class="legend-controls">
+                    <button id="collapseBtn">−</button>
+                    <button id="resetPosBtn">↺</button>
+                </div>
             </div>
+            <div class="legend-content" id="legendContent">
+                <div class="detail-card" id="blockDetail">
+                    <p style="color: #98a9b9; text-align: center;">Click on a block to see details</p>
+                </div>
 
-            <div class="legend">
-                <h3 style="color: #c9a959; margin-bottom: 1rem;">Legend</h3>
+                <h4 style="color: #d4af37; margin: 1rem 0 0.8rem; font-weight: 500;">Legend</h4>
                 <div class="legend-item"><div class="color-box color-gray"></div> Not minted</div>
                 <div class="legend-item"><div class="color-box color-green"></div> Minted, not revealed</div>
                 <div class="legend-item"><div class="color-box color-gold"></div> Revealed</div>
-                <div class="legend-item"><div class="color-box color-gold" style="border: 2px solid #3498db;"></div> Farming active</div>
-                <div class="legend-item"><div class="color-box color-gold" style="border: 2px solid #9b59b6;"></div> Protected</div>
-                <div class="legend-item"><div class="color-box color-gold" style="border: 2px solid #ffffff;"></div> Your block</div>
-            </div>
+                <div class="legend-item"><div class="color-box color-gold" style="border: 3px solid #3498db;"></div> Farming active</div>
+                <div class="legend-item"><div class="color-box color-gold" style="border: 3px solid #9b59b6;"></div> Protected</div>
+                <div class="legend-item"><div class="color-box color-gold" style="border: 3px solid #ffffff;"></div> Your block</div>
 
-            <div class="footer-note">
-                <p>🏗️ 100 rows · 10,000 blocks</p>
-                <p style="margin-top: 0.5rem;">π · φ · Fibonacci</p>
+                <div class="footer-note">
+                    <p>100 rows · 10,000 blocks</p>
+                    <p style="margin-top: 0.2rem;">π · φ · Fibonacci</p>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Ethers.js für Wallet-Interaktion -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
     <script>
         (async function() {
-            // --- Konfiguration ---
+            // ==================== KONFIGURATION ====================
             const SUBGRAPH_URL = "https://api.studio.thegraph.com/query/1743108/inpinity/v0.0.7";
-            const NFT_CONTRACT = "0x277a0D5864293C78d7387C54B48c35D5E9578Ab1"; // Für Owner-Check via Contract (falls nötig)
-            
-            // --- Globale Variablen ---
-            let provider, signer, userAddress = null;
-            let tokens = []; // Array der Länge 10001, Index = Token-ID
-            let farms = new Map(); // tokenId -> active
-            let protections = new Map(); // tokenId -> active
-            let loading = true;
-            let selectedTokenId = null;
+            const NFT_CONTRACT = "0x277a0D5864293C78d7387C54B48c35D5E9578Ab1";
+            const BASE_BLOCK_SIZE = 24; // etwas größer für bessere Sichtbarkeit
 
-            // Canvas & Interaktion
+            // ==================== GLOBALE VARIABLEN ====================
+            let provider, signer, userAddress = null;
+            let tokens = [];                // Array [tokenId] -> { owner, revealed, farmActive }
+            let farms = new Map();           // tokenId -> active
+            let protections = new Map();     // tokenId -> active
+            let selectedTokenId = null;
+            let loading = true;
+
+            // Canvas & UI
             const canvas = document.getElementById('pyramidCanvas');
             const ctx = canvas.getContext('2d');
             const container = document.getElementById('canvasContainer');
@@ -294,44 +392,17 @@
             let offsetX = 0, offsetY = 0;
             let isDragging = false;
             let lastMouseX, lastMouseY;
+            let pinchStartDist = 0;
 
-            // Blockgröße in Pixeln (Basis)
-            const BASE_BLOCK_SIZE = 20;
-
-            // --- Funktionen ---
-
-            // Canvas-Größe anpassen
-            function resizeCanvas() {
-                canvas.width = container.clientWidth;
-                canvas.height = container.clientHeight;
-                drawPyramid();
-            }
-
-            // Wallet verbinden
-            async function connectWallet() {
-                if (typeof window.ethereum !== 'undefined') {
-                    try {
-                        provider = new ethers.BrowserProvider(window.ethereum);
-                        signer = await provider.getSigner();
-                        userAddress = await signer.getAddress();
-                        document.getElementById('walletAddress').innerText = shortenAddress(userAddress);
-                        drawPyramid(); // neu zeichnen, um weißen Rand für eigene Blöcke zu zeigen
-                    } catch (err) {
-                        console.error(err);
-                    }
-                } else {
-                    alert('Please install MetaMask!');
-                }
-            }
-
+            // ==================== UI-HELPER ====================
             function shortenAddress(addr) {
+                if (!addr) return '';
                 return addr.slice(0, 6) + '...' + addr.slice(-4);
             }
 
-            // Daten vom Subgraph laden
+            // ==================== DATEN VOM SUBGRAPH LADEN ====================
             async function loadData() {
                 loading = true;
-                // GraphQL Query: alle tokens, farms, protections
                 const query = `
                 {
                     tokens(first: 10000) {
@@ -363,183 +434,174 @@
                     }
                     const data = json.data;
 
-                    // Tokens in Array ablegen (ID 1..10000)
+                    // Tokens initialisieren (ID 1..10000)
                     tokens = new Array(10001).fill(null);
-                    data.tokens.forEach(t => {
-                        const id = parseInt(t.id);
-                        tokens[id] = {
-                            owner: t.owner.id,
-                            revealed: t.revealed,
-                            farmActive: t.farm ? t.farm.active : false
-                        };
-                    });
+                    if (data.tokens) {
+                        data.tokens.forEach(t => {
+                            const id = parseInt(t.id);
+                            if (id >= 1 && id <= 10000) {
+                                tokens[id] = {
+                                    owner: t.owner ? t.owner.id : null,
+                                    revealed: t.revealed || false,
+                                    farmActive: t.farm ? t.farm.active : false
+                                };
+                            }
+                        });
+                    }
 
-                    // Farms Map (falls nötig, aber wir haben farmActive schon)
+                    // Farms
                     farms.clear();
-                    data.farms.forEach(f => {
-                        farms.set(f.id, f.active);
-                    });
+                    if (data.farms) {
+                        data.farms.forEach(f => {
+                            farms.set(f.id, f.active);
+                        });
+                    }
 
-                    // Protections Map
+                    // Protections
                     protections.clear();
-                    data.protections.forEach(p => {
-                        protections.set(p.id, p.active);
-                    });
+                    if (data.protections) {
+                        data.protections.forEach(p => {
+                            protections.set(p.id, p.active);
+                        });
+                    }
 
+                    console.log('Daten geladen, tokens:', tokens.filter(t => t !== null).length);
                 } catch (err) {
-                    console.error('Failed to load subgraph data:', err);
+                    console.error('Fehler beim Laden der Subgraph-Daten:', err);
                 } finally {
                     loading = false;
                     drawPyramid();
                 }
             }
 
-            // Zeichnen der Pyramide
+            // ==================== ZEICHNEN DER PYRAMIDE ====================
             function drawPyramid() {
                 if (!canvas || !ctx) return;
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const w = canvas.width;
+                const h = canvas.height;
+
+                ctx.clearRect(0, 0, w, h);
                 ctx.save();
                 ctx.translate(offsetX, offsetY);
                 ctx.scale(scale, scale);
 
                 const blockSize = BASE_BLOCK_SIZE;
 
-                // Für jede Reihe 1..100
+                // Alle 100 Reihen durchgehen (1-basiert)
                 for (let row = 1; row <= 100; row++) {
                     const blocksInRow = 2 * row - 1; // 1,3,5,...,199
-                    const rowWidth = blocksInRow * blockSize;
-                    // Zentrierung
-                    const startX = (canvas.width / scale - offsetX) / 2 - rowWidth / 2; // Achtung: Koordinaten sind in transformiertem Raum
-                    // Besser: Wir berechnen die Position in Weltkoordinaten (vor Transformation)
-                    // Wir zeichnen im transformierten Kontext, also müssen wir die Position relativ zum Ursprung setzen.
-                    // Einfacher: Wir berechnen Weltkoordinaten (x,y) und zeichnen.
-                    // Da wir translate und scale gesetzt haben, können wir einfach mit Weltkoordinaten zeichnen.
-                    // Weltkoordinaten: (0,0) ist der Ursprung, der auf dem Bildschirm bei (offsetX, offsetY) liegt.
-                    // Um die Pyramide zu zentrieren, müssen wir den Ursprung so setzen, dass die gesamte Pyramide sichtbar ist.
-                    // Wir können einen initialen offsetX, offsetY wählen, der die Pyramide zentriert.
-                    // Wir setzen offsetX und offsetY beim ersten Zeichnen oder bei resize.
-                    // Besser: Wir definieren die Pyramide in Weltkoordinaten so, dass sie bei (0,0) beginnt, und dann passen wir offset an.
-                    // Aber einfacher: Wir berechnen die Bildschirmposition direkt.
-                    // Ich werde eine Hilfsfunktion machen, die Weltkoordinaten in Bildschirmkoordinaten umrechnet, aber fürs Zeichnen nutzen wir weiterhin Transformation.
-                    // Also setzen wir vor dem Zeichnen die Transformation so, dass die Pyramide gut sichtbar ist.
-                    // Wir können die gesamte Pyramide in Weltkoordinaten zentrieren: Die Breite der Basis ist 199*20 = 3980px, Höhe 100*20 = 2000px.
-                    // Bei Skalierung 1 passt das nicht ins Fenster, daher initialisieren wir scale und offset sinnvoll.
-                    // Wir lassen den Nutzer zoomen, aber initial setzen wir scale so, dass die ganze Pyramide passt.
-                }
+                    const y = (row - 1) * blockSize; // y-Koordinate (oben beginnend)
 
-                // Nachdem wir die Transformation gesetzt haben, zeichnen wir die Blöcke.
-                // Wir iterieren über alle Token-IDs 1..10000.
-                for (let tokenId = 1; tokenId <= 10000; tokenId++) {
-                    // Reihe und Spalte berechnen
-                    let sum = 0;
-                    let row = 1;
-                    while (row <= 100) {
-                        const blocksInRow = 2 * row - 1;
-                        if (tokenId <= sum + blocksInRow) break;
-                        sum += blocksInRow;
-                        row++;
-                    }
-                    const col = tokenId - sum - 1; // 0-basierte Spalte innerhalb der Reihe
+                    // Für jede Spalte (0-basiert) in dieser Reihe
+                    for (let col = 0; col < blocksInRow; col++) {
+                        // Token-ID berechnen: Summe der vorherigen Reihen + col + 1
+                        const sumPrev = (row - 1) * (row - 1); // (r-1)^2 ist Summe der vorherigen ungeraden Zahlen
+                        const tokenId = sumPrev + col + 1;
+                        if (tokenId > 10000) continue;
 
-                    // Weltkoordinaten
-                    const blockSize = BASE_BLOCK_SIZE;
-                    const x = col * blockSize - (row * blockSize); //? Wir müssen zentrieren
-                    // Einfacher: x = (col - (row-1)) * blockSize? Nein.
-                    // Die Reihe ist zentriert um 0. Die mittlere Spalte (row-1) hat x=0.
-                    const centeredX = (col - (row - 1)) * blockSize; // So ist Reihe zentriert um 0
-                    const y = (row - 1) * blockSize;
+                        // Zentrierte x-Koordinate: Spalte relativ zur Mitte, wobei die Mitte bei (row-1) liegt
+                        const midCol = row - 1; // Index der mittleren Spalte (0-basiert)
+                        const x = (col - midCol) * blockSize;
 
-                    // Farbe bestimmen
-                    let fillColor = '#3a4048'; // grau (nicht geminted)
-                    let strokeColor = null;
-                    let lineWidth = 0;
+                        // Farbe bestimmen
+                        let fillColor = '#3a4048'; // grau (nicht geminted)
+                        let strokeColor = null;
+                        let lineWidth = 0;
 
-                    const token = tokens[tokenId];
-                    if (token) {
-                        if (token.revealed) {
-                            fillColor = '#c9a959'; // gold
-                        } else {
-                            fillColor = '#2e7d5e'; // grün (minted, nicht revealed)
+                        const token = tokens[tokenId];
+                        if (token && token.owner) {
+                            if (token.revealed) {
+                                fillColor = '#c9a959'; // gold
+                            } else {
+                                fillColor = '#2e7d5e'; // grün
+                            }
+                            // Schutz prüfen
+                            if (protections.get(tokenId.toString())?.active) {
+                                strokeColor = '#9b59b6';
+                                lineWidth = 3;
+                            } else if (token.farmActive) {
+                                strokeColor = '#3498db';
+                                lineWidth = 3;
+                            }
+                            // Eigenes Highlight
+                            if (userAddress && token.owner.toLowerCase() === userAddress.toLowerCase()) {
+                                strokeColor = '#ffffff';
+                                lineWidth = 3;
+                            }
                         }
-                        // Rahmen für Farming / Protection / Owner
-                        if (protections.get(tokenId.toString())?.active) {
-                            strokeColor = '#9b59b6'; // lila
-                            lineWidth = 3;
-                        } else if (token.farmActive) {
-                            strokeColor = '#3498db'; // blau
-                            lineWidth = 3;
-                        }
-                        if (userAddress && token.owner.toLowerCase() === userAddress.toLowerCase()) {
-                            // Weißer Rand überschreibt eventuell, aber wir priorisieren: owner-Rand zusätzlich? 
-                            // Wir zeichnen einen weißen Rand außen.
-                            strokeColor = '#ffffff';
-                            lineWidth = 3;
-                        }
-                    }
 
-                    // Zeichnen
-                    ctx.fillStyle = fillColor;
-                    ctx.fillRect(centeredX, y, blockSize, blockSize);
-                    if (strokeColor) {
-                        ctx.strokeStyle = strokeColor;
-                        ctx.lineWidth = lineWidth;
-                        ctx.strokeRect(centeredX, y, blockSize, blockSize);
+                        // Block zeichnen
+                        ctx.fillStyle = fillColor;
+                        ctx.fillRect(x, y, blockSize, blockSize);
+                        if (strokeColor) {
+                            ctx.strokeStyle = strokeColor;
+                            ctx.lineWidth = lineWidth;
+                            ctx.strokeRect(x, y, blockSize, blockSize);
+                        }
                     }
                 }
 
                 ctx.restore();
             }
 
-            // Initialisierung
-            window.addEventListener('resize', () => {
-                resizeCanvas();
+            // ==================== ZENTRIERUNG ====================
+            function centerPyramid() {
+                if (!canvas) return;
+                const totalWidth = 199 * BASE_BLOCK_SIZE; // max. Breite
+                const totalHeight = 100 * BASE_BLOCK_SIZE;
+                const scaleX = canvas.width / totalWidth * 0.9;
+                const scaleY = canvas.height / totalHeight * 0.9;
+                scale = Math.min(scaleX, scaleY, 1.5); // nicht zu groß
+                offsetX = (canvas.width - totalWidth * scale) / 2;
+                offsetY = (canvas.height - totalHeight * scale) / 2;
                 drawPyramid();
-            });
+            }
 
-            // Maus-Interaktion für Tooltip und Klick
+            // ==================== INTERAKTION ====================
             function handleMouseMove(e) {
+                if (isDragging) return;
                 const rect = canvas.getBoundingClientRect();
                 const mouseX = (e.clientX - rect.left - offsetX) / scale;
                 const mouseY = (e.clientY - rect.top - offsetY) / scale;
 
                 // Block finden
                 const blockSize = BASE_BLOCK_SIZE;
-                let foundTokenId = null;
-                for (let tokenId = 1; tokenId <= 10000; tokenId++) {
-                    // Berechne Position (wie in draw)
-                    let sum = 0;
-                    let row = 1;
-                    while (row <= 100) {
-                        const blocksInRow = 2 * row - 1;
-                        if (tokenId <= sum + blocksInRow) break;
-                        sum += blocksInRow;
-                        row++;
-                    }
-                    const col = tokenId - sum - 1;
-                    const centeredX = (col - (row - 1)) * blockSize;
+                let found = null;
+                for (let row = 1; row <= 100; row++) {
                     const y = (row - 1) * blockSize;
-                    if (mouseX >= centeredX && mouseX <= centeredX + blockSize &&
-                        mouseY >= y && mouseY <= y + blockSize) {
-                        foundTokenId = tokenId;
-                        break;
+                    if (mouseY < y - 5 || mouseY > y + blockSize + 5) continue;
+                    const midCol = row - 1;
+                    const minX = -midCol * blockSize;
+                    const maxX = midCol * blockSize + blockSize;
+                    if (mouseX < minX - 5 || mouseX > maxX + 5) continue;
+
+                    // Spalte berechnen
+                    const col = Math.round((mouseX / blockSize) + midCol);
+                    if (col >= 0 && col < 2*row - 1) {
+                        const sumPrev = (row - 1) * (row - 1);
+                        const tokenId = sumPrev + col + 1;
+                        if (tokenId >= 1 && tokenId <= 10000) {
+                            found = tokenId;
+                            break;
+                        }
                     }
                 }
 
-                if (foundTokenId) {
-                    const token = tokens[foundTokenId];
-                    let text = `<span>Block #${foundTokenId}</span><br>`;
-                    if (token) {
+                if (found) {
+                    const token = tokens[found];
+                    let text = `<span>Block #${found}</span><br>`;
+                    if (token && token.owner) {
                         text += `Owner: ${shortenAddress(token.owner)}<br>`;
                         text += `Status: ${token.revealed ? 'Revealed' : 'Minted'}`;
                         if (token.farmActive) text += ' · Farming';
-                        if (protections.get(foundTokenId.toString())?.active) text += ' · Protected';
+                        if (protections.get(found.toString())?.active) text += ' · Protected';
                     } else {
                         text += 'Not minted';
                     }
                     tooltip.innerHTML = text;
                     tooltip.style.opacity = 1;
-                    tooltip.style.left = e.clientX + 15 + 'px';
-                    tooltip.style.top = e.clientY - 40 + 'px';
+                    tooltip.style.left = e.clientX + 20 + 'px';
+                    tooltip.style.top = e.clientY - 50 + 'px';
                 } else {
                     tooltip.style.opacity = 0;
                 }
@@ -551,23 +613,20 @@
                 const mouseY = (e.clientY - rect.top - offsetY) / scale;
                 const blockSize = BASE_BLOCK_SIZE;
 
-                for (let tokenId = 1; tokenId <= 10000; tokenId++) {
-                    let sum = 0;
-                    let row = 1;
-                    while (row <= 100) {
-                        const blocksInRow = 2 * row - 1;
-                        if (tokenId <= sum + blocksInRow) break;
-                        sum += blocksInRow;
-                        row++;
-                    }
-                    const col = tokenId - sum - 1;
-                    const centeredX = (col - (row - 1)) * blockSize;
+                for (let row = 1; row <= 100; row++) {
                     const y = (row - 1) * blockSize;
-                    if (mouseX >= centeredX && mouseX <= centeredX + blockSize &&
-                        mouseY >= y && mouseY <= y + blockSize) {
-                        selectedTokenId = tokenId;
-                        updateSidebar(tokenId);
-                        break;
+                    if (mouseY < y || mouseY > y + blockSize) continue;
+                    const midCol = row - 1;
+                    const col = Math.round((mouseX / blockSize) + midCol);
+                    if (col >= 0 && col < 2*row - 1) {
+                        const sumPrev = (row - 1) * (row - 1);
+                        const tokenId = sumPrev + col + 1;
+                        if (tokenId >= 1 && tokenId <= 10000) {
+                            selectedTokenId = tokenId;
+                            updateSidebar(tokenId);
+                            drawPyramid(); // um Selektion zu markieren
+                            break;
+                        }
                     }
                 }
             }
@@ -575,52 +634,174 @@
             function updateSidebar(tokenId) {
                 const token = tokens[tokenId];
                 let html = '';
-                if (token) {
-                    const rarity = calculateRarity(tokenId); // wir brauchen eine Funktion, die die Seltenheit aus den Digits berechnet? Im Subgraph haben wir keine Rarity direkt. Wir können sie aus den Digits berechnen, aber die haben wir nicht. Vielleicht später.
+                if (token && token.owner) {
+                    const ownerShort = shortenAddress(token.owner);
+                    // Rarity aus dem Subgraph? nicht vorhanden, wir lassen Platzhalter
+                    const rarity = '?'; 
                     html = `
                         <div class="detail-row"><span class="detail-label">Block #</span><span class="detail-value">${tokenId}</span></div>
-                        <div class="detail-row"><span class="detail-label">Owner</span><span class="detail-value">${shortenAddress(token.owner)}</span></div>
+                        <div class="detail-row"><span class="detail-label">Owner</span><span class="detail-value">${ownerShort}</span></div>
                         <div class="detail-row"><span class="detail-label">Revealed</span><span class="detail-value">${token.revealed ? '✅' : '❌'}</span></div>
                         <div class="detail-row"><span class="detail-label">Farming</span><span class="detail-value">${token.farmActive ? 'Active' : 'Inactive'}</span></div>
                         <div class="detail-row"><span class="detail-label">Protection</span><span class="detail-value">${protections.get(tokenId.toString())?.active ? '✅' : '❌'}</span></div>
                     `;
                 } else {
-                    html = `<p style="color: #8a8f99;">Block #${tokenId} is not minted.</p>`;
+                    html = `<p style="color: #98a9b9; text-align: center;">Block #${tokenId} is not minted.</p>`;
                 }
                 blockDetailDiv.innerHTML = html;
             }
 
-            // Platzhalter für Rarity (später via Contract oder Subgraph)
-            function calculateRarity(tokenId) {
-                return 'Unknown';
+            // ==================== WALLET ====================
+            async function connectWallet() {
+                if (!window.ethereum) return alert('Please install MetaMask!');
+                try {
+                    provider = new ethers.BrowserProvider(window.ethereum);
+                    signer = await provider.getSigner();
+                    userAddress = await signer.getAddress();
+                    document.getElementById('walletAddress').innerText = shortenAddress(userAddress);
+                    drawPyramid();
+                } catch (err) {
+                    console.error(err);
+                }
             }
 
-            // Zoom mit Mausrad
-            canvas.addEventListener('wheel', (e) => {
+            // ==================== ZOOM & PAN ====================
+            function handleWheel(e) {
                 e.preventDefault();
                 const zoomFactor = 1.1;
-                const delta = e.deltaY > 0 ? 1/zoomFactor : zoomFactor;
+                const delta = e.deltaY > 0 ? 1 / zoomFactor : zoomFactor;
                 const rect = canvas.getBoundingClientRect();
                 const mouseX = e.clientX - rect.left;
                 const mouseY = e.clientY - rect.top;
-                // Mausposition in Weltkoordinaten vor Zoom
                 const worldX = (mouseX - offsetX) / scale;
                 const worldY = (mouseY - offsetY) / scale;
-                scale *= delta;
-                // Neue Offset so dass die Weltposition unter der Maus gleich bleibt
+                scale = Math.max(0.2, Math.min(5, scale * delta)); // Begrenzung
                 offsetX = mouseX - worldX * scale;
                 offsetY = mouseY - worldY * scale;
                 drawPyramid();
-            }, { passive: false });
+            }
 
-            // Pan mit Maus ziehen
+            function handlePinch(e) {
+                // Für Touch-Geräte: zwei Finger Zoom
+                if (e.touches.length === 2) {
+                    e.preventDefault();
+                    const dist = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                    if (pinchStartDist === 0) {
+                        pinchStartDist = dist;
+                        return;
+                    }
+                    const zoomFactor = dist / pinchStartDist;
+                    pinchStartDist = dist;
+
+                    const rect = canvas.getBoundingClientRect();
+                    const mx = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
+                    const my = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
+                    const worldX = (mx - offsetX) / scale;
+                    const worldY = (my - offsetY) / scale;
+                    scale = Math.max(0.2, Math.min(5, scale * zoomFactor));
+                    offsetX = mx - worldX * scale;
+                    offsetY = my - worldY * scale;
+                    drawPyramid();
+                }
+            }
+
+            // ==================== DRAG & RESIZE FÜR LEGENDE ====================
+            const legendPanel = document.getElementById('legendPanel');
+            const dragHandle = document.getElementById('dragHandle');
+            const resizeHandle = document.getElementById('resizeHandle');
+            const collapseBtn = document.getElementById('collapseBtn');
+            const resetPosBtn = document.getElementById('resetPosBtn');
+            const legendContent = document.getElementById('legendContent');
+            let isDraggingPanel = false;
+            let dragStartX, dragStartY, panelStartLeft, panelStartTop;
+
+            // Verschieben per Drag
+            dragHandle.addEventListener('mousedown', (e) => {
+                isDraggingPanel = true;
+                dragStartX = e.clientX;
+                dragStartY = e.clientY;
+                const rect = legendPanel.getBoundingClientRect();
+                panelStartLeft = rect.left;
+                panelStartTop = rect.top;
+                legendPanel.style.transition = 'none';
+                e.preventDefault();
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (!isDraggingPanel) return;
+                const dx = e.clientX - dragStartX;
+                const dy = e.clientY - dragStartY;
+                legendPanel.style.left = (panelStartLeft + dx) + 'px';
+                legendPanel.style.top = (panelStartTop + dy) + 'px';
+                legendPanel.style.right = 'auto';
+            });
+
+            window.addEventListener('mouseup', () => {
+                isDraggingPanel = false;
+                legendPanel.style.transition = '';
+            });
+
+            // Resize per Handle
+            let isResizing = false;
+            resizeHandle.addEventListener('mousedown', (e) => {
+                isResizing = true;
+                e.preventDefault();
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (!isResizing) return;
+                const rect = legendPanel.getBoundingClientRect();
+                const newWidth = rect.right - e.clientX; // da Handle links
+                if (newWidth > 200 && newWidth < 500) {
+                    legendPanel.style.width = newWidth + 'px';
+                    legendPanel.style.right = 'auto';
+                }
+            });
+
+            window.addEventListener('mouseup', () => {
+                isResizing = false;
+            });
+
+            // Einklappen / Ausklappen
+            collapseBtn.addEventListener('click', () => {
+                if (legendContent.classList.contains('collapsed')) {
+                    legendContent.classList.remove('collapsed');
+                    collapseBtn.textContent = '−';
+                } else {
+                    legendContent.classList.add('collapsed');
+                    collapseBtn.textContent = '+';
+                }
+            });
+
+            // Position zurücksetzen
+            resetPosBtn.addEventListener('click', () => {
+                legendPanel.style.left = 'auto';
+                legendPanel.style.top = '20px';
+                legendPanel.style.right = '20px';
+                legendPanel.style.width = '300px';
+            });
+
+            // ==================== EVENT LISTENER ====================
+            window.addEventListener('resize', () => {
+                canvas.width = container.clientWidth;
+                canvas.height = container.clientHeight;
+                centerPyramid();
+            });
+
+            canvas.addEventListener('wheel', handleWheel, { passive: false });
+            canvas.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 2) pinchStartDist = 0;
+            });
+            canvas.addEventListener('touchmove', handlePinch, { passive: false });
             canvas.addEventListener('mousedown', (e) => {
                 isDragging = true;
                 lastMouseX = e.clientX;
                 lastMouseY = e.clientY;
                 canvas.style.cursor = 'grabbing';
             });
-
             window.addEventListener('mousemove', (e) => {
                 if (isDragging) {
                     const dx = e.clientX - lastMouseX;
@@ -634,29 +815,21 @@
                     handleMouseMove(e);
                 }
             });
-
             window.addEventListener('mouseup', () => {
                 isDragging = false;
                 canvas.style.cursor = 'grab';
             });
-
             canvas.addEventListener('click', handleClick);
 
-            // Buttons
             document.getElementById('connectBtn').addEventListener('click', connectWallet);
 
-            // Start
-            resizeCanvas();
+            // ==================== START ====================
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
             await loadData();
-            // Initial Offset setzen, um Pyramide zu zentrieren (nachdem Canvas-Größe bekannt)
-            // Wir zentrieren die Pyramide in der Mitte des Canvas.
-            const totalWidth = 199 * BASE_BLOCK_SIZE; // Breite der Basis
-            const totalHeight = 100 * BASE_BLOCK_SIZE;
-            offsetX = (canvas.width - totalWidth * scale) / 2;
-            offsetY = (canvas.height - totalHeight * scale) / 2;
-            drawPyramid();
+            centerPyramid();
 
-            // Wiederhole loadData periodisch (z.B. alle 30 Sekunden) um neue Blöcke zu laden
+            // Regelmäßiges Update
             setInterval(loadData, 30000);
         })();
     </script>
