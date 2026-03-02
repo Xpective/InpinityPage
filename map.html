@@ -7,12 +7,12 @@
     <link rel="icon" type="image/png" href="favicon.webp" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* (Styles bleiben unverändert – bitte aus vorheriger Version übernehmen) */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
+
         body {
             font-family: 'Inter', sans-serif;
             background: #0b0e12;
@@ -22,23 +22,52 @@
             display: flex;
             flex-direction: column;
         }
+
+        /* Header mit Navigation */
         .header {
             display: flex;
-            justify-content: space-between;
+            flex-wrap: wrap;
             align-items: center;
-            padding: 0.8rem 2rem;
-            background: rgba(20, 28, 36, 0.85);
+            justify-content: space-between;
+            padding: 0.6rem 2rem;
+            background: rgba(20, 28, 36, 0.9);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border-bottom: 1px solid rgba(212, 175, 55, 0.25);
             z-index: 20;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            gap: 1rem;
         }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: #eef2f6;
+            text-decoration: none;
+            padding: 0.4rem 1rem;
+            border-radius: 40px;
+            border: 1px solid #3b8b6b;
+            background: rgba(30, 58, 58, 0.5);
+            transition: 0.2s;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .nav-links a:hover {
+            background: #2e6d5e;
+            border-color: #d4af37;
+            transform: translateY(-2px);
+        }
+
         .logo {
             display: flex;
             align-items: center;
             gap: 0.8rem;
         }
+
         .logo h1 {
             font-weight: 600;
             font-size: 1.7rem;
@@ -47,6 +76,7 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
+
         .logo span {
             font-size: 0.9rem;
             color: #98a2b3;
@@ -55,11 +85,14 @@
             border-radius: 40px;
             border: 1px solid #2f3e4c;
         }
+
         .wallet {
             display: flex;
             align-items: center;
             gap: 1rem;
+            margin-left: auto;
         }
+
         .wallet button {
             background: linear-gradient(145deg, #1e3a3a, #1f4a3a);
             border: 1px solid #3b8b6b;
@@ -72,12 +105,14 @@
             transition: 0.2s;
             box-shadow: 0 2px 6px rgba(0, 40, 30, 0.5);
         }
+
         .wallet button:hover {
             background: #2e6d5e;
             border-color: #d4af37;
             transform: translateY(-2px);
             box-shadow: 0 6px 14px rgba(212, 175, 55, 0.3);
         }
+
         #walletAddress {
             background: #1a232c;
             padding: 0.4rem 1.2rem;
@@ -86,12 +121,16 @@
             border: 1px solid #2f4b5c;
             color: #bcd0e0;
         }
+
+        /* Hauptbereich */
         .main {
             flex: 1;
             display: flex;
             position: relative;
             overflow: hidden;
         }
+
+        /* Canvas-Container – zentriert */
         .canvas-container {
             flex: 1;
             position: relative;
@@ -100,11 +139,14 @@
             cursor: grab;
             touch-action: none;
         }
+
         .canvas-container canvas {
             display: block;
             width: 100%;
             height: 100%;
         }
+
+        /* Tooltip */
         .tooltip {
             position: absolute;
             background: rgba(20, 30, 40, 0.95);
@@ -123,10 +165,13 @@
             border-left: 4px solid #d4af37;
             line-height: 1.5;
         }
+
         .tooltip span {
             color: #d4af37;
             font-weight: 600;
         }
+
+        /* Verschiebbare Sidebar / Legende */
         .legend-panel {
             position: absolute;
             top: 20px;
@@ -145,6 +190,7 @@
             cursor: move;
             user-select: none;
         }
+
         .legend-header {
             display: flex;
             justify-content: space-between;
@@ -155,16 +201,19 @@
             background: rgba(0, 0, 0, 0.2);
             border-radius: 24px 24px 0 0;
         }
+
         .legend-header h3 {
             font-size: 1.2rem;
             color: #d4af37;
             font-weight: 600;
             letter-spacing: 0.5px;
         }
+
         .legend-controls {
             display: flex;
             gap: 0.5rem;
         }
+
         .legend-controls button {
             background: transparent;
             border: 1px solid #3a5060;
@@ -179,22 +228,26 @@
             transition: 0.2s;
             font-size: 1.1rem;
         }
+
         .legend-controls button:hover {
             background: #d4af37;
             color: #0b0e12;
             border-color: #d4af37;
         }
+
         .legend-content {
             padding: 1.2rem 1.5rem;
             transition: max-height 0.3s ease, padding 0.3s ease;
             max-height: 600px;
             overflow-y: auto;
         }
+
         .legend-content.collapsed {
             max-height: 0;
             padding: 0 1.5rem;
             overflow: hidden;
         }
+
         .detail-card {
             background: #1b2630;
             border-radius: 20px;
@@ -202,19 +255,23 @@
             border: 1px solid #2a3f4a;
             margin-bottom: 1.5rem;
         }
+
         .detail-row {
             display: flex;
             justify-content: space-between;
             margin-bottom: 0.7rem;
             font-size: 0.95rem;
         }
+
         .detail-label {
             color: #98a9b9;
         }
+
         .detail-value {
             font-weight: 600;
             color: #f0f4fa;
         }
+
         .legend-item {
             display: flex;
             align-items: center;
@@ -222,18 +279,21 @@
             margin-bottom: 0.8rem;
             font-size: 0.95rem;
         }
+
         .color-box {
             width: 24px;
             height: 24px;
             border-radius: 6px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.4);
         }
+
         .color-gray { background: #3a4048; }
         .color-green { background: #2e7d5e; }
         .color-gold { background: #c9a959; }
         .border-blue { border: 3px solid #3498db; box-sizing: border-box; }
         .border-purple { border: 3px solid #9b59b6; }
         .border-white { border: 3px solid #ffffff; }
+
         .footer-note {
             margin-top: 1.5rem;
             font-size: 0.8rem;
@@ -242,6 +302,7 @@
             border-top: 1px dashed #2a3f4a;
             padding-top: 1rem;
         }
+
         .legend-panel .resize-handle {
             position: absolute;
             left: -5px;
@@ -251,9 +312,16 @@
             cursor: ew-resize;
             background: transparent;
         }
-        @media (max-width: 600px) {
+
+        /* Mobile Optimierung */
+        @media (max-width: 700px) {
             .header {
                 padding: 0.6rem 1rem;
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .nav-links {
+                justify-content: center;
             }
             .logo h1 {
                 font-size: 1.2rem;
@@ -261,9 +329,9 @@
             .logo span {
                 display: none;
             }
-            .wallet button {
-                padding: 0.4rem 1rem;
-                font-size: 0.8rem;
+            .wallet {
+                justify-content: center;
+                margin-left: 0;
             }
             #walletAddress {
                 display: none;
@@ -271,7 +339,7 @@
             .legend-panel {
                 width: 90%;
                 right: 5%;
-                top: 70px;
+                top: 120px;
                 max-width: 320px;
             }
         }
@@ -282,6 +350,11 @@
         <div class="logo">
             <h1>INPINITY</h1>
             <span>Pyramid Map</span>
+        </div>
+        <div class="nav-links">
+            <a href="index.html">🏠 Home</a>
+            <a href="mint.html">⛏️ Mint</a>
+            <a href="game.html">🎮 Game</a>
         </div>
         <div class="wallet">
             <div id="walletAddress">Not connected</div>
@@ -295,6 +368,7 @@
             <div class="tooltip" id="tooltip"></div>
         </div>
 
+        <!-- Verschiebbare Legende / Sidebar -->
         <div class="legend-panel" id="legendPanel">
             <div class="resize-handle" id="resizeHandle"></div>
             <div class="legend-header" id="dragHandle">
@@ -308,6 +382,7 @@
                 <div class="detail-card" id="blockDetail">
                     <p style="color: #98a9b9; text-align: center;">Click on a block to see details</p>
                 </div>
+
                 <h4 style="color: #d4af37; margin: 1rem 0 0.8rem; font-weight: 500;">Legend</h4>
                 <div class="legend-item"><div class="color-box color-gray"></div> Not minted</div>
                 <div class="legend-item"><div class="color-box color-green"></div> Minted, not revealed</div>
@@ -315,9 +390,11 @@
                 <div class="legend-item"><div class="color-box color-gold" style="border: 3px solid #3498db;"></div> Farming active</div>
                 <div class="legend-item"><div class="color-box color-gold" style="border: 3px solid #9b59b6;"></div> Protected</div>
                 <div class="legend-item"><div class="color-box color-gold" style="border: 3px solid #ffffff;"></div> Your block</div>
+
                 <div class="footer-note">
                     <p>100 rows · 10,000 blocks</p>
                     <p style="margin-top: 0.2rem;">π · φ · Fibonacci</p>
+                    <p style="margin-top: 0.5rem; font-size:0.7rem;">👆 Use two fingers to zoom · Drag to pan</p>
                 </div>
             </div>
         </div>
@@ -327,7 +404,7 @@
     <script>
         (async function() {
             // ==================== KONFIGURATION ====================
-            const SUBGRAPH_URL = "https://api.studio.thegraph.com/query/1743108/inpinity/v0.0.7"; // explizite Version
+            const SUBGRAPH_URL = "https://api.studio.thegraph.com/query/1743108/inpinity/v0.0.7";
             const API_KEY = "059bc2832dfe50597009e556898d4ba6";
             const BASE_BLOCK_SIZE = 24;
 
@@ -393,7 +470,7 @@
                     tokens = {};
                     if (data.tokens) {
                         data.tokens.forEach(t => {
-                            const tokenId = t.id; // als String
+                            const tokenId = t.id;
                             tokens[tokenId] = {
                                 owner: t.owner ? t.owner.id : null,
                                 revealed: t.revealed || false,
@@ -447,9 +524,9 @@
                         let strokeColor = null;
                         let lineWidth = 0;
 
-                        // **DEBUG: Markiere einen bestimmten Block rot, um Position zu testen**
+                        // Test: Block 118830 rot markieren
                         if (tokenId === "118830") {
-                            fillColor = '#ff0000'; // rot
+                            fillColor = '#ff0000';
                         } else if (token && token.owner) {
                             if (token.revealed) {
                                 fillColor = '#c9a959'; // gold
