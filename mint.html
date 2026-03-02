@@ -3,8 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>INPINITY – The Pi-Phi Pyramid</title>
+    <title>INPINITY – Mint a Pyramid Block</title>
+    <link rel="icon" type="image/png" href="favicon.webp" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        /* ========== ROOT VARIABLES (aus game.html übernommen) ========== */
+        :root {
+            --bg-dark: #0a0a1a;
+            --bg-card: rgba(20, 20, 40, 0.8);
+            --accent-gold: #d4af37;
+            --accent-cyan: #4a90e2;
+            --accent-purple: #9b59b6;
+            --accent-red: #e74c3c;
+            --text-light: #f0f0ff;
+            --text-dim: #aaa;
+            --border-glow: rgba(212, 175, 55, 0.3);
+            --shadow-gold: 0 0 20px rgba(212, 175, 55, 0.5);
+        }
+
+        /* ========== BESTEHENDE STYLES (unverändert) ========== */
         * {
             margin: 0;
             padding: 0;
@@ -17,7 +36,7 @@
             color: #fff;
             min-height: 100vh;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
             padding: 1.5rem;
         }
@@ -353,9 +372,74 @@
             border: 1px solid #2a2a5a;
             margin-top: 1rem;
         }
+
+        /* ========== NEUE STYLES FÜR NAVIGATION ========== */
+        header nav ul {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+            list-style: none;
+            padding: 1rem;
+            background: rgba(0,0,0,0.5);
+            border-radius: 4rem;
+            margin-bottom: 2rem;
+        }
+        header nav ul li a {
+            color: var(--text-light);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            transition: all 0.2s;
+        }
+        header nav ul li a:hover {
+            background: var(--accent-gold);
+            color: #000;
+        }
+        .themeDots {
+            display: flex;
+            gap: 0.5rem;
+            margin-left: auto;
+        }
+        .dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .dot.light { background-color: #fff; }
+        .dot.dark { background-color: #000; border: 1px solid #666; }
+        .dot.basic { background-color: var(--accent-gold); }
+        .dot:hover { transform: scale(1.2); }
     </style>
 </head>
 <body>
+    <!-- ========== NEUE NAVIGATION (wie in game.html) ========== -->
+    <header>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="features.html">Features</a></li>
+                <li><a href="game.html">Game</a></li>
+                <li><a href="mint.html">Mint</a></li>
+                <li><a href="map.html">Pyramid Map</a></li>
+                <li><a href="collaboration.html">Collaboration</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="whitepaper.html">Whitepaper</a></li>
+                <li><a href="faq.html">FAQ</a></li>
+                <li><a href="guestbook.html">Guestbook</a></li>
+                <li><a href="advertising.html">Advertising</a></li>
+                <li><a href="staking.html">Staking</a></li>
+                <div class="themeDots">
+                    <div class="dot light" title="Light Theme"></div>
+                    <div class="dot dark" title="Dark Theme"></div>
+                    <div class="dot basic" title="Basic Theme"></div>
+                </div>
+            </ul>
+        </nav>
+    </header>
+
     <div class="container">
         <h1>🏗️ INPINITY</h1>
         <div class="subtitle">The Pi-Phi Pyramid · Base Mainnet</div>
@@ -432,13 +516,20 @@
 
         <div class="footer">
             <p>10,000 blocks in Phase 1 · 5 hidden Diamond blocks</p>
-            <p>📄 <a href="https://basescan.org/address/0x35263645aD3C1e4351a5b234C683BAF243b9854F" target="_blank">Contract 0x3526...9854F</a></p>
-            <p>⚡ INPI/ETH Pool: <a href="https://www.geckoterminal.com/de/base/pools/0x2da60979434c607e283ad7956bdcd21b83fa756fa156ef45f996e2b34d2e12a8" target="_blank">GeckoTerminal</a></p>
+            <p>📄 <a href="https://basescan.org/address/0x277a0D5864293C78d7387C54B48c35D5E9578Ab1" target="_blank">NFT Contract on BaseScan</a></p>
+            <p>⚡ INPI Token: <a href="https://basescan.org/address/0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D" target="_blank">0x232F...d0D</a></p>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
     <script>
+        // ==================== THEME DOTS (aus game.html übernommen) ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelector('.themeDots .dot.light')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'light'));
+            document.querySelector('.themeDots .dot.dark')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'dark'));
+            document.querySelector('.themeDots .dot.basic')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'basic'));
+        });
+
         // ==================== CONFIG ====================
         const NFT_ADDRESS = "0x277a0D5864293C78d7387C54B48c35D5E9578Ab1";
         const INPI_ADDRESS = "0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D";
@@ -644,7 +735,7 @@
                     phiProofFormatted,
                     proofs.pi.digit,
                     proofs.phi.digit,
-                    { gasLimit: 1000000 } // Höheres Gas-Limit
+                    { gasLimit: 1000000 }
                 );
                 debugLog('Transaction sent', tx.hash);
                 await tx.wait();
