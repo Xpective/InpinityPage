@@ -644,7 +644,7 @@
                     phiProofFormatted,
                     proofs.pi.digit,
                     proofs.phi.digit,
-                    { gasLimit: 500000 } // Erhöhtes Gas-Limit für Sicherheit
+                    { gasLimit: 1000000 } // Höheres Gas-Limit
                 );
                 debugLog('Transaction sent', tx.hash);
                 await tx.wait();
