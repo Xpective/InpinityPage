@@ -913,28 +913,67 @@
 
         // === EXCHANGE ===
         async function exchangeINPI() {
-            const inpiAmount = parseFloat(document.getElementById('inpiAmount').value);
-            if (isNaN(inpiAmount) || inpiAmount <= 0) return alert('Invalid amount');
-            const amountWei = ethers.utils.parseEther(inpiAmount.toString());
-            const msgDiv = document.getElementById('exchangeMessage');
-            msgDiv.innerHTML = '<span class="success">⏳ Exchanging...</span>';
-            try {
-                const allowance = await inpiContract.allowance(userAddress, PITRONE_ADDRESS);
-                if (allowance.lt(amountWei)) {
-                    msgDiv.innerHTML = '<span class="success">⏳ Approving INPI...</span>';
-                    const approveTx = await inpiContract.approve(PITRONE_ADDRESS, amountWei);
-                    await approveTx.wait();
-                }
-                const tx = await pitroneContract.exchangeINPI(amountWei);
-                await tx.wait();
-                msgDiv.innerHTML = '<span class="success">✅ Exchange successful!</span>';
-                await updateBalances();
-                await updatePoolInfo();
-            } catch (e) {
-                msgDiv.innerHTML = '<span class="error">❌ ' + e.message + '</span>';
-            }
+    const inpiAmount = parseFloat(document.getElementById('inpiAmount').value);
+    if (isNaN(inpiAmount) || inpiAmount <= 0) return alert('Invalid amount');
+    
+    const amountWei = ethers.utils.parseEther(inpiAmount.toString());
+    const msgDiv = document.getElementById('exchangeMessage');
+    msgDiv.innerHTML = '<span class="success">⏳ Exchanging...</span>';
+    
+    try {
+        // 1. Prüfe INPI-Balance
+        const inpiBal = await inpiContract.balanceOf(userAddress);
+        if (inpiBal.lt(amountWei)) {
+            msgDiv.innerHTML = '<span class="error">❌ Insufficient INPI balance</span>';
+            return;
         }
 
+        // 2. Prüfe ob der Betrag zu Overflow führen könnte
+        const rate = await pitroneContract.getRate();
+        const pitroneAmount = amountWei.mul(rate);
+        const maxSupply = ethers.BigNumber.from("314159265359").mul(ethers.constants.WeiPerEther);
+        if (pitroneAmount.gt(maxSupply)) {
+            msgDiv.innerHTML = '<span class="error">❌ Amount too large – would exceed total supply</span>';
+            return;
+        }
+
+        // 3. Approve falls nötig
+        const allowance = await inpiContract.allowance(userAddress, PITRONE_ADDRESS);
+        if (allowance.lt(amountWei)) {
+            msgDiv.innerHTML = '<span class="success">⏳ Approving INPI...</span>';
+            const approveTx = await inpiContract.approve(PITRONE_ADDRESS, amountWei);
+            await approveTx.wait();
+        }
+
+        // 4. Exchange mit manuellem Gas-Limit
+        const gasLimit = 200000; // Ausreichend für diese Funktion
+        const gasPrice = await provider.getGasPrice();
+        const tx = await pitroneContract.exchangeINPI(amountWei, {
+            gasLimit: gasLimit,
+            gasPrice: gasPrice
+        });
+        
+        msgDiv.innerHTML = '<span class="success">⏳ Transaction sent...</span>';
+        await tx.wait();
+        msgDiv.innerHTML = '<span class="success">✅ Exchange successful!</span>';
+        await updateBalances();
+        await updatePoolInfo();
+    } catch (e) {
+        console.error(e);
+        let errorMsg = e.message;
+        if (e.error && e.error.data) {
+            try {
+                const data = e.error.data;
+                if (data.startsWith('0x4e487b71')) {
+                    errorMsg = 'Arithmetic overflow – please try a smaller amount.';
+                } else if (data.startsWith('0xfb8f41b2')) {
+                    errorMsg = 'INPI transfer failed – check allowance.';
+                }
+            } catch {}
+        }
+        msgDiv.innerHTML = '<span class="error">❌ ' + errorMsg + '</span>';
+    }
+    }
         async function exchangePit() {
             const pitAmount = parseFloat(document.getElementById('pitAmount').value);
             if (isNaN(pitAmount) || pitAmount <= 0) return alert('Invalid amount');
