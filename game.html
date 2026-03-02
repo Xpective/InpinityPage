@@ -5,17 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>INPINITY – The Pi-Phi Pyramid (v0.07.1)</title>
     <link rel="icon" type="image/png" href="favicon.webp" />
-    <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* ========== GLOBAL STYLES ========== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
             --bg-dark: #0a0a1a;
             --bg-card: rgba(20, 20, 40, 0.8);
@@ -43,7 +37,7 @@
             padding: 2rem;
         }
 
-        /* ========== NAVIGATION ========== */
+        /* Navigation (wie gehabt) */
         header nav ul {
             display: flex;
             flex-wrap: wrap;
@@ -83,7 +77,7 @@
         .dot.basic { background-color: var(--accent-gold); }
         .dot:hover { transform: scale(1.2); }
 
-        /* ========== WALLET SECTION ========== */
+        /* Wallet-Bar */
         .wallet-bar {
             background: var(--bg-card);
             backdrop-filter: blur(10px);
@@ -96,15 +90,8 @@
             border: 1px solid var(--border-glow);
             margin-bottom: 2rem;
         }
-        .wallet-info {
-            display: flex;
-            flex-direction: column;
-            gap: 0.3rem;
-        }
-        .wallet-status {
-            color: var(--text-dim);
-            font-size: 0.9rem;
-        }
+        .wallet-info { display: flex; flex-direction: column; gap: 0.3rem; }
+        .wallet-status { color: var(--text-dim); font-size: 0.9rem; }
         .wallet-address {
             font-family: 'Roboto Mono', monospace;
             background: #111122;
@@ -112,22 +99,11 @@
             border-radius: 2rem;
             border: 1px solid var(--accent-cyan);
         }
-        .balances {
-            display: flex;
-            gap: 2rem;
-        }
-        .balance-item {
-            font-weight: 600;
-        }
-        .balance-eth {
-            color: var(--accent-cyan);
-        }
-        .balance-inpi {
-            color: var(--accent-gold);
-        }
-        .balance-pit {
-            color: var(--accent-purple);
-        }
+        .balances { display: flex; gap: 2rem; }
+        .balance-item { font-weight: 600; }
+        .balance-eth { color: var(--accent-cyan); }
+        .balance-inpi { color: var(--accent-gold); }
+        .balance-pit { color: var(--accent-purple); }
         .btn {
             background: linear-gradient(145deg, var(--accent-cyan), var(--accent-gold));
             color: white;
@@ -138,16 +114,10 @@
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
         }
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-gold);
-        }
-        .btn-small {
-            padding: 0.4rem 1rem;
-            font-size: 0.9rem;
-        }
+        .btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-gold); }
+        .btn-small { padding: 0.4rem 1rem; font-size: 0.9rem; }
 
-        /* ========== MAIN GRID ========== */
+        /* Haupt-Grid */
         .dashboard {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -188,20 +158,10 @@
             transition: all 0.2s;
             cursor: pointer;
         }
-        .block-card.revealed {
-            border-color: var(--accent-gold);
-            box-shadow: 0 0 10px gold;
-        }
-        .block-card.farming {
-            border-color: var(--accent-cyan);
-        }
-        .block-card.protected {
-            border-color: var(--accent-purple);
-        }
-        .block-card.selected {
-            border: 3px solid var(--accent-gold);
-            transform: scale(1.02);
-        }
+        .block-card.revealed { border-color: var(--accent-gold); box-shadow: 0 0 10px gold; }
+        .block-card.farming { border-color: var(--accent-cyan); }
+        .block-card.protected { border-color: var(--accent-purple); }
+        .block-card.selected { border: 3px solid var(--accent-gold); transform: scale(1.02); }
         .block-card .rarity {
             font-size: 0.8rem;
             background: #2a2a5a;
@@ -210,10 +170,7 @@
             display: inline-block;
             margin-top: 0.5rem;
         }
-        .block-id {
-            font-weight: bold;
-            color: var(--accent-gold);
-        }
+        .block-id { font-weight: bold; color: var(--accent-gold); }
 
         .card {
             background: var(--bg-card);
@@ -258,10 +215,7 @@
             border-radius: 2rem;
             cursor: pointer;
         }
-        .random-btn:hover {
-            background: #3a3a7a;
-            color: white;
-        }
+        .random-btn:hover { background: #3a3a7a; color: white; }
 
         .action-button {
             background: linear-gradient(145deg, var(--accent-gold), #b8860b);
@@ -275,6 +229,11 @@
             margin: 1rem 0;
             cursor: pointer;
         }
+        .action-button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
 
         .resource-panel {
             display: flex;
@@ -284,16 +243,18 @@
             padding: 1.5rem;
             margin-top: 2rem;
         }
-
-        .message-box {
-            padding: 1rem;
-            border-radius: 2rem;
-            margin: 1rem 0;
+        .resource-detail {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
+        .resource-label { font-size: 0.8rem; color: var(--text-dim); }
+        .resource-value { font-size: 1.2rem; font-weight: bold; }
+
+        .message-box { padding: 1rem; border-radius: 2rem; margin: 1rem 0; }
         .success { background: #1a3a1a; border: 1px solid #51cf66; color: #51cf66; }
         .error { background: #3a1a1a; border: 1px solid #ff6b6b; color: #ff6b6b; }
 
-        /* Partners */
         .partners-section {
             display: flex;
             justify-content: center;
@@ -322,26 +283,26 @@
             text-align: center;
             color: var(--text-dim);
         }
-        footer a {
-            color: var(--accent-gold);
-        }
+        footer a { color: var(--accent-gold); }
 
-        /* Responsive */
-        @media (max-width: 900px) {
-            .dashboard {
-                grid-template-columns: 1fr;
-            }
-            .pyramid-panel {
-                grid-column: span 1;
-            }
-        }
-        /* Selected Block Info */
         .selected-block-info {
             background: #1a1a3a;
             padding: 1rem;
             border-radius: 2rem;
             margin-bottom: 1rem;
             border: 1px solid var(--accent-gold);
+        }
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        .resource-item {
+            background: #0a0a1a;
+            padding: 0.3rem;
+            border-radius: 0.5rem;
+            text-align: center;
         }
     </style>
 </head>
@@ -386,26 +347,25 @@
             <button class="btn" id="connectWallet">Connect Wallet</button>
         </div>
 
-        <!-- Partners / Quick Links -->
+        <!-- Partners -->
         <div class="partners-section">
             <div class="partner-item"><a href="https://base.org/" target="_blank">⚡ Base L2</a></div>
             <div class="partner-item"><a href="https://uniswap.org/" target="_blank">🦄 Uniswap</a></div>
             <div class="partner-item"><a href="https://basescan.org/address/0x277a0D5864293C78d7387C54B48c35D5E9578Ab1" target="_blank">📄 NFT Contract</a></div>
         </div>
 
-        <!-- Dashboard Grid -->
+        <!-- Dashboard -->
         <div class="dashboard">
             <!-- Pyramid & Blocks -->
             <div class="pyramid-panel">
                 <h2 class="section-title">🏗️ Your Pyramid Blocks</h2>
                 <div class="blocks-grid" id="blocksGrid">
-                    <!-- Dynamically filled with user's blocks -->
-                    <p style="color: var(--text-dim); grid-column: 1/-1; text-align: center;">Connect wallet to see your blocks.</p>
+                    <p style="color: var(--text-dim); text-align: center;">Connect wallet to see your blocks.</p>
                 </div>
-                <!-- Selected Block Info -->
                 <div id="selectedBlockInfo" class="selected-block-info" style="display: none;">
                     <h4>Selected Block</h4>
                     <p id="selectedBlockText">None</p>
+                    <div id="blockResources" class="resources-grid"></div>
                 </div>
             </div>
 
@@ -426,7 +386,7 @@
                 <div id="mintMessage"></div>
             </div>
 
-            <!-- Block Actions (reveal, farming) -->
+            <!-- Block Actions -->
             <div class="card">
                 <h3>🔧 Block Actions</h3>
                 <div id="blockActions" style="display: none;">
@@ -437,10 +397,10 @@
                     <button class="btn-small" id="claimBtn">💰 Claim Resources</button>
                     <div id="actionMessage"></div>
                 </div>
-                <p id="noBlockSelected" style="color: var(--text-dim);">Select a block from the pyramid to reveal or farm.</p>
+                <p id="noBlockSelected" style="color: var(--text-dim);">Select a block from the pyramid.</p>
             </div>
 
-            <!-- Pirate Attack Card -->
+            <!-- Pirate Attack -->
             <div class="card">
                 <h3>🏴‍☠️ Pirate Attack</h3>
                 <div class="input-group">
@@ -451,12 +411,12 @@
                 <div id="attackMessage"></div>
             </div>
 
-            <!-- Mercenary Protection Card -->
+            <!-- Mercenary Protection -->
             <div class="card">
                 <h3>🛡️ Mercenary Protection</h3>
                 <div class="input-group">
                     <label>Block ID <input type="number" id="protectTokenId"></label>
-                    <label>Protection % (0-50) <input type="number" id="protectLevel" min="0" max="50" value="10"></label>
+                    <label>Protection % <input type="number" id="protectLevel" min="0" max="50" value="10"></label>
                 </div>
                 <button class="btn" id="protectBtn">🛡️ Hire Mercenaries</button>
                 <div id="protectMessage"></div>
@@ -465,33 +425,39 @@
 
         <!-- Resource Overview -->
         <div class="resource-panel">
-            <span>💰 Your INPI: <span id="userInpi">0</span></span>
-            <span>⛽ Pitrone: <span id="userPitrone">0</span></span>
-            <span>⚡ Active Farms: <span id="activeFarms">0</span></span>
+            <div class="resource-detail">
+                <span class="resource-label">💰 INPI</span>
+                <span class="resource-value" id="userInpi">0</span>
+            </div>
+            <div class="resource-detail">
+                <span class="resource-label">⛽ Pitrone</span>
+                <span class="resource-value" id="userPitrone">0</span>
+            </div>
+            <div class="resource-detail">
+                <span class="resource-label">⚡ Active Farms</span>
+                <span class="resource-value" id="activeFarms">0</span>
+            </div>
         </div>
 
-        <!-- Footer -->
         <footer>
             <p>© 2026 INPINITY. All rights reserved. Built on Base.</p>
-            <p>Version 0.07.1 – Pre‑release with full contract integration. Real game (UE5) coming soon.</p>
+            <p>Version 0.07.1 – Pre‑release with full contract integration.</p>
             <p><a href="whitepaper.html">Whitepaper</a> | <a href="https://discord.gg/95yj6Eg6" target="_blank">Discord</a></p>
         </footer>
     </div>
 
-    <!-- Ethers & Script -->
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
     <script>
-        // ==================== CONFIG ====================
+        // === CONFIG ===
         const NFT_ADDRESS = "0x277a0D5864293C78d7387C54B48c35D5E9578Ab1";
         const FARMING_ADDRESS = "0xd9722fB6e9b8e71399A970d4e8F4D628C532E94f";
         const PIRATES_ADDRESS = "0xfD4B74AFF77eeB03FA5bB64Ec701504757BF2585";
         const MERCENARY_ADDRESS = "0x7719516e40A9E8b47d5967ED7E3cB4D528fd18DF";
-        const PARTNERSHIP_ADDRESS = "0x83F5592f2fA5Fd3b2FE742B4B0012e1351dF0a7a";
         const INPI_ADDRESS = "0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D";
         const PITRONE_ADDRESS = "0x023e66Ba400807E0ae2C8f2552B6116039F6960f";
         const WORKER_URL = "https://inpinity-worker-final.s-plat.workers.dev";
 
-        // ==================== ABI ====================
+        // === ABI (erweitert um calculateRarity) ===
         const NFT_ABI = [
             "function mintWithETH(uint256 row, uint256 col) payable",
             "function mintWithINPI(uint256 row, uint256 col) external",
@@ -502,6 +468,7 @@
             "function getBlockPosition(uint256 tokenId) view returns (uint256 row, uint256 col)",
             "function blockData(uint256) view returns (uint8 piDigit, uint8 phiDigit, uint256 row, uint256 col, bool revealed, uint256 farmingEndTime)",
             "function revealBlock(uint256 tokenId, bytes32[] piProof, bytes32[] phiProof, uint8 piDigit, uint8 phiDigit) external",
+            "function calculateRarity(uint256 tokenId) view returns (uint8)",
             "function MINT_PRICE_ETH() view returns (uint256)",
             "function MINT_PRICE_INPI() view returns (uint256)"
         ];
@@ -529,13 +496,13 @@
             "function balanceOf(address account) view returns (uint256)"
         ];
 
-        // ==================== STATE ====================
+        // === STATE ===
         let provider, signer, userAddress;
         let nftContract, farmingContract, piratesContract, mercenaryContract, inpiContract, pitroneContract;
         let selectedPayment = 'eth';
-        let selectedBlock = null; // { tokenId, row, col, revealed }
+        let selectedBlock = null; // { tokenId, row, col, revealed, rarity, farmingActive, protectionLevel }
 
-        // ==================== UI HELPERS ====================
+        // === UI HELPERS ===
         async function updateBalances() {
             if (!userAddress) return;
             const ethBal = await provider.getBalance(userAddress);
@@ -561,23 +528,30 @@
                 return;
             }
             let html = '';
+            let activeFarmsCount = 0;
             for (let i = 0; i < balance; i++) {
                 const tokenId = await nftContract.tokenOfOwnerByIndex(userAddress, i);
                 const data = await nftContract.blockData(tokenId);
                 const pos = await nftContract.getBlockPosition(tokenId);
                 let rarityClass = '';
-                let rarityName = '';
+                let rarityName = '🔒 Hidden';
                 if (data.revealed) {
-                    // Optionally call calculateRarity (but that would require another ABI entry)
+                    const rarity = await nftContract.calculateRarity(tokenId);
+                    const rarityNames = ['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond'];
+                    rarityName = rarityNames[rarity];
                     rarityClass = 'revealed';
-                    rarityName = 'Revealed';
                 }
-                // Check farming status
+                // Farming status
+                let isFarming = false;
                 try {
                     const farm = await farmingContract.farms(tokenId);
-                    if (farm && farm.isActive) rarityClass += ' farming';
+                    if (farm && farm.isActive) {
+                        isFarming = true;
+                        activeFarmsCount++;
+                        rarityClass += ' farming';
+                    }
                 } catch (e) {}
-                // Check protection
+                // Protection
                 try {
                     const protection = await mercenaryContract.getProtectionLevel(tokenId);
                     if (protection > 0) rarityClass += ' protected';
@@ -587,12 +561,12 @@
                 html += `<div class="block-card ${rarityClass} ${selectedClass}" data-tokenid="${tokenId}" data-row="${pos.row}" data-col="${pos.col}">
                     <div class="block-id">#${tokenId}</div>
                     <div>R${pos.row} C${pos.col}</div>
-                    ${data.revealed ? `<div class="rarity">${rarityName}</div>` : '<div class="rarity">🔒 Hidden</div>'}
+                    <div class="rarity">${rarityName}</div>
                 </div>`;
             }
             grid.innerHTML = html;
+            document.getElementById('activeFarms').innerText = activeFarmsCount;
 
-            // Add click listeners to blocks
             document.querySelectorAll('.block-card').forEach(card => {
                 card.addEventListener('click', () => {
                     const tokenId = card.dataset.tokenid;
@@ -603,21 +577,79 @@
             });
         }
 
-        function selectBlock(tokenId, row, col) {
-            selectedBlock = { tokenId, row, col };
+        async function selectBlock(tokenId, row, col) {
+            const data = await nftContract.blockData(tokenId);
+            const revealed = data.revealed;
+            let rarity = null;
+            if (revealed) {
+                rarity = await nftContract.calculateRarity(tokenId);
+            }
+            let farmingActive = false;
+            try {
+                const farm = await farmingContract.farms(tokenId);
+                farmingActive = farm && farm.isActive;
+            } catch (e) {}
+            let protectionLevel = 0;
+            try {
+                protectionLevel = await mercenaryContract.getProtectionLevel(tokenId);
+            } catch (e) {}
+
+            selectedBlock = { tokenId, row, col, revealed, rarity, farmingActive, protectionLevel };
             document.getElementById('selectedBlockInfo').style.display = 'block';
             document.getElementById('selectedBlockText').innerText = `Block #${tokenId} (R${row}, C${col})`;
             document.getElementById('blockActions').style.display = 'block';
             document.getElementById('noBlockSelected').style.display = 'none';
             document.getElementById('selectedActionToken').innerText = `Block #${tokenId}`;
-            // Highlight selected card
+
+            // Buttons anpassen
+            const revealBtn = document.getElementById('revealBtn');
+            revealBtn.disabled = revealed;
+            revealBtn.style.opacity = revealed ? '0.3' : '1';
+
+            const startBtn = document.getElementById('farmingStartBtn');
+            const stopBtn = document.getElementById('farmingStopBtn');
+            startBtn.disabled = farmingActive;
+            stopBtn.disabled = !farmingActive;
+
+            // Ressourcen anzeigen (falls revealed)
+            const resDiv = document.getElementById('blockResources');
+            if (revealed && rarity !== null) {
+                const production = getProduction(rarity);
+                let html = '';
+                for (const [res, amount] of Object.entries(production)) {
+                    html += `<div class="resource-item">${res}: ${amount}/day</div>`;
+                }
+                resDiv.innerHTML = html;
+            } else {
+                resDiv.innerHTML = '<p>Reveal block to see resources.</p>';
+            }
+
+            // Highlight aktualisieren
             document.querySelectorAll('.block-card').forEach(c => c.classList.remove('selected'));
             const selector = `.block-card[data-tokenid="${tokenId}"]`;
             const selectedCard = document.querySelector(selector);
             if (selectedCard) selectedCard.classList.add('selected');
         }
 
-        // ==================== WALLET ====================
+        // Produktion basierend auf Rarity (wie in FarmingV1.sol)
+        function getProduction(rarity) {
+            const production = {};
+            if (rarity === 0) { // Bronze
+                production.OIL = 10; production.LEMONS = 5; production.IRON = 3;
+            } else if (rarity === 1) { // Silver
+                production.OIL = 20; production.LEMONS = 10; production.IRON = 6; production.GOLD = 1;
+            } else if (rarity === 2) { // Gold
+                production.OIL = 30; production.LEMONS = 15; production.IRON = 9; production.GOLD = 2; production.PLATINUM = 1;
+            } else if (rarity === 3) { // Platinum
+                production.OIL = 40; production.LEMONS = 20; production.IRON = 12; production.GOLD = 3; production.PLATINUM = 2; production.CRYSTAL = 1;
+            } else if (rarity === 4) { // Diamond
+                production.OIL = 60; production.LEMONS = 30; production.IRON = 18; production.GOLD = 5; production.PLATINUM = 3; production.CRYSTAL = 2; production.MYSTERIUM = 1;
+                if (selectedBlock && selectedBlock.row === 0) production.AETHER = 1;
+            }
+            return production;
+        }
+
+        // === WALLET ===
         async function connectWallet() {
             if (!window.ethereum) return alert('Please install MetaMask!');
             try {
@@ -668,14 +700,13 @@
             }
         }
 
-        // ==================== MINT ====================
+        // === MINT (unverändert) ===
         async function mint() {
             const row = parseInt(document.getElementById('row').value);
             const col = parseInt(document.getElementById('col').value);
             if (row < 0 || row > 99 || col < 0 || col > 2*row) return alert('Invalid coordinates!');
             const msgDiv = document.getElementById('mintMessage');
             msgDiv.innerHTML = '<span class="success">⏳ Preparing...</span>';
-
             try {
                 const tokenId = row * 2048 + col;
                 try {
@@ -715,7 +746,6 @@
                 msgDiv.innerHTML = '<span class="success">✅ Block minted! 🎉</span>';
                 await updateBalances();
                 await loadUserBlocks();
-                // Auto-select the newly minted block
                 selectBlock(tokenId, row, col);
             } catch (e) {
                 console.error(e);
@@ -723,7 +753,7 @@
             }
         }
 
-        // ==================== REVEAL ====================
+        // === REVEAL (unverändert) ===
         async function revealSelected() {
             if (!selectedBlock) return alert('No block selected.');
             const { tokenId, row, col } = selectedBlock;
@@ -733,22 +763,21 @@
                 const response = await fetch(`${WORKER_URL}/api/get-proof?row=${row}&col=${col}`);
                 if (!response.ok) throw new Error('Proofs not found');
                 const proofs = await response.json();
-
                 const formatProof = (arr) => arr.map(item => (item.left ? item.left : item.right).startsWith('0x') ? (item.left ? item.left : item.right) : '0x' + (item.left ? item.left : item.right));
                 const piProof = formatProof(proofs.pi.proof);
                 const phiProof = formatProof(proofs.phi.proof);
-
                 const tx = await nftContract.revealBlock(tokenId, piProof, phiProof, proofs.pi.digit, proofs.phi.digit, { gasLimit: 500000 });
                 msgDiv.innerHTML = '<span class="success">⏳ Revealing...</span>';
                 await tx.wait();
                 msgDiv.innerHTML = '<span class="success">✅ Block revealed! 🎉</span>';
                 await loadUserBlocks();
+                selectBlock(tokenId, row, col);
             } catch (e) {
                 msgDiv.innerHTML = '<span class="error">❌ ' + e.message + '</span>';
             }
         }
 
-        // ==================== FARMING ====================
+        // === FARMING (unverändert) ===
         async function startFarmingSelected() {
             if (!selectedBlock) return alert('No block selected.');
             const { tokenId } = selectedBlock;
@@ -759,6 +788,7 @@
                 await tx.wait();
                 msgDiv.innerHTML = '<span class="success">✅ Farming started!</span>';
                 await loadUserBlocks();
+                selectBlock(tokenId, selectedBlock.row, selectedBlock.col);
             } catch (e) {
                 msgDiv.innerHTML = '<span class="error">❌ ' + e.message + '</span>';
             }
@@ -774,6 +804,7 @@
                 await tx.wait();
                 msgDiv.innerHTML = '<span class="success">⏹️ Farming stopped.</span>';
                 await loadUserBlocks();
+                selectBlock(tokenId, selectedBlock.row, selectedBlock.col);
             } catch (e) {
                 msgDiv.innerHTML = '<span class="error">❌ ' + e.message + '</span>';
             }
@@ -788,26 +819,24 @@
                 msgDiv.innerHTML = '<span class="success">⏳ Claiming resources...</span>';
                 await tx.wait();
                 msgDiv.innerHTML = '<span class="success">💰 Resources claimed!</span>';
-                // Maybe update resource balances? Not implemented yet.
             } catch (e) {
                 msgDiv.innerHTML = '<span class="error">❌ ' + e.message + '</span>';
             }
         }
 
-        // ==================== ATTACK ====================
+        // === ATTACK (unverändert) ===
         async function attack() {
             const targetRow = parseInt(document.getElementById('attackRow').value);
             const targetCol = parseInt(document.getElementById('attackCol').value);
             if (isNaN(targetRow) || isNaN(targetCol)) return alert('Enter target coordinates');
             const targetTokenId = targetRow * 2048 + targetCol;
-            // We need an attacker token owned by user
             const balance = await nftContract.balanceOf(userAddress);
             if (balance.toNumber() === 0) return alert('You need a block to attack from');
-            const attackerTokenId = await nftContract.tokenOfOwnerByIndex(userAddress, 0); // just first
+            const attackerTokenId = await nftContract.tokenOfOwnerByIndex(userAddress, 0);
             const msgDiv = document.getElementById('attackMessage');
             msgDiv.innerHTML = '<span class="success">⏳ Starting attack...</span>';
             try {
-                const tx = await piratesContract.startAttack(attackerTokenId, targetTokenId, 0); // resource 0 = OIL
+                const tx = await piratesContract.startAttack(attackerTokenId, targetTokenId, 0);
                 await tx.wait();
                 msgDiv.innerHTML = '<span class="success">✅ Attack started! Check back later.</span>';
             } catch (e) {
@@ -815,7 +844,7 @@
             }
         }
 
-        // ==================== PROTECTION ====================
+        // === PROTECTION (unverändert) ===
         async function protect() {
             const tokenId = parseInt(document.getElementById('protectTokenId').value);
             const level = parseInt(document.getElementById('protectLevel').value);
@@ -823,7 +852,7 @@
             const msgDiv = document.getElementById('protectMessage');
             msgDiv.innerHTML = '<span class="success">⏳ Hiring mercenaries...</span>';
             try {
-                const cost = level * 10; // 10 INPI per %
+                const cost = level * 10;
                 const amount = ethers.utils.parseEther(cost.toString());
                 const allowance = await inpiContract.allowance(userAddress, MERCENARY_ADDRESS);
                 if (allowance.lt(amount)) {
@@ -839,23 +868,7 @@
             }
         }
 
-        // ==================== EVENT LISTENERS ====================
-        document.getElementById('connectWallet').addEventListener('click', connectWallet);
-        document.getElementById('mintBtn').addEventListener('click', mint);
-        document.getElementById('randomBlockBtn').addEventListener('click', findRandomFreeBlock);
-        document.getElementById('attackBtn').addEventListener('click', attack);
-        document.getElementById('protectBtn').addEventListener('click', protect);
-        document.getElementById('revealBtn').addEventListener('click', revealSelected);
-        document.getElementById('farmingStartBtn').addEventListener('click', startFarmingSelected);
-        document.getElementById('farmingStopBtn').addEventListener('click', stopFarmingSelected);
-        document.getElementById('claimBtn').addEventListener('click', claimSelected);
-
-        // Payment radio
-        document.querySelectorAll('input[name="payment"]').forEach(radio => {
-            radio.addEventListener('change', (e) => { selectedPayment = e.target.value; });
-        });
-
-        // Random free block finder
+        // === RANDOM FREE BLOCK FINDER ===
         async function findRandomFreeBlock() {
             if (!nftContract) return alert('Connect wallet first.');
             const MAX_ATTEMPTS = 50;
@@ -873,7 +886,6 @@
                         return;
                     }
                 } catch (e) {
-                    // not minted -> free
                     document.getElementById('row').value = row;
                     document.getElementById('col').value = col;
                     document.getElementById('mintMessage').innerHTML = '<span class="success">✅ Free block found!</span>';
@@ -883,7 +895,21 @@
             alert('No free block found after many attempts.');
         }
 
-        // Auto-connect if previously authorized
+        // === EVENT LISTENERS ===
+        document.getElementById('connectWallet').addEventListener('click', connectWallet);
+        document.getElementById('mintBtn').addEventListener('click', mint);
+        document.getElementById('randomBlockBtn').addEventListener('click', findRandomFreeBlock);
+        document.getElementById('attackBtn').addEventListener('click', attack);
+        document.getElementById('protectBtn').addEventListener('click', protect);
+        document.getElementById('revealBtn').addEventListener('click', revealSelected);
+        document.getElementById('farmingStartBtn').addEventListener('click', startFarmingSelected);
+        document.getElementById('farmingStopBtn').addEventListener('click', stopFarmingSelected);
+        document.getElementById('claimBtn').addEventListener('click', claimSelected);
+
+        document.querySelectorAll('input[name="payment"]').forEach(radio => {
+            radio.addEventListener('change', (e) => { selectedPayment = e.target.value; });
+        });
+
         if (window.ethereum && window.ethereum.selectedAddress) {
             connectWallet();
         }
