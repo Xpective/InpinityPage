@@ -43,7 +43,7 @@
             padding: 2rem;
         }
 
-        /* ========== NAVIGATION (from old game.html) ========== */
+        /* ========== NAVIGATION ========== */
         header nav ul {
             display: flex;
             flex-wrap: wrap;
@@ -198,6 +198,10 @@
         .block-card.protected {
             border-color: var(--accent-purple);
         }
+        .block-card.selected {
+            border: 3px solid var(--accent-gold);
+            transform: scale(1.02);
+        }
         .block-card .rarity {
             font-size: 0.8rem;
             background: #2a2a5a;
@@ -331,6 +335,14 @@
                 grid-column: span 1;
             }
         }
+        /* Selected Block Info */
+        .selected-block-info {
+            background: #1a1a3a;
+            padding: 1rem;
+            border-radius: 2rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--accent-gold);
+        }
     </style>
 </head>
 <body>
@@ -383,16 +395,21 @@
 
         <!-- Dashboard Grid -->
         <div class="dashboard">
-            <!-- Left Column: Pyramid & Blocks -->
+            <!-- Pyramid & Blocks -->
             <div class="pyramid-panel">
                 <h2 class="section-title">🏗️ Your Pyramid Blocks</h2>
                 <div class="blocks-grid" id="blocksGrid">
                     <!-- Dynamically filled with user's blocks -->
                     <p style="color: var(--text-dim); grid-column: 1/-1; text-align: center;">Connect wallet to see your blocks.</p>
                 </div>
+                <!-- Selected Block Info -->
+                <div id="selectedBlockInfo" class="selected-block-info" style="display: none;">
+                    <h4>Selected Block</h4>
+                    <p id="selectedBlockText">None</p>
+                </div>
             </div>
 
-            <!-- Right Column: Actions -->
+            <!-- Mint Card -->
             <div class="card">
                 <h3>⛏️ Mint a New Block</h3>
                 <div class="input-group">
@@ -409,18 +426,21 @@
                 <div id="mintMessage"></div>
             </div>
 
+            <!-- Block Actions (reveal, farming) -->
             <div class="card">
-                <h3>🔓 Reveal Block</h3>
-                <p>Select a block from your list above and click reveal.</p>
-                <div id="revealMessage"></div>
+                <h3>🔧 Block Actions</h3>
+                <div id="blockActions" style="display: none;">
+                    <p><strong id="selectedActionToken">Block #?</strong></p>
+                    <button class="btn-small" id="revealBtn">🔓 Reveal</button>
+                    <button class="btn-small" id="farmingStartBtn">🌾 Start Farming</button>
+                    <button class="btn-small" id="farmingStopBtn">⏹️ Stop Farming</button>
+                    <button class="btn-small" id="claimBtn">💰 Claim Resources</button>
+                    <div id="actionMessage"></div>
+                </div>
+                <p id="noBlockSelected" style="color: var(--text-dim);">Select a block from the pyramid to reveal or farm.</p>
             </div>
 
-            <div class="card">
-                <h3>🌾 Farming</h3>
-                <p>Start/stop resource production on your blocks.</p>
-                <div id="farmingMessage"></div>
-            </div>
-
+            <!-- Pirate Attack Card -->
             <div class="card">
                 <h3>🏴‍☠️ Pirate Attack</h3>
                 <div class="input-group">
@@ -431,6 +451,7 @@
                 <div id="attackMessage"></div>
             </div>
 
+            <!-- Mercenary Protection Card -->
             <div class="card">
                 <h3>🛡️ Mercenary Protection</h3>
                 <div class="input-group">
@@ -470,7 +491,7 @@
         const PITRONE_ADDRESS = "0x023e66Ba400807E0ae2C8f2552B6116039F6960f";
         const WORKER_URL = "https://inpinity-worker-final.s-plat.workers.dev";
 
-        // ==================== ABI Snippets ====================
+        // ==================== ABI ====================
         const NFT_ABI = [
             "function mintWithETH(uint256 row, uint256 col) payable",
             "function mintWithINPI(uint256 row, uint256 col) external",
@@ -512,13 +533,9 @@
         let provider, signer, userAddress;
         let nftContract, farmingContract, piratesContract, mercenaryContract, inpiContract, pitroneContract;
         let selectedPayment = 'eth';
+        let selectedBlock = null; // { tokenId, row, col, revealed }
 
         // ==================== UI HELPERS ====================
-        function log(message, type = 'info') {
-            console.log(message);
-            // could show in a global message area
-        }
-
         async function updateBalances() {
             if (!userAddress) return;
             const ethBal = await provider.getBalance(userAddress);
@@ -551,19 +568,23 @@
                 let rarityClass = '';
                 let rarityName = '';
                 if (data.revealed) {
-                    // calculate rarity via contract? We could call calculateRarity, but that's view.
-                    // For now just show revealed.
+                    // Optionally call calculateRarity (but that would require another ABI entry)
                     rarityClass = 'revealed';
                     rarityName = 'Revealed';
                 }
                 // Check farming status
-                const farm = await farmingContract.farms(tokenId);
-                if (farm && farm.isActive) rarityClass += ' farming';
+                try {
+                    const farm = await farmingContract.farms(tokenId);
+                    if (farm && farm.isActive) rarityClass += ' farming';
+                } catch (e) {}
                 // Check protection
-                const protection = await mercenaryContract.getProtectionLevel(tokenId);
-                if (protection > 0) rarityClass += ' protected';
+                try {
+                    const protection = await mercenaryContract.getProtectionLevel(tokenId);
+                    if (protection > 0) rarityClass += ' protected';
+                } catch (e) {}
 
-                html += `<div class="block-card ${rarityClass}" data-tokenid="${tokenId}" data-row="${pos.row}" data-col="${pos.col}">
+                const selectedClass = (selectedBlock && selectedBlock.tokenId == tokenId) ? 'selected' : '';
+                html += `<div class="block-card ${rarityClass} ${selectedClass}" data-tokenid="${tokenId}" data-row="${pos.row}" data-col="${pos.col}">
                     <div class="block-id">#${tokenId}</div>
                     <div>R${pos.row} C${pos.col}</div>
                     ${data.revealed ? `<div class="rarity">${rarityName}</div>` : '<div class="rarity">🔒 Hidden</div>'}
@@ -577,10 +598,23 @@
                     const tokenId = card.dataset.tokenid;
                     const row = card.dataset.row;
                     const col = card.dataset.col;
-                    // You can implement a modal or fill forms
-                    alert(`Block #${tokenId} (R${row}, C${col}) selected. Use action buttons.`);
+                    selectBlock(tokenId, row, col);
                 });
             });
+        }
+
+        function selectBlock(tokenId, row, col) {
+            selectedBlock = { tokenId, row, col };
+            document.getElementById('selectedBlockInfo').style.display = 'block';
+            document.getElementById('selectedBlockText').innerText = `Block #${tokenId} (R${row}, C${col})`;
+            document.getElementById('blockActions').style.display = 'block';
+            document.getElementById('noBlockSelected').style.display = 'none';
+            document.getElementById('selectedActionToken').innerText = `Block #${tokenId}`;
+            // Highlight selected card
+            document.querySelectorAll('.block-card').forEach(c => c.classList.remove('selected'));
+            const selector = `.block-card[data-tokenid="${tokenId}"]`;
+            const selectedCard = document.querySelector(selector);
+            if (selectedCard) selectedCard.classList.add('selected');
         }
 
         // ==================== WALLET ====================
@@ -681,6 +715,8 @@
                 msgDiv.innerHTML = '<span class="success">✅ Block minted! 🎉</span>';
                 await updateBalances();
                 await loadUserBlocks();
+                // Auto-select the newly minted block
+                selectBlock(tokenId, row, col);
             } catch (e) {
                 console.error(e);
                 msgDiv.innerHTML = '<span class="error">❌ ' + e.message + '</span>';
@@ -688,8 +724,10 @@
         }
 
         // ==================== REVEAL ====================
-        async function revealBlock(tokenId, row, col) {
-            const msgDiv = document.getElementById('revealMessage');
+        async function revealSelected() {
+            if (!selectedBlock) return alert('No block selected.');
+            const { tokenId, row, col } = selectedBlock;
+            const msgDiv = document.getElementById('actionMessage');
             msgDiv.innerHTML = '<span class="success">⏳ Loading proofs...</span>';
             try {
                 const response = await fetch(`${WORKER_URL}/api/get-proof?row=${row}&col=${col}`);
@@ -711,22 +749,49 @@
         }
 
         // ==================== FARMING ====================
-        async function startFarming(tokenId) {
+        async function startFarmingSelected() {
+            if (!selectedBlock) return alert('No block selected.');
+            const { tokenId } = selectedBlock;
+            const msgDiv = document.getElementById('actionMessage');
             try {
                 const tx = await farmingContract.startFarming(tokenId);
+                msgDiv.innerHTML = '<span class="success">⏳ Starting farming...</span>';
                 await tx.wait();
-                alert('Farming started!');
+                msgDiv.innerHTML = '<span class="success">✅ Farming started!</span>';
                 await loadUserBlocks();
-            } catch (e) { alert('Error: ' + e.message); }
+            } catch (e) {
+                msgDiv.innerHTML = '<span class="error">❌ ' + e.message + '</span>';
+            }
         }
 
-        async function stopFarming(tokenId) {
+        async function stopFarmingSelected() {
+            if (!selectedBlock) return alert('No block selected.');
+            const { tokenId } = selectedBlock;
+            const msgDiv = document.getElementById('actionMessage');
             try {
                 const tx = await farmingContract.stopFarming(tokenId);
+                msgDiv.innerHTML = '<span class="success">⏳ Stopping farming...</span>';
                 await tx.wait();
-                alert('Farming stopped.');
+                msgDiv.innerHTML = '<span class="success">⏹️ Farming stopped.</span>';
                 await loadUserBlocks();
-            } catch (e) { alert('Error: ' + e.message); }
+            } catch (e) {
+                msgDiv.innerHTML = '<span class="error">❌ ' + e.message + '</span>';
+            }
+        }
+
+        async function claimSelected() {
+            if (!selectedBlock) return alert('No block selected.');
+            const { tokenId } = selectedBlock;
+            const msgDiv = document.getElementById('actionMessage');
+            try {
+                const tx = await farmingContract.claimResources(tokenId);
+                msgDiv.innerHTML = '<span class="success">⏳ Claiming resources...</span>';
+                await tx.wait();
+                msgDiv.innerHTML = '<span class="success">💰 Resources claimed!</span>';
+                // Maybe update resource balances? Not implemented yet.
+            } catch (e) {
+                msgDiv.innerHTML = '<span class="error">❌ ' + e.message + '</span>';
+            }
         }
 
         // ==================== ATTACK ====================
@@ -780,13 +845,17 @@
         document.getElementById('randomBlockBtn').addEventListener('click', findRandomFreeBlock);
         document.getElementById('attackBtn').addEventListener('click', attack);
         document.getElementById('protectBtn').addEventListener('click', protect);
+        document.getElementById('revealBtn').addEventListener('click', revealSelected);
+        document.getElementById('farmingStartBtn').addEventListener('click', startFarmingSelected);
+        document.getElementById('farmingStopBtn').addEventListener('click', stopFarmingSelected);
+        document.getElementById('claimBtn').addEventListener('click', claimSelected);
 
         // Payment radio
         document.querySelectorAll('input[name="payment"]').forEach(radio => {
             radio.addEventListener('change', (e) => { selectedPayment = e.target.value; });
         });
 
-        // Random free block finder (simple)
+        // Random free block finder
         async function findRandomFreeBlock() {
             if (!nftContract) return alert('Connect wallet first.');
             const MAX_ATTEMPTS = 50;
