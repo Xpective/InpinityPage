@@ -111,7 +111,7 @@
             background: #0f1318;
             overflow: hidden;
             cursor: grab;
-            touch-action: none; /* Für Touch-Gesten */
+            touch-action: none;
         }
 
         .canvas-container canvas {
@@ -145,7 +145,7 @@
             font-weight: 600;
         }
 
-        /* Sidebar / Legende – verschiebbar und einklappbar */
+        /* Verschiebbare Sidebar / Legende */
         .legend-panel {
             position: absolute;
             top: 20px;
@@ -161,7 +161,7 @@
             transition: width 0.2s ease, right 0.2s ease;
             resize: horizontal;
             overflow: hidden;
-            cursor: move; /* für Drag */
+            cursor: move;
             user-select: none;
         }
 
@@ -368,7 +368,8 @@
     <script>
         (async function() {
             // ==================== KONFIGURATION ====================
-            const SUBGRAPH_URL = "https://api.studio.thegraph.com/query/1743108/inpinity/v0.0.7";
+            const SUBGRAPH_URL = "https://api.studio.thegraph.com/query/1743108/inpinity/version/latest";
+            const API_KEY = "059bc2832dfe50597009e556898d4ba6";
             const NFT_CONTRACT = "0x277a0D5864293C78d7387C54B48c35D5E9578Ab1";
             const BASE_BLOCK_SIZE = 24; // etwas größer für bessere Sichtbarkeit
 
@@ -424,12 +425,19 @@
                 try {
                     const response = await fetch(SUBGRAPH_URL, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${API_KEY}`
+                        },
                         body: JSON.stringify({ query })
                     });
                     const json = await response.json();
                     if (json.errors) {
                         console.error('Subgraph errors:', json.errors);
+                        // Fehler im Debug-Log ausgeben (falls vorhanden)
+                        if (document.getElementById('debugLog')) {
+                            document.getElementById('debugLog').innerHTML = JSON.stringify(json.errors);
+                        }
                         return;
                     }
                     const data = json.data;
@@ -636,8 +644,6 @@
                 let html = '';
                 if (token && token.owner) {
                     const ownerShort = shortenAddress(token.owner);
-                    // Rarity aus dem Subgraph? nicht vorhanden, wir lassen Platzhalter
-                    const rarity = '?'; 
                     html = `
                         <div class="detail-row"><span class="detail-label">Block #</span><span class="detail-value">${tokenId}</span></div>
                         <div class="detail-row"><span class="detail-label">Owner</span><span class="detail-value">${ownerShort}</span></div>
@@ -829,7 +835,7 @@
             await loadData();
             centerPyramid();
 
-            // Regelmäßiges Update
+            // Regelmäßiges Update (alle 30 Sekunden)
             setInterval(loadData, 30000);
         })();
     </script>
