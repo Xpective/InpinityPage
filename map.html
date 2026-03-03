@@ -365,7 +365,7 @@
         .color-gray { background: #3a4048; }
         .color-green { background: #2e7d5e; }
         .color-gold { background: #c9a959; }
-        .color-cyan { background: #a0d6ff; } /* für eigene Blöcke */
+        .color-cyan { background: #a0d6ff; }
         .border-blue { border: 3px solid #3498db; box-sizing: border-box; }
         .border-purple { border: 3px solid #9b59b6; }
 
@@ -491,6 +491,14 @@
                     <div id="exchangeMessage" class="message"></div>
                 </div>
 
+                <!-- NEU: Eigene Ressourcen-Anzeige -->
+                <div style="margin: 1rem 0; border-top: 1px solid #2a3f4a; padding-top: 1rem;">
+                    <h4 style="color: #d4af37; margin-bottom: 1rem;">📦 Your Resources</h4>
+                    <div id="userResources" style="display: flex; flex-direction: column; gap: 0.3rem;">
+                        <p style="color: #98a9b9;">Connect wallet to see your resource tokens.</p>
+                    </div>
+                </div>
+
                 <h4 style="color: #d4af37; margin: 1rem 0 0.8rem;">Legend</h4>
                 <div class="legend-item"><div class="color-box color-gray"></div> Not minted</div>
                 <div class="legend-item"><div class="color-box color-green"></div> Minted, not revealed</div>
@@ -512,9 +520,9 @@
     <script>
         (async function() {
             // ==================== KONFIGURATION ====================
-            const SUBGRAPH_ID = "22b4uXYgs4rwTj6n3iWB4d8Vk4s7LAG7dTAtRaTXfseQ";
+            // NEUE URL (Development Query URL v0.0.8)
+            const SUBGRAPH_URL = "https://api.studio.thegraph.com/query/1743108/inpinity/version/latest";
             const API_KEY = "059bc2832dfe50597009e556898d4ba6";
-            const SUBGRAPH_URL = `https://gateway.thegraph.com/api/${API_KEY}/subgraphs/id/${SUBGRAPH_ID}`;
             const BASE_BLOCK_SIZE = 24;
 
             // Contract Adressen (Base Mainnet)
@@ -565,6 +573,7 @@
             let farms = new Map();     // tokenId -> active
             let protections = new Map(); // tokenId -> active
             let partnerships = new Map(); // tokenId -> active
+            let userResources = [];    // { resourceId, amount }
             let selectedTokenId = null;
             let selectedTokenOwner = null;
             let selectedRevealed = false;
@@ -586,6 +595,7 @@
             const attackInput = document.getElementById('attackInput');
             const actionMessage = document.getElementById('actionMessage');
             const exchangeMessage = document.getElementById('exchangeMessage');
+            const userResourcesDiv = document.getElementById('userResources');
 
             let scale = 1.0;
             let offsetX = 0, offsetY = 0;
@@ -593,9 +603,34 @@
             let lastMouseX, lastMouseY;
             let pinchStartDist = 0;
 
+            // Ressourcen-Namen für Anzeige
+            const resourceNames = [
+                "Oil", "Lemons", "Iron", "Gold", "Platinum",
+                "Copper", "Crystal", "Obsidian", "Mysterium", "Aether"
+            ];
+
             // ==================== HILFSFUNKTIONEN ====================
             function shortenAddress(addr) {
                 return addr ? addr.slice(0,6) + '...' + addr.slice(-4) : '';
+            }
+
+            async function fetchWithPagination(query) {
+                // Einheitliche Fetch-Funktion mit API-Key im Header
+                const response = await fetch(SUBGRAPH_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_KEY}`
+                    },
+                    body: JSON.stringify({ query })
+                });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const json = await response.json();
+                if (json.errors) {
+                    console.error('Subgraph error:', json.errors);
+                    throw new Error(json.errors[0].message);
+                }
+                return json.data;
             }
 
             async function fetchAllWithPagination(fieldName, subfields) {
@@ -604,18 +639,8 @@
                 let all = [];
                 while (true) {
                     const query = `{ ${fieldName}(first: ${pageSize}, skip: ${skip}) { ${subfields} } }`;
-                    const response = await fetch(SUBGRAPH_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ query })
-                    });
-                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                    const json = await response.json();
-                    if (json.errors) {
-                        console.error('Subgraph error:', json.errors);
-                        throw new Error(json.errors[0].message);
-                    }
-                    const items = json.data[fieldName];
+                    const data = await fetchWithPagination(query);
+                    const items = data[fieldName];
                     if (!items || items.length === 0) break;
                     all = all.concat(items);
                     if (items.length < pageSize) break;
@@ -679,11 +704,49 @@
                         if (tokens[id]) tokens[id].partnerActive = active;
                     }
 
+                    // Wenn Wallet verbunden, lade ResourceBalances
+                    if (userAddress) {
+                        await loadUserResources();
+                    }
+
                     console.log(`Daten geladen. Tokens: ${Object.keys(tokens).length}`);
                     drawPyramid();
                 } catch (err) {
                     console.error('Fehler beim Laden:', err);
                 }
+            }
+
+            async function loadUserResources() {
+                if (!userAddress) return;
+                try {
+                    console.log('Lade ResourceBalances für', userAddress);
+                    // Wir holen alle ResourceBalances und filtern lokal (da der Benutzer nie viele haben wird)
+                    const balanceItems = await fetchAllWithPagination('resourceBalances', `id account resourceId amount`);
+                    userResources = balanceItems
+                        .filter(b => b.account.toLowerCase() === userAddress.toLowerCase())
+                        .map(b => ({ resourceId: parseInt(b.resourceId), amount: BigInt(b.amount) }));
+                    updateUserResourcesDisplay();
+                } catch (err) {
+                    console.error('Fehler beim Laden der ResourceBalances:', err);
+                }
+            }
+
+            function updateUserResourcesDisplay() {
+                if (!userAddress) {
+                    userResourcesDiv.innerHTML = '<p style="color: #98a9b9;">Connect wallet to see your resource tokens.</p>';
+                    return;
+                }
+                if (userResources.length === 0) {
+                    userResourcesDiv.innerHTML = '<p style="color: #98a9b9;">You have no resource tokens yet.</p>';
+                    return;
+                }
+                let html = '';
+                userResources.sort((a,b) => a.resourceId - b.resourceId);
+                for (let r of userResources) {
+                    const name = resourceNames[r.resourceId] || `Resource ${r.resourceId}`;
+                    html += `<div class="detail-row"><span class="detail-label">${name}</span><span class="detail-value">${r.amount.toString()}</span></div>`;
+                }
+                userResourcesDiv.innerHTML = html;
             }
 
             // ==================== ZEICHNEN ====================
@@ -708,19 +771,16 @@
                         let lineWidth = 0;
 
                         if (token && token.owner) {
-                            // Standardfarben für geminte Blöcke
                             if (token.revealed) {
                                 fillColor = '#c9a959'; // gold
                             } else {
                                 fillColor = '#2e7d5e'; // grün
                             }
 
-                            // Eigene Blöcke erhalten eine spezielle Füllfarbe (helles Cyan)
                             if (userAddress && token.owner.toLowerCase() === userAddress.toLowerCase()) {
                                 fillColor = '#a0d6ff'; // helles Cyan
                             }
 
-                            // Rahmen für Schutz oder Farming (nur wenn nicht eigener Block? Eigener Block kann auch Schutz haben)
                             if (token.protectionActive) {
                                 strokeColor = '#9b59b6';
                                 lineWidth = 3;
@@ -738,7 +798,6 @@
                             ctx.strokeRect(x, y, blockSize, blockSize);
                         }
 
-                        // Partner-Symbol
                         if (token && token.partnerActive) {
                             ctx.save();
                             ctx.translate(x + blockSize - 8, y + 8);
@@ -774,7 +833,6 @@
                 selectedRevealed = token ? token.revealed : false;
                 selectedRarity = null;
 
-                // Rarity ermitteln (falls Block geminted und revealed)
                 let productionHtml = '';
                 if (token && token.owner && token.revealed && nftReadOnlyContract) {
                     try {
@@ -809,7 +867,6 @@
                 }
                 blockDetailDiv.innerHTML = detailHtml;
 
-                // Aktionen anzeigen/verbergen
                 actionPanel.style.display = 'block';
                 ownerActionsDiv.innerHTML = '';
                 attackerActionsDiv.innerHTML = '';
@@ -818,7 +875,6 @@
                 actionMessage.innerHTML = '';
 
                 if (userAddress && owner && owner.toLowerCase() === userAddress.toLowerCase()) {
-                    // Eigener Block
                     let btns = '';
                     if (!token.revealed) {
                         btns += `<button class="action-btn" id="revealBtn">🔓 Reveal Block</button>`;
@@ -829,11 +885,9 @@
                         btns += `<button class="action-btn" id="stopFarmBtn">⏹️ Stop Farming</button>`;
                         btns += `<button class="action-btn" id="claimBtn">💰 Claim Resources</button>`;
                     }
-                    // Protection-Kauf immer anbieten
                     protectionInput.style.display = 'flex';
                     ownerActionsDiv.innerHTML = btns;
                 } else if (userAddress && owner) {
-                    // Fremder Block – Angriff möglich
                     attackInput.style.display = 'flex';
                 } else {
                     actionPanel.style.display = 'none';
@@ -971,7 +1025,6 @@
                     signer = await provider.getSigner();
                     userAddress = await signer.getAddress();
 
-                    // Auf Base Mainnet wechseln falls nötig
                     const network = await provider.getNetwork();
                     if (network.chainId !== 8453n) {
                         try {
@@ -992,7 +1045,6 @@
                         }
                     }
 
-                    // Contracts initialisieren (mit Signer)
                     nftContract = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
                     farmingContract = new ethers.Contract(FARMING_ADDRESS, FARMING_ABI, signer);
                     piratesContract = new ethers.Contract(PIRATES_ADDRESS, PIRATES_ABI, signer);
@@ -1001,6 +1053,7 @@
                     pitroneContract = new ethers.Contract(PITRONE_ADDRESS, PITRONE_ABI, signer);
 
                     document.getElementById('walletAddress').innerText = shortenAddress(userAddress);
+                    await loadData(); // lädt nun auch userResources
                     drawPyramid();
                 } catch (err) {
                     console.error(err);
@@ -1217,7 +1270,6 @@
             document.getElementById('exchangeInpiBtn').addEventListener('click', exchangeINPI);
             document.getElementById('exchangePitBtn').addEventListener('click', exchangePit);
 
-            // Event-Delegation für dynamische Buttons
             document.addEventListener('click', async (e) => {
                 if (e.target.id === 'revealBtn') await handleReveal();
                 if (e.target.id === 'startFarmBtn') await handleStartFarm();
@@ -1228,7 +1280,7 @@
             });
 
             // ==================== START ====================
-            await initReadOnly(); // für Rarity-Abfragen
+            await initReadOnly();
             canvas.width = container.clientWidth;
             canvas.height = container.clientHeight;
             await loadData();
