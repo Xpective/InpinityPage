@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>INPINITY – Pyramid Map (Interactive+)</title>
+    <title>INPINITY – Pyramid Map (V1/V2 Support + Resources)</title>
     <link rel="icon" type="image/png" href="favicon.webp" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -520,16 +520,24 @@
     <script>
         (async function() {
             // ==================== KONFIGURATION ====================
-            // NEUE URL (Development Query URL v0.0.8)
             const SUBGRAPH_URL = "https://api.studio.thegraph.com/query/1743108/inpinity/version/latest";
             const API_KEY = "059bc2832dfe50597009e556898d4ba6";
             const BASE_BLOCK_SIZE = 24;
 
             // Contract Adressen (Base Mainnet)
             const NFT_ADDRESS = "0x277a0D5864293C78d7387C54B48c35D5E9578Ab1";
-            const FARMING_ADDRESS = "0x852Bce0713aAF409c4412155Ab8CE6191B525C30";
-            const PIRATES_ADDRESS = "0x46290466327b0Fab5791f030f8487321635Eeb37";
-            const MERCENARY_ADDRESS = "0xFEa09ccA75dbc63cc8053739A61777Bd13fC6Bc2";
+            // V1
+            const FARMING_V1_ADDRESS = "0xd9722fB6e9b8e71399A970d4e8F4D628C532E94f";
+            const PIRATES_V1_ADDRESS = "0xfD4B74AFF77eeB03FA5bB64Ec701504757BF2585";
+            const MERCENARY_V1_ADDRESS = "0x7719516e40A9E8b47d5967ED7E3cB4D528fd18DF";
+            const PARTNERSHIP_V1_ADDRESS = "0x83F5592f2fA5Fd3b2FE742B4B0012e1351dF0a7a";
+            // V2
+            const FARMING_V2_ADDRESS = "0x852Bce0713aAF409c4412155Ab8CE6191B525C30";
+            const PIRATES_V2_ADDRESS = "0x46290466327b0Fab5791f030f8487321635Eeb37";
+            const MERCENARY_V2_ADDRESS = "0xFEa09ccA75dbc63cc8053739A61777Bd13fC6Bc2";
+            const PARTNERSHIP_V2_ADDRESS = "0xb18323efE4Cc8c36e10D664E287b4e2c82Fe3ad9";
+            const RESOURCE_TOKEN_ADDRESS = "0x71E76a6065197acdd1a4d6B736712F80D1Fd3D8b";
+            // Tokens
             const INPI_ADDRESS = "0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D";
             const PITRONE_ADDRESS = "0x7240Ec5B3Ba944888E186c74D0f8B4F5F71c9AE8";
 
@@ -541,13 +549,17 @@
             const FARMING_ABI = [
                 "function startFarming(uint256 tokenId) external",
                 "function stopFarming(uint256 tokenId) external",
-                "function claimResources(uint256 tokenId) external"
+                "function claimResources(uint256 tokenId) external",
+                "function farms(uint256) view returns (uint256 startTime, uint256 lastClaimTime, bool isActive)"
             ];
             const PIRATES_ABI = [
                 "function startAttack(uint256 attackerTokenId, uint256 targetTokenId, uint8 resource) external"
             ];
             const MERCENARY_ABI = [
                 "function hireMercenaries(uint256 tokenId, uint256 protectionLevel) external"
+            ];
+            const PARTNERSHIP_ABI = [
+                "function isPartnerBlock(uint256 tokenId) view returns (bool)"
             ];
             const INPI_ABI = [
                 "function approve(address spender, uint256 amount) returns (bool)",
@@ -569,10 +581,7 @@
             let provider, signer, userAddress = null;
             let readOnlyProvider; // für Calls ohne Wallet
             let nftReadOnlyContract;
-            let tokens = {};          // key = tokenId (String) -> { owner, revealed, farmActive, protectionActive, partnerActive }
-            let farms = new Map();     // tokenId -> active
-            let protections = new Map(); // tokenId -> active
-            let partnerships = new Map(); // tokenId -> active
+            let tokens = {};          // key = tokenId (String) -> { owner, revealed, farmActive, farmingVersion, protectionActive, partnerActive }
             let userResources = [];    // { resourceId, amount }
             let selectedTokenId = null;
             let selectedTokenOwner = null;
@@ -580,7 +589,12 @@
             let selectedRarity = null; // für Ressourcen
 
             // Contract-Instanzen (mit Signer)
-            let nftContract, farmingContract, piratesContract, mercenaryContract, inpiContract, pitroneContract;
+            let nftContract;
+            let farmingV1Contract, farmingV2Contract;
+            let piratesV2Contract;
+            let mercenaryV2Contract;
+            let partnershipV1Contract, partnershipV2Contract;
+            let inpiContract, pitroneContract;
 
             // Canvas & UI
             const canvas = document.getElementById('pyramidCanvas');
@@ -615,7 +629,6 @@
             }
 
             async function fetchWithPagination(query) {
-                // Einheitliche Fetch-Funktion mit API-Key im Header
                 const response = await fetch(SUBGRAPH_URL, {
                     method: 'POST',
                     headers: {
@@ -649,7 +662,7 @@
                 return all;
             }
 
-            // ==================== PRODUKTIONSFUNKTION (aus game.html) ====================
+            // ==================== PRODUKTIONSFUNKTION ====================
             function getProduction(rarity, row) {
                 const production = {};
                 if (rarity === 0) { // Bronze
@@ -667,17 +680,43 @@
                 return production;
             }
 
+            // ==================== FARMING-STATUS AUS BEIDEN CONTRACTS LADEN ====================
+            async function loadFarmingStatus() {
+                if (!userAddress || !farmingV1Contract || !farmingV2Contract) return;
+                for (const tokenId in tokens) {
+                    try {
+                        const farmV1 = await farmingV1Contract.farms(tokenId);
+                        if (farmV1 && farmV1.isActive) {
+                            tokens[tokenId].farmActive = true;
+                            tokens[tokenId].farmingVersion = 'v1';
+                        } else {
+                            const farmV2 = await farmingV2Contract.farms(tokenId);
+                            if (farmV2 && farmV2.isActive) {
+                                tokens[tokenId].farmActive = true;
+                                tokens[tokenId].farmingVersion = 'v2';
+                            } else {
+                                tokens[tokenId].farmActive = false;
+                                tokens[tokenId].farmingVersion = null;
+                            }
+                        }
+                    } catch (e) {
+                        // ignore
+                    }
+                }
+            }
+
             // ==================== DATEN LADEN ====================
             async function loadData() {
                 try {
                     console.log('Lade Tokens...');
-                    const tokenItems = await fetchAllWithPagination('tokens', `id owner { id } revealed farm { active }`);
+                    const tokenItems = await fetchAllWithPagination('tokens', `id owner { id } revealed`);
                     tokens = {};
                     tokenItems.forEach(t => {
                         tokens[t.id] = {
                             owner: t.owner ? t.owner.id : null,
                             revealed: t.revealed || false,
-                            farmActive: t.farm ? t.farm.active : false,
+                            farmActive: false, // wird später gesetzt
+                            farmingVersion: null,
                             protectionActive: false,
                             partnerActive: false
                         };
@@ -685,24 +724,22 @@
 
                     console.log('Lade Protections...');
                     const protectionItems = await fetchAllWithPagination('protections', `id active`);
-                    protections.clear();
+                    const protections = new Map();
                     protectionItems.forEach(p => protections.set(p.id, p.active));
                     for (let [id, active] of protections) {
                         if (tokens[id]) tokens[id].protectionActive = active;
                     }
 
-                    console.log('Lade Farms...');
-                    const farmItems = await fetchAllWithPagination('farms', `id active`);
-                    farms.clear();
-                    farmItems.forEach(f => farms.set(f.id, f.active));
-
                     console.log('Lade Partnerships...');
                     const partnerItems = await fetchAllWithPagination('partnerships', `id active`);
-                    partnerships.clear();
+                    const partnerships = new Map();
                     partnerItems.forEach(p => partnerships.set(p.id, p.active));
                     for (let [id, active] of partnerships) {
                         if (tokens[id]) tokens[id].partnerActive = active;
                     }
+
+                    // Farming-Status von V1/V2 holen
+                    await loadFarmingStatus();
 
                     // Wenn Wallet verbunden, lade ResourceBalances
                     if (userAddress) {
@@ -720,7 +757,6 @@
                 if (!userAddress) return;
                 try {
                     console.log('Lade ResourceBalances für', userAddress);
-                    // Wir holen alle ResourceBalances und filtern lokal (da der Benutzer nie viele haben wird)
                     const balanceItems = await fetchAllWithPagination('resourceBalances', `id account resourceId amount`);
                     userResources = balanceItems
                         .filter(b => b.account.toLowerCase() === userAddress.toLowerCase())
@@ -902,6 +938,7 @@
                     messageDiv.innerHTML = '<span class="success">⏳ Confirming...</span>';
                     await tx.wait();
                     messageDiv.innerHTML = `<span class="success">✅ ${successMsg}</span>`;
+                    // Nach jeder Aktion Daten neu laden
                     await loadData();
                     if (selectedTokenId) updateSidebar(selectedTokenId);
                 } catch (err) {
@@ -931,20 +968,29 @@
 
             async function handleStartFarm() {
                 if (!selectedTokenId) return;
-                const tx = farmingContract.startFarming(selectedTokenId);
+                // Immer V2 für neue Farms
+                const tx = farmingV2Contract.startFarming(selectedTokenId);
                 await sendTx(tx, actionMessage, 'Farming started!');
             }
 
             async function handleStopFarm() {
                 if (!selectedTokenId) return;
-                const tx = farmingContract.stopFarming(selectedTokenId);
+                const token = tokens[selectedTokenId];
+                if (!token || !token.farmActive) return;
+                const contract = token.farmingVersion === 'v2' ? farmingV2Contract : farmingV1Contract;
+                const tx = contract.stopFarming(selectedTokenId);
                 await sendTx(tx, actionMessage, 'Farming stopped.');
             }
 
             async function handleClaim() {
                 if (!selectedTokenId) return;
-                const tx = farmingContract.claimResources(selectedTokenId);
+                const token = tokens[selectedTokenId];
+                if (!token || !token.farmActive) return;
+                const contract = token.farmingVersion === 'v2' ? farmingV2Contract : farmingV1Contract;
+                const tx = contract.claimResources(selectedTokenId);
                 await sendTx(tx, actionMessage, 'Resources claimed!');
+                // Nach Claim Resource-Balances aktualisieren
+                await loadUserResources();
             }
 
             async function handleProtect() {
@@ -953,13 +999,13 @@
                 if (isNaN(level) || level < 0 || level > 50) return alert('Invalid level (0-50)');
                 const cost = level * 10;
                 const amount = ethers.parseEther(cost.toString());
-                const allowance = await inpiContract.allowance(userAddress, MERCENARY_ADDRESS);
+                const allowance = await inpiContract.allowance(userAddress, MERCENARY_V2_ADDRESS);
                 if (allowance < amount) {
                     actionMessage.innerHTML = '<span class="success">⏳ Approving INPI...</span>';
-                    const approveTx = await inpiContract.approve(MERCENARY_ADDRESS, amount);
+                    const approveTx = await inpiContract.approve(MERCENARY_V2_ADDRESS, amount);
                     await approveTx.wait();
                 }
-                const tx = mercenaryContract.hireMercenaries(selectedTokenId, level);
+                const tx = mercenaryV2Contract.hireMercenaries(selectedTokenId, level);
                 await sendTx(tx, actionMessage, 'Protection bought!');
             }
 
@@ -972,7 +1018,7 @@
                 }
                 const attackerTokenId = ownTokens[0][0];
                 const resource = parseInt(document.getElementById('attackResource').value);
-                const tx = piratesContract.startAttack(attackerTokenId, selectedTokenId, resource);
+                const tx = piratesV2Contract.startAttack(attackerTokenId, selectedTokenId, resource);
                 await sendTx(tx, actionMessage, 'Attack launched!');
             }
 
@@ -1046,14 +1092,17 @@
                     }
 
                     nftContract = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
-                    farmingContract = new ethers.Contract(FARMING_ADDRESS, FARMING_ABI, signer);
-                    piratesContract = new ethers.Contract(PIRATES_ADDRESS, PIRATES_ABI, signer);
-                    mercenaryContract = new ethers.Contract(MERCENARY_ADDRESS, MERCENARY_ABI, signer);
+                    farmingV1Contract = new ethers.Contract(FARMING_V1_ADDRESS, FARMING_ABI, signer);
+                    farmingV2Contract = new ethers.Contract(FARMING_V2_ADDRESS, FARMING_ABI, signer);
+                    piratesV2Contract = new ethers.Contract(PIRATES_V2_ADDRESS, PIRATES_ABI, signer);
+                    mercenaryV2Contract = new ethers.Contract(MERCENARY_V2_ADDRESS, MERCENARY_ABI, signer);
+                    partnershipV1Contract = new ethers.Contract(PARTNERSHIP_V1_ADDRESS, PARTNERSHIP_ABI, signer);
+                    partnershipV2Contract = new ethers.Contract(PARTNERSHIP_V2_ADDRESS, PARTNERSHIP_ABI, signer);
                     inpiContract = new ethers.Contract(INPI_ADDRESS, INPI_ABI, signer);
                     pitroneContract = new ethers.Contract(PITRONE_ADDRESS, PITRONE_ABI, signer);
 
                     document.getElementById('walletAddress').innerText = shortenAddress(userAddress);
-                    await loadData(); // lädt nun auch userResources
+                    await loadData();
                     drawPyramid();
                 } catch (err) {
                     console.error(err);
