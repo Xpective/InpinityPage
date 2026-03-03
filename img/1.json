@@ -9,7 +9,7 @@
     { "trait_type": "Resource Rarity", "value": "Base" },
     { "trait_type": "System", "value": "FarmingV2" }
   ],
-  "farmingV1": {
+  "farmingV2": {
     "produced": true,
     "production_per_day_by_block_rarity": {
       "0_Bronze": 5,
