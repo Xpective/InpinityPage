@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>INPINITY – The Pi-Phi Pyramid (v0.10.0)</title>
+    <title>INPINITY – The Pi-Phi Pyramid (v0.11.0 – V2 only)</title>
     <link rel="icon" type="image/png" href="favicon.webp" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        /* === gleiches CSS wie zuvor, unverändert === */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
             --bg-dark: #0a0a1a;
@@ -498,7 +499,7 @@
             </div>
         </div>
 
-        <!-- NEU: Resource Token Balances -->
+        <!-- Resource Token Balances (vom Subgraph) -->
         <div class="user-resources" id="userResources">
             <p style="color: var(--text-dim); grid-column: 1/-1; text-align: center;">Connect wallet to see your resource tokens.</p>
         </div>
@@ -511,27 +512,20 @@
 
         <footer>
             <p>© 2026 INPINITY. All rights reserved. Built on Base.</p>
-            <p>Version 0.10.0 – V1/V2 Support, Resource Tokens, Partnership integration. Real game (UE5) coming soon.</p>
+            <p>Version 0.11.0 – Pure V2, Resource Tokens via Subgraph. Real game (UE5) coming soon.</p>
             <p><a href="whitepaper.html">Whitepaper</a> | <a href="https://discord.gg/95yj6Eg6" target="_blank">Discord</a></p>
         </footer>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
     <script>
-        // === CONFIG ===
-        // V1 Contracts
+        // === CONFIG (NUR V2) ===
         const NFT_ADDRESS = "0x277a0D5864293C78d7387C54B48c35D5E9578Ab1";
-        const FARMING_V1_ADDRESS = "0xd9722fB6e9b8e71399A970d4e8F4D628C532E94f";
-        const PIRATES_V1_ADDRESS = "0xfD4B74AFF77eeB03FA5bB64Ec701504757BF2585";
-        const MERCENARY_V1_ADDRESS = "0x7719516e40A9E8b47d5967ED7E3cB4D528fd18DF";
-        const PARTNERSHIP_V1_ADDRESS = "0x83F5592f2fA5Fd3b2FE742B4B0012e1351dF0a7a";
-        // V2 Contracts
         const FARMING_V2_ADDRESS = "0x852Bce0713aAF409c4412155Ab8CE6191B525C30";
         const PIRATES_V2_ADDRESS = "0x46290466327b0Fab5791f030f8487321635Eeb37";
         const MERCENARY_V2_ADDRESS = "0xFEa09ccA75dbc63cc8053739A61777Bd13fC6Bc2";
         const PARTNERSHIP_V2_ADDRESS = "0xb18323efE4Cc8c36e10D664E287b4e2c82Fe3ad9";
         const RESOURCE_TOKEN_ADDRESS = "0x71E76a6065197acdd1a4d6B736712F80D1Fd3D8b";
-        // Tokens
         const INPI_ADDRESS = "0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D";
         const PITRONE_ADDRESS = "0x7240Ec5B3Ba944888E186c74D0f8B4F5F71c9AE8";
 
@@ -539,7 +533,7 @@
         const SUBGRAPH_URL = "https://api.studio.thegraph.com/query/1743108/inpinity/version/latest";
         const API_KEY = "059bc2832dfe50597009e556898d4ba6";
 
-        // === ABI (unverändert, da Methoden in V1 und V2 identisch) ===
+        // === ABI (identisch, nur für V2) ===
         const NFT_ABI = [
             "function mintWithETH(uint256 row, uint256 col) payable",
             "function mintWithINPI(uint256 row, uint256 col) external",
@@ -561,13 +555,10 @@
             "function farms(uint256) view returns (uint256 startTime, uint256 lastClaimTime, bool isActive)"
         ];
         const PIRATES_ABI = [
-            "function startAttack(uint256 attackerTokenId, uint256 targetTokenId, uint8 resource) external",
-            "function attacks(uint256,uint256) view returns (address attacker, uint256 targetTokenId, uint256 startTime, uint256 endTime, uint8 resource, bool executed)",
-            "function calculateDistance(uint256 tokenId1, uint256 tokenId2) view returns (uint256)"
+            "function startAttack(uint256 attackerTokenId, uint256 targetTokenId, uint8 resource) external"
         ];
         const MERCENARY_ABI = [
-            "function hireMercenaries(uint256 tokenId, uint256 protectionLevel) external",
-            "function getProtectionLevel(uint256 tokenId) view returns (uint256)"
+            "function hireMercenaries(uint256 tokenId, uint256 protectionLevel) external"
         ];
         const PARTNERSHIP_ABI = [
             "function isPartnerBlock(uint256 tokenId) view returns (bool)"
@@ -591,16 +582,11 @@
         // === STATE ===
         let provider, signer, userAddress;
         let nftContract;
-        let farmingV1Contract, farmingV2Contract;
-        let piratesV1Contract, piratesV2Contract;
-        let mercenaryV1Contract, mercenaryV2Contract;
-        let partnershipV1Contract, partnershipV2Contract;
-        let inpiContract, pitroneContract;
+        let farmingContract, piratesContract, mercenaryContract, partnershipContract, inpiContract, pitroneContract;
 
         let selectedPayment = 'eth';
-        let selectedBlock = null; // { tokenId, row, col, revealed, rarity, farmingActive, farmingVersion, protectionLevel, partnerActive }
+        let selectedBlock = null; // { tokenId, row, col, revealed, rarity, farmingActive, protectionLevel, partnerActive }
         let userResourceBalances = {}; // resourceId -> amount
-        let farmingContractMap = {}; // tokenId -> 'v1' oder 'v2'
 
         const resourceNames = [
             "Oil", "Lemons", "Iron", "Gold", "Platinum",
@@ -695,93 +681,74 @@
             container.innerHTML = html;
         }
 
+        // === LADE BLOCK-DATEN VOM SUBGRAPH (inkl. Farming-Status) ===
         async function loadUserBlocks() {
             if (!userAddress || !nftContract) return;
-            const balance = await nftContract.balanceOf(userAddress);
-            const grid = document.getElementById('blocksGrid');
-            if (balance.toNumber() === 0) {
-                grid.innerHTML = '<p style="color:var(--text-dim); text-align:center;">You don’t own any blocks yet.</p>';
-                return;
-            }
-            let html = '';
-            let activeFarmsCount = 0;
-            for (let i = 0; i < balance; i++) {
-                const tokenId = await nftContract.tokenOfOwnerByIndex(userAddress, i);
-                const data = await nftContract.blockData(tokenId);
-                const pos = await nftContract.getBlockPosition(tokenId);
-                let rarityClass = '';
-                let rarityName = '🔒 Hidden';
-                if (data.revealed) {
-                    const rarity = await nftContract.calculateRarity(tokenId);
-                    const rarityNames = ['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond'];
-                    rarityName = rarityNames[rarity];
-                    rarityClass = 'revealed';
+            // Wir holen alle Tokens des Users über den Subgraph (schneller und gibt auch Farming-Status)
+            const query = `{
+                tokens(where: { owner: "${userAddress.toLowerCase()}" }) {
+                    id
+                    revealed
+                    farm { active }
                 }
-                // Farming status aus V1 und V2
-                let isFarmingV1 = false, isFarmingV2 = false;
-                try {
-                    const farmV1 = await farmingV1Contract.farms(tokenId);
-                    if (farmV1 && farmV1.isActive) {
-                        isFarmingV1 = true;
-                        activeFarmsCount++;
-                        rarityClass += ' farming';
-                    }
-                } catch (e) {}
-                try {
-                    const farmV2 = await farmingV2Contract.farms(tokenId);
-                    if (farmV2 && farmV2.isActive) {
-                        isFarmingV2 = true;
-                        activeFarmsCount++;
-                        rarityClass += ' farming';
-                    }
-                } catch (e) {}
-                // Protection (nur V2? Wir prüfen beide, aber es gibt nur einen Protection-Contract? V1 hatte auch mercenary, also prüfen wir beide.)
-                let protectionV1 = false, protectionV2 = false;
-                try {
-                    const p1 = await mercenaryV1Contract.getProtectionLevel(tokenId);
-                    if (p1 > 0) protectionV1 = true;
-                } catch (e) {}
-                try {
-                    const p2 = await mercenaryV2Contract.getProtectionLevel(tokenId);
-                    if (p2 > 0) protectionV2 = true;
-                } catch (e) {}
-                if (protectionV1 || protectionV2) rarityClass += ' protected';
-
-                // Partner (V1 oder V2)
-                let partnerActive = false;
-                try {
-                    const p1 = await partnershipV1Contract.isPartnerBlock(tokenId);
-                    if (p1) partnerActive = true;
-                } catch (e) {}
-                try {
-                    const p2 = await partnershipV2Contract.isPartnerBlock(tokenId);
-                    if (p2) partnerActive = true;
-                } catch (e) {}
-                if (partnerActive) rarityClass += ' partner';
-
-                // Speichere, welcher Farming-Contract aktiv ist
-                if (isFarmingV2) farmingContractMap[tokenId] = 'v2';
-                else if (isFarmingV1) farmingContractMap[tokenId] = 'v1';
-                else farmingContractMap[tokenId] = null;
-
-                const selectedClass = (selectedBlock && selectedBlock.tokenId == tokenId) ? 'selected' : '';
-                html += `<div class="block-card ${rarityClass} ${selectedClass}" data-tokenid="${tokenId}" data-row="${pos.row}" data-col="${pos.col}">
-                    <div class="block-id">#${tokenId}</div>
-                    <div>R${pos.row} C${pos.col}</div>
-                    <div class="rarity">${rarityName}</div>
-                </div>`;
-            }
-            grid.innerHTML = html;
-            document.getElementById('activeFarms').innerText = activeFarmsCount;
-
-            document.querySelectorAll('.block-card').forEach(card => {
-                card.addEventListener('click', () => {
-                    const tokenId = card.dataset.tokenid;
-                    const row = card.dataset.row;
-                    const col = card.dataset.col;
-                    selectBlock(tokenId, row, col);
+            }`;
+            try {
+                const response = await fetch(SUBGRAPH_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_KEY}`
+                    },
+                    body: JSON.stringify({ query })
                 });
-            });
+                const json = await response.json();
+                if (json.errors) throw new Error(json.errors[0].message);
+                const tokenItems = json.data.tokens;
+
+                // Zusätzlich brauchen wir noch Position (row/col) – können wir via Contract holen, da es nur wenige sind
+                const grid = document.getElementById('blocksGrid');
+                if (!tokenItems || tokenItems.length === 0) {
+                    grid.innerHTML = '<p style="color:var(--text-dim); text-align:center;">You don’t own any blocks yet.</p>';
+                    return;
+                }
+
+                let html = '';
+                let activeFarmsCount = 0;
+                for (let t of tokenItems) {
+                    const tokenId = t.id;
+                    const pos = await nftContract.getBlockPosition(tokenId); // direkt vom Contract
+                    const row = pos.row.toNumber();
+                    const col = pos.col.toNumber();
+                    const revealed = t.revealed;
+                    const farmingActive = t.farm ? t.farm.active : false;
+                    if (farmingActive) activeFarmsCount++;
+
+                    // Rarity und Produktion später in selectBlock per Contract
+                    let rarityClass = revealed ? 'revealed' : '';
+                    if (farmingActive) rarityClass += ' farming';
+                    // Protection und Partner später in selectBlock – für die Anzeige hier nur Farbe
+                    // wir holen Protection/Partner später asynchron für jeden Block, aber für die Liste reicht erstmal Basis
+                    const selectedClass = (selectedBlock && selectedBlock.tokenId == tokenId) ? 'selected' : '';
+                    html += `<div class="block-card ${rarityClass} ${selectedClass}" data-tokenid="${tokenId}" data-row="${row}" data-col="${col}">
+                        <div class="block-id">#${tokenId}</div>
+                        <div>R${row} C${col}</div>
+                        <div class="rarity">${revealed ? 'Revealed' : '🔒 Hidden'}</div>
+                    </div>`;
+                }
+                grid.innerHTML = html;
+                document.getElementById('activeFarms').innerText = activeFarmsCount;
+
+                document.querySelectorAll('.block-card').forEach(card => {
+                    card.addEventListener('click', () => {
+                        const tokenId = card.dataset.tokenid;
+                        const row = card.dataset.row;
+                        const col = card.dataset.col;
+                        selectBlock(tokenId, row, col);
+                    });
+                });
+            } catch (err) {
+                console.error('Fehler beim Laden der User-Blöcke:', err);
+            }
         }
 
         async function selectBlock(tokenId, row, col) {
@@ -791,26 +758,23 @@
             if (revealed) {
                 rarity = await nftContract.calculateRarity(tokenId);
             }
-            const farmingVersion = farmingContractMap[tokenId];
-            const farmingActive = farmingVersion !== null;
+            // Farming-Status über Contract (V2)
+            const farm = await farmingContract.farms(tokenId);
+            const farmingActive = farm.isActive;
 
+            // Protection
             let protectionLevel = 0;
             try {
-                const p1 = await mercenaryV1Contract.getProtectionLevel(tokenId);
-                if (p1 > 0) protectionLevel = p1;
-                const p2 = await mercenaryV2Contract.getProtectionLevel(tokenId);
-                if (p2 > 0) protectionLevel = p2;
+                protectionLevel = await mercenaryContract.getProtectionLevel(tokenId);
             } catch (e) {}
 
+            // Partner (V2)
             let partnerActive = false;
             try {
-                const p1 = await partnershipV1Contract.isPartnerBlock(tokenId);
-                if (p1) partnerActive = true;
-                const p2 = await partnershipV2Contract.isPartnerBlock(tokenId);
-                if (p2) partnerActive = true;
+                partnerActive = await partnershipContract.isPartnerBlock(tokenId);
             } catch (e) {}
 
-            selectedBlock = { tokenId, row, col, revealed, rarity, farmingActive, farmingVersion, protectionLevel, partnerActive };
+            selectedBlock = { tokenId, row, col, revealed, rarity, farmingActive, protectionLevel, partnerActive };
             document.getElementById('selectedBlockInfo').style.display = 'block';
             document.getElementById('selectedBlockText').innerText = `Block #${tokenId} (R${row}, C${col})`;
             document.getElementById('blockActions').style.display = 'block';
@@ -894,14 +858,10 @@
                 }
 
                 nftContract = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
-                farmingV1Contract = new ethers.Contract(FARMING_V1_ADDRESS, FARMING_ABI, signer);
-                farmingV2Contract = new ethers.Contract(FARMING_V2_ADDRESS, FARMING_ABI, signer);
-                piratesV1Contract = new ethers.Contract(PIRATES_V1_ADDRESS, PIRATES_ABI, signer);
-                piratesV2Contract = new ethers.Contract(PIRATES_V2_ADDRESS, PIRATES_ABI, signer);
-                mercenaryV1Contract = new ethers.Contract(MERCENARY_V1_ADDRESS, MERCENARY_ABI, signer);
-                mercenaryV2Contract = new ethers.Contract(MERCENARY_V2_ADDRESS, MERCENARY_ABI, signer);
-                partnershipV1Contract = new ethers.Contract(PARTNERSHIP_V1_ADDRESS, PARTNERSHIP_ABI, signer);
-                partnershipV2Contract = new ethers.Contract(PARTNERSHIP_V2_ADDRESS, PARTNERSHIP_ABI, signer);
+                farmingContract = new ethers.Contract(FARMING_V2_ADDRESS, FARMING_ABI, signer);
+                piratesContract = new ethers.Contract(PIRATES_V2_ADDRESS, PIRATES_ABI, signer);
+                mercenaryContract = new ethers.Contract(MERCENARY_V2_ADDRESS, MERCENARY_ABI, signer);
+                partnershipContract = new ethers.Contract(PARTNERSHIP_V2_ADDRESS, PARTNERSHIP_ABI, signer);
                 inpiContract = new ethers.Contract(INPI_ADDRESS, INPI_ABI, signer);
                 pitroneContract = new ethers.Contract(PITRONE_ADDRESS, PITRONE_ABI, signer);
 
@@ -996,14 +956,13 @@
             }
         }
 
-        // === FARMING ===
+        // === FARMING (nur V2) ===
         async function startFarmingSelected() {
             if (!selectedBlock) return alert('No block selected.');
             const { tokenId } = selectedBlock;
             const msgDiv = document.getElementById('actionMessage');
             try {
-                // In V2 starten (V1 vielleicht auch, aber wir starten immer in V2)
-                const tx = await farmingV2Contract.startFarming(tokenId);
+                const tx = await farmingContract.startFarming(tokenId);
                 msgDiv.innerHTML = '<span class="success">⏳ Starting farming...</span>';
                 await tx.wait();
                 msgDiv.innerHTML = '<span class="success">✅ Farming started!</span>';
@@ -1016,11 +975,10 @@
 
         async function stopFarmingSelected() {
             if (!selectedBlock) return alert('No block selected.');
-            const { tokenId, farmingVersion } = selectedBlock;
+            const { tokenId } = selectedBlock;
             const msgDiv = document.getElementById('actionMessage');
             try {
-                const contractToUse = farmingVersion === 'v2' ? farmingV2Contract : farmingV1Contract;
-                const tx = await contractToUse.stopFarming(tokenId);
+                const tx = await farmingContract.stopFarming(tokenId);
                 msgDiv.innerHTML = '<span class="success">⏳ Stopping farming...</span>';
                 await tx.wait();
                 msgDiv.innerHTML = '<span class="success">⏹️ Farming stopped.</span>';
@@ -1033,11 +991,10 @@
 
         async function claimSelected() {
             if (!selectedBlock) return alert('No block selected.');
-            const { tokenId, farmingVersion } = selectedBlock;
+            const { tokenId } = selectedBlock;
             const msgDiv = document.getElementById('actionMessage');
             try {
-                const contractToUse = farmingVersion === 'v2' ? farmingV2Contract : farmingV1Contract;
-                const tx = await contractToUse.claimResources(tokenId);
+                const tx = await farmingContract.claimResources(tokenId);
                 msgDiv.innerHTML = '<span class="success">⏳ Claiming resources...</span>';
                 await tx.wait();
                 msgDiv.innerHTML = '<span class="success">💰 Resources claimed!</span>';
@@ -1059,8 +1016,7 @@
             const msgDiv = document.getElementById('attackMessage');
             msgDiv.innerHTML = '<span class="success">⏳ Starting attack...</span>';
             try {
-                // Standardmäßig V2-Attack (kann später erweitert werden)
-                const tx = await piratesV2Contract.startAttack(attackerTokenId, targetTokenId, 0);
+                const tx = await piratesContract.startAttack(attackerTokenId, targetTokenId, 0);
                 await tx.wait();
                 msgDiv.innerHTML = '<span class="success">✅ Attack started! Check back later.</span>';
             } catch (e) {
@@ -1083,7 +1039,7 @@
                     const approveTx = await inpiContract.approve(MERCENARY_V2_ADDRESS, amount);
                     await approveTx.wait();
                 }
-                const tx = await mercenaryV2Contract.hireMercenaries(tokenId, level);
+                const tx = await mercenaryContract.hireMercenaries(tokenId, level);
                 await tx.wait();
                 msgDiv.innerHTML = '<span class="success">✅ Protection active for 3.14 days.</span>';
                 await loadUserBlocks();
