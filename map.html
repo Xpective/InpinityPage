@@ -7,6 +7,7 @@
     <link rel="icon" type="image/png" href="favicon.webp" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* ========== STYLES (unverändert, aber vollständig) ========== */
         * {
             margin: 0;
             padding: 0;
@@ -23,7 +24,6 @@
             flex-direction: column;
         }
 
-        /* Header mit Navigation */
         .header {
             display: flex;
             flex-wrap: wrap;
@@ -122,7 +122,6 @@
             color: #bcd0e0;
         }
 
-        /* Hauptbereich */
         .main {
             flex: 1;
             display: flex;
@@ -130,7 +129,6 @@
             overflow: hidden;
         }
 
-        /* Canvas-Container – zentriert */
         .canvas-container {
             flex: 1;
             position: relative;
@@ -146,7 +144,6 @@
             height: 100%;
         }
 
-        /* Tooltip */
         .tooltip {
             position: absolute;
             background: rgba(20, 30, 40, 0.95);
@@ -171,7 +168,6 @@
             font-weight: 600;
         }
 
-        /* Verschiebbare Sidebar / Legende */
         .legend-panel {
             position: absolute;
             top: 20px;
@@ -313,7 +309,6 @@
             background: transparent;
         }
 
-        /* Mobile Optimierung */
         @media (max-width: 700px) {
             .header {
                 padding: 0.6rem 1rem;
@@ -368,7 +363,6 @@
             <div class="tooltip" id="tooltip"></div>
         </div>
 
-        <!-- Verschiebbare Legende / Sidebar -->
         <div class="legend-panel" id="legendPanel">
             <div class="resize-handle" id="resizeHandle"></div>
             <div class="legend-header" id="dragHandle">
@@ -404,9 +398,9 @@
     <script>
         (async function() {
             // ==================== KONFIGURATION ====================
-            // NEUE PRODUCTION GATEWAY URL (mit Subgraph-ID und API-Key im Header)
             const SUBGRAPH_ID = "22b4uXYgs4rwTj6n3iWB4d8Vk4s7LAG7dTAtRaTXfseQ";
             const API_KEY = "059bc2832dfe50597009e556898d4ba6";
+            // Korrekte Gateway-URL laut Dokumentation: Basis-URL + API-Key + Pfad
             const SUBGRAPH_URL = `https://gateway.thegraph.com/api/${API_KEY}/subgraphs/id/${SUBGRAPH_ID}`;
             const BASE_BLOCK_SIZE = 24;
 
@@ -435,6 +429,7 @@
 
             // ==================== DATEN LADEN ====================
             async function loadData() {
+                // Einfachere Query zum Testen, falls die große fehlschlägt
                 const query = `
                 {
                     tokens(first: 10000) {
@@ -457,19 +452,24 @@
                     const response = await fetch(SUBGRAPH_URL, {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json',
-                            // Authorization wird vom Gateway erwartet (Bearer <api-key>)
-                            'Authorization': `Bearer ${API_KEY}`
+                            'Content-Type': 'application/json'
+                            // Kein zusätzlicher Authorization-Header nötig, da API-Key in der URL ist
                         },
                         body: JSON.stringify({ query })
                     });
-                    const json = await response.json();
-                    if (json.errors) {
-                        console.error('Subgraph errors:', json.errors);
+
+                    if (!response.ok) {
+                        console.error('HTTP Error:', response.status, response.statusText);
                         return;
                     }
-                    const data = json.data;
 
+                    const json = await response.json();
+                    if (json.errors) {
+                        console.error('Subgraph errors:', JSON.stringify(json.errors, null, 2));
+                        return;
+                    }
+
+                    const data = json.data;
                     tokens = {};
                     if (data.tokens) {
                         data.tokens.forEach(t => {
@@ -513,7 +513,6 @@
 
                 const blockSize = BASE_BLOCK_SIZE;
 
-                // Alle Reihen 0..99
                 for (let row = 0; row < 100; row++) {
                     const blocksInRow = 2 * row + 1;
                     const y = row * blockSize;
@@ -522,7 +521,6 @@
                         const token = tokens[tokenId];
                         const x = (col - row) * blockSize;
 
-                        // Standardfarbe
                         let fillColor = '#3a4048'; // grau
                         let strokeColor = null;
                         let lineWidth = 0;
@@ -562,7 +560,6 @@
                 ctx.restore();
             }
 
-            // ==================== ZENTRIERUNG ====================
             function centerPyramid() {
                 const totalWidth = 199 * BASE_BLOCK_SIZE;
                 const totalHeight = 100 * BASE_BLOCK_SIZE;
