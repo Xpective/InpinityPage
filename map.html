@@ -7,7 +7,7 @@
     <link rel="icon" type="image/png" href="favicon.webp" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* ========== STYLES (unverändert, aber vollständig) ========== */
+        /* ========== STYLES (vollständig und unverändert) ========== */
         * {
             margin: 0;
             padding: 0;
@@ -400,15 +400,14 @@
             // ==================== KONFIGURATION ====================
             const SUBGRAPH_ID = "22b4uXYgs4rwTj6n3iWB4d8Vk4s7LAG7dTAtRaTXfseQ";
             const API_KEY = "059bc2832dfe50597009e556898d4ba6";
-            // Korrekte Gateway-URL laut Dokumentation: Basis-URL + API-Key + Pfad
             const SUBGRAPH_URL = `https://gateway.thegraph.com/api/${API_KEY}/subgraphs/id/${SUBGRAPH_ID}`;
             const BASE_BLOCK_SIZE = 24;
 
             // ==================== GLOBALE VARIABLEN ====================
             let provider, signer, userAddress = null;
-            let tokens = {}; // key = tokenId (String)
-            let farms = new Map();
-            let protections = new Map();
+            let tokens = {};          // key = tokenId (String) -> { owner, revealed, farmActive }
+            let farms = new Map();     // tokenId -> active
+            let protections = new Map(); // tokenId -> active
             let selectedTokenId = null;
 
             const canvas = document.getElementById('pyramidCanvas');
@@ -427,76 +426,73 @@
                 return addr ? addr.slice(0,6) + '...' + addr.slice(-4) : '';
             }
 
-            // ==================== DATEN LADEN ====================
-            async function loadData() {
-                // Einfachere Query zum Testen, falls die große fehlschlägt
-                const query = `
-                {
-                    tokens(first: 10000) {
-                        id
-                        owner { id }
-                        revealed
-                        farm { active }
-                    }
-                    farms(first: 10000) {
-                        id
-                        active
-                    }
-                    protections(first: 10000) {
-                        id
-                        active
-                    }
-                }`;
-
-                try {
+            // ==================== PAGINIERUNGSHELFER ====================
+            async function fetchAllWithPagination(fieldName, subfields) {
+                const pageSize = 1000;
+                let skip = 0;
+                let all = [];
+                while (true) {
+                    const query = `{
+                        ${fieldName}(first: ${pageSize}, skip: ${skip}) {
+                            ${subfields}
+                        }
+                    }`;
                     const response = await fetch(SUBGRAPH_URL, {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                            // Kein zusätzlicher Authorization-Header nötig, da API-Key in der URL ist
-                        },
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ query })
                     });
-
                     if (!response.ok) {
-                        console.error('HTTP Error:', response.status, response.statusText);
-                        return;
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                     }
-
                     const json = await response.json();
                     if (json.errors) {
-                        console.error('Subgraph errors:', JSON.stringify(json.errors, null, 2));
-                        return;
+                        console.error('Subgraph error in pagination:', JSON.stringify(json.errors));
+                        throw new Error(json.errors[0].message);
                     }
+                    const items = json.data[fieldName];
+                    if (!items || items.length === 0) break;
+                    all = all.concat(items);
+                    if (items.length < pageSize) break;
+                    skip += pageSize;
+                }
+                return all;
+            }
 
-                    const data = json.data;
+            // ==================== DATEN LADEN MIT PAGINIERUNG ====================
+            async function loadData() {
+                try {
+                    console.log('Lade Tokens...');
+                    const tokenFields = `id owner { id } revealed farm { active }`;
+                    const tokenItems = await fetchAllWithPagination('tokens', tokenFields);
+                    
                     tokens = {};
-                    if (data.tokens) {
-                        data.tokens.forEach(t => {
-                            const tokenId = t.id;
-                            tokens[tokenId] = {
-                                owner: t.owner ? t.owner.id : null,
-                                revealed: t.revealed || false,
-                                farmActive: t.farm ? t.farm.active : false
-                            };
-                        });
-                    }
+                    tokenItems.forEach(t => {
+                        const tokenId = t.id;
+                        tokens[tokenId] = {
+                            owner: t.owner ? t.owner.id : null,
+                            revealed: t.revealed || false,
+                            farmActive: t.farm ? t.farm.active : false
+                        };
+                    });
 
+                    console.log('Lade Farms...');
+                    const farmFields = `id active`;
+                    const farmItems = await fetchAllWithPagination('farms', farmFields);
                     farms.clear();
-                    if (data.farms) {
-                        data.farms.forEach(f => farms.set(f.id, f.active));
-                    }
+                    farmItems.forEach(f => farms.set(f.id, f.active));
 
+                    console.log('Lade Protections...');
+                    const protectionFields = `id active`;
+                    const protectionItems = await fetchAllWithPagination('protections', protectionFields);
                     protections.clear();
-                    if (data.protections) {
-                        data.protections.forEach(p => protections.set(p.id, p.active));
-                    }
+                    protectionItems.forEach(p => protections.set(p.id, p.active));
 
-                    console.log('Daten geladen. Anzahl Tokens:', Object.keys(tokens).length);
+                    console.log(`Daten geladen. Tokens: ${Object.keys(tokens).length}, Farms: ${farms.size}, Protections: ${protections.size}`);
                     console.log('Beispiel-Token-IDs:', Object.keys(tokens).slice(0, 10));
                     drawPyramid();
                 } catch (err) {
-                    console.error('Fehler beim Laden:', err);
+                    console.error('Fehler beim Laden der Subgraph-Daten:', err);
                 }
             }
 
@@ -513,6 +509,7 @@
 
                 const blockSize = BASE_BLOCK_SIZE;
 
+                // Alle Reihen 0..99
                 for (let row = 0; row < 100; row++) {
                     const blocksInRow = 2 * row + 1;
                     const y = row * blockSize;
@@ -525,7 +522,7 @@
                         let strokeColor = null;
                         let lineWidth = 0;
 
-                        // Test: Block 118830 rot markieren
+                        // Test: Block 118830 rot markieren (falls in Daten)
                         if (tokenId === "118830") {
                             fillColor = '#ff0000';
                         } else if (token && token.owner) {
@@ -560,12 +557,15 @@
                 ctx.restore();
             }
 
+            // ==================== ZENTRIERUNG (mit kleinem Rand) ====================
             function centerPyramid() {
                 const totalWidth = 199 * BASE_BLOCK_SIZE;
                 const totalHeight = 100 * BASE_BLOCK_SIZE;
-                const scaleX = canvas.width / totalWidth * 0.9;
-                const scaleY = canvas.height / totalHeight * 0.9;
+                // Skalierung so, dass die Pyramide mit etwas Rand ins Fenster passt
+                const scaleX = canvas.width / totalWidth * 0.95;
+                const scaleY = canvas.height / totalHeight * 0.95;
                 scale = Math.min(scaleX, scaleY, 1.5);
+                // Zentriere die Pyramide
                 offsetX = (canvas.width - totalWidth * scale) / 2;
                 offsetY = (canvas.height - totalHeight * scale) / 2;
                 drawPyramid();
@@ -822,7 +822,7 @@
             canvas.height = container.clientHeight;
             await loadData();
             centerPyramid();
-            setInterval(loadData, 30000);
+            setInterval(loadData, 30000); // Aktualisiere alle 30 Sekunden
         })();
     </script>
 </body>
