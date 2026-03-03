@@ -1,9 +1,9 @@
-Nun game- mit ressources und den feature von den V2s auch eine Erklärung das copper und obsidian nur von Partnerships gemint werden kann, die für die Inpinity City zum upgrade dienen und später in UE5 in Game bei Version alpha 0.9 genutzt werden kann <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>INPINITY – The Pi-Phi Pyramid (v0.08.0)</title>
+    <title>INPINITY – The Pi-Phi Pyramid (v0.10.0)</title>
     <link rel="icon" type="image/png" href="favicon.webp" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -312,6 +312,39 @@ Nun game- mit ressources und den feature von den V2s auch eine Erklärung das co
             display: flex;
             justify-content: space-between;
         }
+        /* Neue Styles für Resource-Balances und Info-Block */
+        .user-resources {
+            background: #0a0a20;
+            border-radius: 2rem;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+        }
+        .resource-card {
+            background: #1b2630;
+            border-radius: 1rem;
+            padding: 0.8rem;
+            text-align: center;
+            border: 1px solid #2a3f4a;
+        }
+        .resource-name {
+            color: var(--accent-gold);
+            font-weight: 600;
+        }
+        .resource-amount {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+        .info-note {
+            background: #1a1a3a;
+            border-left: 4px solid var(--accent-purple);
+            padding: 1rem;
+            border-radius: 1rem;
+            margin: 1rem 0;
+            font-size: 0.95rem;
+        }
     </style>
 </head>
 <body>
@@ -430,7 +463,7 @@ Nun game- mit ressources und den feature von den V2s auch eine Erklärung das co
                 <div id="protectMessage"></div>
             </div>
 
-            <!-- NEW: Pitrone Exchange Card -->
+            <!-- Pitrone Exchange Card -->
             <div class="card">
                 <h3>💰 Pitrone Exchange</h3>
                 <div class="exchange-info">
@@ -449,7 +482,7 @@ Nun game- mit ressources und den feature von den V2s auch eine Erklärung das co
             </div>
         </div>
 
-        <!-- Resource Overview -->
+        <!-- Resource Overview (Classic) -->
         <div class="resource-panel">
             <div class="resource-detail">
                 <span class="resource-label">💰 INPI</span>
@@ -465,9 +498,20 @@ Nun game- mit ressources und den feature von den V2s auch eine Erklärung das co
             </div>
         </div>
 
+        <!-- NEU: Resource Token Balances -->
+        <div class="user-resources" id="userResources">
+            <p style="color: var(--text-dim); grid-column: 1/-1; text-align: center;">Connect wallet to see your resource tokens.</p>
+        </div>
+
+        <!-- Info about Copper & Obsidian -->
+        <div class="info-note">
+            <strong>✨ Special Resources: Copper & Obsidian</strong><br>
+            These resources are not produced by regular blocks. They can only be obtained through <strong>Partnerships</strong> and are used to upgrade your <strong>Infinite City</strong> (coming in UE5 alpha 0.9). Stay tuned!
+        </div>
+
         <footer>
             <p>© 2026 INPINITY. All rights reserved. Built on Base.</p>
-            <p>Version 0.08.0 – Pitrone Exchange integrated. Real game (UE5) coming soon.</p>
+            <p>Version 0.10.0 – V1/V2 Support, Resource Tokens, Partnership integration. Real game (UE5) coming soon.</p>
             <p><a href="whitepaper.html">Whitepaper</a> | <a href="https://discord.gg/95yj6Eg6" target="_blank">Discord</a></p>
         </footer>
     </div>
@@ -475,15 +519,27 @@ Nun game- mit ressources und den feature von den V2s auch eine Erklärung das co
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
     <script>
         // === CONFIG ===
+        // V1 Contracts
         const NFT_ADDRESS = "0x277a0D5864293C78d7387C54B48c35D5E9578Ab1";
-        const FARMING_ADDRESS = "0xd9722fB6e9b8e71399A970d4e8F4D628C532E94f";
-        const PIRATES_ADDRESS = "0xfD4B74AFF77eeB03FA5bB64Ec701504757BF2585";
-        const MERCENARY_ADDRESS = "0x7719516e40A9E8b47d5967ED7E3cB4D528fd18DF";
+        const FARMING_V1_ADDRESS = "0xd9722fB6e9b8e71399A970d4e8F4D628C532E94f";
+        const PIRATES_V1_ADDRESS = "0xfD4B74AFF77eeB03FA5bB64Ec701504757BF2585";
+        const MERCENARY_V1_ADDRESS = "0x7719516e40A9E8b47d5967ED7E3cB4D528fd18DF";
+        const PARTNERSHIP_V1_ADDRESS = "0x83F5592f2fA5Fd3b2FE742B4B0012e1351dF0a7a";
+        // V2 Contracts
+        const FARMING_V2_ADDRESS = "0x852Bce0713aAF409c4412155Ab8CE6191B525C30";
+        const PIRATES_V2_ADDRESS = "0x46290466327b0Fab5791f030f8487321635Eeb37";
+        const MERCENARY_V2_ADDRESS = "0xFEa09ccA75dbc63cc8053739A61777Bd13fC6Bc2";
+        const PARTNERSHIP_V2_ADDRESS = "0xb18323efE4Cc8c36e10D664E287b4e2c82Fe3ad9";
+        const RESOURCE_TOKEN_ADDRESS = "0x71E76a6065197acdd1a4d6B736712F80D1Fd3D8b";
+        // Tokens
         const INPI_ADDRESS = "0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D";
         const PITRONE_ADDRESS = "0x7240Ec5B3Ba944888E186c74D0f8B4F5F71c9AE8";
-        const WORKER_URL = "https://inpinity-worker-final.s-plat.workers.dev";
 
-        // === ABI ===
+        const WORKER_URL = "https://inpinity-worker-final.s-plat.workers.dev";
+        const SUBGRAPH_URL = "https://api.studio.thegraph.com/query/1743108/inpinity/version/latest";
+        const API_KEY = "059bc2832dfe50597009e556898d4ba6";
+
+        // === ABI (unverändert, da Methoden in V1 und V2 identisch) ===
         const NFT_ABI = [
             "function mintWithETH(uint256 row, uint256 col) payable",
             "function mintWithINPI(uint256 row, uint256 col) external",
@@ -513,6 +569,9 @@ Nun game- mit ressources und den feature von den V2s auch eine Erklärung das co
             "function hireMercenaries(uint256 tokenId, uint256 protectionLevel) external",
             "function getProtectionLevel(uint256 tokenId) view returns (uint256)"
         ];
+        const PARTNERSHIP_ABI = [
+            "function isPartnerBlock(uint256 tokenId) view returns (bool)"
+        ];
         const INPI_ABI = [
             "function approve(address spender, uint256 amount) returns (bool)",
             "function balanceOf(address account) view returns (uint256)",
@@ -531,9 +590,22 @@ Nun game- mit ressources und den feature von den V2s auch eine Erklärung das co
 
         // === STATE ===
         let provider, signer, userAddress;
-        let nftContract, farmingContract, piratesContract, mercenaryContract, inpiContract, pitroneContract;
+        let nftContract;
+        let farmingV1Contract, farmingV2Contract;
+        let piratesV1Contract, piratesV2Contract;
+        let mercenaryV1Contract, mercenaryV2Contract;
+        let partnershipV1Contract, partnershipV2Contract;
+        let inpiContract, pitroneContract;
+
         let selectedPayment = 'eth';
-        let selectedBlock = null; // { tokenId, row, col, revealed, rarity, farmingActive, protectionLevel }
+        let selectedBlock = null; // { tokenId, row, col, revealed, rarity, farmingActive, farmingVersion, protectionLevel, partnerActive }
+        let userResourceBalances = {}; // resourceId -> amount
+        let farmingContractMap = {}; // tokenId -> 'v1' oder 'v2'
+
+        const resourceNames = [
+            "Oil", "Lemons", "Iron", "Gold", "Platinum",
+            "Copper", "Crystal", "Obsidian", "Mysterium", "Aether"
+        ];
 
         // === UI HELPERS ===
         async function updateBalances() {
@@ -564,6 +636,65 @@ Nun game- mit ressources und den feature von den V2s auch eine Erklärung das co
             } catch (e) {}
         }
 
+        async function loadResourceBalances() {
+            if (!userAddress) return;
+            const query = `{
+                resourceBalances(where: { account: "${userAddress.toLowerCase()}" }) {
+                    resourceId
+                    amount
+                }
+            }`;
+            try {
+                const response = await fetch(SUBGRAPH_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_KEY}`
+                    },
+                    body: JSON.stringify({ query })
+                });
+                const json = await response.json();
+                if (json.errors) {
+                    console.error('Subgraph errors:', json.errors);
+                    return;
+                }
+                const balances = json.data.resourceBalances || [];
+                userResourceBalances = {};
+                balances.forEach(b => {
+                    userResourceBalances[b.resourceId] = ethers.BigNumber.from(b.amount);
+                });
+                displayResourceBalances();
+            } catch (err) {
+                console.error('Failed to load resource balances:', err);
+            }
+        }
+
+        function displayResourceBalances() {
+            const container = document.getElementById('userResources');
+            if (!userAddress) {
+                container.innerHTML = '<p style="color: var(--text-dim); grid-column: 1/-1; text-align: center;">Connect wallet to see your resource tokens.</p>';
+                return;
+            }
+            if (Object.keys(userResourceBalances).length === 0) {
+                container.innerHTML = '<p style="color: var(--text-dim); grid-column: 1/-1; text-align: center;">You have no resource tokens yet. Start farming or participate in partnerships!</p>';
+                return;
+            }
+            let html = '';
+            for (let i = 0; i <= 9; i++) {
+                const amount = userResourceBalances[i] || ethers.BigNumber.from(0);
+                if (amount.gt(0)) {
+                    html += `<div class="resource-card">
+                        <div class="resource-name">${resourceNames[i]}</div>
+                        <div class="resource-amount">${amount.toString()}</div>
+                    </div>`;
+                }
+            }
+            if (html === '') {
+                html = '<p style="color: var(--text-dim); grid-column: 1/-1; text-align: center;">You have no resource tokens yet.</p>';
+            }
+            container.innerHTML = html;
+        }
+
         async function loadUserBlocks() {
             if (!userAddress || !nftContract) return;
             const balance = await nftContract.balanceOf(userAddress);
@@ -586,21 +717,52 @@ Nun game- mit ressources und den feature von den V2s auch eine Erklärung das co
                     rarityName = rarityNames[rarity];
                     rarityClass = 'revealed';
                 }
-                // Farming status
-                let isFarming = false;
+                // Farming status aus V1 und V2
+                let isFarmingV1 = false, isFarmingV2 = false;
                 try {
-                    const farm = await farmingContract.farms(tokenId);
-                    if (farm && farm.isActive) {
-                        isFarming = true;
+                    const farmV1 = await farmingV1Contract.farms(tokenId);
+                    if (farmV1 && farmV1.isActive) {
+                        isFarmingV1 = true;
                         activeFarmsCount++;
                         rarityClass += ' farming';
                     }
                 } catch (e) {}
-                // Protection
                 try {
-                    const protection = await mercenaryContract.getProtectionLevel(tokenId);
-                    if (protection > 0) rarityClass += ' protected';
+                    const farmV2 = await farmingV2Contract.farms(tokenId);
+                    if (farmV2 && farmV2.isActive) {
+                        isFarmingV2 = true;
+                        activeFarmsCount++;
+                        rarityClass += ' farming';
+                    }
                 } catch (e) {}
+                // Protection (nur V2? Wir prüfen beide, aber es gibt nur einen Protection-Contract? V1 hatte auch mercenary, also prüfen wir beide.)
+                let protectionV1 = false, protectionV2 = false;
+                try {
+                    const p1 = await mercenaryV1Contract.getProtectionLevel(tokenId);
+                    if (p1 > 0) protectionV1 = true;
+                } catch (e) {}
+                try {
+                    const p2 = await mercenaryV2Contract.getProtectionLevel(tokenId);
+                    if (p2 > 0) protectionV2 = true;
+                } catch (e) {}
+                if (protectionV1 || protectionV2) rarityClass += ' protected';
+
+                // Partner (V1 oder V2)
+                let partnerActive = false;
+                try {
+                    const p1 = await partnershipV1Contract.isPartnerBlock(tokenId);
+                    if (p1) partnerActive = true;
+                } catch (e) {}
+                try {
+                    const p2 = await partnershipV2Contract.isPartnerBlock(tokenId);
+                    if (p2) partnerActive = true;
+                } catch (e) {}
+                if (partnerActive) rarityClass += ' partner';
+
+                // Speichere, welcher Farming-Contract aktiv ist
+                if (isFarmingV2) farmingContractMap[tokenId] = 'v2';
+                else if (isFarmingV1) farmingContractMap[tokenId] = 'v1';
+                else farmingContractMap[tokenId] = null;
 
                 const selectedClass = (selectedBlock && selectedBlock.tokenId == tokenId) ? 'selected' : '';
                 html += `<div class="block-card ${rarityClass} ${selectedClass}" data-tokenid="${tokenId}" data-row="${pos.row}" data-col="${pos.col}">
@@ -629,17 +791,26 @@ Nun game- mit ressources und den feature von den V2s auch eine Erklärung das co
             if (revealed) {
                 rarity = await nftContract.calculateRarity(tokenId);
             }
-            let farmingActive = false;
-            try {
-                const farm = await farmingContract.farms(tokenId);
-                farmingActive = farm && farm.isActive;
-            } catch (e) {}
+            const farmingVersion = farmingContractMap[tokenId];
+            const farmingActive = farmingVersion !== null;
+
             let protectionLevel = 0;
             try {
-                protectionLevel = await mercenaryContract.getProtectionLevel(tokenId);
+                const p1 = await mercenaryV1Contract.getProtectionLevel(tokenId);
+                if (p1 > 0) protectionLevel = p1;
+                const p2 = await mercenaryV2Contract.getProtectionLevel(tokenId);
+                if (p2 > 0) protectionLevel = p2;
             } catch (e) {}
 
-            selectedBlock = { tokenId, row, col, revealed, rarity, farmingActive, protectionLevel };
+            let partnerActive = false;
+            try {
+                const p1 = await partnershipV1Contract.isPartnerBlock(tokenId);
+                if (p1) partnerActive = true;
+                const p2 = await partnershipV2Contract.isPartnerBlock(tokenId);
+                if (p2) partnerActive = true;
+            } catch (e) {}
+
+            selectedBlock = { tokenId, row, col, revealed, rarity, farmingActive, farmingVersion, protectionLevel, partnerActive };
             document.getElementById('selectedBlockInfo').style.display = 'block';
             document.getElementById('selectedBlockText').innerText = `Block #${tokenId} (R${row}, C${col})`;
             document.getElementById('blockActions').style.display = 'block';
@@ -723,9 +894,14 @@ Nun game- mit ressources und den feature von den V2s auch eine Erklärung das co
                 }
 
                 nftContract = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
-                farmingContract = new ethers.Contract(FARMING_ADDRESS, FARMING_ABI, signer);
-                piratesContract = new ethers.Contract(PIRATES_ADDRESS, PIRATES_ABI, signer);
-                mercenaryContract = new ethers.Contract(MERCENARY_ADDRESS, MERCENARY_ABI, signer);
+                farmingV1Contract = new ethers.Contract(FARMING_V1_ADDRESS, FARMING_ABI, signer);
+                farmingV2Contract = new ethers.Contract(FARMING_V2_ADDRESS, FARMING_ABI, signer);
+                piratesV1Contract = new ethers.Contract(PIRATES_V1_ADDRESS, PIRATES_ABI, signer);
+                piratesV2Contract = new ethers.Contract(PIRATES_V2_ADDRESS, PIRATES_ABI, signer);
+                mercenaryV1Contract = new ethers.Contract(MERCENARY_V1_ADDRESS, MERCENARY_ABI, signer);
+                mercenaryV2Contract = new ethers.Contract(MERCENARY_V2_ADDRESS, MERCENARY_ABI, signer);
+                partnershipV1Contract = new ethers.Contract(PARTNERSHIP_V1_ADDRESS, PARTNERSHIP_ABI, signer);
+                partnershipV2Contract = new ethers.Contract(PARTNERSHIP_V2_ADDRESS, PARTNERSHIP_ABI, signer);
                 inpiContract = new ethers.Contract(INPI_ADDRESS, INPI_ABI, signer);
                 pitroneContract = new ethers.Contract(PITRONE_ADDRESS, PITRONE_ABI, signer);
 
@@ -736,6 +912,7 @@ Nun game- mit ressources und den feature von den V2s auch eine Erklärung das co
                 await updateBalances();
                 await updatePoolInfo();
                 await loadUserBlocks();
+                await loadResourceBalances();
             } catch (e) {
                 console.error(e);
                 alert('Connection error: ' + e.message);
@@ -825,7 +1002,8 @@ Nun game- mit ressources und den feature von den V2s auch eine Erklärung das co
             const { tokenId } = selectedBlock;
             const msgDiv = document.getElementById('actionMessage');
             try {
-                const tx = await farmingContract.startFarming(tokenId);
+                // In V2 starten (V1 vielleicht auch, aber wir starten immer in V2)
+                const tx = await farmingV2Contract.startFarming(tokenId);
                 msgDiv.innerHTML = '<span class="success">⏳ Starting farming...</span>';
                 await tx.wait();
                 msgDiv.innerHTML = '<span class="success">✅ Farming started!</span>';
@@ -838,10 +1016,11 @@ Nun game- mit ressources und den feature von den V2s auch eine Erklärung das co
 
         async function stopFarmingSelected() {
             if (!selectedBlock) return alert('No block selected.');
-            const { tokenId } = selectedBlock;
+            const { tokenId, farmingVersion } = selectedBlock;
             const msgDiv = document.getElementById('actionMessage');
             try {
-                const tx = await farmingContract.stopFarming(tokenId);
+                const contractToUse = farmingVersion === 'v2' ? farmingV2Contract : farmingV1Contract;
+                const tx = await contractToUse.stopFarming(tokenId);
                 msgDiv.innerHTML = '<span class="success">⏳ Stopping farming...</span>';
                 await tx.wait();
                 msgDiv.innerHTML = '<span class="success">⏹️ Farming stopped.</span>';
@@ -854,13 +1033,15 @@ Nun game- mit ressources und den feature von den V2s auch eine Erklärung das co
 
         async function claimSelected() {
             if (!selectedBlock) return alert('No block selected.');
-            const { tokenId } = selectedBlock;
+            const { tokenId, farmingVersion } = selectedBlock;
             const msgDiv = document.getElementById('actionMessage');
             try {
-                const tx = await farmingContract.claimResources(tokenId);
+                const contractToUse = farmingVersion === 'v2' ? farmingV2Contract : farmingV1Contract;
+                const tx = await contractToUse.claimResources(tokenId);
                 msgDiv.innerHTML = '<span class="success">⏳ Claiming resources...</span>';
                 await tx.wait();
                 msgDiv.innerHTML = '<span class="success">💰 Resources claimed!</span>';
+                await loadResourceBalances(); // nach Claimen aktualisieren
             } catch (e) {
                 msgDiv.innerHTML = '<span class="error">❌ ' + e.message + '</span>';
             }
@@ -878,7 +1059,8 @@ Nun game- mit ressources und den feature von den V2s auch eine Erklärung das co
             const msgDiv = document.getElementById('attackMessage');
             msgDiv.innerHTML = '<span class="success">⏳ Starting attack...</span>';
             try {
-                const tx = await piratesContract.startAttack(attackerTokenId, targetTokenId, 0);
+                // Standardmäßig V2-Attack (kann später erweitert werden)
+                const tx = await piratesV2Contract.startAttack(attackerTokenId, targetTokenId, 0);
                 await tx.wait();
                 msgDiv.innerHTML = '<span class="success">✅ Attack started! Check back later.</span>';
             } catch (e) {
@@ -896,12 +1078,12 @@ Nun game- mit ressources und den feature von den V2s auch eine Erklärung das co
             try {
                 const cost = level * 10;
                 const amount = ethers.utils.parseEther(cost.toString());
-                const allowance = await inpiContract.allowance(userAddress, MERCENARY_ADDRESS);
+                const allowance = await inpiContract.allowance(userAddress, MERCENARY_V2_ADDRESS);
                 if (allowance.lt(amount)) {
-                    const approveTx = await inpiContract.approve(MERCENARY_ADDRESS, amount);
+                    const approveTx = await inpiContract.approve(MERCENARY_V2_ADDRESS, amount);
                     await approveTx.wait();
                 }
-                const tx = await mercenaryContract.hireMercenaries(tokenId, level);
+                const tx = await mercenaryV2Contract.hireMercenaries(tokenId, level);
                 await tx.wait();
                 msgDiv.innerHTML = '<span class="success">✅ Protection active for 3.14 days.</span>';
                 await loadUserBlocks();
@@ -910,69 +1092,57 @@ Nun game- mit ressources und den feature von den V2s auch eine Erklärung das co
             }
         }
 
-        // === EXCHANGE ===
+        // === EXCHANGE (unverändert) ===
         async function exchangeINPI() {
-    const inpiAmount = parseFloat(document.getElementById('inpiAmount').value);
-    if (isNaN(inpiAmount) || inpiAmount <= 0) return alert('Invalid amount');
-    
-    const amountWei = ethers.utils.parseEther(inpiAmount.toString());
-    const msgDiv = document.getElementById('exchangeMessage');
-    msgDiv.innerHTML = '<span class="success">⏳ Exchanging...</span>';
-    
-    try {
-        // 1. Prüfe INPI-Balance
-        const inpiBal = await inpiContract.balanceOf(userAddress);
-        if (inpiBal.lt(amountWei)) {
-            msgDiv.innerHTML = '<span class="error">❌ Insufficient INPI balance</span>';
-            return;
-        }
-
-        // 2. Prüfe ob der Betrag zu Overflow führen könnte
-        const rate = await pitroneContract.getRate();
-        const pitroneAmount = amountWei.mul(rate);
-        const maxSupply = ethers.BigNumber.from("314159265359").mul(ethers.constants.WeiPerEther);
-        if (pitroneAmount.gt(maxSupply)) {
-            msgDiv.innerHTML = '<span class="error">❌ Amount too large – would exceed total supply</span>';
-            return;
-        }
-
-        // 3. Approve falls nötig
-        const allowance = await inpiContract.allowance(userAddress, PITRONE_ADDRESS);
-        if (allowance.lt(amountWei)) {
-            msgDiv.innerHTML = '<span class="success">⏳ Approving INPI...</span>';
-            const approveTx = await inpiContract.approve(PITRONE_ADDRESS, amountWei);
-            await approveTx.wait();
-        }
-
-        // 4. Exchange mit manuellem Gas-Limit
-        const gasLimit = 200000; // Ausreichend für diese Funktion
-        const gasPrice = await provider.getGasPrice();
-        const tx = await pitroneContract.exchangeINPI(amountWei, {
-            gasLimit: gasLimit,
-            gasPrice: gasPrice
-        });
-        
-        msgDiv.innerHTML = '<span class="success">⏳ Transaction sent...</span>';
-        await tx.wait();
-        msgDiv.innerHTML = '<span class="success">✅ Exchange successful!</span>';
-        await updateBalances();
-        await updatePoolInfo();
-    } catch (e) {
-        console.error(e);
-        let errorMsg = e.message;
-        if (e.error && e.error.data) {
+            const inpiAmount = parseFloat(document.getElementById('inpiAmount').value);
+            if (isNaN(inpiAmount) || inpiAmount <= 0) return alert('Invalid amount');
+            const amountWei = ethers.utils.parseEther(inpiAmount.toString());
+            const msgDiv = document.getElementById('exchangeMessage');
+            msgDiv.innerHTML = '<span class="success">⏳ Exchanging...</span>';
             try {
-                const data = e.error.data;
-                if (data.startsWith('0x4e487b71')) {
-                    errorMsg = 'Arithmetic overflow – please try a smaller amount.';
-                } else if (data.startsWith('0xfb8f41b2')) {
-                    errorMsg = 'INPI transfer failed – check allowance.';
+                const inpiBal = await inpiContract.balanceOf(userAddress);
+                if (inpiBal.lt(amountWei)) {
+                    msgDiv.innerHTML = '<span class="error">❌ Insufficient INPI balance</span>';
+                    return;
                 }
-            } catch {}
+                const rate = await pitroneContract.getRate();
+                const pitroneAmount = amountWei.mul(rate);
+                const maxSupply = ethers.BigNumber.from("314159265359").mul(ethers.constants.WeiPerEther);
+                if (pitroneAmount.gt(maxSupply)) {
+                    msgDiv.innerHTML = '<span class="error">❌ Amount too large – would exceed total supply</span>';
+                    return;
+                }
+                const allowance = await inpiContract.allowance(userAddress, PITRONE_ADDRESS);
+                if (allowance.lt(amountWei)) {
+                    msgDiv.innerHTML = '<span class="success">⏳ Approving INPI...</span>';
+                    const approveTx = await inpiContract.approve(PITRONE_ADDRESS, amountWei);
+                    await approveTx.wait();
+                }
+                const gasLimit = 200000;
+                const gasPrice = await provider.getGasPrice();
+                const tx = await pitroneContract.exchangeINPI(amountWei, { gasLimit, gasPrice });
+                msgDiv.innerHTML = '<span class="success">⏳ Transaction sent...</span>';
+                await tx.wait();
+                msgDiv.innerHTML = '<span class="success">✅ Exchange successful!</span>';
+                await updateBalances();
+                await updatePoolInfo();
+            } catch (e) {
+                console.error(e);
+                let errorMsg = e.message;
+                if (e.error && e.error.data) {
+                    try {
+                        const data = e.error.data;
+                        if (data.startsWith('0x4e487b71')) {
+                            errorMsg = 'Arithmetic overflow – please try a smaller amount.';
+                        } else if (data.startsWith('0xfb8f41b2')) {
+                            errorMsg = 'INPI transfer failed – check allowance.';
+                        }
+                    } catch {}
+                }
+                msgDiv.innerHTML = '<span class="error">❌ ' + errorMsg + '</span>';
+            }
         }
-        msgDiv.innerHTML = '<span class="error">❌ ' + errorMsg + '</span>';
-    }
-    }
+
         async function exchangePit() {
             const pitAmount = parseFloat(document.getElementById('pitAmount').value);
             if (isNaN(pitAmount) || pitAmount <= 0) return alert('Invalid amount');
@@ -980,7 +1150,6 @@ Nun game- mit ressources und den feature von den V2s auch eine Erklärung das co
             const msgDiv = document.getElementById('exchangeMessage');
             msgDiv.innerHTML = '<span class="success">⏳ Exchanging...</span>';
             try {
-                const allowance = await pitroneContract.allowance(userAddress, PITRONE_ADDRESS); // eigentlich self? Nein, man braucht approval für pitrone, aber es ist der gleiche Contract? exchangePitrone zieht direkt vom caller, keine allowance nötig.
                 const tx = await pitroneContract.exchangePitrone(amountWei);
                 await tx.wait();
                 msgDiv.innerHTML = '<span class="success">✅ Exchange successful!</span>';
