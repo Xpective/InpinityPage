@@ -404,8 +404,10 @@
     <script>
         (async function() {
             // ==================== KONFIGURATION ====================
-            const SUBGRAPH_URL = "https://api.studio.thegraph.com/query/1743108/inpinity/v0.0.7";
+            // NEUE PRODUCTION GATEWAY URL (mit Subgraph-ID und API-Key im Header)
+            const SUBGRAPH_ID = "22b4uXYgs4rwTj6n3iWB4d8Vk4s7LAG7dTAtRaTXfseQ";
             const API_KEY = "059bc2832dfe50597009e556898d4ba6";
+            const SUBGRAPH_URL = `https://gateway.thegraph.com/api/${API_KEY}/subgraphs/id/${SUBGRAPH_ID}`;
             const BASE_BLOCK_SIZE = 24;
 
             // ==================== GLOBALE VARIABLEN ====================
@@ -456,6 +458,7 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
+                            // Authorization wird vom Gateway erwartet (Bearer <api-key>)
                             'Authorization': `Bearer ${API_KEY}`
                         },
                         body: JSON.stringify({ query })
