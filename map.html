@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>INPINITY – Pyramid Map (Interactive)</title>
+    <title>INPINITY – Pyramid Map (Interactive+)</title>
     <link rel="icon" type="image/png" href="favicon.webp" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -359,6 +359,7 @@
             height: 24px;
             border-radius: 6px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+            position: relative;
         }
 
         .color-gray { background: #3a4048; }
@@ -367,6 +368,15 @@
         .border-blue { border: 3px solid #3498db; box-sizing: border-box; }
         .border-purple { border: 3px solid #9b59b6; }
         .border-white { border: 3px solid #ffffff; }
+
+        .star {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            font-size: 16px;
+            color: gold;
+            text-shadow: 0 0 5px black;
+        }
 
         .footer-note {
             margin-top: 1.5rem;
@@ -471,7 +481,8 @@
                 <div class="legend-item"><div class="color-box color-gold"></div> Revealed</div>
                 <div class="legend-item"><div class="color-box color-gold border-blue"></div> Farming active</div>
                 <div class="legend-item"><div class="color-box color-gold border-purple"></div> Protected</div>
-                <div class="legend-item"><div class="color-box color-gold border-white"></div> Your block</div>
+                <div class="legend-item"><div class="color-box color-gold" style="border: 3px solid #3498db;"></div> Your block (blue border)</div>
+                <div class="legend-item"><div class="color-box color-gold" style="position: relative;"><span class="star">★</span></div> Partner block</div>
 
                 <div class="footer-note">
                     <p>100 rows · 10,000 blocks</p>
@@ -520,9 +531,10 @@
 
             // ==================== GLOBALE VARIABLEN ====================
             let provider, signer, userAddress = null;
-            let tokens = {};          // key = tokenId (String) -> { owner, revealed, farmActive, protectionActive }
+            let tokens = {};          // key = tokenId (String) -> { owner, revealed, farmActive, protectionActive, partnerActive }
             let farms = new Map();     // tokenId -> active
             let protections = new Map(); // tokenId -> active
+            let partnerships = new Map(); // tokenId -> active (oder beliebig)
             let selectedTokenId = null;
             let selectedTokenOwner = null;
             let selectedRevealed = false;
@@ -591,7 +603,8 @@
                             owner: t.owner ? t.owner.id : null,
                             revealed: t.revealed || false,
                             farmActive: t.farm ? t.farm.active : false,
-                            protectionActive: false // wird später aus protections gesetzt
+                            protectionActive: false,
+                            partnerActive: false
                         };
                     });
 
@@ -599,7 +612,6 @@
                     const protectionItems = await fetchAllWithPagination('protections', `id active`);
                     protections.clear();
                     protectionItems.forEach(p => protections.set(p.id, p.active));
-                    // protections in tokens übertragen
                     for (let [id, active] of protections) {
                         if (tokens[id]) tokens[id].protectionActive = active;
                     }
@@ -608,9 +620,17 @@
                     const farmItems = await fetchAllWithPagination('farms', `id active`);
                     farms.clear();
                     farmItems.forEach(f => farms.set(f.id, f.active));
-                    // farms in tokens übertragen (optional, da wir farmActive bereits aus token.farm haben)
 
-                    console.log(`Daten geladen. Tokens: ${Object.keys(tokens).length}`);
+                    console.log('Lade Partnerships...');
+                    // Annahme: Es gibt eine Entität "partnerships" mit id und active
+                    const partnerItems = await fetchAllWithPagination('partnerships', `id active`);
+                    partnerships.clear();
+                    partnerItems.forEach(p => partnerships.set(p.id, p.active));
+                    for (let [id, active] of partnerships) {
+                        if (tokens[id]) tokens[id].partnerActive = active;
+                    }
+
+                    console.log(`Daten geladen. Tokens: ${Object.keys(tokens).length}, Farms: ${farms.size}, Protections: ${protections.size}, Partners: ${partnerships.size}`);
                     drawPyramid();
                 } catch (err) {
                     console.error('Fehler beim Laden:', err);
@@ -649,8 +669,9 @@
                                 strokeColor = '#3498db';
                                 lineWidth = 3;
                             }
+                            // Eigene Blöcke: blauer Rand (überschreibt andere Ränder? Wir setzen explizit)
                             if (userAddress && token.owner.toLowerCase() === userAddress.toLowerCase()) {
-                                strokeColor = '#ffffff';
+                                strokeColor = '#3498db'; // blau
                                 lineWidth = 3;
                             }
                         }
@@ -661,6 +682,18 @@
                             ctx.strokeStyle = strokeColor;
                             ctx.lineWidth = lineWidth;
                             ctx.strokeRect(x, y, blockSize, blockSize);
+                        }
+
+                        // Partner-Symbol zeichnen (goldener Stern)
+                        if (token && token.partnerActive) {
+                            ctx.save();
+                            ctx.translate(x + blockSize - 8, y + 8);
+                            ctx.font = 'bold 16px "Inter", sans-serif';
+                            ctx.fillStyle = '#FFD700';
+                            ctx.shadowColor = '#000';
+                            ctx.shadowBlur = 4;
+                            ctx.fillText('★', -8, 4);
+                            ctx.restore();
                         }
                     }
                 }
@@ -694,6 +727,7 @@
                         <div class="detail-row"><span class="detail-label">Revealed</span><span class="detail-value">${token.revealed ? '✅' : '❌'}</span></div>
                         <div class="detail-row"><span class="detail-label">Farming</span><span class="detail-value">${token.farmActive ? 'Active' : 'Inactive'}</span></div>
                         <div class="detail-row"><span class="detail-label">Protection</span><span class="detail-value">${token.protectionActive ? '✅' : '❌'}</span></div>
+                        <div class="detail-row"><span class="detail-label">Partner</span><span class="detail-value">${token.partnerActive ? '⭐' : '❌'}</span></div>
                     `;
                 } else {
                     detailHtml = `<p style="color: #98a9b9; text-align: center;">Block #${tokenId} is not minted.</p>`;
@@ -750,7 +784,6 @@
 
             async function handleReveal() {
                 if (!selectedTokenId || !selectedTokenOwner) return;
-                // Proofs vom Worker holen (wie in game.html)
                 const tokenIdNum = parseInt(selectedTokenId);
                 const row = Math.floor(tokenIdNum / 2048);
                 const col = tokenIdNum % 2048;
@@ -792,7 +825,6 @@
                 if (isNaN(level) || level < 0 || level > 50) return alert('Invalid level (0-50)');
                 const cost = level * 10;
                 const amount = ethers.parseEther(cost.toString());
-                // Prüfe INPI Allowance
                 const allowance = await inpiContract.allowance(userAddress, MERCENARY_ADDRESS);
                 if (allowance < amount) {
                     actionMessage.innerHTML = '<span class="success">⏳ Approving INPI...</span>';
@@ -805,7 +837,6 @@
 
             async function handleAttack() {
                 if (!selectedTokenId || !userAddress) return;
-                // Wir benötigen einen eigenen Block als Angreifer – nimm den ersten eigenen Block
                 const ownTokens = Object.entries(tokens).filter(([id, t]) => t.owner && t.owner.toLowerCase() === userAddress.toLowerCase());
                 if (ownTokens.length === 0) {
                     actionMessage.innerHTML = '<span class="error">❌ You need a block to attack from.</span>';
@@ -825,7 +856,6 @@
                     signer = await provider.getSigner();
                     userAddress = await signer.getAddress();
 
-                    // Auf Base Mainnet wechseln falls nötig
                     const network = await provider.getNetwork();
                     if (network.chainId !== 8453n) {
                         try {
@@ -846,7 +876,6 @@
                         }
                     }
 
-                    // Contracts initialisieren
                     nftContract = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
                     farmingContract = new ethers.Contract(FARMING_ADDRESS, FARMING_ABI, signer);
                     piratesContract = new ethers.Contract(PIRATES_ADDRESS, PIRATES_ABI, signer);
@@ -890,6 +919,7 @@
                         text += `Status: ${token.revealed ? 'Revealed' : 'Minted'}`;
                         if (token.farmActive) text += ' · Farming';
                         if (token.protectionActive) text += ' · Protected';
+                        if (token.partnerActive) text += ' ⭐';
                     } else {
                         text += 'Not minted';
                     }
@@ -915,7 +945,7 @@
                     if (col >= 0 && col <= 2 * row) {
                         const tokenId = (row * 2048 + col).toString();
                         updateSidebar(tokenId);
-                        drawPyramid(); // zur Hervorhebung des selektierten Blocks (optional)
+                        drawPyramid();
                         break;
                     }
                 }
