@@ -1,0 +1,27 @@
+{
+  "name": "INPINITY Resource — Platinum",
+  "description": "Platinum is a rare high-tier resource in INPINITY Online. Used for advanced Infinite City construction and powerful upgrades.",
+  "image": "https://inpinity.online/img/4.PNG",
+  "external_url": "https://inpinity.online",
+  "attributes": [
+    { "trait_type": "Resource", "value": "Platinum" },
+    { "trait_type": "Code", "value": "PLATINUM" },
+    { "trait_type": "Resource Rarity", "value": "Rare" },
+    { "trait_type": "System", "value": "FarmingV2" }
+  ],
+  "farmingV1": {
+    "produced": true,
+    "production_per_day_by_block_rarity": {
+      "0_Bronze": 0,
+      "1_Silver": 0,
+      "2_Gold": 1,
+      "3_Platinum": 2,
+      "4_Diamond": 3
+    },
+    "claim": "Claimed via claimResources. Until claimed, resources are stored on the block."
+  },
+  "risk": {
+    "pirates": "Stored resources can be stolen by pirate attacks (up to 9% per day) until claimed."
+  },
+  "use_cases": ["Trade", "Infinite City Build", "Advanced Upgrades"]
+}
