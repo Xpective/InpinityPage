@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>INPINITY – The Pi-Phi Pyramid (v0.15.0 – Full V2 Integration)</title>
+    <title>INPINITY – The Pi-Phi Pyramid (v0.16.0 – Full V2 mit stealResources)</title>
     <link rel="icon" type="image/png" href="favicon.webp" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* === GLEICHES CSS WIE VORHER - KEINE ÄNDERUNG === */
+        /* === CSS bleibt unverändert === */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
             --bg-dark: #0a0a1a;
@@ -43,7 +43,6 @@
             padding: 2rem;
         }
 
-        /* Navigation */
         header nav ul {
             display: flex;
             flex-wrap: wrap;
@@ -83,7 +82,6 @@
         .dot.basic { background-color: var(--accent-gold); }
         .dot:hover { transform: scale(1.2); }
 
-        /* Wallet-Bar */
         .wallet-bar {
             background: var(--bg-card);
             backdrop-filter: blur(10px);
@@ -123,7 +121,6 @@
         .btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-gold); }
         .btn-small { padding: 0.4rem 1rem; font-size: 0.9rem; }
 
-        /* Haupt-Grid */
         .dashboard {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -191,7 +188,6 @@
 
         .block-id { font-weight: bold; color: var(--accent-gold); }
 
-        /* Angriffsliste */
         .attacks-section {
             margin-top: 2rem;
             border-top: 1px solid var(--accent-gold);
@@ -591,7 +587,7 @@
 
         <footer>
             <p>© 2026 INPINITY. All rights reserved. Built on Base.</p>
-            <p>Version 0.15.0 – Full V2 integration with attackIndex and resources.</p>
+            <p>Version 0.16.0 – Full V2 with stealResources and 9% max steal.</p>
             <p><a href="whitepaper.html">Whitepaper</a> | <a href="https://discord.gg/95yj6Eg6" target="_blank">Discord</a></p>
         </footer>
     </div>
@@ -611,12 +607,12 @@
 
         const WORKER_URL = "https://inpinity-worker-final.s-plat.workers.dev";
 
-        // Subgraph V2 (v0.0.9) - NEU!
-        const SUBGRAPH_ID_V2 = "22b4uXYgs4rwTj6n3iWB4d8Vk4s7LAG7dTAtRaTXfseQ"; // Diese ID bleibt gleich
+        // Subgraph V2 (v0.0.9)
+        const SUBGRAPH_ID_V2 = "22b4uXYgs4rwTj6n3iWB4d8Vk4s7LAG7dTAtRaTXfseQ";
         const API_KEY = "059bc2832dfe50597009e556898d4ba6";
         const SUBGRAPH_URL_V2 = `https://gateway.thegraph.com/api/${API_KEY}/subgraphs/id/${SUBGRAPH_ID_V2}`;
 
-        // V1 wird NUR für historische Daten verwendet
+        // V1 für historische Daten
         const DEPLOYMENT_ID_V1 = "QmbpREskj5F7R8WpzUS6pv4XkKx1M34KAUc19fuUPtmu3o";
         const SUBGRAPH_URL_V1 = `https://gateway.thegraph.com/api/${API_KEY}/deployments/id/${DEPLOYMENT_ID_V1}`;
 
@@ -640,7 +636,8 @@
             "function startFarming(uint256 tokenId) external",
             "function stopFarming(uint256 tokenId) external",
             "function claimResources(uint256 tokenId) external",
-            "function farms(uint256) view returns (uint256 startTime, uint256 lastClaimTime, bool isActive)"
+            "function farms(uint256) view returns (uint256 startTime, uint256 lastClaimTime, bool isActive)",
+            "function stealResources(uint256 tokenId, address attacker, uint8 resource, uint256 maxPercent) external returns (uint256)"
         ];
 
         const PIRATES_V2_ABI = [
@@ -689,12 +686,29 @@
         let userBlocks = [];
         let userAttacks = [];
 
+        // Resource IDs gemäß ResourceToken Contract
+        const resourceIds = {
+            OIL: 0,
+            LEMONS: 1,
+            IRON: 2,
+            GOLD: 3,
+            PLATINUM: 4,
+            COPPER: 5,
+            CRYSTAL: 6,
+            OBSIDIAN: 7,
+            MYSTERIUM: 8,
+            AETHER: 9
+        };
+
         const resourceNames = [
             "Oil", "Lemons", "Iron", "Gold", "Platinum",
             "Copper", "Crystal", "Obsidian", "Mysterium", "Aether"
         ];
 
         const rarityNames = ["Bronze", "Silver", "Gold", "Platinum", "Diamond"];
+
+        // Maximaler Anteil, der gestohlen werden kann (9%)
+        const MAX_STEAL_PERCENT = 9;
 
         // ==================== HILFSFUNKTIONEN ====================
         function shortenAddress(addr) {
@@ -823,7 +837,6 @@
         async function loadFarmingStatus() {
             const farmsMap = new Map();
             try {
-                // Nur V2 Farms für aktive Blöcke
                 const v2Farms = await fetchAllWithPagination(SUBGRAPH_URL_V2, 'farms', 'id active');
                 v2Farms.forEach(f => {
                     if (f.active) farmsMap.set(f.id, { active: true, version: 'v2' });
@@ -855,11 +868,10 @@
             if (!userAddress) return;
             try {
                 const where = `{ attacker: "${userAddress.toLowerCase()}", executed: false }`;
-                // WICHTIG: Die Feldnamen müssen EXAKT denen im Subgraph entsprechen!
                 const attacks = await fetchAllWithPagination(SUBGRAPH_URL_V2, 'attacks', 
-                    'id target attackIndex startTime endTime executed', where); // resource entfernt
+                    'id target attackIndex startTime endTime executed', where);
                 userAttacks = attacks.map(a => {
-                    console.log('Raw attack from subgraph:', a); // Zum Debuggen
+                    console.log('Raw attack from subgraph:', a);
                     return {
                         id: a.id,
                         targetTokenId: parseInt(a.target),
@@ -867,7 +879,7 @@
                         protectionLevel: 0,
                         startTime: parseInt(a.startTime),
                         endTime: parseInt(a.endTime),
-                        resource: 0,
+                        resource: 0, // Platzhalter
                         attacker: a.attacker,
                         executed: a.executed
                     };
@@ -904,7 +916,6 @@
 
                 html += `<div class="attack-item">
                     <div><strong>Target #${attack.targetTokenId}</strong></div>
-                    <!-- Resource wird nicht mehr angezeigt, da nicht im Subgraph -->
                     <div>${status}</div>
                     ${executeBtn}
                 </div>`;
@@ -915,7 +926,21 @@
                 btn.addEventListener('click', async (e) => {
                     const targetTokenId = parseInt(btn.dataset.targetid);
                     const attackIndex = parseInt(btn.dataset.attackindex);
-                    await executeAttack({ targetTokenId, attackIndex });
+                    
+                    // Hier müssen wir die Resource aus dem Attack-Objekt holen
+                    // Da wir sie nicht im Subgraph haben, müssen wir sie anders speichern
+                    // Für jetzt nehmen wir an, dass der Angreifer die Resource kennt
+                    // Idee: Wir speichern die Resource im localStorage oder in einer Map
+                    
+                    // Für Test: Resource aus dem Select-Element holen
+                    const resourceSelect = document.getElementById('attackResourceSelect');
+                    const resource = parseInt(resourceSelect.value);
+                    
+                    await executeAttack({ 
+                        targetTokenId, 
+                        attackIndex,
+                        resource 
+                    });
                 });
             });
         }
@@ -937,41 +962,37 @@
                     }
                 }
             });
-                }
+        }
+
+        // ==================== ANGRIFF AUSFÜHREN (NEU: über FarmingV2.stealResources) ====================
         async function executeAttack(attack) {
             const msgDiv = document.getElementById('attackMessage');
             msgDiv.innerHTML = '<span class="success">⏳ Executing attack...</span>';
             
-            // DEBUG: Zeige an, was wir bekommen haben
             console.log('executeAttack received:', attack);
             
             try {
-                // Prüfen ob die Daten valide sind
                 if (!attack || attack.targetTokenId === undefined || attack.attackIndex === undefined) {
                     throw new Error('Invalid attack data - missing targetTokenId or attackIndex');
                 }
                 
-                // Protection-Level des Ziel-Blocks holen
-                let protectionLevel = 0;
-                try {
-                    protectionLevel = await mercenaryV2Contract.getProtectionLevel(attack.targetTokenId);
-                    console.log('Target protection level:', protectionLevel.toString());
-                } catch (e) {
-                    console.log('No protection on target block or error:', e.message);
-                }
+                // Resource aus dem Attack-Objekt holen (muss vorher gespeichert werden)
+                const resource = attack.resource !== undefined ? attack.resource : 0;
                 
-                // Transaktion vorbereiten und senden
-                console.log('Calling executeAttack with:', {
-                    targetTokenId: attack.targetTokenId,
-                    attackIndex: attack.attackIndex,
-                    protectionLevel: protectionLevel
+                console.log('Calling farmingV2Contract.stealResources with:', {
+                    tokenId: attack.targetTokenId,
+                    attacker: userAddress,
+                    resource: resource,
+                    maxPercent: MAX_STEAL_PERCENT
                 });
                 
-                const tx = await piratesV2Contract.executeAttack(
+                // stealResources auf FarmingV2 aufrufen
+                const tx = await farmingV2Contract.stealResources(
                     attack.targetTokenId,
-                    attack.attackIndex,
-                    protectionLevel,
-                    { gasLimit: 300000 } // Gas-Limit für Sicherheit
+                    userAddress,
+                    resource,
+                    MAX_STEAL_PERCENT,
+                    { gasLimit: 300000 }
                 );
                 
                 console.log('Transaction sent:', tx.hash);
@@ -980,7 +1001,6 @@
                 await tx.wait();
                 msgDiv.innerHTML = '<span class="success">✅ Attack executed! Resources stolen.</span>';
                 
-                // Nach erfolgreicher Ausführung Daten neu laden
                 await loadUserAttacks();
                 await loadResourceBalances();
                 refreshBlockMarkings();
@@ -990,17 +1010,19 @@
                 console.error('Error data:', e.data);
                 console.error('Error transaction:', e.transaction);
                 
-                // Benutzerfreundliche Fehlermeldung
                 let errorMsg = e.message;
                 if (e.message.includes('Nur erlaubte Contracts')) {
-                    errorMsg = '❌ Execution failed: Only allowed contracts can call this function. Make sure you are the attacker and the attack is ready.';
+                    errorMsg = '❌ Execution failed: Only allowed contracts can call this function.';
                 } else if (e.message.includes('execution reverted')) {
                     errorMsg = '❌ Transaction reverted. The attack might already be executed or not ready yet.';
+                } else if (e.message.includes('insufficient balance')) {
+                    errorMsg = '❌ Target has insufficient resources to steal.';
                 }
                 
                 msgDiv.innerHTML = '<span class="error">' + errorMsg + '</span>';
             }
         }
+
         // ==================== BLOCKS ANZEIGEN ====================
         async function loadUserBlocks() {
             if (!userAddress || !nftContract) return;
@@ -1368,6 +1390,16 @@
                 const tx = await piratesV2Contract.startAttack(attackerTokenId, targetTokenId, resource);
                 await tx.wait();
                 msgDiv.innerHTML = '<span class="success">✅ Attack started! Check back later.</span>';
+                
+                // Speichere die Resource für später (im localStorage)
+                // Da der Subgraph kein resource-Feld hat, müssen wir uns merken, welche Resource wir gewählt haben
+                const attackKey = `attack_${targetTokenId}`;
+                localStorage.setItem(attackKey, JSON.stringify({
+                    targetTokenId,
+                    resource,
+                    startTime: Math.floor(Date.now() / 1000)
+                }));
+                
                 await loadUserAttacks();
                 refreshBlockMarkings();
             } catch (e) {
