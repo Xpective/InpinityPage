@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>INPINITY – The Pi-Phi Pyramid (v0.12.0 – V1+V2)</title>
+    <title>INPINITY – The Pi-Phi Pyramid (v0.13.0 – Enhanced UI)</title>
     <link rel="icon" type="image/png" href="favicon.webp" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,6 +22,11 @@
             --text-dim: #aaa;
             --border-glow: rgba(212, 175, 55, 0.3);
             --shadow-gold: 0 0 20px rgba(212, 175, 55, 0.5);
+            --rarity-bronze: #cd7f32;
+            --rarity-silver: #c0c0c0;
+            --rarity-gold: #ffd700;
+            --rarity-platinum: #e5e4e2;
+            --rarity-diamond: #b9f2ff;
         }
         body {
             font-family: 'Inter', sans-serif;
@@ -158,19 +163,30 @@
             border: 1px solid #3a3a6a;
             transition: all 0.2s;
             cursor: pointer;
+            position: relative;
         }
-        .block-card.revealed { border-color: var(--accent-gold); box-shadow: 0 0 10px gold; }
+        .block-card.revealed { 
+            border-color: var(--accent-gold); 
+            box-shadow: 0 0 10px gold; 
+        }
         .block-card.farming { border-color: var(--accent-cyan); }
         .block-card.protected { border-color: var(--accent-purple); }
         .block-card.selected { border: 3px solid var(--accent-gold); transform: scale(1.02); }
-        .block-card .rarity {
-            font-size: 0.8rem;
-            background: #2a2a5a;
+        .block-card .rarity-badge {
+            font-size: 0.7rem;
             padding: 0.2rem 0.5rem;
             border-radius: 1rem;
             display: inline-block;
             margin-top: 0.5rem;
+            font-weight: 600;
+            color: #000;
         }
+        .rarity-badge.bronze { background: var(--rarity-bronze); color: #fff; }
+        .rarity-badge.silver { background: var(--rarity-silver); color: #000; }
+        .rarity-badge.gold { background: var(--rarity-gold); color: #000; }
+        .rarity-badge.platinum { background: var(--rarity-platinum); color: #000; }
+        .rarity-badge.diamond { background: var(--rarity-diamond); color: #000; box-shadow: 0 0 8px cyan; }
+
         .block-id { font-weight: bold; color: var(--accent-gold); }
 
         .card {
@@ -346,6 +362,27 @@
             margin: 1rem 0;
             font-size: 0.95rem;
         }
+        /* Attack Resource Select */
+        .attack-resource-group {
+            margin: 1rem 0;
+        }
+        .attack-resource-group select {
+            width: 100%;
+            padding: 0.8rem;
+            border-radius: 2rem;
+            background: #0f1a22;
+            border: 1px solid var(--accent-gold);
+            color: white;
+            font-size: 1rem;
+        }
+        .rarity-text {
+            font-weight: bold;
+        }
+        .rarity-0 { color: var(--rarity-bronze); }
+        .rarity-1 { color: var(--rarity-silver); text-shadow: 0 0 5px rgba(255,255,255,0.3); }
+        .rarity-2 { color: var(--rarity-gold); text-shadow: 0 0 5px gold; }
+        .rarity-3 { color: var(--rarity-platinum); text-shadow: 0 0 5px cyan; }
+        .rarity-4 { color: var(--rarity-diamond); text-shadow: 0 0 8px cyan; }
     </style>
 </head>
 <body>
@@ -442,12 +479,16 @@
                 <p id="noBlockSelected" style="color: var(--text-dim);">Select a block from the pyramid.</p>
             </div>
 
-            <!-- Pirate Attack -->
+            <!-- Pirate Attack with Resource Select -->
             <div class="card">
                 <h3>🏴‍☠️ Pirate Attack</h3>
                 <div class="input-group">
                     <label>Target Row <input type="number" id="attackRow" min="0" max="99"></label>
                     <label>Target Col <input type="number" id="attackCol" min="0" max="198"></label>
+                </div>
+                <div class="attack-resource-group">
+                    <label style="color: var(--accent-gold); margin-bottom: 0.5rem; display: block;">Choose resource to steal:</label>
+                    <select id="attackResourceSelect"></select>
                 </div>
                 <button class="btn" id="attackBtn">⚔️ Start Attack</button>
                 <div id="attackMessage"></div>
@@ -512,7 +553,7 @@
 
         <footer>
             <p>© 2026 INPINITY. All rights reserved. Built on Base.</p>
-            <p>Version 0.12.0 – V1+V2 support, both Subgraphs. Real game (UE5) coming soon.</p>
+            <p>Version 0.13.0 – Rarity display, full resource selection. Real game (UE5) coming soon.</p>
             <p><a href="whitepaper.html">Whitepaper</a> | <a href="https://discord.gg/95yj6Eg6" target="_blank">Discord</a></p>
         </footer>
     </div>
@@ -605,6 +646,8 @@
             "Oil", "Lemons", "Iron", "Gold", "Platinum",
             "Copper", "Crystal", "Obsidian", "Mysterium", "Aether"
         ];
+
+        const rarityNames = ["Bronze", "Silver", "Gold", "Platinum", "Diamond"];
 
         // === UI HELPERS ===
         async function updateBalances() {
@@ -724,35 +767,20 @@
         }
 
         // === LADE FARMS AUS V1 UND V2 SUBGRAPHS ===
-        // Gibt eine Map zurück: tokenId -> { active, version }
         async function loadFarmingStatus() {
             const farmsMap = new Map();
-
-            // V1-Farmen laden
             try {
                 const v1Farms = await fetchAllWithPagination(SUBGRAPH_URL_V1, 'farms', 'id active');
                 v1Farms.forEach(f => {
-                    if (f.active) {
-                        farmsMap.set(f.id, { active: true, version: 'v1' });
-                    }
+                    if (f.active) farmsMap.set(f.id, { active: true, version: 'v1' });
                 });
-            } catch (e) {
-                console.warn('V1 farms could not be loaded:', e);
-            }
-
-            // V2-Farmen laden
+            } catch (e) {}
             try {
                 const v2Farms = await fetchAllWithPagination(SUBGRAPH_URL_V2, 'farms', 'id active');
                 v2Farms.forEach(f => {
-                    if (f.active) {
-                        // V2 überschreibt V1, falls ein Block in beiden aktiv wäre (sollte nicht passieren)
-                        farmsMap.set(f.id, { active: true, version: 'v2' });
-                    }
+                    if (f.active) farmsMap.set(f.id, { active: true, version: 'v2' });
                 });
-            } catch (e) {
-                console.warn('V2 farms could not be loaded:', e);
-            }
-
+            } catch (e) {}
             return farmsMap;
         }
 
@@ -761,12 +789,8 @@
             const protMap = new Map();
             try {
                 const protections = await fetchAllWithPagination(SUBGRAPH_URL_V2, 'protections', 'id active');
-                protections.forEach(p => {
-                    if (p.active) protMap.set(p.id, true);
-                });
-            } catch (e) {
-                console.warn('Protections could not be loaded:', e);
-            }
+                protections.forEach(p => { if (p.active) protMap.set(p.id, true); });
+            } catch (e) {}
             return protMap;
         }
 
@@ -775,32 +799,19 @@
             const partMap = new Map();
             try {
                 const partnerships = await fetchAllWithPagination(SUBGRAPH_URL_V2, 'partnerships', 'id active');
-                partnerships.forEach(p => {
-                    if (p.active) partMap.set(p.id, true);
-                });
-            } catch (e) {
-                console.warn('Partnerships could not be loaded:', e);
-            }
+                partnerships.forEach(p => { if (p.active) partMap.set(p.id, true); });
+            } catch (e) {}
             return partMap;
         }
 
         // === HAUPTFUNKTION: LADE ALLE DATEN FÜR DIE BLOCK-ANZEIGE ===
         async function loadUserBlocks() {
             if (!userAddress || !nftContract) return;
-
-            // 1. Token-IDs des Users aus dem NFT-Contract holen
             await loadUserBlocksFromContract();
-
-            // 2. Farming-Status aus V1/V2 holen
             const farmsMap = await loadFarmingStatus();
-
-            // 3. Protections (V2) holen
             const protectionsMap = await loadProtections();
-
-            // 4. Partnerships (V2) holen
             const partnershipsMap = await loadPartnerships();
 
-            // 5. Für jeden Block die Details zusammenbauen
             const grid = document.getElementById('blocksGrid');
             if (userBlocks.length === 0) {
                 grid.innerHTML = '<p style="color:var(--text-dim); text-align:center;">You don’t own any blocks yet.</p>';
@@ -810,46 +821,44 @@
             let html = '';
             let activeFarmsCount = 0;
             for (let tokenId of userBlocks) {
-                // Position vom Contract holen
                 const pos = await nftContract.getBlockPosition(tokenId);
                 const row = pos.row.toNumber();
                 const col = pos.col.toNumber();
-
-                // Reveal-Status vom Contract (blockData)
                 const data = await nftContract.blockData(tokenId);
                 const revealed = data.revealed;
-
-                // Farming-Status aus farmsMap
                 const farm = farmsMap.get(tokenId);
                 const farmingActive = farm ? farm.active : false;
                 const farmingVersion = farm ? farm.version : null;
                 if (farmingActive) activeFarmsCount++;
-
-                // Protection
                 const protectionActive = protectionsMap.get(tokenId) || false;
-
-                // Partner
                 const partnerActive = partnershipsMap.get(tokenId) || false;
 
-                // CSS-Klassen für die Karte
+                // Rarity holen (falls revealed)
+                let rarity = null;
+                let rarityName = '';
+                if (revealed) {
+                    rarity = await nftContract.calculateRarity(tokenId);
+                    rarityName = rarityNames[rarity];
+                }
+
                 let rarityClass = revealed ? 'revealed' : '';
                 if (farmingActive) rarityClass += ' farming';
                 if (protectionActive) rarityClass += ' protected';
-                // Partner hat keinen eigenen Rahmen, aber einen Stern (wird später gezeichnet)
-
                 const selectedClass = (selectedBlock && selectedBlock.tokenId == tokenId) ? 'selected' : '';
+
+                // Rarity-Badge HTML
+                const rarityBadge = revealed ? `<div class="rarity-badge ${rarityName.toLowerCase()}">${rarityName}</div>` : '<div class="rarity">🔒 Hidden</div>';
 
                 html += `<div class="block-card ${rarityClass} ${selectedClass}" data-tokenid="${tokenId}" data-row="${row}" data-col="${col}">
                     <div class="block-id">#${tokenId}</div>
                     <div>R${row} C${col}</div>
-                    <div class="rarity">${revealed ? 'Revealed' : '🔒 Hidden'}</div>
+                    ${rarityBadge}
                     ${partnerActive ? '<span class="star" style="position: absolute; top: -5px; right: -5px;">★</span>' : ''}
                 </div>`;
             }
             grid.innerHTML = html;
             document.getElementById('activeFarms').innerText = activeFarmsCount;
 
-            // Event-Listener für Klicks
             document.querySelectorAll('.block-card').forEach(card => {
                 card.addEventListener('click', () => {
                     const tokenId = card.dataset.tokenid;
@@ -862,7 +871,6 @@
 
         // === SELECT BLOCK (DETAILS LADEN) ===
         async function selectBlock(tokenId, row, col) {
-            // Grunddaten vom Contract
             const data = await nftContract.blockData(tokenId);
             const revealed = data.revealed;
             let rarity = null;
@@ -870,8 +878,6 @@
                 rarity = await nftContract.calculateRarity(tokenId);
             }
 
-            // Farming-Status (nochmal aus den Subgraphs? Wir haben die Daten nicht mehr lokal,
-            // daher holen wir sie direkt vom Vertrag – das ist sicherer)
             let farmingActive = false;
             let farmingVersion = null;
             try {
@@ -891,13 +897,11 @@
                 } catch (e) {}
             }
 
-            // Protection (V2)
             let protectionLevel = 0;
             try {
                 protectionLevel = await mercenaryV2Contract.getProtectionLevel(tokenId);
             } catch (e) {}
 
-            // Partner (V2)
             let partnerActive = false;
             try {
                 partnerActive = await partnershipV2Contract.isPartnerBlock(tokenId);
@@ -942,7 +946,6 @@
                 resDiv.innerHTML = '<p>Reveal block to see resources.</p>';
             }
 
-            // Markierung in der Grid-Ansicht
             document.querySelectorAll('.block-card').forEach(c => c.classList.remove('selected'));
             const selector = `.block-card[data-tokenid="${tokenId}"]`;
             const selectedCard = document.querySelector(selector);
@@ -951,19 +954,32 @@
 
         function getProduction(rarity, row) {
             const production = {};
-            if (rarity === 0) { // Bronze
+            if (rarity === 0) {
                 production.OIL = 10; production.LEMONS = 5; production.IRON = 3;
-            } else if (rarity === 1) { // Silver
+            } else if (rarity === 1) {
                 production.OIL = 20; production.LEMONS = 10; production.IRON = 6; production.GOLD = 1;
-            } else if (rarity === 2) { // Gold
+            } else if (rarity === 2) {
                 production.OIL = 30; production.LEMONS = 15; production.IRON = 9; production.GOLD = 2; production.PLATINUM = 1;
-            } else if (rarity === 3) { // Platinum
+            } else if (rarity === 3) {
                 production.OIL = 40; production.LEMONS = 20; production.IRON = 12; production.GOLD = 3; production.PLATINUM = 2; production.CRYSTAL = 1;
-            } else if (rarity === 4) { // Diamond
+            } else if (rarity === 4) {
                 production.OIL = 60; production.LEMONS = 30; production.IRON = 18; production.GOLD = 5; production.PLATINUM = 3; production.CRYSTAL = 2; production.MYSTERIUM = 1;
                 if (row === 0) production.AETHER = 1;
             }
             return production;
+        }
+
+        // === ATTACK RESOURCE SELECT DYNAMISCH BEFÜLLEN ===
+        function initAttackResourceSelect() {
+            const select = document.getElementById('attackResourceSelect');
+            if (!select) return;
+            select.innerHTML = '';
+            for (let i = 0; i < resourceNames.length; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = resourceNames[i];
+                select.appendChild(option);
+            }
         }
 
         // === WALLET ===
@@ -1011,9 +1027,11 @@
                 document.getElementById('walletAddress').innerHTML = userAddress.slice(0,6) + '...' + userAddress.slice(-4);
                 document.getElementById('connectWallet').innerText = 'Wallet Connected';
 
+                initAttackResourceSelect(); // Dropdown initialisieren
+
                 await updateBalances();
                 await updatePoolInfo();
-                await loadUserBlocks(); // Lädt Blöcke und Subgraph-Daten
+                await loadUserBlocks();
                 await loadResourceBalances();
             } catch (e) {
                 console.error(e);
@@ -1104,7 +1122,6 @@
             const { tokenId } = selectedBlock;
             const msgDiv = document.getElementById('actionMessage');
             try {
-                // Immer V2 für neue Farms
                 const tx = await farmingV2Contract.startFarming(tokenId);
                 msgDiv.innerHTML = '<span class="success">⏳ Starting farming...</span>';
                 await tx.wait();
@@ -1143,13 +1160,13 @@
                 msgDiv.innerHTML = '<span class="success">⏳ Claiming resources...</span>';
                 await tx.wait();
                 msgDiv.innerHTML = '<span class="success">💰 Resources claimed!</span>';
-                await loadResourceBalances(); // nach Claimen aktualisieren
+                await loadResourceBalances();
             } catch (e) {
                 msgDiv.innerHTML = '<span class="error">❌ ' + e.message + '</span>';
             }
         }
 
-        // === ATTACK (nur V2) ===
+        // === ATTACK (mit dynamischem Resource-Select) ===
         async function attack() {
             const targetRow = parseInt(document.getElementById('attackRow').value);
             const targetCol = parseInt(document.getElementById('attackCol').value);
@@ -1158,10 +1175,15 @@
             const balance = await nftContract.balanceOf(userAddress);
             if (balance.toNumber() === 0) return alert('You need a block to attack from');
             const attackerTokenId = await nftContract.tokenOfOwnerByIndex(userAddress, 0);
+            
+            // Gewählte Resource aus dem Dropdown
+            const resourceSelect = document.getElementById('attackResourceSelect');
+            const resource = parseInt(resourceSelect.value);
+            
             const msgDiv = document.getElementById('attackMessage');
             msgDiv.innerHTML = '<span class="success">⏳ Starting attack...</span>';
             try {
-                const tx = await piratesV2Contract.startAttack(attackerTokenId, targetTokenId, 0);
+                const tx = await piratesV2Contract.startAttack(attackerTokenId, targetTokenId, resource);
                 await tx.wait();
                 msgDiv.innerHTML = '<span class="success">✅ Attack started! Check back later.</span>';
             } catch (e) {
@@ -1169,7 +1191,7 @@
             }
         }
 
-        // === PROTECTION (nur V2) ===
+        // === PROTECTION ===
         async function protect() {
             const tokenId = parseInt(document.getElementById('protectTokenId').value);
             const level = parseInt(document.getElementById('protectLevel').value);
@@ -1193,7 +1215,7 @@
             }
         }
 
-        // === EXCHANGE (unverändert) ===
+        // === EXCHANGE ===
         async function exchangeINPI() {
             const inpiAmount = parseFloat(document.getElementById('inpiAmount').value);
             if (isNaN(inpiAmount) || inpiAmount <= 0) return alert('Invalid amount');
