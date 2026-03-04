@@ -530,8 +530,10 @@
         const PITRONE_ADDRESS = "0x7240Ec5B3Ba944888E186c74D0f8B4F5F71c9AE8";
 
         const WORKER_URL = "https://inpinity-worker-final.s-plat.workers.dev";
-        const SUBGRAPH_URL = "https://api.studio.thegraph.com/query/1743108/inpinity/version/latest";
+        // NEUE SUBGRAPH-URL (Production Gateway mit Subgraph-ID)
+        const SUBGRAPH_ID = "22b4uXYgs4rwTj6n3iWB4d8Vk4s7LAG7dTAtRaTXfseQ";
         const API_KEY = "059bc2832dfe50597009e556898d4ba6";
+        const SUBGRAPH_URL = `https://gateway.thegraph.com/api/${API_KEY}/subgraphs/id/${SUBGRAPH_ID}`;
 
         // === ABI (identisch, nur für V2) ===
         const NFT_ABI = [
