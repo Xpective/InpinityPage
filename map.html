@@ -378,6 +378,13 @@
             text-shadow: 0 0 5px black;
         }
 
+        /* Rarity-Farben für die Sidebar */
+        .rarity-bronze { color: #cd7f32; font-weight: bold; }
+        .rarity-silver { color: #c0c0c0; font-weight: bold; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
+        .rarity-gold { color: #ffd700; font-weight: bold; text-shadow: 0 0 8px gold; }
+        .rarity-platinum { color: #e5e4e2; font-weight: bold; text-shadow: 0 0 8px #a0d6ff; }
+        .rarity-diamond { color: #b9f2ff; font-weight: bold; text-shadow: 0 0 12px cyan; }
+
         .footer-note {
             margin-top: 1.5rem;
             font-size: 0.8rem;
@@ -464,12 +471,7 @@
                     </div>
                     <div class="input-group" id="attackInput" style="display: none;">
                         <label>Resource</label>
-                        <select id="attackResource">
-                            <option value="0">Oil</option>
-                            <option value="1">Lemons</option>
-                            <option value="2">Iron</option>
-                            <option value="3">Gold</option>
-                        </select>
+                        <select id="attackResource"></select> <!-- wird dynamisch befüllt -->
                         <button class="action-btn" id="attackBtn">⚔️ Attack</button>
                     </div>
                     <div id="actionMessage" class="message"></div>
@@ -621,6 +623,25 @@
                 "Oil", "Lemons", "Iron", "Gold", "Platinum",
                 "Copper", "Crystal", "Obsidian", "Mysterium", "Aether"
             ];
+
+            // Rarity-Namen und CSS-Klassen
+            const rarityNames = ["Bronze", "Silver", "Gold", "Platinum", "Diamond"];
+            const rarityClass = ["rarity-bronze", "rarity-silver", "rarity-gold", "rarity-platinum", "rarity-diamond"];
+
+            // ==================== DROPDOWN DYNAMISCH BEFÜLLEN ====================
+            function populateAttackResourceSelect() {
+                const select = document.getElementById('attackResource');
+                if (!select) return;
+                select.innerHTML = ''; // leeren
+                for (let i = 0; i < resourceNames.length; i++) {
+                    const option = document.createElement('option');
+                    option.value = i;
+                    option.textContent = resourceNames[i];
+                    select.appendChild(option);
+                }
+            }
+            // Einmal beim Start aufrufen
+            populateAttackResourceSelect();
 
             // ==================== HILFSFUNKTIONEN ====================
             function shortenAddress(addr) {
@@ -887,12 +908,19 @@
                 selectedRarity = null;
 
                 let productionHtml = '';
+                let rarityDisplay = '';
                 if (token && token.owner && token.revealed && nftReadOnlyContract) {
                     try {
                         const tokenIdNum = parseInt(tokenId);
                         const row = Math.floor(tokenIdNum / 2048);
                         const rarity = await nftReadOnlyContract.calculateRarity(tokenIdNum);
                         selectedRarity = rarity;
+                        // Rarity-Text mit CSS-Klasse
+                        rarityDisplay = `<div class="detail-row">
+                            <span class="detail-label">Rarity</span>
+                            <span class="detail-value ${rarityClass[rarity]}">${rarityNames[rarity]}</span>
+                        </div>`;
+
                         const production = getProduction(rarity, row);
                         let prodText = '';
                         for (const [res, amount] of Object.entries(production)) {
@@ -910,6 +938,7 @@
                         <div class="detail-row"><span class="detail-label">Block #</span><span class="detail-value">${tokenId}</span></div>
                         <div class="detail-row"><span class="detail-label">Owner</span><span class="detail-value">${shortenAddress(owner)}</span></div>
                         <div class="detail-row"><span class="detail-label">Revealed</span><span class="detail-value">${token.revealed ? '✅' : '❌'}</span></div>
+                        ${rarityDisplay}
                         <div class="detail-row"><span class="detail-label">Farming</span><span class="detail-value">${token.farmActive ? 'Active' : 'Inactive'}</span></div>
                         <div class="detail-row"><span class="detail-label">Protection</span><span class="detail-value">${token.protectionActive ? '✅' : '❌'}</span></div>
                         <div class="detail-row"><span class="detail-label">Partner</span><span class="detail-value">${token.partnerActive ? '⭐' : '❌'}</span></div>
