@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>INPINITY – Pyramid Map (V2 Complete + Attack Execution)</title>
+  <title>INPINITY – Pyramid Map (V3 + Attack Execution)</title>
   <link rel="icon" type="image/png" href="favicon.webp" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
@@ -421,7 +421,7 @@
       <div class="tooltip" id="tooltip"></div>
     </div>
 
-    <!-- Interaktive Sidebar -->
+    <!-- Sidebar -->
     <div class="legend-panel" id="legendPanel">
       <div class="resize-handle" id="resizeHandle"></div>
       <div class="legend-header" id="dragHandle">
@@ -431,16 +431,14 @@
           <button id="resetPosBtn">↺</button>
         </div>
       </div>
+
       <div class="legend-content" id="legendContent">
-        <!-- Block-Details -->
         <div class="detail-card" id="blockDetail">
           <p style="color: #98a9b9; text-align: center;">Click a block to start</p>
         </div>
 
-        <!-- Aktionen -->
         <div id="actionPanel" style="display: none;">
           <div class="action-buttons" id="ownerActions"></div>
-          <div class="action-buttons" id="attackerActions"></div>
 
           <div class="input-group" id="protectionInput" style="display: none;">
             <label>Protection %</label>
@@ -457,7 +455,6 @@
           <div id="actionMessage" class="message"></div>
         </div>
 
-        <!-- Angriffsübersicht -->
         <div style="margin: 1.5rem 0; border-top: 1px solid #2a3f4a; padding-top: 1rem;">
           <h4 style="color: #d4af37; margin-bottom: 1rem;">⚔️ Your Attacks</h4>
           <div id="userAttacksList" class="attacks-list">
@@ -465,107 +462,10 @@
           </div>
         </div>
 
-        <!-- Token Exchange -->
         <div style="margin: 1.5rem 0; border-top: 1px solid #2a3f4a; padding-top: 1rem;">
-          <h4 style="color: #d4af37; margin-bottom: 1rem;">💰 Token Exchange</h4>
-          <div class="input-group">
-            <label>INPI</label>
-            <input type="number" id="inpiAmount" min="0" step="0.0001" value="10" placeholder="Amount" />
-            <button class="action-btn" id="exchangeInpiBtn">→ PIT</button>
-          </div>
-          <div class="input-group">
-            <label>PIT</label>
-            <input type="number" id="pitAmount" min="0" step="0.0001" value="1000" placeholder="Amount" />
-            <button class="action-btn" id="exchangePitBtn">→ INPI</button>
-          </div>
-          <div id="exchangeMessage" class="message"></div>
-        </div>
-
-        <!-- Eigene Ressourcen -->
-        <div style="margin: 1rem 0; border-top: 1px solid #2a3f4a; padding-top: 1rem;">
           <h4 style="color: #d4af37; margin-bottom: 1rem;">📦 Your Resources</h4>
           <div id="userResources" style="display: flex; flex-direction: column; gap: 0.3rem; max-height: 150px; overflow-y: auto;">
             <p style="color: #98a9b9;">Connect wallet to see your resource tokens.</p>
-          </div>
-        </div>
-
-        <!-- FAQ / Prozesserklärungen -->
-        <div class="faq-section">
-          <h4 style="color: #d4af37; margin-bottom: 1rem;">❓ Game Processes</h4>
-
-          <div class="faq-item">
-            <div class="faq-question" onclick="this.nextElementSibling.classList.toggle('hidden')">
-              <span>⛏️ Minting</span><span>▼</span>
-            </div>
-            <div class="faq-answer hidden">
-              <strong>Mint With:</strong><br />
-              • 0.003 ETH<br />
-              • 30 INPI<br />
-              • 0.0015 ETH + 15 INPI (mixed)<br /><br />
-              Each block has a unique (row, col) coordinate. Row 0 is the top, 100 rows total. Minting gives you an unrevealed block.
-            </div>
-          </div>
-
-          <div class="faq-item">
-            <div class="faq-question" onclick="this.nextElementSibling.classList.toggle('hidden')">
-              <span>🔓 Revealing</span><span>▼</span>
-            </div>
-            <div class="faq-answer hidden">
-              Reveal your block using π and φ proofs. Once revealed, you can see its rarity (Bronze → Diamond) and daily production rates. Rarity determines resource output.
-            </div>
-          </div>
-
-          <div class="faq-item">
-            <div class="faq-question" onclick="this.nextElementSibling.classList.toggle('hidden')">
-              <span>🌾 Farming</span><span>▼</span>
-            </div>
-            <div class="faq-answer hidden">
-              <strong>Start Farming:</strong> Your block begins producing resources daily.<br />
-              <strong>Claim Resources:</strong> Collect produced resources at any time.<br />
-              <strong>Stop Farming:</strong> Stops production (resources remain).<br />
-              Resources are ERC1155 tokens and can be viewed in "Your Resources".
-            </div>
-          </div>
-
-          <div class="faq-item">
-            <div class="faq-question" onclick="this.nextElementSibling.classList.toggle('hidden')">
-              <span>🛡️ Protection</span><span>▼</span>
-            </div>
-            <div class="faq-answer hidden">
-              Buy protection for your block with INPI. Protection level (0-50%) reduces stolen resources during attacks. Costs 10 INPI per percent. Lasts 3.14 days.
-            </div>
-          </div>
-
-          <div class="faq-item">
-            <div class="faq-question" onclick="this.nextElementSibling.classList.toggle('hidden')">
-              <span>⚔️ Attacking</span><span>▼</span>
-            </div>
-            <div class="faq-answer hidden">
-              <strong>1. Start Attack:</strong> Choose target block and resource to steal.<br />
-              <strong>2. Wait 24h:</strong> Attack becomes executable.<br />
-              <strong>3. Execute:</strong> Steal resources from target (minus their protection).<br />
-              Blocks under attack have <span style="color:#000;">⚫ black</span> borders; executable attacks have <span style="color:#e74c3c;">🔴 red</span> borders.
-            </div>
-          </div>
-
-          <div class="faq-item">
-            <div class="faq-question" onclick="this.nextElementSibling.classList.toggle('hidden')">
-              <span>🤝 Partnerships</span><span>▼</span>
-            </div>
-            <div class="faq-answer hidden">
-              Partner blocks (marked with ★) can produce special resources: Copper, Obsidian, Crystal, Mysterium, and Aether. These are used for upcoming Infinite City upgrades.
-            </div>
-          </div>
-
-          <div class="faq-item">
-            <div class="faq-question" onclick="this.nextElementSibling.classList.toggle('hidden')">
-              <span>💰 Token Exchange</span><span>▼</span>
-            </div>
-            <div class="faq-answer hidden">
-              <strong>INPI → PIT:</strong> Exchange INPI for Pitrone at the current rate (1 INPI = 100 PIT).<br />
-              <strong>PIT → INPI:</strong> Exchange Pitrone back to INPI.<br />
-              Rate may change based on pool liquidity.
-            </div>
           </div>
         </div>
 
@@ -583,6 +483,7 @@
         <div class="footer-note">
           <p>100 rows · 10,000 blocks</p>
           <p>π · φ · Fibonacci</p>
+          <p>Map: V3 (FarmingV3 + PiratesV3)</p>
         </div>
       </div>
     </div>
@@ -597,47 +498,51 @@
       const DEPLOYMENT_ID_V1 = "QmbpREskj5F7R8WpzUS6pv4XkKx1M34KAUc19fuUPtmu3o";
       const SUBGRAPH_ID_V2 = "22b4uXYgs4rwTj6n3iWB4d8Vk4s7LAG7dTAtRaTXfseQ";
       const API_KEY = "059bc2832dfe50597009e556898d4ba6";
+
       const SUBGRAPH_URL_V1 = `https://gateway.thegraph.com/api/${API_KEY}/deployments/id/${DEPLOYMENT_ID_V1}`;
       const SUBGRAPH_URL_V2 = `https://gateway.thegraph.com/api/${API_KEY}/subgraphs/id/${SUBGRAPH_ID_V2}`;
-      const BASE_BLOCK_SIZE = 24;
 
-      // Worker
+      const BASE_BLOCK_SIZE = 24;
       const WORKER_URL = "https://inpinity-worker-final.s-plat.workers.dev";
 
-      // Contract Adressen (Base Mainnet) - ALLE V2!
+      // ====== Contracts ======
       const NFT_ADDRESS = "0x277a0D5864293C78d7387C54B48c35D5E9578Ab1";
-      const FARMING_V2_ADDRESS = "0x852Bce0713aAF409c4412155Ab8CE6191B525C30";
-      const PIRATES_V2_ADDRESS = "0x46290466327b0Fab5791f030f8487321635Eeb37";
-      const MERCENARY_V2_ADDRESS = "0xFEa09ccA75dbc63cc8053739A61777Bd13fC6Bc2";
-      const PARTNERSHIP_V2_ADDRESS = "0xb18323efE4Cc8c36e10D664E287b4e2c82Fe3ad9";
+      const RESOURCE_TOKEN_ADDRESS = "0x71E76a6065197acdd1a4d6B736712F80D1Fd3D8b";
       const INPI_ADDRESS = "0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D";
       const PITRONE_ADDRESS = "0x7240Ec5B3Ba944888E186c74D0f8B4F5F71c9AE8";
 
-      // ABIs (minimal, but correct for this page)
+      // ✅ NEW V3:
+      const FARMING_V3_ADDRESS = "0xE79445C9ef97B8156BB505D784C0356E54432AD9";
+      const PIRATES_V3_ADDRESS = "0xC3544804cea908b8Ac6752B4F47609e1c22DaF5d";
+
+      // stays V2:
+      const MERCENARY_V2_ADDRESS = "0xFEa09ccA75dbc63cc8053739A61777Bd13fC6Bc2";
+
+      // ==================== ABIs ====================
       const NFT_ABI = [
         "function revealBlock(uint256 tokenId, bytes32[] piProof, bytes32[] phiProof, uint8 piDigit, uint8 phiDigit) external",
-        "function calculateRarity(uint256 tokenId) view returns (uint8)"
+        "function calculateRarity(uint256 tokenId) view returns (uint8)",
+        "function getBlockPosition(uint256 tokenId) view returns (uint256 row, uint256 col)",
+        "function ownerOf(uint256 tokenId) view returns (address)"
       ];
 
-      const FARMING_V2_ABI = [
+      // ✅ FarmingV3
+      const FARMING_V3_ABI = [
         "function startFarming(uint256 tokenId) external",
         "function stopFarming(uint256 tokenId) external",
         "function claimResources(uint256 tokenId) external",
-        "function farms(uint256) view returns (uint256 startTime, uint256 lastClaimTime, bool isActive)"
+        "function farms(uint256) view returns (uint256 startTime, uint256 lastAccrualTime, uint256 boostExpiry, bool isActive)"
       ];
 
-      const PIRATES_V2_ABI = [
+      // ✅ PiratesV3
+      const PIRATES_V3_ABI = [
         "function startAttack(uint256 attackerTokenId, uint256 targetTokenId, uint8 resource) external",
-        "function executeAttack(uint256 targetTokenId, uint256 attackIndex, uint256 protectionLevel) external"
+        "function executeAttack(uint256 targetTokenId, uint256 attackIndex) external"
       ];
 
       const MERCENARY_V2_ABI = [
         "function hireMercenaries(uint256 tokenId, uint256 protectionLevel) external",
         "function getProtectionLevel(uint256 tokenId) view returns (uint256)"
-      ];
-
-      const PARTNERSHIP_V2_ABI = [
-        "function isPartnerBlock(uint256 tokenId) view returns (bool)"
       ];
 
       const INPI_ABI = [
@@ -650,26 +555,23 @@
         "function balanceOf(address account) view returns (uint256)",
         "function exchangeINPI(uint256 inpiAmount) external",
         "function exchangePitrone(uint256 pitroneAmount) external",
-        "function getRate() view returns (uint256)",
-        "function availableINPI() view returns (uint256)",
-        "function availablePitrone() view returns (uint256)",
         "function allowance(address owner, address spender) view returns (uint256)",
         "function approve(address spender, uint256 amount) returns (bool)"
       ];
 
-      // ==================== GLOBALE VARIABLEN ====================
+      // ==================== STATE ====================
       let provider, signer, userAddress = null;
       let readOnlyProvider, nftReadOnlyContract;
 
-      let tokens = {};             // tokenId -> { owner, revealed, farmActive, protectionActive, partnerActive, ... }
-      let userResources = [];      // from subgraph
+      let tokens = {};
+      let userResources = [];
       let selectedTokenId = null;
       let selectedTokenOwner = null;
 
-      let userAttacks = [];        // { id, targetTokenId, attackIndex, endTime, resource }
+      let userAttacks = [];
       let attacksTicker = null;
 
-      let nftContract, farmingV2Contract, piratesV2Contract, mercenaryV2Contract, partnershipV2Contract, inpiContract, pitroneContract;
+      let nftContract, farmingV3Contract, piratesV3Contract, mercenaryV2Contract, inpiContract, pitroneContract;
 
       const canvas = document.getElementById("pyramidCanvas");
       const ctx = canvas.getContext("2d");
@@ -682,7 +584,6 @@
       const protectionInput = document.getElementById("protectionInput");
       const attackInput = document.getElementById("attackInput");
       const actionMessage = document.getElementById("actionMessage");
-      const exchangeMessage = document.getElementById("exchangeMessage");
       const userResourcesDiv = document.getElementById("userResources");
 
       let scale = 1.0;
@@ -691,14 +592,10 @@
       let lastMouseX = 0, lastMouseY = 0;
       let pinchStartDist = 0;
 
-      const resourceNames = [
-        "Oil", "Lemons", "Iron", "Gold", "Platinum",
-        "Copper", "Crystal", "Obsidian", "Mysterium", "Aether"
-      ];
-      const rarityNames = ["Bronze", "Silver", "Gold", "Platinum", "Diamond"];
-      const rarityClass = ["rarity-bronze", "rarity-silver", "rarity-gold", "rarity-platinum", "rarity-diamond"];
+      const resourceNames = ["Oil","Lemons","Iron","Gold","Platinum","Copper","Crystal","Obsidian","Mysterium","Aether"];
+      const rarityNames = ["Bronze","Silver","Gold","Platinum","Diamond"];
+      const rarityClass = ["rarity-bronze","rarity-silver","rarity-gold","rarity-platinum","rarity-diamond"];
 
-      // ==================== DROPDOWN BEFÜLLEN ====================
       function populateAttackResourceSelect() {
         const select = document.getElementById("attackResource");
         if (!select) return;
@@ -712,37 +609,25 @@
       }
       populateAttackResourceSelect();
 
-      // ==================== HILFSFUNKTIONEN ====================
-      function shortenAddress(addr) {
-        return addr ? addr.slice(0, 6) + "..." + addr.slice(-4) : "";
-      }
-
+      function shortenAddress(addr) { return addr ? addr.slice(0, 6) + "..." + addr.slice(-4) : ""; }
       function formatTime(seconds) {
         if (seconds < 0) seconds = 0;
         if (seconds < 60) return seconds + "s";
         if (seconds < 3600) return Math.floor(seconds / 60) + "m";
         return Math.floor(seconds / 3600) + "h";
       }
-
-      function clamp(n, min, max) {
-        return Math.max(min, Math.min(max, n));
-      }
+      function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
+      function getAttackStorageKey(targetTokenId) { return `attack_${targetTokenId}`; }
 
       async function fetchSubgraph(url, query) {
         const response = await fetch(url, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${API_KEY}`
-          },
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${API_KEY}` },
           body: JSON.stringify({ query })
         });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const json = await response.json();
-        if (json.errors) {
-          console.error("Subgraph error:", json.errors);
-          throw new Error(json.errors[0].message);
-        }
+        if (json.errors) throw new Error(json.errors[0]?.message || "Subgraph error");
         return json.data;
       }
 
@@ -752,13 +637,7 @@
         let all = [];
         while (true) {
           const query = `{ ${fieldName}(first:${pageSize}, skip:${skip}${where ? ", where: " + where : ""}) { ${subfields} } }`;
-          let data;
-          try {
-            data = await fetchSubgraph(url, query);
-          } catch (e) {
-            console.warn(`Pagination for ${fieldName} failed:`, e);
-            break;
-          }
+          const data = await fetchSubgraph(url, query);
           const items = data[fieldName];
           if (!items || items.length === 0) break;
           all = all.concat(items);
@@ -770,31 +649,18 @@
 
       function getProduction(rarity, row) {
         const production = {};
-        if (rarity === 0) {
-          production.OIL = 10; production.LEMONS = 5; production.IRON = 3;
-        } else if (rarity === 1) {
-          production.OIL = 20; production.LEMONS = 10; production.IRON = 6; production.GOLD = 1;
-        } else if (rarity === 2) {
-          production.OIL = 30; production.LEMONS = 15; production.IRON = 9; production.GOLD = 2; production.PLATINUM = 1;
-        } else if (rarity === 3) {
-          production.OIL = 40; production.LEMONS = 20; production.IRON = 12; production.GOLD = 3; production.PLATINUM = 2; production.CRYSTAL = 1;
-        } else if (rarity === 4) {
-          production.OIL = 60; production.LEMONS = 30; production.IRON = 18; production.GOLD = 5; production.PLATINUM = 3; production.CRYSTAL = 2; production.MYSTERIUM = 1;
-          if (row === 0) production.AETHER = 1;
-        }
+        if (rarity === 0) { production.OIL=10; production.LEMONS=5; production.IRON=3; }
+        else if (rarity === 1) { production.OIL=20; production.LEMONS=10; production.IRON=6; production.GOLD=1; }
+        else if (rarity === 2) { production.OIL=30; production.LEMONS=15; production.IRON=9; production.GOLD=2; production.PLATINUM=1; }
+        else if (rarity === 3) { production.OIL=40; production.LEMONS=20; production.IRON=12; production.GOLD=3; production.PLATINUM=2; production.CRYSTAL=1; }
+        else if (rarity === 4) { production.OIL=60; production.LEMONS=30; production.IRON=18; production.GOLD=5; production.PLATINUM=3; production.CRYSTAL=2; production.MYSTERIUM=1; if (row === 0) production.AETHER=1; }
         return production;
       }
 
-      function getAttackStorageKey(targetTokenId) {
-        return `attack_${targetTokenId}`;
-      }
-
-      // ==================== ANGRIFFE LADEN (Subgraph + localStorage resource) ====================
+      // ====== LOAD ATTACKS (subgraph + localStorage for resource) ======
       async function loadUserAttacks() {
         if (!userAddress) return;
-
         try {
-          // IMPORTANT: use fields that definitely exist (same as your mint dashboard)
           const where = `{ attacker: "${userAddress.toLowerCase()}", executed: false }`;
           const attacks = await fetchAllWithPagination(
             SUBGRAPH_URL_V2,
@@ -805,10 +671,6 @@
 
           userAttacks = attacks.map(a => {
             const targetTokenId = parseInt(a.target, 10);
-            const attackIndex = parseInt(a.attackIndex, 10);
-            const endTime = parseInt(a.endTime, 10);
-
-            // resource from localStorage (fallback 0)
             let resource = 0;
             const saved = localStorage.getItem(getAttackStorageKey(targetTokenId));
             if (saved) {
@@ -818,14 +680,12 @@
                 if (!Number.isFinite(resource)) resource = 0;
               } catch (_) {}
             }
-
             return {
               id: a.id,
-              attacker: a.attacker,
               targetTokenId,
-              attackIndex,
-              startTime: parseInt(a.startTime, 10),
-              endTime,
+              attackIndex: parseInt(a.attackIndex || "0", 10),
+              startTime: parseInt(a.startTime || "0", 10),
+              endTime: parseInt(a.endTime || "0", 10),
               executed: !!a.executed,
               resource
             };
@@ -892,8 +752,6 @@
       function startAttacksTicker() {
         if (attacksTicker) return;
         attacksTicker = setInterval(() => {
-          if (!userAttacks || userAttacks.length === 0) return;
-
           const now = Math.floor(Date.now() / 1000);
 
           document.querySelectorAll(".attack-status").forEach(el => {
@@ -910,9 +768,8 @@
           });
 
           document.querySelectorAll(".execute-btn").forEach(btn => {
-            const parent = btn.closest(".attack-item");
-            const statusEl = parent ? parent.querySelector(".attack-status") : null;
-            const endTime = statusEl ? parseInt(statusEl.dataset.endtime || "0", 10) : 0;
+            const endTimeEl = btn.parentElement?.querySelector(".attack-status");
+            const endTime = endTimeEl ? parseInt(endTimeEl.dataset.endtime || "0", 10) : 0;
             const timeLeft = endTime - now;
             if (timeLeft <= 0) {
               btn.disabled = false;
@@ -923,36 +780,19 @@
             }
           });
 
-          // update borders live
           drawPyramid();
         }, 1000);
       }
 
-      // ==================== ANGRIFF AUSFÜHREN (PiratesV2.executeAttack + onchain protection) ====================
+      // ✅ EXECUTE (PiratesV3.executeAttack WITHOUT protection param)
       async function executeAttack(attack) {
         actionMessage.innerHTML = '<span class="success">⏳ Executing attack...</span>';
         try {
-          if (!piratesV2Contract || !mercenaryV2Contract) {
-            throw new Error("Connect wallet first.");
-          }
-          if (!attack || attack.targetTokenId == null || attack.attackIndex == null) {
-            throw new Error("Invalid attack data.");
-          }
+          if (!piratesV3Contract) throw new Error("Connect wallet first.");
 
-          // fetch protection on-chain (clamp 0..50)
-          let protectionLevel = 0;
-          try {
-            const p = await mercenaryV2Contract.getProtectionLevel(attack.targetTokenId);
-            protectionLevel = clamp(Number(p), 0, 50);
-            if (!Number.isFinite(protectionLevel)) protectionLevel = 0;
-          } catch (_) {
-            protectionLevel = 0;
-          }
-
-          const tx = await piratesV2Contract.executeAttack(
+          const tx = await piratesV3Contract.executeAttack(
             attack.targetTokenId,
             attack.attackIndex,
-            protectionLevel,
             { gasLimit: 350000 }
           );
 
@@ -961,23 +801,20 @@
 
           actionMessage.innerHTML = '<span class="success">✅ Attack executed! Resources stolen.</span>';
 
-          // cleanup localStorage for this target (optional)
           localStorage.removeItem(getAttackStorageKey(attack.targetTokenId));
 
           await loadUserAttacks();
           await loadUserResources();
-          await loadData(); // refresh map state
+          await loadData();
         } catch (e) {
           console.error("executeAttack error:", e);
           let msg = e?.message || "Unknown error";
-          if ((msg + "").includes("execution reverted")) {
-            msg = "❌ Transaction reverted. Attack not ready / already executed / invalid index.";
-          }
+          if ((msg + "").includes("execution reverted")) msg = "❌ Reverted. Attack not ready / already executed / invalid index.";
           actionMessage.innerHTML = `<span class="error">${msg}</span>`;
         }
       }
 
-      // ==================== DATEN LADEN (V1 + V2) ====================
+      // ====== LOAD MAP DATA ======
       async function loadData() {
         try {
           const [tokenItemsV1, tokenItemsV2] = await Promise.all([
@@ -988,24 +825,12 @@
           tokens = {};
 
           tokenItemsV1.forEach(t => {
-            tokens[t.id] = {
-              owner: t.owner ? t.owner.id : null,
-              revealed: !!t.revealed,
-              farmActive: false,
-              protectionActive: false,
-              partnerActive: false
-            };
+            tokens[t.id] = { owner: t.owner ? t.owner.id : null, revealed: !!t.revealed, farmActive: false, protectionActive: false, partnerActive: false };
           });
 
           tokenItemsV2.forEach(t => {
             if (!tokens[t.id]) {
-              tokens[t.id] = {
-                owner: t.owner ? t.owner.id : null,
-                revealed: !!t.revealed,
-                farmActive: t.farm ? !!t.farm.active : false,
-                protectionActive: false,
-                partnerActive: false
-              };
+              tokens[t.id] = { owner: t.owner ? t.owner.id : null, revealed: !!t.revealed, farmActive: t.farm ? !!t.farm.active : false, protectionActive: false, partnerActive: false };
             } else {
               tokens[t.id].owner = t.owner ? t.owner.id : tokens[t.id].owner;
               tokens[t.id].revealed = !!t.revealed || tokens[t.id].revealed;
@@ -1013,25 +838,14 @@
             }
           });
 
-          // Protections V2
           const protectionItems = await fetchAllWithPagination(SUBGRAPH_URL_V2, "protections", "id active").catch(() => []);
-          protectionItems.forEach(p => {
-            if (tokens[p.id]) tokens[p.id].protectionActive = !!p.active;
-          });
+          protectionItems.forEach(p => { if (tokens[p.id]) tokens[p.id].protectionActive = !!p.active; });
 
-          // Partnerships V2
           const partnerItems = await fetchAllWithPagination(SUBGRAPH_URL_V2, "partnerships", "id active").catch(() => []);
-          partnerItems.forEach(p => {
-            if (tokens[p.id]) tokens[p.id].partnerActive = !!p.active;
-          });
+          partnerItems.forEach(p => { if (tokens[p.id]) tokens[p.id].partnerActive = !!p.active; });
 
-          // Farms V1 (optional)
           const farmItemsV1 = await fetchAllWithPagination(SUBGRAPH_URL_V1, "farms", "id active").catch(() => []);
-          farmItemsV1.forEach(f => {
-            if (f.active && tokens[f.id]) {
-              if (!tokens[f.id].farmActive) tokens[f.id].farmActive = true;
-            }
-          });
+          farmItemsV1.forEach(f => { if (f.active && tokens[f.id] && !tokens[f.id].farmActive) tokens[f.id].farmActive = true; });
 
           if (userAddress) {
             await loadUserResources();
@@ -1048,12 +862,7 @@
         if (!userAddress) return;
         try {
           const where = `{ account: "${userAddress.toLowerCase()}" }`;
-          const balanceItems = await fetchAllWithPagination(
-            SUBGRAPH_URL_V2,
-            "resourceBalances",
-            "id account resourceId amount",
-            where
-          );
+          const balanceItems = await fetchAllWithPagination(SUBGRAPH_URL_V2, "resourceBalances", "id account resourceId amount", where);
 
           userResources = balanceItems
             .filter(b => (b.account || "").toLowerCase() === userAddress.toLowerCase())
@@ -1083,7 +892,7 @@
         userResourcesDiv.innerHTML = html;
       }
 
-      // ==================== ZEICHNEN ====================
+      // ====== DRAW ======
       function drawPyramid() {
         if (!canvas || !ctx) return;
 
@@ -1105,34 +914,21 @@
             const token = tokens[tokenId];
             const x = (col - row) * blockSize;
 
-            let fillColor = "#3a4048"; // not minted default
+            let fillColor = "#3a4048";
             let strokeColor = null;
             let lineWidth = 0;
 
             if (token && token.owner) {
               fillColor = token.revealed ? "#c9a959" : "#2e7d5e";
-              if (userAddress && token.owner.toLowerCase() === userAddress.toLowerCase()) {
-                fillColor = "#a0d6ff";
-              }
+              if (userAddress && token.owner.toLowerCase() === userAddress.toLowerCase()) fillColor = "#a0d6ff";
 
-              // Attacks border override (black/red)
               const attack = userAttacks.find(a => String(a.targetTokenId) === tokenId);
               if (attack) {
-                if (attack.endTime <= now) {
-                  strokeColor = "#e74c3c";
-                  lineWidth = 4;
-                } else {
-                  strokeColor = "#000000";
-                  lineWidth = 4;
-                }
+                if (attack.endTime <= now) { strokeColor = "#e74c3c"; lineWidth = 4; }
+                else { strokeColor = "#000000"; lineWidth = 4; }
               } else {
-                if (token.protectionActive) {
-                  strokeColor = "#9b59b6";
-                  lineWidth = 3;
-                } else if (token.farmActive) {
-                  strokeColor = "#3498db";
-                  lineWidth = 3;
-                }
+                if (token.protectionActive) { strokeColor = "#9b59b6"; lineWidth = 3; }
+                else if (token.farmActive) { strokeColor = "#3498db"; lineWidth = 3; }
               }
             }
 
@@ -1172,7 +968,7 @@
         drawPyramid();
       }
 
-      // ==================== SIDEBAR & AKTIONEN ====================
+      // ====== SIDEBAR ======
       async function updateSidebar(tokenId) {
         selectedTokenId = tokenId;
         const token = tokens[tokenId];
@@ -1202,9 +998,7 @@
               prodText += `<div class="detail-row"><span class="detail-label">${res}</span><span class="detail-value">${amount}/day</span></div>`;
             }
             productionHtml = `<div class="detail-row"><span class="detail-label">Production</span></div>${prodText}`;
-          } catch (e) {
-            console.warn("Could not fetch rarity:", e);
-          }
+          } catch (_) {}
         }
 
         let detailHtml = "";
@@ -1233,9 +1027,8 @@
         if (userAddress && owner && owner.toLowerCase() === userAddress.toLowerCase()) {
           let btns = "";
           if (!token.revealed) btns += `<button class="action-btn" id="revealBtn">🔓 Reveal Block</button>`;
-          if (!token.farmActive) {
-            btns += `<button class="action-btn" id="startFarmBtn">🌾 Start Farming</button>`;
-          } else {
+          if (!token.farmActive) btns += `<button class="action-btn" id="startFarmBtn">🌾 Start Farming</button>`;
+          else {
             btns += `<button class="action-btn" id="stopFarmBtn">⏹️ Stop Farming</button>`;
             btns += `<button class="action-btn" id="claimBtn">💰 Claim Resources</button>`;
           }
@@ -1248,7 +1041,6 @@
         }
       }
 
-      // ==================== TRANSAKTION-HELPER ====================
       async function sendTx(txPromise, messageDiv, successMsg) {
         messageDiv.innerHTML = '<span class="success">⏳ Sending...</span>';
         try {
@@ -1275,25 +1067,19 @@
           if (!response.ok) throw new Error("Proofs not found");
           const proofs = await response.json();
 
-          const formatProof = (arr) =>
-            arr.map(item => {
-              const v = (item.left ? item.left : item.right);
-              return (v || "").startsWith("0x") ? v : ("0x" + v);
-            });
+          const formatProof = (arr) => arr.map(item => {
+            const v = (item.left ? item.left : item.right);
+            return (v || "").startsWith("0x") ? v : ("0x" + v);
+          });
 
           const piProof = formatProof(proofs.pi.proof);
           const phiProof = formatProof(proofs.phi.proof);
 
-          const tx = nftContract.revealBlock(
-            selectedTokenId,
-            piProof,
-            phiProof,
-            proofs.pi.digit,
-            proofs.phi.digit,
-            { gasLimit: 500000 }
+          await sendTx(
+            nftContract.revealBlock(selectedTokenId, piProof, phiProof, proofs.pi.digit, proofs.phi.digit, { gasLimit: 500000 }),
+            actionMessage,
+            "Block revealed!"
           );
-
-          await sendTx(tx, actionMessage, "Block revealed!");
         } catch (e) {
           actionMessage.innerHTML = `<span class="error">❌ ${e.message}</span>`;
         }
@@ -1301,21 +1087,21 @@
 
       async function handleStartFarm() {
         if (!selectedTokenId) return;
-        await sendTx(farmingV2Contract.startFarming(selectedTokenId), actionMessage, "Farming started!");
+        await sendTx(farmingV3Contract.startFarming(selectedTokenId), actionMessage, "Farming started!");
       }
 
       async function handleStopFarm() {
         if (!selectedTokenId) return;
         const token = tokens[selectedTokenId];
         if (!token || !token.farmActive) return;
-        await sendTx(farmingV2Contract.stopFarming(selectedTokenId), actionMessage, "Farming stopped.");
+        await sendTx(farmingV3Contract.stopFarming(selectedTokenId), actionMessage, "Farming stopped.");
       }
 
       async function handleClaim() {
         if (!selectedTokenId) return;
         const token = tokens[selectedTokenId];
         if (!token || !token.farmActive) return;
-        await sendTx(farmingV2Contract.claimResources(selectedTokenId), actionMessage, "Resources claimed!");
+        await sendTx(farmingV3Contract.claimResources(selectedTokenId), actionMessage, "Resources claimed!");
         await loadUserResources();
       }
 
@@ -1323,18 +1109,15 @@
         if (!selectedTokenId || !userAddress) return;
         const level = parseInt(document.getElementById("protectLevel").value, 10);
         if (!Number.isFinite(level) || level < 0 || level > 50) return alert("Invalid level (0-50)");
-
         try {
-          const cost = level * 10; // 10 INPI per percent
-          const amount = ethers.parseEther(String(cost)); // bigint
-
-          const allowance = await inpiContract.allowance(userAddress, MERCENARY_V2_ADDRESS); // bigint
+          const cost = level * 10;
+          const amount = ethers.parseEther(String(cost));
+          const allowance = await inpiContract.allowance(userAddress, MERCENARY_V2_ADDRESS);
           if (allowance < amount) {
             actionMessage.innerHTML = '<span class="success">⏳ Approving INPI...</span>';
             const approveTx = await inpiContract.approve(MERCENARY_V2_ADDRESS, amount);
             await approveTx.wait();
           }
-
           await sendTx(mercenaryV2Contract.hireMercenaries(selectedTokenId, level), actionMessage, "Protection bought!");
         } catch (e) {
           actionMessage.innerHTML = `<span class="error">❌ ${e.message}</span>`;
@@ -1344,7 +1127,6 @@
       async function handleAttack() {
         if (!selectedTokenId || !userAddress) return;
 
-        // find any owned token in loaded map (fast) – pick first
         const ownTokens = Object.entries(tokens).filter(([id, t]) => t.owner && t.owner.toLowerCase() === userAddress.toLowerCase());
         if (ownTokens.length === 0) {
           actionMessage.innerHTML = '<span class="error">❌ You need a block to attack from.</span>';
@@ -1355,74 +1137,22 @@
         const targetTokenId = parseInt(selectedTokenId, 10);
         const resource = parseInt(document.getElementById("attackResource").value, 10);
 
-        // store resource locally (because subgraph might not include it)
         localStorage.setItem(getAttackStorageKey(targetTokenId), JSON.stringify({
           targetTokenId,
           resource,
           startTime: Math.floor(Date.now() / 1000)
         }));
 
-        await sendTx(piratesV2Contract.startAttack(attackerTokenId, targetTokenId, resource), actionMessage, "Attack launched!");
+        await sendTx(piratesV3Contract.startAttack(attackerTokenId, targetTokenId, resource), actionMessage, "Attack launched!");
         await loadUserAttacks();
       }
 
-      // ==================== EXCHANGE ====================
-      async function exchangeINPI() {
-        if (!userAddress) { exchangeMessage.innerHTML = '<span class="error">❌ Connect wallet first.</span>'; return; }
-        const inpiAmount = parseFloat(document.getElementById("inpiAmount").value);
-        if (!Number.isFinite(inpiAmount) || inpiAmount <= 0) return alert("Invalid amount");
-
-        const amountWei = ethers.parseEther(inpiAmount.toString());
-        exchangeMessage.innerHTML = '<span class="success">⏳ Exchanging...</span>';
-
-        try {
-          const inpiBal = await inpiContract.balanceOf(userAddress);
-          if (inpiBal < amountWei) throw new Error("Insufficient INPI balance");
-
-          const allowance = await inpiContract.allowance(userAddress, PITRONE_ADDRESS);
-          if (allowance < amountWei) {
-            exchangeMessage.innerHTML = '<span class="success">⏳ Approving INPI...</span>';
-            const approveTx = await inpiContract.approve(PITRONE_ADDRESS, amountWei);
-            await approveTx.wait();
-          }
-
-          const tx = await pitroneContract.exchangeINPI(amountWei);
-          exchangeMessage.innerHTML = '<span class="success">⏳ Transaction sent...</span>';
-          await tx.wait();
-          exchangeMessage.innerHTML = '<span class="success">✅ Exchange successful!</span>';
-        } catch (e) {
-          exchangeMessage.innerHTML = `<span class="error">❌ ${e.message}</span>`;
-        }
-      }
-
-      async function exchangePit() {
-        if (!userAddress) { exchangeMessage.innerHTML = '<span class="error">❌ Connect wallet first.</span>'; return; }
-        const pitAmount = parseFloat(document.getElementById("pitAmount").value);
-        if (!Number.isFinite(pitAmount) || pitAmount <= 0) return alert("Invalid amount");
-
-        const amountWei = ethers.parseEther(pitAmount.toString());
-        exchangeMessage.innerHTML = '<span class="success">⏳ Exchanging...</span>';
-
-        try {
-          const tx = await pitroneContract.exchangePitrone(amountWei);
-          exchangeMessage.innerHTML = '<span class="success">⏳ Transaction sent...</span>';
-          await tx.wait();
-          exchangeMessage.innerHTML = '<span class="success">✅ Exchange successful!</span>';
-        } catch (e) {
-          exchangeMessage.innerHTML = `<span class="error">❌ ${e.message}</span>`;
-        }
-      }
-
-      // ==================== WALLET ====================
+      // ====== WALLET ======
       async function connectWallet() {
         if (!window.ethereum) return alert("Please install MetaMask!");
-
         try {
           provider = new ethers.BrowserProvider(window.ethereum);
-
-          // request accounts explicitly (more reliable)
           await provider.send("eth_requestAccounts", []);
-
           signer = await provider.getSigner();
           userAddress = await signer.getAddress();
 
@@ -1442,17 +1172,14 @@
                     blockExplorerUrls: ["https://basescan.org"]
                   }]
                 });
-              } else {
-                throw switchError;
-              }
+              } else throw switchError;
             }
           }
 
           nftContract = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
-          farmingV2Contract = new ethers.Contract(FARMING_V2_ADDRESS, FARMING_V2_ABI, signer);
-          piratesV2Contract = new ethers.Contract(PIRATES_V2_ADDRESS, PIRATES_V2_ABI, signer);
+          farmingV3Contract = new ethers.Contract(FARMING_V3_ADDRESS, FARMING_V3_ABI, signer);
+          piratesV3Contract = new ethers.Contract(PIRATES_V3_ADDRESS, PIRATES_V3_ABI, signer);
           mercenaryV2Contract = new ethers.Contract(MERCENARY_V2_ADDRESS, MERCENARY_V2_ABI, signer);
-          partnershipV2Contract = new ethers.Contract(PARTNERSHIP_V2_ADDRESS, PARTNERSHIP_V2_ABI, signer);
           inpiContract = new ethers.Contract(INPI_ADDRESS, INPI_ABI, signer);
           pitroneContract = new ethers.Contract(PITRONE_ADDRESS, PITRONE_ABI, signer);
 
@@ -1464,24 +1191,19 @@
           await loadUserAttacks();
           drawPyramid();
 
-          // periodic refresh (subgraph state)
-          setInterval(() => {
-            loadUserAttacks();
-          }, 30000);
-
+          setInterval(() => { loadUserAttacks(); }, 30000);
         } catch (err) {
           console.error(err);
           alert("Connection error: " + (err?.message || err));
         }
       }
 
-      // ==================== READ-ONLY PROVIDER ====================
       async function initReadOnly() {
         readOnlyProvider = new ethers.JsonRpcProvider("https://mainnet.base.org");
         nftReadOnlyContract = new ethers.Contract(NFT_ADDRESS, NFT_ABI, readOnlyProvider);
       }
 
-      // ==================== INTERAKTION ====================
+      // ====== INTERACTION ======
       function handleMouseMove(e) {
         if (isDragging) return;
         const rect = canvas.getBoundingClientRect();
@@ -1496,12 +1218,8 @@
           const minX = -row * blockSize;
           const maxX = (row + 1) * blockSize;
           if (mouseX < minX - 5 || mouseX > maxX + 5) continue;
-
           const col = Math.round((mouseX / blockSize) + row);
-          if (col >= 0 && col <= 2 * row) {
-            found = String(row * 2048 + col);
-            break;
-          }
+          if (col >= 0 && col <= 2 * row) { found = String(row * 2048 + col); break; }
         }
 
         if (found) {
@@ -1517,11 +1235,8 @@
             const attack = userAttacks.find(a => String(a.targetTokenId) === found);
             if (attack) {
               const now = Math.floor(Date.now() / 1000);
-              if (attack.endTime <= now) {
-                text += " · 🔴 Attack ready!";
-              } else {
-                text += ` · ⚔️ Attacking (${formatTime(attack.endTime - now)} left)`;
-              }
+              if (attack.endTime <= now) text += " · 🔴 Attack ready!";
+              else text += ` · ⚔️ Attacking (${formatTime(attack.endTime - now)} left)`;
             }
           } else {
             text += "Not minted";
@@ -1544,7 +1259,6 @@
         for (let row = 0; row < 100; row++) {
           const y = row * blockSize;
           if (mouseY < y || mouseY > y + blockSize) continue;
-
           const col = Math.round((mouseX / blockSize) + row);
           if (col >= 0 && col <= 2 * row) {
             const tokenId = String(row * 2048 + col);
@@ -1555,7 +1269,6 @@
         }
       }
 
-      // ==================== ZOOM & PAN ====================
       function handleWheel(e) {
         e.preventDefault();
         const zoomFactor = 1.1;
@@ -1574,10 +1287,7 @@
       function handlePinch(e) {
         if (e.touches.length === 2) {
           e.preventDefault();
-          const dist = Math.hypot(
-            e.touches[0].clientX - e.touches[1].clientX,
-            e.touches[0].clientY - e.touches[1].clientY
-          );
+          const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
           if (pinchStartDist === 0) { pinchStartDist = dist; return; }
           const zoomFactor = dist / pinchStartDist;
           pinchStartDist = dist;
@@ -1596,7 +1306,7 @@
         }
       }
 
-      // ==================== SIDEBAR DRAG & RESIZE ====================
+      // ====== Sidebar Drag/Resize ======
       const legendPanel = document.getElementById("legendPanel");
       const dragHandle = document.getElementById("dragHandle");
       const resizeHandle = document.getElementById("resizeHandle");
@@ -1631,10 +1341,7 @@
       });
 
       let isResizing = false;
-      resizeHandle.addEventListener("mousedown", (e) => {
-        isResizing = true;
-        e.preventDefault();
-      });
+      resizeHandle.addEventListener("mousedown", (e) => { isResizing = true; e.preventDefault(); });
 
       window.addEventListener("mousemove", (e) => {
         if (!isResizing) return;
@@ -1665,7 +1372,7 @@
         legendPanel.style.width = "380px";
       });
 
-      // ==================== EVENT LISTENER ====================
+      // ====== Canvas events ======
       window.addEventListener("resize", () => {
         canvas.width = container.clientWidth;
         canvas.height = container.clientHeight;
@@ -1705,8 +1412,6 @@
       canvas.addEventListener("click", handleClick);
 
       document.getElementById("connectBtn").addEventListener("click", connectWallet);
-      document.getElementById("exchangeInpiBtn").addEventListener("click", exchangeINPI);
-      document.getElementById("exchangePitBtn").addEventListener("click", exchangePit);
 
       document.addEventListener("click", async (e) => {
         if (e.target.id === "revealBtn") await handleReveal();
@@ -1717,14 +1422,12 @@
         if (e.target.id === "attackBtn") await handleAttack();
       });
 
-      // ==================== START ====================
+      // ====== START ======
       await initReadOnly();
       canvas.width = container.clientWidth;
       canvas.height = container.clientHeight;
       await loadData();
       centerPyramid();
-
-      // refresh global data every 30s (map status)
       setInterval(loadData, 30000);
     })();
   </script>
