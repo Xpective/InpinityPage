@@ -670,7 +670,10 @@
             "function allowance(address owner, address spender) view returns (uint256)",
             "function approve(address spender, uint256 amount) returns (bool)"
         ];
-
+        const RESOURCE_TOKEN_ABI = [
+            "function balanceOf(address account, uint256 id) view returns (uint256)",
+            "function balanceOfBatch(address[] accounts, uint256[] ids) view returns (uint256[])"
+        ];
         // ==================== GLOBALE VARIABLEN ====================
         let provider, signer, userAddress;
         let nftContract;
@@ -679,6 +682,7 @@
         let mercenaryV2Contract;
         let partnershipV2Contract;
         let inpiContract, pitroneContract;
+        let resourceTokenContract;
 
         let selectedPayment = 'eth';
         let selectedBlock = null;
@@ -800,6 +804,24 @@
             }
         }
 
+        async function loadResourceBalancesOnchain() {
+            if (!userAddress || !resourceTokenContract) return;
+            
+            const ids = [...Array(10).keys()]; // 0..9
+            const accounts = ids.map(() => userAddress);
+            
+            try {
+            const balances = await resourceTokenContract.balanceOfBatch(accounts, ids);
+            userResourceBalances = {};
+            for (let i = 0; i < ids.length; i++) {
+                userResourceBalances[ids[i]] = balances[i];
+            }
+            displayResourceBalances();
+            } catch (err) {
+            console.error('Failed to load on-chain resource balances:', err);
+            }
+        }
+
         function displayResourceBalances() {
             const container = document.getElementById('userResources');
             if (!userAddress) {
@@ -868,8 +890,12 @@
             if (!userAddress) return;
             try {
                 const where = `{ attacker: "${userAddress.toLowerCase()}", executed: false }`;
-                const attacks = await fetchAllWithPagination(SUBGRAPH_URL_V2, 'attacks', 
-                    'id target attackIndex startTime endTime executed', where);
+                const attacks = await fetchAllWithPagination(
+                      SUBGRAPH_URL_V2,
+                      'attacks',
+                      'id attacker target attackIndex startTime endTime executed',
+                      where
+                    );
                 
                 userAttacks = attacks.map(a => {
                     console.log('Raw attack from subgraph:', a);
@@ -970,69 +996,60 @@
                 }
             });
         }
-
-        // ==================== ANGRIFF AUSFÜHREN (NEU: über FarmingV2.stealResources) ====================
+        // ==================== ANGRIFF AUSFÜHREN (KORREKT: über PiratesV2.executeAttack) ====================
         async function executeAttack(attack) {
-            const msgDiv = document.getElementById('attackMessage');
-            msgDiv.innerHTML = '<span class="success">⏳ Executing attack...</span>';
-            
-            console.log('executeAttack received:', attack);
-            
-            try {
-                if (!attack || attack.targetTokenId === undefined || attack.attackIndex === undefined) {
-                    throw new Error('Invalid attack data - missing targetTokenId or attackIndex');
-                }
-                
-                // Resource aus dem Attack-Objekt holen
-                const resource = attack.resource !== undefined ? attack.resource : 0;
-                
-                console.log('Calling farmingV2Contract.stealResources with:', {
-                    tokenId: attack.targetTokenId,
-                    attacker: userAddress,
-                    resource: resource,
-                    maxPercent: MAX_STEAL_PERCENT
-                });
-                
-                // stealResources auf FarmingV2 aufrufen
-                const tx = await farmingV2Contract.stealResources(
-                    attack.targetTokenId,
-                    userAddress,
-                    resource,
-                    MAX_STEAL_PERCENT,
-                    { gasLimit: 300000 }
-                );
-                
-                console.log('Transaction sent:', tx.hash);
-                msgDiv.innerHTML = '<span class="success">⏳ Confirming transaction...</span>';
-                
-                await tx.wait();
-                msgDiv.innerHTML = '<span class="success">✅ Attack executed! Resources stolen.</span>';
-                
-                // Nach erfolgreicher Ausführung den localStorage-Eintrag löschen
-                localStorage.removeItem(`attack_${attack.targetTokenId}`);
-                
-                await loadUserAttacks();
-                await loadResourceBalances();
-                refreshBlockMarkings();
-                
-            } catch (e) {
-                console.error('ExecuteAttack error:', e);
-                console.error('Error data:', e.data);
-                console.error('Error transaction:', e.transaction);
-                
-                let errorMsg = e.message;
-                if (e.message.includes('Nur erlaubte Contracts')) {
-                    errorMsg = '❌ Execution failed: Only allowed contracts can call this function.';
-                } else if (e.message.includes('execution reverted')) {
-                    errorMsg = '❌ Transaction reverted. The attack might already be executed or not ready yet.';
-                } else if (e.message.includes('insufficient balance')) {
-                    errorMsg = '❌ Target has insufficient resources to steal.';
-                }
-                
-                msgDiv.innerHTML = '<span class="error">' + errorMsg + '</span>';
+          const msgDiv = document.getElementById('attackMessage');
+          msgDiv.innerHTML = '<span class="success">⏳ Executing attack...</span>';
+        
+          try {
+            if (!attack || attack.targetTokenId === undefined || attack.attackIndex === undefined) {
+              throw new Error('Invalid attack data - missing targetTokenId or attackIndex');
             }
+        
+            // Protection Level on-chain holen (oder 0)
+            let protectionLevel = 0;
+            try {
+              protectionLevel = await mercenaryV2Contract.getProtectionLevel(attack.targetTokenId);
+              protectionLevel = Number(protectionLevel.toString());
+              if (protectionLevel > 50) protectionLevel = 50;
+              if (protectionLevel < 0) protectionLevel = 0;
+            } catch (e) {
+              protectionLevel = 0;
+            }
+        
+            // ✅ PiratesV2.executeAttack
+            const tx = await piratesV2Contract.executeAttack(
+              attack.targetTokenId,
+              attack.attackIndex,
+              protectionLevel,
+              { gasLimit: 350000 }
+            );
+        
+            msgDiv.innerHTML = '<span class="success">⏳ Confirming transaction...</span>';
+            await tx.wait();
+        
+            msgDiv.innerHTML = '<span class="success">✅ Attack executed!</span>';
+        
+            // localStorage cleanup (optional)
+            localStorage.removeItem(`attack_${attack.targetTokenId}`);
+        
+            await loadUserAttacks();
+        
+            // ✅ Nach execute on-chain balances refreshen
+            await loadResourceBalancesOnchain();
+        
+            refreshBlockMarkings();
+          } catch (e) {
+            console.error('ExecuteAttack error:', e);
+            let errorMsg = e.message || 'Unknown error';
+        
+            if ((errorMsg + '').includes('execution reverted')) {
+              errorMsg = '❌ Transaction reverted. Attack not ready / already executed / invalid index.';
+            }
+        
+            msgDiv.innerHTML = '<span class="error">' + errorMsg + '</span>';
+          }
         }
-
         // ==================== BLOCKS ANZEIGEN ====================
         async function loadUserBlocks() {
             if (!userAddress || !nftContract) return;
@@ -1236,6 +1253,7 @@
                 partnershipV2Contract = new ethers.Contract(PARTNERSHIP_V2_ADDRESS, PARTNERSHIP_V2_ABI, signer);
                 inpiContract = new ethers.Contract(INPI_ADDRESS, INPI_ABI, signer);
                 pitroneContract = new ethers.Contract(PITRONE_ADDRESS, PITRONE_ABI, signer);
+                resourceTokenContract = new ethers.Contract(RESOURCE_TOKEN_ADDRESS, RESOURCE_TOKEN_ABI, signer);
 
                 document.getElementById('walletStatus').innerHTML = '🟢 Connected';
                 document.getElementById('walletAddress').innerHTML = shortenAddress(userAddress);
@@ -1246,7 +1264,7 @@
                 await updateBalances();
                 await updatePoolInfo();
                 await loadUserBlocks();
-                await loadResourceBalances();
+                await loadResourceBalancesOnchain();
                 await loadUserAttacks();
 
                 setInterval(() => {
@@ -1376,7 +1394,7 @@
                 msgDiv.innerHTML = '<span class="success">⏳ Claiming resources...</span>';
                 await tx.wait();
                 msgDiv.innerHTML = '<span class="success">💰 Resources claimed!</span>';
-                await loadResourceBalances();
+                await loadResourceBalancesOnchain();
             } catch (e) {
                 msgDiv.innerHTML = '<span class="error">❌ ' + e.message + '</span>';
             }
@@ -1440,7 +1458,8 @@
         }
 
         async function exchangeINPI() {
-            if (!userAddress) { exchangeMessage.innerHTML = '<span class="error">❌ Connect wallet first.</span>'; return; }
+            const msgDiv = document.getElementById('exchangeMessage');
+            if (!userAddress) { msgDiv.innerHTML = '<span class="error">❌ Connect wallet first.</span>'; return; }
             const inpiAmount = parseFloat(document.getElementById('inpiAmount').value);
             if (isNaN(inpiAmount) || inpiAmount <= 0) return alert('Invalid amount');
             const amountWei = ethers.utils.parseEther(inpiAmount.toString());
@@ -1467,8 +1486,8 @@
         }
 
         async function exchangePit() {
-            if (!userAddress) { exchangeMessage.innerHTML = '<span class="error">❌ Connect wallet first.</span>'; return; }
-            const pitAmount = parseFloat(document.getElementById('pitAmount').value);
+            const msgDiv = document.getElementById('exchangeMessage');
+            if (!userAddress) { msgDiv.innerHTML = '<span class="error">❌ Connect wallet first.</span>'; return; }            const pitAmount = parseFloat(document.getElementById('pitAmount').value);
             if (isNaN(pitAmount) || pitAmount <= 0) return alert('Invalid amount');
             const amountWei = ethers.utils.parseEther(pitAmount.toString());
             const msgDiv = document.getElementById('exchangeMessage');
