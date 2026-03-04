@@ -858,15 +858,20 @@
                 // WICHTIG: Die Feldnamen müssen EXAKT denen im Subgraph entsprechen!
                 const attacks = await fetchAllWithPagination(SUBGRAPH_URL_V2, 'attacks', 
                     'id target attackIndex startTime endTime executed', where); // resource entfernt
-                userAttacks = attacks.map(a => ({
-                    ...a,
-                    targetTokenId: parseInt(a.target),
-                    attackIndex: parseInt(a.attackIndex),
-                    protectionLevel: 0,
-                    startTime: parseInt(a.startTime),
-                    endTime: parseInt(a.endTime),
-                    resource: 0 // Placeholder, da nicht im Subgraph
-                }));
+                userAttacks = attacks.map(a => {
+                    console.log('Raw attack from subgraph:', a); // Zum Debuggen
+                    return {
+                        id: a.id,
+                        targetTokenId: parseInt(a.target),
+                        attackIndex: parseInt(a.attackIndex),
+                        protectionLevel: 0,
+                        startTime: parseInt(a.startTime),
+                        endTime: parseInt(a.endTime),
+                        resource: 0,
+                        attacker: a.attacker,
+                        executed: a.executed
+                    };
+                });
                 displayUserAttacks();
                 refreshBlockMarkings();
             } catch (e) {
@@ -894,7 +899,7 @@
                     ? '<span style="color: #51cf66;">Ready to execute</span>' 
                     : `<span>⏳ ${formatTime(timeLeft)} remaining</span>`;
                 const executeBtn = timeLeft <= 0 
-                    ? `<button class="execute-btn" data-attack='${JSON.stringify(attack)}'>⚔️ Execute</button>` 
+                    ? `<button class="execute-btn" data-targetid="${attack.targetTokenId}" data-attackindex="${attack.attackIndex}">⚔️ Execute</button>` 
                     : '';
 
                 html += `<div class="attack-item">
@@ -908,8 +913,9 @@
 
             document.querySelectorAll('.execute-btn').forEach(btn => {
                 btn.addEventListener('click', async (e) => {
-                    const attack = JSON.parse(btn.dataset.attack);
-                    await executeAttack(attack);
+                    const targetTokenId = parseInt(btn.dataset.targetid);
+                    const attackIndex = parseInt(btn.dataset.attackindex);
+                    await executeAttack({ targetTokenId, attackIndex });
                 });
             });
         }
@@ -931,35 +937,70 @@
                     }
                 }
             });
-        }
-
+                }
         async function executeAttack(attack) {
             const msgDiv = document.getElementById('attackMessage');
             msgDiv.innerHTML = '<span class="success">⏳ Executing attack...</span>';
+            
+            // DEBUG: Zeige an, was wir bekommen haben
+            console.log('executeAttack received:', attack);
+            
             try {
+                // Prüfen ob die Daten valide sind
+                if (!attack || attack.targetTokenId === undefined || attack.attackIndex === undefined) {
+                    throw new Error('Invalid attack data - missing targetTokenId or attackIndex');
+                }
+                
                 // Protection-Level des Ziel-Blocks holen
                 let protectionLevel = 0;
                 try {
                     protectionLevel = await mercenaryV2Contract.getProtectionLevel(attack.targetTokenId);
+                    console.log('Target protection level:', protectionLevel.toString());
                 } catch (e) {
-                    console.log('No protection on target block');
+                    console.log('No protection on target block or error:', e.message);
                 }
+                
+                // Transaktion vorbereiten und senden
+                console.log('Calling executeAttack with:', {
+                    targetTokenId: attack.targetTokenId,
+                    attackIndex: attack.attackIndex,
+                    protectionLevel: protectionLevel
+                });
                 
                 const tx = await piratesV2Contract.executeAttack(
                     attack.targetTokenId,
                     attack.attackIndex,
-                    protectionLevel
+                    protectionLevel,
+                    { gasLimit: 300000 } // Gas-Limit für Sicherheit
                 );
+                
+                console.log('Transaction sent:', tx.hash);
+                msgDiv.innerHTML = '<span class="success">⏳ Confirming transaction...</span>';
+                
                 await tx.wait();
                 msgDiv.innerHTML = '<span class="success">✅ Attack executed! Resources stolen.</span>';
+                
+                // Nach erfolgreicher Ausführung Daten neu laden
                 await loadUserAttacks();
                 await loadResourceBalances();
                 refreshBlockMarkings();
+                
             } catch (e) {
-                msgDiv.innerHTML = '<span class="error">❌ ' + e.message + '</span>';
+                console.error('ExecuteAttack error:', e);
+                console.error('Error data:', e.data);
+                console.error('Error transaction:', e.transaction);
+                
+                // Benutzerfreundliche Fehlermeldung
+                let errorMsg = e.message;
+                if (e.message.includes('Nur erlaubte Contracts')) {
+                    errorMsg = '❌ Execution failed: Only allowed contracts can call this function. Make sure you are the attacker and the attack is ready.';
+                } else if (e.message.includes('execution reverted')) {
+                    errorMsg = '❌ Transaction reverted. The attack might already be executed or not ready yet.';
+                }
+                
+                msgDiv.innerHTML = '<span class="error">' + errorMsg + '</span>';
             }
         }
-
         // ==================== BLOCKS ANZEIGEN ====================
         async function loadUserBlocks() {
             if (!userAddress || !nftContract) return;
