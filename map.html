@@ -475,7 +475,7 @@
                     <div id="actionMessage" class="message"></div>
                 </div>
 
-                <!-- NEU: Token Exchange Bereich (immer sichtbar) -->
+                <!-- Token Exchange Bereich (immer sichtbar) -->
                 <div style="margin: 1.5rem 0; border-top: 1px solid #2a3f4a; padding-top: 1rem;">
                     <h4 style="color: #d4af37; margin-bottom: 1rem;">💰 Token Exchange</h4>
                     <div class="input-group">
@@ -491,7 +491,7 @@
                     <div id="exchangeMessage" class="message"></div>
                 </div>
 
-                <!-- NEU: Eigene Ressourcen-Anzeige -->
+                <!-- Eigene Ressourcen-Anzeige -->
                 <div style="margin: 1rem 0; border-top: 1px solid #2a3f4a; padding-top: 1rem;">
                     <h4 style="color: #d4af37; margin-bottom: 1rem;">📦 Your Resources</h4>
                     <div id="userResources" style="display: flex; flex-direction: column; gap: 0.3rem;">
@@ -519,7 +519,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
     <script>
         (async function() {
-            // ==================== KONFIGURATION (V2 ONLY) ====================
+            // ==================== KONFIGURATION (NUR V2) ====================
             const SUBGRAPH_ID = "22b4uXYgs4rwTj6n3iWB4d8Vk4s7LAG7dTAtRaTXfseQ";
             const API_KEY = "059bc2832dfe50597009e556898d4ba6";
             const SUBGRAPH_URL = `https://gateway.thegraph.com/api/${API_KEY}/subgraphs/id/${SUBGRAPH_ID}`;
@@ -535,7 +535,7 @@
             const INPI_ADDRESS = "0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D";
             const PITRONE_ADDRESS = "0x7240Ec5B3Ba944888E186c74D0f8B4F5F71c9AE8";
 
-            // ABIs (vollständig für Interaktion)
+            // ABIs
             const NFT_ABI = [
                 "function revealBlock(uint256 tokenId, bytes32[] piProof, bytes32[] phiProof, uint8 piDigit, uint8 phiDigit) external",
                 "function calculateRarity(uint256 tokenId) view returns (uint8)"
@@ -582,7 +582,7 @@
             let selectedRevealed = false;
             let selectedRarity = null;
 
-            // Contract-Instanzen (mit Signer) – nur V2
+            // Contract-Instanzen (nur V2)
             let nftContract;
             let farmingContract;
             let piratesContract;
@@ -656,7 +656,6 @@
                 return all;
             }
 
-            // ==================== PRODUKTIONSFUNKTION ====================
             function getProduction(rarity, row) {
                 const production = {};
                 if (rarity === 0) { // Bronze
@@ -706,13 +705,10 @@
                         if (tokens[id]) tokens[id].partnerActive = active;
                     }
 
-                    // Farming-Status direkt über Subgraph (farm-Feld im token)
-                    // Wir ergänzen farmActive aus dem token-Feld (falls vorhanden)
-                    if (tokenItems) {
-                        for (let t of tokenItems) {
-                            if (tokens[t.id] && t.farm) {
-                                tokens[t.id].farmActive = t.farm.active;
-                            }
+                    // Farming-Status direkt aus token.farm (Subgraph liefert farm-Feld)
+                    for (let t of tokenItems) {
+                        if (t.farm && t.farm.active) {
+                            tokens[t.id].farmActive = true;
                         }
                     }
 
@@ -913,7 +909,6 @@
                     messageDiv.innerHTML = '<span class="success">⏳ Confirming...</span>';
                     await tx.wait();
                     messageDiv.innerHTML = `<span class="success">✅ ${successMsg}</span>`;
-                    // Nach jeder Aktion Daten neu laden
                     await loadData();
                     if (selectedTokenId) updateSidebar(selectedTokenId);
                 } catch (err) {
