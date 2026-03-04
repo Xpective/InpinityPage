@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>INPINITY – The Pi-Phi Pyramid (v0.11.0 – V2 only)</title>
+    <title>INPINITY – The Pi-Phi Pyramid (v0.12.0 – V1+V2)</title>
     <link rel="icon" type="image/png" href="favicon.webp" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -512,15 +512,16 @@
 
         <footer>
             <p>© 2026 INPINITY. All rights reserved. Built on Base.</p>
-            <p>Version 0.11.0 – Pure V2, Resource Tokens via Subgraph. Real game (UE5) coming soon.</p>
+            <p>Version 0.12.0 – V1+V2 support, both Subgraphs. Real game (UE5) coming soon.</p>
             <p><a href="whitepaper.html">Whitepaper</a> | <a href="https://discord.gg/95yj6Eg6" target="_blank">Discord</a></p>
         </footer>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
     <script>
-        // === CONFIG (NUR V2) ===
+        // === CONFIG (V1 + V2) ===
         const NFT_ADDRESS = "0x277a0D5864293C78d7387C54B48c35D5E9578Ab1";
+        const FARMING_V1_ADDRESS = "0xd9722fB6e9b8e71399A970d4e8F4D628C532E94f";
         const FARMING_V2_ADDRESS = "0x852Bce0713aAF409c4412155Ab8CE6191B525C30";
         const PIRATES_V2_ADDRESS = "0x46290466327b0Fab5791f030f8487321635Eeb37";
         const MERCENARY_V2_ADDRESS = "0xFEa09ccA75dbc63cc8053739A61777Bd13fC6Bc2";
@@ -530,12 +531,17 @@
         const PITRONE_ADDRESS = "0x7240Ec5B3Ba944888E186c74D0f8B4F5F71c9AE8";
 
         const WORKER_URL = "https://inpinity-worker-final.s-plat.workers.dev";
-        // NEUE SUBGRAPH-URL (Production Gateway mit Subgraph-ID)
-        const SUBGRAPH_ID = "22b4uXYgs4rwTj6n3iWB4d8Vk4s7LAG7dTAtRaTXfseQ";
-        const API_KEY = "059bc2832dfe50597009e556898d4ba6";
-        const SUBGRAPH_URL = `https://gateway.thegraph.com/api/${API_KEY}/subgraphs/id/${SUBGRAPH_ID}`;
 
-        // === ABI (identisch, nur für V2) ===
+        // Subgraph V1 (v0.0.7) – enthält V1-Farmen
+        const DEPLOYMENT_ID_V1 = "QmbpREskj5F7R8WpzUS6pv4XkKx1M34KAUc19fuUPtmu3o";
+        // Subgraph V2 (v0.0.8) – enthält V2-Farmen, Ressourcen, etc.
+        const SUBGRAPH_ID_V2 = "22b4uXYgs4rwTj6n3iWB4d8Vk4s7LAG7dTAtRaTXfseQ";
+
+        const API_KEY = "059bc2832dfe50597009e556898d4ba6";
+        const SUBGRAPH_URL_V1 = `https://gateway.thegraph.com/api/${API_KEY}/deployments/id/${DEPLOYMENT_ID_V1}`;
+        const SUBGRAPH_URL_V2 = `https://gateway.thegraph.com/api/${API_KEY}/subgraphs/id/${SUBGRAPH_ID_V2}`;
+
+        // === ABI ===
         const NFT_ABI = [
             "function mintWithETH(uint256 row, uint256 col) payable",
             "function mintWithINPI(uint256 row, uint256 col) external",
@@ -584,11 +590,16 @@
         // === STATE ===
         let provider, signer, userAddress;
         let nftContract;
-        let farmingContract, piratesContract, mercenaryContract, partnershipContract, inpiContract, pitroneContract;
+        let farmingV1Contract, farmingV2Contract;
+        let piratesV2Contract;
+        let mercenaryV2Contract;
+        let partnershipV2Contract;
+        let inpiContract, pitroneContract;
 
         let selectedPayment = 'eth';
-        let selectedBlock = null; // { tokenId, row, col, revealed, rarity, farmingActive, protectionLevel, partnerActive }
+        let selectedBlock = null; // { tokenId, row, col, revealed, rarity, farmingActive, farmingVersion, protectionLevel, partnerActive }
         let userResourceBalances = {}; // resourceId -> amount
+        let userBlocks = []; // Liste der Token-IDs des Users (aus NFT-Contract)
 
         const resourceNames = [
             "Oil", "Lemons", "Iron", "Gold", "Platinum",
@@ -624,31 +635,49 @@
             } catch (e) {}
         }
 
+        // === SUBGRAPH-HELPER (mit API-Key) ===
+        async function fetchSubgraph(url, query) {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${API_KEY}`
+                },
+                body: JSON.stringify({ query })
+            });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const json = await response.json();
+            if (json.errors) {
+                console.error('Subgraph error:', json.errors);
+                throw new Error(json.errors[0].message);
+            }
+            return json.data;
+        }
+
+        async function fetchAllWithPagination(url, fieldName, subfields, where = '') {
+            const pageSize = 1000;
+            let skip = 0;
+            let all = [];
+            while (true) {
+                const query = `{ ${fieldName}(first: ${pageSize}, skip: ${skip}${where ? ', where: ' + where : ''}) { ${subfields} } }`;
+                const data = await fetchSubgraph(url, query);
+                const items = data[fieldName];
+                if (!items || items.length === 0) break;
+                all = all.concat(items);
+                if (items.length < pageSize) break;
+                skip += pageSize;
+            }
+            return all;
+        }
+
+        // === LADE RESOURCE-TOKEN-BALANCES (V2) ===
         async function loadResourceBalances() {
             if (!userAddress) return;
-            const query = `{
-                resourceBalances(where: { account: "${userAddress.toLowerCase()}" }) {
-                    resourceId
-                    amount
-                }
-            }`;
             try {
-                const response = await fetch(SUBGRAPH_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${API_KEY}`
-                    },
-                    body: JSON.stringify({ query })
-                });
-                const json = await response.json();
-                if (json.errors) {
-                    console.error('Subgraph errors:', json.errors);
-                    return;
-                }
-                const balances = json.data.resourceBalances || [];
+                const where = `{ account: "${userAddress.toLowerCase()}" }`;
+                const balanceItems = await fetchAllWithPagination(SUBGRAPH_URL_V2, 'resourceBalances', 'id account resourceId amount', where);
                 userResourceBalances = {};
-                balances.forEach(b => {
+                balanceItems.forEach(b => {
                     userResourceBalances[b.resourceId] = ethers.BigNumber.from(b.amount);
                 });
                 displayResourceBalances();
@@ -683,100 +712,209 @@
             container.innerHTML = html;
         }
 
-        // === LADE BLOCK-DATEN VOM SUBGRAPH (inkl. Farming-Status) ===
-        async function loadUserBlocks() {
+        // === LADE USER-BLÖCKE (aus NFT-Contract) ===
+        async function loadUserBlocksFromContract() {
             if (!userAddress || !nftContract) return;
-            // Wir holen alle Tokens des Users über den Subgraph (schneller und gibt auch Farming-Status)
-            const query = `{
-                tokens(where: { owner: "${userAddress.toLowerCase()}" }) {
-                    id
-                    revealed
-                    farm { active }
-                }
-            }`;
-            try {
-                const response = await fetch(SUBGRAPH_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${API_KEY}`
-                    },
-                    body: JSON.stringify({ query })
-                });
-                const json = await response.json();
-                if (json.errors) throw new Error(json.errors[0].message);
-                const tokenItems = json.data.tokens;
-
-                // Zusätzlich brauchen wir noch Position (row/col) – können wir via Contract holen, da es nur wenige sind
-                const grid = document.getElementById('blocksGrid');
-                if (!tokenItems || tokenItems.length === 0) {
-                    grid.innerHTML = '<p style="color:var(--text-dim); text-align:center;">You don’t own any blocks yet.</p>';
-                    return;
-                }
-
-                let html = '';
-                let activeFarmsCount = 0;
-                for (let t of tokenItems) {
-                    const tokenId = t.id;
-                    const pos = await nftContract.getBlockPosition(tokenId); // direkt vom Contract
-                    const row = pos.row.toNumber();
-                    const col = pos.col.toNumber();
-                    const revealed = t.revealed;
-                    const farmingActive = t.farm ? t.farm.active : false;
-                    if (farmingActive) activeFarmsCount++;
-
-                    // Rarity und Produktion später in selectBlock per Contract
-                    let rarityClass = revealed ? 'revealed' : '';
-                    if (farmingActive) rarityClass += ' farming';
-                    // Protection und Partner später in selectBlock – für die Anzeige hier nur Farbe
-                    // wir holen Protection/Partner später asynchron für jeden Block, aber für die Liste reicht erstmal Basis
-                    const selectedClass = (selectedBlock && selectedBlock.tokenId == tokenId) ? 'selected' : '';
-                    html += `<div class="block-card ${rarityClass} ${selectedClass}" data-tokenid="${tokenId}" data-row="${row}" data-col="${col}">
-                        <div class="block-id">#${tokenId}</div>
-                        <div>R${row} C${col}</div>
-                        <div class="rarity">${revealed ? 'Revealed' : '🔒 Hidden'}</div>
-                    </div>`;
-                }
-                grid.innerHTML = html;
-                document.getElementById('activeFarms').innerText = activeFarmsCount;
-
-                document.querySelectorAll('.block-card').forEach(card => {
-                    card.addEventListener('click', () => {
-                        const tokenId = card.dataset.tokenid;
-                        const row = card.dataset.row;
-                        const col = card.dataset.col;
-                        selectBlock(tokenId, row, col);
-                    });
-                });
-            } catch (err) {
-                console.error('Fehler beim Laden der User-Blöcke:', err);
+            const balance = await nftContract.balanceOf(userAddress);
+            userBlocks = [];
+            for (let i = 0; i < balance; i++) {
+                const tokenId = await nftContract.tokenOfOwnerByIndex(userAddress, i);
+                userBlocks.push(tokenId.toString());
             }
         }
 
+        // === LADE FARMS AUS V1 UND V2 SUBGRAPHS ===
+        // Gibt eine Map zurück: tokenId -> { active, version }
+        async function loadFarmingStatus() {
+            const farmsMap = new Map();
+
+            // V1-Farmen laden
+            try {
+                const v1Farms = await fetchAllWithPagination(SUBGRAPH_URL_V1, 'farms', 'id active');
+                v1Farms.forEach(f => {
+                    if (f.active) {
+                        farmsMap.set(f.id, { active: true, version: 'v1' });
+                    }
+                });
+            } catch (e) {
+                console.warn('V1 farms could not be loaded:', e);
+            }
+
+            // V2-Farmen laden
+            try {
+                const v2Farms = await fetchAllWithPagination(SUBGRAPH_URL_V2, 'farms', 'id active');
+                v2Farms.forEach(f => {
+                    if (f.active) {
+                        // V2 überschreibt V1, falls ein Block in beiden aktiv wäre (sollte nicht passieren)
+                        farmsMap.set(f.id, { active: true, version: 'v2' });
+                    }
+                });
+            } catch (e) {
+                console.warn('V2 farms could not be loaded:', e);
+            }
+
+            return farmsMap;
+        }
+
+        // === LADE PROTECTIONS (V2) ===
+        async function loadProtections() {
+            const protMap = new Map();
+            try {
+                const protections = await fetchAllWithPagination(SUBGRAPH_URL_V2, 'protections', 'id active');
+                protections.forEach(p => {
+                    if (p.active) protMap.set(p.id, true);
+                });
+            } catch (e) {
+                console.warn('Protections could not be loaded:', e);
+            }
+            return protMap;
+        }
+
+        // === LADE PARTNERSHIPS (V2) ===
+        async function loadPartnerships() {
+            const partMap = new Map();
+            try {
+                const partnerships = await fetchAllWithPagination(SUBGRAPH_URL_V2, 'partnerships', 'id active');
+                partnerships.forEach(p => {
+                    if (p.active) partMap.set(p.id, true);
+                });
+            } catch (e) {
+                console.warn('Partnerships could not be loaded:', e);
+            }
+            return partMap;
+        }
+
+        // === HAUPTFUNKTION: LADE ALLE DATEN FÜR DIE BLOCK-ANZEIGE ===
+        async function loadUserBlocks() {
+            if (!userAddress || !nftContract) return;
+
+            // 1. Token-IDs des Users aus dem NFT-Contract holen
+            await loadUserBlocksFromContract();
+
+            // 2. Farming-Status aus V1/V2 holen
+            const farmsMap = await loadFarmingStatus();
+
+            // 3. Protections (V2) holen
+            const protectionsMap = await loadProtections();
+
+            // 4. Partnerships (V2) holen
+            const partnershipsMap = await loadPartnerships();
+
+            // 5. Für jeden Block die Details zusammenbauen
+            const grid = document.getElementById('blocksGrid');
+            if (userBlocks.length === 0) {
+                grid.innerHTML = '<p style="color:var(--text-dim); text-align:center;">You don’t own any blocks yet.</p>';
+                return;
+            }
+
+            let html = '';
+            let activeFarmsCount = 0;
+            for (let tokenId of userBlocks) {
+                // Position vom Contract holen
+                const pos = await nftContract.getBlockPosition(tokenId);
+                const row = pos.row.toNumber();
+                const col = pos.col.toNumber();
+
+                // Reveal-Status vom Contract (blockData)
+                const data = await nftContract.blockData(tokenId);
+                const revealed = data.revealed;
+
+                // Farming-Status aus farmsMap
+                const farm = farmsMap.get(tokenId);
+                const farmingActive = farm ? farm.active : false;
+                const farmingVersion = farm ? farm.version : null;
+                if (farmingActive) activeFarmsCount++;
+
+                // Protection
+                const protectionActive = protectionsMap.get(tokenId) || false;
+
+                // Partner
+                const partnerActive = partnershipsMap.get(tokenId) || false;
+
+                // CSS-Klassen für die Karte
+                let rarityClass = revealed ? 'revealed' : '';
+                if (farmingActive) rarityClass += ' farming';
+                if (protectionActive) rarityClass += ' protected';
+                // Partner hat keinen eigenen Rahmen, aber einen Stern (wird später gezeichnet)
+
+                const selectedClass = (selectedBlock && selectedBlock.tokenId == tokenId) ? 'selected' : '';
+
+                html += `<div class="block-card ${rarityClass} ${selectedClass}" data-tokenid="${tokenId}" data-row="${row}" data-col="${col}">
+                    <div class="block-id">#${tokenId}</div>
+                    <div>R${row} C${col}</div>
+                    <div class="rarity">${revealed ? 'Revealed' : '🔒 Hidden'}</div>
+                    ${partnerActive ? '<span class="star" style="position: absolute; top: -5px; right: -5px;">★</span>' : ''}
+                </div>`;
+            }
+            grid.innerHTML = html;
+            document.getElementById('activeFarms').innerText = activeFarmsCount;
+
+            // Event-Listener für Klicks
+            document.querySelectorAll('.block-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const tokenId = card.dataset.tokenid;
+                    const row = card.dataset.row;
+                    const col = card.dataset.col;
+                    selectBlock(tokenId, row, col);
+                });
+            });
+        }
+
+        // === SELECT BLOCK (DETAILS LADEN) ===
         async function selectBlock(tokenId, row, col) {
+            // Grunddaten vom Contract
             const data = await nftContract.blockData(tokenId);
             const revealed = data.revealed;
             let rarity = null;
             if (revealed) {
                 rarity = await nftContract.calculateRarity(tokenId);
             }
-            // Farming-Status über Contract (V2)
-            const farm = await farmingContract.farms(tokenId);
-            const farmingActive = farm.isActive;
 
-            // Protection
+            // Farming-Status (nochmal aus den Subgraphs? Wir haben die Daten nicht mehr lokal,
+            // daher holen wir sie direkt vom Vertrag – das ist sicherer)
+            let farmingActive = false;
+            let farmingVersion = null;
+            try {
+                const farmV1 = await farmingV1Contract.farms(tokenId);
+                if (farmV1 && farmV1.isActive) {
+                    farmingActive = true;
+                    farmingVersion = 'v1';
+                }
+            } catch (e) {}
+            if (!farmingActive) {
+                try {
+                    const farmV2 = await farmingV2Contract.farms(tokenId);
+                    if (farmV2 && farmV2.isActive) {
+                        farmingActive = true;
+                        farmingVersion = 'v2';
+                    }
+                } catch (e) {}
+            }
+
+            // Protection (V2)
             let protectionLevel = 0;
             try {
-                protectionLevel = await mercenaryContract.getProtectionLevel(tokenId);
+                protectionLevel = await mercenaryV2Contract.getProtectionLevel(tokenId);
             } catch (e) {}
 
             // Partner (V2)
             let partnerActive = false;
             try {
-                partnerActive = await partnershipContract.isPartnerBlock(tokenId);
+                partnerActive = await partnershipV2Contract.isPartnerBlock(tokenId);
             } catch (e) {}
 
-            selectedBlock = { tokenId, row, col, revealed, rarity, farmingActive, protectionLevel, partnerActive };
+            selectedBlock = {
+                tokenId,
+                row,
+                col,
+                revealed,
+                rarity,
+                farmingActive,
+                farmingVersion,
+                protectionLevel,
+                partnerActive
+            };
+
             document.getElementById('selectedBlockInfo').style.display = 'block';
             document.getElementById('selectedBlockText').innerText = `Block #${tokenId} (R${row}, C${col})`;
             document.getElementById('blockActions').style.display = 'block';
@@ -804,6 +942,7 @@
                 resDiv.innerHTML = '<p>Reveal block to see resources.</p>';
             }
 
+            // Markierung in der Grid-Ansicht
             document.querySelectorAll('.block-card').forEach(c => c.classList.remove('selected'));
             const selector = `.block-card[data-tokenid="${tokenId}"]`;
             const selectedCard = document.querySelector(selector);
@@ -860,10 +999,11 @@
                 }
 
                 nftContract = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
-                farmingContract = new ethers.Contract(FARMING_V2_ADDRESS, FARMING_ABI, signer);
-                piratesContract = new ethers.Contract(PIRATES_V2_ADDRESS, PIRATES_ABI, signer);
-                mercenaryContract = new ethers.Contract(MERCENARY_V2_ADDRESS, MERCENARY_ABI, signer);
-                partnershipContract = new ethers.Contract(PARTNERSHIP_V2_ADDRESS, PARTNERSHIP_ABI, signer);
+                farmingV1Contract = new ethers.Contract(FARMING_V1_ADDRESS, FARMING_ABI, signer);
+                farmingV2Contract = new ethers.Contract(FARMING_V2_ADDRESS, FARMING_ABI, signer);
+                piratesV2Contract = new ethers.Contract(PIRATES_V2_ADDRESS, PIRATES_ABI, signer);
+                mercenaryV2Contract = new ethers.Contract(MERCENARY_V2_ADDRESS, MERCENARY_ABI, signer);
+                partnershipV2Contract = new ethers.Contract(PARTNERSHIP_V2_ADDRESS, PARTNERSHIP_ABI, signer);
                 inpiContract = new ethers.Contract(INPI_ADDRESS, INPI_ABI, signer);
                 pitroneContract = new ethers.Contract(PITRONE_ADDRESS, PITRONE_ABI, signer);
 
@@ -873,7 +1013,7 @@
 
                 await updateBalances();
                 await updatePoolInfo();
-                await loadUserBlocks();
+                await loadUserBlocks(); // Lädt Blöcke und Subgraph-Daten
                 await loadResourceBalances();
             } catch (e) {
                 console.error(e);
@@ -958,13 +1098,14 @@
             }
         }
 
-        // === FARMING (nur V2) ===
+        // === FARMING ===
         async function startFarmingSelected() {
             if (!selectedBlock) return alert('No block selected.');
             const { tokenId } = selectedBlock;
             const msgDiv = document.getElementById('actionMessage');
             try {
-                const tx = await farmingContract.startFarming(tokenId);
+                // Immer V2 für neue Farms
+                const tx = await farmingV2Contract.startFarming(tokenId);
                 msgDiv.innerHTML = '<span class="success">⏳ Starting farming...</span>';
                 await tx.wait();
                 msgDiv.innerHTML = '<span class="success">✅ Farming started!</span>';
@@ -977,10 +1118,11 @@
 
         async function stopFarmingSelected() {
             if (!selectedBlock) return alert('No block selected.');
-            const { tokenId } = selectedBlock;
+            const { tokenId, farmingVersion } = selectedBlock;
             const msgDiv = document.getElementById('actionMessage');
             try {
-                const tx = await farmingContract.stopFarming(tokenId);
+                const contractToUse = farmingVersion === 'v2' ? farmingV2Contract : farmingV1Contract;
+                const tx = await contractToUse.stopFarming(tokenId);
                 msgDiv.innerHTML = '<span class="success">⏳ Stopping farming...</span>';
                 await tx.wait();
                 msgDiv.innerHTML = '<span class="success">⏹️ Farming stopped.</span>';
@@ -993,10 +1135,11 @@
 
         async function claimSelected() {
             if (!selectedBlock) return alert('No block selected.');
-            const { tokenId } = selectedBlock;
+            const { tokenId, farmingVersion } = selectedBlock;
             const msgDiv = document.getElementById('actionMessage');
             try {
-                const tx = await farmingContract.claimResources(tokenId);
+                const contractToUse = farmingVersion === 'v2' ? farmingV2Contract : farmingV1Contract;
+                const tx = await contractToUse.claimResources(tokenId);
                 msgDiv.innerHTML = '<span class="success">⏳ Claiming resources...</span>';
                 await tx.wait();
                 msgDiv.innerHTML = '<span class="success">💰 Resources claimed!</span>';
@@ -1006,7 +1149,7 @@
             }
         }
 
-        // === ATTACK ===
+        // === ATTACK (nur V2) ===
         async function attack() {
             const targetRow = parseInt(document.getElementById('attackRow').value);
             const targetCol = parseInt(document.getElementById('attackCol').value);
@@ -1018,7 +1161,7 @@
             const msgDiv = document.getElementById('attackMessage');
             msgDiv.innerHTML = '<span class="success">⏳ Starting attack...</span>';
             try {
-                const tx = await piratesContract.startAttack(attackerTokenId, targetTokenId, 0);
+                const tx = await piratesV2Contract.startAttack(attackerTokenId, targetTokenId, 0);
                 await tx.wait();
                 msgDiv.innerHTML = '<span class="success">✅ Attack started! Check back later.</span>';
             } catch (e) {
@@ -1026,7 +1169,7 @@
             }
         }
 
-        // === PROTECTION ===
+        // === PROTECTION (nur V2) ===
         async function protect() {
             const tokenId = parseInt(document.getElementById('protectTokenId').value);
             const level = parseInt(document.getElementById('protectLevel').value);
@@ -1041,7 +1184,7 @@
                     const approveTx = await inpiContract.approve(MERCENARY_V2_ADDRESS, amount);
                     await approveTx.wait();
                 }
-                const tx = await mercenaryContract.hireMercenaries(tokenId, level);
+                const tx = await mercenaryV2Contract.hireMercenaries(tokenId, level);
                 await tx.wait();
                 msgDiv.innerHTML = '<span class="success">✅ Protection active for 3.14 days.</span>';
                 await loadUserBlocks();
