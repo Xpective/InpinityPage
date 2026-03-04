@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>INPINITY – The Pi-Phi Pyramid (v0.13.0 – Enhanced UI)</title>
+    <title>INPINITY – The Pi-Phi Pyramid (v0.14.0 – Attack Execution & Visuals)</title>
     <link rel="icon" type="image/png" href="favicon.webp" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* === gleiches CSS wie zuvor, unverändert === */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
             --bg-dark: #0a0a1a;
@@ -172,6 +171,8 @@
         .block-card.farming { border-color: var(--accent-cyan); }
         .block-card.protected { border-color: var(--accent-purple); }
         .block-card.selected { border: 3px solid var(--accent-gold); transform: scale(1.02); }
+        .block-card.attacking { border-color: #000; box-shadow: 0 0 15px rgba(0,0,0,0.8); }
+        .block-card.executable { border-color: var(--accent-red); box-shadow: 0 0 15px var(--accent-red); }
         .block-card .rarity-badge {
             font-size: 0.7rem;
             padding: 0.2rem 0.5rem;
@@ -188,6 +189,36 @@
         .rarity-badge.diamond { background: var(--rarity-diamond); color: #000; box-shadow: 0 0 8px cyan; }
 
         .block-id { font-weight: bold; color: var(--accent-gold); }
+
+        /* Angriffsliste */
+        .attacks-section {
+            margin-top: 2rem;
+            border-top: 1px solid var(--accent-gold);
+            padding-top: 1.5rem;
+        }
+        .attacks-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+        .attack-item {
+            background: #0f1a2a;
+            border-radius: 1rem;
+            padding: 0.8rem 1.2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--accent-gold);
+        }
+        .attack-item .execute-btn {
+            background: var(--accent-red);
+            color: white;
+            border: none;
+            padding: 0.3rem 1rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
 
         .card {
             background: var(--bg-card);
@@ -329,7 +360,6 @@
             display: flex;
             justify-content: space-between;
         }
-        /* Neue Styles für Resource-Balances und Info-Block */
         .user-resources {
             background: #0a0a20;
             border-radius: 2rem;
@@ -362,7 +392,6 @@
             margin: 1rem 0;
             font-size: 0.95rem;
         }
-        /* Attack Resource Select */
         .attack-resource-group {
             margin: 1rem 0;
         }
@@ -435,7 +464,7 @@
 
         <!-- Dashboard -->
         <div class="dashboard">
-            <!-- Pyramid & Blocks -->
+            <!-- Pyramid & Blocks + Angriffsliste -->
             <div class="pyramid-panel">
                 <h2 class="section-title">🏗️ Your Pyramid Blocks</h2>
                 <div class="blocks-grid" id="blocksGrid">
@@ -445,6 +474,14 @@
                     <h4>Selected Block</h4>
                     <p id="selectedBlockText">None</p>
                     <div id="blockResources" class="resources-grid"></div>
+                </div>
+
+                <!-- NEU: Angriffsübersicht -->
+                <div class="attacks-section">
+                    <h4 style="color: var(--accent-gold); margin-bottom: 1rem;">⚔️ Your Attacks</h4>
+                    <div id="userAttacksList" class="attacks-list">
+                        <p style="color: var(--text-dim);">Connect wallet to see your attacks.</p>
+                    </div>
                 </div>
             </div>
 
@@ -553,7 +590,7 @@
 
         <footer>
             <p>© 2026 INPINITY. All rights reserved. Built on Base.</p>
-            <p>Version 0.13.0 – Rarity display, full resource selection. Real game (UE5) coming soon.</p>
+            <p>Version 0.14.0 – Attack execution & visual markers.</p>
             <p><a href="whitepaper.html">Whitepaper</a> | <a href="https://discord.gg/95yj6Eg6" target="_blank">Discord</a></p>
         </footer>
     </div>
@@ -603,11 +640,14 @@
             "function claimResources(uint256 tokenId) external",
             "function farms(uint256) view returns (uint256 startTime, uint256 lastClaimTime, bool isActive)"
         ];
+        // WICHTIG: executeAttack hinzugefügt
         const PIRATES_ABI = [
-            "function startAttack(uint256 attackerTokenId, uint256 targetTokenId, uint8 resource) external"
+            "function startAttack(uint256 attackerTokenId, uint256 targetTokenId, uint8 resource) external",
+            "function executeAttack(uint256 targetTokenId, uint256 attackIndex, uint256 protectionLevel) external"
         ];
         const MERCENARY_ABI = [
-            "function hireMercenaries(uint256 tokenId, uint256 protectionLevel) external"
+            "function hireMercenaries(uint256 tokenId, uint256 protectionLevel) external",
+            "function getProtectionLevel(uint256 tokenId) view returns (uint256)"
         ];
         const PARTNERSHIP_ABI = [
             "function isPartnerBlock(uint256 tokenId) view returns (bool)"
@@ -641,6 +681,8 @@
         let selectedBlock = null; // { tokenId, row, col, revealed, rarity, farmingActive, farmingVersion, protectionLevel, partnerActive }
         let userResourceBalances = {}; // resourceId -> amount
         let userBlocks = []; // Liste der Token-IDs des Users (aus NFT-Contract)
+        // NEU: Laufende Angriffe
+        let userAttacks = []; // { id, targetTokenId, attackIndex, protectionLevel, endTime, resource, executed }
 
         const resourceNames = [
             "Oil", "Lemons", "Iron", "Gold", "Platinum",
@@ -804,6 +846,118 @@
             return partMap;
         }
 
+        // === NEU: LADE ANGRIFFE DES USERS (V2) ===
+        async function loadUserAttacks() {
+            if (!userAddress) return;
+            try {
+                const where = `{ attacker: "${userAddress.toLowerCase()}", executed: false }`;
+                const attacks = await fetchAllWithPagination(SUBGRAPH_URL_V2, 'attacks', 
+                    'id targetTokenId attackIndex protectionLevel endTime resource executed', where);
+                userAttacks = attacks.map(a => ({
+                    ...a,
+                    targetTokenId: parseInt(a.targetTokenId),
+                    attackIndex: parseInt(a.attackIndex),
+                    protectionLevel: parseInt(a.protectionLevel),
+                    endTime: parseInt(a.endTime),
+                    resource: parseInt(a.resource)
+                }));
+                displayUserAttacks();
+                refreshBlockMarkings();
+            } catch (e) {
+                console.error('Failed to load attacks:', e);
+            }
+        }
+
+        // === NEU: ANZEIGE DER ANGRIFFE ===
+        function displayUserAttacks() {
+            const container = document.getElementById('userAttacksList');
+            if (!container) return;
+            if (!userAddress) {
+                container.innerHTML = '<p style="color: var(--text-dim);">Connect wallet to see your attacks.</p>';
+                return;
+            }
+            if (userAttacks.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-dim);">No active attacks.</p>';
+                return;
+            }
+
+            let html = '';
+            const now = Math.floor(Date.now() / 1000);
+            userAttacks.forEach(attack => {
+                const timeLeft = attack.endTime - now;
+                const status = timeLeft <= 0 
+                    ? '<span style="color: #51cf66;">Ready to execute</span>' 
+                    : `<span>⏳ ${formatTime(timeLeft)} remaining</span>`;
+                const executeBtn = timeLeft <= 0 
+                    ? `<button class="execute-btn" data-attack='${JSON.stringify(attack)}'>⚔️ Execute</button>` 
+                    : '';
+
+                html += `<div class="attack-item">
+                    <div><strong>Target #${attack.targetTokenId}</strong> (${resourceNames[attack.resource]})</div>
+                    <div>${status}</div>
+                    ${executeBtn}
+                </div>`;
+            });
+            container.innerHTML = html;
+
+            // Event-Listener für Execute-Buttons
+            document.querySelectorAll('.execute-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const attack = JSON.parse(btn.dataset.attack);
+                    await executeAttack(attack);
+                });
+            });
+        }
+
+        // Hilfsfunktion für Zeitformat
+        function formatTime(seconds) {
+            if (seconds < 60) return seconds + 's';
+            if (seconds < 3600) return Math.floor(seconds / 60) + 'm';
+            return Math.floor(seconds / 3600) + 'h';
+        }
+
+        // === NEU: MARKIERUNG DER BLÖCKE (schwarz für laufend, rot für ausführbar) ===
+        function refreshBlockMarkings() {
+            // Alte Markierungen entfernen
+            document.querySelectorAll('.block-card').forEach(card => {
+                card.classList.remove('attacking', 'executable');
+            });
+
+            const now = Math.floor(Date.now() / 1000);
+            userAttacks.forEach(attack => {
+                const selector = `.block-card[data-tokenid="${attack.targetTokenId}"]`;
+                const card = document.querySelector(selector);
+                if (card) {
+                    if (attack.endTime <= now) {
+                        card.classList.add('executable'); // roter Rahmen
+                    } else {
+                        card.classList.add('attacking');   // schwarzer Rahmen
+                    }
+                }
+            });
+        }
+
+        // === NEU: ANGRIFF AUSFÜHREN ===
+        async function executeAttack(attack) {
+            const msgDiv = document.getElementById('attackMessage');
+            msgDiv.innerHTML = '<span class="success">⏳ Executing attack...</span>';
+            try {
+                const tx = await piratesV2Contract.executeAttack(
+                    attack.targetTokenId,
+                    attack.attackIndex,
+                    attack.protectionLevel
+                );
+                await tx.wait();
+                msgDiv.innerHTML = '<span class="success">✅ Attack executed! Resources stolen.</span>';
+                // Nach erfolgreicher Ausführung: Angriffsliste neu laden und Ressourcen aktualisieren
+                await loadUserAttacks();
+                await loadResourceBalances();
+                refreshBlockMarkings();
+            } catch (e) {
+                msgDiv.innerHTML = '<span class="error">❌ ' + e.message + '</span>';
+            }
+        }
+
         // === HAUPTFUNKTION: LADE ALLE DATEN FÜR DIE BLOCK-ANZEIGE ===
         async function loadUserBlocks() {
             if (!userAddress || !nftContract) return;
@@ -867,6 +1021,9 @@
                     selectBlock(tokenId, row, col);
                 });
             });
+
+            // Nach dem Zeichnen der Karten die Markierungen aktualisieren
+            refreshBlockMarkings();
         }
 
         // === SELECT BLOCK (DETAILS LADEN) ===
@@ -1033,6 +1190,13 @@
                 await updatePoolInfo();
                 await loadUserBlocks();
                 await loadResourceBalances();
+                await loadUserAttacks(); // NEU: Angriffe laden
+
+                // Periodische Aktualisierung (alle 30 Sekunden)
+                setInterval(() => {
+                    loadUserAttacks();
+                    refreshBlockMarkings();
+                }, 30000);
             } catch (e) {
                 console.error(e);
                 alert('Connection error: ' + e.message);
@@ -1166,7 +1330,7 @@
             }
         }
 
-        // === ATTACK (mit dynamischem Resource-Select) ===
+        // === ATTACK (Start) ===
         async function attack() {
             const targetRow = parseInt(document.getElementById('attackRow').value);
             const targetCol = parseInt(document.getElementById('attackCol').value);
@@ -1176,7 +1340,6 @@
             if (balance.toNumber() === 0) return alert('You need a block to attack from');
             const attackerTokenId = await nftContract.tokenOfOwnerByIndex(userAddress, 0);
             
-            // Gewählte Resource aus dem Dropdown
             const resourceSelect = document.getElementById('attackResourceSelect');
             const resource = parseInt(resourceSelect.value);
             
@@ -1186,6 +1349,8 @@
                 const tx = await piratesV2Contract.startAttack(attackerTokenId, targetTokenId, resource);
                 await tx.wait();
                 msgDiv.innerHTML = '<span class="success">✅ Attack started! Check back later.</span>';
+                await loadUserAttacks(); // Angriffsliste neu laden
+                refreshBlockMarkings();
             } catch (e) {
                 msgDiv.innerHTML = '<span class="error">❌ ' + e.message + '</span>';
             }
