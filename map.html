@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>INPINITY – Pyramid Map (V2 only)</title>
+    <title>INPINITY – Pyramid Map (V1+V2 Support)</title>
     <link rel="icon" type="image/png" href="favicon.webp" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -519,14 +519,19 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
     <script>
         (async function() {
-            // ==================== KONFIGURATION (NUR V2) ====================
-            const SUBGRAPH_ID = "22b4uXYgs4rwTj6n3iWB4d8Vk4s7LAG7dTAtRaTXfseQ";
+            // ==================== KONFIGURATION ====================
+            // Subgraph V1 (v0.0.7)
+            const DEPLOYMENT_ID_V1 = "QmbpREskj5F7R8WpzUS6pv4XkKx1M34KAUc19fuUPtmu3o";
+            // Subgraph V2 (v0.0.8)
+            const SUBGRAPH_ID_V2 = "22b4uXYgs4rwTj6n3iWB4d8Vk4s7LAG7dTAtRaTXfseQ";
             const API_KEY = "059bc2832dfe50597009e556898d4ba6";
-            const SUBGRAPH_URL = `https://gateway.thegraph.com/api/${API_KEY}/subgraphs/id/${SUBGRAPH_ID}`;
+            const SUBGRAPH_URL_V1 = `https://gateway.thegraph.com/api/${API_KEY}/deployments/id/${DEPLOYMENT_ID_V1}`;
+            const SUBGRAPH_URL_V2 = `https://gateway.thegraph.com/api/${API_KEY}/subgraphs/id/${SUBGRAPH_ID_V2}`;
             const BASE_BLOCK_SIZE = 24;
 
-            // Contract Adressen (Base Mainnet) – NUR V2
+            // Contract Adressen (Base Mainnet)
             const NFT_ADDRESS = "0x277a0D5864293C78d7387C54B48c35D5E9578Ab1";
+            const FARMING_V1_ADDRESS = "0xd9722fB6e9b8e71399A970d4e8F4D628C532E94f";
             const FARMING_V2_ADDRESS = "0x852Bce0713aAF409c4412155Ab8CE6191B525C30";
             const PIRATES_V2_ADDRESS = "0x46290466327b0Fab5791f030f8487321635Eeb37";
             const MERCENARY_V2_ADDRESS = "0xFEa09ccA75dbc63cc8053739A61777Bd13fC6Bc2";
@@ -575,19 +580,19 @@
             let provider, signer, userAddress = null;
             let readOnlyProvider;
             let nftReadOnlyContract;
-            let tokens = {};          // key = tokenId (String) -> { owner, revealed, farmActive, protectionActive, partnerActive }
+            let tokens = {};          // key = tokenId (String) -> { owner, revealed, farmActive, farmingVersion, protectionActive, partnerActive }
             let userResources = [];    // { resourceId, amount }
             let selectedTokenId = null;
             let selectedTokenOwner = null;
             let selectedRevealed = false;
             let selectedRarity = null;
 
-            // Contract-Instanzen (nur V2)
+            // Contract-Instanzen (mit Signer)
             let nftContract;
-            let farmingContract;
-            let piratesContract;
-            let mercenaryContract;
-            let partnershipContract;
+            let farmingV1Contract, farmingV2Contract;
+            let piratesV2Contract;
+            let mercenaryV2Contract;
+            let partnershipV2Contract;
             let inpiContract, pitroneContract;
 
             // Canvas & UI
@@ -622,8 +627,8 @@
                 return addr ? addr.slice(0,6) + '...' + addr.slice(-4) : '';
             }
 
-            async function fetchWithPagination(query) {
-                const response = await fetch(SUBGRAPH_URL, {
+            async function fetchSubgraph(url, query) {
+                const response = await fetch(url, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -640,18 +645,23 @@
                 return json.data;
             }
 
-            async function fetchAllWithPagination(fieldName, subfields) {
+            async function fetchAllWithPagination(url, fieldName, subfields, where = '') {
                 const pageSize = 1000;
                 let skip = 0;
                 let all = [];
                 while (true) {
-                    const query = `{ ${fieldName}(first: ${pageSize}, skip: ${skip}) { ${subfields} } }`;
-                    const data = await fetchWithPagination(query);
-                    const items = data[fieldName];
-                    if (!items || items.length === 0) break;
-                    all = all.concat(items);
-                    if (items.length < pageSize) break;
-                    skip += pageSize;
+                    const query = `{ ${fieldName}(first: ${pageSize}, skip: ${skip}${where ? ', where: ' + where : ''}) { ${subfields} } }`;
+                    try {
+                        const data = await fetchSubgraph(url, query);
+                        const items = data[fieldName];
+                        if (!items || items.length === 0) break;
+                        all = all.concat(items);
+                        if (items.length < pageSize) break;
+                        skip += pageSize;
+                    } catch (e) {
+                        console.warn(`Pagination for ${fieldName} failed:`, e);
+                        break;
+                    }
                 }
                 return all;
             }
@@ -673,46 +683,81 @@
                 return production;
             }
 
-            // ==================== DATEN LADEN ====================
+            // ==================== DATEN LADEN (V1 + V2) ====================
             async function loadData() {
                 try {
-                    console.log('Lade Tokens...');
-                    const tokenItems = await fetchAllWithPagination('tokens', `id owner { id } revealed`);
+                    console.log('Lade Tokens von V1 und V2...');
+                    const [tokenItemsV1, tokenItemsV2] = await Promise.all([
+                        fetchAllWithPagination(SUBGRAPH_URL_V1, 'tokens', `id owner { id } revealed`).catch(() => []),
+                        fetchAllWithPagination(SUBGRAPH_URL_V2, 'tokens', `id owner { id } revealed farm { active }`).catch(() => [])
+                    ]);
+
                     tokens = {};
-                    tokenItems.forEach(t => {
+
+                    // V1-Tokens
+                    tokenItemsV1.forEach(t => {
                         tokens[t.id] = {
                             owner: t.owner ? t.owner.id : null,
                             revealed: t.revealed || false,
                             farmActive: false,
+                            farmingVersion: null,
                             protectionActive: false,
                             partnerActive: false
                         };
                     });
 
-                    console.log('Lade Protections...');
-                    const protectionItems = await fetchAllWithPagination('protections', `id active`);
+                    // V2-Tokens überschreiben/ergänzen
+                    tokenItemsV2.forEach(t => {
+                        if (!tokens[t.id]) {
+                            tokens[t.id] = {
+                                owner: t.owner ? t.owner.id : null,
+                                revealed: t.revealed || false,
+                                farmActive: t.farm ? t.farm.active : false,
+                                farmingVersion: t.farm && t.farm.active ? 'v2' : null,
+                                protectionActive: false,
+                                partnerActive: false
+                            };
+                        } else {
+                            // Bereits vorhanden – ergänzen, nicht überschreiben
+                            tokens[t.id].owner = t.owner ? t.owner.id : tokens[t.id].owner;
+                            tokens[t.id].revealed = t.revealed || tokens[t.id].revealed;
+                            if (t.farm && t.farm.active) {
+                                tokens[t.id].farmActive = true;
+                                tokens[t.id].farmingVersion = 'v2';
+                            }
+                        }
+                    });
+
+                    console.log('Lade Protections von V2...');
+                    const protectionItems = await fetchAllWithPagination(SUBGRAPH_URL_V2, 'protections', `id active`).catch(() => []);
                     const protections = new Map();
                     protectionItems.forEach(p => protections.set(p.id, p.active));
                     for (let [id, active] of protections) {
                         if (tokens[id]) tokens[id].protectionActive = active;
                     }
 
-                    console.log('Lade Partnerships...');
-                    const partnerItems = await fetchAllWithPagination('partnerships', `id active`);
+                    console.log('Lade Partnerships von V2...');
+                    const partnerItems = await fetchAllWithPagination(SUBGRAPH_URL_V2, 'partnerships', `id active`).catch(() => []);
                     const partnerships = new Map();
                     partnerItems.forEach(p => partnerships.set(p.id, p.active));
                     for (let [id, active] of partnerships) {
                         if (tokens[id]) tokens[id].partnerActive = active;
                     }
 
-                    // Farming-Status direkt aus token.farm (Subgraph liefert farm-Feld)
-                    for (let t of tokenItems) {
-                        if (t.farm && t.farm.active) {
-                            tokens[t.id].farmActive = true;
+                    // Farming-Status aus V1 separat laden
+                    console.log('Lade Farms von V1...');
+                    const farmItemsV1 = await fetchAllWithPagination(SUBGRAPH_URL_V1, 'farms', `id active`).catch(() => []);
+                    for (let f of farmItemsV1) {
+                        if (f.active && tokens[f.id]) {
+                            // Nur setzen, wenn nicht bereits V2 aktiv
+                            if (!tokens[f.id].farmActive) {
+                                tokens[f.id].farmActive = true;
+                                tokens[f.id].farmingVersion = 'v1';
+                            }
                         }
                     }
 
-                    // Wenn Wallet verbunden, lade ResourceBalances
+                    // Wenn Wallet verbunden, lade ResourceBalances (nur V2)
                     if (userAddress) {
                         await loadUserResources();
                     }
@@ -728,7 +773,8 @@
                 if (!userAddress) return;
                 try {
                     console.log('Lade ResourceBalances für', userAddress);
-                    const balanceItems = await fetchAllWithPagination('resourceBalances', `id account resourceId amount`);
+                    const where = `{ account: "${userAddress.toLowerCase()}" }`;
+                    const balanceItems = await fetchAllWithPagination(SUBGRAPH_URL_V2, 'resourceBalances', 'id account resourceId amount', where);
                     userResources = balanceItems
                         .filter(b => b.account.toLowerCase() === userAddress.toLowerCase())
                         .map(b => ({ resourceId: parseInt(b.resourceId), amount: BigInt(b.amount) }));
@@ -882,6 +928,7 @@
                 actionMessage.innerHTML = '';
 
                 if (userAddress && owner && owner.toLowerCase() === userAddress.toLowerCase()) {
+                    // Eigener Block
                     let btns = '';
                     if (!token.revealed) {
                         btns += `<button class="action-btn" id="revealBtn">🔓 Reveal Block</button>`;
@@ -895,6 +942,7 @@
                     protectionInput.style.display = 'flex';
                     ownerActionsDiv.innerHTML = btns;
                 } else if (userAddress && owner) {
+                    // Fremder Block – Angriff möglich
                     attackInput.style.display = 'flex';
                 } else {
                     actionPanel.style.display = 'none';
@@ -909,6 +957,7 @@
                     messageDiv.innerHTML = '<span class="success">⏳ Confirming...</span>';
                     await tx.wait();
                     messageDiv.innerHTML = `<span class="success">✅ ${successMsg}</span>`;
+                    // Nach jeder Aktion Daten neu laden
                     await loadData();
                     if (selectedTokenId) updateSidebar(selectedTokenId);
                 } catch (err) {
@@ -938,7 +987,8 @@
 
             async function handleStartFarm() {
                 if (!selectedTokenId) return;
-                const tx = farmingContract.startFarming(selectedTokenId);
+                // Neue Farms immer in V2
+                const tx = farmingV2Contract.startFarming(selectedTokenId);
                 await sendTx(tx, actionMessage, 'Farming started!');
             }
 
@@ -946,7 +996,8 @@
                 if (!selectedTokenId) return;
                 const token = tokens[selectedTokenId];
                 if (!token || !token.farmActive) return;
-                const tx = farmingContract.stopFarming(selectedTokenId);
+                const contract = token.farmingVersion === 'v2' ? farmingV2Contract : farmingV1Contract;
+                const tx = contract.stopFarming(selectedTokenId);
                 await sendTx(tx, actionMessage, 'Farming stopped.');
             }
 
@@ -954,8 +1005,10 @@
                 if (!selectedTokenId) return;
                 const token = tokens[selectedTokenId];
                 if (!token || !token.farmActive) return;
-                const tx = farmingContract.claimResources(selectedTokenId);
+                const contract = token.farmingVersion === 'v2' ? farmingV2Contract : farmingV1Contract;
+                const tx = contract.claimResources(selectedTokenId);
                 await sendTx(tx, actionMessage, 'Resources claimed!');
+                // Nach Claim Resource-Balances aktualisieren
                 await loadUserResources();
             }
 
@@ -971,7 +1024,7 @@
                     const approveTx = await inpiContract.approve(MERCENARY_V2_ADDRESS, amount);
                     await approveTx.wait();
                 }
-                const tx = mercenaryContract.hireMercenaries(selectedTokenId, level);
+                const tx = mercenaryV2Contract.hireMercenaries(selectedTokenId, level);
                 await sendTx(tx, actionMessage, 'Protection bought!');
             }
 
@@ -984,7 +1037,7 @@
                 }
                 const attackerTokenId = ownTokens[0][0];
                 const resource = parseInt(document.getElementById('attackResource').value);
-                const tx = piratesContract.startAttack(attackerTokenId, selectedTokenId, resource);
+                const tx = piratesV2Contract.startAttack(attackerTokenId, selectedTokenId, resource);
                 await sendTx(tx, actionMessage, 'Attack launched!');
             }
 
@@ -1058,10 +1111,11 @@
                     }
 
                     nftContract = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
-                    farmingContract = new ethers.Contract(FARMING_V2_ADDRESS, FARMING_ABI, signer);
-                    piratesContract = new ethers.Contract(PIRATES_V2_ADDRESS, PIRATES_ABI, signer);
-                    mercenaryContract = new ethers.Contract(MERCENARY_V2_ADDRESS, MERCENARY_ABI, signer);
-                    partnershipContract = new ethers.Contract(PARTNERSHIP_V2_ADDRESS, PARTNERSHIP_ABI, signer);
+                    farmingV1Contract = new ethers.Contract(FARMING_V1_ADDRESS, FARMING_ABI, signer);
+                    farmingV2Contract = new ethers.Contract(FARMING_V2_ADDRESS, FARMING_ABI, signer);
+                    piratesV2Contract = new ethers.Contract(PIRATES_V2_ADDRESS, PIRATES_ABI, signer);
+                    mercenaryV2Contract = new ethers.Contract(MERCENARY_V2_ADDRESS, MERCENARY_ABI, signer);
+                    partnershipV2Contract = new ethers.Contract(PARTNERSHIP_V2_ADDRESS, PARTNERSHIP_ABI, signer);
                     inpiContract = new ethers.Contract(INPI_ADDRESS, INPI_ABI, signer);
                     pitroneContract = new ethers.Contract(PITRONE_ADDRESS, PITRONE_ABI, signer);
 
@@ -1283,6 +1337,7 @@
             document.getElementById('exchangeInpiBtn').addEventListener('click', exchangeINPI);
             document.getElementById('exchangePitBtn').addEventListener('click', exchangePit);
 
+            // Event-Delegation für dynamische Buttons
             document.addEventListener('click', async (e) => {
                 if (e.target.id === 'revealBtn') await handleReveal();
                 if (e.target.id === 'startFarmBtn') await handleStartFarm();
