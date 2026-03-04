@@ -857,14 +857,15 @@
                 const where = `{ attacker: "${userAddress.toLowerCase()}", executed: false }`;
                 // WICHTIG: Die Feldnamen müssen EXAKT denen im Subgraph entsprechen!
                 const attacks = await fetchAllWithPagination(SUBGRAPH_URL_V2, 'attacks', 
-                    'id target attackIndex endTime resource executed', where); // protectionLevel entfernt
+                    'id target attackIndex startTime endTime executed', where); // resource entfernt
                 userAttacks = attacks.map(a => ({
                     ...a,
                     targetTokenId: parseInt(a.target),
                     attackIndex: parseInt(a.attackIndex),
-                    protectionLevel: 0, // Wird später aus dem Ziel-Block geholt
+                    protectionLevel: 0,
+                    startTime: parseInt(a.startTime),
                     endTime: parseInt(a.endTime),
-                    resource: parseInt(a.resource)
+                    resource: 0 // Placeholder, da nicht im Subgraph
                 }));
                 displayUserAttacks();
                 refreshBlockMarkings();
@@ -897,7 +898,8 @@
                     : '';
 
                 html += `<div class="attack-item">
-                    <div><strong>Target #${attack.targetTokenId}</strong> (${resourceNames[attack.resource]})</div>
+                    <div><strong>Target #${attack.targetTokenId}</strong></div>
+                    <!-- Resource wird nicht mehr angezeigt, da nicht im Subgraph -->
                     <div>${status}</div>
                     ${executeBtn}
                 </div>`;
