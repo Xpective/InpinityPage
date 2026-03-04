@@ -685,6 +685,7 @@
         let resourceTokenContract;
 
         let selectedPayment = 'eth';
+        let attacksTicker = null;
         let selectedBlock = null;
         let userResourceBalances = {};
         let userBlocks = [];
@@ -946,14 +947,14 @@
             const now = Math.floor(Date.now() / 1000);
             userAttacks.forEach(attack => {
                 const timeLeft = attack.endTime - now;
-                const status = timeLeft <= 0 
-                    ? '<span style="color: #51cf66;">Ready to execute</span>' 
-                    : `<span>⏳ ${formatTime(timeLeft)} remaining</span>`;
+                const status = timeLeft <= 0
+                    ? `<span class="attack-status" data-endtime="${attack.endTime}" style="color:#51cf66;">Ready to execute</span>`
+                    : `<span class="attack-status" data-endtime="${attack.endTime}">⏳ ${formatTime(timeLeft)} remaining</span>`;
                 
                 // Resource im Button mitspeichern
-                const executeBtn = timeLeft <= 0 
-                    ? `<button class="execute-btn" data-targetid="${attack.targetTokenId}" data-attackindex="${attack.attackIndex}" data-resource="${attack.resource}">⚔️ Execute</button>` 
-                    : '';
+                const executeBtn = timeLeft <= 0
+                    ? `<button class="execute-btn" data-targetid="${attack.targetTokenId}" data-attackindex="${attack.attackIndex}" data-resource="${attack.resource}">⚔️ Execute</button>`
+                    : `<button class="execute-btn" data-targetid="${attack.targetTokenId}" data-attackindex="${attack.attackIndex}" data-resource="${attack.resource}" disabled style="opacity:0.4;cursor:not-allowed;">⏳ Waiting</button>`;
 
                 html += `<div class="attack-item">
                     <div><strong>Target #${attack.targetTokenId}</strong> (${resourceNames[attack.resource]})</div>
@@ -962,9 +963,11 @@
                 </div>`;
             });
             container.innerHTML = html;
+            startAttacksTicker();
 
             document.querySelectorAll('.execute-btn').forEach(btn => {
                 btn.addEventListener('click', async (e) => {
+                    if (btn.disabled) return;
                     const targetTokenId = parseInt(btn.dataset.targetid);
                     const attackIndex = parseInt(btn.dataset.attackindex);
                     const resource = parseInt(btn.dataset.resource);
@@ -976,6 +979,57 @@
                     });
                 });
             });
+        }
+
+        function startAttacksTicker() {
+            // verhindert mehrfaches Starten
+            if (attacksTicker) return;
+            
+            attacksTicker = setInterval(() => {
+            const now = Math.floor(Date.now() / 1000);
+            
+            // alle Status-Spans updaten
+            document.querySelectorAll('.attack-status').forEach(el => {
+                const endTime = parseInt(el.dataset.endtime || "0", 10);
+                if (!endTime) return;
+            
+                const timeLeft = endTime - now;
+            
+                if (timeLeft <= 0) {
+                el.textContent = 'Ready to execute';
+                el.style.color = '#51cf66';
+                } else {
+                el.textContent = `⏳ ${formatTime(timeLeft)} remaining`;
+                el.style.color = '';
+                }
+            });
+            
+                // Buttons aktivieren/deaktivieren passend zur Zeit
+            document.querySelectorAll('.execute-btn').forEach(btn => {
+                  // wenn kein targetid: skip
+                const parentItem = btn.closest('.attack-item');
+                const statusEl = parentItem ? parentItem.querySelector('.attack-status') : null;
+                if (!statusEl) return;
+            
+                const endTime = parseInt(statusEl.dataset.endtime || "0", 10);
+                const timeLeft = endTime - now;
+            
+                if (timeLeft <= 0) {
+                btn.disabled = false;
+                btn.textContent = '⚔️ Execute';
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+                } else {
+                btn.disabled = true;
+                btn.textContent = '⏳ Waiting';
+                btn.style.opacity = '0.4';
+                btn.style.cursor = 'not-allowed';
+                }
+            });
+            
+            // optional: Karten-Markierungen live aktualisieren
+            refreshBlockMarkings();
+            }, 1000);
         }
 
         function refreshBlockMarkings() {
@@ -1036,7 +1090,8 @@
             await loadUserAttacks();
         
             // ✅ Nach execute on-chain balances refreshen
-            await loadResourceBalancesOnchain();
+            await loadResourceBalances();
+            await updateBalances();
         
             refreshBlockMarkings();
           } catch (e) {
