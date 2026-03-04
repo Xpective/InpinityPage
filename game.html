@@ -857,12 +857,12 @@
                 const where = `{ attacker: "${userAddress.toLowerCase()}", executed: false }`;
                 // WICHTIG: Die Feldnamen müssen EXAKT denen im Subgraph entsprechen!
                 const attacks = await fetchAllWithPagination(SUBGRAPH_URL_V2, 'attacks', 
-                    'id target attackIndex protectionLevel endTime resource executed', where);
+                    'id target attackIndex endTime resource executed', where); // protectionLevel entfernt
                 userAttacks = attacks.map(a => ({
                     ...a,
                     targetTokenId: parseInt(a.target),
                     attackIndex: parseInt(a.attackIndex),
-                    protectionLevel: parseInt(a.protectionLevel),
+                    protectionLevel: 0, // Wird später aus dem Ziel-Block geholt
                     endTime: parseInt(a.endTime),
                     resource: parseInt(a.resource)
                 }));
@@ -935,10 +935,18 @@
             const msgDiv = document.getElementById('attackMessage');
             msgDiv.innerHTML = '<span class="success">⏳ Executing attack...</span>';
             try {
+                // Protection-Level des Ziel-Blocks holen
+                let protectionLevel = 0;
+                try {
+                    protectionLevel = await mercenaryV2Contract.getProtectionLevel(attack.targetTokenId);
+                } catch (e) {
+                    console.log('No protection on target block');
+                }
+                
                 const tx = await piratesV2Contract.executeAttack(
                     attack.targetTokenId,
                     attack.attackIndex,
-                    attack.protectionLevel
+                    protectionLevel
                 );
                 await tx.wait();
                 msgDiv.innerHTML = '<span class="success">✅ Attack executed! Resources stolen.</span>';
