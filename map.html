@@ -1,1644 +1,1732 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>INPINITY – Pyramid Map (V2 Complete + Attack Execution)</title>
-    <link rel="icon" type="image/png" href="favicon.webp" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        /* ========== BASIS-STYLES ========== */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>INPINITY – Pyramid Map (V2 Complete + Attack Execution)</title>
+  <link rel="icon" type="image/png" href="favicon.webp" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ========== BASIS-STYLES ========== */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #0b0e12;
-            color: #eef2f6;
-            overflow: hidden;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0b0e12;
+      color: #eef2f6;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
 
-        /* Header */
-        .header {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.6rem 2rem;
-            background: rgba(20, 28, 36, 0.9);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(212, 175, 55, 0.25);
-            z-index: 20;
-            gap: 1rem;
-        }
+    /* Header */
+    .header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.6rem 2rem;
+      background: rgba(20, 28, 36, 0.9);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.25);
+      z-index: 20;
+      gap: 1rem;
+    }
 
-        .nav-links {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
+    .nav-links { display: flex; gap: 1rem; flex-wrap: wrap; }
 
-        .nav-links a {
-            color: #eef2f6;
-            text-decoration: none;
-            padding: 0.4rem 1rem;
-            border-radius: 40px;
-            border: 1px solid #3b8b6b;
-            background: rgba(30, 58, 58, 0.5);
-            transition: 0.2s;
-            font-weight: 500;
-            font-size: 0.95rem;
-        }
+    .nav-links a {
+      color: #eef2f6;
+      text-decoration: none;
+      padding: 0.4rem 1rem;
+      border-radius: 40px;
+      border: 1px solid #3b8b6b;
+      background: rgba(30, 58, 58, 0.5);
+      transition: 0.2s;
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
 
-        .nav-links a:hover {
-            background: #2e6d5e;
-            border-color: #d4af37;
-            transform: translateY(-2px);
-        }
+    .nav-links a:hover {
+      background: #2e6d5e;
+      border-color: #d4af37;
+      transform: translateY(-2px);
+    }
 
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-        }
+    .logo { display: flex; align-items: center; gap: 0.8rem; }
 
-        .logo h1 {
-            font-weight: 600;
-            font-size: 1.7rem;
-            letter-spacing: 0.5px;
-            background: linear-gradient(135deg, #f5e7c8, #d4af37);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+    .logo h1 {
+      font-weight: 600;
+      font-size: 1.7rem;
+      letter-spacing: 0.5px;
+      background: linear-gradient(135deg, #f5e7c8, #d4af37);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
 
-        .logo span {
-            font-size: 0.9rem;
-            color: #98a2b3;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 0.2rem 0.8rem;
-            border-radius: 40px;
-            border: 1px solid #2f3e4c;
-        }
+    .logo span {
+      font-size: 0.9rem;
+      color: #98a2b3;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 0.2rem 0.8rem;
+      border-radius: 40px;
+      border: 1px solid #2f3e4c;
+    }
 
-        .wallet {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-left: auto;
-        }
+    .wallet { display: flex; align-items: center; gap: 1rem; margin-left: auto; }
 
-        .wallet button {
-            background: linear-gradient(145deg, #1e3a3a, #1f4a3a);
-            border: 1px solid #3b8b6b;
-            color: #f0f4fa;
-            padding: 0.5rem 1.5rem;
-            border-radius: 40px;
-            font-weight: 600;
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: 0.2s;
-            box-shadow: 0 2px 6px rgba(0, 40, 30, 0.5);
-        }
+    .wallet button {
+      background: linear-gradient(145deg, #1e3a3a, #1f4a3a);
+      border: 1px solid #3b8b6b;
+      color: #f0f4fa;
+      padding: 0.5rem 1.5rem;
+      border-radius: 40px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: 0.2s;
+      box-shadow: 0 2px 6px rgba(0, 40, 30, 0.5);
+    }
 
-        .wallet button:hover {
-            background: #2e6d5e;
-            border-color: #d4af37;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 14px rgba(212, 175, 55, 0.3);
-        }
+    .wallet button:hover {
+      background: #2e6d5e;
+      border-color: #d4af37;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 14px rgba(212, 175, 55, 0.3);
+    }
 
-        #walletAddress {
-            background: #1a232c;
-            padding: 0.4rem 1.2rem;
-            border-radius: 40px;
-            font-size: 0.9rem;
-            border: 1px solid #2f4b5c;
-            color: #bcd0e0;
-        }
+    #walletAddress {
+      background: #1a232c;
+      padding: 0.4rem 1.2rem;
+      border-radius: 40px;
+      font-size: 0.9rem;
+      border: 1px solid #2f4b5c;
+      color: #bcd0e0;
+    }
 
-        /* Hauptbereich */
-        .main {
-            flex: 1;
-            display: flex;
-            position: relative;
-            overflow: hidden;
-        }
+    /* Hauptbereich */
+    .main { flex: 1; display: flex; position: relative; overflow: hidden; }
 
-        .canvas-container {
-            flex: 1;
-            position: relative;
-            background: #0f1318;
-            overflow: hidden;
-            cursor: grab;
-            touch-action: none;
-        }
+    .canvas-container {
+      flex: 1;
+      position: relative;
+      background: #0f1318;
+      overflow: hidden;
+      cursor: grab;
+      touch-action: none;
+    }
 
-        .canvas-container canvas {
-            display: block;
-            width: 100%;
-            height: 100%;
-        }
+    .canvas-container canvas { display: block; width: 100%; height: 100%; }
 
-        .tooltip {
-            position: absolute;
-            background: rgba(20, 30, 40, 0.95);
-            backdrop-filter: blur(6px);
-            border: 1px solid #d4af37;
-            border-radius: 16px;
-            padding: 0.75rem 1.2rem;
-            font-size: 0.9rem;
-            pointer-events: none;
-            color: #ecf3fa;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
-            z-index: 100;
-            transition: opacity 0.15s;
-            opacity: 0;
-            max-width: 260px;
-            border-left: 4px solid #d4af37;
-            line-height: 1.5;
-        }
+    .tooltip {
+      position: absolute;
+      background: rgba(20, 30, 40, 0.95);
+      backdrop-filter: blur(6px);
+      border: 1px solid #d4af37;
+      border-radius: 16px;
+      padding: 0.75rem 1.2rem;
+      font-size: 0.9rem;
+      pointer-events: none;
+      color: #ecf3fa;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+      z-index: 100;
+      transition: opacity 0.15s;
+      opacity: 0;
+      max-width: 260px;
+      border-left: 4px solid #d4af37;
+      line-height: 1.5;
+    }
 
-        .tooltip span {
-            color: #d4af37;
-            font-weight: 600;
-        }
+    .tooltip span { color: #d4af37; font-weight: 600; }
 
-        /* Sidebar / Legende */
-        .legend-panel {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 380px;
-            background: rgba(20, 28, 38, 0.95);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-radius: 24px;
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
-            z-index: 15;
-            transition: width 0.2s ease, right 0.2s ease;
-            resize: horizontal;
-            overflow: hidden;
-            cursor: move;
-            user-select: none;
-        }
+    /* Sidebar / Legende */
+    .legend-panel {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 380px;
+      background: rgba(20, 28, 38, 0.95);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: 24px;
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+      z-index: 15;
+      transition: width 0.2s ease, right 0.2s ease;
+      resize: horizontal;
+      overflow: hidden;
+      cursor: move;
+      user-select: none;
+    }
 
-        .legend-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid #2a3a48;
-            cursor: move;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 24px 24px 0 0;
-        }
+    .legend-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid #2a3a48;
+      cursor: move;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 24px 24px 0 0;
+    }
 
-        .legend-header h3 {
-            font-size: 1.2rem;
-            color: #d4af37;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
+    .legend-header h3 {
+      font-size: 1.2rem;
+      color: #d4af37;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
 
-        .legend-controls {
-            display: flex;
-            gap: 0.5rem;
-        }
+    .legend-controls { display: flex; gap: 0.5rem; }
 
-        .legend-controls button {
-            background: transparent;
-            border: 1px solid #3a5060;
-            color: #d4af37;
-            width: 30px;
-            height: 30px;
-            border-radius: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: 0.2s;
-            font-size: 1.1rem;
-        }
+    .legend-controls button {
+      background: transparent;
+      border: 1px solid #3a5060;
+      color: #d4af37;
+      width: 30px;
+      height: 30px;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: 0.2s;
+      font-size: 1.1rem;
+    }
 
-        .legend-controls button:hover {
-            background: #d4af37;
-            color: #0b0e12;
-            border-color: #d4af37;
-        }
+    .legend-controls button:hover {
+      background: #d4af37;
+      color: #0b0e12;
+      border-color: #d4af37;
+    }
 
-        .legend-content {
-            padding: 1.2rem 1.5rem;
-            transition: max-height 0.3s ease, padding 0.3s ease;
-            max-height: 600px;
-            overflow-y: auto;
-        }
+    .legend-content {
+      padding: 1.2rem 1.5rem;
+      transition: max-height 0.3s ease, padding 0.3s ease;
+      max-height: 600px;
+      overflow-y: auto;
+    }
 
-        .legend-content.collapsed {
-            max-height: 0;
-            padding: 0 1.5rem;
-            overflow: hidden;
-        }
+    .legend-content.collapsed {
+      max-height: 0;
+      padding: 0 1.5rem;
+      overflow: hidden;
+    }
 
-        /* Detail-Karte */
-        .detail-card {
-            background: #1b2630;
-            border-radius: 20px;
-            padding: 1.2rem;
-            border: 1px solid #2a3f4a;
-            margin-bottom: 1.5rem;
-        }
+    /* Detail-Karte */
+    .detail-card {
+      background: #1b2630;
+      border-radius: 20px;
+      padding: 1.2rem;
+      border: 1px solid #2a3f4a;
+      margin-bottom: 1.5rem;
+    }
 
-        .detail-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.7rem;
-            font-size: 0.95rem;
-        }
+    .detail-row { display: flex; justify-content: space-between; margin-bottom: 0.7rem; font-size: 0.95rem; }
+    .detail-label { color: #98a9b9; }
+    .detail-value { font-weight: 600; color: #f0f4fa; }
 
-        .detail-label {
-            color: #98a9b9;
-        }
+    /* Buttons & Formulare */
+    .action-buttons { display: flex; flex-direction: column; gap: 0.8rem; margin: 1rem 0; }
 
-        .detail-value {
-            font-weight: 600;
-            color: #f0f4fa;
-        }
+    .action-btn {
+      background: linear-gradient(145deg, #2a3f4a, #1b2a33);
+      border: 1px solid #3b6b8b;
+      color: #eef2f6;
+      padding: 0.8rem;
+      border-radius: 40px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+      text-align: center;
+    }
 
-        /* Buttons & Formulare */
-        .action-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 0.8rem;
-            margin: 1rem 0;
-        }
+    .action-btn:hover:not(:disabled) {
+      background: #3b6b8b;
+      border-color: #d4af37;
+      transform: translateY(-2px);
+    }
 
-        .action-btn {
-            background: linear-gradient(145deg, #2a3f4a, #1b2a33);
-            border: 1px solid #3b6b8b;
-            color: #eef2f6;
-            padding: 0.8rem;
-            border-radius: 40px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-            text-align: center;
-        }
+    .action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-        .action-btn:hover:not(:disabled) {
-            background: #3b6b8b;
-            border-color: #d4af37;
-            transform: translateY(-2px);
-        }
+    .input-group { display: flex; align-items: center; gap: 0.5rem; margin: 0.8rem 0; }
 
-        .action-btn:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
+    .input-group label { font-size: 0.9rem; color: #98a9b9; min-width: 70px; }
 
-        .input-group {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin: 0.8rem 0;
-        }
+    .input-group input, .input-group select {
+      flex: 1;
+      background: #0f1a22;
+      border: 1px solid #2a3f4a;
+      color: white;
+      padding: 0.6rem 1rem;
+      border-radius: 30px;
+      outline: none;
+    }
 
-        .input-group label {
-            font-size: 0.9rem;
-            color: #98a9b9;
-            min-width: 70px;
-        }
+    .input-group input:focus, .input-group select:focus { border-color: #d4af37; }
 
-        .input-group input, .input-group select {
-            flex: 1;
-            background: #0f1a22;
-            border: 1px solid #2a3f4a;
-            color: white;
-            padding: 0.6rem 1rem;
-            border-radius: 30px;
-            outline: none;
-        }
+    .message {
+      margin-top: 0.8rem;
+      padding: 0.6rem;
+      border-radius: 30px;
+      text-align: center;
+      font-size: 0.9rem;
+    }
 
-        .input-group input:focus, .input-group select:focus {
-            border-color: #d4af37;
-        }
+    .success { background: #1a3a2a; border: 1px solid #2e7d5e; color: #a0e0a0; }
+    .error { background: #3a1a1a; border: 1px solid #b33a3a; color: #ffa0a0; }
 
-        .message {
-            margin-top: 0.8rem;
-            padding: 0.6rem;
-            border-radius: 30px;
-            text-align: center;
-            font-size: 0.9rem;
-        }
+    /* Angriffsliste */
+    .attacks-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+    .attack-item {
+      background: #0f1a2a;
+      border-radius: 16px;
+      padding: 0.5rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 1px solid #d4af37;
+      font-size: 0.85rem;
+      gap: 0.6rem;
+    }
+    .execute-btn {
+      background: #e74c3c;
+      border: none;
+      color: white;
+      padding: 0.2rem 0.8rem;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.8rem;
+      white-space: nowrap;
+    }
+    .execute-btn[disabled] { opacity: 0.4; cursor: not-allowed; }
 
-        .success {
-            background: #1a3a2a;
-            border: 1px solid #2e7d5e;
-            color: #a0e0a0;
-        }
+    /* FAQ Bereich */
+    .faq-section { margin-top: 1.5rem; border-top: 1px solid #2a3f4a; padding-top: 1rem; }
+    .faq-item { margin-bottom: 1rem; background: #0f1a22; border-radius: 16px; padding: 0.8rem; }
+    .faq-question {
+      color: #d4af37;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .faq-question:hover { color: #ffd700; }
+    .faq-answer {
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      color: #b0c4de;
+      line-height: 1.4;
+      border-left: 2px solid #d4af37;
+      padding-left: 0.8rem;
+    }
+    .faq-answer.hidden { display: none; }
 
-        .error {
-            background: #3a1a1a;
-            border: 1px solid #b33a3a;
-            color: #ffa0a0;
-        }
+    .legend-item { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.8rem; font-size: 0.95rem; }
 
-        /* Angriffsliste */
-        .attacks-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            margin-top: 0.5rem;
-            max-height: 150px;
-            overflow-y: auto;
-        }
-        .attack-item {
-            background: #0f1a2a;
-            border-radius: 16px;
-            padding: 0.5rem 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid #d4af37;
-            font-size: 0.85rem;
-        }
-        .execute-btn {
-            background: #e74c3c;
-            border: none;
-            color: white;
-            padding: 0.2rem 0.8rem;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.8rem;
-        }
+    .color-box {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+      position: relative;
+    }
 
-        /* FAQ Bereich */
-        .faq-section {
-            margin-top: 1.5rem;
-            border-top: 1px solid #2a3f4a;
-            padding-top: 1rem;
-        }
-        .faq-item {
-            margin-bottom: 1rem;
-            background: #0f1a22;
-            border-radius: 16px;
-            padding: 0.8rem;
-        }
-        .faq-question {
-            color: #d4af37;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .faq-question:hover {
-            color: #ffd700;
-        }
-        .faq-answer {
-            margin-top: 0.5rem;
-            font-size: 0.9rem;
-            color: #b0c4de;
-            line-height: 1.4;
-            border-left: 2px solid #d4af37;
-            padding-left: 0.8rem;
-        }
-        .faq-answer.hidden {
-            display: none;
-        }
+    .color-gray { background: #3a4048; }
+    .color-green { background: #2e7d5e; }
+    .color-gold { background: #c9a959; }
+    .color-cyan { background: #a0d6ff; }
+    .border-blue { border: 3px solid #3498db; box-sizing: border-box; }
+    .border-purple { border: 3px solid #9b59b6; box-sizing: border-box; }
+    .border-black { border: 3px solid #000; box-sizing: border-box; }
+    .border-red { border: 3px solid #e74c3c; box-sizing: border-box; }
 
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            margin-bottom: 0.8rem;
-            font-size: 0.95rem;
-        }
+    .star {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      font-size: 16px;
+      color: gold;
+      text-shadow: 0 0 5px black;
+    }
 
-        .color-box {
-            width: 24px;
-            height: 24px;
-            border-radius: 6px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.4);
-            position: relative;
-        }
+    /* Rarity-Farben */
+    .rarity-bronze { color: #cd7f32; font-weight: bold; }
+    .rarity-silver { color: #c0c0c0; font-weight: bold; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
+    .rarity-gold { color: #ffd700; font-weight: bold; text-shadow: 0 0 8px gold; }
+    .rarity-platinum { color: #e5e4e2; font-weight: bold; text-shadow: 0 0 8px #a0d6ff; }
+    .rarity-diamond { color: #b9f2ff; font-weight: bold; text-shadow: 0 0 12px cyan; }
 
-        .color-gray { background: #3a4048; }
-        .color-green { background: #2e7d5e; }
-        .color-gold { background: #c9a959; }
-        .color-cyan { background: #a0d6ff; }
-        .border-blue { border: 3px solid #3498db; box-sizing: border-box; }
-        .border-purple { border: 3px solid #9b59b6; }
-        .border-black { border: 3px solid #000; box-sizing: border-box; }
-        .border-red { border: 3px solid #e74c3c; box-sizing: border-box; }
+    .footer-note {
+      margin-top: 1.5rem;
+      font-size: 0.8rem;
+      color: #6f7c8a;
+      text-align: center;
+      border-top: 1px dashed #2a3f4a;
+      padding-top: 1rem;
+    }
 
-        .star {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            font-size: 16px;
-            color: gold;
-            text-shadow: 0 0 5px black;
-        }
+    .legend-panel .resize-handle {
+      position: absolute;
+      left: -5px;
+      top: 0;
+      bottom: 0;
+      width: 10px;
+      cursor: ew-resize;
+      background: transparent;
+    }
 
-        /* Rarity-Farben */
-        .rarity-bronze { color: #cd7f32; font-weight: bold; }
-        .rarity-silver { color: #c0c0c0; font-weight: bold; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
-        .rarity-gold { color: #ffd700; font-weight: bold; text-shadow: 0 0 8px gold; }
-        .rarity-platinum { color: #e5e4e2; font-weight: bold; text-shadow: 0 0 8px #a0d6ff; }
-        .rarity-diamond { color: #b9f2ff; font-weight: bold; text-shadow: 0 0 12px cyan; }
-
-        .footer-note {
-            margin-top: 1.5rem;
-            font-size: 0.8rem;
-            color: #6f7c8a;
-            text-align: center;
-            border-top: 1px dashed #2a3f4a;
-            padding-top: 1rem;
-        }
-
-        .legend-panel .resize-handle {
-            position: absolute;
-            left: -5px;
-            top: 0;
-            bottom: 0;
-            width: 10px;
-            cursor: ew-resize;
-            background: transparent;
-        }
-
-        @media (max-width: 700px) {
-            .header {
-                padding: 0.6rem 1rem;
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .nav-links {
-                justify-content: center;
-            }
-            .logo h1 { font-size: 1.2rem; }
-            .logo span { display: none; }
-            .wallet { justify-content: center; margin-left: 0; }
-            #walletAddress { display: none; }
-            .legend-panel { width: 90%; right: 5%; top: 120px; max-width: 320px; }
-        }
-    </style>
+    @media (max-width: 700px) {
+      .header { padding: 0.6rem 1rem; flex-direction: column; align-items: stretch; }
+      .nav-links { justify-content: center; }
+      .logo h1 { font-size: 1.2rem; }
+      .logo span { display: none; }
+      .wallet { justify-content: center; margin-left: 0; }
+      #walletAddress { display: none; }
+      .legend-panel { width: 90%; right: 5%; top: 120px; max-width: 320px; }
+    }
+  </style>
 </head>
 <body>
-    <div class="header">
-        <div class="logo">
-            <h1>INPINITY</h1>
-            <span>Interactive Map</span>
-        </div>
-        <div class="nav-links">
-            <a href="index.html">🏠 Home</a>
-            <a href="mint.html">⛏️ Mint</a>
-            <a href="game.html">🎮 Game</a>
-        </div>
-        <div class="wallet">
-            <div id="walletAddress">Not connected</div>
-            <button id="connectBtn">Connect Wallet</button>
-        </div>
+  <div class="header">
+    <div class="logo">
+      <h1>INPINITY</h1>
+      <span>Interactive Map</span>
+    </div>
+    <div class="nav-links">
+      <a href="index.html">🏠 Home</a>
+      <a href="mint.html">⛏️ Mint</a>
+      <a href="game.html">🎮 Game</a>
+    </div>
+    <div class="wallet">
+      <div id="walletAddress">Not connected</div>
+      <button id="connectBtn">Connect Wallet</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="canvas-container" id="canvasContainer">
+      <canvas id="pyramidCanvas"></canvas>
+      <div class="tooltip" id="tooltip"></div>
     </div>
 
-    <div class="main">
-        <div class="canvas-container" id="canvasContainer">
-            <canvas id="pyramidCanvas"></canvas>
-            <div class="tooltip" id="tooltip"></div>
+    <!-- Interaktive Sidebar -->
+    <div class="legend-panel" id="legendPanel">
+      <div class="resize-handle" id="resizeHandle"></div>
+      <div class="legend-header" id="dragHandle">
+        <h3>🔷 Block Control</h3>
+        <div class="legend-controls">
+          <button id="collapseBtn">−</button>
+          <button id="resetPosBtn">↺</button>
+        </div>
+      </div>
+      <div class="legend-content" id="legendContent">
+        <!-- Block-Details -->
+        <div class="detail-card" id="blockDetail">
+          <p style="color: #98a9b9; text-align: center;">Click a block to start</p>
         </div>
 
-        <!-- Interaktive Sidebar -->
-        <div class="legend-panel" id="legendPanel">
-            <div class="resize-handle" id="resizeHandle"></div>
-            <div class="legend-header" id="dragHandle">
-                <h3>🔷 Block Control</h3>
-                <div class="legend-controls">
-                    <button id="collapseBtn">−</button>
-                    <button id="resetPosBtn">↺</button>
-                </div>
-            </div>
-            <div class="legend-content" id="legendContent">
-                <!-- Block-Details -->
-                <div class="detail-card" id="blockDetail">
-                    <p style="color: #98a9b9; text-align: center;">Click a block to start</p>
-                </div>
+        <!-- Aktionen -->
+        <div id="actionPanel" style="display: none;">
+          <div class="action-buttons" id="ownerActions"></div>
+          <div class="action-buttons" id="attackerActions"></div>
 
-                <!-- Aktionen -->
-                <div id="actionPanel" style="display: none;">
-                    <div class="action-buttons" id="ownerActions"></div>
-                    <div class="action-buttons" id="attackerActions"></div>
-                    <div class="input-group" id="protectionInput" style="display: none;">
-                        <label>Protection %</label>
-                        <input type="number" id="protectLevel" min="0" max="50" value="10">
-                        <button class="action-btn" id="protectBtn">🛡️ Buy</button>
-                    </div>
-                    <div class="input-group" id="attackInput" style="display: none;">
-                        <label>Resource</label>
-                        <select id="attackResource"></select>
-                        <button class="action-btn" id="attackBtn">⚔️ Attack</button>
-                    </div>
-                    <div id="actionMessage" class="message"></div>
-                </div>
+          <div class="input-group" id="protectionInput" style="display: none;">
+            <label>Protection %</label>
+            <input type="number" id="protectLevel" min="0" max="50" value="10" />
+            <button class="action-btn" id="protectBtn">🛡️ Buy</button>
+          </div>
 
-                <!-- Angriffsübersicht -->
-                <div style="margin: 1.5rem 0; border-top: 1px solid #2a3f4a; padding-top: 1rem;">
-                    <h4 style="color: #d4af37; margin-bottom: 1rem;">⚔️ Your Attacks</h4>
-                    <div id="userAttacksList" class="attacks-list">
-                        <p style="color: #98a9b9;">Connect wallet to see your attacks.</p>
-                    </div>
-                </div>
+          <div class="input-group" id="attackInput" style="display: none;">
+            <label>Resource</label>
+            <select id="attackResource"></select>
+            <button class="action-btn" id="attackBtn">⚔️ Attack</button>
+          </div>
 
-                <!-- Token Exchange -->
-                <div style="margin: 1.5rem 0; border-top: 1px solid #2a3f4a; padding-top: 1rem;">
-                    <h4 style="color: #d4af37; margin-bottom: 1rem;">💰 Token Exchange</h4>
-                    <div class="input-group">
-                        <label>INPI</label>
-                        <input type="number" id="inpiAmount" min="0" step="0.0001" value="10" placeholder="Amount">
-                        <button class="action-btn" id="exchangeInpiBtn">→ PIT</button>
-                    </div>
-                    <div class="input-group">
-                        <label>PIT</label>
-                        <input type="number" id="pitAmount" min="0" step="0.0001" value="1000" placeholder="Amount">
-                        <button class="action-btn" id="exchangePitBtn">→ INPI</button>
-                    </div>
-                    <div id="exchangeMessage" class="message"></div>
-                </div>
-
-                <!-- Eigene Ressourcen -->
-                <div style="margin: 1rem 0; border-top: 1px solid #2a3f4a; padding-top: 1rem;">
-                    <h4 style="color: #d4af37; margin-bottom: 1rem;">📦 Your Resources</h4>
-                    <div id="userResources" style="display: flex; flex-direction: column; gap: 0.3rem; max-height: 150px; overflow-y: auto;">
-                        <p style="color: #98a9b9;">Connect wallet to see your resource tokens.</p>
-                    </div>
-                </div>
-
-                <!-- FAQ / Prozesserklärungen -->
-                <div class="faq-section">
-                    <h4 style="color: #d4af37; margin-bottom: 1rem;">❓ Game Processes</h4>
-                    
-                    <div class="faq-item">
-                        <div class="faq-question" onclick="this.nextElementSibling.classList.toggle('hidden')">
-                            <span>⛏️ Minting</span>
-                            <span>▼</span>
-                        </div>
-                        <div class="faq-answer hidden">
-                            <strong>Mint With:</strong><br>
-                            • 0.003 ETH<br>
-                            • 30 INPI<br>
-                            • 0.0015 ETH + 15 INPI (mixed)<br>
-                            <br>
-                            Each block has a unique (row, col) coordinate. Row 0 is the top, 100 rows total. Minting gives you an unrevealed block.
-                        </div>
-                    </div>
-
-                    <div class="faq-item">
-                        <div class="faq-question" onclick="this.nextElementSibling.classList.toggle('hidden')">
-                            <span>🔓 Revealing</span>
-                            <span>▼</span>
-                        </div>
-                        <div class="faq-answer hidden">
-                            Reveal your block using π and φ proofs. Once revealed, you can see its rarity (Bronze → Diamond) and daily production rates. Rarity determines resource output.
-                        </div>
-                    </div>
-
-                    <div class="faq-item">
-                        <div class="faq-question" onclick="this.nextElementSibling.classList.toggle('hidden')">
-                            <span>🌾 Farming</span>
-                            <span>▼</span>
-                        </div>
-                        <div class="faq-answer hidden">
-                            <strong>Start Farming:</strong> Your block begins producing resources daily.<br>
-                            <strong>Claim Resources:</strong> Collect produced resources at any time.<br>
-                            <strong>Stop Farming:</strong> Stops production (resources remain).<br>
-                            Resources are ERC1155 tokens and can be viewed in "Your Resources".
-                        </div>
-                    </div>
-
-                    <div class="faq-item">
-                        <div class="faq-question" onclick="this.nextElementSibling.classList.toggle('hidden')">
-                            <span>🛡️ Protection</span>
-                            <span>▼</span>
-                        </div>
-                        <div class="faq-answer hidden">
-                            Buy protection for your block with INPI. Protection level (0-50%) reduces stolen resources during attacks. Costs 10 INPI per percent. Lasts 3.14 days.
-                        </div>
-                    </div>
-
-                    <div class="faq-item">
-                        <div class="faq-question" onclick="this.nextElementSibling.classList.toggle('hidden')">
-                            <span>⚔️ Attacking</span>
-                            <span>▼</span>
-                        </div>
-                        <div class="faq-answer hidden">
-                            <strong>1. Start Attack:</strong> Choose target block and resource to steal.<br>
-                            <strong>2. Wait 24h:</strong> Attack becomes executable.<br>
-                            <strong>3. Execute:</strong> Steal resources from target (minus their protection).<br>
-                            Blocks under attack have <span style="color:#000;">⚫ black</span> borders; executable attacks have <span style="color:#e74c3c;">🔴 red</span> borders.
-                        </div>
-                    </div>
-
-                    <div class="faq-item">
-                        <div class="faq-question" onclick="this.nextElementSibling.classList.toggle('hidden')">
-                            <span>🤝 Partnerships</span>
-                            <span>▼</span>
-                        </div>
-                        <div class="faq-answer hidden">
-                            Partner blocks (marked with ★) can produce special resources: Copper, Obsidian, Crystal, Mysterium, and Aether. These are used for upcoming Infinite City upgrades.
-                        </div>
-                    </div>
-
-                    <div class="faq-item">
-                        <div class="faq-question" onclick="this.nextElementSibling.classList.toggle('hidden')">
-                            <span>💰 Token Exchange</span>
-                            <span>▼</span>
-                        </div>
-                        <div class="faq-answer hidden">
-                            <strong>INPI → PIT:</strong> Exchange INPI for Pitrone at the current rate (1 INPI = 100 PIT).<br>
-                            <strong>PIT → INPI:</strong> Exchange Pitrone back to INPI.<br>
-                            Rate may change based on pool liquidity.
-                        </div>
-                    </div>
-                </div>
-
-                <h4 style="color: #d4af37; margin: 1.5rem 0 0.8rem;">Legend</h4>
-                <div class="legend-item"><div class="color-box color-gray"></div> Not minted</div>
-                <div class="legend-item"><div class="color-box color-green"></div> Minted, not revealed</div>
-                <div class="legend-item"><div class="color-box color-gold"></div> Revealed</div>
-                <div class="legend-item"><div class="color-box color-cyan"></div> Your block</div>
-                <div class="legend-item"><div class="color-box color-gold border-blue"></div> Farming active</div>
-                <div class="legend-item"><div class="color-box color-gold border-purple"></div> Protected</div>
-                <div class="legend-item"><div class="color-box color-gold border-black"></div> Under attack</div>
-                <div class="legend-item"><div class="color-box color-gold border-red"></div> Attack ready</div>
-                <div class="legend-item"><div class="color-box color-gold" style="position: relative;"><span class="star">★</span></div> Partner block</div>
-
-                <div class="footer-note">
-                    <p>100 rows · 10,000 blocks</p>
-                    <p>π · φ · Fibonacci</p>
-                </div>
-            </div>
+          <div id="actionMessage" class="message"></div>
         </div>
+
+        <!-- Angriffsübersicht -->
+        <div style="margin: 1.5rem 0; border-top: 1px solid #2a3f4a; padding-top: 1rem;">
+          <h4 style="color: #d4af37; margin-bottom: 1rem;">⚔️ Your Attacks</h4>
+          <div id="userAttacksList" class="attacks-list">
+            <p style="color: #98a9b9;">Connect wallet to see your attacks.</p>
+          </div>
+        </div>
+
+        <!-- Token Exchange -->
+        <div style="margin: 1.5rem 0; border-top: 1px solid #2a3f4a; padding-top: 1rem;">
+          <h4 style="color: #d4af37; margin-bottom: 1rem;">💰 Token Exchange</h4>
+          <div class="input-group">
+            <label>INPI</label>
+            <input type="number" id="inpiAmount" min="0" step="0.0001" value="10" placeholder="Amount" />
+            <button class="action-btn" id="exchangeInpiBtn">→ PIT</button>
+          </div>
+          <div class="input-group">
+            <label>PIT</label>
+            <input type="number" id="pitAmount" min="0" step="0.0001" value="1000" placeholder="Amount" />
+            <button class="action-btn" id="exchangePitBtn">→ INPI</button>
+          </div>
+          <div id="exchangeMessage" class="message"></div>
+        </div>
+
+        <!-- Eigene Ressourcen -->
+        <div style="margin: 1rem 0; border-top: 1px solid #2a3f4a; padding-top: 1rem;">
+          <h4 style="color: #d4af37; margin-bottom: 1rem;">📦 Your Resources</h4>
+          <div id="userResources" style="display: flex; flex-direction: column; gap: 0.3rem; max-height: 150px; overflow-y: auto;">
+            <p style="color: #98a9b9;">Connect wallet to see your resource tokens.</p>
+          </div>
+        </div>
+
+        <!-- FAQ / Prozesserklärungen -->
+        <div class="faq-section">
+          <h4 style="color: #d4af37; margin-bottom: 1rem;">❓ Game Processes</h4>
+
+          <div class="faq-item">
+            <div class="faq-question" onclick="this.nextElementSibling.classList.toggle('hidden')">
+              <span>⛏️ Minting</span><span>▼</span>
+            </div>
+            <div class="faq-answer hidden">
+              <strong>Mint With:</strong><br />
+              • 0.003 ETH<br />
+              • 30 INPI<br />
+              • 0.0015 ETH + 15 INPI (mixed)<br /><br />
+              Each block has a unique (row, col) coordinate. Row 0 is the top, 100 rows total. Minting gives you an unrevealed block.
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question" onclick="this.nextElementSibling.classList.toggle('hidden')">
+              <span>🔓 Revealing</span><span>▼</span>
+            </div>
+            <div class="faq-answer hidden">
+              Reveal your block using π and φ proofs. Once revealed, you can see its rarity (Bronze → Diamond) and daily production rates. Rarity determines resource output.
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question" onclick="this.nextElementSibling.classList.toggle('hidden')">
+              <span>🌾 Farming</span><span>▼</span>
+            </div>
+            <div class="faq-answer hidden">
+              <strong>Start Farming:</strong> Your block begins producing resources daily.<br />
+              <strong>Claim Resources:</strong> Collect produced resources at any time.<br />
+              <strong>Stop Farming:</strong> Stops production (resources remain).<br />
+              Resources are ERC1155 tokens and can be viewed in "Your Resources".
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question" onclick="this.nextElementSibling.classList.toggle('hidden')">
+              <span>🛡️ Protection</span><span>▼</span>
+            </div>
+            <div class="faq-answer hidden">
+              Buy protection for your block with INPI. Protection level (0-50%) reduces stolen resources during attacks. Costs 10 INPI per percent. Lasts 3.14 days.
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question" onclick="this.nextElementSibling.classList.toggle('hidden')">
+              <span>⚔️ Attacking</span><span>▼</span>
+            </div>
+            <div class="faq-answer hidden">
+              <strong>1. Start Attack:</strong> Choose target block and resource to steal.<br />
+              <strong>2. Wait 24h:</strong> Attack becomes executable.<br />
+              <strong>3. Execute:</strong> Steal resources from target (minus their protection).<br />
+              Blocks under attack have <span style="color:#000;">⚫ black</span> borders; executable attacks have <span style="color:#e74c3c;">🔴 red</span> borders.
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question" onclick="this.nextElementSibling.classList.toggle('hidden')">
+              <span>🤝 Partnerships</span><span>▼</span>
+            </div>
+            <div class="faq-answer hidden">
+              Partner blocks (marked with ★) can produce special resources: Copper, Obsidian, Crystal, Mysterium, and Aether. These are used for upcoming Infinite City upgrades.
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question" onclick="this.nextElementSibling.classList.toggle('hidden')">
+              <span>💰 Token Exchange</span><span>▼</span>
+            </div>
+            <div class="faq-answer hidden">
+              <strong>INPI → PIT:</strong> Exchange INPI for Pitrone at the current rate (1 INPI = 100 PIT).<br />
+              <strong>PIT → INPI:</strong> Exchange Pitrone back to INPI.<br />
+              Rate may change based on pool liquidity.
+            </div>
+          </div>
+        </div>
+
+        <h4 style="color: #d4af37; margin: 1.5rem 0 0.8rem;">Legend</h4>
+        <div class="legend-item"><div class="color-box color-gray"></div> Not minted</div>
+        <div class="legend-item"><div class="color-box color-green"></div> Minted, not revealed</div>
+        <div class="legend-item"><div class="color-box color-gold"></div> Revealed</div>
+        <div class="legend-item"><div class="color-box color-cyan"></div> Your block</div>
+        <div class="legend-item"><div class="color-box color-gold border-blue"></div> Farming active</div>
+        <div class="legend-item"><div class="color-box color-gold border-purple"></div> Protected</div>
+        <div class="legend-item"><div class="color-box color-gold border-black"></div> Under attack</div>
+        <div class="legend-item"><div class="color-box color-gold border-red"></div> Attack ready</div>
+        <div class="legend-item"><div class="color-box color-gold" style="position: relative;"><span class="star">★</span></div> Partner block</div>
+
+        <div class="footer-note">
+          <p>100 rows · 10,000 blocks</p>
+          <p>π · φ · Fibonacci</p>
+        </div>
+      </div>
     </div>
+  </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
-    <script>
-        (async function() {
-            // ==================== KONFIGURATION ====================
-            const DEPLOYMENT_ID_V1 = "QmbpREskj5F7R8WpzUS6pv4XkKx1M34KAUc19fuUPtmu3o";
-            const SUBGRAPH_ID_V2 = "22b4uXYgs4rwTj6n3iWB4d8Vk4s7LAG7dTAtRaTXfseQ";
-            const API_KEY = "059bc2832dfe50597009e556898d4ba6";
-            const SUBGRAPH_URL_V1 = `https://gateway.thegraph.com/api/${API_KEY}/deployments/id/${DEPLOYMENT_ID_V1}`;
-            const SUBGRAPH_URL_V2 = `https://gateway.thegraph.com/api/${API_KEY}/subgraphs/id/${SUBGRAPH_ID_V2}`;
-            const BASE_BLOCK_SIZE = 24;
+  <!-- Ethers v6 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
 
-            // Contract Adressen (Base Mainnet) - ALLE V2!
-            const NFT_ADDRESS = "0x277a0D5864293C78d7387C54B48c35D5E9578Ab1";
-            const FARMING_V2_ADDRESS = "0x852Bce0713aAF409c4412155Ab8CE6191B525C30";
-            const PIRATES_V2_ADDRESS = "0x46290466327b0Fab5791f030f8487321635Eeb37";
-            const MERCENARY_V2_ADDRESS = "0xFEa09ccA75dbc63cc8053739A61777Bd13fC6Bc2";
-            const PARTNERSHIP_V2_ADDRESS = "0xb18323efE4Cc8c36e10D664E287b4e2c82Fe3ad9";
-            const RESOURCE_TOKEN_ADDRESS = "0x71E76a6065197acdd1a4d6B736712F80D1Fd3D8b";
-            const INPI_ADDRESS = "0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D";
-            const PITRONE_ADDRESS = "0x7240Ec5B3Ba944888E186c74D0f8B4F5F71c9AE8";
+  <script>
+    (async function () {
+      // ==================== KONFIGURATION ====================
+      const DEPLOYMENT_ID_V1 = "QmbpREskj5F7R8WpzUS6pv4XkKx1M34KAUc19fuUPtmu3o";
+      const SUBGRAPH_ID_V2 = "22b4uXYgs4rwTj6n3iWB4d8Vk4s7LAG7dTAtRaTXfseQ";
+      const API_KEY = "059bc2832dfe50597009e556898d4ba6";
+      const SUBGRAPH_URL_V1 = `https://gateway.thegraph.com/api/${API_KEY}/deployments/id/${DEPLOYMENT_ID_V1}`;
+      const SUBGRAPH_URL_V2 = `https://gateway.thegraph.com/api/${API_KEY}/subgraphs/id/${SUBGRAPH_ID_V2}`;
+      const BASE_BLOCK_SIZE = 24;
 
-            // ABIs
-            const NFT_ABI = [
-                "function revealBlock(uint256 tokenId, bytes32[] piProof, bytes32[] phiProof, uint8 piDigit, uint8 phiDigit) external",
-                "function calculateRarity(uint256 tokenId) view returns (uint8)"
-            ];
-            const FARMING_V2_ABI = [
-                "function startFarming(uint256 tokenId) external",
-                "function stopFarming(uint256 tokenId) external",
-                "function claimResources(uint256 tokenId) external",
-                "function farms(uint256) view returns (uint256 startTime, uint256 lastClaimTime, bool isActive)"
-            ];
-            const PIRATES_V2_ABI = [
-                "function startAttack(uint256 attackerTokenId, uint256 targetTokenId, uint8 resource) external",
-                "function executeAttack(uint256 targetTokenId, uint256 attackIndex, uint256 protectionLevel) external"
-            ];
-            const MERCENARY_V2_ABI = [
-                "function hireMercenaries(uint256 tokenId, uint256 protectionLevel) external"
-            ];
-            const PARTNERSHIP_V2_ABI = [
-                "function isPartnerBlock(uint256 tokenId) view returns (bool)"
-            ];
-            const INPI_ABI = [
-                "function approve(address spender, uint256 amount) returns (bool)",
-                "function balanceOf(address account) view returns (uint256)",
-                "function allowance(address owner, address spender) view returns (uint256)"
-            ];
-            const PITRONE_ABI = [
-                "function balanceOf(address account) view returns (uint256)",
-                "function exchangeINPI(uint256 inpiAmount) external",
-                "function exchangePitrone(uint256 pitroneAmount) external",
-                "function getRate() view returns (uint256)",
-                "function availableINPI() view returns (uint256)",
-                "function availablePitrone() view returns (uint256)",
-                "function allowance(address owner, address spender) view returns (uint256)",
-                "function approve(address spender, uint256 amount) returns (bool)"
-            ];
+      // Worker
+      const WORKER_URL = "https://inpinity-worker-final.s-plat.workers.dev";
 
-            // ==================== GLOBALE VARIABLEN ====================
-            let provider, signer, userAddress = null;
-            let readOnlyProvider;
-            let nftReadOnlyContract;
-            let tokens = {};
-            let userResources = [];
-            let selectedTokenId = null;
-            let selectedTokenOwner = null;
-            let selectedRevealed = false;
-            let selectedRarity = null;
-            let userAttacks = [];
+      // Contract Adressen (Base Mainnet) - ALLE V2!
+      const NFT_ADDRESS = "0x277a0D5864293C78d7387C54B48c35D5E9578Ab1";
+      const FARMING_V2_ADDRESS = "0x852Bce0713aAF409c4412155Ab8CE6191B525C30";
+      const PIRATES_V2_ADDRESS = "0x46290466327b0Fab5791f030f8487321635Eeb37";
+      const MERCENARY_V2_ADDRESS = "0xFEa09ccA75dbc63cc8053739A61777Bd13fC6Bc2";
+      const PARTNERSHIP_V2_ADDRESS = "0xb18323efE4Cc8c36e10D664E287b4e2c82Fe3ad9";
+      const INPI_ADDRESS = "0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D";
+      const PITRONE_ADDRESS = "0x7240Ec5B3Ba944888E186c74D0f8B4F5F71c9AE8";
 
-            let nftContract;
-            let farmingV2Contract;
-            let piratesV2Contract;
-            let mercenaryV2Contract;
-            let partnershipV2Contract;
-            let inpiContract, pitroneContract;
+      // ABIs (minimal, but correct for this page)
+      const NFT_ABI = [
+        "function revealBlock(uint256 tokenId, bytes32[] piProof, bytes32[] phiProof, uint8 piDigit, uint8 phiDigit) external",
+        "function calculateRarity(uint256 tokenId) view returns (uint8)"
+      ];
 
-            const canvas = document.getElementById('pyramidCanvas');
-            const ctx = canvas.getContext('2d');
-            const container = document.getElementById('canvasContainer');
-            const tooltip = document.getElementById('tooltip');
-            const blockDetailDiv = document.getElementById('blockDetail');
-            const actionPanel = document.getElementById('actionPanel');
-            const ownerActionsDiv = document.getElementById('ownerActions');
-            const attackerActionsDiv = document.getElementById('attackerActions');
-            const protectionInput = document.getElementById('protectionInput');
-            const attackInput = document.getElementById('attackInput');
-            const actionMessage = document.getElementById('actionMessage');
-            const exchangeMessage = document.getElementById('exchangeMessage');
-            const userResourcesDiv = document.getElementById('userResources');
+      const FARMING_V2_ABI = [
+        "function startFarming(uint256 tokenId) external",
+        "function stopFarming(uint256 tokenId) external",
+        "function claimResources(uint256 tokenId) external",
+        "function farms(uint256) view returns (uint256 startTime, uint256 lastClaimTime, bool isActive)"
+      ];
 
-            let scale = 1.0;
-            let offsetX = 0, offsetY = 0;
-            let isDragging = false;
-            let lastMouseX, lastMouseY;
-            let pinchStartDist = 0;
+      const PIRATES_V2_ABI = [
+        "function startAttack(uint256 attackerTokenId, uint256 targetTokenId, uint8 resource) external",
+        "function executeAttack(uint256 targetTokenId, uint256 attackIndex, uint256 protectionLevel) external"
+      ];
 
-            const resourceNames = [
-                "Oil", "Lemons", "Iron", "Gold", "Platinum",
-                "Copper", "Crystal", "Obsidian", "Mysterium", "Aether"
-            ];
-            const rarityNames = ["Bronze", "Silver", "Gold", "Platinum", "Diamond"];
-            const rarityClass = ["rarity-bronze", "rarity-silver", "rarity-gold", "rarity-platinum", "rarity-diamond"];
+      const MERCENARY_V2_ABI = [
+        "function hireMercenaries(uint256 tokenId, uint256 protectionLevel) external",
+        "function getProtectionLevel(uint256 tokenId) view returns (uint256)"
+      ];
 
-            // ==================== DROPDOWN BEFÜLLEN ====================
-            function populateAttackResourceSelect() {
-                const select = document.getElementById('attackResource');
-                if (!select) return;
-                select.innerHTML = '';
-                for (let i = 0; i < resourceNames.length; i++) {
-                    const option = document.createElement('option');
-                    option.value = i;
-                    option.textContent = resourceNames[i];
-                    select.appendChild(option);
+      const PARTNERSHIP_V2_ABI = [
+        "function isPartnerBlock(uint256 tokenId) view returns (bool)"
+      ];
+
+      const INPI_ABI = [
+        "function approve(address spender, uint256 amount) returns (bool)",
+        "function balanceOf(address account) view returns (uint256)",
+        "function allowance(address owner, address spender) view returns (uint256)"
+      ];
+
+      const PITRONE_ABI = [
+        "function balanceOf(address account) view returns (uint256)",
+        "function exchangeINPI(uint256 inpiAmount) external",
+        "function exchangePitrone(uint256 pitroneAmount) external",
+        "function getRate() view returns (uint256)",
+        "function availableINPI() view returns (uint256)",
+        "function availablePitrone() view returns (uint256)",
+        "function allowance(address owner, address spender) view returns (uint256)",
+        "function approve(address spender, uint256 amount) returns (bool)"
+      ];
+
+      // ==================== GLOBALE VARIABLEN ====================
+      let provider, signer, userAddress = null;
+      let readOnlyProvider, nftReadOnlyContract;
+
+      let tokens = {};             // tokenId -> { owner, revealed, farmActive, protectionActive, partnerActive, ... }
+      let userResources = [];      // from subgraph
+      let selectedTokenId = null;
+      let selectedTokenOwner = null;
+
+      let userAttacks = [];        // { id, targetTokenId, attackIndex, endTime, resource }
+      let attacksTicker = null;
+
+      let nftContract, farmingV2Contract, piratesV2Contract, mercenaryV2Contract, partnershipV2Contract, inpiContract, pitroneContract;
+
+      const canvas = document.getElementById("pyramidCanvas");
+      const ctx = canvas.getContext("2d");
+      const container = document.getElementById("canvasContainer");
+      const tooltip = document.getElementById("tooltip");
+
+      const blockDetailDiv = document.getElementById("blockDetail");
+      const actionPanel = document.getElementById("actionPanel");
+      const ownerActionsDiv = document.getElementById("ownerActions");
+      const protectionInput = document.getElementById("protectionInput");
+      const attackInput = document.getElementById("attackInput");
+      const actionMessage = document.getElementById("actionMessage");
+      const exchangeMessage = document.getElementById("exchangeMessage");
+      const userResourcesDiv = document.getElementById("userResources");
+
+      let scale = 1.0;
+      let offsetX = 0, offsetY = 0;
+      let isDragging = false;
+      let lastMouseX = 0, lastMouseY = 0;
+      let pinchStartDist = 0;
+
+      const resourceNames = [
+        "Oil", "Lemons", "Iron", "Gold", "Platinum",
+        "Copper", "Crystal", "Obsidian", "Mysterium", "Aether"
+      ];
+      const rarityNames = ["Bronze", "Silver", "Gold", "Platinum", "Diamond"];
+      const rarityClass = ["rarity-bronze", "rarity-silver", "rarity-gold", "rarity-platinum", "rarity-diamond"];
+
+      // ==================== DROPDOWN BEFÜLLEN ====================
+      function populateAttackResourceSelect() {
+        const select = document.getElementById("attackResource");
+        if (!select) return;
+        select.innerHTML = "";
+        for (let i = 0; i < resourceNames.length; i++) {
+          const option = document.createElement("option");
+          option.value = String(i);
+          option.textContent = resourceNames[i];
+          select.appendChild(option);
+        }
+      }
+      populateAttackResourceSelect();
+
+      // ==================== HILFSFUNKTIONEN ====================
+      function shortenAddress(addr) {
+        return addr ? addr.slice(0, 6) + "..." + addr.slice(-4) : "";
+      }
+
+      function formatTime(seconds) {
+        if (seconds < 0) seconds = 0;
+        if (seconds < 60) return seconds + "s";
+        if (seconds < 3600) return Math.floor(seconds / 60) + "m";
+        return Math.floor(seconds / 3600) + "h";
+      }
+
+      function clamp(n, min, max) {
+        return Math.max(min, Math.min(max, n));
+      }
+
+      async function fetchSubgraph(url, query) {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${API_KEY}`
+          },
+          body: JSON.stringify({ query })
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const json = await response.json();
+        if (json.errors) {
+          console.error("Subgraph error:", json.errors);
+          throw new Error(json.errors[0].message);
+        }
+        return json.data;
+      }
+
+      async function fetchAllWithPagination(url, fieldName, subfields, where = "") {
+        const pageSize = 1000;
+        let skip = 0;
+        let all = [];
+        while (true) {
+          const query = `{ ${fieldName}(first:${pageSize}, skip:${skip}${where ? ", where: " + where : ""}) { ${subfields} } }`;
+          let data;
+          try {
+            data = await fetchSubgraph(url, query);
+          } catch (e) {
+            console.warn(`Pagination for ${fieldName} failed:`, e);
+            break;
+          }
+          const items = data[fieldName];
+          if (!items || items.length === 0) break;
+          all = all.concat(items);
+          if (items.length < pageSize) break;
+          skip += pageSize;
+        }
+        return all;
+      }
+
+      function getProduction(rarity, row) {
+        const production = {};
+        if (rarity === 0) {
+          production.OIL = 10; production.LEMONS = 5; production.IRON = 3;
+        } else if (rarity === 1) {
+          production.OIL = 20; production.LEMONS = 10; production.IRON = 6; production.GOLD = 1;
+        } else if (rarity === 2) {
+          production.OIL = 30; production.LEMONS = 15; production.IRON = 9; production.GOLD = 2; production.PLATINUM = 1;
+        } else if (rarity === 3) {
+          production.OIL = 40; production.LEMONS = 20; production.IRON = 12; production.GOLD = 3; production.PLATINUM = 2; production.CRYSTAL = 1;
+        } else if (rarity === 4) {
+          production.OIL = 60; production.LEMONS = 30; production.IRON = 18; production.GOLD = 5; production.PLATINUM = 3; production.CRYSTAL = 2; production.MYSTERIUM = 1;
+          if (row === 0) production.AETHER = 1;
+        }
+        return production;
+      }
+
+      function getAttackStorageKey(targetTokenId) {
+        return `attack_${targetTokenId}`;
+      }
+
+      // ==================== ANGRIFFE LADEN (Subgraph + localStorage resource) ====================
+      async function loadUserAttacks() {
+        if (!userAddress) return;
+
+        try {
+          // IMPORTANT: use fields that definitely exist (same as your mint dashboard)
+          const where = `{ attacker: "${userAddress.toLowerCase()}", executed: false }`;
+          const attacks = await fetchAllWithPagination(
+            SUBGRAPH_URL_V2,
+            "attacks",
+            "id attacker target attackIndex startTime endTime executed",
+            where
+          );
+
+          userAttacks = attacks.map(a => {
+            const targetTokenId = parseInt(a.target, 10);
+            const attackIndex = parseInt(a.attackIndex, 10);
+            const endTime = parseInt(a.endTime, 10);
+
+            // resource from localStorage (fallback 0)
+            let resource = 0;
+            const saved = localStorage.getItem(getAttackStorageKey(targetTokenId));
+            if (saved) {
+              try {
+                const parsed = JSON.parse(saved);
+                resource = Number(parsed.resource ?? 0);
+                if (!Number.isFinite(resource)) resource = 0;
+              } catch (_) {}
+            }
+
+            return {
+              id: a.id,
+              attacker: a.attacker,
+              targetTokenId,
+              attackIndex,
+              startTime: parseInt(a.startTime, 10),
+              endTime,
+              executed: !!a.executed,
+              resource
+            };
+          });
+
+          displayUserAttacks();
+          drawPyramid();
+          startAttacksTicker();
+        } catch (e) {
+          console.error("Failed to load attacks:", e);
+        }
+      }
+
+      function displayUserAttacks() {
+        const container = document.getElementById("userAttacksList");
+        if (!container) return;
+
+        if (!userAddress) {
+          container.innerHTML = '<p style="color:#98a9b9;">Connect wallet to see your attacks.</p>';
+          return;
+        }
+
+        if (userAttacks.length === 0) {
+          container.innerHTML = '<p style="color:#98a9b9;">No active attacks.</p>';
+          return;
+        }
+
+        const now = Math.floor(Date.now() / 1000);
+        let html = "";
+
+        userAttacks.forEach(attack => {
+          const timeLeft = attack.endTime - now;
+          const ready = timeLeft <= 0;
+
+          html += `
+            <div class="attack-item">
+              <span>#${attack.targetTokenId} (${resourceNames[attack.resource] || "Oil"})</span>
+              <span class="attack-status" data-endtime="${attack.endTime}" style="${ready ? "color:#51cf66;" : ""}">
+                ${ready ? "Ready" : "⏳ " + formatTime(timeLeft)}
+              </span>
+              <button class="execute-btn"
+                data-targetid="${attack.targetTokenId}"
+                data-attackindex="${attack.attackIndex}"
+                data-resource="${attack.resource}"
+                ${ready ? "" : "disabled"}
+              >${ready ? "⚔️ Execute" : "⏳ Waiting"}</button>
+            </div>
+          `;
+        });
+
+        container.innerHTML = html;
+
+        container.querySelectorAll(".execute-btn").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            if (btn.disabled) return;
+            const targetTokenId = parseInt(btn.dataset.targetid, 10);
+            const attackIndex = parseInt(btn.dataset.attackindex, 10);
+            const resource = parseInt(btn.dataset.resource, 10);
+            await executeAttack({ targetTokenId, attackIndex, resource });
+          });
+        });
+      }
+
+      function startAttacksTicker() {
+        if (attacksTicker) return;
+        attacksTicker = setInterval(() => {
+          if (!userAttacks || userAttacks.length === 0) return;
+
+          const now = Math.floor(Date.now() / 1000);
+
+          document.querySelectorAll(".attack-status").forEach(el => {
+            const endTime = parseInt(el.dataset.endtime || "0", 10);
+            if (!endTime) return;
+            const timeLeft = endTime - now;
+            if (timeLeft <= 0) {
+              el.textContent = "Ready";
+              el.style.color = "#51cf66";
+            } else {
+              el.textContent = "⏳ " + formatTime(timeLeft);
+              el.style.color = "";
+            }
+          });
+
+          document.querySelectorAll(".execute-btn").forEach(btn => {
+            const parent = btn.closest(".attack-item");
+            const statusEl = parent ? parent.querySelector(".attack-status") : null;
+            const endTime = statusEl ? parseInt(statusEl.dataset.endtime || "0", 10) : 0;
+            const timeLeft = endTime - now;
+            if (timeLeft <= 0) {
+              btn.disabled = false;
+              btn.textContent = "⚔️ Execute";
+            } else {
+              btn.disabled = true;
+              btn.textContent = "⏳ Waiting";
+            }
+          });
+
+          // update borders live
+          drawPyramid();
+        }, 1000);
+      }
+
+      // ==================== ANGRIFF AUSFÜHREN (PiratesV2.executeAttack + onchain protection) ====================
+      async function executeAttack(attack) {
+        actionMessage.innerHTML = '<span class="success">⏳ Executing attack...</span>';
+        try {
+          if (!piratesV2Contract || !mercenaryV2Contract) {
+            throw new Error("Connect wallet first.");
+          }
+          if (!attack || attack.targetTokenId == null || attack.attackIndex == null) {
+            throw new Error("Invalid attack data.");
+          }
+
+          // fetch protection on-chain (clamp 0..50)
+          let protectionLevel = 0;
+          try {
+            const p = await mercenaryV2Contract.getProtectionLevel(attack.targetTokenId);
+            protectionLevel = clamp(Number(p), 0, 50);
+            if (!Number.isFinite(protectionLevel)) protectionLevel = 0;
+          } catch (_) {
+            protectionLevel = 0;
+          }
+
+          const tx = await piratesV2Contract.executeAttack(
+            attack.targetTokenId,
+            attack.attackIndex,
+            protectionLevel,
+            { gasLimit: 350000 }
+          );
+
+          actionMessage.innerHTML = '<span class="success">⏳ Confirming...</span>';
+          await tx.wait();
+
+          actionMessage.innerHTML = '<span class="success">✅ Attack executed! Resources stolen.</span>';
+
+          // cleanup localStorage for this target (optional)
+          localStorage.removeItem(getAttackStorageKey(attack.targetTokenId));
+
+          await loadUserAttacks();
+          await loadUserResources();
+          await loadData(); // refresh map state
+        } catch (e) {
+          console.error("executeAttack error:", e);
+          let msg = e?.message || "Unknown error";
+          if ((msg + "").includes("execution reverted")) {
+            msg = "❌ Transaction reverted. Attack not ready / already executed / invalid index.";
+          }
+          actionMessage.innerHTML = `<span class="error">${msg}</span>`;
+        }
+      }
+
+      // ==================== DATEN LADEN (V1 + V2) ====================
+      async function loadData() {
+        try {
+          const [tokenItemsV1, tokenItemsV2] = await Promise.all([
+            fetchAllWithPagination(SUBGRAPH_URL_V1, "tokens", "id owner { id } revealed").catch(() => []),
+            fetchAllWithPagination(SUBGRAPH_URL_V2, "tokens", "id owner { id } revealed farm { active }").catch(() => [])
+          ]);
+
+          tokens = {};
+
+          tokenItemsV1.forEach(t => {
+            tokens[t.id] = {
+              owner: t.owner ? t.owner.id : null,
+              revealed: !!t.revealed,
+              farmActive: false,
+              protectionActive: false,
+              partnerActive: false
+            };
+          });
+
+          tokenItemsV2.forEach(t => {
+            if (!tokens[t.id]) {
+              tokens[t.id] = {
+                owner: t.owner ? t.owner.id : null,
+                revealed: !!t.revealed,
+                farmActive: t.farm ? !!t.farm.active : false,
+                protectionActive: false,
+                partnerActive: false
+              };
+            } else {
+              tokens[t.id].owner = t.owner ? t.owner.id : tokens[t.id].owner;
+              tokens[t.id].revealed = !!t.revealed || tokens[t.id].revealed;
+              if (t.farm && t.farm.active) tokens[t.id].farmActive = true;
+            }
+          });
+
+          // Protections V2
+          const protectionItems = await fetchAllWithPagination(SUBGRAPH_URL_V2, "protections", "id active").catch(() => []);
+          protectionItems.forEach(p => {
+            if (tokens[p.id]) tokens[p.id].protectionActive = !!p.active;
+          });
+
+          // Partnerships V2
+          const partnerItems = await fetchAllWithPagination(SUBGRAPH_URL_V2, "partnerships", "id active").catch(() => []);
+          partnerItems.forEach(p => {
+            if (tokens[p.id]) tokens[p.id].partnerActive = !!p.active;
+          });
+
+          // Farms V1 (optional)
+          const farmItemsV1 = await fetchAllWithPagination(SUBGRAPH_URL_V1, "farms", "id active").catch(() => []);
+          farmItemsV1.forEach(f => {
+            if (f.active && tokens[f.id]) {
+              if (!tokens[f.id].farmActive) tokens[f.id].farmActive = true;
+            }
+          });
+
+          if (userAddress) {
+            await loadUserResources();
+            await loadUserAttacks();
+          }
+
+          drawPyramid();
+        } catch (err) {
+          console.error("Fehler beim Laden:", err);
+        }
+      }
+
+      async function loadUserResources() {
+        if (!userAddress) return;
+        try {
+          const where = `{ account: "${userAddress.toLowerCase()}" }`;
+          const balanceItems = await fetchAllWithPagination(
+            SUBGRAPH_URL_V2,
+            "resourceBalances",
+            "id account resourceId amount",
+            where
+          );
+
+          userResources = balanceItems
+            .filter(b => (b.account || "").toLowerCase() === userAddress.toLowerCase())
+            .map(b => ({ resourceId: parseInt(b.resourceId, 10), amount: BigInt(b.amount) }));
+
+          updateUserResourcesDisplay();
+        } catch (err) {
+          console.error("Fehler beim Laden der ResourceBalances:", err);
+        }
+      }
+
+      function updateUserResourcesDisplay() {
+        if (!userAddress) {
+          userResourcesDiv.innerHTML = '<p style="color:#98a9b9;">Connect wallet to see your resource tokens.</p>';
+          return;
+        }
+        if (!userResources || userResources.length === 0) {
+          userResourcesDiv.innerHTML = '<p style="color:#98a9b9;">You have no resource tokens yet.</p>';
+          return;
+        }
+        userResources.sort((a, b) => a.resourceId - b.resourceId);
+        let html = "";
+        for (const r of userResources) {
+          const name = resourceNames[r.resourceId] || `Resource ${r.resourceId}`;
+          html += `<div class="detail-row"><span class="detail-label">${name}</span><span class="detail-value">${r.amount.toString()}</span></div>`;
+        }
+        userResourcesDiv.innerHTML = html;
+      }
+
+      // ==================== ZEICHNEN ====================
+      function drawPyramid() {
+        if (!canvas || !ctx) return;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+        ctx.translate(offsetX, offsetY);
+        ctx.scale(scale, scale);
+
+        const blockSize = BASE_BLOCK_SIZE;
+        const now = Math.floor(Date.now() / 1000);
+
+        for (let row = 0; row < 100; row++) {
+          const blocksInRow = 2 * row + 1;
+          const y = row * blockSize;
+
+          for (let col = 0; col < blocksInRow; col++) {
+            const tokenIdNum = row * 2048 + col;
+            const tokenId = String(tokenIdNum);
+            const token = tokens[tokenId];
+            const x = (col - row) * blockSize;
+
+            let fillColor = "#3a4048"; // not minted default
+            let strokeColor = null;
+            let lineWidth = 0;
+
+            if (token && token.owner) {
+              fillColor = token.revealed ? "#c9a959" : "#2e7d5e";
+              if (userAddress && token.owner.toLowerCase() === userAddress.toLowerCase()) {
+                fillColor = "#a0d6ff";
+              }
+
+              // Attacks border override (black/red)
+              const attack = userAttacks.find(a => String(a.targetTokenId) === tokenId);
+              if (attack) {
+                if (attack.endTime <= now) {
+                  strokeColor = "#e74c3c";
+                  lineWidth = 4;
+                } else {
+                  strokeColor = "#000000";
+                  lineWidth = 4;
                 }
+              } else {
+                if (token.protectionActive) {
+                  strokeColor = "#9b59b6";
+                  lineWidth = 3;
+                } else if (token.farmActive) {
+                  strokeColor = "#3498db";
+                  lineWidth = 3;
+                }
+              }
             }
-            populateAttackResourceSelect();
 
-            // ==================== HILFSFUNKTIONEN ====================
-            function shortenAddress(addr) {
-                return addr ? addr.slice(0,6) + '...' + addr.slice(-4) : '';
+            ctx.fillStyle = fillColor;
+            ctx.fillRect(x, y, blockSize, blockSize);
+
+            if (strokeColor) {
+              ctx.strokeStyle = strokeColor;
+              ctx.lineWidth = lineWidth;
+              ctx.strokeRect(x, y, blockSize, blockSize);
             }
 
-            async function fetchSubgraph(url, query) {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${API_KEY}`
-                    },
-                    body: JSON.stringify({ query })
+            if (token && token.partnerActive) {
+              ctx.save();
+              ctx.translate(x + blockSize - 8, y + 8);
+              ctx.font = 'bold 16px "Inter", sans-serif';
+              ctx.fillStyle = "#FFD700";
+              ctx.shadowColor = "#000";
+              ctx.shadowBlur = 4;
+              ctx.fillText("★", -8, 4);
+              ctx.restore();
+            }
+          }
+        }
+
+        ctx.restore();
+      }
+
+      function centerPyramid() {
+        const totalWidth = 199 * BASE_BLOCK_SIZE;
+        const totalHeight = 100 * BASE_BLOCK_SIZE;
+        const scaleX = (canvas.width / totalWidth) * 0.95;
+        const scaleY = (canvas.height / totalHeight) * 0.95;
+        scale = Math.min(scaleX, scaleY, 1.5);
+        offsetX = (canvas.width - totalWidth * scale) / 2;
+        offsetY = (canvas.height - totalHeight * scale) / 2;
+        drawPyramid();
+      }
+
+      // ==================== SIDEBAR & AKTIONEN ====================
+      async function updateSidebar(tokenId) {
+        selectedTokenId = tokenId;
+        const token = tokens[tokenId];
+        const owner = token ? token.owner : null;
+        selectedTokenOwner = owner;
+
+        let productionHtml = "";
+        let rarityDisplay = "";
+
+        if (token && token.owner && token.revealed && nftReadOnlyContract) {
+          try {
+            const tokenIdNum = parseInt(tokenId, 10);
+            const row = Math.floor(tokenIdNum / 2048);
+            const rarity = await nftReadOnlyContract.calculateRarity(tokenIdNum);
+            const r = Number(rarity);
+
+            rarityDisplay = `
+              <div class="detail-row">
+                <span class="detail-label">Rarity</span>
+                <span class="detail-value ${rarityClass[r]}">${rarityNames[r]}</span>
+              </div>
+            `;
+
+            const production = getProduction(r, row);
+            let prodText = "";
+            for (const [res, amount] of Object.entries(production)) {
+              prodText += `<div class="detail-row"><span class="detail-label">${res}</span><span class="detail-value">${amount}/day</span></div>`;
+            }
+            productionHtml = `<div class="detail-row"><span class="detail-label">Production</span></div>${prodText}`;
+          } catch (e) {
+            console.warn("Could not fetch rarity:", e);
+          }
+        }
+
+        let detailHtml = "";
+        if (token && owner) {
+          detailHtml = `
+            <div class="detail-row"><span class="detail-label">Block #</span><span class="detail-value">${tokenId}</span></div>
+            <div class="detail-row"><span class="detail-label">Owner</span><span class="detail-value">${shortenAddress(owner)}</span></div>
+            <div class="detail-row"><span class="detail-label">Revealed</span><span class="detail-value">${token.revealed ? "✅" : "❌"}</span></div>
+            ${rarityDisplay}
+            <div class="detail-row"><span class="detail-label">Farming</span><span class="detail-value">${token.farmActive ? "Active" : "Inactive"}</span></div>
+            <div class="detail-row"><span class="detail-label">Protection</span><span class="detail-value">${token.protectionActive ? "✅" : "❌"}</span></div>
+            <div class="detail-row"><span class="detail-label">Partner</span><span class="detail-value">${token.partnerActive ? "⭐" : "❌"}</span></div>
+            ${productionHtml}
+          `;
+        } else {
+          detailHtml = `<p style="color:#98a9b9; text-align:center;">Block #${tokenId} is not minted.</p>`;
+        }
+        blockDetailDiv.innerHTML = detailHtml;
+
+        actionPanel.style.display = "block";
+        ownerActionsDiv.innerHTML = "";
+        protectionInput.style.display = "none";
+        attackInput.style.display = "none";
+        actionMessage.innerHTML = "";
+
+        if (userAddress && owner && owner.toLowerCase() === userAddress.toLowerCase()) {
+          let btns = "";
+          if (!token.revealed) btns += `<button class="action-btn" id="revealBtn">🔓 Reveal Block</button>`;
+          if (!token.farmActive) {
+            btns += `<button class="action-btn" id="startFarmBtn">🌾 Start Farming</button>`;
+          } else {
+            btns += `<button class="action-btn" id="stopFarmBtn">⏹️ Stop Farming</button>`;
+            btns += `<button class="action-btn" id="claimBtn">💰 Claim Resources</button>`;
+          }
+          protectionInput.style.display = "flex";
+          ownerActionsDiv.innerHTML = btns;
+        } else if (userAddress && owner) {
+          attackInput.style.display = "flex";
+        } else {
+          actionPanel.style.display = "none";
+        }
+      }
+
+      // ==================== TRANSAKTION-HELPER ====================
+      async function sendTx(txPromise, messageDiv, successMsg) {
+        messageDiv.innerHTML = '<span class="success">⏳ Sending...</span>';
+        try {
+          const tx = await txPromise;
+          messageDiv.innerHTML = '<span class="success">⏳ Confirming...</span>';
+          await tx.wait();
+          messageDiv.innerHTML = `<span class="success">✅ ${successMsg}</span>`;
+          await loadData();
+          if (selectedTokenId) await updateSidebar(selectedTokenId);
+        } catch (err) {
+          console.error(err);
+          messageDiv.innerHTML = `<span class="error">❌ ${err.message || "Tx failed"}</span>`;
+        }
+      }
+
+      async function handleReveal() {
+        if (!selectedTokenId || !selectedTokenOwner) return;
+        const tokenIdNum = parseInt(selectedTokenId, 10);
+        const row = Math.floor(tokenIdNum / 2048);
+        const col = tokenIdNum % 2048;
+
+        try {
+          const response = await fetch(`${WORKER_URL}/api/get-proof?row=${row}&col=${col}`);
+          if (!response.ok) throw new Error("Proofs not found");
+          const proofs = await response.json();
+
+          const formatProof = (arr) =>
+            arr.map(item => {
+              const v = (item.left ? item.left : item.right);
+              return (v || "").startsWith("0x") ? v : ("0x" + v);
+            });
+
+          const piProof = formatProof(proofs.pi.proof);
+          const phiProof = formatProof(proofs.phi.proof);
+
+          const tx = nftContract.revealBlock(
+            selectedTokenId,
+            piProof,
+            phiProof,
+            proofs.pi.digit,
+            proofs.phi.digit,
+            { gasLimit: 500000 }
+          );
+
+          await sendTx(tx, actionMessage, "Block revealed!");
+        } catch (e) {
+          actionMessage.innerHTML = `<span class="error">❌ ${e.message}</span>`;
+        }
+      }
+
+      async function handleStartFarm() {
+        if (!selectedTokenId) return;
+        await sendTx(farmingV2Contract.startFarming(selectedTokenId), actionMessage, "Farming started!");
+      }
+
+      async function handleStopFarm() {
+        if (!selectedTokenId) return;
+        const token = tokens[selectedTokenId];
+        if (!token || !token.farmActive) return;
+        await sendTx(farmingV2Contract.stopFarming(selectedTokenId), actionMessage, "Farming stopped.");
+      }
+
+      async function handleClaim() {
+        if (!selectedTokenId) return;
+        const token = tokens[selectedTokenId];
+        if (!token || !token.farmActive) return;
+        await sendTx(farmingV2Contract.claimResources(selectedTokenId), actionMessage, "Resources claimed!");
+        await loadUserResources();
+      }
+
+      async function handleProtect() {
+        if (!selectedTokenId || !userAddress) return;
+        const level = parseInt(document.getElementById("protectLevel").value, 10);
+        if (!Number.isFinite(level) || level < 0 || level > 50) return alert("Invalid level (0-50)");
+
+        try {
+          const cost = level * 10; // 10 INPI per percent
+          const amount = ethers.parseEther(String(cost)); // bigint
+
+          const allowance = await inpiContract.allowance(userAddress, MERCENARY_V2_ADDRESS); // bigint
+          if (allowance < amount) {
+            actionMessage.innerHTML = '<span class="success">⏳ Approving INPI...</span>';
+            const approveTx = await inpiContract.approve(MERCENARY_V2_ADDRESS, amount);
+            await approveTx.wait();
+          }
+
+          await sendTx(mercenaryV2Contract.hireMercenaries(selectedTokenId, level), actionMessage, "Protection bought!");
+        } catch (e) {
+          actionMessage.innerHTML = `<span class="error">❌ ${e.message}</span>`;
+        }
+      }
+
+      async function handleAttack() {
+        if (!selectedTokenId || !userAddress) return;
+
+        // find any owned token in loaded map (fast) – pick first
+        const ownTokens = Object.entries(tokens).filter(([id, t]) => t.owner && t.owner.toLowerCase() === userAddress.toLowerCase());
+        if (ownTokens.length === 0) {
+          actionMessage.innerHTML = '<span class="error">❌ You need a block to attack from.</span>';
+          return;
+        }
+
+        const attackerTokenId = parseInt(ownTokens[0][0], 10);
+        const targetTokenId = parseInt(selectedTokenId, 10);
+        const resource = parseInt(document.getElementById("attackResource").value, 10);
+
+        // store resource locally (because subgraph might not include it)
+        localStorage.setItem(getAttackStorageKey(targetTokenId), JSON.stringify({
+          targetTokenId,
+          resource,
+          startTime: Math.floor(Date.now() / 1000)
+        }));
+
+        await sendTx(piratesV2Contract.startAttack(attackerTokenId, targetTokenId, resource), actionMessage, "Attack launched!");
+        await loadUserAttacks();
+      }
+
+      // ==================== EXCHANGE ====================
+      async function exchangeINPI() {
+        if (!userAddress) { exchangeMessage.innerHTML = '<span class="error">❌ Connect wallet first.</span>'; return; }
+        const inpiAmount = parseFloat(document.getElementById("inpiAmount").value);
+        if (!Number.isFinite(inpiAmount) || inpiAmount <= 0) return alert("Invalid amount");
+
+        const amountWei = ethers.parseEther(inpiAmount.toString());
+        exchangeMessage.innerHTML = '<span class="success">⏳ Exchanging...</span>';
+
+        try {
+          const inpiBal = await inpiContract.balanceOf(userAddress);
+          if (inpiBal < amountWei) throw new Error("Insufficient INPI balance");
+
+          const allowance = await inpiContract.allowance(userAddress, PITRONE_ADDRESS);
+          if (allowance < amountWei) {
+            exchangeMessage.innerHTML = '<span class="success">⏳ Approving INPI...</span>';
+            const approveTx = await inpiContract.approve(PITRONE_ADDRESS, amountWei);
+            await approveTx.wait();
+          }
+
+          const tx = await pitroneContract.exchangeINPI(amountWei);
+          exchangeMessage.innerHTML = '<span class="success">⏳ Transaction sent...</span>';
+          await tx.wait();
+          exchangeMessage.innerHTML = '<span class="success">✅ Exchange successful!</span>';
+        } catch (e) {
+          exchangeMessage.innerHTML = `<span class="error">❌ ${e.message}</span>`;
+        }
+      }
+
+      async function exchangePit() {
+        if (!userAddress) { exchangeMessage.innerHTML = '<span class="error">❌ Connect wallet first.</span>'; return; }
+        const pitAmount = parseFloat(document.getElementById("pitAmount").value);
+        if (!Number.isFinite(pitAmount) || pitAmount <= 0) return alert("Invalid amount");
+
+        const amountWei = ethers.parseEther(pitAmount.toString());
+        exchangeMessage.innerHTML = '<span class="success">⏳ Exchanging...</span>';
+
+        try {
+          const tx = await pitroneContract.exchangePitrone(amountWei);
+          exchangeMessage.innerHTML = '<span class="success">⏳ Transaction sent...</span>';
+          await tx.wait();
+          exchangeMessage.innerHTML = '<span class="success">✅ Exchange successful!</span>';
+        } catch (e) {
+          exchangeMessage.innerHTML = `<span class="error">❌ ${e.message}</span>`;
+        }
+      }
+
+      // ==================== WALLET ====================
+      async function connectWallet() {
+        if (!window.ethereum) return alert("Please install MetaMask!");
+
+        try {
+          provider = new ethers.BrowserProvider(window.ethereum);
+
+          // request accounts explicitly (more reliable)
+          await provider.send("eth_requestAccounts", []);
+
+          signer = await provider.getSigner();
+          userAddress = await signer.getAddress();
+
+          const network = await provider.getNetwork();
+          if (network.chainId !== 8453n) {
+            try {
+              await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: "0x2105" }] });
+            } catch (switchError) {
+              if (switchError.code === 4902) {
+                await window.ethereum.request({
+                  method: "wallet_addEthereumChain",
+                  params: [{
+                    chainId: "0x2105",
+                    chainName: "Base Mainnet",
+                    nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 },
+                    rpcUrls: ["https://mainnet.base.org"],
+                    blockExplorerUrls: ["https://basescan.org"]
+                  }]
                 });
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                const json = await response.json();
-                if (json.errors) {
-                    console.error('Subgraph error:', json.errors);
-                    throw new Error(json.errors[0].message);
-                }
-                return json.data;
+              } else {
+                throw switchError;
+              }
             }
+          }
 
-            async function fetchAllWithPagination(url, fieldName, subfields, where = '') {
-                const pageSize = 1000;
-                let skip = 0;
-                let all = [];
-                while (true) {
-                    const query = `{ ${fieldName}(first: ${pageSize}, skip: ${skip}${where ? ', where: ' + where : ''}) { ${subfields} } }`;
-                    try {
-                        const data = await fetchSubgraph(url, query);
-                        const items = data[fieldName];
-                        if (!items || items.length === 0) break;
-                        all = all.concat(items);
-                        if (items.length < pageSize) break;
-                        skip += pageSize;
-                    } catch (e) {
-                        console.warn(`Pagination for ${fieldName} failed:`, e);
-                        break;
-                    }
-                }
-                return all;
+          nftContract = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
+          farmingV2Contract = new ethers.Contract(FARMING_V2_ADDRESS, FARMING_V2_ABI, signer);
+          piratesV2Contract = new ethers.Contract(PIRATES_V2_ADDRESS, PIRATES_V2_ABI, signer);
+          mercenaryV2Contract = new ethers.Contract(MERCENARY_V2_ADDRESS, MERCENARY_V2_ABI, signer);
+          partnershipV2Contract = new ethers.Contract(PARTNERSHIP_V2_ADDRESS, PARTNERSHIP_V2_ABI, signer);
+          inpiContract = new ethers.Contract(INPI_ADDRESS, INPI_ABI, signer);
+          pitroneContract = new ethers.Contract(PITRONE_ADDRESS, PITRONE_ABI, signer);
+
+          document.getElementById("walletAddress").innerText = shortenAddress(userAddress);
+          document.getElementById("connectBtn").innerText = "Wallet Connected";
+
+          await loadData();
+          await loadUserResources();
+          await loadUserAttacks();
+          drawPyramid();
+
+          // periodic refresh (subgraph state)
+          setInterval(() => {
+            loadUserAttacks();
+          }, 30000);
+
+        } catch (err) {
+          console.error(err);
+          alert("Connection error: " + (err?.message || err));
+        }
+      }
+
+      // ==================== READ-ONLY PROVIDER ====================
+      async function initReadOnly() {
+        readOnlyProvider = new ethers.JsonRpcProvider("https://mainnet.base.org");
+        nftReadOnlyContract = new ethers.Contract(NFT_ADDRESS, NFT_ABI, readOnlyProvider);
+      }
+
+      // ==================== INTERAKTION ====================
+      function handleMouseMove(e) {
+        if (isDragging) return;
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = (e.clientX - rect.left - offsetX) / scale;
+        const mouseY = (e.clientY - rect.top - offsetY) / scale;
+        const blockSize = BASE_BLOCK_SIZE;
+
+        let found = null;
+        for (let row = 0; row < 100; row++) {
+          const y = row * blockSize;
+          if (mouseY < y - 5 || mouseY > y + blockSize + 5) continue;
+          const minX = -row * blockSize;
+          const maxX = (row + 1) * blockSize;
+          if (mouseX < minX - 5 || mouseX > maxX + 5) continue;
+
+          const col = Math.round((mouseX / blockSize) + row);
+          if (col >= 0 && col <= 2 * row) {
+            found = String(row * 2048 + col);
+            break;
+          }
+        }
+
+        if (found) {
+          const token = tokens[found];
+          let text = `<span>Block #${found}</span><br>`;
+          if (token && token.owner) {
+            text += `Owner: ${shortenAddress(token.owner)}<br>`;
+            text += `Status: ${token.revealed ? "Revealed" : "Minted"}`;
+            if (token.farmActive) text += " · Farming";
+            if (token.protectionActive) text += " · Protected";
+            if (token.partnerActive) text += " ⭐";
+
+            const attack = userAttacks.find(a => String(a.targetTokenId) === found);
+            if (attack) {
+              const now = Math.floor(Date.now() / 1000);
+              if (attack.endTime <= now) {
+                text += " · 🔴 Attack ready!";
+              } else {
+                text += ` · ⚔️ Attacking (${formatTime(attack.endTime - now)} left)`;
+              }
             }
-
-            function getProduction(rarity, row) {
-                const production = {};
-                if (rarity === 0) {
-                    production.OIL = 10; production.LEMONS = 5; production.IRON = 3;
-                } else if (rarity === 1) {
-                    production.OIL = 20; production.LEMONS = 10; production.IRON = 6; production.GOLD = 1;
-                } else if (rarity === 2) {
-                    production.OIL = 30; production.LEMONS = 15; production.IRON = 9; production.GOLD = 2; production.PLATINUM = 1;
-                } else if (rarity === 3) {
-                    production.OIL = 40; production.LEMONS = 20; production.IRON = 12; production.GOLD = 3; production.PLATINUM = 2; production.CRYSTAL = 1;
-                } else if (rarity === 4) {
-                    production.OIL = 60; production.LEMONS = 30; production.IRON = 18; production.GOLD = 5; production.PLATINUM = 3; production.CRYSTAL = 2; production.MYSTERIUM = 1;
-                    if (row === 0) production.AETHER = 1;
-                }
-                return production;
-            }
-
-            // ==================== ANGRIFFE LADEN ====================
-            async function loadUserAttacks() {
-                if (!userAddress) return;
-                try {
-                    const where = `{ attacker: "${userAddress.toLowerCase()}", executed: false }`;
-                    const attacks = await fetchAllWithPagination(SUBGRAPH_URL_V2, 'attacks', 
-                        'id target attackIndex protectionLevel endTime resource executed', where);
-                    userAttacks = attacks.map(a => ({
-                        ...a,
-                        targetTokenId: parseInt(a.target),
-                        attackIndex: parseInt(a.attackIndex),
-                        protectionLevel: parseInt(a.protectionLevel),
-                        endTime: parseInt(a.endTime),
-                        resource: parseInt(a.resource)
-                    }));
-                    displayUserAttacks();
-                    drawPyramid();
-                } catch (e) {
-                    console.error('Failed to load attacks:', e);
-                }
-            }
-
-            function displayUserAttacks() {
-                const container = document.getElementById('userAttacksList');
-                if (!container) return;
-                if (!userAddress) {
-                    container.innerHTML = '<p style="color: #98a9b9;">Connect wallet to see your attacks.</p>';
-                    return;
-                }
-                if (userAttacks.length === 0) {
-                    container.innerHTML = '<p style="color: #98a9b9;">No active attacks.</p>';
-                    return;
-                }
-                let html = '';
-                const now = Math.floor(Date.now() / 1000);
-                userAttacks.forEach(attack => {
-                    const timeLeft = attack.endTime - now;
-                    const status = timeLeft <= 0 
-                        ? '<span style="color: #51cf66;">Ready</span>' 
-                        : `<span>⏳ ${formatTime(timeLeft)}</span>`;
-                    const executeBtn = timeLeft <= 0 
-                        ? `<button class="action-btn execute-attack-btn" style="padding:0.2rem 0.8rem; background:#e74c3c; color:white; border:none; border-radius:20px;" data-attack='${JSON.stringify(attack)}'>⚔️ Execute</button>` 
-                        : '';
-                    html += `<div class="attack-item">
-                        <span>#${attack.targetTokenId} (${resourceNames[attack.resource]})</span>
-                        ${status}
-                        ${executeBtn}
-                    </div>`;
-                });
-                container.innerHTML = html;
-
-                document.querySelectorAll('.execute-attack-btn').forEach(btn => {
-                    btn.addEventListener('click', async (e) => {
-                        const attack = JSON.parse(btn.dataset.attack);
-                        await executeAttack(attack);
-                    });
-                });
-            }
-
-            function formatTime(seconds) {
-                if (seconds < 60) return seconds + 's';
-                if (seconds < 3600) return Math.floor(seconds / 60) + 'm';
-                return Math.floor(seconds / 3600) + 'h';
-            }
-
-            async function executeAttack(attack) {
-                const msgDiv = document.getElementById('actionMessage');
-                msgDiv.innerHTML = '<span class="success">⏳ Executing attack...</span>';
-                try {
-                    const tx = await piratesV2Contract.executeAttack(
-                        attack.targetTokenId,
-                        attack.attackIndex,
-                        attack.protectionLevel
-                    );
-                    await tx.wait();
-                    msgDiv.innerHTML = '<span class="success">✅ Attack executed! Resources stolen.</span>';
-                    await loadUserAttacks();
-                    await loadUserResources();
-                    drawPyramid();
-                } catch (e) {
-                    msgDiv.innerHTML = '<span class="error">❌ ' + e.message + '</span>';
-                }
-            }
-
-            // ==================== DATEN LADEN (V1 + V2) ====================
-            async function loadData() {
-                try {
-                    console.log('Lade Tokens von V1 und V2...');
-                    const [tokenItemsV1, tokenItemsV2] = await Promise.all([
-                        fetchAllWithPagination(SUBGRAPH_URL_V1, 'tokens', `id owner { id } revealed`).catch(() => []),
-                        fetchAllWithPagination(SUBGRAPH_URL_V2, 'tokens', `id owner { id } revealed farm { active }`).catch(() => [])
-                    ]);
-
-                    tokens = {};
-
-                    tokenItemsV1.forEach(t => {
-                        tokens[t.id] = {
-                            owner: t.owner ? t.owner.id : null,
-                            revealed: t.revealed || false,
-                            farmActive: false,
-                            farmingVersion: null,
-                            protectionActive: false,
-                            partnerActive: false
-                        };
-                    });
-
-                    tokenItemsV2.forEach(t => {
-                        if (!tokens[t.id]) {
-                            tokens[t.id] = {
-                                owner: t.owner ? t.owner.id : null,
-                                revealed: t.revealed || false,
-                                farmActive: t.farm ? t.farm.active : false,
-                                farmingVersion: t.farm && t.farm.active ? 'v2' : null,
-                                protectionActive: false,
-                                partnerActive: false
-                            };
-                        } else {
-                            tokens[t.id].owner = t.owner ? t.owner.id : tokens[t.id].owner;
-                            tokens[t.id].revealed = t.revealed || tokens[t.id].revealed;
-                            if (t.farm && t.farm.active) {
-                                tokens[t.id].farmActive = true;
-                                tokens[t.id].farmingVersion = 'v2';
-                            }
-                        }
-                    });
-
-                    console.log('Lade Protections von V2...');
-                    const protectionItems = await fetchAllWithPagination(SUBGRAPH_URL_V2, 'protections', `id active`).catch(() => []);
-                    const protections = new Map();
-                    protectionItems.forEach(p => protections.set(p.id, p.active));
-                    for (let [id, active] of protections) {
-                        if (tokens[id]) tokens[id].protectionActive = active;
-                    }
-
-                    console.log('Lade Partnerships von V2...');
-                    const partnerItems = await fetchAllWithPagination(SUBGRAPH_URL_V2, 'partnerships', `id active`).catch(() => []);
-                    const partnerships = new Map();
-                    partnerItems.forEach(p => partnerships.set(p.id, p.active));
-                    for (let [id, active] of partnerships) {
-                        if (tokens[id]) tokens[id].partnerActive = active;
-                    }
-
-                    console.log('Lade Farms von V1...');
-                    const farmItemsV1 = await fetchAllWithPagination(SUBGRAPH_URL_V1, 'farms', `id active`).catch(() => []);
-                    for (let f of farmItemsV1) {
-                        if (f.active && tokens[f.id]) {
-                            if (!tokens[f.id].farmActive) {
-                                tokens[f.id].farmActive = true;
-                                tokens[f.id].farmingVersion = 'v1';
-                            }
-                        }
-                    }
-
-                    if (userAddress) {
-                        await loadUserResources();
-                        await loadUserAttacks();
-                    }
-
-                    console.log(`Daten geladen. Tokens: ${Object.keys(tokens).length}`);
-                    drawPyramid();
-                } catch (err) {
-                    console.error('Fehler beim Laden:', err);
-                }
-            }
-
-            async function loadUserResources() {
-                if (!userAddress) return;
-                try {
-                    const where = `{ account: "${userAddress.toLowerCase()}" }`;
-                    const balanceItems = await fetchAllWithPagination(SUBGRAPH_URL_V2, 'resourceBalances', 'id account resourceId amount', where);
-                    userResources = balanceItems
-                        .filter(b => b.account.toLowerCase() === userAddress.toLowerCase())
-                        .map(b => ({ resourceId: parseInt(b.resourceId), amount: BigInt(b.amount) }));
-                    updateUserResourcesDisplay();
-                } catch (err) {
-                    console.error('Fehler beim Laden der ResourceBalances:', err);
-                }
-            }
-
-            function updateUserResourcesDisplay() {
-                if (!userAddress) {
-                    userResourcesDiv.innerHTML = '<p style="color: #98a9b9;">Connect wallet to see your resource tokens.</p>';
-                    return;
-                }
-                if (userResources.length === 0) {
-                    userResourcesDiv.innerHTML = '<p style="color: #98a9b9;">You have no resource tokens yet.</p>';
-                    return;
-                }
-                let html = '';
-                userResources.sort((a,b) => a.resourceId - b.resourceId);
-                for (let r of userResources) {
-                    const name = resourceNames[r.resourceId] || `Resource ${r.resourceId}`;
-                    html += `<div class="detail-row"><span class="detail-label">${name}</span><span class="detail-value">${r.amount.toString()}</span></div>`;
-                }
-                userResourcesDiv.innerHTML = html;
-            }
-
-            // ==================== ZEICHNEN ====================
-            function drawPyramid() {
-                if (!canvas || !ctx) return;
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.save();
-                ctx.translate(offsetX, offsetY);
-                ctx.scale(scale, scale);
-
-                const blockSize = BASE_BLOCK_SIZE;
-                const now = Math.floor(Date.now() / 1000);
-
-                for (let row = 0; row < 100; row++) {
-                    const blocksInRow = 2 * row + 1;
-                    const y = row * blockSize;
-                    for (let col = 0; col < blocksInRow; col++) {
-                        const tokenId = (row * 2048 + col).toString();
-                        const token = tokens[tokenId];
-                        const x = (col - row) * blockSize;
-
-                        let fillColor = '#3a4048';
-                        let strokeColor = null;
-                        let lineWidth = 0;
-
-                        if (token && token.owner) {
-                            if (token.revealed) {
-                                fillColor = '#c9a959';
-                            } else {
-                                fillColor = '#2e7d5e';
-                            }
-
-                            if (userAddress && token.owner.toLowerCase() === userAddress.toLowerCase()) {
-                                fillColor = '#a0d6ff';
-                            }
-
-                            const attack = userAttacks.find(a => a.targetTokenId == tokenId);
-                            if (attack) {
-                                if (attack.endTime <= now) {
-                                    strokeColor = '#e74c3c';
-                                    lineWidth = 4;
-                                } else {
-                                    strokeColor = '#000000';
-                                    lineWidth = 4;
-                                }
-                            } else {
-                                if (token.protectionActive) {
-                                    strokeColor = '#9b59b6';
-                                    lineWidth = 3;
-                                } else if (token.farmActive) {
-                                    strokeColor = '#3498db';
-                                    lineWidth = 3;
-                                }
-                            }
-                        }
-
-                        ctx.fillStyle = fillColor;
-                        ctx.fillRect(x, y, blockSize, blockSize);
-                        if (strokeColor) {
-                            ctx.strokeStyle = strokeColor;
-                            ctx.lineWidth = lineWidth;
-                            ctx.strokeRect(x, y, blockSize, blockSize);
-                        }
-
-                        if (token && token.partnerActive) {
-                            ctx.save();
-                            ctx.translate(x + blockSize - 8, y + 8);
-                            ctx.font = 'bold 16px "Inter", sans-serif';
-                            ctx.fillStyle = '#FFD700';
-                            ctx.shadowColor = '#000';
-                            ctx.shadowBlur = 4;
-                            ctx.fillText('★', -8, 4);
-                            ctx.restore();
-                        }
-                    }
-                }
-                ctx.restore();
-            }
-
-            function centerPyramid() {
-                const totalWidth = 199 * BASE_BLOCK_SIZE;
-                const totalHeight = 100 * BASE_BLOCK_SIZE;
-                const scaleX = canvas.width / totalWidth * 0.95;
-                const scaleY = canvas.height / totalHeight * 0.95;
-                scale = Math.min(scaleX, scaleY, 1.5);
-                offsetX = (canvas.width - totalWidth * scale) / 2;
-                offsetY = (canvas.height - totalHeight * scale) / 2;
-                drawPyramid();
-            }
-
-            // ==================== SIDEBAR & AKTIONEN ====================
-            async function updateSidebar(tokenId) {
-                selectedTokenId = tokenId;
-                const token = tokens[tokenId];
-                const owner = token ? token.owner : null;
-                selectedTokenOwner = owner;
-                selectedRevealed = token ? token.revealed : false;
-                selectedRarity = null;
-
-                let productionHtml = '';
-                let rarityDisplay = '';
-                if (token && token.owner && token.revealed && nftReadOnlyContract) {
-                    try {
-                        const tokenIdNum = parseInt(tokenId);
-                        const row = Math.floor(tokenIdNum / 2048);
-                        const rarity = await nftReadOnlyContract.calculateRarity(tokenIdNum);
-                        selectedRarity = rarity;
-                        rarityDisplay = `<div class="detail-row">
-                            <span class="detail-label">Rarity</span>
-                            <span class="detail-value ${rarityClass[rarity]}">${rarityNames[rarity]}</span>
-                        </div>`;
-
-                        const production = getProduction(rarity, row);
-                        let prodText = '';
-                        for (const [res, amount] of Object.entries(production)) {
-                            prodText += `<div class="detail-row"><span class="detail-label">${res}</span><span class="detail-value">${amount}/day</span></div>`;
-                        }
-                        productionHtml = `<div class="detail-row"><span class="detail-label">Production</span></div>${prodText}`;
-                    } catch (e) {
-                        console.warn('Could not fetch rarity:', e);
-                    }
-                }
-
-                let detailHtml = '';
-                if (token && owner) {
-                    detailHtml = `
-                        <div class="detail-row"><span class="detail-label">Block #</span><span class="detail-value">${tokenId}</span></div>
-                        <div class="detail-row"><span class="detail-label">Owner</span><span class="detail-value">${shortenAddress(owner)}</span></div>
-                        <div class="detail-row"><span class="detail-label">Revealed</span><span class="detail-value">${token.revealed ? '✅' : '❌'}</span></div>
-                        ${rarityDisplay}
-                        <div class="detail-row"><span class="detail-label">Farming</span><span class="detail-value">${token.farmActive ? 'Active' : 'Inactive'}</span></div>
-                        <div class="detail-row"><span class="detail-label">Protection</span><span class="detail-value">${token.protectionActive ? '✅' : '❌'}</span></div>
-                        <div class="detail-row"><span class="detail-label">Partner</span><span class="detail-value">${token.partnerActive ? '⭐' : '❌'}</span></div>
-                        ${productionHtml}
-                    `;
-                } else {
-                    detailHtml = `<p style="color: #98a9b9; text-align: center;">Block #${tokenId} is not minted.</p>`;
-                }
-                blockDetailDiv.innerHTML = detailHtml;
-
-                actionPanel.style.display = 'block';
-                ownerActionsDiv.innerHTML = '';
-                attackerActionsDiv.innerHTML = '';
-                protectionInput.style.display = 'none';
-                attackInput.style.display = 'none';
-                actionMessage.innerHTML = '';
-
-                if (userAddress && owner && owner.toLowerCase() === userAddress.toLowerCase()) {
-                    let btns = '';
-                    if (!token.revealed) {
-                        btns += `<button class="action-btn" id="revealBtn">🔓 Reveal Block</button>`;
-                    }
-                    if (!token.farmActive) {
-                        btns += `<button class="action-btn" id="startFarmBtn">🌾 Start Farming</button>`;
-                    } else {
-                        btns += `<button class="action-btn" id="stopFarmBtn">⏹️ Stop Farming</button>`;
-                        btns += `<button class="action-btn" id="claimBtn">💰 Claim Resources</button>`;
-                    }
-                    protectionInput.style.display = 'flex';
-                    ownerActionsDiv.innerHTML = btns;
-                } else if (userAddress && owner) {
-                    attackInput.style.display = 'flex';
-                } else {
-                    actionPanel.style.display = 'none';
-                }
-            }
-
-            // ==================== TRANSAKTIONEN ====================
-            async function sendTx(txPromise, messageDiv, successMsg) {
-                messageDiv.innerHTML = '<span class="success">⏳ Sending...</span>';
-                try {
-                    const tx = await txPromise;
-                    messageDiv.innerHTML = '<span class="success">⏳ Confirming...</span>';
-                    await tx.wait();
-                    messageDiv.innerHTML = `<span class="success">✅ ${successMsg}</span>`;
-                    await loadData();
-                    if (selectedTokenId) updateSidebar(selectedTokenId);
-                } catch (err) {
-                    console.error(err);
-                    messageDiv.innerHTML = `<span class="error">❌ ${err.message}</span>`;
-                }
-            }
-
-            async function handleReveal() {
-                if (!selectedTokenId || !selectedTokenOwner) return;
-                const tokenIdNum = parseInt(selectedTokenId);
-                const row = Math.floor(tokenIdNum / 2048);
-                const col = tokenIdNum % 2048;
-                try {
-                    const response = await fetch(`https://inpinity-worker-final.s-plat.workers.dev/api/get-proof?row=${row}&col=${col}`);
-                    if (!response.ok) throw new Error('Proofs not found');
-                    const proofs = await response.json();
-                    const formatProof = (arr) => arr.map(item => (item.left ? item.left : item.right).startsWith('0x') ? (item.left ? item.left : item.right) : '0x' + (item.left ? item.left : item.right));
-                    const piProof = formatProof(proofs.pi.proof);
-                    const phiProof = formatProof(proofs.phi.proof);
-                    const tx = nftContract.revealBlock(selectedTokenId, piProof, phiProof, proofs.pi.digit, proofs.phi.digit, { gasLimit: 500000 });
-                    await sendTx(tx, actionMessage, 'Block revealed!');
-                } catch (e) {
-                    actionMessage.innerHTML = `<span class="error">❌ ${e.message}</span>`;
-                }
-            }
-
-            async function handleStartFarm() {
-                if (!selectedTokenId) return;
-                const tx = farmingV2Contract.startFarming(selectedTokenId);
-                await sendTx(tx, actionMessage, 'Farming started!');
-            }
-
-            async function handleStopFarm() {
-                if (!selectedTokenId) return;
-                const token = tokens[selectedTokenId];
-                if (!token || !token.farmActive) return;
-                const contract = farmingV2Contract;
-                const tx = contract.stopFarming(selectedTokenId);
-                await sendTx(tx, actionMessage, 'Farming stopped.');
-            }
-
-            async function handleClaim() {
-                if (!selectedTokenId) return;
-                const token = tokens[selectedTokenId];
-                if (!token || !token.farmActive) return;
-                const contract = farmingV2Contract;
-                const tx = contract.claimResources(selectedTokenId);
-                await sendTx(tx, actionMessage, 'Resources claimed!');
-                await loadUserResources();
-            }
-
-            async function handleProtect() {
-                if (!selectedTokenId || !userAddress) return;
-                const level = parseInt(document.getElementById('protectLevel').value);
-                if (isNaN(level) || level < 0 || level > 50) return alert('Invalid level (0-50)');
-                const cost = level * 10;
-                const amount = ethers.parseEther(cost.toString());
-                const allowance = await inpiContract.allowance(userAddress, MERCENARY_V2_ADDRESS);
-                if (allowance < amount) {
-                    actionMessage.innerHTML = '<span class="success">⏳ Approving INPI...</span>';
-                    const approveTx = await inpiContract.approve(MERCENARY_V2_ADDRESS, amount);
-                    await approveTx.wait();
-                }
-                const tx = mercenaryV2Contract.hireMercenaries(selectedTokenId, level);
-                await sendTx(tx, actionMessage, 'Protection bought!');
-            }
-
-            async function handleAttack() {
-                if (!selectedTokenId || !userAddress) return;
-                const ownTokens = Object.entries(tokens).filter(([id, t]) => t.owner && t.owner.toLowerCase() === userAddress.toLowerCase());
-                if (ownTokens.length === 0) {
-                    actionMessage.innerHTML = '<span class="error">❌ You need a block to attack from.</span>';
-                    return;
-                }
-                const attackerTokenId = ownTokens[0][0];
-                const resource = parseInt(document.getElementById('attackResource').value);
-                const tx = piratesV2Contract.startAttack(attackerTokenId, selectedTokenId, resource);
-                await sendTx(tx, actionMessage, 'Attack launched!');
-                await loadUserAttacks();
-            }
-
-            // ==================== EXCHANGE ====================
-            async function exchangeINPI() {
-                if (!userAddress) { exchangeMessage.innerHTML = '<span class="error">❌ Connect wallet first.</span>'; return; }
-                const inpiAmount = parseFloat(document.getElementById('inpiAmount').value);
-                if (isNaN(inpiAmount) || inpiAmount <= 0) return alert('Invalid amount');
-                const amountWei = ethers.parseEther(inpiAmount.toString());
-                exchangeMessage.innerHTML = '<span class="success">⏳ Exchanging...</span>';
-                try {
-                    const inpiBal = await inpiContract.balanceOf(userAddress);
-                    if (inpiBal < amountWei) throw new Error('Insufficient INPI balance');
-                    const allowance = await inpiContract.allowance(userAddress, PITRONE_ADDRESS);
-                    if (allowance < amountWei) {
-                        exchangeMessage.innerHTML = '<span class="success">⏳ Approving INPI...</span>';
-                        const approveTx = await inpiContract.approve(PITRONE_ADDRESS, amountWei);
-                        await approveTx.wait();
-                    }
-                    const tx = await pitroneContract.exchangeINPI(amountWei);
-                    exchangeMessage.innerHTML = '<span class="success">⏳ Transaction sent...</span>';
-                    await tx.wait();
-                    exchangeMessage.innerHTML = '<span class="success">✅ Exchange successful!</span>';
-                } catch (e) {
-                    exchangeMessage.innerHTML = `<span class="error">❌ ${e.message}</span>`;
-                }
-            }
-
-            async function exchangePit() {
-                if (!userAddress) { exchangeMessage.innerHTML = '<span class="error">❌ Connect wallet first.</span>'; return; }
-                const pitAmount = parseFloat(document.getElementById('pitAmount').value);
-                if (isNaN(pitAmount) || pitAmount <= 0) return alert('Invalid amount');
-                const amountWei = ethers.parseEther(pitAmount.toString());
-                exchangeMessage.innerHTML = '<span class="success">⏳ Exchanging...</span>';
-                try {
-                    const tx = await pitroneContract.exchangePitrone(amountWei);
-                    exchangeMessage.innerHTML = '<span class="success">⏳ Transaction sent...</span>';
-                    await tx.wait();
-                    exchangeMessage.innerHTML = '<span class="success">✅ Exchange successful!</span>';
-                } catch (e) {
-                    exchangeMessage.innerHTML = `<span class="error">❌ ${e.message}</span>`;
-                }
-            }
-
-            // ==================== WALLET ====================
-            async function connectWallet() {
-                if (!window.ethereum) return alert('Please install MetaMask!');
-                try {
-                    provider = new ethers.BrowserProvider(window.ethereum);
-                    signer = await provider.getSigner();
-                    userAddress = await signer.getAddress();
-
-                    const network = await provider.getNetwork();
-                    if (network.chainId !== 8453n) {
-                        try {
-                            await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x2105' }] });
-                        } catch (switchError) {
-                            if (switchError.code === 4902) {
-                                await window.ethereum.request({
-                                    method: 'wallet_addEthereumChain',
-                                    params: [{
-                                        chainId: '0x2105',
-                                        chainName: 'Base Mainnet',
-                                        nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
-                                        rpcUrls: ['https://mainnet.base.org'],
-                                        blockExplorerUrls: ['https://basescan.org']
-                                    }]
-                                });
-                            } else throw switchError;
-                        }
-                    }
-
-                    nftContract = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
-                    farmingV2Contract = new ethers.Contract(FARMING_V2_ADDRESS, FARMING_V2_ABI, signer);
-                    piratesV2Contract = new ethers.Contract(PIRATES_V2_ADDRESS, PIRATES_V2_ABI, signer);
-                    mercenaryV2Contract = new ethers.Contract(MERCENARY_V2_ADDRESS, MERCENARY_V2_ABI, signer);
-                    partnershipV2Contract = new ethers.Contract(PARTNERSHIP_V2_ADDRESS, PARTNERSHIP_V2_ABI, signer);
-                    inpiContract = new ethers.Contract(INPI_ADDRESS, INPI_ABI, signer);
-                    pitroneContract = new ethers.Contract(PITRONE_ADDRESS, PITRONE_ABI, signer);
-
-                    document.getElementById('walletAddress').innerText = shortenAddress(userAddress);
-                    await loadData();
-                    drawPyramid();
-
-                    setInterval(() => {
-                        loadUserAttacks();
-                    }, 30000);
-                } catch (err) {
-                    console.error(err);
-                }
-            }
-
-            // ==================== READ-ONLY PROVIDER ====================
-            async function initReadOnly() {
-                const baseRpc = 'https://mainnet.base.org';
-                readOnlyProvider = new ethers.JsonRpcProvider(baseRpc);
-                nftReadOnlyContract = new ethers.Contract(NFT_ADDRESS, NFT_ABI, readOnlyProvider);
-            }
-
-            // ==================== INTERAKTION ====================
-            function handleMouseMove(e) {
-                if (isDragging) return;
-                const rect = canvas.getBoundingClientRect();
-                const mouseX = (e.clientX - rect.left - offsetX) / scale;
-                const mouseY = (e.clientY - rect.top - offsetY) / scale;
-                const blockSize = BASE_BLOCK_SIZE;
-
-                let found = null;
-                for (let row = 0; row < 100; row++) {
-                    const y = row * blockSize;
-                    if (mouseY < y - 5 || mouseY > y + blockSize + 5) continue;
-                    const minX = -row * blockSize;
-                    const maxX = (row + 1) * blockSize;
-                    if (mouseX < minX - 5 || mouseX > maxX + 5) continue;
-                    const col = Math.round((mouseX / blockSize) + row);
-                    if (col >= 0 && col <= 2 * row) {
-                        found = (row * 2048 + col).toString();
-                        break;
-                    }
-                }
-
-                if (found) {
-                    const token = tokens[found];
-                    let text = `<span>Block #${found}</span><br>`;
-                    if (token && token.owner) {
-                        text += `Owner: ${shortenAddress(token.owner)}<br>`;
-                        text += `Status: ${token.revealed ? 'Revealed' : 'Minted'}`;
-                        if (token.farmActive) text += ' · Farming';
-                        if (token.protectionActive) text += ' · Protected';
-                        if (token.partnerActive) text += ' ⭐';
-                        const attack = userAttacks.find(a => a.targetTokenId == found);
-                        if (attack) {
-                            const now = Math.floor(Date.now() / 1000);
-                            if (attack.endTime <= now) {
-                                text += ' · 🔴 Attack ready!';
-                            } else {
-                                text += ` · ⚔️ Attacking (${formatTime(attack.endTime - now)} left)`;
-                            }
-                        }
-                    } else {
-                        text += 'Not minted';
-                    }
-                    tooltip.innerHTML = text;
-                    tooltip.style.opacity = 1;
-                    tooltip.style.left = e.clientX + 20 + 'px';
-                    tooltip.style.top = e.clientY - 50 + 'px';
-                } else {
-                    tooltip.style.opacity = 0;
-                }
-            }
-
-            function handleClick(e) {
-                const rect = canvas.getBoundingClientRect();
-                const mouseX = (e.clientX - rect.left - offsetX) / scale;
-                const mouseY = (e.clientY - rect.top - offsetY) / scale;
-                const blockSize = BASE_BLOCK_SIZE;
-
-                for (let row = 0; row < 100; row++) {
-                    const y = row * blockSize;
-                    if (mouseY < y || mouseY > y + blockSize) continue;
-                    const col = Math.round((mouseX / blockSize) + row);
-                    if (col >= 0 && col <= 2 * row) {
-                        const tokenId = (row * 2048 + col).toString();
-                        updateSidebar(tokenId);
-                        drawPyramid();
-                        break;
-                    }
-                }
-            }
-
-            // ==================== ZOOM & PAN ====================
-            function handleWheel(e) {
-                e.preventDefault();
-                const zoomFactor = 1.1;
-                const delta = e.deltaY > 0 ? 1 / zoomFactor : zoomFactor;
-                const rect = canvas.getBoundingClientRect();
-                const mouseX = e.clientX - rect.left;
-                const mouseY = e.clientY - rect.top;
-                const worldX = (mouseX - offsetX) / scale;
-                const worldY = (mouseY - offsetY) / scale;
-                scale = Math.max(0.2, Math.min(5, scale * delta));
-                offsetX = mouseX - worldX * scale;
-                offsetY = mouseY - worldY * scale;
-                drawPyramid();
-            }
-
-            function handlePinch(e) {
-                if (e.touches.length === 2) {
-                    e.preventDefault();
-                    const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-                    if (pinchStartDist === 0) { pinchStartDist = dist; return; }
-                    const zoomFactor = dist / pinchStartDist;
-                    pinchStartDist = dist;
-                    const rect = canvas.getBoundingClientRect();
-                    const mx = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
-                    const my = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
-                    const worldX = (mx - offsetX) / scale;
-                    const worldY = (my - offsetY) / scale;
-                    scale = Math.max(0.2, Math.min(5, scale * zoomFactor));
-                    offsetX = mx - worldX * scale;
-                    offsetY = my - worldY * scale;
-                    drawPyramid();
-                }
-            }
-
-            // ==================== SIDEBAR DRAG & RESIZE ====================
-            const legendPanel = document.getElementById('legendPanel');
-            const dragHandle = document.getElementById('dragHandle');
-            const resizeHandle = document.getElementById('resizeHandle');
-            const collapseBtn = document.getElementById('collapseBtn');
-            const resetPosBtn = document.getElementById('resetPosBtn');
-            const legendContent = document.getElementById('legendContent');
-            let isDraggingPanel = false;
-            let dragStartX, dragStartY, panelStartLeft, panelStartTop;
-
-            dragHandle.addEventListener('mousedown', (e) => {
-                isDraggingPanel = true;
-                dragStartX = e.clientX; dragStartY = e.clientY;
-                const rect = legendPanel.getBoundingClientRect();
-                panelStartLeft = rect.left; panelStartTop = rect.top;
-                legendPanel.style.transition = 'none';
-                e.preventDefault();
-            });
-
-            window.addEventListener('mousemove', (e) => {
-                if (!isDraggingPanel) return;
-                const dx = e.clientX - dragStartX;
-                const dy = e.clientY - dragStartY;
-                legendPanel.style.left = (panelStartLeft + dx) + 'px';
-                legendPanel.style.top = (panelStartTop + dy) + 'px';
-                legendPanel.style.right = 'auto';
-            });
-
-            window.addEventListener('mouseup', () => {
-                isDraggingPanel = false;
-                legendPanel.style.transition = '';
-            });
-
-            let isResizing = false;
-            resizeHandle.addEventListener('mousedown', (e) => {
-                isResizing = true;
-                e.preventDefault();
-            });
-
-            window.addEventListener('mousemove', (e) => {
-                if (!isResizing) return;
-                const rect = legendPanel.getBoundingClientRect();
-                const newWidth = rect.right - e.clientX;
-                if (newWidth > 200 && newWidth < 500) {
-                    legendPanel.style.width = newWidth + 'px';
-                    legendPanel.style.right = 'auto';
-                }
-            });
-
-            window.addEventListener('mouseup', () => { isResizing = false; });
-
-            collapseBtn.addEventListener('click', () => {
-                if (legendContent.classList.contains('collapsed')) {
-                    legendContent.classList.remove('collapsed');
-                    collapseBtn.textContent = '−';
-                } else {
-                    legendContent.classList.add('collapsed');
-                    collapseBtn.textContent = '+';
-                }
-            });
-
-            resetPosBtn.addEventListener('click', () => {
-                legendPanel.style.left = 'auto';
-                legendPanel.style.top = '20px';
-                legendPanel.style.right = '20px';
-                legendPanel.style.width = '300px';
-            });
-
-            // ==================== EVENT LISTENER ====================
-            window.addEventListener('resize', () => {
-                canvas.width = container.clientWidth;
-                canvas.height = container.clientHeight;
-                centerPyramid();
-            });
-
-            canvas.addEventListener('wheel', handleWheel, { passive: false });
-            canvas.addEventListener('touchstart', (e) => {
-                if (e.touches.length === 2) pinchStartDist = 0;
-            });
-            canvas.addEventListener('touchmove', handlePinch, { passive: false });
-            canvas.addEventListener('mousedown', (e) => {
-                isDragging = true;
-                lastMouseX = e.clientX; lastMouseY = e.clientY;
-                canvas.style.cursor = 'grabbing';
-            });
-            window.addEventListener('mousemove', (e) => {
-                if (isDragging) {
-                    const dx = e.clientX - lastMouseX;
-                    const dy = e.clientY - lastMouseY;
-                    offsetX += dx; offsetY += dy;
-                    lastMouseX = e.clientX; lastMouseY = e.clientY;
-                    drawPyramid();
-                } else {
-                    handleMouseMove(e);
-                }
-            });
-            window.addEventListener('mouseup', () => {
-                isDragging = false;
-                canvas.style.cursor = 'grab';
-            });
-            canvas.addEventListener('click', handleClick);
-
-            document.getElementById('connectBtn').addEventListener('click', connectWallet);
-            document.getElementById('exchangeInpiBtn').addEventListener('click', exchangeINPI);
-            document.getElementById('exchangePitBtn').addEventListener('click', exchangePit);
-
-            document.addEventListener('click', async (e) => {
-                if (e.target.id === 'revealBtn') await handleReveal();
-                if (e.target.id === 'startFarmBtn') await handleStartFarm();
-                if (e.target.id === 'stopFarmBtn') await handleStopFarm();
-                if (e.target.id === 'claimBtn') await handleClaim();
-                if (e.target.id === 'protectBtn') await handleProtect();
-                if (e.target.id === 'attackBtn') await handleAttack();
-            });
-
-            // ==================== START ====================
-            await initReadOnly();
-            canvas.width = container.clientWidth;
-            canvas.height = container.clientHeight;
-            await loadData();
-            centerPyramid();
-            setInterval(loadData, 30000);
-        })();
-    </script>
+          } else {
+            text += "Not minted";
+          }
+          tooltip.innerHTML = text;
+          tooltip.style.opacity = 1;
+          tooltip.style.left = (e.clientX + 20) + "px";
+          tooltip.style.top = (e.clientY - 50) + "px";
+        } else {
+          tooltip.style.opacity = 0;
+        }
+      }
+
+      function handleClick(e) {
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = (e.clientX - rect.left - offsetX) / scale;
+        const mouseY = (e.clientY - rect.top - offsetY) / scale;
+        const blockSize = BASE_BLOCK_SIZE;
+
+        for (let row = 0; row < 100; row++) {
+          const y = row * blockSize;
+          if (mouseY < y || mouseY > y + blockSize) continue;
+
+          const col = Math.round((mouseX / blockSize) + row);
+          if (col >= 0 && col <= 2 * row) {
+            const tokenId = String(row * 2048 + col);
+            updateSidebar(tokenId);
+            drawPyramid();
+            break;
+          }
+        }
+      }
+
+      // ==================== ZOOM & PAN ====================
+      function handleWheel(e) {
+        e.preventDefault();
+        const zoomFactor = 1.1;
+        const delta = e.deltaY > 0 ? 1 / zoomFactor : zoomFactor;
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+        const worldX = (mouseX - offsetX) / scale;
+        const worldY = (mouseY - offsetY) / scale;
+        scale = Math.max(0.2, Math.min(5, scale * delta));
+        offsetX = mouseX - worldX * scale;
+        offsetY = mouseY - worldY * scale;
+        drawPyramid();
+      }
+
+      function handlePinch(e) {
+        if (e.touches.length === 2) {
+          e.preventDefault();
+          const dist = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+          );
+          if (pinchStartDist === 0) { pinchStartDist = dist; return; }
+          const zoomFactor = dist / pinchStartDist;
+          pinchStartDist = dist;
+
+          const rect = canvas.getBoundingClientRect();
+          const mx = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
+          const my = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
+
+          const worldX = (mx - offsetX) / scale;
+          const worldY = (my - offsetY) / scale;
+
+          scale = Math.max(0.2, Math.min(5, scale * zoomFactor));
+          offsetX = mx - worldX * scale;
+          offsetY = my - worldY * scale;
+          drawPyramid();
+        }
+      }
+
+      // ==================== SIDEBAR DRAG & RESIZE ====================
+      const legendPanel = document.getElementById("legendPanel");
+      const dragHandle = document.getElementById("dragHandle");
+      const resizeHandle = document.getElementById("resizeHandle");
+      const collapseBtn = document.getElementById("collapseBtn");
+      const resetPosBtn = document.getElementById("resetPosBtn");
+      const legendContent = document.getElementById("legendContent");
+
+      let isDraggingPanel = false;
+      let dragStartX = 0, dragStartY = 0, panelStartLeft = 0, panelStartTop = 0;
+
+      dragHandle.addEventListener("mousedown", (e) => {
+        isDraggingPanel = true;
+        dragStartX = e.clientX; dragStartY = e.clientY;
+        const rect = legendPanel.getBoundingClientRect();
+        panelStartLeft = rect.left; panelStartTop = rect.top;
+        legendPanel.style.transition = "none";
+        e.preventDefault();
+      });
+
+      window.addEventListener("mousemove", (e) => {
+        if (!isDraggingPanel) return;
+        const dx = e.clientX - dragStartX;
+        const dy = e.clientY - dragStartY;
+        legendPanel.style.left = (panelStartLeft + dx) + "px";
+        legendPanel.style.top = (panelStartTop + dy) + "px";
+        legendPanel.style.right = "auto";
+      });
+
+      window.addEventListener("mouseup", () => {
+        isDraggingPanel = false;
+        legendPanel.style.transition = "";
+      });
+
+      let isResizing = false;
+      resizeHandle.addEventListener("mousedown", (e) => {
+        isResizing = true;
+        e.preventDefault();
+      });
+
+      window.addEventListener("mousemove", (e) => {
+        if (!isResizing) return;
+        const rect = legendPanel.getBoundingClientRect();
+        const newWidth = rect.right - e.clientX;
+        if (newWidth > 200 && newWidth < 520) {
+          legendPanel.style.width = newWidth + "px";
+          legendPanel.style.right = "auto";
+        }
+      });
+
+      window.addEventListener("mouseup", () => { isResizing = false; });
+
+      collapseBtn.addEventListener("click", () => {
+        if (legendContent.classList.contains("collapsed")) {
+          legendContent.classList.remove("collapsed");
+          collapseBtn.textContent = "−";
+        } else {
+          legendContent.classList.add("collapsed");
+          collapseBtn.textContent = "+";
+        }
+      });
+
+      resetPosBtn.addEventListener("click", () => {
+        legendPanel.style.left = "auto";
+        legendPanel.style.top = "20px";
+        legendPanel.style.right = "20px";
+        legendPanel.style.width = "380px";
+      });
+
+      // ==================== EVENT LISTENER ====================
+      window.addEventListener("resize", () => {
+        canvas.width = container.clientWidth;
+        canvas.height = container.clientHeight;
+        centerPyramid();
+      });
+
+      canvas.addEventListener("wheel", handleWheel, { passive: false });
+      canvas.addEventListener("touchstart", (e) => { if (e.touches.length === 2) pinchStartDist = 0; }, { passive: false });
+      canvas.addEventListener("touchmove", handlePinch, { passive: false });
+
+      canvas.addEventListener("mousedown", (e) => {
+        isDragging = true;
+        lastMouseX = e.clientX;
+        lastMouseY = e.clientY;
+        canvas.style.cursor = "grabbing";
+      });
+
+      window.addEventListener("mousemove", (e) => {
+        if (isDragging) {
+          const dx = e.clientX - lastMouseX;
+          const dy = e.clientY - lastMouseY;
+          offsetX += dx;
+          offsetY += dy;
+          lastMouseX = e.clientX;
+          lastMouseY = e.clientY;
+          drawPyramid();
+        } else {
+          handleMouseMove(e);
+        }
+      });
+
+      window.addEventListener("mouseup", () => {
+        isDragging = false;
+        canvas.style.cursor = "grab";
+      });
+
+      canvas.addEventListener("click", handleClick);
+
+      document.getElementById("connectBtn").addEventListener("click", connectWallet);
+      document.getElementById("exchangeInpiBtn").addEventListener("click", exchangeINPI);
+      document.getElementById("exchangePitBtn").addEventListener("click", exchangePit);
+
+      document.addEventListener("click", async (e) => {
+        if (e.target.id === "revealBtn") await handleReveal();
+        if (e.target.id === "startFarmBtn") await handleStartFarm();
+        if (e.target.id === "stopFarmBtn") await handleStopFarm();
+        if (e.target.id === "claimBtn") await handleClaim();
+        if (e.target.id === "protectBtn") await handleProtect();
+        if (e.target.id === "attackBtn") await handleAttack();
+      });
+
+      // ==================== START ====================
+      await initReadOnly();
+      canvas.width = container.clientWidth;
+      canvas.height = container.clientHeight;
+      await loadData();
+      centerPyramid();
+
+      // refresh global data every 30s (map status)
+      setInterval(loadData, 30000);
+    })();
+  </script>
 </body>
 </html>
