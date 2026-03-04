@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>INPINITY – Pyramid Map (V1+V2 + Attack Execution)</title>
+    <title>INPINITY – Pyramid Map (V2 Complete + Attack Execution)</title>
     <link rel="icon" type="image/png" href="favicon.webp" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -166,12 +166,12 @@
             font-weight: 600;
         }
 
-        /* Sidebar / Legende (erweitert für Aktionen) */
+        /* Sidebar / Legende */
         .legend-panel {
             position: absolute;
             top: 20px;
             right: 20px;
-            width: 360px;
+            width: 380px;
             background: rgba(20, 28, 38, 0.95);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
@@ -352,6 +352,8 @@
             flex-direction: column;
             gap: 0.5rem;
             margin-top: 0.5rem;
+            max-height: 150px;
+            overflow-y: auto;
         }
         .attack-item {
             background: #0f1a2a;
@@ -361,6 +363,7 @@
             justify-content: space-between;
             align-items: center;
             border: 1px solid #d4af37;
+            font-size: 0.85rem;
         }
         .execute-btn {
             background: #e74c3c;
@@ -370,6 +373,42 @@
             border-radius: 20px;
             cursor: pointer;
             font-weight: 600;
+            font-size: 0.8rem;
+        }
+
+        /* FAQ Bereich */
+        .faq-section {
+            margin-top: 1.5rem;
+            border-top: 1px solid #2a3f4a;
+            padding-top: 1rem;
+        }
+        .faq-item {
+            margin-bottom: 1rem;
+            background: #0f1a22;
+            border-radius: 16px;
+            padding: 0.8rem;
+        }
+        .faq-question {
+            color: #d4af37;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .faq-question:hover {
+            color: #ffd700;
+        }
+        .faq-answer {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: #b0c4de;
+            line-height: 1.4;
+            border-left: 2px solid #d4af37;
+            padding-left: 0.8rem;
+        }
+        .faq-answer.hidden {
+            display: none;
         }
 
         .legend-item {
@@ -406,7 +445,7 @@
             text-shadow: 0 0 5px black;
         }
 
-        /* Rarity-Farben für die Sidebar */
+        /* Rarity-Farben */
         .rarity-bronze { color: #cd7f32; font-weight: bold; }
         .rarity-silver { color: #c0c0c0; font-weight: bold; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
         .rarity-gold { color: #ffd700; font-weight: bold; text-shadow: 0 0 8px gold; }
@@ -483,12 +522,12 @@
                 </div>
             </div>
             <div class="legend-content" id="legendContent">
-                <!-- Block-Details werden hier dynamisch befüllt -->
+                <!-- Block-Details -->
                 <div class="detail-card" id="blockDetail">
                     <p style="color: #98a9b9; text-align: center;">Click a block to start</p>
                 </div>
 
-                <!-- Aktionen (werden per JS eingeblendet) -->
+                <!-- Aktionen -->
                 <div id="actionPanel" style="display: none;">
                     <div class="action-buttons" id="ownerActions"></div>
                     <div class="action-buttons" id="attackerActions"></div>
@@ -505,7 +544,7 @@
                     <div id="actionMessage" class="message"></div>
                 </div>
 
-                <!-- NEU: Angriffsübersicht -->
+                <!-- Angriffsübersicht -->
                 <div style="margin: 1.5rem 0; border-top: 1px solid #2a3f4a; padding-top: 1rem;">
                     <h4 style="color: #d4af37; margin-bottom: 1rem;">⚔️ Your Attacks</h4>
                     <div id="userAttacksList" class="attacks-list">
@@ -513,7 +552,7 @@
                     </div>
                 </div>
 
-                <!-- Token Exchange Bereich (immer sichtbar) -->
+                <!-- Token Exchange -->
                 <div style="margin: 1.5rem 0; border-top: 1px solid #2a3f4a; padding-top: 1rem;">
                     <h4 style="color: #d4af37; margin-bottom: 1rem;">💰 Token Exchange</h4>
                     <div class="input-group">
@@ -529,23 +568,111 @@
                     <div id="exchangeMessage" class="message"></div>
                 </div>
 
-                <!-- Eigene Ressourcen-Anzeige -->
+                <!-- Eigene Ressourcen -->
                 <div style="margin: 1rem 0; border-top: 1px solid #2a3f4a; padding-top: 1rem;">
                     <h4 style="color: #d4af37; margin-bottom: 1rem;">📦 Your Resources</h4>
-                    <div id="userResources" style="display: flex; flex-direction: column; gap: 0.3rem;">
+                    <div id="userResources" style="display: flex; flex-direction: column; gap: 0.3rem; max-height: 150px; overflow-y: auto;">
                         <p style="color: #98a9b9;">Connect wallet to see your resource tokens.</p>
                     </div>
                 </div>
 
-                <h4 style="color: #d4af37; margin: 1rem 0 0.8rem;">Legend</h4>
+                <!-- FAQ / Prozesserklärungen -->
+                <div class="faq-section">
+                    <h4 style="color: #d4af37; margin-bottom: 1rem;">❓ Game Processes</h4>
+                    
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="this.nextElementSibling.classList.toggle('hidden')">
+                            <span>⛏️ Minting</span>
+                            <span>▼</span>
+                        </div>
+                        <div class="faq-answer hidden">
+                            <strong>Mint With:</strong><br>
+                            • 0.003 ETH<br>
+                            • 30 INPI<br>
+                            • 0.0015 ETH + 15 INPI (mixed)<br>
+                            <br>
+                            Each block has a unique (row, col) coordinate. Row 0 is the top, 100 rows total. Minting gives you an unrevealed block.
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="this.nextElementSibling.classList.toggle('hidden')">
+                            <span>🔓 Revealing</span>
+                            <span>▼</span>
+                        </div>
+                        <div class="faq-answer hidden">
+                            Reveal your block using π and φ proofs. Once revealed, you can see its rarity (Bronze → Diamond) and daily production rates. Rarity determines resource output.
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="this.nextElementSibling.classList.toggle('hidden')">
+                            <span>🌾 Farming</span>
+                            <span>▼</span>
+                        </div>
+                        <div class="faq-answer hidden">
+                            <strong>Start Farming:</strong> Your block begins producing resources daily.<br>
+                            <strong>Claim Resources:</strong> Collect produced resources at any time.<br>
+                            <strong>Stop Farming:</strong> Stops production (resources remain).<br>
+                            Resources are ERC1155 tokens and can be viewed in "Your Resources".
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="this.nextElementSibling.classList.toggle('hidden')">
+                            <span>🛡️ Protection</span>
+                            <span>▼</span>
+                        </div>
+                        <div class="faq-answer hidden">
+                            Buy protection for your block with INPI. Protection level (0-50%) reduces stolen resources during attacks. Costs 10 INPI per percent. Lasts 3.14 days.
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="this.nextElementSibling.classList.toggle('hidden')">
+                            <span>⚔️ Attacking</span>
+                            <span>▼</span>
+                        </div>
+                        <div class="faq-answer hidden">
+                            <strong>1. Start Attack:</strong> Choose target block and resource to steal.<br>
+                            <strong>2. Wait 24h:</strong> Attack becomes executable.<br>
+                            <strong>3. Execute:</strong> Steal resources from target (minus their protection).<br>
+                            Blocks under attack have <span style="color:#000;">⚫ black</span> borders; executable attacks have <span style="color:#e74c3c;">🔴 red</span> borders.
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="this.nextElementSibling.classList.toggle('hidden')">
+                            <span>🤝 Partnerships</span>
+                            <span>▼</span>
+                        </div>
+                        <div class="faq-answer hidden">
+                            Partner blocks (marked with ★) can produce special resources: Copper, Obsidian, Crystal, Mysterium, and Aether. These are used for upcoming Infinite City upgrades.
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="this.nextElementSibling.classList.toggle('hidden')">
+                            <span>💰 Token Exchange</span>
+                            <span>▼</span>
+                        </div>
+                        <div class="faq-answer hidden">
+                            <strong>INPI → PIT:</strong> Exchange INPI for Pitrone at the current rate (1 INPI = 100 PIT).<br>
+                            <strong>PIT → INPI:</strong> Exchange Pitrone back to INPI.<br>
+                            Rate may change based on pool liquidity.
+                        </div>
+                    </div>
+                </div>
+
+                <h4 style="color: #d4af37; margin: 1.5rem 0 0.8rem;">Legend</h4>
                 <div class="legend-item"><div class="color-box color-gray"></div> Not minted</div>
                 <div class="legend-item"><div class="color-box color-green"></div> Minted, not revealed</div>
                 <div class="legend-item"><div class="color-box color-gold"></div> Revealed</div>
-                <div class="legend-item"><div class="color-box color-cyan"></div> Your block (cyan fill)</div>
+                <div class="legend-item"><div class="color-box color-cyan"></div> Your block</div>
                 <div class="legend-item"><div class="color-box color-gold border-blue"></div> Farming active</div>
                 <div class="legend-item"><div class="color-box color-gold border-purple"></div> Protected</div>
-                <div class="legend-item"><div class="color-box color-gold border-black"></div> Under attack (waiting)</div>
-                <div class="legend-item"><div class="color-box color-gold border-red"></div> Attack ready to execute</div>
+                <div class="legend-item"><div class="color-box color-gold border-black"></div> Under attack</div>
+                <div class="legend-item"><div class="color-box color-gold border-red"></div> Attack ready</div>
                 <div class="legend-item"><div class="color-box color-gold" style="position: relative;"><span class="star">★</span></div> Partner block</div>
 
                 <div class="footer-note">
@@ -567,9 +694,8 @@
             const SUBGRAPH_URL_V2 = `https://gateway.thegraph.com/api/${API_KEY}/subgraphs/id/${SUBGRAPH_ID_V2}`;
             const BASE_BLOCK_SIZE = 24;
 
-            // Contract Adressen (Base Mainnet)
+            // Contract Adressen (Base Mainnet) - ALLE V2!
             const NFT_ADDRESS = "0x277a0D5864293C78d7387C54B48c35D5E9578Ab1";
-            const FARMING_V1_ADDRESS = "0xd9722fB6e9b8e71399A970d4e8F4D628C532E94f";
             const FARMING_V2_ADDRESS = "0x852Bce0713aAF409c4412155Ab8CE6191B525C30";
             const PIRATES_V2_ADDRESS = "0x46290466327b0Fab5791f030f8487321635Eeb37";
             const MERCENARY_V2_ADDRESS = "0xFEa09ccA75dbc63cc8053739A61777Bd13fC6Bc2";
@@ -578,25 +704,25 @@
             const INPI_ADDRESS = "0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D";
             const PITRONE_ADDRESS = "0x7240Ec5B3Ba944888E186c74D0f8B4F5F71c9AE8";
 
-            // ABIs (mit executeAttack erweitert)
+            // ABIs
             const NFT_ABI = [
                 "function revealBlock(uint256 tokenId, bytes32[] piProof, bytes32[] phiProof, uint8 piDigit, uint8 phiDigit) external",
                 "function calculateRarity(uint256 tokenId) view returns (uint8)"
             ];
-            const FARMING_ABI = [
+            const FARMING_V2_ABI = [
                 "function startFarming(uint256 tokenId) external",
                 "function stopFarming(uint256 tokenId) external",
                 "function claimResources(uint256 tokenId) external",
                 "function farms(uint256) view returns (uint256 startTime, uint256 lastClaimTime, bool isActive)"
             ];
-            const PIRATES_ABI = [
+            const PIRATES_V2_ABI = [
                 "function startAttack(uint256 attackerTokenId, uint256 targetTokenId, uint8 resource) external",
                 "function executeAttack(uint256 targetTokenId, uint256 attackIndex, uint256 protectionLevel) external"
             ];
-            const MERCENARY_ABI = [
+            const MERCENARY_V2_ABI = [
                 "function hireMercenaries(uint256 tokenId, uint256 protectionLevel) external"
             ];
-            const PARTNERSHIP_ABI = [
+            const PARTNERSHIP_V2_ABI = [
                 "function isPartnerBlock(uint256 tokenId) view returns (bool)"
             ];
             const INPI_ABI = [
@@ -619,25 +745,21 @@
             let provider, signer, userAddress = null;
             let readOnlyProvider;
             let nftReadOnlyContract;
-            let tokens = {};          // key = tokenId (String) -> { owner, revealed, farmActive, farmingVersion, protectionActive, partnerActive }
-            let userResources = [];    // { resourceId, amount }
+            let tokens = {};
+            let userResources = [];
             let selectedTokenId = null;
             let selectedTokenOwner = null;
             let selectedRevealed = false;
             let selectedRarity = null;
+            let userAttacks = [];
 
-            // NEU: Angriffe
-            let userAttacks = []; // { id, targetTokenId, attackIndex, protectionLevel, endTime, resource, executed }
-
-            // Contract-Instanzen (mit Signer)
             let nftContract;
-            let farmingV1Contract, farmingV2Contract;
+            let farmingV2Contract;
             let piratesV2Contract;
             let mercenaryV2Contract;
             let partnershipV2Contract;
             let inpiContract, pitroneContract;
 
-            // Canvas & UI
             const canvas = document.getElementById('pyramidCanvas');
             const ctx = canvas.getContext('2d');
             const container = document.getElementById('canvasContainer');
@@ -658,17 +780,14 @@
             let lastMouseX, lastMouseY;
             let pinchStartDist = 0;
 
-            // Ressourcen-Namen für Anzeige
             const resourceNames = [
                 "Oil", "Lemons", "Iron", "Gold", "Platinum",
                 "Copper", "Crystal", "Obsidian", "Mysterium", "Aether"
             ];
-
-            // Rarity-Namen und CSS-Klassen
             const rarityNames = ["Bronze", "Silver", "Gold", "Platinum", "Diamond"];
             const rarityClass = ["rarity-bronze", "rarity-silver", "rarity-gold", "rarity-platinum", "rarity-diamond"];
 
-            // ==================== DROPDOWN DYNAMISCH BEFÜLLEN ====================
+            // ==================== DROPDOWN BEFÜLLEN ====================
             function populateAttackResourceSelect() {
                 const select = document.getElementById('attackResource');
                 if (!select) return;
@@ -743,23 +862,23 @@
                 return production;
             }
 
-            // ==================== NEU: ANGRIFFE LADEN ====================
+            // ==================== ANGRIFFE LADEN ====================
             async function loadUserAttacks() {
                 if (!userAddress) return;
                 try {
                     const where = `{ attacker: "${userAddress.toLowerCase()}", executed: false }`;
                     const attacks = await fetchAllWithPagination(SUBGRAPH_URL_V2, 'attacks', 
-                        'id targetTokenId attackIndex protectionLevel endTime resource executed', where);
+                        'id target attackIndex protectionLevel endTime resource executed', where);
                     userAttacks = attacks.map(a => ({
                         ...a,
-                        targetTokenId: parseInt(a.targetTokenId),
+                        targetTokenId: parseInt(a.target),
                         attackIndex: parseInt(a.attackIndex),
                         protectionLevel: parseInt(a.protectionLevel),
                         endTime: parseInt(a.endTime),
                         resource: parseInt(a.resource)
                     }));
                     displayUserAttacks();
-                    drawPyramid(); // Rahmen aktualisieren
+                    drawPyramid();
                 } catch (e) {
                     console.error('Failed to load attacks:', e);
                 }
@@ -784,7 +903,7 @@
                         ? '<span style="color: #51cf66;">Ready</span>' 
                         : `<span>⏳ ${formatTime(timeLeft)}</span>`;
                     const executeBtn = timeLeft <= 0 
-                        ? `<button class="action-btn execute-attack-btn" style="padding:0.2rem 1rem;" data-attack='${JSON.stringify(attack)}'>⚔️ Execute</button>` 
+                        ? `<button class="action-btn execute-attack-btn" style="padding:0.2rem 0.8rem; background:#e74c3c; color:white; border:none; border-radius:20px;" data-attack='${JSON.stringify(attack)}'>⚔️ Execute</button>` 
                         : '';
                     html += `<div class="attack-item">
                         <span>#${attack.targetTokenId} (${resourceNames[attack.resource]})</span>
@@ -898,7 +1017,7 @@
 
                     if (userAddress) {
                         await loadUserResources();
-                        await loadUserAttacks(); // NEU
+                        await loadUserAttacks();
                     }
 
                     console.log(`Daten geladen. Tokens: ${Object.keys(tokens).length}`);
@@ -911,7 +1030,6 @@
             async function loadUserResources() {
                 if (!userAddress) return;
                 try {
-                    console.log('Lade ResourceBalances für', userAddress);
                     const where = `{ account: "${userAddress.toLowerCase()}" }`;
                     const balanceItems = await fetchAllWithPagination(SUBGRAPH_URL_V2, 'resourceBalances', 'id account resourceId amount', where);
                     userResources = balanceItems
@@ -941,7 +1059,7 @@
                 userResourcesDiv.innerHTML = html;
             }
 
-            // ==================== ZEICHNEN (mit Angriffsrahmen) ====================
+            // ==================== ZEICHNEN ====================
             function drawPyramid() {
                 if (!canvas || !ctx) return;
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -975,14 +1093,13 @@
                                 fillColor = '#a0d6ff';
                             }
 
-                            // Angriffsrahmen haben Vorrang
                             const attack = userAttacks.find(a => a.targetTokenId == tokenId);
                             if (attack) {
                                 if (attack.endTime <= now) {
-                                    strokeColor = '#e74c3c'; // rot
+                                    strokeColor = '#e74c3c';
                                     lineWidth = 4;
                                 } else {
-                                    strokeColor = '#000000'; // schwarz
+                                    strokeColor = '#000000';
                                     lineWidth = 4;
                                 }
                             } else {
@@ -1152,7 +1269,7 @@
                 if (!selectedTokenId) return;
                 const token = tokens[selectedTokenId];
                 if (!token || !token.farmActive) return;
-                const contract = token.farmingVersion === 'v2' ? farmingV2Contract : farmingV1Contract;
+                const contract = farmingV2Contract;
                 const tx = contract.stopFarming(selectedTokenId);
                 await sendTx(tx, actionMessage, 'Farming stopped.');
             }
@@ -1161,7 +1278,7 @@
                 if (!selectedTokenId) return;
                 const token = tokens[selectedTokenId];
                 if (!token || !token.farmActive) return;
-                const contract = token.farmingVersion === 'v2' ? farmingV2Contract : farmingV1Contract;
+                const contract = farmingV2Contract;
                 const tx = contract.claimResources(selectedTokenId);
                 await sendTx(tx, actionMessage, 'Resources claimed!');
                 await loadUserResources();
@@ -1194,10 +1311,10 @@
                 const resource = parseInt(document.getElementById('attackResource').value);
                 const tx = piratesV2Contract.startAttack(attackerTokenId, selectedTokenId, resource);
                 await sendTx(tx, actionMessage, 'Attack launched!');
-                await loadUserAttacks(); // Angriffe neu laden
+                await loadUserAttacks();
             }
 
-            // ==================== EXCHANGE-FUNKTIONEN ====================
+            // ==================== EXCHANGE ====================
             async function exchangeINPI() {
                 if (!userAddress) { exchangeMessage.innerHTML = '<span class="error">❌ Connect wallet first.</span>'; return; }
                 const inpiAmount = parseFloat(document.getElementById('inpiAmount').value);
@@ -1267,11 +1384,10 @@
                     }
 
                     nftContract = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
-                    farmingV1Contract = new ethers.Contract(FARMING_V1_ADDRESS, FARMING_ABI, signer);
-                    farmingV2Contract = new ethers.Contract(FARMING_V2_ADDRESS, FARMING_ABI, signer);
-                    piratesV2Contract = new ethers.Contract(PIRATES_V2_ADDRESS, PIRATES_ABI, signer);
-                    mercenaryV2Contract = new ethers.Contract(MERCENARY_V2_ADDRESS, MERCENARY_ABI, signer);
-                    partnershipV2Contract = new ethers.Contract(PARTNERSHIP_V2_ADDRESS, PARTNERSHIP_ABI, signer);
+                    farmingV2Contract = new ethers.Contract(FARMING_V2_ADDRESS, FARMING_V2_ABI, signer);
+                    piratesV2Contract = new ethers.Contract(PIRATES_V2_ADDRESS, PIRATES_V2_ABI, signer);
+                    mercenaryV2Contract = new ethers.Contract(MERCENARY_V2_ADDRESS, MERCENARY_V2_ABI, signer);
+                    partnershipV2Contract = new ethers.Contract(PARTNERSHIP_V2_ADDRESS, PARTNERSHIP_V2_ABI, signer);
                     inpiContract = new ethers.Contract(INPI_ADDRESS, INPI_ABI, signer);
                     pitroneContract = new ethers.Contract(PITRONE_ADDRESS, PITRONE_ABI, signer);
 
@@ -1279,7 +1395,6 @@
                     await loadData();
                     drawPyramid();
 
-                    // Periodische Aktualisierung der Angriffe
                     setInterval(() => {
                         loadUserAttacks();
                     }, 30000);
@@ -1288,7 +1403,7 @@
                 }
             }
 
-            // ==================== READ-ONLY PROVIDER FÜR RARITY ====================
+            // ==================== READ-ONLY PROVIDER ====================
             async function initReadOnly() {
                 const baseRpc = 'https://mainnet.base.org';
                 readOnlyProvider = new ethers.JsonRpcProvider(baseRpc);
@@ -1326,7 +1441,6 @@
                         if (token.farmActive) text += ' · Farming';
                         if (token.protectionActive) text += ' · Protected';
                         if (token.partnerActive) text += ' ⭐';
-                        // Angriffsinfo
                         const attack = userAttacks.find(a => a.targetTokenId == found);
                         if (attack) {
                             const now = Math.floor(Date.now() / 1000);
@@ -1508,7 +1622,6 @@
             document.getElementById('exchangeInpiBtn').addEventListener('click', exchangeINPI);
             document.getElementById('exchangePitBtn').addEventListener('click', exchangePit);
 
-            // Event-Delegation für dynamische Buttons
             document.addEventListener('click', async (e) => {
                 if (e.target.id === 'revealBtn') await handleReveal();
                 if (e.target.id === 'startFarmBtn') await handleStartFarm();
