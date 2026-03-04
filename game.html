@@ -1463,7 +1463,7 @@
             const inpiAmount = parseFloat(document.getElementById('inpiAmount').value);
             if (isNaN(inpiAmount) || inpiAmount <= 0) return alert('Invalid amount');
             const amountWei = ethers.utils.parseEther(inpiAmount.toString());
-            const msgDiv = document.getElementById('exchangeMessage');
+            
             msgDiv.innerHTML = '<span class="success">⏳ Exchanging...</span>';
             try {
                 const inpiBal = await inpiContract.balanceOf(userAddress);
@@ -1490,7 +1490,7 @@
             if (!userAddress) { msgDiv.innerHTML = '<span class="error">❌ Connect wallet first.</span>'; return; }            const pitAmount = parseFloat(document.getElementById('pitAmount').value);
             if (isNaN(pitAmount) || pitAmount <= 0) return alert('Invalid amount');
             const amountWei = ethers.utils.parseEther(pitAmount.toString());
-            const msgDiv = document.getElementById('exchangeMessage');
+            
             msgDiv.innerHTML = '<span class="success">⏳ Exchanging...</span>';
             try {
                 const tx = await pitroneContract.exchangePitrone(amountWei);
