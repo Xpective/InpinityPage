@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>INPINITY – The Pi-Phi Pyramid (v0.16.0 – Full V2 mit stealResources)</title>
+    <title>INPINITY – The Pi-Phi Pyramid (v0.17.0 – Full V2 mit localStorage)</title>
     <link rel="icon" type="image/png" href="favicon.webp" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -587,7 +587,7 @@
 
         <footer>
             <p>© 2026 INPINITY. All rights reserved. Built on Base.</p>
-            <p>Version 0.16.0 – Full V2 with stealResources and 9% max steal.</p>
+            <p>Version 0.17.0 – Full V2 with localStorage resource tracking.</p>
             <p><a href="whitepaper.html">Whitepaper</a> | <a href="https://discord.gg/95yj6Eg6" target="_blank">Discord</a></p>
         </footer>
     </div>
@@ -870,16 +870,29 @@
                 const where = `{ attacker: "${userAddress.toLowerCase()}", executed: false }`;
                 const attacks = await fetchAllWithPagination(SUBGRAPH_URL_V2, 'attacks', 
                     'id target attackIndex startTime endTime executed', where);
+                
                 userAttacks = attacks.map(a => {
                     console.log('Raw attack from subgraph:', a);
+                    
+                    // Versuche, die gespeicherte Resource aus localStorage zu holen
+                    let resource = 0;
+                    const targetId = parseInt(a.target);
+                    const savedAttack = localStorage.getItem(`attack_${targetId}`);
+                    if (savedAttack) {
+                        try {
+                            const attackData = JSON.parse(savedAttack);
+                            resource = attackData.resource || 0;
+                        } catch (e) {}
+                    }
+                    
                     return {
                         id: a.id,
-                        targetTokenId: parseInt(a.target),
+                        targetTokenId: targetId,
                         attackIndex: parseInt(a.attackIndex),
                         protectionLevel: 0,
                         startTime: parseInt(a.startTime),
                         endTime: parseInt(a.endTime),
-                        resource: 0, // Platzhalter
+                        resource: resource,
                         attacker: a.attacker,
                         executed: a.executed
                     };
@@ -910,12 +923,14 @@
                 const status = timeLeft <= 0 
                     ? '<span style="color: #51cf66;">Ready to execute</span>' 
                     : `<span>⏳ ${formatTime(timeLeft)} remaining</span>`;
+                
+                // Resource im Button mitspeichern
                 const executeBtn = timeLeft <= 0 
-                    ? `<button class="execute-btn" data-targetid="${attack.targetTokenId}" data-attackindex="${attack.attackIndex}">⚔️ Execute</button>` 
+                    ? `<button class="execute-btn" data-targetid="${attack.targetTokenId}" data-attackindex="${attack.attackIndex}" data-resource="${attack.resource}">⚔️ Execute</button>` 
                     : '';
 
                 html += `<div class="attack-item">
-                    <div><strong>Target #${attack.targetTokenId}</strong></div>
+                    <div><strong>Target #${attack.targetTokenId}</strong> (${resourceNames[attack.resource]})</div>
                     <div>${status}</div>
                     ${executeBtn}
                 </div>`;
@@ -926,15 +941,7 @@
                 btn.addEventListener('click', async (e) => {
                     const targetTokenId = parseInt(btn.dataset.targetid);
                     const attackIndex = parseInt(btn.dataset.attackindex);
-                    
-                    // Hier müssen wir die Resource aus dem Attack-Objekt holen
-                    // Da wir sie nicht im Subgraph haben, müssen wir sie anders speichern
-                    // Für jetzt nehmen wir an, dass der Angreifer die Resource kennt
-                    // Idee: Wir speichern die Resource im localStorage oder in einer Map
-                    
-                    // Für Test: Resource aus dem Select-Element holen
-                    const resourceSelect = document.getElementById('attackResourceSelect');
-                    const resource = parseInt(resourceSelect.value);
+                    const resource = parseInt(btn.dataset.resource);
                     
                     await executeAttack({ 
                         targetTokenId, 
@@ -976,7 +983,7 @@
                     throw new Error('Invalid attack data - missing targetTokenId or attackIndex');
                 }
                 
-                // Resource aus dem Attack-Objekt holen (muss vorher gespeichert werden)
+                // Resource aus dem Attack-Objekt holen
                 const resource = attack.resource !== undefined ? attack.resource : 0;
                 
                 console.log('Calling farmingV2Contract.stealResources with:', {
@@ -1000,6 +1007,9 @@
                 
                 await tx.wait();
                 msgDiv.innerHTML = '<span class="success">✅ Attack executed! Resources stolen.</span>';
+                
+                // Nach erfolgreicher Ausführung den localStorage-Eintrag löschen
+                localStorage.removeItem(`attack_${attack.targetTokenId}`);
                 
                 await loadUserAttacks();
                 await loadResourceBalances();
@@ -1392,7 +1402,6 @@
                 msgDiv.innerHTML = '<span class="success">✅ Attack started! Check back later.</span>';
                 
                 // Speichere die Resource für später (im localStorage)
-                // Da der Subgraph kein resource-Feld hat, müssen wir uns merken, welche Resource wir gewählt haben
                 const attackKey = `attack_${targetTokenId}`;
                 localStorage.setItem(attackKey, JSON.stringify({
                     targetTokenId,
