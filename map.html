@@ -887,31 +887,43 @@
   
     // ✅ EXECUTE (PiratesV3.executeAttack)
     async function executeAttack(attack) {
-      actionMessage.innerHTML = '<span class="success">⏳ Executing attack...</span>';
+      actionMessage.innerHTML = '<span class="success">⏳ Checking target resources...</span>';
       try {
         if (!piratesV3Contract) throw new Error("Connect wallet first.");
-  
+    
+        // Prüfe, ob das Ziel unclaimed Ressourcen des angegriffenen Typs hat
+        const pending = await farmingV3Contract.getAllPending(attack.targetTokenId);
+        // pending ist ein Array von 10 BigInt (ethers v6)
+        if (pending[attack.resource] <= 0n) {
+          actionMessage.innerHTML = '<span class="error">❌ Target has no unclaimed resources for this resource type. Execute not possible.</span>';
+          // Angriff lokal verwerfen (aus UI entfernen)
+          if (attack.id) dismissAttackById(attack.id);
+          await loadUserAttacks();
+          return;
+        }
+    
+        actionMessage.innerHTML = '<span class="success">⏳ Executing attack...</span>';
+    
         const tx = await piratesV3Contract.executeAttack(
           attack.targetTokenId,
           attack.attackIndex,
           { gasLimit: 350000 }
         );
-  
+    
         actionMessage.innerHTML = '<span class="success">⏳ Confirming...</span>';
         await tx.wait();
-  
+    
         actionMessage.innerHTML = '<span class="success">✅ Attack executed! Resources stolen.</span>';
-  
+    
         localStorage.removeItem(getAttackStorageKey(attack.targetTokenId));
-  
+    
         await loadUserAttacks();
-        await loadUserResources();   // on-chain
+        await loadUserResources();
         await loadData();
       } catch (e) {
         console.error("executeAttack error:", e);
         let msg = e?.message || "Unknown error";
         if ((msg + "").includes("execution reverted")) {
-          // Bei Revert nach Ablauf der Zeit -> wahrscheinlich "nichts zu stehlen"
           if (attack.id) dismissAttackById(attack.id);
           await loadUserAttacks();
           actionMessage.innerHTML = `<span class="error">❌ Attack failed – nothing to steal (target empty).</span>`;
