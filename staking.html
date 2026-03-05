@@ -5,6 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inpinity - Staking</title>
+
     <link rel="stylesheet" href="css/base.css" />
     <link rel="stylesheet" href="css/layout.css" />
     <link rel="stylesheet" href="css/animations.css" />
@@ -23,10 +24,12 @@
     <link rel="stylesheet" href="css/gamification.css" />
     <link rel="stylesheet" href="css/referral.css"/>
     <script defer src="main.js"></script>
+
     <!-- Ethers.js for blockchain interaction -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
+
     <link rel="icon" type="image/png" href="favicon.webp">
-    <meta name="keywords" content="Inpinity, Game Design, Game Development, Platform, Collaboration, Forum, Tools, GameDesign, AI Development, Games of future, programming, programs, python gui, staking">
+    <meta name="keywords" content="Inpinity, staking, INPI, Base, Uniswap">
     <meta name="author" content="Xpective">
     <meta property="og:title" content="Inpinity - Staking">
     <meta property="og:description" content="Stake your $INPI tokens and earn passive rewards.">
@@ -37,7 +40,12 @@
     <meta name="twitter:creator" content="@Inpinity1">
     <meta name="theme-color" content="#FarbcodeIhrerWebsite">
     <meta name="robots" content="index,follow">
+
     <style>
+        /* ✅ prevent footer overlap / add breathing room */
+        main { padding-bottom: 4rem; }
+        footer { margin-top: 3rem; padding-top: 1rem; }
+
         /* Staking page specific styles */
         .staking-container {
             max-width: 900px;
@@ -109,9 +117,7 @@
             cursor: pointer;
             transition: transform 0.2s;
         }
-        .connect-wallet-btn:hover {
-            transform: scale(1.05);
-        }
+        .connect-wallet-btn:hover { transform: scale(1.05); }
         .wallet-details {
             background: #222;
             padding: 0.5rem 1rem;
@@ -155,13 +161,8 @@
             padding: 2rem;
             margin: 2rem 0;
         }
-        .staking-form h2 {
-            color: gold;
-            margin-top: 0;
-        }
-        .form-group {
-            margin: 1.5rem 0;
-        }
+        .staking-form h2 { color: gold; margin-top: 0; }
+        .form-group { margin: 1.5rem 0; }
         .form-group label {
             display: block;
             color: gold;
@@ -203,18 +204,13 @@
             transform: scale(1.02);
             box-shadow: 0 0 15px gold;
         }
-        .action-btn:disabled {
-            background: #666;
-            cursor: not-allowed;
-        }
+        .action-btn:disabled { background: #666; cursor: not-allowed; }
         .action-btn.secondary {
             background: #444;
             color: gold;
             border: 1px solid gold;
         }
-        .action-btn.secondary:hover:not(:disabled) {
-            background: #555;
-        }
+        .action-btn.secondary:hover:not(:disabled) { background: #555; }
         .info-note {
             background: #2a2a2a;
             border-left: 4px solid gold;
@@ -222,9 +218,7 @@
             margin: 1rem 0;
             color: #ccc;
         }
-        .info-note strong {
-            color: gold;
-        }
+        .info-note strong { color: gold; }
         .warning-note {
             background: #332211;
             border: 1px solid #ffaa00;
@@ -234,9 +228,7 @@
             max-width: 800px;
             text-align: center;
         }
-        .warning-note a {
-            color: gold;
-        }
+        .warning-note a { color: gold; }
         .reward-rate {
             display: flex;
             justify-content: space-around;
@@ -246,9 +238,7 @@
             background: #222;
             border-radius: 8px;
         }
-        .rate-item {
-            text-align: center;
-        }
+        .rate-item { text-align: center; }
         .rate-item .value {
             font-size: 1.2rem;
             font-weight: bold;
@@ -256,410 +246,350 @@
         }
     </style>
 </head>
+
 <body>
-    <header>
-        <nav>
-            <ul>
-                <li><a aria-label="Home" href="index.html">Home</a></li>
-                <li><a aria-label="Features" href="features.html">Features</a></li>
-                <li><a aria-label="Game" href="game.html">Game</a></li>
-                <li><a aria-label="Forum" href="forum.html">Forum</a></li>
-                <li><a aria-label="Collaboration" href="collaboration.html">Collaboration</a></li>
-                <li><a aria-label="Register" href="register.html">Register</a></li>
-                <li><a aria-label="About" href="about.html">About</a></li>
-                <li><a aria-label="Whitepaper" href="https://github.com/Xpective/InpinityPage/raw/3923cf22782286d60574c8ae9b92e693cb314215/Inpinity%20Whitepaper%20.pdf" target="_blank" rel="noopener">Whitepaper</a></li>
-                <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
-                <li><a aria-label="Guestbook" href="guestbook.html">Guestbook</a></li>
-                <li><a aria-label="Advertising" href="advertising.html">Advertising</a></li>
-                <li><a aria-label="Profile" href="profile.html">Profile</a></li>
-                <li><a aria-label="Staking" href="staking.html">Staking</a></li>
-                <div class="themeDots">
-                    <div class="dot light" title="Light Theme"></div>
-                    <div class="dot dark" title="Dark Theme"></div>
-                    <div class="dot basic" title="Basic Theme"></div>
-                </div>
-            </ul>
-        </nav>
-        <style>
-            .themeDots .dot {
-                display: inline-block;
-                width: 20px;
-                height: 20px;
-                border-radius: 50%;
-                margin: 5px;
-                cursor: pointer;
-                transition: transform 0.2s;
-            }
-            .themeDots .dot.light { background-color: #FFFFFF; }
-            .themeDots .dot.dark { background-color: #000000; }
-            .themeDots .dot.basic { background-color: var(--quinary-color); }
-            .themeDots .dot:hover { transform: scale(1.2); }
-        </style>
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                document.querySelector('.themeDots .dot.light')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'light'));
-                document.querySelector('.themeDots .dot.dark')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'dark'));
-                document.querySelector('.themeDots .dot.basic')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'basic'));
-            });
-        </script>
-    </header>
+<header>
+    <nav>
+        <ul>
+            <li><a aria-label="Home" href="index.html">Home</a></li>
+            <li><a aria-label="Features" href="features.html">Features</a></li>
+            <li><a aria-label="Game" href="game.html">Game</a></li>
+            <li><a aria-label="Mint" href="mint.html">Mint</a></li>
+            <li><a aria-label="Pyramid Map" href="map.html">Pyramid Map</a></li>
+            <li><a aria-label="Collaboration" href="collaboration.html">Collaboration</a></li>
+            <li><a aria-label="About" href="about.html">About</a></li>
+            <li><a aria-label="Whitepaper" href="whitepaper.html">Whitepaper</a></li>
+            <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
+            <li><a aria-label="Guestbook" href="guestbook.html">Guestbook</a></li>
+            <li><a aria-label="Advertising" href="advertising.html">Advertising</a></li>
+            <li><a aria-label="Staking" href="staking.html">Staking</a></li>
 
-    <main>
-        <!-- Warning about ToshiMart -->
-        <div class="warning-note">
-            <p>⚠️ <strong>Important Update:</strong> We have withdrawn from ToshiMart due to phishing concerns. Our new INPI token is <code>0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</code>. All official contracts are listed on our <a href="index.html">homepage</a>. Do not interact with the old token or ToshiMart pools.</p>
-        </div>
-
-        <!-- Partners Section (ToshiMart removed) -->
-        <div class="partners-section">
-            <div class="partner-item"><a href="https://base.org/" target="_blank">⚡ Base L2</a></div>
-            <div class="partner-item"><a href="https://uniswap.org/" target="_blank">🦄 Uniswap</a></div>
-        </div>
-
-        <div class="staking-container">
-            <h1>⚡ Stake $INPI, Earn Rewards</h1>
-
-            <!-- Wallet Connection Bar -->
-            <div class="wallet-bar">
-                <div class="wallet-info">
-                    <button id="connectWalletBtn" class="connect-wallet-btn">🔌 Connect Wallet</button>
-                    <span id="walletStatus" class="wallet-details" style="display: none;"></span>
-                </div>
-                <div id="tokenBalanceInfo" style="display: none;">
-                    <span class="wallet-details">INPI: <span id="tokenBalance">0</span></span>
-                </div>
+            <div class="themeDots">
+                <div class="dot light" title="Light Theme"></div>
+                <div class="dot dark" title="Dark Theme"></div>
+                <div class="dot basic" title="Basic Theme"></div>
             </div>
+        </ul>
+    </nav>
 
-            <!-- Staking Info Panel -->
-            <div class="balance-panel">
-                <div class="balance-card">
-                    <h3>Your Staked INPI</h3>
-                    <div class="value" id="stakedBalance">0</div>
-                    <div class="label">Currently staked</div>
-                </div>
-                <div class="balance-card">
-                    <h3>Pending Rewards</h3>
-                    <div class="value" id="pendingRewards">0</div>
-                    <div class="label">Claimable INPI</div>
-                </div>
-                <div class="balance-card">
-                    <h3>Total Staked</h3>
-                    <div class="value" id="totalStaked">0</div>
-                    <div class="label">Across all users</div>
-                </div>
-            </div>
-
-            <!-- Reward Rate Info -->
-            <div class="reward-rate">
-                <div class="rate-item">
-                    <div class="value" id="ratePerSecond">0</div>
-                    <div>INPI/sec</div>
-                </div>
-                <div class="rate-item">
-                    <div class="value" id="ratePerDay">0</div>
-                    <div>INPI/day</div>
-                </div>
-                <div class="rate-item">
-                    <div class="value" id="ratePerYear">0</div>
-                    <div>INPI/year</div>
-                </div>
-            </div>
-
-            <!-- Stake Form -->
-            <div class="staking-form">
-                <h2>Stake INPI</h2>
-                <div class="form-group">
-                    <label for="stakeAmount">Amount to Stake</label>
-                    <input type="number" id="stakeAmount" placeholder="e.g. 1000" step="any">
-                </div>
-                <div class="button-group">
-                    <button id="stakeBtn" class="action-btn" disabled>🔒 Stake</button>
-                    <button id="unstakeBtn" class="action-btn secondary" disabled>🔓 Unstake</button>
-                </div>
-                <div class="info-note">
-                    <strong>Note:</strong> Staking rewards accumulate continuously based on your share of the total staked pool. You can claim rewards at any time.
-                </div>
-            </div>
-
-            <!-- Claim Form -->
-            <div class="staking-form">
-                <h2>Claim Rewards</h2>
-                <div class="form-group">
-                    <label for="claimAmount">Available: <span id="claimableAmount">0</span> INPI</label>
-                </div>
-                <button id="claimBtn" class="action-btn" disabled>💰 Claim Rewards</button>
-                <div class="info-note">
-                    <strong>Tip:</strong> Claiming does not unstake your tokens. Rewards are sent directly to your wallet.
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <footer>
-        <p>© 2026 Inpinity. All rights reserved. Working with <a href="https://base.org/" target="_blank" rel="noopener" style="color: gold;">Base</a> and <a href="https://uniswap.org/" target="_blank" rel="noopener" style="color: gold;">Uniswap</a>.</p>
-        <div class="footer-links">
-            <a href="privacypolicy.html">Privacy Policy</a>
-            <a href="termsofuse.html">Terms of Use</a>
-            <a href="contact.html">Contact</a>
-            <a href="faq.html">FAQ</a>
-            <a href="guestbook.html">Guestbook</a>
-            <a href="advertising.html">Advertising</a>
-            <a href="profile.html">Profile</a>
-            <a href="staking.html">Staking</a>
-        </div>
-    </footer>
-
+    <style>
+        .themeDots .dot {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin: 5px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .themeDots .dot.light { background-color: #FFFFFF; }
+        .themeDots .dot.dark { background-color: #000000; }
+        .themeDots .dot.basic { background-color: var(--quinary-color); }
+        .themeDots .dot:hover { transform: scale(1.2); }
+    </style>
     <script>
-        (function() {
-            // ========== Configuration ==========
-            const TOKEN_ADDRESS = '0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D'; // new INPI token
-            const STAKING_ADDRESS = '0xF8c74E4fEe036C91228268E804f83eD8f55a6524'; // staking contract
-
-            // Minimal ERC-20 ABI
-            const TOKEN_ABI = [
-                "function balanceOf(address owner) view returns (uint256)",
-                "function decimals() view returns (uint8)",
-                "function symbol() view returns (string)",
-                "function transfer(address to, uint amount) returns (bool)",
-                "function approve(address spender, uint256 amount) returns (bool)",
-                "function allowance(address owner, address spender) view returns (uint256)"
-            ];
-
-            // Staking contract ABI (simplified, based on our staking.sol)
-            const STAKING_ABI = [
-                "function stake(uint256 amount) external",
-                "function withdraw(uint256 amount) external",
-                "function getReward() external",
-                "function balanceOf(address account) view returns (uint256)",
-                "function earned(address account) view returns (uint256)",
-                "function totalSupply() view returns (uint256)",
-                "function rewardRate() view returns (uint256)"
-            ];
-
-            // ========== DOM Elements ==========
-            const connectBtn = document.getElementById('connectWalletBtn');
-            const walletStatus = document.getElementById('walletStatus');
-            const tokenBalanceInfo = document.getElementById('tokenBalanceInfo');
-            const tokenBalanceSpan = document.getElementById('tokenBalance');
-            const stakedBalanceSpan = document.getElementById('stakedBalance');
-            const pendingRewardsSpan = document.getElementById('pendingRewards');
-            const totalStakedSpan = document.getElementById('totalStaked');
-            const ratePerSecondSpan = document.getElementById('ratePerSecond');
-            const ratePerDaySpan = document.getElementById('ratePerDay');
-            const ratePerYearSpan = document.getElementById('ratePerYear');
-            const stakeAmountInput = document.getElementById('stakeAmount');
-            const stakeBtn = document.getElementById('stakeBtn');
-            const unstakeBtn = document.getElementById('unstakeBtn');
-            const claimBtn = document.getElementById('claimBtn');
-            const claimableAmountSpan = document.getElementById('claimableAmount');
-
-            // ========== State ==========
-            let provider, signer, userAddress = null;
-            let tokenContract, stakingContract;
-            let decimals = 18;
-            let userBalance = 0;
-            let stakedBalance = 0;
-            let earnedBalance = 0;
-            let totalStaked = 0;
-            let rewardRate = 0;
-            let intervalId = null;
-
-            // ========== Helper Functions ==========
-            function formatAddress(address) {
-                if (!address) return '';
-                return address.substring(0, 6) + '...' + address.substring(address.length - 4);
-            }
-
-            function formatUnits(value, decimals) {
-                return Number(ethers.formatUnits(value, decimals)).toLocaleString(undefined, { maximumFractionDigits: 2 });
-            }
-
-            function parseUnits(value, decimals) {
-                return ethers.parseUnits(value.toString(), decimals);
-            }
-
-            async function updateBalances() {
-                if (!userAddress || !provider) return;
-
-                try {
-                    // Token balance of user
-                    const tokenBalWei = await tokenContract.balanceOf(userAddress);
-                    userBalance = tokenBalWei;
-                    tokenBalanceSpan.textContent = formatUnits(tokenBalWei, decimals);
-
-                    // Staked balance of user
-                    const stakedWei = await stakingContract.balanceOf(userAddress);
-                    stakedBalance = stakedWei;
-                    stakedBalanceSpan.textContent = formatUnits(stakedWei, decimals);
-
-                    // Earned rewards
-                    const earnedWei = await stakingContract.earned(userAddress);
-                    earnedBalance = earnedWei;
-                    pendingRewardsSpan.textContent = formatUnits(earnedWei, decimals);
-                    claimableAmountSpan.textContent = formatUnits(earnedWei, decimals);
-
-                    // Total staked
-                    const totalWei = await stakingContract.totalSupply();
-                    totalStaked = totalWei;
-                    totalStakedSpan.textContent = formatUnits(totalWei, decimals);
-
-                    // Reward rate
-                    const rateWei = await stakingContract.rewardRate();
-                    rewardRate = rateWei;
-                    const ratePerSec = formatUnits(rateWei, decimals);
-                    ratePerSecondSpan.textContent = ratePerSec;
-                    const ratePerDay = (Number(ratePerSec) * 86400).toLocaleString(undefined, { maximumFractionDigits: 2 });
-                    ratePerDaySpan.textContent = ratePerDay;
-                    const ratePerYear = (Number(ratePerSec) * 31536000).toLocaleString(undefined, { maximumFractionDigits: 2 });
-                    ratePerYearSpan.textContent = ratePerYear;
-
-                    // Enable/disable buttons based on balances
-                    stakeBtn.disabled = userBalance === 0n;
-                    unstakeBtn.disabled = stakedBalance === 0n;
-                    claimBtn.disabled = earnedBalance === 0n;
-                } catch (err) {
-                    console.error('Error updating balances:', err);
-                }
-            }
-
-            // ========== Wallet Connection ==========
-            async function connectWallet() {
-                if (typeof window.ethereum === 'undefined') {
-                    alert('MetaMask or another Web3 wallet is not installed.');
-                    return;
-                }
-                try {
-                    provider = new ethers.BrowserProvider(window.ethereum);
-                    await provider.send("eth_requestAccounts", []);
-                    signer = await provider.getSigner();
-                    userAddress = await signer.getAddress();
-
-                    walletStatus.textContent = `Connected: ${formatAddress(userAddress)}`;
-                    walletStatus.style.display = 'inline-block';
-                    connectBtn.textContent = '✅ Connected';
-                    connectBtn.disabled = true;
-
-                    // Initialize contracts
-                    tokenContract = new ethers.Contract(TOKEN_ADDRESS, TOKEN_ABI, signer);
-                    stakingContract = new ethers.Contract(STAKING_ADDRESS, STAKING_ABI, signer);
-
-                    // Get token decimals
-                    decimals = await tokenContract.decimals();
-
-                    // Show token balance area
-                    tokenBalanceInfo.style.display = 'inline-block';
-
-                    // Update balances immediately
-                    await updateBalances();
-
-                    // Set up periodic refresh (every 15 seconds)
-                    if (intervalId) clearInterval(intervalId);
-                    intervalId = setInterval(updateBalances, 15000);
-
-                } catch (err) {
-                    console.error(err);
-                    alert('Connection failed.');
-                }
-            }
-
-            function disconnectWallet() {
-                userAddress = null;
-                provider = null;
-                signer = null;
-                tokenContract = null;
-                stakingContract = null;
-                walletStatus.style.display = 'none';
-                connectBtn.textContent = '🔌 Connect Wallet';
-                connectBtn.disabled = false;
-                tokenBalanceInfo.style.display = 'none';
-                if (intervalId) {
-                    clearInterval(intervalId);
-                    intervalId = null;
-                }
-                // Reset displays
-                tokenBalanceSpan.textContent = '0';
-                stakedBalanceSpan.textContent = '0';
-                pendingRewardsSpan.textContent = '0';
-                totalStakedSpan.textContent = '0';
-                ratePerSecondSpan.textContent = '0';
-                ratePerDaySpan.textContent = '0';
-                ratePerYearSpan.textContent = '0';
-                claimableAmountSpan.textContent = '0';
-                stakeBtn.disabled = true;
-                unstakeBtn.disabled = true;
-                claimBtn.disabled = true;
-            }
-
-            // ========== Staking Actions ==========
-            async function stake() {
-                if (!userAddress) return alert('Please connect wallet.');
-                const amount = stakeAmountInput.value.trim();
-                if (!amount || isNaN(amount) || Number(amount) <= 0) return alert('Enter a valid amount.');
-                try {
-                    const amountWei = parseUnits(amount, decimals);
-                    // Check allowance
-                    const allowance = await tokenContract.allowance(userAddress, STAKING_ADDRESS);
-                    if (allowance < amountWei) {
-                        // Request approval
-                        const approveTx = await tokenContract.approve(STAKING_ADDRESS, amountWei);
-                        await approveTx.wait();
-                    }
-                    const stakeTx = await stakingContract.stake(amountWei);
-                    await stakeTx.wait();
-                    alert('Staking successful!');
-                    await updateBalances();
-                    stakeAmountInput.value = '';
-                } catch (err) {
-                    console.error(err);
-                    alert('Staking failed: ' + err.message);
-                }
-            }
-
-            async function unstake() {
-                if (!userAddress) return alert('Please connect wallet.');
-                const amount = stakeAmountInput.value.trim();
-                if (!amount || isNaN(amount) || Number(amount) <= 0) return alert('Enter a valid amount.');
-                try {
-                    const amountWei = parseUnits(amount, decimals);
-                    const unstakeTx = await stakingContract.withdraw(amountWei);
-                    await unstakeTx.wait();
-                    alert('Unstaking successful!');
-                    await updateBalances();
-                    stakeAmountInput.value = '';
-                } catch (err) {
-                    console.error(err);
-                    alert('Unstaking failed: ' + err.message);
-                }
-            }
-
-            async function claim() {
-                if (!userAddress) return alert('Please connect wallet.');
-                try {
-                    const claimTx = await stakingContract.getReward();
-                    await claimTx.wait();
-                    alert('Rewards claimed!');
-                    await updateBalances();
-                } catch (err) {
-                    console.error(err);
-                    alert('Claim failed: ' + err.message);
-                }
-            }
-
-            // ========== Event Listeners ==========
-            connectBtn.addEventListener('click', connectWallet);
-            stakeBtn.addEventListener('click', stake);
-            unstakeBtn.addEventListener('click', unstake);
-            claimBtn.addEventListener('click', claim);
-
-            // Optionally disconnect when network changes (simplified, not implemented)
-
-            // Check if already connected (e.g., after page reload)
-            window.addEventListener('load', async () => {
-                if (window.ethereum && window.ethereum.selectedAddress) {
-                    await connectWallet();
-                }
-            });
-        })();
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelector('.themeDots .dot.light')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'light'));
+            document.querySelector('.themeDots .dot.dark')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'dark'));
+            document.querySelector('.themeDots .dot.basic')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'basic'));
+        });
     </script>
+</header>
+
+<main class="container">
+    <div class="warning-note">
+        <p>
+            ⚠️ <strong>Important Update:</strong> We withdrew from ToshiMart due to phishing concerns.
+            Our official INPI token is
+            <code>0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</code>.
+            All official contracts are listed on our <a href="index.html">homepage</a>.
+        </p>
+    </div>
+
+    <div class="partners-section">
+        <div class="partner-item"><a href="https://base.org/" target="_blank" rel="noopener">⚡ Base L2</a></div>
+        <div class="partner-item"><a href="https://uniswap.org/" target="_blank" rel="noopener">🦄 Uniswap</a></div>
+    </div>
+
+    <div class="staking-container">
+        <h1>⚡ Stake $INPI, Earn Rewards</h1>
+
+        <div class="wallet-bar">
+            <div class="wallet-info">
+                <button id="connectWalletBtn" class="connect-wallet-btn">🔌 Connect Wallet</button>
+                <span id="walletStatus" class="wallet-details" style="display: none;"></span>
+            </div>
+            <div id="tokenBalanceInfo" style="display: none;">
+                <span class="wallet-details">INPI: <span id="tokenBalance">0</span></span>
+            </div>
+        </div>
+
+        <div class="balance-panel">
+            <div class="balance-card">
+                <h3>Your Staked INPI</h3>
+                <div class="value" id="stakedBalance">0</div>
+                <div class="label">Currently staked</div>
+            </div>
+            <div class="balance-card">
+                <h3>Pending Rewards</h3>
+                <div class="value" id="pendingRewards">0</div>
+                <div class="label">Claimable INPI</div>
+            </div>
+            <div class="balance-card">
+                <h3>Total Staked</h3>
+                <div class="value" id="totalStaked">0</div>
+                <div class="label">Across all users</div>
+            </div>
+        </div>
+
+        <div class="reward-rate">
+            <div class="rate-item">
+                <div class="value" id="ratePerSecond">0</div>
+                <div>INPI/sec</div>
+            </div>
+            <div class="rate-item">
+                <div class="value" id="ratePerDay">0</div>
+                <div>INPI/day</div>
+            </div>
+            <div class="rate-item">
+                <div class="value" id="ratePerYear">0</div>
+                <div>INPI/year</div>
+            </div>
+        </div>
+
+        <div class="staking-form">
+            <h2>Stake INPI</h2>
+            <div class="form-group">
+                <label for="stakeAmount">Amount to Stake</label>
+                <input type="number" id="stakeAmount" placeholder="e.g. 1000" step="any">
+            </div>
+            <div class="button-group">
+                <button id="stakeBtn" class="action-btn" disabled>🔒 Stake</button>
+                <button id="unstakeBtn" class="action-btn secondary" disabled>🔓 Unstake</button>
+            </div>
+            <div class="info-note">
+                <strong>Note:</strong> Staking rewards accumulate continuously based on your share of the total staked pool.
+                You can claim rewards at any time.
+            </div>
+        </div>
+
+        <div class="staking-form">
+            <h2>Claim Rewards</h2>
+            <div class="form-group">
+                <label>Available: <span id="claimableAmount">0</span> INPI</label>
+            </div>
+            <button id="claimBtn" class="action-btn" disabled>💰 Claim Rewards</button>
+            <div class="info-note">
+                <strong>Tip:</strong> Claiming does not unstake your tokens. Rewards are sent directly to your wallet.
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer>
+    <p>© 2026 Inpinity. All rights reserved. Working with
+        <a href="https://base.org/" target="_blank" rel="noopener" style="color: gold;">Base</a>
+        and <a href="https://uniswap.org/" target="_blank" rel="noopener" style="color: gold;">Uniswap</a>.
+    </p>
+    <div class="footer-links">
+        <a href="privacypolicy.html">Privacy Policy</a>
+        <a href="termsofuse.html">Terms of Use</a>
+        <a href="contact.html">Contact</a>
+        <a href="faq.html">FAQ</a>
+        <a href="guestbook.html">Guestbook</a>
+        <a href="advertising.html">Advertising</a>
+        <a href="staking.html">Staking</a>
+        <a href="whitepaper.html">Whitepaper</a>
+        <a href="mint.html">Mint</a>
+        <a href="map.html">Pyramid Map</a>
+        <a href="game.html">Game</a>
+    </div>
+</footer>
+
+<script>
+(function() {
+    const TOKEN_ADDRESS = '0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D';
+    const STAKING_ADDRESS = '0xF8c74E4fEe036C91228268E804f83eD8f55a6524';
+
+    const TOKEN_ABI = [
+        "function balanceOf(address owner) view returns (uint256)",
+        "function decimals() view returns (uint8)",
+        "function approve(address spender, uint256 amount) returns (bool)",
+        "function allowance(address owner, address spender) view returns (uint256)"
+    ];
+
+    const STAKING_ABI = [
+        "function stake(uint256 amount) external",
+        "function withdraw(uint256 amount) external",
+        "function getReward() external",
+        "function balanceOf(address account) view returns (uint256)",
+        "function earned(address account) view returns (uint256)",
+        "function totalSupply() view returns (uint256)",
+        "function rewardRate() view returns (uint256)"
+    ];
+
+    const connectBtn = document.getElementById('connectWalletBtn');
+    const walletStatus = document.getElementById('walletStatus');
+    const tokenBalanceInfo = document.getElementById('tokenBalanceInfo');
+    const tokenBalanceSpan = document.getElementById('tokenBalance');
+    const stakedBalanceSpan = document.getElementById('stakedBalance');
+    const pendingRewardsSpan = document.getElementById('pendingRewards');
+    const totalStakedSpan = document.getElementById('totalStaked');
+    const ratePerSecondSpan = document.getElementById('ratePerSecond');
+    const ratePerDaySpan = document.getElementById('ratePerDay');
+    const ratePerYearSpan = document.getElementById('ratePerYear');
+    const stakeAmountInput = document.getElementById('stakeAmount');
+    const stakeBtn = document.getElementById('stakeBtn');
+    const unstakeBtn = document.getElementById('unstakeBtn');
+    const claimBtn = document.getElementById('claimBtn');
+    const claimableAmountSpan = document.getElementById('claimableAmount');
+
+    let provider, signer, userAddress = null;
+    let tokenContract, stakingContract;
+    let decimals = 18;
+    let intervalId = null;
+
+    function formatAddress(address) {
+        return address ? address.substring(0, 6) + '...' + address.substring(address.length - 4) : '';
+    }
+    function fmt(value) {
+        return Number(ethers.formatUnits(value, decimals)).toLocaleString(undefined, { maximumFractionDigits: 2 });
+    }
+
+    async function updateBalances() {
+        if (!userAddress || !tokenContract || !stakingContract) return;
+
+        try {
+            const tokenBalWei = await tokenContract.balanceOf(userAddress);
+            tokenBalanceSpan.textContent = fmt(tokenBalWei);
+
+            const stakedWei = await stakingContract.balanceOf(userAddress);
+            stakedBalanceSpan.textContent = fmt(stakedWei);
+
+            const earnedWei = await stakingContract.earned(userAddress);
+            pendingRewardsSpan.textContent = fmt(earnedWei);
+            claimableAmountSpan.textContent = fmt(earnedWei);
+
+            const totalWei = await stakingContract.totalSupply();
+            totalStakedSpan.textContent = fmt(totalWei);
+
+            const rateWei = await stakingContract.rewardRate();
+            const ratePerSec = Number(ethers.formatUnits(rateWei, decimals));
+            ratePerSecondSpan.textContent = ratePerSec.toLocaleString(undefined, { maximumFractionDigits: 6 });
+            ratePerDaySpan.textContent = (ratePerSec * 86400).toLocaleString(undefined, { maximumFractionDigits: 2 });
+            ratePerYearSpan.textContent = (ratePerSec * 31536000).toLocaleString(undefined, { maximumFractionDigits: 2 });
+
+            stakeBtn.disabled = (tokenBalWei === 0n);
+            unstakeBtn.disabled = (stakedWei === 0n);
+            claimBtn.disabled = (earnedWei === 0n);
+        } catch (err) {
+            console.error('Error updating balances:', err);
+        }
+    }
+
+    async function connectWallet() {
+        if (!window.ethereum) {
+            alert('MetaMask or another Web3 wallet is not installed.');
+            return;
+        }
+        try {
+            provider = new ethers.BrowserProvider(window.ethereum);
+            await provider.send("eth_requestAccounts", []);
+            signer = await provider.getSigner();
+            userAddress = await signer.getAddress();
+
+            walletStatus.textContent = `Connected: ${formatAddress(userAddress)}`;
+            walletStatus.style.display = 'inline-block';
+            connectBtn.textContent = '✅ Connected';
+            connectBtn.disabled = true;
+
+            tokenContract = new ethers.Contract(TOKEN_ADDRESS, TOKEN_ABI, signer);
+            stakingContract = new ethers.Contract(STAKING_ADDRESS, STAKING_ABI, signer);
+
+            decimals = await tokenContract.decimals();
+
+            tokenBalanceInfo.style.display = 'inline-block';
+
+            await updateBalances();
+
+            if (intervalId) clearInterval(intervalId);
+            intervalId = setInterval(updateBalances, 15000);
+        } catch (err) {
+            console.error(err);
+            alert('Connection failed.');
+        }
+    }
+
+    async function stake() {
+        if (!userAddress) return alert('Please connect wallet.');
+        const amount = stakeAmountInput.value.trim();
+        if (!amount || isNaN(amount) || Number(amount) <= 0) return alert('Enter a valid amount.');
+
+        try {
+            const amountWei = ethers.parseUnits(amount.toString(), decimals);
+            const allowance = await tokenContract.allowance(userAddress, STAKING_ADDRESS);
+
+            if (allowance < amountWei) {
+                const approveTx = await tokenContract.approve(STAKING_ADDRESS, amountWei);
+                await approveTx.wait();
+            }
+
+            const tx = await stakingContract.stake(amountWei);
+            await tx.wait();
+
+            stakeAmountInput.value = '';
+            await updateBalances();
+            alert('Staking successful!');
+        } catch (err) {
+            console.error(err);
+            alert('Staking failed: ' + (err.message || 'unknown error'));
+        }
+    }
+
+    async function unstake() {
+        if (!userAddress) return alert('Please connect wallet.');
+        const amount = stakeAmountInput.value.trim();
+        if (!amount || isNaN(amount) || Number(amount) <= 0) return alert('Enter a valid amount.');
+
+        try {
+            const amountWei = ethers.parseUnits(amount.toString(), decimals);
+            const tx = await stakingContract.withdraw(amountWei);
+            await tx.wait();
+
+            stakeAmountInput.value = '';
+            await updateBalances();
+            alert('Unstaking successful!');
+        } catch (err) {
+            console.error(err);
+            alert('Unstaking failed: ' + (err.message || 'unknown error'));
+        }
+    }
+
+    async function claim() {
+        if (!userAddress) return alert('Please connect wallet.');
+        try {
+            const tx = await stakingContract.getReward();
+            await tx.wait();
+            await updateBalances();
+            alert('Rewards claimed!');
+        } catch (err) {
+            console.error(err);
+            alert('Claim failed: ' + (err.message || 'unknown error'));
+        }
+    }
+
+    connectBtn.addEventListener('click', connectWallet);
+    stakeBtn.addEventListener('click', stake);
+    unstakeBtn.addEventListener('click', unstake);
+    claimBtn.addEventListener('click', claim);
+
+    window.addEventListener('load', async () => {
+        if (window.ethereum && window.ethereum.selectedAddress) {
+            await connectWallet();
+        }
+    });
+})();
+</script>
+
 </body>
 </html>
