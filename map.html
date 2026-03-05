@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>INPINITY – Pyramid Map (V3 + Attack Execution)</title>
+  <title>INPINITY – Pyramid Map (V3 + Attack Execution + Resource Icons)</title>
   <link rel="icon" type="image/png" href="favicon.webp" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/base.css">
@@ -391,6 +391,30 @@
       background: transparent;
     }
 
+    /* Resource-Icons */
+    .resource-icon {
+      width: 20px;
+      height: 20px;
+      object-fit: contain;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    .resource-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.4rem;
+      font-size: 0.95rem;
+    }
+    .resource-name {
+      color: #d4af37;
+      margin-right: 8px;
+      min-width: 70px;
+    }
+    .resource-amount {
+      font-weight: 600;
+      color: #f0f4fa;
+    }
+
     @media (max-width: 700px) {
       .header { padding: 0.6rem 1rem; flex-direction: column; align-items: stretch; }
       .nav-links { justify-content: center; }
@@ -460,7 +484,7 @@
         </div>
 
         <div style="margin: 1.5rem 0; border-top: 1px solid #2a3f4a; padding-top: 1rem;">
-          <h4 style="color: #d4af37; margin-bottom: 1rem;">⚔️ Your Attacks</h4>
+          <h4 style="color: #d4af37; margin-bottom: 1rem;">⚔️ Your Attacks (V3)</h4>
           <div id="userAttacksList" class="attacks-list">
             <p style="color: #98a9b9;">Connect wallet to see your attacks.</p>
           </div>
@@ -468,7 +492,7 @@
 
         <div style="margin: 1.5rem 0; border-top: 1px solid #2a3f4a; padding-top: 1rem;">
           <h4 style="color: #d4af37; margin-bottom: 1rem;">📦 Your Resources</h4>
-          <div id="userResources" style="display: flex; flex-direction: column; gap: 0.3rem; max-height: 150px; overflow-y: auto;">
+          <div id="userResources" style="max-height: 200px; overflow-y: auto;">
             <p style="color: #98a9b9;">Connect wallet to see your resource tokens.</p>
           </div>
         </div>
@@ -720,41 +744,30 @@
       return { ok: true, msg: "Started V3" };
     }
   
-    // ==================== LOAD ATTACKS (subgraph + localStorage for resource) ====================
+    // ==================== LOAD ATTACKS (V3) – Jetzt mit attackV3s ====================
     async function loadUserAttacks() {
       if (!userAddress) return;
       try {
-        const where = `{ attacker: "${userAddress.toLowerCase()}", executed: false }`;
+        // AttackV3-Entities abfragen (statt "attacks")
+        const where = `{ attacker: "${userAddress.toLowerCase()}" }`;  // wir holen alle (executed + nicht executed), aber filtern später
         const attacks = await fetchAllWithPagination(
           SUBGRAPH_URL_V2,
-          "attacks",
-          "id attacker target attackIndex startTime endTime executed",
+          "attackV3s",                       // ⬅️ NEU: attackV3s
+          "id attacker target attackIndex startTime endTime resource executed",
           where
         );
   
-        userAttacks = attacks.map(a => {
-          const targetTokenId = parseInt(a.target, 10);
-  
-          let resource = 0;
-          const saved = localStorage.getItem(getAttackStorageKey(targetTokenId));
-          if (saved) {
-            try {
-              const parsed = JSON.parse(saved);
-              resource = Number(parsed.resource ?? 0);
-              if (!Number.isFinite(resource)) resource = 0;
-            } catch (_) {}
-          }
-  
-          return {
+        userAttacks = attacks
+          .filter(a => !a.executed)           // nur nicht ausgeführte Angriffe
+          .map(a => ({
             id: a.id,
-            targetTokenId,
-            attackIndex: parseInt(a.attackIndex || "0", 10),
-            startTime: parseInt(a.startTime || "0", 10),
-            endTime: parseInt(a.endTime || "0", 10),
+            targetTokenId: parseInt(a.target, 10),
+            attackIndex: parseInt(a.attackIndex, 10),
+            startTime: parseInt(a.startTime, 10),
+            endTime: parseInt(a.endTime, 10),
             executed: !!a.executed,
-            resource
-          };
-        });
+            resource: parseInt(a.resource, 10)   // ⬅️ direkt aus Subgraph
+          }));
   
         displayUserAttacks();
         drawPyramid();
@@ -849,7 +862,7 @@
       }, 1000);
     }
   
-    // ✅ EXECUTE (PiratesV3.executeAttack WITHOUT protection param)
+    // ✅ EXECUTE (PiratesV3.executeAttack)
     async function executeAttack(attack) {
       actionMessage.innerHTML = '<span class="success">⏳ Executing attack...</span>';
       try {
@@ -866,6 +879,7 @@
   
         actionMessage.innerHTML = '<span class="success">✅ Attack executed! Resources stolen.</span>';
   
+        // localStorage nicht mehr nötig, aber falls alte Einträge existieren, aufräumen
         localStorage.removeItem(getAttackStorageKey(attack.targetTokenId));
   
         await loadUserAttacks();
@@ -909,14 +923,13 @@
         const partnerItems = await fetchAllWithPagination(SUBGRAPH_URL_V2, "partnerships", "id active").catch(() => []);
         partnerItems.forEach(p => { if (tokens[p.id]) tokens[p.id].partnerActive = !!p.active; });
   
-        // NOTE: V1 farms optional
+        // V1 farms optional
         const farmItemsV1 = await fetchAllWithPagination(SUBGRAPH_URL_V1, "farms", "id active").catch(() => []);
         farmItemsV1.forEach(f => { if (f.active && tokens[f.id] && !tokens[f.id].farmActive) tokens[f.id].farmActive = true; });
   
-        // ✅ IMPORTANT: overwrite farmActive with REAL on-chain V3 state if connected
+        // ✅ on-chain V3 state for farmActive (override)
         if (userAddress && farmingV3Contract) {
           const ids = Object.keys(tokens);
-          // keep it light: only check minted tokens with owner
           const mintedIds = ids.filter(id => tokens[id] && tokens[id].owner);
           for (const id of mintedIds) {
             try {
@@ -937,6 +950,7 @@
       }
     }
   
+    // ==================== RESSOURCEN MIT BILDCHEN ====================
     async function loadUserResources() {
       if (!userAddress) return;
       try {
@@ -971,7 +985,15 @@
       let html = "";
       for (const r of userResources) {
         const name = resourceNames[r.resourceId] || `Resource ${r.resourceId}`;
-        html += `<div class="detail-row"><span class="detail-label">${name}</span><span class="detail-value">${r.amount.toString()}</span></div>`;
+        // Bild-URL: https://inpinity.online/img/{id}.PNG (Großschreibung beachten)
+        const imgUrl = `https://inpinity.online/img/${r.resourceId}.PNG`;
+        html += `
+          <div class="resource-row">
+            <img src="${imgUrl}" alt="${name}" class="resource-icon" onerror="this.style.display='none'">
+            <span class="resource-name">${name}</span>
+            <span class="resource-amount">${r.amount.toString()}</span>
+          </div>
+        `;
       }
       userResourcesDiv.innerHTML = html;
     }
@@ -1059,7 +1081,7 @@
       const owner = token ? token.owner : null;
       selectedTokenOwner = owner;
   
-      // ✅ real V3 active (on-chain), don't trust subgraph V2 farm entity
+      // ✅ real V3 active (on-chain)
       let v3Active = false;
       if (farmingV3Contract) {
         try {
@@ -1180,7 +1202,6 @@
       }
     }
   
-    // ✅ start = auto-migrate
     async function handleStartFarm() {
       if (!selectedTokenId) return;
       actionMessage.innerHTML = '<span class="success">⏳ Migrating / starting V3...</span>';
@@ -1263,6 +1284,7 @@
       const targetTokenId = parseInt(selectedTokenId, 10);
       const resource = parseInt(document.getElementById("attackResource").value, 10);
   
+      // localStorage nur noch als Fallback, falls Subgraph nicht schnell genug ist – aber nicht mehr benötigt
       localStorage.setItem(getAttackStorageKey(targetTokenId), JSON.stringify({
         targetTokenId,
         resource,
