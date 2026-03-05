@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>INPINITY – The Pi-Phi Pyramid (v0.17.0 – Full V2 mit localStorage)</title>
+    <title>INPINITY – The Pi-Phi Pyramid (v0.18.0 – PiratesV3 Attacken + Resource Icons)</title>
     <link rel="icon" type="image/png" href="favicon.webp" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/color.css">
     <style>
-        /* === CSS bleibt unverändert === */
+        /* === CSS bleibt unverändert (wie in deiner Vorlage) === */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
             --bg-dark: #0a0a1a;
@@ -475,9 +475,9 @@
                     <div id="blockResources" class="resources-grid"></div>
                 </div>
 
-                <!-- Angriffsübersicht -->
+                <!-- Angriffsübersicht (AttackV3) -->
                 <div class="attacks-section">
-                    <h4 style="color: var(--accent-gold); margin-bottom: 1rem;">⚔️ Your Attacks</h4>
+                    <h4 style="color: var(--accent-gold); margin-bottom: 1rem;">⚔️ Your Attacks (V3)</h4>
                     <div id="userAttacksList" class="attacks-list">
                         <p style="color: var(--text-dim);">Connect wallet to see your attacks.</p>
                     </div>
@@ -582,7 +582,7 @@
             </div>
         </div>
 
-        <!-- Resource Token Balances (vom Subgraph) -->
+        <!-- Resource Token Balances (mit Icons) -->
         <div class="user-resources" id="userResources">
             <p style="color: var(--text-dim); grid-column: 1/-1; text-align: center;">Connect wallet to see your resource tokens.</p>
         </div>
@@ -595,7 +595,7 @@
 
         <footer>
             <p>© 2026 INPINITY. All rights reserved. Built on Base.</p>
-            <p>Version 0.17.0 – Full V2 with localStorage resource tracking.</p>
+            <p>Version 0.18.0 – PiratesV3 Attacken + Resource Icons</p>
             <p><a href="whitepaper.html">Whitepaper</a> | <a href="https://discord.gg/95yj6Eg6" target="_blank">Discord</a></p>
         </footer>
     </div>
@@ -603,12 +603,10 @@
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
     <script>
     /* =========================================================
-       INPINITY GAME – Clean V3 Script (no duplicate syntax)
+       INPINITY GAME – Clean V3 Script mit PiratesV3 Attacken + Icons
        - Farming main: V3
-       - Pirates main: V3
-       - Mercenary/Partnership: V2
-       - Auto-migrate: V1/V2 → V3 (claim → stop → start)
-       - NEW: Shows farming duration (how long a block is farming)
+       - Pirates main: V3 (AttackV3 Entities)
+       - Ressourcen mit Bildern von inpinity.online/img/{id}.PNG
     ========================================================= */
     
     /* ==================== KONFIGURATION ==================== */
@@ -632,8 +630,8 @@
     const PRICE_ETH_MIXED  = "0.0015";  // 0.0015 ETH
     const PRICE_INPI_MIXED = "15";      // 15 INPI
     
-    // ✅ Subgraph 0.1.0
-    const USE_STUDIO = true; // Debug: true (no API key header)
+    // ✅ Subgraph 0.1.0 (mit PiratesV3)
+    const USE_STUDIO = true; // true = Studio-URL (sofort aktuell), false = Production-Gateway
     const SUBGRAPH_STUDIO_URL  = "https://api.studio.thegraph.com/query/1743108/inpinity/version/latest";
     const SUBGRAPH_GATEWAY_URL = "https://gateway.thegraph.com/api/subgraphs/id/22b4uXYgs4rwTj6n3iWB4d8Vk4s7LAG7dTAtRaTXfseQ";
     const API_KEY = "059bc2832dfe50597009e556898d4ba6";
@@ -720,7 +718,7 @@
     
     let userBlocks = [];
     let userAttacks = [];
-    let userResourceBalances = {};
+    let userResources = []; // Array von { resourceId, amount } (BigInt)
     
     let attacksTicker = null;
     let attacksPoller = null;
@@ -739,7 +737,6 @@
       return Math.floor(seconds/3600)+"h";
     }
     
-    // NEW: farming duration pretty
     function formatDuration(seconds){
       seconds = Math.max(0, Math.floor(seconds));
       const d = Math.floor(seconds / 86400);
@@ -821,18 +818,20 @@
       }catch(e){}
     }
     
-    /* ==================== RESOURCES (ERC1155) ==================== */
+    /* ==================== RESOURCES (ERC1155 on-chain) ==================== */
     async function loadResourceBalancesOnchain(){
       if(!userAddress || !resourceTokenContract) return;
       const ids = [...Array(10).keys()];
       const accounts = ids.map(() => userAddress);
       const balances = await resourceTokenContract.balanceOfBatch(accounts, ids);
-      userResourceBalances = {};
-      for(let i=0;i<ids.length;i++) userResourceBalances[ids[i]] = balances[i];
-      displayResourceBalances();
+      userResources = ids.map((id, idx) => ({
+        resourceId: id,
+        amount: balances[idx] // BigNumber (ethers v5)
+      })).filter(r => r.amount.gt(0));
+      updateUserResourcesDisplay();
     }
     
-    function displayResourceBalances(){
+    function updateUserResourcesDisplay(){
       const container = document.getElementById("userResources");
       if(!container) return;
     
@@ -841,19 +840,27 @@
         return;
       }
     
-      let html = "";
-      let any = false;
-      for(let i=0;i<=9;i++){
-        const amount = userResourceBalances[i] || ethers.BigNumber.from(0);
-        if(amount.gt(0)){
-          any = true;
-          html += `<div class="resource-card">
-            <div class="resource-name">${resourceNames[i]}</div>
-            <div class="resource-amount">${amount.toString()}</div>
-          </div>`;
-        }
+      if(!userResources || userResources.length === 0){
+        container.innerHTML = `<p style="color: var(--text-dim); grid-column: 1/-1; text-align: center;">You have no resource tokens yet. Start farming!</p>`;
+        return;
       }
-      container.innerHTML = any ? html : `<p style="color: var(--text-dim); grid-column: 1/-1; text-align: center;">You have no resource tokens yet. Start farming!</p>`;
+    
+      // Sortieren nach resourceId
+      userResources.sort((a,b) => a.resourceId - b.resourceId);
+    
+      let html = "";
+      for(const r of userResources){
+        const name = resourceNames[r.resourceId] || `Resource ${r.resourceId}`;
+        const imgUrl = `https://inpinity.online/img/${r.resourceId}.PNG`; // Großschreibung wie in JSON
+        html += `
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; background:#1b2630; border-radius:1rem; padding:0.5rem;">
+            <img src="${imgUrl}" alt="${name}" style="width:32px; height:32px; object-fit:contain;" onerror="this.style.display='none'">
+            <span style="color:#d4af37; min-width:80px; font-weight:600;">${name}</span>
+            <span style="font-weight:600; color:#f0f4fa;">${r.amount.toString()}</span>
+          </div>
+        `;
+      }
+      container.innerHTML = html;
     }
     
     /* ==================== FARM MIGRATION (V1/V2 -> V3) ==================== */
@@ -950,7 +957,7 @@
         const data = await nftContract.blockData(tokenId);
         const revealed = data.revealed;
     
-        // ✅ FarmingV3 status ON-CHAIN
+        // FarmingV3 status ON-CHAIN
         let farmingActive = false;
         let farmStartTime = 0;
         try{
@@ -1091,7 +1098,7 @@
       return p;
     }
     
-    /* ==================== ATTACKS (Subgraph + localStorage resource) ==================== */
+    /* ==================== ATTACKS (PiratesV3) ==================== */
     function initAttackResourceSelect(){
       const select=document.getElementById("attackResourceSelect");
       if(!select) return;
@@ -1102,66 +1109,37 @@
         select.appendChild(opt);
       }
     }
-
-    function updateUserResourcesDisplay() {
-      const container = document.getElementById("userResources"); // Stelle sicher, dass das Element existiert
-      if (!userAddress) {
-        container.innerHTML = '<p style="color:#98a9b9;">Connect wallet to see your resource tokens.</p>';
-        return;
-      }
-      if (!userResources || userResources.length === 0) {
-        container.innerHTML = '<p style="color:#98a9b9;">You have no resource tokens yet.</p>';
-        return;
-      }
-      userResources.sort((a, b) => a.resourceId - b.resourceId);
-      let html = "";
-      for (const r of userResources) {
-        const name = resourceNames[r.resourceId] || `Resource ${r.resourceId}`;
-        const imgUrl = `https://inpinity.online/img/${r.resourceId}.PNG`; // ggf. .png anpassen
-        html += `
-          <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-            <img src="${imgUrl}" alt="${name}" style="width:24px; height:24px; object-fit:contain;" onerror="this.style.display='none'">
-            <span style="color:#d4af37; min-width:80px;">${name}</span>
-            <span style="font-weight:600;">${r.amount.toString()}</span>
-          </div>
-        `;
-      }
-      container.innerHTML = html;
-    }
     
     async function loadUserAttacks() {
-        if (!userAddress) return;
-        
-        try {
-            // ⬇️ WICHTIG: Jetzt "attackV3s" statt "attacks"
+      if (!userAddress) return;
+      try {
+        // AttackV3-Entities abfragen (nicht ausgeführte)
         const where = `{ attacker: "${userAddress.toLowerCase()}" }`;
         const attacks = await fetchAllWithPagination(
-            SUBGRAPH_URL_V2,          // deine Subgraph-URL (V2)
-            "attackV3s",              // ⬅️ NEU: Plural, genau wie im Schema
-            "id attacker target attackIndex startTime endTime resource executed",
-            where
+          "attackV3s",  // ⬅️ WICHTIG: attackV3s
+          "id attacker target attackIndex startTime endTime resource executed",
+          where
         );
-        
-            // Nur nicht ausgeführte Angriffe anzeigen
+    
         userAttacks = attacks
-            .filter(a => !a.executed)
-            .map(a => ({
+          .filter(a => !a.executed)
+          .map(a => ({
             id: a.id,
             targetTokenId: parseInt(a.target, 10),
             attackIndex: parseInt(a.attackIndex, 10),
             startTime: parseInt(a.startTime, 10),
             endTime: parseInt(a.endTime, 10),
             executed: !!a.executed,
-            resource: parseInt(a.resource, 10)   // ✅ direkt vom Subgraph
-            }));
-        
+            resource: parseInt(a.resource, 10)   // direkt vom Subgraph
+          }));
+    
         displayUserAttacks();
         refreshBlockMarkings();
-        } catch (e) {
+        startAttacksTicker();
+      } catch (e) {
         console.error("Failed to load attacks:", e);
-        }
+      }
     }
-    
     
     function displayUserAttacks(){
       const container=document.getElementById("userAttacksList");
@@ -1214,8 +1192,6 @@
           await executeAttack({ targetTokenId, attackIndex });
         });
       });
-    
-      startAttacksTicker();
     }
     
     function startAttacksTicker(){
@@ -1341,7 +1317,6 @@
       }
     }
     
-    // ✅ Start farming = auto-migrate (fixes "Farm nicht aktiv" cases)
     async function startFarmingSelected(){
       if(!selectedBlock) return alert("No block selected.");
       await migrateToV3(selectedBlock.tokenId, "actionMessage");
@@ -1354,7 +1329,6 @@
       const msgDiv=document.getElementById("actionMessage");
     
       try{
-        // ensure V3
         const st = await getFarmStatus(selectedBlock.tokenId);
         if(!st.v3Active) await migrateToV3(selectedBlock.tokenId, "actionMessage");
     
@@ -1375,7 +1349,6 @@
       const msgDiv=document.getElementById("actionMessage");
     
       try{
-        // ensure V3
         const st = await getFarmStatus(selectedBlock.tokenId);
         if(!st.v3Active) await migrateToV3(selectedBlock.tokenId, "actionMessage");
     
@@ -1384,7 +1357,7 @@
         await tx.wait();
         msgDiv.innerHTML = `<span class="success">💰 Resources claimed!</span>`;
         await loadResourceBalancesOnchain();
-        await loadUserBlocks(); // refresh duration display
+        await loadUserBlocks();
       }catch(e){
         msgDiv.innerHTML = `<span class="error">❌ ${e.message}</span>`;
       }
@@ -1412,6 +1385,7 @@
     
         msgDiv.innerHTML = `<span class="success">✅ Attack started! Check back later.</span>`;
     
+        // Lokaler Speicher als Backup, wird aber nicht mehr für die Anzeige benötigt
         localStorage.setItem(`attack_${targetTokenId}`, JSON.stringify({
           targetTokenId, resource, startTime: Math.floor(Date.now()/1000)
         }));
@@ -1449,7 +1423,7 @@
       }
     }
     
-    /* ==================== EXCHANGE (working minimal) ==================== */
+    /* ==================== EXCHANGE ==================== */
     async function exchangeINPI(){
       const msgDiv = document.getElementById("exchangeMessage");
       if (!userAddress) { msgDiv.innerHTML = `<span class="error">❌ Connect wallet first.</span>`; return; }
@@ -1554,11 +1528,10 @@
         await loadResourceBalancesOnchain();
         await loadUserAttacks();
     
-        // refresh attacks + farming duration
         if(!attacksPoller){
           attacksPoller = setInterval(async ()=>{
             await loadUserAttacks();
-            await loadUserBlocks(); // updates farming duration text
+            await loadUserBlocks();
             refreshBlockMarkings();
           }, 30000);
         }
@@ -1571,40 +1544,39 @@
         isConnecting = false;
       }
     }
-    /* ==================== RANDOM FREE BLOCK (ERC721 CORRECT) ==================== */
-async function findRandomFreeBlock(){
-  const msgDiv = document.getElementById("mintMessage");
-  if(!userAddress || !nftContract){
-    if(msgDiv) msgDiv.innerHTML = `<div class="message-box error">❌ Please connect wallet first.</div>`;
-    return;
-  }
-
-  if(msgDiv) msgDiv.innerHTML = `<div class="message-box success">⏳ Searching a free block...</div>`;
-
-  const MAX_ATTEMPTS = 80;
-
-  for(let attempt=0; attempt<MAX_ATTEMPTS; attempt++){
-    const row = Math.floor(Math.random() * (MAX_ROW + 1));
-    const col = Math.floor(Math.random() * (2 * row + 1));
-    const tokenId = row * 2048 + col; // IMPORTANT: same mapping as mint.html
-
-    try{
-      // minted -> ownerOf works -> NOT free
-      await nftContract.ownerOf(tokenId);
-    }catch(e){
-      // unminted -> ownerOf reverts -> FREE
-      document.getElementById("row").value = row;
-      document.getElementById("col").value = col;
-      if(msgDiv) msgDiv.innerHTML = `<div class="message-box success">✅ Free block found: Row ${row}, Col ${col}. You can mint now.</div>`;
-      return;
+    
+    /* ==================== RANDOM FREE BLOCK ==================== */
+    async function findRandomFreeBlock(){
+      const msgDiv = document.getElementById("mintMessage");
+      if(!userAddress || !nftContract){
+        if(msgDiv) msgDiv.innerHTML = `<div class="message-box error">❌ Please connect wallet first.</div>`;
+        return;
+      }
+    
+      if(msgDiv) msgDiv.innerHTML = `<div class="message-box success">⏳ Searching a free block...</div>`;
+    
+      const MAX_ATTEMPTS = 80;
+    
+      for(let attempt=0; attempt<MAX_ATTEMPTS; attempt++){
+        const row = Math.floor(Math.random() * (MAX_ROW + 1));
+        const col = Math.floor(Math.random() * (2 * row + 1));
+        const tokenId = row * 2048 + col;
+    
+        try{
+          await nftContract.ownerOf(tokenId);
+        }catch(e){
+          document.getElementById("row").value = row;
+          document.getElementById("col").value = col;
+          if(msgDiv) msgDiv.innerHTML = `<div class="message-box success">✅ Free block found: Row ${row}, Col ${col}. You can mint now.</div>`;
+          return;
+        }
+      }
+    
+      if(msgDiv) msgDiv.innerHTML = `<div class="message-box error">❌ Could not find a free block fast. Try again or pick manually.</div>`;
     }
-  }
-
-  if(msgDiv) msgDiv.innerHTML = `<div class="message-box error">❌ Could not find a free block fast. Try again or pick manually.</div>`;
-}
-
-/* ==================== MINT (ETH / INPI / MIXED) ==================== */
-async function mintBlock(){
+    
+    /* ==================== MINT ==================== */
+    async function mintBlock(){
       const msgDiv = document.getElementById("mintMessage");
     
       if(!userAddress || !nftContract){
@@ -1625,7 +1597,6 @@ async function mintBlock(){
       try{
         if(msgDiv) msgDiv.innerHTML = `<div class="message-box success">⏳ Checking block availability...</div>`;
     
-        // Same logic as mint.html: ownerOf reverts => free
         try{
           await nftContract.ownerOf(tokenId);
           if(msgDiv) msgDiv.innerHTML = `<div class="message-box error">❌ This block is already minted.</div>`;
@@ -1701,7 +1672,6 @@ async function mintBlock(){
     
         if(msgDiv) msgDiv.innerHTML = `<div class="message-box success">✅ Block minted! 🎉</div>`;
     
-        // refresh UI
         await updateBalances();
         await loadUserBlocks();
         await loadResourceBalancesOnchain();
@@ -1713,6 +1683,7 @@ async function mintBlock(){
         if(msgDiv) msgDiv.innerHTML = `<div class="message-box error">❌ ${msg}</div>`;
       }
     }
+    
     /* ==================== EVENT LISTENERS ==================== */
     document.getElementById("connectWallet").addEventListener("click", connectWallet);
     document.getElementById("attackBtn").addEventListener("click", attack);
@@ -1730,7 +1701,6 @@ async function mintBlock(){
       radio.addEventListener("change",(e)=>{ selectedPayment = e.target.value; });
     });
     
-    // optional auto-connect
     if(window.ethereum && window.ethereum.selectedAddress){
       connectWallet();
     }
