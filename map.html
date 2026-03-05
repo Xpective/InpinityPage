@@ -562,7 +562,8 @@
       "function revealBlock(uint256 tokenId, bytes32[] piProof, bytes32[] phiProof, uint8 piDigit, uint8 phiDigit) external",
       "function calculateRarity(uint256 tokenId) view returns (uint8)",
       "function getBlockPosition(uint256 tokenId) view returns (uint256 row, uint256 col)",
-      "function ownerOf(uint256 tokenId) view returns (address)"
+      "function ownerOf(uint256 tokenId) view returns (address)",
+      "function blockData(uint256) view returns (uint8 piDigit, uint8 phiDigit, uint256 row, uint256 col, bool revealed, uint256 farmingEndTime)"
     ];
   
     const FARMING_V3_ABI = [
