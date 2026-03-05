@@ -594,24 +594,50 @@
 
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
     <script>
+    /* =========================================================
+       INPINITY GAME – Clean V3 Script (no duplicate syntax)
+       - Farming main: V3
+       - Pirates main: V3
+       - Mercenary/Partnership: V2
+       - Auto-migrate: V1/V2 → V3 (claim → stop → start)
+       - NEW: Shows farming duration (how long a block is farming)
+    ========================================================= */
+    
     /* ==================== KONFIGURATION ==================== */
     // ✅ Contracts (Base Mainnet)
-    const NFT_ADDRESS          = "0x277a0D5864293C78d7387C54B48c35D5E9578Ab1";
-    const FARMING_V3_ADDRESS   = "0xE79445C9ef97B8156BB505D784C0356E54432AD9";
-    const PIRATES_V3_ADDRESS   = "0xC3544804cea908b8Ac6752B4F47609e1c22DaF5d";
-    const MERCENARY_V2_ADDRESS = "0xFEa09ccA75dbc63cc8053739A61777Bd13fC6Bc2";
+    const NFT_ADDRESS            = "0x277a0D5864293C78d7387C54B48c35D5E9578Ab1";
+    const FARMING_V1_ADDRESS     = "0xd9722fB6e9b8e71399A970d4e8F4D628C532E94f";
+    const FARMING_V2_ADDRESS     = "0x852Bce0713aAF409c4412155Ab8CE6191B525C30";
+    const FARMING_V3_ADDRESS     = "0xE79445C9ef97B8156BB505D784C0356E54432AD9";
+    const PIRATES_V3_ADDRESS     = "0xC3544804cea908b8Ac6752B4F47609e1c22DaF5d";
+    const MERCENARY_V2_ADDRESS   = "0xFEa09ccA75dbc63cc8053739A61777Bd13fC6Bc2";
     const PARTNERSHIP_V2_ADDRESS = "0xb18323efE4Cc8c36e10D664E287b4e2c82Fe3ad9";
     const RESOURCE_TOKEN_ADDRESS = "0x71E76a6065197acdd1a4d6B736712F80D1Fd3D8b";
-    const INPI_ADDRESS         = "0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D";
-    const PITRONE_ADDRESS      = "0x7240Ec5B3Ba944888E186c74D0f8B4F5F71c9AE8";
+    const INPI_ADDRESS           = "0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D";
+    const PITRONE_ADDRESS        = "0x7240Ec5B3Ba944888E186c74D0f8B4F5F71c9AE8";
     
     const WORKER_URL = "https://inpinity-worker-final.s-plat.workers.dev";
-    // ADDR
-    const FARMING_V1_ADDRESS = "0xd9722fB6e9b8e71399A970d4e8F4D628C532E94f";
-    const FARMING_V2_ADDRESS = "0x852Bce0713aAF409c4412155Ab8CE6191B525C30";
-    const FARMING_V3_ADDRESS = "0xE79445C9ef97B8156BB505D784C0356E54432AD9";
     
-    // Minimal ABIs
+    // ✅ Subgraph 0.1.0
+    const USE_STUDIO = true; // Debug: true (no API key header)
+    const SUBGRAPH_STUDIO_URL  = "https://api.studio.thegraph.com/query/1743108/inpinity/0.1.0";
+    const SUBGRAPH_GATEWAY_URL = "https://gateway.thegraph.com/api/subgraphs/id/22b4uXYgs4rwTj6n3iWB4d8Vk4s7LAG7dTAtRaTXfseQ";
+    const API_KEY = "059bc2832dfe50597009e556898d4ba6";
+    
+    /* ==================== ABIs ==================== */
+    const NFT_ABI = [
+      "function mintWithETH(uint256 row, uint256 col) payable",
+      "function mintWithINPI(uint256 row, uint256 col) external",
+      "function mintMixed(uint256 row, uint256 col) payable",
+      "function ownerOf(uint256 tokenId) view returns (address)",
+      "function balanceOf(address owner) view returns (uint256)",
+      "function tokenOfOwnerByIndex(address owner, uint256 index) view returns (uint256)",
+      "function getBlockPosition(uint256 tokenId) view returns (uint256 row, uint256 col)",
+      "function blockData(uint256) view returns (uint8 piDigit, uint8 phiDigit, uint256 row, uint256 col, bool revealed, uint256 farmingEndTime)",
+      "function revealBlock(uint256 tokenId, bytes32[] piProof, bytes32[] phiProof, uint8 piDigit, uint8 phiDigit) external",
+      "function calculateRarity(uint256 tokenId) view returns (uint8)"
+    ];
+    
     const FARMING_V1_ABI = [
       "function farms(uint256) view returns (uint256 startTime, uint256 lastClaimTime, bool isActive)",
       "function claimResources(uint256) external",
@@ -626,96 +652,6 @@
     ];
     
     const FARMING_V3_ABI = [
-      "function farms(uint256) view returns (uint256 startTime, uint256 lastAccrualTime, uint256 boostExpiry, bool isActive)",
-      "function claimResources(uint256) external",
-      "function stopFarming(uint256) external",
-      "function startFarming(uint256) external"
-    ];
-    
-    let farmingV1, farmingV2, farmingV3;
-    
-    function initFarmingContracts(signer){
-      farmingV1 = new ethers.Contract(FARMING_V1_ADDRESS, FARMING_V1_ABI, signer);
-      farmingV2 = new ethers.Contract(FARMING_V2_ADDRESS, FARMING_V2_ABI, signer);
-      farmingV3 = new ethers.Contract(FARMING_V3_ADDRESS, FARMING_V3_ABI, signer);
-    }
-    
-    async function getFarmStatus(tokenId){
-      const [v1, v2, v3] = await Promise.allSettled([
-        farmingV1.farms(tokenId),
-        farmingV2.farms(tokenId),
-        farmingV3.farms(tokenId),
-      ]);
-    
-      const s = {
-        v1Active: v1.status==="fulfilled" ? !!v1.value.isActive : false,
-        v2Active: v2.status==="fulfilled" ? !!v2.value.isActive : false,
-        v3Active: v3.status==="fulfilled" ? !!v3.value.isActive : false,
-      };
-      return s;
-    }
-    
-    async function migrateToV3(tokenId, msgDivId="actionMessage"){
-      const msgDiv = document.getElementById(msgDivId);
-      msgDiv.innerHTML = `<span class="success">⏳ Checking farms...</span>`;
-    
-      const st = await getFarmStatus(tokenId);
-      if (st.v3Active){
-        msgDiv.innerHTML = `<span class="success">✅ Already on V3.</span>`;
-        return;
-      }
-    
-      // Prefer migrate from V2, else V1
-      try {
-        if (st.v2Active){
-          msgDiv.innerHTML = `<span class="success">⏳ Migrating V2 → V3 (claim → stop → start)...</span>`;
-          await (await farmingV2.claimResources(tokenId)).wait();
-          await (await farmingV2.stopFarming(tokenId)).wait();
-          await (await farmingV3.startFarming(tokenId)).wait();
-          msgDiv.innerHTML = `<span class="success">✅ Migrated V2 → V3.</span>`;
-          return;
-        }
-    
-        if (st.v1Active){
-          msgDiv.innerHTML = `<span class="success">⏳ Migrating V1 → V3 (claim → stop → start)...</span>`;
-          await (await farmingV1.claimResources(tokenId)).wait();
-          await (await farmingV1.stopFarming(tokenId)).wait();
-          await (await farmingV3.startFarming(tokenId)).wait();
-          msgDiv.innerHTML = `<span class="success">✅ Migrated V1 → V3.</span>`;
-          return;
-        }
-    
-        // nothing active anywhere → just start V3
-        msgDiv.innerHTML = `<span class="success">⏳ Starting V3...</span>`;
-        await (await farmingV3.startFarming(tokenId)).wait();
-        msgDiv.innerHTML = `<span class="success">✅ V3 started.</span>`;
-      } catch (e){
-        console.error(e);
-        msgDiv.innerHTML = `<span class="error">❌ ${e.message}</span>`;
-      }
-    }
-        // ✅ Subgraph 0.1.0
-        const USE_STUDIO = true; // <— beim Debuggen true lassen
-        const SUBGRAPH_STUDIO_URL = "https://api.studio.thegraph.com/query/1743108/inpinity/0.1.0";
-        const SUBGRAPH_GATEWAY_URL = "https://gateway.thegraph.com/api/subgraphs/id/22b4uXYgs4rwTj6n3iWB4d8Vk4s7LAG7dTAtRaTXfseQ";
-        const API_KEY = "059bc2832dfe50597009e556898d4ba6";
-        
-    /* ==================== ABI ==================== */
-    const NFT_ABI = [
-      "function mintWithETH(uint256 row, uint256 col) payable",
-      "function mintWithINPI(uint256 row, uint256 col) external",
-      "function mintMixed(uint256 row, uint256 col) payable",
-      "function ownerOf(uint256 tokenId) view returns (address)",
-      "function balanceOf(address owner) view returns (uint256)",
-      "function tokenOfOwnerByIndex(address owner, uint256 index) view returns (uint256)",
-      "function getBlockPosition(uint256 tokenId) view returns (uint256 row, uint256 col)",
-      "function blockData(uint256) view returns (uint8 piDigit, uint8 phiDigit, uint256 row, uint256 col, bool revealed, uint256 farmingEndTime)",
-      "function revealBlock(uint256 tokenId, bytes32[] piProof, bytes32[] phiProof, uint8 piDigit, uint8 phiDigit) external",
-      "function calculateRarity(uint256 tokenId) view returns (uint8)"
-    ];
-    
-    // ✅ FarmingV3 minimal ABI (genau was UI braucht)
-    const FARMING_V3_ABI = [
       "function startFarming(uint256 tokenId) external",
       "function stopFarming(uint256 tokenId) external",
       "function claimResources(uint256 tokenId) external",
@@ -725,11 +661,9 @@
       "function getDailyProduction(uint256 tokenId) view returns (uint256[10] production)"
     ];
     
-    // ✅ PiratesV3: executeAttack hat NUR (targetTokenId, attackIndex)
     const PIRATES_V3_ABI = [
       "function startAttack(uint256 attackerTokenId, uint256 targetTokenId, uint8 resource) external",
-      "function executeAttack(uint256 targetTokenId, uint256 attackIndex) external",
-      "function getAttackCount(uint256 targetTokenId) view returns (uint256)"
+      "function executeAttack(uint256 targetTokenId, uint256 attackIndex) external"
     ];
     
     const MERCENARY_V2_ABI = [
@@ -764,31 +698,44 @@
     
     /* ==================== GLOBALS ==================== */
     let provider, signer, userAddress;
-    let nftContract, farmingV3Contract, piratesV3Contract, mercenaryV2Contract, partnershipV2Contract;
+    let nftContract, farmingV1Contract, farmingV2Contract, farmingV3Contract, piratesV3Contract, mercenaryV2Contract, partnershipV2Contract;
     let inpiContract, pitroneContract, resourceTokenContract;
     
     let selectedPayment = "eth";
     let selectedBlock = null;
     
-    let userResourceBalances = {};
     let userBlocks = [];
     let userAttacks = [];
+    let userResourceBalances = {};
     
     let attacksTicker = null;
     let attacksPoller = null;
     let isConnecting = false;
     
     const resourceNames = ["Oil","Lemons","Iron","Gold","Platinum","Copper","Crystal","Obsidian","Mysterium","Aether"];
-    const rarityNames = ["Bronze","Silver","Gold","Platinum","Diamond"];
+    const rarityNames   = ["Bronze","Silver","Gold","Platinum","Diamond"];
     
     /* ==================== HELPERS ==================== */
     function shortenAddress(addr){ return addr ? addr.slice(0,6)+"..."+addr.slice(-4) : ""; }
+    
     function formatTime(seconds){
       if (seconds < 0) seconds = 0;
       if (seconds < 60) return seconds+"s";
       if (seconds < 3600) return Math.floor(seconds/60)+"m";
       return Math.floor(seconds/3600)+"h";
     }
+    
+    // NEW: farming duration pretty
+    function formatDuration(seconds){
+      seconds = Math.max(0, Math.floor(seconds));
+      const d = Math.floor(seconds / 86400);
+      const h = Math.floor((seconds % 86400) / 3600);
+      const m = Math.floor((seconds % 3600) / 60);
+      if (d > 0) return `${d}d ${h}h`;
+      if (h > 0) return `${h}h ${m}m`;
+      return `${m}m`;
+    }
+    
     function safeText(id, txt){ const el=document.getElementById(id); if(el) el.innerText=txt; }
     function safeHTML(id, html){ const el=document.getElementById(id); if(el) el.innerHTML=html; }
     
@@ -801,11 +748,7 @@
       const headers = { "Content-Type":"application/json" };
       if (!USE_STUDIO) headers["Authorization"] = `Bearer ${API_KEY}`;
     
-      const res = await fetch(getSubgraphURL(), {
-        method:"POST",
-        headers,
-        body: JSON.stringify({ query })
-      });
+      const res = await fetch(getSubgraphURL(), { method:"POST", headers, body: JSON.stringify({ query }) });
       const json = await res.json();
       if (!res.ok || json.errors){
         console.error("Subgraph error:", json.errors || json);
@@ -855,8 +798,10 @@
       try{
         const rate = await pitroneContract.getRate();
         safeText("exchangeRate", rate.toString());
+    
         const aInpi = await pitroneContract.availableINPI();
         safeText("poolInpi", ethers.utils.formatEther(aInpi).split(".")[0]);
+    
         const aPit = await pitroneContract.availablePitrone();
         safeText("poolPit", ethers.utils.formatEther(aPit).split(".")[0]);
       }catch(e){}
@@ -897,6 +842,65 @@
       container.innerHTML = any ? html : `<p style="color: var(--text-dim); grid-column: 1/-1; text-align: center;">You have no resource tokens yet. Start farming!</p>`;
     }
     
+    /* ==================== FARM MIGRATION (V1/V2 -> V3) ==================== */
+    function initFarmingContracts(signer){
+      farmingV1Contract = new ethers.Contract(FARMING_V1_ADDRESS, FARMING_V1_ABI, signer);
+      farmingV2Contract = new ethers.Contract(FARMING_V2_ADDRESS, FARMING_V2_ABI, signer);
+      farmingV3Contract = new ethers.Contract(FARMING_V3_ADDRESS, FARMING_V3_ABI, signer);
+    }
+    
+    async function getFarmStatus(tokenId){
+      const [v1, v2, v3] = await Promise.allSettled([
+        farmingV1Contract.farms(tokenId),
+        farmingV2Contract.farms(tokenId),
+        farmingV3Contract.farms(tokenId),
+      ]);
+    
+      return {
+        v1Active: v1.status==="fulfilled" ? !!v1.value.isActive : false,
+        v2Active: v2.status==="fulfilled" ? !!v2.value.isActive : false,
+        v3Active: v3.status==="fulfilled" ? !!v3.value.isActive : false,
+      };
+    }
+    
+    async function migrateToV3(tokenId, msgDivId="actionMessage"){
+      const msgDiv = document.getElementById(msgDivId);
+      if (msgDiv) msgDiv.innerHTML = `<span class="success">⏳ Checking farms...</span>`;
+    
+      const st = await getFarmStatus(tokenId);
+      if (st.v3Active){
+        if (msgDiv) msgDiv.innerHTML = `<span class="success">✅ Already on V3.</span>`;
+        return;
+      }
+    
+      try {
+        if (st.v2Active){
+          if (msgDiv) msgDiv.innerHTML = `<span class="success">⏳ Migrating V2 → V3 (claim → stop → start)...</span>`;
+          await (await farmingV2Contract.claimResources(tokenId, { gasLimit: 600000 })).wait();
+          await (await farmingV2Contract.stopFarming(tokenId, { gasLimit: 600000 })).wait();
+          await (await farmingV3Contract.startFarming(tokenId, { gasLimit: 600000 })).wait();
+          if (msgDiv) msgDiv.innerHTML = `<span class="success">✅ Migrated V2 → V3.</span>`;
+          return;
+        }
+    
+        if (st.v1Active){
+          if (msgDiv) msgDiv.innerHTML = `<span class="success">⏳ Migrating V1 → V3 (claim → stop → start)...</span>`;
+          await (await farmingV1Contract.claimResources(tokenId, { gasLimit: 600000 })).wait();
+          await (await farmingV1Contract.stopFarming(tokenId, { gasLimit: 600000 })).wait();
+          await (await farmingV3Contract.startFarming(tokenId, { gasLimit: 600000 })).wait();
+          if (msgDiv) msgDiv.innerHTML = `<span class="success">✅ Migrated V1 → V3.</span>`;
+          return;
+        }
+    
+        if (msgDiv) msgDiv.innerHTML = `<span class="success">⏳ Starting V3...</span>`;
+        await (await farmingV3Contract.startFarming(tokenId, { gasLimit: 600000 })).wait();
+        if (msgDiv) msgDiv.innerHTML = `<span class="success">✅ V3 started.</span>`;
+      } catch (e){
+        console.error(e);
+        if (msgDiv) msgDiv.innerHTML = `<span class="error">❌ ${e.message}</span>`;
+      }
+    }
+    
     /* ==================== BLOCKS ==================== */
     async function loadUserBlocksFromContract(){
       if(!userAddress || !nftContract) return;
@@ -922,6 +926,7 @@
     
       let html = "";
       let activeFarmsCount = 0;
+      const now = Math.floor(Date.now()/1000);
     
       for(const tokenId of userBlocks){
         const pos = await nftContract.getBlockPosition(tokenId);
@@ -931,11 +936,13 @@
         const data = await nftContract.blockData(tokenId);
         const revealed = data.revealed;
     
-        // ✅ FarmingV3 status ON-CHAIN (unabhängig vom subgraph schema)
+        // ✅ FarmingV3 status ON-CHAIN
         let farmingActive = false;
+        let farmStartTime = 0;
         try{
           const f = await farmingV3Contract.farms(tokenId);
           farmingActive = !!f.isActive;
+          farmStartTime = Number(f.startTime.toString());
         }catch(e){}
     
         if(farmingActive) activeFarmsCount++;
@@ -968,10 +975,15 @@
           ? `<div class="rarity-badge ${rarityName.toLowerCase()}">${rarityName}</div>`
           : `<div class="rarity">🔒 Hidden</div>`;
     
+        const farmDurationLine = farmingActive && farmStartTime > 0
+          ? `<div style="margin-top:6px; font-size:0.78rem; color: var(--text-dim);">⏱️ Farming: ${formatDuration(now - farmStartTime)}</div>`
+          : "";
+    
         html += `<div class="block-card ${classNames}" data-tokenid="${tokenId}" data-row="${row}" data-col="${col}">
           <div class="block-id">#${tokenId}</div>
           <div>R${row} C${col}</div>
           ${badge}
+          ${farmDurationLine}
           ${partnerActive ? '<span class="star" style="position:absolute; top:-5px; right:-5px;">★</span>' : ''}
         </div>`;
       }
@@ -996,9 +1008,11 @@
       if(revealed) rarity = await nftContract.calculateRarity(tokenId);
     
       let farmingActive = false;
+      let farmStartTime = 0;
       try{
         const f = await farmingV3Contract.farms(tokenId);
         farmingActive = !!f.isActive;
+        farmStartTime = Number(f.startTime.toString());
       }catch(e){}
     
       let protectionLevel = 0;
@@ -1012,10 +1026,14 @@
         partnerActive = await partnershipV2Contract.isPartnerBlock(tokenId);
       }catch(e){}
     
-      selectedBlock = { tokenId, row, col, revealed, rarity, farmingActive, protectionLevel, partnerActive };
+      selectedBlock = { tokenId, row, col, revealed, rarity, farmingActive, protectionLevel, partnerActive, farmStartTime };
     
       document.getElementById("selectedBlockInfo").style.display="block";
-      safeText("selectedBlockText", `Block #${tokenId} (R${row}, C${col})`);
+    
+      const now = Math.floor(Date.now()/1000);
+      const farmDur = (farmingActive && farmStartTime > 0) ? ` · ⏱️ ${formatDuration(now - farmStartTime)}` : "";
+    
+      safeText("selectedBlockText", `Block #${tokenId} (R${row}, C${col})${farmDur}`);
       document.getElementById("blockActions").style.display="block";
       document.getElementById("noBlockSelected").style.display="none";
       safeText("selectedActionToken", `Block #${tokenId}`);
@@ -1059,7 +1077,7 @@
       return p;
     }
     
-    /* ==================== ATTACKS ==================== */
+    /* ==================== ATTACKS (Subgraph + localStorage resource) ==================== */
     function initAttackResourceSelect(){
       const select=document.getElementById("attackResourceSelect");
       if(!select) return;
@@ -1074,7 +1092,6 @@
     async function loadUserAttacks(){
       if(!userAddress) return;
     
-      // Attack entity heißt weiterhin "attacks" bei dir – wir fragen minimal ab
       const where = `{ attacker: "${userAddress.toLowerCase()}", executed: false }`;
       const attacks = await fetchAllWithPagination(
         "attacks",
@@ -1083,7 +1100,7 @@
       );
     
       userAttacks = attacks.map(a=>{
-        const targetId = parseInt(a.target);
+        const targetId = parseInt(a.target, 10);
         let resource = 0;
         const saved = localStorage.getItem(`attack_${targetId}`);
         if(saved){
@@ -1092,9 +1109,9 @@
         return {
           id: a.id,
           targetTokenId: targetId,
-          attackIndex: parseInt(a.attackIndex),
-          startTime: parseInt(a.startTime),
-          endTime: parseInt(a.endTime),
+          attackIndex: parseInt(a.attackIndex || "0", 10),
+          startTime: parseInt(a.startTime || "0", 10),
+          endTime: parseInt(a.endTime || "0", 10),
           executed: !!a.executed,
           resource
         };
@@ -1131,9 +1148,6 @@
                 <span class="attack-status" data-endtime="${attack.endTime}">
                   ${timeLeft<=0 ? "Ready to execute" : ("⏳ "+formatTime(timeLeft)+" remaining")}
                 </span>
-                <span style="margin-left:10px; font-family:'Roboto Mono', monospace; font-size:0.8rem; opacity:0.8;">
-                  (end: ${attack.endTime})
-                </span>
               </div>
             </div>
             <div style="min-width:140px; display:flex; justify-content:flex-end;">
@@ -1153,8 +1167,8 @@
       document.querySelectorAll(".execute-btn").forEach(btn=>{
         btn.addEventListener("click", async ()=>{
           if(btn.disabled) return;
-          const targetTokenId = parseInt(btn.dataset.targetid);
-          const attackIndex = parseInt(btn.dataset.attackindex);
+          const targetTokenId = parseInt(btn.dataset.targetid, 10);
+          const attackIndex = parseInt(btn.dataset.attackindex, 10);
           await executeAttack({ targetTokenId, attackIndex });
         });
       });
@@ -1211,7 +1225,7 @@
     
       const now=Math.floor(Date.now()/1000);
       userAttacks.forEach(attack=>{
-        const card=document.querySelector(`.block-card[data-tokenid="${attack.targetTokenId}"]`);
+        const card=document.querySelector(\`.block-card[data-tokenid="\${attack.targetTokenId}"]\`);
         if(!card) return;
         if(attack.endTime<=now) card.classList.add("executable");
         else card.classList.add("attacking");
@@ -1233,21 +1247,10 @@
         );
     
         msgDiv.innerHTML = `<span class="success">⏳ Confirming transaction...</span>`;
+        await tx.wait();
     
-        try{
-          await tx.wait();
-          msgDiv.innerHTML = `<span class="success">✅ Attack executed!</span>`;
-        }catch(e){
-          if(e && e.code==="TRANSACTION_REPLACED"){
-            const ok = e.receipt && e.receipt.status===1;
-            if(ok) msgDiv.innerHTML = `<span class="success">✅ Attack executed (replaced tx confirmed)!</span>`;
-            else throw e;
-          }else{
-            throw e;
-          }
-        }
+        msgDiv.innerHTML = `<span class="success">✅ Attack executed!</span>`;
     
-        // refresh
         await loadUserAttacks();
         await loadResourceBalancesOnchain();
         await updateBalances();
@@ -1263,8 +1266,6 @@
     }
     
     /* ==================== ACTIONS ==================== */
-    async function mint(){ /* unverändert aus deinem Code */ return alert("Mint ist noch V2 in diesem Patch. Wenn du willst, passe ich dir Mint als nächstes an."); }
-    
     async function revealSelected(){
       if(!selectedBlock) return alert("No block selected.");
       const { tokenId,row,col } = selectedBlock;
@@ -1296,29 +1297,28 @@
       }
     }
     
+    // ✅ Start farming = auto-migrate (fixes "Farm nicht aktiv" cases)
     async function startFarmingSelected(){
       if(!selectedBlock) return alert("No block selected.");
-      const msgDiv=document.getElementById("actionMessage");
-      try{
-        const tx = await farmingV3Contract.startFarming(selectedBlock.tokenId);
-        msgDiv.innerHTML = `<span class="success">⏳ Starting farming...</span>`;
-        await tx.wait();
-        msgDiv.innerHTML = `<span class="success">✅ Farming started!</span>`;
-        await loadUserBlocks();
-        await selectBlock(selectedBlock.tokenId, selectedBlock.row, selectedBlock.col);
-      }catch(e){
-        msgDiv.innerHTML = `<span class="error">❌ ${e.message}</span>`;
-      }
+      await migrateToV3(selectedBlock.tokenId, "actionMessage");
+      await loadUserBlocks();
+      await selectBlock(selectedBlock.tokenId, selectedBlock.row, selectedBlock.col);
     }
     
     async function stopFarmingSelected(){
       if(!selectedBlock) return alert("No block selected.");
       const msgDiv=document.getElementById("actionMessage");
+    
       try{
-        const tx = await farmingV3Contract.stopFarming(selectedBlock.tokenId);
+        // ensure V3
+        const st = await getFarmStatus(selectedBlock.tokenId);
+        if(!st.v3Active) await migrateToV3(selectedBlock.tokenId, "actionMessage");
+    
+        const tx = await farmingV3Contract.stopFarming(selectedBlock.tokenId, { gasLimit: 500000 });
         msgDiv.innerHTML = `<span class="success">⏳ Stopping farming...</span>`;
         await tx.wait();
         msgDiv.innerHTML = `<span class="success">⏹️ Farming stopped.</span>`;
+    
         await loadUserBlocks();
         await selectBlock(selectedBlock.tokenId, selectedBlock.row, selectedBlock.col);
       }catch(e){
@@ -1329,12 +1329,18 @@
     async function claimSelected(){
       if(!selectedBlock) return alert("No block selected.");
       const msgDiv=document.getElementById("actionMessage");
+    
       try{
-        const tx = await farmingV3Contract.claimResources(selectedBlock.tokenId);
+        // ensure V3
+        const st = await getFarmStatus(selectedBlock.tokenId);
+        if(!st.v3Active) await migrateToV3(selectedBlock.tokenId, "actionMessage");
+    
+        const tx = await farmingV3Contract.claimResources(selectedBlock.tokenId, { gasLimit: 600000 });
         msgDiv.innerHTML = `<span class="success">⏳ Claiming resources...</span>`;
         await tx.wait();
         msgDiv.innerHTML = `<span class="success">💰 Resources claimed!</span>`;
         await loadResourceBalancesOnchain();
+        await loadUserBlocks(); // refresh duration display
       }catch(e){
         msgDiv.innerHTML = `<span class="error">❌ ${e.message}</span>`;
       }
@@ -1351,17 +1357,17 @@
       if(balance.toNumber()===0) return alert("You need a block to attack from");
     
       const attackerTokenId = await nftContract.tokenOfOwnerByIndex(userAddress, 0);
-      const resource = parseInt(document.getElementById("attackResourceSelect").value);
+      const resource = parseInt(document.getElementById("attackResourceSelect").value, 10);
     
       const msgDiv=document.getElementById("attackMessage");
       msgDiv.innerHTML = `<span class="success">⏳ Starting attack...</span>`;
     
       try{
-        const tx = await piratesV3Contract.startAttack(attackerTokenId, targetTokenId, resource);
+        const tx = await piratesV3Contract.startAttack(attackerTokenId, targetTokenId, resource, { gasLimit: 450000 });
         await tx.wait();
+    
         msgDiv.innerHTML = `<span class="success">✅ Attack started! Check back later.</span>`;
     
-        // resource merken (weil subgraph minimal query)
         localStorage.setItem(`attack_${targetTokenId}`, JSON.stringify({
           targetTokenId, resource, startTime: Math.floor(Date.now()/1000)
         }));
@@ -1389,7 +1395,7 @@
           const approveTx = await inpiContract.approve(MERCENARY_V2_ADDRESS, amount);
           await approveTx.wait();
         }
-        const tx = await mercenaryV2Contract.hireMercenaries(tokenId, level);
+        const tx = await mercenaryV2Contract.hireMercenaries(tokenId, level, { gasLimit: 400000 });
         await tx.wait();
     
         msgDiv.innerHTML = `<span class="success">✅ Protection active for 3.14 days.</span>`;
@@ -1399,10 +1405,66 @@
       }
     }
     
-    // Exchange bleibt wie gehabt
-    async function exchangeINPI(){ /* nimm deinen Code – unverändert */ }
-    async function exchangePit(){ /* nimm deinen Code – unverändert */ }
-    async function findRandomFreeBlock(){ /* nimm deinen Code – unverändert */ }
+    /* ==================== EXCHANGE (working minimal) ==================== */
+    async function exchangeINPI(){
+      const msgDiv = document.getElementById("exchangeMessage");
+      if (!userAddress) { msgDiv.innerHTML = `<span class="error">❌ Connect wallet first.</span>`; return; }
+    
+      const inpiAmount = parseFloat(document.getElementById("inpiAmount").value);
+      if (isNaN(inpiAmount) || inpiAmount <= 0) return alert("Invalid amount");
+    
+      const amountWei = ethers.utils.parseEther(inpiAmount.toString());
+      msgDiv.innerHTML = `<span class="success">⏳ Exchanging...</span>`;
+    
+      try {
+        const inpiBal = await inpiContract.balanceOf(userAddress);
+        if (inpiBal.lt(amountWei)) throw new Error("Insufficient INPI balance");
+    
+        const allowance = await inpiContract.allowance(userAddress, PITRONE_ADDRESS);
+        if (allowance.lt(amountWei)) {
+          msgDiv.innerHTML = `<span class="success">⏳ Approving INPI...</span>`;
+          const approveTx = await inpiContract.approve(PITRONE_ADDRESS, amountWei);
+          await approveTx.wait();
+        }
+    
+        const tx = await pitroneContract.exchangeINPI(amountWei, { gasLimit: 400000 });
+        msgDiv.innerHTML = `<span class="success">⏳ Transaction sent...</span>`;
+        await tx.wait();
+    
+        msgDiv.innerHTML = `<span class="success">✅ Exchange successful!</span>`;
+        await updateBalances();
+        await updatePoolInfo();
+      } catch (e) {
+        msgDiv.innerHTML = `<span class="error">❌ ${e.message}</span>`;
+      }
+    }
+    
+    async function exchangePit(){
+      const msgDiv = document.getElementById("exchangeMessage");
+      if (!userAddress) { msgDiv.innerHTML = `<span class="error">❌ Connect wallet first.</span>`; return; }
+    
+      const pitAmount = parseFloat(document.getElementById("pitAmount").value);
+      if (isNaN(pitAmount) || pitAmount <= 0) return alert("Invalid amount");
+    
+      const amountWei = ethers.utils.parseEther(pitAmount.toString());
+      msgDiv.innerHTML = `<span class="success">⏳ Exchanging...</span>`;
+    
+      try {
+        const allowance = await pitroneContract.allowance(userAddress, PITRONE_ADDRESS);
+        // (Optional approve for PIT token if required by your PIT contract; keep if you use ERC20 allowances)
+        // if (allowance.lt(amountWei)) { ... }
+    
+        const tx = await pitroneContract.exchangePitrone(amountWei, { gasLimit: 400000 });
+        msgDiv.innerHTML = `<span class="success">⏳ Transaction sent...</span>`;
+        await tx.wait();
+    
+        msgDiv.innerHTML = `<span class="success">✅ Exchange successful!</span>`;
+        await updateBalances();
+        await updatePoolInfo();
+      } catch (e) {
+        msgDiv.innerHTML = `<span class="error">❌ ${e.message}</span>`;
+      }
+    }
     
     /* ==================== WALLET ==================== */
     async function connectWallet(){
@@ -1420,17 +1482,21 @@
     
         const network = await provider.getNetwork();
         if(network.chainId !== 8453){
-          await window.ethereum.request({ method:"wallet_switchEthereumChain", params:[{ chainId:"0x2105" }] });
+          try{
+            await window.ethereum.request({ method:"wallet_switchEthereumChain", params:[{ chainId:"0x2105" }] });
+          }catch(e){
+            // optional add chain
+          }
         }
     
-        nftContract = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
-        farmingV3Contract = new ethers.Contract(FARMING_V3_ADDRESS, FARMING_V3_ABI, signer);
-        piratesV3Contract = new ethers.Contract(PIRATES_V3_ADDRESS, PIRATES_V3_ABI, signer);
-        mercenaryV2Contract = new ethers.Contract(MERCENARY_V2_ADDRESS, MERCENARY_V2_ABI, signer);
-        partnershipV2Contract = new ethers.Contract(PARTNERSHIP_V2_ADDRESS, PARTNERSHIP_V2_ABI, signer);
-        inpiContract = new ethers.Contract(INPI_ADDRESS, INPI_ABI, signer);
-        pitroneContract = new ethers.Contract(PITRONE_ADDRESS, PITRONE_ABI, signer);
-        resourceTokenContract = new ethers.Contract(RESOURCE_TOKEN_ADDRESS, RESOURCE_TOKEN_ABI, signer);
+        nftContract          = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
+        initFarmingContracts(signer); // v1/v2/v3 for migration + v3 main
+        piratesV3Contract    = new ethers.Contract(PIRATES_V3_ADDRESS, PIRATES_V3_ABI, signer);
+        mercenaryV2Contract  = new ethers.Contract(MERCENARY_V2_ADDRESS, MERCENARY_V2_ABI, signer);
+        partnershipV2Contract= new ethers.Contract(PARTNERSHIP_V2_ADDRESS, PARTNERSHIP_V2_ABI, signer);
+        inpiContract         = new ethers.Contract(INPI_ADDRESS, INPI_ABI, signer);
+        pitroneContract      = new ethers.Contract(PITRONE_ADDRESS, PITRONE_ABI, signer);
+        resourceTokenContract= new ethers.Contract(RESOURCE_TOKEN_ADDRESS, RESOURCE_TOKEN_ABI, signer);
     
         safeHTML("walletStatus","🟢 Connected");
         safeHTML("walletAddress", shortenAddress(userAddress));
@@ -1444,12 +1510,15 @@
         await loadResourceBalancesOnchain();
         await loadUserAttacks();
     
+        // refresh attacks + farming duration
         if(!attacksPoller){
           attacksPoller = setInterval(async ()=>{
             await loadUserAttacks();
+            await loadUserBlocks(); // updates farming duration text
             refreshBlockMarkings();
           }, 30000);
         }
+    
       }catch(e){
         console.error(e);
         alert("Connection error: "+e.message);
@@ -1467,11 +1536,14 @@
     document.getElementById("farmingStartBtn").addEventListener("click", startFarmingSelected);
     document.getElementById("farmingStopBtn").addEventListener("click", stopFarmingSelected);
     document.getElementById("claimBtn").addEventListener("click", claimSelected);
+    document.getElementById("exchangeInpiBtn").addEventListener("click", exchangeINPI);
+    document.getElementById("exchangePitBtn").addEventListener("click", exchangePit);
     
     document.querySelectorAll('input[name="payment"]').forEach(radio=>{
       radio.addEventListener("change",(e)=>{ selectedPayment = e.target.value; });
     });
     
+    // optional auto-connect
     if(window.ethereum && window.ethereum.selectedAddress){
       connectWallet();
     }
