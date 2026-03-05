@@ -491,945 +491,1074 @@
 
   <!-- Ethers v6 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
-
+  
   <script>
-    (async function () {
-      // ==================== KONFIGURATION ====================
-      const DEPLOYMENT_ID_V1 = "QmbpREskj5F7R8WpzUS6pv4XkKx1M34KAUc19fuUPtmu3o";
-      const SUBGRAPH_ID_V2 = "22b4uXYgs4rwTj6n3iWB4d8Vk4s7LAG7dTAtRaTXfseQ";
-      const API_KEY = "059bc2832dfe50597009e556898d4ba6";
-
-      const SUBGRAPH_URL_V1 = `https://gateway.thegraph.com/api/${API_KEY}/deployments/id/${DEPLOYMENT_ID_V1}`;
-      const SUBGRAPH_URL_V2 = `https://gateway.thegraph.com/api/${API_KEY}/subgraphs/id/${SUBGRAPH_ID_V2}`;
-
-      const BASE_BLOCK_SIZE = 24;
-      const WORKER_URL = "https://inpinity-worker-final.s-plat.workers.dev";
-
-      // ====== Contracts ======
-      const NFT_ADDRESS = "0x277a0D5864293C78d7387C54B48c35D5E9578Ab1";
-      const RESOURCE_TOKEN_ADDRESS = "0x71E76a6065197acdd1a4d6B736712F80D1Fd3D8b";
-      const INPI_ADDRESS = "0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D";
-      const PITRONE_ADDRESS = "0x7240Ec5B3Ba944888E186c74D0f8B4F5F71c9AE8";
-
-      // ✅ NEW V3:
-      const FARMING_V3_ADDRESS = "0xE79445C9ef97B8156BB505D784C0356E54432AD9";
-      const PIRATES_V3_ADDRESS = "0xC3544804cea908b8Ac6752B4F47609e1c22DaF5d";
-
-      // stays V2:
-      const MERCENARY_V2_ADDRESS = "0xFEa09ccA75dbc63cc8053739A61777Bd13fC6Bc2";
-
-      // ==================== ABIs ====================
-      const NFT_ABI = [
-        "function revealBlock(uint256 tokenId, bytes32[] piProof, bytes32[] phiProof, uint8 piDigit, uint8 phiDigit) external",
-        "function calculateRarity(uint256 tokenId) view returns (uint8)",
-        "function getBlockPosition(uint256 tokenId) view returns (uint256 row, uint256 col)",
-        "function ownerOf(uint256 tokenId) view returns (address)"
-      ];
-
-      // ✅ FarmingV3
-      const FARMING_V3_ABI = [
-        "function startFarming(uint256 tokenId) external",
-        "function stopFarming(uint256 tokenId) external",
-        "function claimResources(uint256 tokenId) external",
-        "function farms(uint256) view returns (uint256 startTime, uint256 lastAccrualTime, uint256 boostExpiry, bool isActive)"
-      ];
-
-      // ✅ PiratesV3
-      const PIRATES_V3_ABI = [
-        "function startAttack(uint256 attackerTokenId, uint256 targetTokenId, uint8 resource) external",
-        "function executeAttack(uint256 targetTokenId, uint256 attackIndex) external"
-      ];
-
-      const MERCENARY_V2_ABI = [
-        "function hireMercenaries(uint256 tokenId, uint256 protectionLevel) external",
-        "function getProtectionLevel(uint256 tokenId) view returns (uint256)"
-      ];
-
-      const INPI_ABI = [
-        "function approve(address spender, uint256 amount) returns (bool)",
-        "function balanceOf(address account) view returns (uint256)",
-        "function allowance(address owner, address spender) view returns (uint256)"
-      ];
-
-      const PITRONE_ABI = [
-        "function balanceOf(address account) view returns (uint256)",
-        "function exchangeINPI(uint256 inpiAmount) external",
-        "function exchangePitrone(uint256 pitroneAmount) external",
-        "function allowance(address owner, address spender) view returns (uint256)",
-        "function approve(address spender, uint256 amount) returns (bool)"
-      ];
-
-      // ==================== STATE ====================
-      let provider, signer, userAddress = null;
-      let readOnlyProvider, nftReadOnlyContract;
-
-      let tokens = {};
-      let userResources = [];
-      let selectedTokenId = null;
-      let selectedTokenOwner = null;
-
-      let userAttacks = [];
-      let attacksTicker = null;
-
-      let nftContract, farmingV3Contract, piratesV3Contract, mercenaryV2Contract, inpiContract, pitroneContract;
-
-      const canvas = document.getElementById("pyramidCanvas");
-      const ctx = canvas.getContext("2d");
-      const container = document.getElementById("canvasContainer");
-      const tooltip = document.getElementById("tooltip");
-
-      const blockDetailDiv = document.getElementById("blockDetail");
-      const actionPanel = document.getElementById("actionPanel");
-      const ownerActionsDiv = document.getElementById("ownerActions");
-      const protectionInput = document.getElementById("protectionInput");
-      const attackInput = document.getElementById("attackInput");
-      const actionMessage = document.getElementById("actionMessage");
-      const userResourcesDiv = document.getElementById("userResources");
-
-      let scale = 1.0;
-      let offsetX = 0, offsetY = 0;
-      let isDragging = false;
-      let lastMouseX = 0, lastMouseY = 0;
-      let pinchStartDist = 0;
-
-      const resourceNames = ["Oil","Lemons","Iron","Gold","Platinum","Copper","Crystal","Obsidian","Mysterium","Aether"];
-      const rarityNames = ["Bronze","Silver","Gold","Platinum","Diamond"];
-      const rarityClass = ["rarity-bronze","rarity-silver","rarity-gold","rarity-platinum","rarity-diamond"];
-
-      function populateAttackResourceSelect() {
-        const select = document.getElementById("attackResource");
-        if (!select) return;
-        select.innerHTML = "";
-        for (let i = 0; i < resourceNames.length; i++) {
-          const option = document.createElement("option");
-          option.value = String(i);
-          option.textContent = resourceNames[i];
-          select.appendChild(option);
-        }
+  (async function () {
+    // ==================== KONFIGURATION ====================
+    const DEPLOYMENT_ID_V1 = "QmbpREskj5F7R8WpzUS6pv4XkKx1M34KAUc19fuUPtmu3o";
+    const SUBGRAPH_ID_V2   = "22b4uXYgs4rwTj6n3iWB4d8Vk4s7LAG7dTAtRaTXfseQ";
+    const API_KEY          = "059bc2832dfe50597009e556898d4ba6";
+  
+    const SUBGRAPH_URL_V1 = `https://gateway.thegraph.com/api/${API_KEY}/deployments/id/${DEPLOYMENT_ID_V1}`;
+    const SUBGRAPH_URL_V2 = `https://gateway.thegraph.com/api/${API_KEY}/subgraphs/id/${SUBGRAPH_ID_V2}`;
+  
+    const BASE_BLOCK_SIZE = 24;
+    const WORKER_URL = "https://inpinity-worker-final.s-plat.workers.dev";
+  
+    // ====== Contracts ======
+    const NFT_ADDRESS = "0x277a0D5864293C78d7387C54B48c35D5E9578Ab1";
+    const RESOURCE_TOKEN_ADDRESS = "0x71E76a6065197acdd1a4d6B736712F80D1Fd3D8b";
+    const INPI_ADDRESS = "0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D";
+    const PITRONE_ADDRESS = "0x7240Ec5B3Ba944888E186c74D0f8B4F5F71c9AE8";
+  
+    // ✅ MAIN
+    const FARMING_V3_ADDRESS = "0xE79445C9ef97B8156BB505D784C0356E54432AD9";
+    const PIRATES_V3_ADDRESS = "0xC3544804cea908b8Ac6752B4F47609e1c22DaF5d";
+  
+    // stays V2
+    const MERCENARY_V2_ADDRESS = "0xFEa09ccA75dbc63cc8053739A61777Bd13fC6Bc2";
+  
+    // ✅ OLD (for migration)
+    const FARMING_V1_ADDRESS = "0xd9722fB6e9b8e71399A970d4e8F4D628C532E94f";
+    const FARMING_V2_ADDRESS = "0x852Bce0713aAF409c4412155Ab8CE6191B525C30";
+  
+    // ==================== ABIs ====================
+    const NFT_ABI = [
+      "function revealBlock(uint256 tokenId, bytes32[] piProof, bytes32[] phiProof, uint8 piDigit, uint8 phiDigit) external",
+      "function calculateRarity(uint256 tokenId) view returns (uint8)",
+      "function getBlockPosition(uint256 tokenId) view returns (uint256 row, uint256 col)",
+      "function ownerOf(uint256 tokenId) view returns (address)"
+    ];
+  
+    const FARMING_V3_ABI = [
+      "function startFarming(uint256 tokenId) external",
+      "function stopFarming(uint256 tokenId) external",
+      "function claimResources(uint256 tokenId) external",
+      "function farms(uint256) view returns (uint256 startTime, uint256 lastAccrualTime, uint256 boostExpiry, bool isActive)"
+    ];
+  
+    const FARMING_V1_ABI = [
+      "function farms(uint256) view returns (uint256 startTime, uint256 lastClaimTime, bool isActive)",
+      "function claimResources(uint256) external",
+      "function stopFarming(uint256) external"
+    ];
+  
+    const FARMING_V2_ABI = [
+      "function farms(uint256) view returns (uint256 startTime, uint256 lastClaimTime, bool isActive)",
+      "function claimResources(uint256) external",
+      "function stopFarming(uint256) external",
+      "function startFarming(uint256) external"
+    ];
+  
+    const PIRATES_V3_ABI = [
+      "function startAttack(uint256 attackerTokenId, uint256 targetTokenId, uint8 resource) external",
+      "function executeAttack(uint256 targetTokenId, uint256 attackIndex) external"
+    ];
+  
+    const MERCENARY_V2_ABI = [
+      "function hireMercenaries(uint256 tokenId, uint256 protectionLevel) external",
+      "function getProtectionLevel(uint256 tokenId) view returns (uint256)"
+    ];
+  
+    const INPI_ABI = [
+      "function approve(address spender, uint256 amount) returns (bool)",
+      "function balanceOf(address account) view returns (uint256)",
+      "function allowance(address owner, address spender) view returns (uint256)"
+    ];
+  
+    const PITRONE_ABI = [
+      "function balanceOf(address account) view returns (uint256)",
+      "function exchangeINPI(uint256 inpiAmount) external",
+      "function exchangePitrone(uint256 pitroneAmount) external",
+      "function allowance(address owner, address spender) view returns (uint256)",
+      "function approve(address spender, uint256 amount) returns (bool)"
+    ];
+  
+    // ==================== STATE ====================
+    let provider, signer, userAddress = null;
+    let readOnlyProvider, nftReadOnlyContract;
+  
+    let tokens = {};
+    let userResources = [];
+    let selectedTokenId = null;
+    let selectedTokenOwner = null;
+  
+    let userAttacks = [];
+    let attacksTicker = null;
+  
+    let nftContract, farmingV3Contract, piratesV3Contract, mercenaryV2Contract, inpiContract, pitroneContract;
+    let farmingV1Contract, farmingV2Contract;
+  
+    const canvas = document.getElementById("pyramidCanvas");
+    const ctx = canvas.getContext("2d");
+    const container = document.getElementById("canvasContainer");
+    const tooltip = document.getElementById("tooltip");
+  
+    const blockDetailDiv = document.getElementById("blockDetail");
+    const actionPanel = document.getElementById("actionPanel");
+    const ownerActionsDiv = document.getElementById("ownerActions");
+    const protectionInput = document.getElementById("protectionInput");
+    const attackInput = document.getElementById("attackInput");
+    const actionMessage = document.getElementById("actionMessage");
+    const userResourcesDiv = document.getElementById("userResources");
+  
+    let scale = 1.0;
+    let offsetX = 0, offsetY = 0;
+    let isDragging = false;
+    let lastMouseX = 0, lastMouseY = 0;
+    let pinchStartDist = 0;
+  
+    const resourceNames = ["Oil","Lemons","Iron","Gold","Platinum","Copper","Crystal","Obsidian","Mysterium","Aether"];
+    const rarityNames = ["Bronze","Silver","Gold","Platinum","Diamond"];
+    const rarityClass = ["rarity-bronze","rarity-silver","rarity-gold","rarity-platinum","rarity-diamond"];
+  
+    function populateAttackResourceSelect() {
+      const select = document.getElementById("attackResource");
+      if (!select) return;
+      select.innerHTML = "";
+      for (let i = 0; i < resourceNames.length; i++) {
+        const option = document.createElement("option");
+        option.value = String(i);
+        option.textContent = resourceNames[i];
+        select.appendChild(option);
       }
-      populateAttackResourceSelect();
-
-      function shortenAddress(addr) { return addr ? addr.slice(0, 6) + "..." + addr.slice(-4) : ""; }
-      function formatTime(seconds) {
-        if (seconds < 0) seconds = 0;
-        if (seconds < 60) return seconds + "s";
-        if (seconds < 3600) return Math.floor(seconds / 60) + "m";
-        return Math.floor(seconds / 3600) + "h";
+    }
+    populateAttackResourceSelect();
+  
+    function shortenAddress(addr) { return addr ? addr.slice(0, 6) + "..." + addr.slice(-4) : ""; }
+    function formatTime(seconds) {
+      if (seconds < 0) seconds = 0;
+      if (seconds < 60) return seconds + "s";
+      if (seconds < 3600) return Math.floor(seconds / 60) + "m";
+      return Math.floor(seconds / 3600) + "h";
+    }
+    function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
+    function getAttackStorageKey(targetTokenId) { return `attack_${targetTokenId}`; }
+  
+    // ==================== SUBGRAPH HELPERS ====================
+    async function fetchSubgraph(url, query) {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${API_KEY}` },
+        body: JSON.stringify({ query })
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const json = await response.json();
+      if (json.errors) throw new Error(json.errors[0]?.message || "Subgraph error");
+      return json.data;
+    }
+  
+    async function fetchAllWithPagination(url, fieldName, subfields, where = "") {
+      const pageSize = 1000;
+      let skip = 0;
+      let all = [];
+      while (true) {
+        const query = `{ ${fieldName}(first:${pageSize}, skip:${skip}${where ? ", where: " + where : ""}) { ${subfields} } }`;
+        const data = await fetchSubgraph(url, query);
+        const items = data[fieldName];
+        if (!items || items.length === 0) break;
+        all = all.concat(items);
+        if (items.length < pageSize) break;
+        skip += pageSize;
       }
-      function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
-      function getAttackStorageKey(targetTokenId) { return `attack_${targetTokenId}`; }
-
-      async function fetchSubgraph(url, query) {
-        const response = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${API_KEY}` },
-          body: JSON.stringify({ query })
+      return all;
+    }
+  
+    function getProduction(rarity, row) {
+      const production = {};
+      if (rarity === 0) { production.OIL=10; production.LEMONS=5; production.IRON=3; }
+      else if (rarity === 1) { production.OIL=20; production.LEMONS=10; production.IRON=6; production.GOLD=1; }
+      else if (rarity === 2) { production.OIL=30; production.LEMONS=15; production.IRON=9; production.GOLD=2; production.PLATINUM=1; }
+      else if (rarity === 3) { production.OIL=40; production.LEMONS=20; production.IRON=12; production.GOLD=3; production.PLATINUM=2; production.CRYSTAL=1; }
+      else if (rarity === 4) { production.OIL=60; production.LEMONS=30; production.IRON=18; production.GOLD=5; production.PLATINUM=3; production.CRYSTAL=2; production.MYSTERIUM=1; if (row === 0) production.AETHER=1; }
+      return production;
+    }
+  
+    // ==================== MIGRATION HELPERS (V1/V2 -> V3) ====================
+    function initFarmingContracts(signer) {
+      farmingV1Contract = new ethers.Contract(FARMING_V1_ADDRESS, FARMING_V1_ABI, signer);
+      farmingV2Contract = new ethers.Contract(FARMING_V2_ADDRESS, FARMING_V2_ABI, signer);
+    }
+  
+    async function getFarmStatus(tokenId) {
+      const [v1, v2, v3] = await Promise.allSettled([
+        farmingV1Contract.farms(tokenId),
+        farmingV2Contract.farms(tokenId),
+        farmingV3Contract.farms(tokenId),
+      ]);
+  
+      return {
+        v1Active: v1.status === "fulfilled" ? !!v1.value.isActive : false,
+        v2Active: v2.status === "fulfilled" ? !!v2.value.isActive : false,
+        v3Active: v3.status === "fulfilled" ? !!v3.value.isActive : false,
+      };
+    }
+  
+    async function migrateToV3(tokenId) {
+      const st = await getFarmStatus(tokenId);
+      if (st.v3Active) return { ok: true, msg: "Already on V3" };
+  
+      if (st.v2Active) {
+        await (await farmingV2Contract.claimResources(tokenId, { gasLimit: 500000 })).wait();
+        await (await farmingV2Contract.stopFarming(tokenId, { gasLimit: 500000 })).wait();
+        await (await farmingV3Contract.startFarming(tokenId, { gasLimit: 500000 })).wait();
+        return { ok: true, msg: "Migrated V2 → V3" };
+      }
+  
+      if (st.v1Active) {
+        await (await farmingV1Contract.claimResources(tokenId, { gasLimit: 500000 })).wait();
+        await (await farmingV1Contract.stopFarming(tokenId, { gasLimit: 500000 })).wait();
+        await (await farmingV3Contract.startFarming(tokenId, { gasLimit: 500000 })).wait();
+        return { ok: true, msg: "Migrated V1 → V3" };
+      }
+  
+      await (await farmingV3Contract.startFarming(tokenId, { gasLimit: 500000 })).wait();
+      return { ok: true, msg: "Started V3" };
+    }
+  
+    // ==================== LOAD ATTACKS (subgraph + localStorage for resource) ====================
+    async function loadUserAttacks() {
+      if (!userAddress) return;
+      try {
+        const where = `{ attacker: "${userAddress.toLowerCase()}", executed: false }`;
+        const attacks = await fetchAllWithPagination(
+          SUBGRAPH_URL_V2,
+          "attacks",
+          "id attacker target attackIndex startTime endTime executed",
+          where
+        );
+  
+        userAttacks = attacks.map(a => {
+          const targetTokenId = parseInt(a.target, 10);
+  
+          let resource = 0;
+          const saved = localStorage.getItem(getAttackStorageKey(targetTokenId));
+          if (saved) {
+            try {
+              const parsed = JSON.parse(saved);
+              resource = Number(parsed.resource ?? 0);
+              if (!Number.isFinite(resource)) resource = 0;
+            } catch (_) {}
+          }
+  
+          return {
+            id: a.id,
+            targetTokenId,
+            attackIndex: parseInt(a.attackIndex || "0", 10),
+            startTime: parseInt(a.startTime || "0", 10),
+            endTime: parseInt(a.endTime || "0", 10),
+            executed: !!a.executed,
+            resource
+          };
         });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const json = await response.json();
-        if (json.errors) throw new Error(json.errors[0]?.message || "Subgraph error");
-        return json.data;
+  
+        displayUserAttacks();
+        drawPyramid();
+        startAttacksTicker();
+      } catch (e) {
+        console.error("Failed to load attacks:", e);
       }
-
-      async function fetchAllWithPagination(url, fieldName, subfields, where = "") {
-        const pageSize = 1000;
-        let skip = 0;
-        let all = [];
-        while (true) {
-          const query = `{ ${fieldName}(first:${pageSize}, skip:${skip}${where ? ", where: " + where : ""}) { ${subfields} } }`;
-          const data = await fetchSubgraph(url, query);
-          const items = data[fieldName];
-          if (!items || items.length === 0) break;
-          all = all.concat(items);
-          if (items.length < pageSize) break;
-          skip += pageSize;
-        }
-        return all;
+    }
+  
+    function displayUserAttacks() {
+      const container = document.getElementById("userAttacksList");
+      if (!container) return;
+  
+      if (!userAddress) {
+        container.innerHTML = '<p style="color:#98a9b9;">Connect wallet to see your attacks.</p>';
+        return;
       }
-
-      function getProduction(rarity, row) {
-        const production = {};
-        if (rarity === 0) { production.OIL=10; production.LEMONS=5; production.IRON=3; }
-        else if (rarity === 1) { production.OIL=20; production.LEMONS=10; production.IRON=6; production.GOLD=1; }
-        else if (rarity === 2) { production.OIL=30; production.LEMONS=15; production.IRON=9; production.GOLD=2; production.PLATINUM=1; }
-        else if (rarity === 3) { production.OIL=40; production.LEMONS=20; production.IRON=12; production.GOLD=3; production.PLATINUM=2; production.CRYSTAL=1; }
-        else if (rarity === 4) { production.OIL=60; production.LEMONS=30; production.IRON=18; production.GOLD=5; production.PLATINUM=3; production.CRYSTAL=2; production.MYSTERIUM=1; if (row === 0) production.AETHER=1; }
-        return production;
+  
+      if (userAttacks.length === 0) {
+        container.innerHTML = '<p style="color:#98a9b9;">No active attacks.</p>';
+        return;
       }
-
-      // ====== LOAD ATTACKS (subgraph + localStorage for resource) ======
-      async function loadUserAttacks() {
-        if (!userAddress) return;
-        try {
-          const where = `{ attacker: "${userAddress.toLowerCase()}", executed: false }`;
-          const attacks = await fetchAllWithPagination(
-            SUBGRAPH_URL_V2,
-            "attacks",
-            "id attacker target attackIndex startTime endTime executed",
-            where
-          );
-
-          userAttacks = attacks.map(a => {
-            const targetTokenId = parseInt(a.target, 10);
-            let resource = 0;
-            const saved = localStorage.getItem(getAttackStorageKey(targetTokenId));
-            if (saved) {
-              try {
-                const parsed = JSON.parse(saved);
-                resource = Number(parsed.resource ?? 0);
-                if (!Number.isFinite(resource)) resource = 0;
-              } catch (_) {}
-            }
-            return {
-              id: a.id,
-              targetTokenId,
-              attackIndex: parseInt(a.attackIndex || "0", 10),
-              startTime: parseInt(a.startTime || "0", 10),
-              endTime: parseInt(a.endTime || "0", 10),
-              executed: !!a.executed,
-              resource
-            };
-          });
-
-          displayUserAttacks();
-          drawPyramid();
-          startAttacksTicker();
-        } catch (e) {
-          console.error("Failed to load attacks:", e);
-        }
-      }
-
-      function displayUserAttacks() {
-        const container = document.getElementById("userAttacksList");
-        if (!container) return;
-
-        if (!userAddress) {
-          container.innerHTML = '<p style="color:#98a9b9;">Connect wallet to see your attacks.</p>';
-          return;
-        }
-
-        if (userAttacks.length === 0) {
-          container.innerHTML = '<p style="color:#98a9b9;">No active attacks.</p>';
-          return;
-        }
-
+  
+      const now = Math.floor(Date.now() / 1000);
+      let html = "";
+  
+      userAttacks.forEach(attack => {
+        const timeLeft = attack.endTime - now;
+        const ready = timeLeft <= 0;
+  
+        html += `
+          <div class="attack-item">
+            <span>#${attack.targetTokenId} (${resourceNames[attack.resource] || "Oil"})</span>
+            <span class="attack-status" data-endtime="${attack.endTime}" style="${ready ? "color:#51cf66;" : ""}">
+              ${ready ? "Ready" : "⏳ " + formatTime(timeLeft)}
+            </span>
+            <button class="execute-btn"
+              data-targetid="${attack.targetTokenId}"
+              data-attackindex="${attack.attackIndex}"
+              data-resource="${attack.resource}"
+              ${ready ? "" : "disabled"}
+            >${ready ? "⚔️ Execute" : "⏳ Waiting"}</button>
+          </div>
+        `;
+      });
+  
+      container.innerHTML = html;
+  
+      container.querySelectorAll(".execute-btn").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          if (btn.disabled) return;
+          const targetTokenId = parseInt(btn.dataset.targetid, 10);
+          const attackIndex = parseInt(btn.dataset.attackindex, 10);
+          const resource = parseInt(btn.dataset.resource, 10);
+          await executeAttack({ targetTokenId, attackIndex, resource });
+        });
+      });
+    }
+  
+    function startAttacksTicker() {
+      if (attacksTicker) return;
+      attacksTicker = setInterval(() => {
         const now = Math.floor(Date.now() / 1000);
-        let html = "";
-
-        userAttacks.forEach(attack => {
-          const timeLeft = attack.endTime - now;
-          const ready = timeLeft <= 0;
-
-          html += `
-            <div class="attack-item">
-              <span>#${attack.targetTokenId} (${resourceNames[attack.resource] || "Oil"})</span>
-              <span class="attack-status" data-endtime="${attack.endTime}" style="${ready ? "color:#51cf66;" : ""}">
-                ${ready ? "Ready" : "⏳ " + formatTime(timeLeft)}
-              </span>
-              <button class="execute-btn"
-                data-targetid="${attack.targetTokenId}"
-                data-attackindex="${attack.attackIndex}"
-                data-resource="${attack.resource}"
-                ${ready ? "" : "disabled"}
-              >${ready ? "⚔️ Execute" : "⏳ Waiting"}</button>
+  
+        document.querySelectorAll(".attack-status").forEach(el => {
+          const endTime = parseInt(el.dataset.endtime || "0", 10);
+          if (!endTime) return;
+          const timeLeft = endTime - now;
+          if (timeLeft <= 0) {
+            el.textContent = "Ready";
+            el.style.color = "#51cf66";
+          } else {
+            el.textContent = "⏳ " + formatTime(timeLeft);
+            el.style.color = "";
+          }
+        });
+  
+        document.querySelectorAll(".execute-btn").forEach(btn => {
+          const endTimeEl = btn.parentElement?.querySelector(".attack-status");
+          const endTime = endTimeEl ? parseInt(endTimeEl.dataset.endtime || "0", 10) : 0;
+          const timeLeft = endTime - now;
+          if (timeLeft <= 0) {
+            btn.disabled = false;
+            btn.textContent = "⚔️ Execute";
+          } else {
+            btn.disabled = true;
+            btn.textContent = "⏳ Waiting";
+          }
+        });
+  
+        drawPyramid();
+      }, 1000);
+    }
+  
+    // ✅ EXECUTE (PiratesV3.executeAttack WITHOUT protection param)
+    async function executeAttack(attack) {
+      actionMessage.innerHTML = '<span class="success">⏳ Executing attack...</span>';
+      try {
+        if (!piratesV3Contract) throw new Error("Connect wallet first.");
+  
+        const tx = await piratesV3Contract.executeAttack(
+          attack.targetTokenId,
+          attack.attackIndex,
+          { gasLimit: 350000 }
+        );
+  
+        actionMessage.innerHTML = '<span class="success">⏳ Confirming...</span>';
+        await tx.wait();
+  
+        actionMessage.innerHTML = '<span class="success">✅ Attack executed! Resources stolen.</span>';
+  
+        localStorage.removeItem(getAttackStorageKey(attack.targetTokenId));
+  
+        await loadUserAttacks();
+        await loadUserResources();
+        await loadData();
+      } catch (e) {
+        console.error("executeAttack error:", e);
+        let msg = e?.message || "Unknown error";
+        if ((msg + "").includes("execution reverted")) msg = "❌ Reverted. Attack not ready / already executed / invalid index.";
+        actionMessage.innerHTML = `<span class="error">${msg}</span>`;
+      }
+    }
+  
+    // ==================== LOAD MAP DATA ====================
+    async function loadData() {
+      try {
+        const [tokenItemsV1, tokenItemsV2] = await Promise.all([
+          fetchAllWithPagination(SUBGRAPH_URL_V1, "tokens", "id owner { id } revealed").catch(() => []),
+          fetchAllWithPagination(SUBGRAPH_URL_V2, "tokens", "id owner { id } revealed farm { active }").catch(() => [])
+        ]);
+  
+        tokens = {};
+  
+        tokenItemsV1.forEach(t => {
+          tokens[t.id] = { owner: t.owner ? t.owner.id : null, revealed: !!t.revealed, farmActive: false, protectionActive: false, partnerActive: false };
+        });
+  
+        tokenItemsV2.forEach(t => {
+          if (!tokens[t.id]) {
+            tokens[t.id] = { owner: t.owner ? t.owner.id : null, revealed: !!t.revealed, farmActive: t.farm ? !!t.farm.active : false, protectionActive: false, partnerActive: false };
+          } else {
+            tokens[t.id].owner = t.owner ? t.owner.id : tokens[t.id].owner;
+            tokens[t.id].revealed = !!t.revealed || tokens[t.id].revealed;
+            if (t.farm && t.farm.active) tokens[t.id].farmActive = true;
+          }
+        });
+  
+        const protectionItems = await fetchAllWithPagination(SUBGRAPH_URL_V2, "protections", "id active").catch(() => []);
+        protectionItems.forEach(p => { if (tokens[p.id]) tokens[p.id].protectionActive = !!p.active; });
+  
+        const partnerItems = await fetchAllWithPagination(SUBGRAPH_URL_V2, "partnerships", "id active").catch(() => []);
+        partnerItems.forEach(p => { if (tokens[p.id]) tokens[p.id].partnerActive = !!p.active; });
+  
+        // NOTE: V1 farms optional
+        const farmItemsV1 = await fetchAllWithPagination(SUBGRAPH_URL_V1, "farms", "id active").catch(() => []);
+        farmItemsV1.forEach(f => { if (f.active && tokens[f.id] && !tokens[f.id].farmActive) tokens[f.id].farmActive = true; });
+  
+        // ✅ IMPORTANT: overwrite farmActive with REAL on-chain V3 state if connected
+        if (userAddress && farmingV3Contract) {
+          const ids = Object.keys(tokens);
+          // keep it light: only check minted tokens with owner
+          const mintedIds = ids.filter(id => tokens[id] && tokens[id].owner);
+          for (const id of mintedIds) {
+            try {
+              const f = await farmingV3Contract.farms(id);
+              tokens[id].farmActive = !!f.isActive;
+            } catch (_) {}
+          }
+        }
+  
+        if (userAddress) {
+          await loadUserResources();
+          await loadUserAttacks();
+        }
+  
+        drawPyramid();
+      } catch (err) {
+        console.error("Fehler beim Laden:", err);
+      }
+    }
+  
+    async function loadUserResources() {
+      if (!userAddress) return;
+      try {
+        const where = `{ account: "${userAddress.toLowerCase()}" }`;
+        const balanceItems = await fetchAllWithPagination(
+          SUBGRAPH_URL_V2,
+          "resourceBalances",
+          "id account resourceId amount",
+          where
+        );
+  
+        userResources = balanceItems
+          .filter(b => (b.account || "").toLowerCase() === userAddress.toLowerCase())
+          .map(b => ({ resourceId: parseInt(b.resourceId, 10), amount: BigInt(b.amount) }));
+  
+        updateUserResourcesDisplay();
+      } catch (err) {
+        console.error("Fehler beim Laden der ResourceBalances:", err);
+      }
+    }
+  
+    function updateUserResourcesDisplay() {
+      if (!userAddress) {
+        userResourcesDiv.innerHTML = '<p style="color:#98a9b9;">Connect wallet to see your resource tokens.</p>';
+        return;
+      }
+      if (!userResources || userResources.length === 0) {
+        userResourcesDiv.innerHTML = '<p style="color:#98a9b9;">You have no resource tokens yet.</p>';
+        return;
+      }
+      userResources.sort((a, b) => a.resourceId - b.resourceId);
+      let html = "";
+      for (const r of userResources) {
+        const name = resourceNames[r.resourceId] || `Resource ${r.resourceId}`;
+        html += `<div class="detail-row"><span class="detail-label">${name}</span><span class="detail-value">${r.amount.toString()}</span></div>`;
+      }
+      userResourcesDiv.innerHTML = html;
+    }
+  
+    // ==================== DRAW ====================
+    function drawPyramid() {
+      if (!canvas || !ctx) return;
+  
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.save();
+      ctx.translate(offsetX, offsetY);
+      ctx.scale(scale, scale);
+  
+      const blockSize = BASE_BLOCK_SIZE;
+      const now = Math.floor(Date.now() / 1000);
+  
+      for (let row = 0; row < 100; row++) {
+        const blocksInRow = 2 * row + 1;
+        const y = row * blockSize;
+  
+        for (let col = 0; col < blocksInRow; col++) {
+          const tokenIdNum = row * 2048 + col;
+          const tokenId = String(tokenIdNum);
+          const token = tokens[tokenId];
+          const x = (col - row) * blockSize;
+  
+          let fillColor = "#3a4048";
+          let strokeColor = null;
+          let lineWidth = 0;
+  
+          if (token && token.owner) {
+            fillColor = token.revealed ? "#c9a959" : "#2e7d5e";
+            if (userAddress && token.owner.toLowerCase() === userAddress.toLowerCase()) fillColor = "#a0d6ff";
+  
+            const attack = userAttacks.find(a => String(a.targetTokenId) === tokenId);
+            if (attack) {
+              if (attack.endTime <= now) { strokeColor = "#e74c3c"; lineWidth = 4; }
+              else { strokeColor = "#000000"; lineWidth = 4; }
+            } else {
+              if (token.protectionActive) { strokeColor = "#9b59b6"; lineWidth = 3; }
+              else if (token.farmActive) { strokeColor = "#3498db"; lineWidth = 3; }
+            }
+          }
+  
+          ctx.fillStyle = fillColor;
+          ctx.fillRect(x, y, blockSize, blockSize);
+  
+          if (strokeColor) {
+            ctx.strokeStyle = strokeColor;
+            ctx.lineWidth = lineWidth;
+            ctx.strokeRect(x, y, blockSize, blockSize);
+          }
+  
+          if (token && token.partnerActive) {
+            ctx.save();
+            ctx.translate(x + blockSize - 8, y + 8);
+            ctx.font = 'bold 16px "Inter", sans-serif';
+            ctx.fillStyle = "#FFD700";
+            ctx.shadowColor = "#000";
+            ctx.shadowBlur = 4;
+            ctx.fillText("★", -8, 4);
+            ctx.restore();
+          }
+        }
+      }
+  
+      ctx.restore();
+    }
+  
+    function centerPyramid() {
+      const totalWidth = 199 * BASE_BLOCK_SIZE;
+      const totalHeight = 100 * BASE_BLOCK_SIZE;
+      const scaleX = (canvas.width / totalWidth) * 0.95;
+      const scaleY = (canvas.height / totalHeight) * 0.95;
+      scale = Math.min(scaleX, scaleY, 1.5);
+      offsetX = (canvas.width - totalWidth * scale) / 2;
+      offsetY = (canvas.height - totalHeight * scale) / 2;
+      drawPyramid();
+    }
+  
+    // ==================== SIDEBAR ====================
+    async function updateSidebar(tokenId) {
+      selectedTokenId = tokenId;
+      const token = tokens[tokenId];
+      const owner = token ? token.owner : null;
+      selectedTokenOwner = owner;
+  
+      // ✅ real V3 active (on-chain), don't trust subgraph V2 farm entity
+      let v3Active = false;
+      if (farmingV3Contract) {
+        try {
+          const f = await farmingV3Contract.farms(tokenId);
+          v3Active = !!f.isActive;
+        } catch (_) {}
+      }
+  
+      let productionHtml = "";
+      let rarityDisplay = "";
+  
+      if (token && token.owner && token.revealed && nftReadOnlyContract) {
+        try {
+          const tokenIdNum = parseInt(tokenId, 10);
+          const row = Math.floor(tokenIdNum / 2048);
+          const rarity = await nftReadOnlyContract.calculateRarity(tokenIdNum);
+          const r = Number(rarity);
+  
+          rarityDisplay = `
+            <div class="detail-row">
+              <span class="detail-label">Rarity</span>
+              <span class="detail-value ${rarityClass[r]}">${rarityNames[r]}</span>
             </div>
           `;
+  
+          const production = getProduction(r, row);
+          let prodText = "";
+          for (const [res, amount] of Object.entries(production)) {
+            prodText += `<div class="detail-row"><span class="detail-label">${res}</span><span class="detail-value">${amount}/day</span></div>`;
+          }
+          productionHtml = `<div class="detail-row"><span class="detail-label">Production</span></div>${prodText}`;
+        } catch (_) {}
+      }
+  
+      let detailHtml = "";
+      if (token && owner) {
+        detailHtml = `
+          <div class="detail-row"><span class="detail-label">Block #</span><span class="detail-value">${tokenId}</span></div>
+          <div class="detail-row"><span class="detail-label">Owner</span><span class="detail-value">${shortenAddress(owner)}</span></div>
+          <div class="detail-row"><span class="detail-label">Revealed</span><span class="detail-value">${token.revealed ? "✅" : "❌"}</span></div>
+          ${rarityDisplay}
+          <div class="detail-row"><span class="detail-label">Farming (V3)</span><span class="detail-value">${v3Active ? "Active" : "Inactive"}</span></div>
+          <div class="detail-row"><span class="detail-label">Protection</span><span class="detail-value">${token.protectionActive ? "✅" : "❌"}</span></div>
+          <div class="detail-row"><span class="detail-label">Partner</span><span class="detail-value">${token.partnerActive ? "⭐" : "❌"}</span></div>
+          ${productionHtml}
+        `;
+      } else {
+        detailHtml = `<p style="color:#98a9b9; text-align:center;">Block #${tokenId} is not minted.</p>`;
+      }
+      blockDetailDiv.innerHTML = detailHtml;
+  
+      actionPanel.style.display = "block";
+      ownerActionsDiv.innerHTML = "";
+      protectionInput.style.display = "none";
+      attackInput.style.display = "none";
+      actionMessage.innerHTML = "";
+  
+      if (userAddress && owner && owner.toLowerCase() === userAddress.toLowerCase()) {
+        let btns = "";
+        if (!token.revealed) btns += `<button class="action-btn" id="revealBtn">🔓 Reveal Block</button>`;
+        if (!v3Active) btns += `<button class="action-btn" id="startFarmBtn">🌾 Start Farming (auto-migrate)</button>`;
+        else {
+          btns += `<button class="action-btn" id="stopFarmBtn">⏹️ Stop Farming</button>`;
+          btns += `<button class="action-btn" id="claimBtn">💰 Claim Resources</button>`;
+        }
+        protectionInput.style.display = "flex";
+        ownerActionsDiv.innerHTML = btns;
+      } else if (userAddress && owner) {
+        attackInput.style.display = "flex";
+      } else {
+        actionPanel.style.display = "none";
+      }
+    }
+  
+    // ==================== TX HELPER ====================
+    async function sendTx(txPromise, messageDiv, successMsg) {
+      messageDiv.innerHTML = '<span class="success">⏳ Sending...</span>';
+      try {
+        const tx = await txPromise;
+        messageDiv.innerHTML = '<span class="success">⏳ Confirming...</span>';
+        await tx.wait();
+        messageDiv.innerHTML = `<span class="success">✅ ${successMsg}</span>`;
+        await loadData();
+        if (selectedTokenId) await updateSidebar(selectedTokenId);
+      } catch (err) {
+        console.error(err);
+        messageDiv.innerHTML = `<span class="error">❌ ${err.message || "Tx failed"}</span>`;
+      }
+    }
+  
+    // ==================== ACTIONS ====================
+    async function handleReveal() {
+      if (!selectedTokenId || !selectedTokenOwner) return;
+      const tokenIdNum = parseInt(selectedTokenId, 10);
+      const row = Math.floor(tokenIdNum / 2048);
+      const col = tokenIdNum % 2048;
+  
+      try {
+        const response = await fetch(`${WORKER_URL}/api/get-proof?row=${row}&col=${col}`);
+        if (!response.ok) throw new Error("Proofs not found");
+        const proofs = await response.json();
+  
+        const formatProof = (arr) => arr.map(item => {
+          const v = (item.left ? item.left : item.right);
+          return (v || "").startsWith("0x") ? v : ("0x" + v);
         });
-
-        container.innerHTML = html;
-
-        container.querySelectorAll(".execute-btn").forEach(btn => {
-          btn.addEventListener("click", async () => {
-            if (btn.disabled) return;
-            const targetTokenId = parseInt(btn.dataset.targetid, 10);
-            const attackIndex = parseInt(btn.dataset.attackindex, 10);
-            const resource = parseInt(btn.dataset.resource, 10);
-            await executeAttack({ targetTokenId, attackIndex, resource });
-          });
-        });
+  
+        const piProof = formatProof(proofs.pi.proof);
+        const phiProof = formatProof(proofs.phi.proof);
+  
+        await sendTx(
+          nftContract.revealBlock(selectedTokenId, piProof, phiProof, proofs.pi.digit, proofs.phi.digit, { gasLimit: 500000 }),
+          actionMessage,
+          "Block revealed!"
+        );
+      } catch (e) {
+        actionMessage.innerHTML = `<span class="error">❌ ${e.message}</span>`;
       }
-
-      function startAttacksTicker() {
-        if (attacksTicker) return;
-        attacksTicker = setInterval(() => {
-          const now = Math.floor(Date.now() / 1000);
-
-          document.querySelectorAll(".attack-status").forEach(el => {
-            const endTime = parseInt(el.dataset.endtime || "0", 10);
-            if (!endTime) return;
-            const timeLeft = endTime - now;
-            if (timeLeft <= 0) {
-              el.textContent = "Ready";
-              el.style.color = "#51cf66";
-            } else {
-              el.textContent = "⏳ " + formatTime(timeLeft);
-              el.style.color = "";
-            }
-          });
-
-          document.querySelectorAll(".execute-btn").forEach(btn => {
-            const endTimeEl = btn.parentElement?.querySelector(".attack-status");
-            const endTime = endTimeEl ? parseInt(endTimeEl.dataset.endtime || "0", 10) : 0;
-            const timeLeft = endTime - now;
-            if (timeLeft <= 0) {
-              btn.disabled = false;
-              btn.textContent = "⚔️ Execute";
-            } else {
-              btn.disabled = true;
-              btn.textContent = "⏳ Waiting";
-            }
-          });
-
-          drawPyramid();
-        }, 1000);
+    }
+  
+    // ✅ start = auto-migrate
+    async function handleStartFarm() {
+      if (!selectedTokenId) return;
+      actionMessage.innerHTML = '<span class="success">⏳ Migrating / starting V3...</span>';
+      try {
+        const r = await migrateToV3(selectedTokenId);
+        actionMessage.innerHTML = `<span class="success">✅ ${r.msg}</span>`;
+        await loadData();
+        await updateSidebar(selectedTokenId);
+      } catch (e) {
+        actionMessage.innerHTML = `<span class="error">❌ ${e.message}</span>`;
       }
-
-      // ✅ EXECUTE (PiratesV3.executeAttack WITHOUT protection param)
-      async function executeAttack(attack) {
-        actionMessage.innerHTML = '<span class="success">⏳ Executing attack...</span>';
-        try {
-          if (!piratesV3Contract) throw new Error("Connect wallet first.");
-
-          const tx = await piratesV3Contract.executeAttack(
-            attack.targetTokenId,
-            attack.attackIndex,
-            { gasLimit: 350000 }
-          );
-
-          actionMessage.innerHTML = '<span class="success">⏳ Confirming...</span>';
-          await tx.wait();
-
-          actionMessage.innerHTML = '<span class="success">✅ Attack executed! Resources stolen.</span>';
-
-          localStorage.removeItem(getAttackStorageKey(attack.targetTokenId));
-
-          await loadUserAttacks();
-          await loadUserResources();
-          await loadData();
-        } catch (e) {
-          console.error("executeAttack error:", e);
-          let msg = e?.message || "Unknown error";
-          if ((msg + "").includes("execution reverted")) msg = "❌ Reverted. Attack not ready / already executed / invalid index.";
-          actionMessage.innerHTML = `<span class="error">${msg}</span>`;
-        }
+    }
+  
+    async function handleStopFarm() {
+      if (!selectedTokenId) return;
+      actionMessage.innerHTML = '<span class="success">⏳ Ensuring V3 + stopping...</span>';
+      try {
+        const st = await getFarmStatus(selectedTokenId);
+        if (!st.v3Active) await migrateToV3(selectedTokenId);
+        await sendTx(
+          farmingV3Contract.stopFarming(selectedTokenId, { gasLimit: 500000 }),
+          actionMessage,
+          "Farming stopped."
+        );
+      } catch (e) {
+        actionMessage.innerHTML = `<span class="error">❌ ${e.message}</span>`;
       }
-
-      // ====== LOAD MAP DATA ======
-      async function loadData() {
-        try {
-          const [tokenItemsV1, tokenItemsV2] = await Promise.all([
-            fetchAllWithPagination(SUBGRAPH_URL_V1, "tokens", "id owner { id } revealed").catch(() => []),
-            fetchAllWithPagination(SUBGRAPH_URL_V2, "tokens", "id owner { id } revealed farm { active }").catch(() => [])
-          ]);
-
-          tokens = {};
-
-          tokenItemsV1.forEach(t => {
-            tokens[t.id] = { owner: t.owner ? t.owner.id : null, revealed: !!t.revealed, farmActive: false, protectionActive: false, partnerActive: false };
-          });
-
-          tokenItemsV2.forEach(t => {
-            if (!tokens[t.id]) {
-              tokens[t.id] = { owner: t.owner ? t.owner.id : null, revealed: !!t.revealed, farmActive: t.farm ? !!t.farm.active : false, protectionActive: false, partnerActive: false };
-            } else {
-              tokens[t.id].owner = t.owner ? t.owner.id : tokens[t.id].owner;
-              tokens[t.id].revealed = !!t.revealed || tokens[t.id].revealed;
-              if (t.farm && t.farm.active) tokens[t.id].farmActive = true;
-            }
-          });
-
-          const protectionItems = await fetchAllWithPagination(SUBGRAPH_URL_V2, "protections", "id active").catch(() => []);
-          protectionItems.forEach(p => { if (tokens[p.id]) tokens[p.id].protectionActive = !!p.active; });
-
-          const partnerItems = await fetchAllWithPagination(SUBGRAPH_URL_V2, "partnerships", "id active").catch(() => []);
-          partnerItems.forEach(p => { if (tokens[p.id]) tokens[p.id].partnerActive = !!p.active; });
-
-          const farmItemsV1 = await fetchAllWithPagination(SUBGRAPH_URL_V1, "farms", "id active").catch(() => []);
-          farmItemsV1.forEach(f => { if (f.active && tokens[f.id] && !tokens[f.id].farmActive) tokens[f.id].farmActive = true; });
-
-          if (userAddress) {
-            await loadUserResources();
-            await loadUserAttacks();
-          }
-
-          drawPyramid();
-        } catch (err) {
-          console.error("Fehler beim Laden:", err);
-        }
-      }
-
-      async function loadUserResources() {
-        if (!userAddress) return;
-        try {
-          const where = `{ account: "${userAddress.toLowerCase()}" }`;
-          const balanceItems = await fetchAllWithPagination(SUBGRAPH_URL_V2, "resourceBalances", "id account resourceId amount", where);
-
-          userResources = balanceItems
-            .filter(b => (b.account || "").toLowerCase() === userAddress.toLowerCase())
-            .map(b => ({ resourceId: parseInt(b.resourceId, 10), amount: BigInt(b.amount) }));
-
-          updateUserResourcesDisplay();
-        } catch (err) {
-          console.error("Fehler beim Laden der ResourceBalances:", err);
-        }
-      }
-
-      function updateUserResourcesDisplay() {
-        if (!userAddress) {
-          userResourcesDiv.innerHTML = '<p style="color:#98a9b9;">Connect wallet to see your resource tokens.</p>';
-          return;
-        }
-        if (!userResources || userResources.length === 0) {
-          userResourcesDiv.innerHTML = '<p style="color:#98a9b9;">You have no resource tokens yet.</p>';
-          return;
-        }
-        userResources.sort((a, b) => a.resourceId - b.resourceId);
-        let html = "";
-        for (const r of userResources) {
-          const name = resourceNames[r.resourceId] || `Resource ${r.resourceId}`;
-          html += `<div class="detail-row"><span class="detail-label">${name}</span><span class="detail-value">${r.amount.toString()}</span></div>`;
-        }
-        userResourcesDiv.innerHTML = html;
-      }
-
-      // ====== DRAW ======
-      function drawPyramid() {
-        if (!canvas || !ctx) return;
-
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.save();
-        ctx.translate(offsetX, offsetY);
-        ctx.scale(scale, scale);
-
-        const blockSize = BASE_BLOCK_SIZE;
-        const now = Math.floor(Date.now() / 1000);
-
-        for (let row = 0; row < 100; row++) {
-          const blocksInRow = 2 * row + 1;
-          const y = row * blockSize;
-
-          for (let col = 0; col < blocksInRow; col++) {
-            const tokenIdNum = row * 2048 + col;
-            const tokenId = String(tokenIdNum);
-            const token = tokens[tokenId];
-            const x = (col - row) * blockSize;
-
-            let fillColor = "#3a4048";
-            let strokeColor = null;
-            let lineWidth = 0;
-
-            if (token && token.owner) {
-              fillColor = token.revealed ? "#c9a959" : "#2e7d5e";
-              if (userAddress && token.owner.toLowerCase() === userAddress.toLowerCase()) fillColor = "#a0d6ff";
-
-              const attack = userAttacks.find(a => String(a.targetTokenId) === tokenId);
-              if (attack) {
-                if (attack.endTime <= now) { strokeColor = "#e74c3c"; lineWidth = 4; }
-                else { strokeColor = "#000000"; lineWidth = 4; }
-              } else {
-                if (token.protectionActive) { strokeColor = "#9b59b6"; lineWidth = 3; }
-                else if (token.farmActive) { strokeColor = "#3498db"; lineWidth = 3; }
-              }
-            }
-
-            ctx.fillStyle = fillColor;
-            ctx.fillRect(x, y, blockSize, blockSize);
-
-            if (strokeColor) {
-              ctx.strokeStyle = strokeColor;
-              ctx.lineWidth = lineWidth;
-              ctx.strokeRect(x, y, blockSize, blockSize);
-            }
-
-            if (token && token.partnerActive) {
-              ctx.save();
-              ctx.translate(x + blockSize - 8, y + 8);
-              ctx.font = 'bold 16px "Inter", sans-serif';
-              ctx.fillStyle = "#FFD700";
-              ctx.shadowColor = "#000";
-              ctx.shadowBlur = 4;
-              ctx.fillText("★", -8, 4);
-              ctx.restore();
-            }
-          }
-        }
-
-        ctx.restore();
-      }
-
-      function centerPyramid() {
-        const totalWidth = 199 * BASE_BLOCK_SIZE;
-        const totalHeight = 100 * BASE_BLOCK_SIZE;
-        const scaleX = (canvas.width / totalWidth) * 0.95;
-        const scaleY = (canvas.height / totalHeight) * 0.95;
-        scale = Math.min(scaleX, scaleY, 1.5);
-        offsetX = (canvas.width - totalWidth * scale) / 2;
-        offsetY = (canvas.height - totalHeight * scale) / 2;
-        drawPyramid();
-      }
-
-      // ====== SIDEBAR ======
-      async function updateSidebar(tokenId) {
-        selectedTokenId = tokenId;
-        const token = tokens[tokenId];
-        const owner = token ? token.owner : null;
-        selectedTokenOwner = owner;
-
-        let productionHtml = "";
-        let rarityDisplay = "";
-
-        if (token && token.owner && token.revealed && nftReadOnlyContract) {
-          try {
-            const tokenIdNum = parseInt(tokenId, 10);
-            const row = Math.floor(tokenIdNum / 2048);
-            const rarity = await nftReadOnlyContract.calculateRarity(tokenIdNum);
-            const r = Number(rarity);
-
-            rarityDisplay = `
-              <div class="detail-row">
-                <span class="detail-label">Rarity</span>
-                <span class="detail-value ${rarityClass[r]}">${rarityNames[r]}</span>
-              </div>
-            `;
-
-            const production = getProduction(r, row);
-            let prodText = "";
-            for (const [res, amount] of Object.entries(production)) {
-              prodText += `<div class="detail-row"><span class="detail-label">${res}</span><span class="detail-value">${amount}/day</span></div>`;
-            }
-            productionHtml = `<div class="detail-row"><span class="detail-label">Production</span></div>${prodText}`;
-          } catch (_) {}
-        }
-
-        let detailHtml = "";
-        if (token && owner) {
-          detailHtml = `
-            <div class="detail-row"><span class="detail-label">Block #</span><span class="detail-value">${tokenId}</span></div>
-            <div class="detail-row"><span class="detail-label">Owner</span><span class="detail-value">${shortenAddress(owner)}</span></div>
-            <div class="detail-row"><span class="detail-label">Revealed</span><span class="detail-value">${token.revealed ? "✅" : "❌"}</span></div>
-            ${rarityDisplay}
-            <div class="detail-row"><span class="detail-label">Farming</span><span class="detail-value">${token.farmActive ? "Active" : "Inactive"}</span></div>
-            <div class="detail-row"><span class="detail-label">Protection</span><span class="detail-value">${token.protectionActive ? "✅" : "❌"}</span></div>
-            <div class="detail-row"><span class="detail-label">Partner</span><span class="detail-value">${token.partnerActive ? "⭐" : "❌"}</span></div>
-            ${productionHtml}
-          `;
-        } else {
-          detailHtml = `<p style="color:#98a9b9; text-align:center;">Block #${tokenId} is not minted.</p>`;
-        }
-        blockDetailDiv.innerHTML = detailHtml;
-
-        actionPanel.style.display = "block";
-        ownerActionsDiv.innerHTML = "";
-        protectionInput.style.display = "none";
-        attackInput.style.display = "none";
-        actionMessage.innerHTML = "";
-
-        if (userAddress && owner && owner.toLowerCase() === userAddress.toLowerCase()) {
-          let btns = "";
-          if (!token.revealed) btns += `<button class="action-btn" id="revealBtn">🔓 Reveal Block</button>`;
-          if (!token.farmActive) btns += `<button class="action-btn" id="startFarmBtn">🌾 Start Farming</button>`;
-          else {
-            btns += `<button class="action-btn" id="stopFarmBtn">⏹️ Stop Farming</button>`;
-            btns += `<button class="action-btn" id="claimBtn">💰 Claim Resources</button>`;
-          }
-          protectionInput.style.display = "flex";
-          ownerActionsDiv.innerHTML = btns;
-        } else if (userAddress && owner) {
-          attackInput.style.display = "flex";
-        } else {
-          actionPanel.style.display = "none";
-        }
-      }
-
-      async function sendTx(txPromise, messageDiv, successMsg) {
-        messageDiv.innerHTML = '<span class="success">⏳ Sending...</span>';
-        try {
-          const tx = await txPromise;
-          messageDiv.innerHTML = '<span class="success">⏳ Confirming...</span>';
-          await tx.wait();
-          messageDiv.innerHTML = `<span class="success">✅ ${successMsg}</span>`;
-          await loadData();
-          if (selectedTokenId) await updateSidebar(selectedTokenId);
-        } catch (err) {
-          console.error(err);
-          messageDiv.innerHTML = `<span class="error">❌ ${err.message || "Tx failed"}</span>`;
-        }
-      }
-
-      async function handleReveal() {
-        if (!selectedTokenId || !selectedTokenOwner) return;
-        const tokenIdNum = parseInt(selectedTokenId, 10);
-        const row = Math.floor(tokenIdNum / 2048);
-        const col = tokenIdNum % 2048;
-
-        try {
-          const response = await fetch(`${WORKER_URL}/api/get-proof?row=${row}&col=${col}`);
-          if (!response.ok) throw new Error("Proofs not found");
-          const proofs = await response.json();
-
-          const formatProof = (arr) => arr.map(item => {
-            const v = (item.left ? item.left : item.right);
-            return (v || "").startsWith("0x") ? v : ("0x" + v);
-          });
-
-          const piProof = formatProof(proofs.pi.proof);
-          const phiProof = formatProof(proofs.phi.proof);
-
-          await sendTx(
-            nftContract.revealBlock(selectedTokenId, piProof, phiProof, proofs.pi.digit, proofs.phi.digit, { gasLimit: 500000 }),
-            actionMessage,
-            "Block revealed!"
-          );
-        } catch (e) {
-          actionMessage.innerHTML = `<span class="error">❌ ${e.message}</span>`;
-        }
-      }
-
-      async function handleStartFarm() {
-        if (!selectedTokenId) return;
-        await sendTx(farmingV3Contract.startFarming(selectedTokenId), actionMessage, "Farming started!");
-      }
-
-      async function handleStopFarm() {
-        if (!selectedTokenId) return;
-        const token = tokens[selectedTokenId];
-        if (!token || !token.farmActive) return;
-        await sendTx(farmingV3Contract.stopFarming(selectedTokenId), actionMessage, "Farming stopped.");
-      }
-
-      async function handleClaim() {
-        if (!selectedTokenId) return;
-        const token = tokens[selectedTokenId];
-        if (!token || !token.farmActive) return;
-        await sendTx(farmingV3Contract.claimResources(selectedTokenId), actionMessage, "Resources claimed!");
+    }
+  
+    async function handleClaim() {
+      if (!selectedTokenId) return;
+      actionMessage.innerHTML = '<span class="success">⏳ Ensuring V3 + claiming...</span>';
+      try {
+        const st = await getFarmStatus(selectedTokenId);
+        if (!st.v3Active) await migrateToV3(selectedTokenId);
+        await sendTx(
+          farmingV3Contract.claimResources(selectedTokenId, { gasLimit: 600000 }),
+          actionMessage,
+          "Resources claimed!"
+        );
         await loadUserResources();
+      } catch (e) {
+        actionMessage.innerHTML = `<span class="error">❌ ${e.message}</span>`;
       }
-
-      async function handleProtect() {
-        if (!selectedTokenId || !userAddress) return;
-        const level = parseInt(document.getElementById("protectLevel").value, 10);
-        if (!Number.isFinite(level) || level < 0 || level > 50) return alert("Invalid level (0-50)");
-        try {
-          const cost = level * 10;
-          const amount = ethers.parseEther(String(cost));
-          const allowance = await inpiContract.allowance(userAddress, MERCENARY_V2_ADDRESS);
-          if (allowance < amount) {
-            actionMessage.innerHTML = '<span class="success">⏳ Approving INPI...</span>';
-            const approveTx = await inpiContract.approve(MERCENARY_V2_ADDRESS, amount);
-            await approveTx.wait();
+    }
+  
+    async function handleProtect() {
+      if (!selectedTokenId || !userAddress) return;
+      const level = parseInt(document.getElementById("protectLevel").value, 10);
+      if (!Number.isFinite(level) || level < 0 || level > 50) return alert("Invalid level (0-50)");
+      try {
+        const cost = level * 10;
+        const amount = ethers.parseEther(String(cost));
+        const allowance = await inpiContract.allowance(userAddress, MERCENARY_V2_ADDRESS);
+        if (allowance < amount) {
+          actionMessage.innerHTML = '<span class="success">⏳ Approving INPI...</span>';
+          const approveTx = await inpiContract.approve(MERCENARY_V2_ADDRESS, amount);
+          await approveTx.wait();
+        }
+        await sendTx(
+          mercenaryV2Contract.hireMercenaries(selectedTokenId, level, { gasLimit: 400000 }),
+          actionMessage,
+          "Protection bought!"
+        );
+      } catch (e) {
+        actionMessage.innerHTML = `<span class="error">❌ ${e.message}</span>`;
+      }
+    }
+  
+    async function handleAttack() {
+      if (!selectedTokenId || !userAddress) return;
+  
+      const ownTokens = Object.entries(tokens).filter(([id, t]) => t.owner && t.owner.toLowerCase() === userAddress.toLowerCase());
+      if (ownTokens.length === 0) {
+        actionMessage.innerHTML = '<span class="error">❌ You need a block to attack from.</span>';
+        return;
+      }
+  
+      const attackerTokenId = parseInt(ownTokens[0][0], 10);
+      const targetTokenId = parseInt(selectedTokenId, 10);
+      const resource = parseInt(document.getElementById("attackResource").value, 10);
+  
+      localStorage.setItem(getAttackStorageKey(targetTokenId), JSON.stringify({
+        targetTokenId,
+        resource,
+        startTime: Math.floor(Date.now() / 1000)
+      }));
+  
+      await sendTx(
+        piratesV3Contract.startAttack(attackerTokenId, targetTokenId, resource, { gasLimit: 450000 }),
+        actionMessage,
+        "Attack launched!"
+      );
+      await loadUserAttacks();
+    }
+  
+    // ==================== WALLET ====================
+    async function connectWallet() {
+      if (!window.ethereum) return alert("Please install MetaMask!");
+      try {
+        provider = new ethers.BrowserProvider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        signer = await provider.getSigner();
+        userAddress = await signer.getAddress();
+  
+        const network = await provider.getNetwork();
+        if (network.chainId !== 8453n) {
+          try {
+            await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: "0x2105" }] });
+          } catch (switchError) {
+            if (switchError.code === 4902) {
+              await window.ethereum.request({
+                method: "wallet_addEthereumChain",
+                params: [{
+                  chainId: "0x2105",
+                  chainName: "Base Mainnet",
+                  nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 },
+                  rpcUrls: ["https://mainnet.base.org"],
+                  blockExplorerUrls: ["https://basescan.org"]
+                }]
+              });
+            } else throw switchError;
           }
-          await sendTx(mercenaryV2Contract.hireMercenaries(selectedTokenId, level), actionMessage, "Protection bought!");
-        } catch (e) {
-          actionMessage.innerHTML = `<span class="error">❌ ${e.message}</span>`;
         }
-      }
-
-      async function handleAttack() {
-        if (!selectedTokenId || !userAddress) return;
-
-        const ownTokens = Object.entries(tokens).filter(([id, t]) => t.owner && t.owner.toLowerCase() === userAddress.toLowerCase());
-        if (ownTokens.length === 0) {
-          actionMessage.innerHTML = '<span class="error">❌ You need a block to attack from.</span>';
-          return;
-        }
-
-        const attackerTokenId = parseInt(ownTokens[0][0], 10);
-        const targetTokenId = parseInt(selectedTokenId, 10);
-        const resource = parseInt(document.getElementById("attackResource").value, 10);
-
-        localStorage.setItem(getAttackStorageKey(targetTokenId), JSON.stringify({
-          targetTokenId,
-          resource,
-          startTime: Math.floor(Date.now() / 1000)
-        }));
-
-        await sendTx(piratesV3Contract.startAttack(attackerTokenId, targetTokenId, resource), actionMessage, "Attack launched!");
+  
+        nftContract = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
+        farmingV3Contract = new ethers.Contract(FARMING_V3_ADDRESS, FARMING_V3_ABI, signer);
+        piratesV3Contract = new ethers.Contract(PIRATES_V3_ADDRESS, PIRATES_V3_ABI, signer);
+        mercenaryV2Contract = new ethers.Contract(MERCENARY_V2_ADDRESS, MERCENARY_V2_ABI, signer);
+        inpiContract = new ethers.Contract(INPI_ADDRESS, INPI_ABI, signer);
+        pitroneContract = new ethers.Contract(PITRONE_ADDRESS, PITRONE_ABI, signer);
+  
+        // ✅ init old farms for migration
+        initFarmingContracts(signer);
+  
+        document.getElementById("walletAddress").innerText = shortenAddress(userAddress);
+        document.getElementById("connectBtn").innerText = "Wallet Connected";
+  
+        await loadData();
+        await loadUserResources();
         await loadUserAttacks();
+        drawPyramid();
+  
+        setInterval(() => { loadUserAttacks(); }, 30000);
+      } catch (err) {
+        console.error(err);
+        alert("Connection error: " + (err?.message || err));
       }
-
-      // ====== WALLET ======
-      async function connectWallet() {
-        if (!window.ethereum) return alert("Please install MetaMask!");
-        try {
-          provider = new ethers.BrowserProvider(window.ethereum);
-          await provider.send("eth_requestAccounts", []);
-          signer = await provider.getSigner();
-          userAddress = await signer.getAddress();
-
-          const network = await provider.getNetwork();
-          if (network.chainId !== 8453n) {
-            try {
-              await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: "0x2105" }] });
-            } catch (switchError) {
-              if (switchError.code === 4902) {
-                await window.ethereum.request({
-                  method: "wallet_addEthereumChain",
-                  params: [{
-                    chainId: "0x2105",
-                    chainName: "Base Mainnet",
-                    nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 },
-                    rpcUrls: ["https://mainnet.base.org"],
-                    blockExplorerUrls: ["https://basescan.org"]
-                  }]
-                });
-              } else throw switchError;
-            }
+    }
+  
+    async function initReadOnly() {
+      readOnlyProvider = new ethers.JsonRpcProvider("https://mainnet.base.org");
+      nftReadOnlyContract = new ethers.Contract(NFT_ADDRESS, NFT_ABI, readOnlyProvider);
+    }
+  
+    // ==================== INTERACTION ====================
+    function handleMouseMove(e) {
+      if (isDragging) return;
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = (e.clientX - rect.left - offsetX) / scale;
+      const mouseY = (e.clientY - rect.top - offsetY) / scale;
+      const blockSize = BASE_BLOCK_SIZE;
+  
+      let found = null;
+      for (let row = 0; row < 100; row++) {
+        const y = row * blockSize;
+        if (mouseY < y - 5 || mouseY > y + blockSize + 5) continue;
+        const minX = -row * blockSize;
+        const maxX = (row + 1) * blockSize;
+        if (mouseX < minX - 5 || mouseX > maxX + 5) continue;
+        const col = Math.round((mouseX / blockSize) + row);
+        if (col >= 0 && col <= 2 * row) { found = String(row * 2048 + col); break; }
+      }
+  
+      if (found) {
+        const token = tokens[found];
+        let text = `<span>Block #${found}</span><br>`;
+        if (token && token.owner) {
+          text += `Owner: ${shortenAddress(token.owner)}<br>`;
+          text += `Status: ${token.revealed ? "Revealed" : "Minted"}`;
+          if (token.farmActive) text += " · Farming";
+          if (token.protectionActive) text += " · Protected";
+          if (token.partnerActive) text += " ⭐";
+  
+          const attack = userAttacks.find(a => String(a.targetTokenId) === found);
+          if (attack) {
+            const now = Math.floor(Date.now() / 1000);
+            if (attack.endTime <= now) text += " · 🔴 Attack ready!";
+            else text += ` · ⚔️ Attacking (${formatTime(attack.endTime - now)} left)`;
           }
-
-          nftContract = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
-          farmingV3Contract = new ethers.Contract(FARMING_V3_ADDRESS, FARMING_V3_ABI, signer);
-          piratesV3Contract = new ethers.Contract(PIRATES_V3_ADDRESS, PIRATES_V3_ABI, signer);
-          mercenaryV2Contract = new ethers.Contract(MERCENARY_V2_ADDRESS, MERCENARY_V2_ABI, signer);
-          inpiContract = new ethers.Contract(INPI_ADDRESS, INPI_ABI, signer);
-          pitroneContract = new ethers.Contract(PITRONE_ADDRESS, PITRONE_ABI, signer);
-
-          document.getElementById("walletAddress").innerText = shortenAddress(userAddress);
-          document.getElementById("connectBtn").innerText = "Wallet Connected";
-
-          await loadData();
-          await loadUserResources();
-          await loadUserAttacks();
-          drawPyramid();
-
-          setInterval(() => { loadUserAttacks(); }, 30000);
-        } catch (err) {
-          console.error(err);
-          alert("Connection error: " + (err?.message || err));
-        }
-      }
-
-      async function initReadOnly() {
-        readOnlyProvider = new ethers.JsonRpcProvider("https://mainnet.base.org");
-        nftReadOnlyContract = new ethers.Contract(NFT_ADDRESS, NFT_ABI, readOnlyProvider);
-      }
-
-      // ====== INTERACTION ======
-      function handleMouseMove(e) {
-        if (isDragging) return;
-        const rect = canvas.getBoundingClientRect();
-        const mouseX = (e.clientX - rect.left - offsetX) / scale;
-        const mouseY = (e.clientY - rect.top - offsetY) / scale;
-        const blockSize = BASE_BLOCK_SIZE;
-
-        let found = null;
-        for (let row = 0; row < 100; row++) {
-          const y = row * blockSize;
-          if (mouseY < y - 5 || mouseY > y + blockSize + 5) continue;
-          const minX = -row * blockSize;
-          const maxX = (row + 1) * blockSize;
-          if (mouseX < minX - 5 || mouseX > maxX + 5) continue;
-          const col = Math.round((mouseX / blockSize) + row);
-          if (col >= 0 && col <= 2 * row) { found = String(row * 2048 + col); break; }
-        }
-
-        if (found) {
-          const token = tokens[found];
-          let text = `<span>Block #${found}</span><br>`;
-          if (token && token.owner) {
-            text += `Owner: ${shortenAddress(token.owner)}<br>`;
-            text += `Status: ${token.revealed ? "Revealed" : "Minted"}`;
-            if (token.farmActive) text += " · Farming";
-            if (token.protectionActive) text += " · Protected";
-            if (token.partnerActive) text += " ⭐";
-
-            const attack = userAttacks.find(a => String(a.targetTokenId) === found);
-            if (attack) {
-              const now = Math.floor(Date.now() / 1000);
-              if (attack.endTime <= now) text += " · 🔴 Attack ready!";
-              else text += ` · ⚔️ Attacking (${formatTime(attack.endTime - now)} left)`;
-            }
-          } else {
-            text += "Not minted";
-          }
-          tooltip.innerHTML = text;
-          tooltip.style.opacity = 1;
-          tooltip.style.left = (e.clientX + 20) + "px";
-          tooltip.style.top = (e.clientY - 50) + "px";
         } else {
-          tooltip.style.opacity = 0;
+          text += "Not minted";
+        }
+        tooltip.innerHTML = text;
+        tooltip.style.opacity = 1;
+        tooltip.style.left = (e.clientX + 20) + "px";
+        tooltip.style.top = (e.clientY - 50) + "px";
+      } else {
+        tooltip.style.opacity = 0;
+      }
+    }
+  
+    function handleClick(e) {
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = (e.clientX - rect.left - offsetX) / scale;
+      const mouseY = (e.clientY - rect.top - offsetY) / scale;
+      const blockSize = BASE_BLOCK_SIZE;
+  
+      for (let row = 0; row < 100; row++) {
+        const y = row * blockSize;
+        if (mouseY < y || mouseY > y + blockSize) continue;
+        const col = Math.round((mouseX / blockSize) + row);
+        if (col >= 0 && col <= 2 * row) {
+          const tokenId = String(row * 2048 + col);
+          updateSidebar(tokenId);
+          drawPyramid();
+          break;
         }
       }
-
-      function handleClick(e) {
-        const rect = canvas.getBoundingClientRect();
-        const mouseX = (e.clientX - rect.left - offsetX) / scale;
-        const mouseY = (e.clientY - rect.top - offsetY) / scale;
-        const blockSize = BASE_BLOCK_SIZE;
-
-        for (let row = 0; row < 100; row++) {
-          const y = row * blockSize;
-          if (mouseY < y || mouseY > y + blockSize) continue;
-          const col = Math.round((mouseX / blockSize) + row);
-          if (col >= 0 && col <= 2 * row) {
-            const tokenId = String(row * 2048 + col);
-            updateSidebar(tokenId);
-            drawPyramid();
-            break;
-          }
-        }
-      }
-
-      function handleWheel(e) {
+    }
+  
+    function handleWheel(e) {
+      e.preventDefault();
+      const zoomFactor = 1.1;
+      const delta = e.deltaY > 0 ? 1 / zoomFactor : zoomFactor;
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+      const worldX = (mouseX - offsetX) / scale;
+      const worldY = (mouseY - offsetY) / scale;
+      scale = Math.max(0.2, Math.min(5, scale * delta));
+      offsetX = mouseX - worldX * scale;
+      offsetY = mouseY - worldY * scale;
+      drawPyramid();
+    }
+  
+    function handlePinch(e) {
+      if (e.touches.length === 2) {
         e.preventDefault();
-        const zoomFactor = 1.1;
-        const delta = e.deltaY > 0 ? 1 / zoomFactor : zoomFactor;
+        const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+        if (pinchStartDist === 0) { pinchStartDist = dist; return; }
+        const zoomFactor = dist / pinchStartDist;
+        pinchStartDist = dist;
+  
         const rect = canvas.getBoundingClientRect();
-        const mouseX = e.clientX - rect.left;
-        const mouseY = e.clientY - rect.top;
-        const worldX = (mouseX - offsetX) / scale;
-        const worldY = (mouseY - offsetY) / scale;
-        scale = Math.max(0.2, Math.min(5, scale * delta));
-        offsetX = mouseX - worldX * scale;
-        offsetY = mouseY - worldY * scale;
+        const mx = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
+        const my = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
+  
+        const worldX = (mx - offsetX) / scale;
+        const worldY = (my - offsetY) / scale;
+  
+        scale = Math.max(0.2, Math.min(5, scale * zoomFactor));
+        offsetX = mx - worldX * scale;
+        offsetY = my - worldY * scale;
         drawPyramid();
       }
-
-      function handlePinch(e) {
-        if (e.touches.length === 2) {
-          e.preventDefault();
-          const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-          if (pinchStartDist === 0) { pinchStartDist = dist; return; }
-          const zoomFactor = dist / pinchStartDist;
-          pinchStartDist = dist;
-
-          const rect = canvas.getBoundingClientRect();
-          const mx = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
-          const my = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
-
-          const worldX = (mx - offsetX) / scale;
-          const worldY = (my - offsetY) / scale;
-
-          scale = Math.max(0.2, Math.min(5, scale * zoomFactor));
-          offsetX = mx - worldX * scale;
-          offsetY = my - worldY * scale;
-          drawPyramid();
-        }
-      }
-
-      // ====== Sidebar Drag/Resize ======
-      const legendPanel = document.getElementById("legendPanel");
-      const dragHandle = document.getElementById("dragHandle");
-      const resizeHandle = document.getElementById("resizeHandle");
-      const collapseBtn = document.getElementById("collapseBtn");
-      const resetPosBtn = document.getElementById("resetPosBtn");
-      const legendContent = document.getElementById("legendContent");
-
-      let isDraggingPanel = false;
-      let dragStartX = 0, dragStartY = 0, panelStartLeft = 0, panelStartTop = 0;
-
-      dragHandle.addEventListener("mousedown", (e) => {
-        isDraggingPanel = true;
-        dragStartX = e.clientX; dragStartY = e.clientY;
-        const rect = legendPanel.getBoundingClientRect();
-        panelStartLeft = rect.left; panelStartTop = rect.top;
-        legendPanel.style.transition = "none";
-        e.preventDefault();
-      });
-
-      window.addEventListener("mousemove", (e) => {
-        if (!isDraggingPanel) return;
-        const dx = e.clientX - dragStartX;
-        const dy = e.clientY - dragStartY;
-        legendPanel.style.left = (panelStartLeft + dx) + "px";
-        legendPanel.style.top = (panelStartTop + dy) + "px";
+    }
+  
+    // ==================== Sidebar Drag/Resize (unchanged) ====================
+    const legendPanel = document.getElementById("legendPanel");
+    const dragHandle = document.getElementById("dragHandle");
+    const resizeHandle = document.getElementById("resizeHandle");
+    const collapseBtn = document.getElementById("collapseBtn");
+    const resetPosBtn = document.getElementById("resetPosBtn");
+    const legendContent = document.getElementById("legendContent");
+  
+    let isDraggingPanel = false;
+    let dragStartX = 0, dragStartY = 0, panelStartLeft = 0, panelStartTop = 0;
+  
+    dragHandle.addEventListener("mousedown", (e) => {
+      isDraggingPanel = true;
+      dragStartX = e.clientX; dragStartY = e.clientY;
+      const rect = legendPanel.getBoundingClientRect();
+      panelStartLeft = rect.left; panelStartTop = rect.top;
+      legendPanel.style.transition = "none";
+      e.preventDefault();
+    });
+  
+    window.addEventListener("mousemove", (e) => {
+      if (!isDraggingPanel) return;
+      const dx = e.clientX - dragStartX;
+      const dy = e.clientY - dragStartY;
+      legendPanel.style.left = (panelStartLeft + dx) + "px";
+      legendPanel.style.top = (panelStartTop + dy) + "px";
+      legendPanel.style.right = "auto";
+    });
+  
+    window.addEventListener("mouseup", () => {
+      isDraggingPanel = false;
+      legendPanel.style.transition = "";
+    });
+  
+    let isResizing = false;
+    resizeHandle.addEventListener("mousedown", (e) => { isResizing = true; e.preventDefault(); });
+  
+    window.addEventListener("mousemove", (e) => {
+      if (!isResizing) return;
+      const rect = legendPanel.getBoundingClientRect();
+      const newWidth = rect.right - e.clientX;
+      if (newWidth > 200 && newWidth < 520) {
+        legendPanel.style.width = newWidth + "px";
         legendPanel.style.right = "auto";
-      });
-
-      window.addEventListener("mouseup", () => {
-        isDraggingPanel = false;
-        legendPanel.style.transition = "";
-      });
-
-      let isResizing = false;
-      resizeHandle.addEventListener("mousedown", (e) => { isResizing = true; e.preventDefault(); });
-
-      window.addEventListener("mousemove", (e) => {
-        if (!isResizing) return;
-        const rect = legendPanel.getBoundingClientRect();
-        const newWidth = rect.right - e.clientX;
-        if (newWidth > 200 && newWidth < 520) {
-          legendPanel.style.width = newWidth + "px";
-          legendPanel.style.right = "auto";
-        }
-      });
-
-      window.addEventListener("mouseup", () => { isResizing = false; });
-
-      collapseBtn.addEventListener("click", () => {
-        if (legendContent.classList.contains("collapsed")) {
-          legendContent.classList.remove("collapsed");
-          collapseBtn.textContent = "−";
-        } else {
-          legendContent.classList.add("collapsed");
-          collapseBtn.textContent = "+";
-        }
-      });
-
-      resetPosBtn.addEventListener("click", () => {
-        legendPanel.style.left = "auto";
-        legendPanel.style.top = "20px";
-        legendPanel.style.right = "20px";
-        legendPanel.style.width = "380px";
-      });
-
-      // ====== Canvas events ======
-      window.addEventListener("resize", () => {
-        canvas.width = container.clientWidth;
-        canvas.height = container.clientHeight;
-        centerPyramid();
-      });
-
-      canvas.addEventListener("wheel", handleWheel, { passive: false });
-      canvas.addEventListener("touchstart", (e) => { if (e.touches.length === 2) pinchStartDist = 0; }, { passive: false });
-      canvas.addEventListener("touchmove", handlePinch, { passive: false });
-
-      canvas.addEventListener("mousedown", (e) => {
-        isDragging = true;
-        lastMouseX = e.clientX;
-        lastMouseY = e.clientY;
-        canvas.style.cursor = "grabbing";
-      });
-
-      window.addEventListener("mousemove", (e) => {
-        if (isDragging) {
-          const dx = e.clientX - lastMouseX;
-          const dy = e.clientY - lastMouseY;
-          offsetX += dx;
-          offsetY += dy;
-          lastMouseX = e.clientX;
-          lastMouseY = e.clientY;
-          drawPyramid();
-        } else {
-          handleMouseMove(e);
-        }
-      });
-
-      window.addEventListener("mouseup", () => {
-        isDragging = false;
-        canvas.style.cursor = "grab";
-      });
-
-      canvas.addEventListener("click", handleClick);
-
-      document.getElementById("connectBtn").addEventListener("click", connectWallet);
-
-      document.addEventListener("click", async (e) => {
-        if (e.target.id === "revealBtn") await handleReveal();
-        if (e.target.id === "startFarmBtn") await handleStartFarm();
-        if (e.target.id === "stopFarmBtn") await handleStopFarm();
-        if (e.target.id === "claimBtn") await handleClaim();
-        if (e.target.id === "protectBtn") await handleProtect();
-        if (e.target.id === "attackBtn") await handleAttack();
-      });
-
-      // ====== START ======
-      await initReadOnly();
+      }
+    });
+  
+    window.addEventListener("mouseup", () => { isResizing = false; });
+  
+    collapseBtn.addEventListener("click", () => {
+      if (legendContent.classList.contains("collapsed")) {
+        legendContent.classList.remove("collapsed");
+        collapseBtn.textContent = "−";
+      } else {
+        legendContent.classList.add("collapsed");
+        collapseBtn.textContent = "+";
+      }
+    });
+  
+    resetPosBtn.addEventListener("click", () => {
+      legendPanel.style.left = "auto";
+      legendPanel.style.top = "20px";
+      legendPanel.style.right = "20px";
+      legendPanel.style.width = "380px";
+    });
+  
+    // ==================== Canvas events ====================
+    window.addEventListener("resize", () => {
       canvas.width = container.clientWidth;
       canvas.height = container.clientHeight;
-      await loadData();
       centerPyramid();
-      setInterval(loadData, 30000);
-    })();
+    });
+  
+    canvas.addEventListener("wheel", handleWheel, { passive: false });
+    canvas.addEventListener("touchstart", (e) => { if (e.touches.length === 2) pinchStartDist = 0; }, { passive: false });
+    canvas.addEventListener("touchmove", handlePinch, { passive: false });
+  
+    canvas.addEventListener("mousedown", (e) => {
+      isDragging = true;
+      lastMouseX = e.clientX;
+      lastMouseY = e.clientY;
+      canvas.style.cursor = "grabbing";
+    });
+  
+    window.addEventListener("mousemove", (e) => {
+      if (isDragging) {
+        const dx = e.clientX - lastMouseX;
+        const dy = e.clientY - lastMouseY;
+        offsetX += dx;
+        offsetY += dy;
+        lastMouseX = e.clientX;
+        lastMouseY = e.clientY;
+        drawPyramid();
+      } else {
+        handleMouseMove(e);
+      }
+    });
+  
+    window.addEventListener("mouseup", () => {
+      isDragging = false;
+      canvas.style.cursor = "grab";
+    });
+  
+    canvas.addEventListener("click", handleClick);
+  
+    document.getElementById("connectBtn").addEventListener("click", connectWallet);
+  
+    document.addEventListener("click", async (e) => {
+      if (e.target.id === "revealBtn") await handleReveal();
+      if (e.target.id === "startFarmBtn") await handleStartFarm();
+      if (e.target.id === "stopFarmBtn") await handleStopFarm();
+      if (e.target.id === "claimBtn") await handleClaim();
+      if (e.target.id === "protectBtn") await handleProtect();
+      if (e.target.id === "attackBtn") await handleAttack();
+    });
+  
+    // ==================== START ====================
+    await initReadOnly();
+    canvas.width = container.clientWidth;
+    canvas.height = container.clientHeight;
+    await loadData();
+    centerPyramid();
+    setInterval(loadData, 30000);
+  })();
   </script>
 </body>
 </html>
