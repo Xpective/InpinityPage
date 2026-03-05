@@ -487,6 +487,12 @@
             <!-- Mint Card -->
             <div class="card">
                 <h3>⛏️ Mint a New Block</h3>
+                <div class="info-note" style="margin-top:0.8rem;">
+                  <strong>What is a Block?</strong><br>
+                  A Block is an on-chain NFT with fixed coordinates (Row/Col) in the Pi-Phi Pyramid.
+                  Reveal it to unlock its Pi/Phi digits (rarity), then farm resources, defend it with mercenaries,
+                  and use it for attacks & upcoming UE5 gameplay.
+                </div>
                 <div class="input-group">
                     <label>Row <input type="number" id="row" min="0" max="99" value="0"></label>
                     <label>Col <input type="number" id="col" min="0" max="198" value="0"></label>
@@ -1689,6 +1695,8 @@ async function mintBlock(){
     document.getElementById("claimBtn").addEventListener("click", claimSelected);
     document.getElementById("exchangeInpiBtn").addEventListener("click", exchangeINPI);
     document.getElementById("exchangePitBtn").addEventListener("click", exchangePit);
+    document.getElementById("randomBlockBtn").addEventListener("click", findRandomFreeBlock);
+    document.getElementById("mintBtn").addEventListener("click", mintBlock);
     
     document.querySelectorAll('input[name="payment"]').forEach(radio=>{
       radio.addEventListener("change",(e)=>{ selectedPayment = e.target.value; });
