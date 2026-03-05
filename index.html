@@ -5,6 +5,7 @@
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
   <meta content="Inpinity - Tools and resources for game design and development, powered by blockchain." name="description" />
   <title>Inpinity - Home</title>
+
   <link rel="stylesheet" href="css/base.css" />
   <link rel="stylesheet" href="css/layout.css" />
   <link rel="stylesheet" href="css/animations.css" />
@@ -24,9 +25,9 @@
   <link rel="stylesheet" href="css/referral.css"/>
 
   <script defer src="main.js"></script>
-  <!-- Forminit SDK for contact form -->
   <script src="https://forminit.com/sdk/v1/forminit.js"></script>
   <link rel="icon" type="image/png" href="favicon.webp">
+
   <meta content="Inpinity, Game Design, Game Development, Platform, Collaboration, Forum, Tools, GameDesign, AI Development, Games of future, programming, programs, python gui, Base, Uniswap" name="keywords">
   <meta content="Inpinity Team" name="Xpective">
   <meta property="og:title" content="Inpinity - The Community for Game Design and Blockchain">
@@ -36,7 +37,7 @@
   <meta name="twitter:card" content="logo_background.webp">
   <meta name="twitter:site" content="@unxpective">
   <meta name="twitter:creator" content="@Inpinity1">
-  <meta name="theme-color" content="#FarbcodeIhrerWebsite">
+  <meta name="theme-color" content="#d4af37">
   <meta name="robots" content="index,follow">
 
   <style>
@@ -50,7 +51,7 @@
       padding: 1rem;
       background: rgba(0,0,0,0.3);
       border-radius: 12px;
-      max-width: 900px;
+      max-width: 1000px;
     }
     .partner-item a {
       display: inline-block;
@@ -83,66 +84,82 @@
       color: gold;
       text-align: center;
       font-size: 2rem;
-      margin-bottom: 2rem;
+      margin-bottom: 0.8rem;
     }
+    .tokenomics-subtitle{
+      text-align:center;
+      color:#cfcfcf;
+      margin: 0 0 1.8rem;
+      line-height: 1.5;
+    }
+
     .token-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.5rem;
-      margin-top: 2rem;
+      gap: 1.2rem;
+      margin-top: 1.3rem;
     }
     .token-card {
       background: #222;
       border-left: 4px solid gold;
       padding: 1.2rem;
-      border-radius: 8px;
+      border-radius: 10px;
     }
     .token-card h3 {
       color: gold;
       margin-top: 0;
-      margin-bottom: 0.8rem;
-      font-size: 1.3rem;
+      margin-bottom: 0.7rem;
+      font-size: 1.2rem;
     }
     .token-card p {
-      margin: 0.3rem 0;
+      margin: 0.35rem 0;
       color: #ccc;
+      line-height: 1.45;
     }
     .token-card .address {
-      font-family: monospace;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       background: #111;
-      padding: 0.3rem 0.5rem;
-      border-radius: 4px;
+      padding: 0.45rem 0.6rem;
+      border-radius: 8px;
       word-break: break-all;
       color: #aaa;
       border: 1px solid #333;
+      margin-top: 0.35rem;
     }
+
     .tokenomics-chart {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 2rem;
-      margin: 2rem 0 1rem;
+      gap: 1.5rem;
+      margin: 1.7rem 0 0.8rem;
     }
     .chart-item {
       text-align: center;
-      min-width: 120px;
+      min-width: 140px;
+      background:#171717;
+      border:1px solid rgba(255,215,0,0.25);
+      border-radius: 12px;
+      padding: 0.8rem 1rem;
     }
     .chart-item .percent {
-      font-size: 2rem;
+      font-size: 1.6rem;
       font-weight: bold;
       color: gold;
       line-height: 1.2;
     }
     .chart-item .label {
-      color: #ccc;
+      color: #cfcfcf;
       font-size: 0.9rem;
+      margin-top: 0.25rem;
     }
+
     .presale-status {
       background: #2a2a2a;
       border: 1px solid #444;
-      border-radius: 8px;
-      padding: 1.5rem;
-      margin: 2rem 0 1rem;
+      border-radius: 12px;
+      padding: 1.2rem 1.4rem;
+      margin: 1.3rem 0 0.8rem;
       text-align: center;
     }
     .presale-status .live-badge {
@@ -152,25 +169,110 @@
       border-radius: 20px;
       font-weight: bold;
       display: inline-block;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.6rem;
     }
     .presale-status .time-info {
       color: gold;
       font-weight: bold;
     }
-    /* Neues Styling für das Kontaktformular */
-    .contact-form {
-      max-width: 600px;
-      margin: 2rem 0;
+
+    .quick-links {
+      max-width: 1000px;
+      margin: 1.5rem auto 0.5rem;
+      display:flex;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+      justify-content: center;
     }
-    .contact-form label {
-      display: block;
+    .quick-links a{
+      display:inline-block;
+      padding: 0.7rem 1.2rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,215,0,0.45);
+      background: rgba(0,0,0,0.35);
       color: gold;
-      margin-bottom: 0.3rem;
-      font-weight: bold;
+      font-weight: 700;
+      text-decoration:none;
+      transition: 0.2s;
     }
-    .contact-form input,
-    .contact-form textarea {
+    .quick-links a:hover{
+      transform: translateY(-2px);
+      background: gold;
+      color:#000;
+    }
+
+    .note-box{
+      max-width: 1000px;
+      margin: 1.3rem auto 0;
+      padding: 1.1rem 1.3rem;
+      background: #141414;
+      border: 1px solid rgba(255,215,0,0.25);
+      border-radius: 12px;
+      color:#d5d5d5;
+      line-height:1.55;
+    }
+    .note-box strong{ color: gold; }
+
+    .tag-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+    .tag{
+      font-size: 0.85rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,215,0,0.25);
+      background: rgba(255,215,0,0.06);
+      color: #f2e6b7;
+    }
+
+    .link-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:0.6rem;
+      margin-top: 0.7rem;
+    }
+    .small-link{
+      color: gold;
+      text-decoration:none;
+      border-bottom: 1px dotted rgba(255,215,0,0.6);
+    }
+    .small-link:hover{ opacity: 0.9; }
+
+    .addr-actions{
+      display:flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 0.6rem;
+      align-items:center;
+    }
+    .copy-btn{
+      background: transparent;
+      border: 1px solid rgba(255,215,0,0.55);
+      color: gold;
+      padding: 0.35rem 0.7rem;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.9rem;
+      transition:0.2s;
+    }
+    .copy-btn:hover{
+      background: gold;
+      color: #000;
+      transform: translateY(-1px);
+    }
+    .copy-hint{
+      color:#9a9a9a;
+      font-size:0.85rem;
+    }
+
+    /* Kontaktform */
+    .contact-form { max-width: 600px; margin: 2rem 0; }
+    .contact-form label { display: block; color: gold; margin-bottom: 0.3rem; font-weight: bold; }
+    .contact-form input, .contact-form textarea {
       width: 100%;
       padding: 0.75rem;
       margin-bottom: 1rem;
@@ -180,8 +282,7 @@
       color: white;
       font-size: 1rem;
     }
-    .contact-form input:focus,
-    .contact-form textarea:focus {
+    .contact-form input:focus, .contact-form textarea:focus {
       outline: none;
       border-color: gold;
       box-shadow: 0 0 5px gold;
@@ -197,21 +298,11 @@
       cursor: pointer;
       transition: all 0.2s;
     }
-    .contact-form button:hover {
-      transform: scale(1.02);
-      box-shadow: 0 0 15px gold;
-    }
-    #form-result {
-      margin-top: 1rem;
-      font-weight: bold;
-    }
-    .success-message {
-      color: #00aa00;
-    }
-    .error-message {
-      color: #ff4444;
-    }
-    /* Logo im Header */
+    .contact-form button:hover { transform: scale(1.02); box-shadow: 0 0 15px gold; }
+    #form-result { margin-top: 1rem; font-weight: bold; }
+    .success-message { color: #00aa00; }
+    .error-message { color: #ff4444; }
+
     .logo-container {
       display: flex;
       justify-content: center;
@@ -219,16 +310,7 @@
       gap: 20px;
       margin-bottom: 20px;
     }
-    .logo-svg {
-      height: 60px;
-      width: auto;
-    }
-    /* Kleines Token-Logo in der Karte */
-    .token-logo-small {
-      height: 32px;
-      width: auto;
-      margin-right: 10px;
-    }
+    .token-logo-small { height: 32px; width: auto; margin-right: 10px; }
   </style>
 </head>
 
@@ -274,31 +356,59 @@
   </header>
 
   <main>
+    <!-- HERO -->
     <section>
       <div class="hero">
         <h1>Develop games more efficiently with Inpinity.</h1>
-        <h2>The best platform for game developers. Create, Share, Grow.</h2>
+        <h2>The platform where Game Dev meets On-Chain Gameplay. Create, Share, Grow.</h2>
       </div>
 
       <div class="button-wrapper">
-        <!-- 🔗 BUTTON zur Token Hub-Seite -->
-        <a class="cta-button" href="https://inpinity.online/token/" target="_blank" rel="noopener" style="background: linear-gradient(135deg, #8A2BE2, #00FFFF); padding: 1rem 2rem; border-radius: 50px; font-size: 1.3rem;">
+        <a class="cta-button" href="https://inpinity.online/token/" target="_blank" rel="noopener"
+           style="background: linear-gradient(135deg, #8A2BE2, #00FFFF); padding: 1rem 2rem; border-radius: 50px; font-size: 1.3rem;">
           🚀 Go to INPI Token Hub
         </a>
       </div>
+
+      <div class="quick-links">
+        <a href="mint.html">⛏️ Mint a Pyramid Block</a>
+        <a href="game.html">🎮 Game Dashboard</a>
+        <a href="map.html">🗺️ Interactive Pyramid Map</a>
+        <a href="whitepaper.html">📄 Whitepaper</a>
+      </div>
+
+      <div class="note-box">
+        <strong>What is Inpinity?</strong><br>
+        Inpinity is building a playable on-chain world on <strong>Base</strong>: you mint a <strong>Pyramid Block NFT</strong> with fixed coordinates (Row/Col),
+        reveal your Pi/Phi digits (rarity), then <strong>farm resources</strong>, <strong>defend</strong> with mercenaries, and <strong>attack</strong> other blocks with pirates.
+        This website is the live dashboard for the ecosystem — and the foundation for the upcoming <strong>UE5 alpha gameplay</strong>.
+        <div class="tag-row">
+          <span class="tag">Pi · Φ · Fibonacci</span>
+          <span class="tag">On-Chain Farming</span>
+          <span class="tag">Pirate Attacks</span>
+          <span class="tag">Resource Economy</span>
+          <span class="tag">UE5 Integration</span>
+        </div>
+      </div>
     </section>
 
-    <!-- Partners Section (Base und Uniswap) -->
+    <!-- PARTNERS -->
     <section>
       <div class="partners-section">
         <div class="partner-item"><a href="https://base.org/" target="_blank" rel="noopener">⚡ Base L2</a></div>
         <div class="partner-item"><a href="https://uniswap.org/" target="_blank" rel="noopener">🦄 Uniswap</a></div>
+        <div class="partner-item"><a href="https://opensea.io/collection/inpinity-pyramid-447084512" target="_blank" rel="noopener">🖼️ OpenSea: Pyramid Blocks</a></div>
+        <div class="partner-item"><a href="https://opensea.io/collection/0x71e76a6065197acdd1a4d6b736712f80d1fd3d8b" target="_blank" rel="noopener">🧱 OpenSea: Resources (ERC-1155)</a></div>
       </div>
     </section>
 
-    <!-- New Tokenomics & Ecosystem Section -->
+    <!-- TOKENOMICS + CONTRACTS -->
     <section class="tokenomics-section">
-      <h2>📊 Our Tokenomics & Ecosystem Contracts</h2>
+      <h2>📊 Tokenomics & On-Chain Game Contracts</h2>
+      <p class="tokenomics-subtitle">
+        Everything below is the live contract stack that powers <strong>Mint → Reveal → Farm → Protect → Attack → Execute</strong>.
+        Addresses are copyable and linked to BaseScan & OpenSea where relevant. 🫶🏽
+      </p>
 
       <div class="tokenomics-chart">
         <div class="chart-item"><span class="percent">20%</span><div class="label">Liquidity (Locked till 3033)</div></div>
@@ -308,49 +418,167 @@
         <div class="chart-item"><span class="percent">50%</span><div class="label">Reserve & Ecosystem</div></div>
       </div>
 
-      <!-- ✅ KORRIGIERT: Presale-Status mit neuen Daten -->
       <div class="presale-status">
         <span class="live-badge" style="background:#00aa00;">🔴 PRESALE LIVE</span>
-        <p>Until <span class="time-info">March 25, 2026, 20:20 UTC</span><br>
-        Rate: <strong>2,000,000 INPI per 1 ETH</strong> | Min: 0.01 ETH | Max: 2 ETH</p>
+        <p>
+          Until <span class="time-info">March 25, 2026, 20:20 UTC</span><br>
+          Rate: <strong>2,000,000 INPI per 1 ETH</strong> | Min: 0.01 ETH | Max: 2 ETH
+        </p>
       </div>
 
-      <!-- ✅ KORRIGIERT: Token-Karten mit neuer Presale-Adresse und Staking-Infos -->
       <div class="token-grid">
+        <!-- INPI TOKEN -->
         <div class="token-card">
-          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-            <!-- INPI Logo -->
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
             <img src="img/Logo200.svg" alt="INPI Logo" class="token-logo-small">
             <h3 style="margin:0;">🪙 INPI Token (New)</h3>
           </div>
           <p><strong>Address:</strong></p>
-          <div class="address">0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</div>
-          <p>Total Supply: 1,000,000,000 INPI<br>Decimals: 18</p>
+          <div class="address" data-copy="0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D">0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</div>
+          <div class="addr-actions">
+            <button class="copy-btn" data-copy-btn="0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D">Copy</button>
+            <span class="copy-hint">Token used across the ecosystem</span>
+          </div>
+          <div class="link-row">
+            <a class="small-link" href="https://basescan.org/address/0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D" target="_blank" rel="noopener">BaseScan</a>
+            <a class="small-link" href="https://inpinity.online/token/" target="_blank" rel="noopener">Token Hub</a>
+          </div>
+          <p>Total Supply: 1,000,000,000 INPI · Decimals: 18</p>
         </div>
+
+        <!-- PYRAMID NFT -->
         <div class="token-card">
-          <h3>📈 Presale</h3>
-          <p><strong>Address:</strong></p>
-          <div class="address">0x0A650932cf2b5EB04ccA16E8836Ec2323C046C6b</div>
-          <p><a href="https://basescan.org/address/0x0A650932cf2b5EB04ccA16E8836Ec2323C046C6b#code" target="_blank" style="color:gold;">Verified on BaseScan</a></p>
+          <h3>🧩 Inpinity Pyramid (NFT)</h3>
+          <p><strong>InpinityNFT:</strong></p>
+          <div class="address" data-copy="0x277a0D5864293C78d7387C54B48c35D5E9578Ab1">0x277a0D5864293C78d7387C54B48c35D5E9578Ab1</div>
+          <div class="addr-actions">
+            <button class="copy-btn" data-copy-btn="0x277a0D5864293C78d7387C54B48c35D5E9578Ab1">Copy</button>
+            <span class="copy-hint">Mint blocks with Row/Col coordinates</span>
+          </div>
+          <div class="link-row">
+            <a class="small-link" href="https://basescan.org/address/0x277a0D5864293C78d7387C54B48c35D5E9578Ab1" target="_blank" rel="noopener">BaseScan</a>
+            <a class="small-link" href="https://opensea.io/collection/inpinity-pyramid-447084512" target="_blank" rel="noopener">OpenSea</a>
+            <a class="small-link" href="mint.html">Mint Page</a>
+            <a class="small-link" href="map.html">Map</a>
+          </div>
+          <p>
+            Mint → Reveal (Pi/Phi digits) → Rarity → Production → Gameplay hooks.
+            <br><span style="color:#9a9a9a;">Deployed at block: 42820334</span>
+          </p>
         </div>
+
+        <!-- RESOURCES ERC1155 -->
         <div class="token-card">
-          <h3>⏳ Team Vesting</h3>
+          <h3>📦 ResourceToken (ERC-1155)</h3>
           <p><strong>Address:</strong></p>
-          <div class="address">0x504b505Bd60C6A660A0ED38519eD6e17d8A9fc14</div>
-          <p>Cliff 1 year, vesting 3 years</p>
+          <div class="address" data-copy="0x71E76a6065197acdd1a4d6B736712F80D1Fd3D8b">0x71E76a6065197acdd1a4d6B736712F80D1Fd3D8b</div>
+          <div class="addr-actions">
+            <button class="copy-btn" data-copy-btn="0x71E76a6065197acdd1a4d6B736712F80D1Fd3D8b">Copy</button>
+            <span class="copy-hint">Oil · Lemons · Iron · Gold · Platinum · …</span>
+          </div>
+          <div class="link-row">
+            <a class="small-link" href="https://basescan.org/address/0x71E76a6065197acdd1a4d6B736712F80D1Fd3D8b" target="_blank" rel="noopener">BaseScan</a>
+            <a class="small-link" href="https://opensea.io/collection/0x71e76a6065197acdd1a4d6b736712f80d1fd3d8b" target="_blank" rel="noopener">OpenSea</a>
+            <a class="small-link" href="game.html">See balances in Game</a>
+          </div>
+          <p><span style="color:#9a9a9a;">Deployed at block: 42890140</span></p>
         </div>
+
+        <!-- FARMING V3 -->
+        <div class="token-card">
+          <h3>🌾 FarmingV3</h3>
+          <p><strong>Address:</strong></p>
+          <div class="address" data-copy="0xE79445C9ef97B8156BB505D784C0356E54432AD9">0xE79445C9ef97B8156BB505D784C0356E54432AD9</div>
+          <div class="addr-actions">
+            <button class="copy-btn" data-copy-btn="0xE79445C9ef97B8156BB505D784C0356E54432AD9">Copy</button>
+            <span class="copy-hint">Start / Stop / Claim · V3 is the current farming engine</span>
+          </div>
+          <div class="link-row">
+            <a class="small-link" href="https://basescan.org/address/0xE79445C9ef97B8156BB505D784C0356E54432AD9" target="_blank" rel="noopener">BaseScan</a>
+            <a class="small-link" href="game.html">Use in Game</a>
+            <a class="small-link" href="map.html">Use in Map</a>
+          </div>
+          <p><span style="color:#9a9a9a;">Deployed at block: 42937196</span></p>
+        </div>
+
+        <!-- PIRATES V3 -->
+        <div class="token-card">
+          <h3>🏴‍☠️ PiratesV3</h3>
+          <p><strong>Address:</strong></p>
+          <div class="address" data-copy="0xC3544804cea908b8Ac6752B4F47609e1c22DaF5d">0xC3544804cea908b8Ac6752B4F47609e1c22DaF5d</div>
+          <div class="addr-actions">
+            <button class="copy-btn" data-copy-btn="0xC3544804cea908b8Ac6752B4F47609e1c22DaF5d">Copy</button>
+            <span class="copy-hint">StartAttack → wait → ExecuteAttack</span>
+          </div>
+          <div class="link-row">
+            <a class="small-link" href="https://basescan.org/address/0xC3544804cea908b8Ac6752B4F47609e1c22DaF5d" target="_blank" rel="noopener">BaseScan</a>
+            <a class="small-link" href="game.html">Attack UI</a>
+            <a class="small-link" href="map.html">Execute UI</a>
+          </div>
+          <p><span style="color:#9a9a9a;">Deployed at block: 42937335</span></p>
+        </div>
+
+        <!-- MERCENARY V2 -->
+        <div class="token-card">
+          <h3>🛡️ MercenaryV2</h3>
+          <p><strong>Address:</strong></p>
+          <div class="address" data-copy="0xFEa09ccA75dbc63cc8053739A61777Bd13fC6Bc2">0xFEa09ccA75dbc63cc8053739A61777Bd13fC6Bc2</div>
+          <div class="addr-actions">
+            <button class="copy-btn" data-copy-btn="0xFEa09ccA75dbc63cc8053739A61777Bd13fC6Bc2">Copy</button>
+            <span class="copy-hint">Protection against attacks</span>
+          </div>
+          <div class="link-row">
+            <a class="small-link" href="https://basescan.org/address/0xFEa09ccA75dbc63cc8053739A61777Bd13fC6Bc2" target="_blank" rel="noopener">BaseScan</a>
+            <a class="small-link" href="game.html">Hire in Game</a>
+          </div>
+          <p><span style="color:#9a9a9a;">Deployed at block: 42890791</span></p>
+        </div>
+
+        <!-- PARTNERSHIP V2 -->
+        <div class="token-card">
+          <h3>⭐ PartnershipV2</h3>
+          <p><strong>Address:</strong></p>
+          <div class="address" data-copy="0xb18323efE4Cc8c36e10D664E287b4e2c82Fe3ad9">0xb18323efE4Cc8c36e10D664E287b4e2c82Fe3ad9</div>
+          <div class="addr-actions">
+            <button class="copy-btn" data-copy-btn="0xb18323efE4Cc8c36e10D664E287b4e2c82Fe3ad9">Copy</button>
+            <span class="copy-hint">Partner blocks + special resources</span>
+          </div>
+          <div class="link-row">
+            <a class="small-link" href="https://basescan.org/address/0xb18323efE4Cc8c36e10D664E287b4e2c82Fe3ad9" target="_blank" rel="noopener">BaseScan</a>
+            <a class="small-link" href="map.html">See ★ on Map</a>
+          </div>
+          <p><span style="color:#9a9a9a;">Deployed at block: 42890806</span></p>
+        </div>
+
+        <!-- STAKING -->
         <div class="token-card">
           <h3>⚡ Staking</h3>
           <p><strong>Address:</strong></p>
-          <div class="address">0xF8c74E4fEe036C91228268E804f83eD8f55a6524</div>
-          <p>Reward rate: <strong>~0.00475 INPI per second</strong> (≈150,000 INPI/year, designed to last 1,000+ years)</p>
-          <p><a href="staking.html" style="color:gold;">Go to Staking Dashboard →</a></p>
+          <div class="address" data-copy="0xF8c74E4fEe036C91228268E804f83eD8f55a6524">0xF8c74E4fEe036C91228268E804f83eD8f55a6524</div>
+          <div class="addr-actions">
+            <button class="copy-btn" data-copy-btn="0xF8c74E4fEe036C91228268E804f83eD8f55a6524">Copy</button>
+            <span class="copy-hint">Earn INPI via staking</span>
+          </div>
+          <div class="link-row">
+            <a class="small-link" href="https://basescan.org/address/0xF8c74E4fEe036C91228268E804f83eD8f55a6524" target="_blank" rel="noopener">BaseScan</a>
+            <a class="small-link" href="staking.html">Staking Dashboard →</a>
+          </div>
+          <p>Reward rate: <strong>~0.00475 INPI/sec</strong> (≈150,000 INPI/year, designed to last 1,000+ years)</p>
         </div>
+
       </div>
 
-      <p style="text-align:center; margin-top:2rem;">
+      <p style="text-align:center; margin-top:1.6rem; color:#cfcfcf;">
         ⚠️ The old INPI token (<code>0x15ac8e2c38f0c644123e61011e7113de56038453</code>) is deprecated. Do not use it.
       </p>
+
+      <div class="note-box" style="margin-top: 1.4rem;">
+        <strong>Roadmap snapshot (website → gameplay):</strong><br>
+        • <strong>Now:</strong> Mint / Map / Game dashboards (attacks, execution, farming, resource balances).<br>
+        • <strong>Next:</strong> Resource-driven upgrades (City / Buildings / boosts), partner-based special drops, UI polish.<br>
+        • <strong>UE5 Alpha:</strong> Strategy + exploration layer where your wallet = your territory (Farm/Defend/Raid).<br>
+        • <strong>Forge:</strong> Deterministic item generation (seeds/DNA) + previews + later on-chain mint pipeline.
+      </div>
     </section>
 
     <section>
@@ -366,27 +594,43 @@
 
     <details>
       <summary>Welcome to Inpinity</summary>
-      <p>Unite, Create, Experience. Inpinity is not just a platform, but a home for visionary game designers and developers. We believe in the power of community and that together we can create worlds beyond our imagination.</p>
+      <p>
+        Unite, Create, Experience. Inpinity is a home for visionary builders: game designers, developers, artists,
+        and on-chain pioneers. Our goal is simple: make web3 gameplay feel like a real game — not a spreadsheet.
+      </p>
     </details>
+
     <details>
-      <summary>Our Vision</summary>
-      <p>We dream of a game world shaped by the creative minds of the future. A world where every idea, every character, and every adventure is the result of a passionate community.</p>
+      <summary>How the Pyramid Game works</summary>
+      <p><strong>1) Mint a Block NFT</strong> (Row/Col) on Base → your coordinates are permanent.</p>
+      <p><strong>2) Reveal</strong> your block to unlock Pi/Phi digits → rarity → production profile.</p>
+      <p><strong>3) Start Farming</strong> on FarmingV3 → claim ERC-1155 resources over time.</p>
+      <p><strong>4) Defend</strong> your block with Mercenaries → reduces pirate success.</p>
+      <p><strong>5) Attack</strong> other blocks via PiratesV3 → wait until ready → execute → resources move on-chain.</p>
+      <p>
+        You can do everything from <a class="small-link" href="game.html">Game</a> and <a class="small-link" href="map.html">Map</a>.
+      </p>
     </details>
+
     <details>
       <summary>Why Inpinity?</summary>
-      <p>Community: With us, community comes first. Collaborate, share ideas, and grow with other talented individuals.</p>
-      <p>Resources: We offer tools, resources, and support to turn your vision into reality.</p>
-      <p>Experience: Exchange experiences, learn from industry experts, and become part of a constantly growing network.</p>
+      <p><strong>Community:</strong> Collaboration first. Share ideas, build together, ship fast.</p>
+      <p><strong>Resources:</strong> Real dashboards + contracts + gameplay loops already live.</p>
+      <p><strong>Experience:</strong> Everything is transparent, verifiable, and designed to evolve into UE5 gameplay.</p>
     </details>
+
     <details>
       <summary>Join us!</summary>
-      <p>Whether you are an experienced developer or a newcomer to the world of game design, there is a place for everyone at Inpinity. Become a member today and start your adventure with us!</p>
+      <p>
+        Whether you’re an experienced dev or brand new: you can mint a block, farm resources, and start interacting today.
+        Then grow with us into the UE5 alpha world.
+      </p>
     </details>
-    <!-- Testimonials entfernt -->
+
     <details>
       <summary>Contact</summary>
       <p>Do you have questions or want to learn more about us? Contact us and let's stay connected!</p>
-      <!-- Verbessertes Kontaktformular mit Forminit -->
+
       <form id="contact-form" class="contact-form">
         <label for="firstName">First name *</label>
         <input type="text" id="firstName" name="fi-sender-firstName" required placeholder="John">
@@ -403,9 +647,7 @@
         <label for="message">Message *</label>
         <textarea id="message" name="fi-text-message" rows="4" required placeholder="Your message..."></textarea>
 
-        <!-- Honeypot -->
         <input type="text" name="_gotcha" style="display:none;">
-
         <button type="submit">📨 Send Message</button>
       </form>
       <p id="form-result"></p>
@@ -422,9 +664,9 @@
       <a href="guestbook.html">Guestbook</a>
       <a href="advertising.html">Advertising</a>
       <a href="staking.html">Staking</a>
-      <!-- Neue Links auch im Footer (optional) -->
       <a href="mint.html">Mint</a>
       <a href="map.html">Pyramid Map</a>
+      <a href="game.html">Game</a>
     </div>
   </footer>
 
@@ -432,7 +674,7 @@
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       const forminit = new Forminit();
-      const FORM_ID = '7ktpdl3xza8'; // gleiche Form-ID wie bei Collaboration
+      const FORM_ID = '7ktpdl3xza8';
 
       const form = document.getElementById('contact-form');
       const resultEl = document.getElementById('form-result');
@@ -441,7 +683,7 @@
         event.preventDefault();
 
         const formData = new FormData(form);
-        const { data, redirectUrl, error } = await forminit.submit(FORM_ID, formData);
+        const { error } = await forminit.submit(FORM_ID, formData);
 
         if (error) {
           resultEl.innerHTML = `<span class="error-message">❌ ${error.message}</span>`;
@@ -450,6 +692,43 @@
 
         resultEl.innerHTML = '<span class="success-message">✅ Message sent successfully! We will get back to you soon.</span>';
         form.reset();
+      });
+    });
+  </script>
+
+  <!-- Copy-to-clipboard helper for contract addresses -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const copy = async (text) => {
+        try {
+          await navigator.clipboard.writeText(text);
+          return true;
+        } catch (e) {
+          // fallback
+          try {
+            const ta = document.createElement("textarea");
+            ta.value = text;
+            ta.style.position = "fixed";
+            ta.style.opacity = "0";
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand("copy");
+            document.body.removeChild(ta);
+            return true;
+          } catch (e2) {
+            return false;
+          }
+        }
+      };
+
+      document.querySelectorAll("[data-copy-btn]").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const addr = btn.getAttribute("data-copy-btn");
+          const ok = await copy(addr);
+          const old = btn.textContent;
+          btn.textContent = ok ? "Copied ✅" : "Copy failed ❌";
+          setTimeout(() => (btn.textContent = old), 1200);
+        });
       });
     });
   </script>
