@@ -1219,15 +1219,17 @@
     }
     
     function refreshBlockMarkings(){
-      document.querySelectorAll(".block-card").forEach(card=>{
-        card.classList.remove("attacking","executable");
+       document.querySelectorAll(".block-card").forEach(card=>{
+       card.classList.remove("attacking","executable");
       });
-    
-      const now=Math.floor(Date.now()/1000);
+
+      const now = Math.floor(Date.now()/1000);
+
       userAttacks.forEach(attack=>{
-        const card=document.querySelector(\`.block-card[data-tokenid="\${attack.targetTokenId}"]\`);
+        const card = document.querySelector(`.block-card[data-tokenid="${attack.targetTokenId}"]`);
         if(!card) return;
-        if(attack.endTime<=now) card.classList.add("executable");
+
+        if(attack.endTime <= now) card.classList.add("executable");
         else card.classList.add("attacking");
       });
     }
