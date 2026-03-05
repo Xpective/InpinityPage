@@ -1106,30 +1106,28 @@
     async function loadUserAttacks(){
       if(!userAddress) return;
     
+      // AttackV3 entities abfragen (statt "attacks")
       const where = `{ attacker: "${userAddress.toLowerCase()}", executed: false }`;
       const attacks = await fetchAllWithPagination(
-        "attacks",
-        "id attacker target attackIndex startTime endTime executed",
+        "attackV3s",                           // ⬅️ Entity-Name
+        "id attacker attackerTokenId target attackIndex startTime endTime resource executed",
         where
       );
     
-      userAttacks = attacks.map(a=>{
-        const targetId = parseInt(a.target, 10);
-        let resource = 0;
-        const saved = localStorage.getItem(`attack_${targetId}`);
-        if(saved){
-          try{ resource = (JSON.parse(saved).resource ?? 0); }catch(e){}
-        }
-        return {
-          id: a.id,
-          targetTokenId: targetId,
-          attackIndex: parseInt(a.attackIndex || "0", 10),
-          startTime: parseInt(a.startTime || "0", 10),
-          endTime: parseInt(a.endTime || "0", 10),
-          executed: !!a.executed,
-          resource
-        };
-      });
+      userAttacks = attacks.map(a => ({
+        id: a.id,
+        targetTokenId: parseInt(a.target, 10),
+        attackerTokenId: parseInt(a.attackerTokenId, 10),
+        attackIndex: parseInt(a.attackIndex, 10),
+        startTime: parseInt(a.startTime, 10),
+        endTime: parseInt(a.endTime, 10),
+        executed: !!a.executed,
+        resource: parseInt(a.resource, 10)      // ⬅️ kommt jetzt direkt vom Subgraph
+      }));
+    
+      displayUserAttacks();
+      refreshBlockMarkings();
+    }
     
       displayUserAttacks();
       refreshBlockMarkings();
