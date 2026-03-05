@@ -1537,7 +1537,148 @@
         isConnecting = false;
       }
     }
+    /* ==================== RANDOM FREE BLOCK (ERC721 CORRECT) ==================== */
+async function findRandomFreeBlock(){
+  const msgDiv = document.getElementById("mintMessage");
+  if(!userAddress || !nftContract){
+    if(msgDiv) msgDiv.innerHTML = `<div class="message-box error">❌ Please connect wallet first.</div>`;
+    return;
+  }
+
+  if(msgDiv) msgDiv.innerHTML = `<div class="message-box success">⏳ Searching a free block...</div>`;
+
+  const MAX_ATTEMPTS = 80;
+
+  for(let attempt=0; attempt<MAX_ATTEMPTS; attempt++){
+    const row = Math.floor(Math.random() * (MAX_ROW + 1));
+    const col = Math.floor(Math.random() * (2 * row + 1));
+    const tokenId = row * 2048 + col; // IMPORTANT: same mapping as mint.html
+
+    try{
+      // minted -> ownerOf works -> NOT free
+      await nftContract.ownerOf(tokenId);
+    }catch(e){
+      // unminted -> ownerOf reverts -> FREE
+      document.getElementById("row").value = row;
+      document.getElementById("col").value = col;
+      if(msgDiv) msgDiv.innerHTML = `<div class="message-box success">✅ Free block found: Row ${row}, Col ${col}. You can mint now.</div>`;
+      return;
+    }
+  }
+
+  if(msgDiv) msgDiv.innerHTML = `<div class="message-box error">❌ Could not find a free block fast. Try again or pick manually.</div>`;
+}
+
+/* ==================== MINT (ETH / INPI / MIXED) ==================== */
+async function mintBlock(){
+      const msgDiv = document.getElementById("mintMessage");
     
+      if(!userAddress || !nftContract){
+        if(msgDiv) msgDiv.innerHTML = `<div class="message-box error">❌ Please connect wallet first.</div>`;
+        return;
+      }
+    
+      const row = parseInt(document.getElementById("row").value, 10);
+      const col = parseInt(document.getElementById("col").value, 10);
+    
+      if(Number.isNaN(row) || Number.isNaN(col) || row < 0 || row > MAX_ROW || col < 0 || col > (2*row)){
+        if(msgDiv) msgDiv.innerHTML = `<div class="message-box error">❌ Invalid coordinates.</div>`;
+        return;
+      }
+    
+      const tokenId = row * 2048 + col;
+    
+      try{
+        if(msgDiv) msgDiv.innerHTML = `<div class="message-box success">⏳ Checking block availability...</div>`;
+    
+        // Same logic as mint.html: ownerOf reverts => free
+        try{
+          await nftContract.ownerOf(tokenId);
+          if(msgDiv) msgDiv.innerHTML = `<div class="message-box error">❌ This block is already minted.</div>`;
+          return;
+        }catch(e){
+          // ok: not minted
+        }
+    
+        let tx;
+    
+        if(selectedPayment === "eth"){
+          if(msgDiv) msgDiv.innerHTML = `<div class="message-box success">⏳ Minting with ETH...</div>`;
+          tx = await nftContract.mintWithETH(row, col, {
+            value: ethers.utils.parseEther(PRICE_ETH)
+          });
+    
+        }else if(selectedPayment === "inpi"){
+          if(!inpiContract){
+            if(msgDiv) msgDiv.innerHTML = `<div class="message-box error">❌ INPI contract not ready. Connect wallet again.</div>`;
+            return;
+          }
+    
+          const amount = ethers.utils.parseEther(PRICE_INPI);
+    
+          const bal = await inpiContract.balanceOf(userAddress);
+          if(bal.lt(amount)){
+            if(msgDiv) msgDiv.innerHTML = `<div class="message-box error">❌ Insufficient INPI balance.</div>`;
+            return;
+          }
+    
+          const allowance = await inpiContract.allowance(userAddress, NFT_ADDRESS);
+          if(allowance.lt(amount)){
+            if(msgDiv) msgDiv.innerHTML = `<div class="message-box success">⏳ Approving INPI...</div>`;
+            const approveTx = await inpiContract.approve(NFT_ADDRESS, amount);
+            await approveTx.wait();
+          }
+    
+          if(msgDiv) msgDiv.innerHTML = `<div class="message-box success">⏳ Minting with INPI...</div>`;
+          tx = await nftContract.mintWithINPI(row, col);
+    
+        }else if(selectedPayment === "mixed"){
+          if(!inpiContract){
+            if(msgDiv) msgDiv.innerHTML = `<div class="message-box error">❌ INPI contract not ready. Connect wallet again.</div>`;
+            return;
+          }
+    
+          const ethAmount  = ethers.utils.parseEther(PRICE_ETH_MIXED);
+          const inpiAmount = ethers.utils.parseEther(PRICE_INPI_MIXED);
+    
+          const bal = await inpiContract.balanceOf(userAddress);
+          if(bal.lt(inpiAmount)){
+            if(msgDiv) msgDiv.innerHTML = `<div class="message-box error">❌ Insufficient INPI balance for mixed payment.</div>`;
+            return;
+          }
+    
+          const allowance = await inpiContract.allowance(userAddress, NFT_ADDRESS);
+          if(allowance.lt(inpiAmount)){
+            if(msgDiv) msgDiv.innerHTML = `<div class="message-box success">⏳ Approving INPI...</div>`;
+            const approveTx = await inpiContract.approve(NFT_ADDRESS, inpiAmount);
+            await approveTx.wait();
+          }
+    
+          if(msgDiv) msgDiv.innerHTML = `<div class="message-box success">⏳ Minting (Mixed)...</div>`;
+          tx = await nftContract.mintMixed(row, col, { value: ethAmount });
+    
+        }else{
+          if(msgDiv) msgDiv.innerHTML = `<div class="message-box error">❌ Unknown payment method.</div>`;
+          return;
+        }
+    
+        if(msgDiv) msgDiv.innerHTML = `<div class="message-box success">⏳ Transaction sent: ${tx.hash.slice(0,10)}...</div>`;
+        await tx.wait();
+    
+        if(msgDiv) msgDiv.innerHTML = `<div class="message-box success">✅ Block minted! 🎉</div>`;
+    
+        // refresh UI
+        await updateBalances();
+        await loadUserBlocks();
+        await loadResourceBalancesOnchain();
+        await loadUserAttacks();
+    
+      }catch(e){
+        console.error("Mint error:", e);
+        const msg = (e && e.message) ? e.message : "Unknown error";
+        if(msgDiv) msgDiv.innerHTML = `<div class="message-box error">❌ ${msg}</div>`;
+      }
+    }
     /* ==================== EVENT LISTENERS ==================== */
     document.getElementById("connectWallet").addEventListener("click", connectWallet);
     document.getElementById("attackBtn").addEventListener("click", attack);
