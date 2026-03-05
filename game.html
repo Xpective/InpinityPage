@@ -1112,26 +1112,26 @@
     
     async function loadUserAttacks() {
       if (!userAddress) return;
+    
       try {
-        // AttackV3-Entities abfragen (nicht ausgeführte)
-        const where = `{ attacker: "${userAddress.toLowerCase()}" }`;
+        // ✅ AttackV3 Entities (PiratesV3)
+        const where = `{ attacker: "${userAddress.toLowerCase()}", executed: false }`;
+    
         const attacks = await fetchAllWithPagination(
-          "attackV3S",  
+          "attackV3S", // ✅ LIST field aus deinem Schema
           "id attacker target attackIndex startTime endTime resource executed",
           where
         );
     
-        userAttacks = attacks
-          .filter(a => !a.executed)
-          .map(a => ({
-            id: a.id,
-            targetTokenId: parseInt(a.target, 10),
-            attackIndex: parseInt(a.attackIndex, 10),
-            startTime: parseInt(a.startTime, 10),
-            endTime: parseInt(a.endTime, 10),
-            executed: !!a.executed,
-            resource: parseInt(a.resource, 10)   // direkt vom Subgraph
-          }));
+        userAttacks = (attacks || []).map(a => ({
+          id: a.id,
+          targetTokenId: parseInt(a.target, 10),
+          attackIndex: parseInt(a.attackIndex || "0", 10),
+          startTime: parseInt(a.startTime || "0", 10),
+          endTime: parseInt(a.endTime || "0", 10),
+          executed: !!a.executed,
+          resource: parseInt(a.resource || "0", 10)
+        }));
     
         displayUserAttacks();
         refreshBlockMarkings();
