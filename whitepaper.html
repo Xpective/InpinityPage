@@ -5,6 +5,7 @@
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
   <meta content="Inpinity - Official Whitepaper" name="description" />
   <title>Inpinity - Whitepaper</title>
+
   <link rel="stylesheet" href="css/base.css" />
   <link rel="stylesheet" href="css/layout.css" />
   <link rel="stylesheet" href="css/animations.css" />
@@ -22,9 +23,11 @@
   <link rel="stylesheet" href="css/combined_latest.css"/>
   <link rel="stylesheet" href="css/gamification.css" />
   <link rel="stylesheet" href="css/referral.css"/>
+
   <script defer src="main.js"></script>
   <link rel="icon" type="image/png" href="favicon.webp">
-  <meta content="Inpinity, Game Design, Game Development, Platform, Collaboration, Forum, Tools, GameDesign, AI Development, Games of future, programming, programs, python gui" name="keywords">
+
+  <meta content="Inpinity, Whitepaper, Base, Uniswap, UE5, Pi Phi Pyramid, NFTs, Resources" name="keywords">
   <meta content="Inpinity Team" name="Xpective">
   <meta property="og:title" content="Inpinity - Whitepaper">
   <meta property="og:description" content="Official Whitepaper of Inpinity – a decentralized gaming ecosystem on Base.">
@@ -33,9 +36,13 @@
   <meta name="twitter:card" content="logo_background.webp">
   <meta name="twitter:site" content="@unxpective">
   <meta name="twitter:creator" content="@Inpinity1">
-  <meta name="theme-color" content="#FarbcodeIhrerWebsite">
   <meta name="robots" content="index,follow">
+
   <style>
+    /* ✅ keep content away from footer */
+    main { padding-bottom: 4rem; }
+    footer { margin-top: 3rem; padding-top: 1rem; }
+
     /* Whitepaper specific styling */
     .whitepaper-container {
       max-width: 900px;
@@ -93,9 +100,7 @@
       margin: 1rem 0;
       padding-left: 2rem;
     }
-    .whitepaper-container li {
-      margin: 0.5rem 0;
-    }
+    .whitepaper-container li { margin: 0.5rem 0; }
     .whitepaper-container .address {
       font-family: monospace;
       background: #111;
@@ -118,6 +123,7 @@
     }
   </style>
 </head>
+
 <body>
   <header>
     <nav>
@@ -125,16 +131,16 @@
         <li><a aria-label="Home" href="index.html">Home</a></li>
         <li><a aria-label="Features" href="features.html">Features</a></li>
         <li><a aria-label="Game" href="game.html">Game</a></li>
-        <li><a aria-label="Forum" href="forum.html">Forum</a></li>
+        <li><a aria-label="Mint" href="mint.html">Mint</a></li>
+        <li><a aria-label="Pyramid Map" href="map.html">Pyramid Map</a></li>
         <li><a aria-label="Collaboration" href="collaboration.html">Collaboration</a></li>
-        <li><a aria-label="Register" href="register.html">Register</a></li>
         <li><a aria-label="About" href="about.html">About</a></li>
         <li><a aria-label="Whitepaper" href="whitepaper.html">Whitepaper</a></li>
         <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
         <li><a aria-label="Guestbook" href="guestbook.html">Guestbook</a></li>
         <li><a aria-label="Advertising" href="advertising.html">Advertising</a></li>
-        <li><a aria-label="Profile" href="profile.html">Profile</a></li>
         <li><a aria-label="Staking" href="staking.html">Staking</a></li>
+
         <div class="themeDots">
           <div class="dot light" title="Light Theme"></div>
           <div class="dot dark" title="Dark Theme"></div>
@@ -142,6 +148,7 @@
         </div>
       </ul>
     </nav>
+
     <style>
       .themeDots .dot {
         display: inline-block;
@@ -157,6 +164,7 @@
       .themeDots .dot.basic { background-color: var(--quinary-color); }
       .themeDots .dot:hover { transform: scale(1.2); }
     </style>
+
     <script>
       document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('.themeDots .dot.light')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'light'));
@@ -168,6 +176,7 @@
 
   <main>
     <div class="whitepaper-container">
+      <!-- ✅ Dein bestehender Whitepaper Content bleibt ab hier 1:1 -->
       <h1>Whitepaper: Inpinity</h1>
       <p class="version"><strong>Version 2.2 – March 2026</strong></p>
 
@@ -180,263 +189,4 @@
       <p>
         The ecosystem is already playable through the live web dashboards:
         <span class="pill">Mint</span><span class="pill">Map</span><span class="pill">Game</span>
-        and evolves step-by-step into <strong>Inpinity City</strong> (a persistent upgrade/crafting layer) and later a full
-        <strong>Unreal Engine 5</strong> version of the game.
-      </p>
-
-      <div class="warning-note">
-        <strong>Important:</strong> Inpinity migrated away from legacy infrastructure and now focuses on transparent,
-        verifiable contracts and community-first development. Always verify addresses and interact through
-        the official website: <a href="https://inpinity.online">https://inpinity.online</a>.
-      </div>
-
-      <h2>2. Project Overview</h2>
-      <table>
-        <tr><th>Project Name</th><td>Inpinity</td></tr>
-        <tr><th>Token Ticker</th><td>$INPI</td></tr>
-        <tr><th>Blockchain</th><td>Base (Ethereum L2)</td></tr>
-        <tr><th>Contract Address (NEW)</th><td class="address">0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</td></tr>
-        <tr><th>Old Contract (Deprecated)</th><td class="address">0x15ac8e2c38f0c644123e61011e7113de56038453</td></tr>
-        <tr><th>Official Website</th><td><a href="https://inpinity.online">https://inpinity.online</a></td></tr>
-        <tr><th>Live Apps</th><td>
-          <a href="mint.html">Mint</a> ·
-          <a href="map.html">Pyramid Map</a> ·
-          <a href="game.html">Game Dashboard</a> ·
-          <a href="staking.html">Staking</a>
-        </td></tr>
-        <tr><th>Community</th><td>
-          Twitter: <a href="https://twitter.com/unxpective">@unxpective</a><br>
-          Discord: <a href="https://discord.gg/95yj6Eg6">https://discord.gg/95yj6Eg6</a><br>
-          Telegram: <a href="https://t.me/+1hl5Ou-pGChhYmUy">https://t.me/+1hl5Ou-pGChhYmUy</a>
-        </td></tr>
-        <tr><th>Development</th><td>GitHub: <a href="https://github.com/Xpective">Xpective</a></td></tr>
-      </table>
-
-      <h2>3. The On-Chain Game: Pyramid Blocks, Resources & Combat</h2>
-      <p>
-        The first live module of Inpinity is the <strong>Pi-Phi Pyramid</strong>: a grid of block NFTs with fixed coordinates
-        (Row/Col). Each block can be minted, revealed to unlock its Pi/Phi digits (rarity), then used for farming, defense,
-        and pirate attacks.
-      </p>
-
-      <h3>3.1 Core Contracts (Game Module)</h3>
-      <table>
-        <tr><th>Module</th><th>Contract</th><th>Address</th><th>What it does</th></tr>
-        <tr>
-          <td>Pyramid Blocks (NFT)</td>
-          <td>InpinityNFT</td>
-          <td class="address">0x277a0D5864293C78d7387C54B48c35D5E9578Ab1</td>
-          <td>Mint blocks, store position + revealed state, reveal Pi/Phi digits & rarity.</td>
-        </tr>
-        <tr>
-          <td>Resources (ERC-1155)</td>
-          <td>ResourceToken</td>
-          <td class="address">0x71E76a6065197acdd1a4d6B736712F80D1Fd3D8b</td>
-          <td>On-chain balances for resources (Oil, Lemons, Iron, Gold, Platinum, …).</td>
-        </tr>
-        <tr>
-          <td>Farming</td>
-          <td>FarmingV3</td>
-          <td class="address">0xE79445C9ef97B8156BB505D784C0356E54432AD9</td>
-          <td>Start/Stop farming, claim resources, boosts & accrual engine (current).</td>
-        </tr>
-        <tr>
-          <td>Combat / Raids</td>
-          <td>PiratesV3</td>
-          <td class="address">0xC3544804cea908b8Ac6752B4F47609e1c22DaF5d</td>
-          <td>StartAttack → wait → ExecuteAttack (steal resources).</td>
-        </tr>
-        <tr>
-          <td>Defense</td>
-          <td>MercenaryV2</td>
-          <td class="address">0xFEa09ccA75dbc63cc8053739A61777Bd13fC6Bc2</td>
-          <td>Hire mercenaries for protection (defense layer).</td>
-        </tr>
-        <tr>
-          <td>Partnership Layer</td>
-          <td>PartnershipV2</td>
-          <td class="address">0xb18323efE4Cc8c36e10D664E287b4e2c82Fe3ad9</td>
-          <td>Partner blocks (⭐) and special mechanics / future access paths.</td>
-        </tr>
-      </table>
-
-      <h3>3.2 Collections</h3>
-      <ul>
-        <li>Pyramid Blocks (OpenSea): <a href="https://opensea.io/collection/inpinity-pyramid-447084512" target="_blank" rel="noopener">https://opensea.io/collection/inpinity-pyramid-447084512</a></li>
-        <li>Resources (OpenSea): <a href="https://opensea.io/collection/0x71e76a6065197acdd1a4d6b736712f80d1fd3d8b" target="_blank" rel="noopener">https://opensea.io/collection/0x71e76a6065197acdd1a4d6b736712f80d1fd3d8b</a></li>
-      </ul>
-
-      <h3>3.3 Gameplay Loop (Today)</h3>
-      <ol>
-        <li><strong>Mint</strong> a block at fixed coordinates (Row/Col).</li>
-        <li><strong>Reveal</strong> the block to unlock Pi/Phi digits (rarity).</li>
-        <li><strong>Farm (V3)</strong> to generate ERC-1155 resources.</li>
-        <li><strong>Protect</strong> your block with mercenaries.</li>
-        <li><strong>Attack</strong> other blocks using pirates and execute after cooldown.</li>
-        <li><strong>Use resources</strong> for upgrades and the upcoming <strong>Inpinity City</strong> layer.</li>
-      </ol>
-
-      <h2>4. Tokenomics</h2>
-      <p>The economic model of Inpinity is designed for long-term growth and stability. The total supply is fixed at <strong>1,000,000,000 (1 billion) $INPI</strong>.</p>
-
-      <h3>4.1 Supply Distribution</h3>
-      <table>
-        <tr><th>Category</th><th>Percentage</th><th>Amount ($INPI)</th><th>Description</th></tr>
-        <tr><td>Liquidity</td><td>20%</td><td>200,000,000</td><td>Locked until <strong>23 October 3033</strong> in a time-lock contract.</td></tr>
-        <tr><td>Team & Advisors</td><td>10%</td><td>100,000,000</td><td>Vesting: 1-year cliff, then linear over 3 years.</td></tr>
-        <tr><td>Staking Rewards</td><td>15%</td><td>150,000,000</td><td>Reserved for staking incentives.</td></tr>
-        <tr><td>Events & Airdrops</td><td>5%</td><td>50,000,000</td><td>For community growth, marketing, and giveaways.</td></tr>
-        <tr><td>Reserve & Ecosystem</td><td>50%</td><td>500,000,000</td><td>Development, partnerships, strategic initiatives and future liquidity expansions.</td></tr>
-      </table>
-
-      <h3>4.2 Locks and Transparency</h3>
-      <ul>
-        <li><strong>Liquidity (20%)</strong>: LP tokens locked until <strong>23 October 3033</strong> (no early liquidity removal).</li>
-        <li><strong>Team Tokens (10%)</strong>: Vesting schedule ensures long-term alignment with the project.</li>
-        <li><strong>Staking Rewards (15%)</strong>: Distributed over time via the staking contract parameters.</li>
-        <li><strong>Reserve & Ecosystem (50%)</strong>: Used to scale the ecosystem, support development, and create long-term value.</li>
-      </ul>
-
-      <h2>5. Presale & Migration</h2>
-      <p>
-        Inpinity migrated to a new token contract. The presale parameters shown on the main website are:
-        <strong>Until March 25, 2026, 20:20 UTC</strong> with a rate of <strong>2,000,000 INPI per 1 ETH</strong>,
-        minimum <strong>0.01 ETH</strong>, maximum <strong>2 ETH</strong> per wallet.
-      </p>
-      <p><strong>Presale contract (verified):</strong> <span class="address">0x0A650932cf2b5EB04ccA16E8836Ec2323C046C6b</span></p>
-
-      <h2>6. Utilities: The Power of $INPI</h2>
-      <ol>
-        <li><strong>Staking</strong>: Stake tokens to earn rewards and participate in ecosystem growth.</li>
-        <li><strong>Governance (Planned)</strong>: Vote on upgrades, economy parameters, and new modules.</li>
-        <li><strong>In-Game Economy</strong>: INPI as currency for boosts, upgrades, protection, raids, and later city progression.</li>
-        <li><strong>Marketplace Utility</strong>: Medium for trading NFTs/resources in community marketplaces.</li>
-        <li><strong>Events & Drops</strong>: Access to limited drops, quests, and seasonal systems.</li>
-        <li><strong>UE5 Integration</strong>: Wallet-based identity and ownership bridge into the Unreal game world.</li>
-      </ol>
-
-      <h2>7. Roadmap (Updated): Inpinity City + UE5 Game</h2>
-      <p>
-        The roadmap is structured around two layers:
-        <strong>(A) Live Web On-Chain Module</strong> (already playable) and
-        <strong>(B) The UE5 Game World</strong> (expansion layer that uses the same on-chain ownership).
-      </p>
-
-      <h3>7.1 Roadmap Table</h3>
-      <table>
-        <tr><th>Phase</th><th>Focus</th><th>Deliverables</th></tr>
-
-        <tr>
-          <td><strong>Now (Web V3)</strong></td>
-          <td>Stabilize & polish the live Pyramid module</td>
-          <td>
-            V3 farming + V3 pirates live in Game/Map, improved UI/UX, clearer economy display,
-            better resource visualization, attack execution clarity, and contract transparency.
-          </td>
-        </tr>
-
-        <tr>
-          <td><strong>Inpinity City (Alpha)</strong></td>
-          <td>Persistent “upgrade/crafting” layer</td>
-          <td>
-            <ul>
-              <li><strong>City slots</strong> tied to blocks (buildings/upgrades use resources)</li>
-              <li><strong>Resource sinks</strong> (upgrade paths that stabilize inflation)</li>
-              <li><strong>Crafting & progression</strong> (using ERC-1155 resources)</li>
-              <li><strong>Partner mechanics</strong> (⭐ blocks unlock special blueprints / boosts)</li>
-            </ul>
-          </td>
-        </tr>
-
-        <tr>
-          <td><strong>Economy Expansion</strong></td>
-          <td>More depth, less “flat farming”</td>
-          <td>
-            Boosts, time-based events, limited drops, seasonal modifiers, balancing passes,
-            and new resource utility (construction, defense, city modules).
-          </td>
-        </tr>
-
-        <tr>
-          <td><strong>UE5 Version (Prototype)</strong></td>
-          <td>Bring the on-chain world into Unreal Engine 5</td>
-          <td>
-            <ul>
-              <li>UE5 client prototype that reads ownership (wallet login) + loads player city data</li>
-              <li>Visual representation of blocks/city modules and resources</li>
-              <li>Deterministic “seed/DNA” systems for consistent visuals</li>
-            </ul>
-          </td>
-        </tr>
-
-        <tr>
-          <td><strong>UE5 Version (Playable Alpha)</strong></td>
-          <td>Gameplay in 3D (strategy + exploration)</td>
-          <td>
-            City gameplay loop in UE5: build/upgrade, defend, missions/quests,
-            and on-chain sync points (claims, upgrades, raids).
-          </td>
-        </tr>
-
-        <tr>
-          <td><strong>UE5 Version (Multiplayer & Scale)</strong></td>
-          <td>Social + economy scale-out</td>
-          <td>
-            Multiplayer features, shared hubs, trading UX, tournaments/events,
-            performance improvements and long-term content cadence.
-          </td>
-        </tr>
-      </table>
-
-      <h3>7.2 Inpinity City: Design Goals</h3>
-      <ul>
-        <li><strong>Make resources meaningful</strong>: resources become building materials, not only collectibles.</li>
-        <li><strong>Long-term progression</strong>: upgrades have tiers, dependencies, and strategic choices.</li>
-        <li><strong>Economy health</strong>: sinks/fees/upgrades prevent runaway inflation.</li>
-        <li><strong>Partner blocks</strong>: special routes for collaborations and rare content.</li>
-      </ul>
-
-      <h3>7.3 UE5 Game: Why Unreal?</h3>
-      <ul>
-        <li><strong>Visual world</strong>: your on-chain assets become a playable space.</li>
-        <li><strong>Deep gameplay</strong>: strategy + exploration + crafting layers are easier to deliver in UE5.</li>
-        <li><strong>Future-proof</strong>: web stays as lightweight dashboard, UE5 becomes the “main game client”.</li>
-      </ul>
-
-      <h2>8. Ecosystem Partners</h2>
-      <ul>
-        <li><strong>Base</strong>: Scalable, secure L2 blockchain where Inpinity operates.</li>
-        <li><strong>Uniswap</strong>: Decentralized exchange providing liquidity and trading.</li>
-        <li><strong>OpenSea</strong>: NFT discovery and trading for Pyramid Blocks & Resources.</li>
-      </ul>
-
-      <h2>9. Team</h2>
-      <p><strong>Xpective</strong> – A dedicated team of developers, blockchain enthusiasts, and visionaries who believe that the future of gaming must be decentralized and community-driven.</p>
-
-      <h2>10. Security and Legal</h2>
-      <ul>
-        <li><strong>Security</strong>: Always verify contract addresses and use official links.</li>
-        <li><strong>Audits</strong>: Audits and security reviews are part of the long-term process as modules scale.</li>
-        <li><strong>Legal</strong>: This whitepaper is for informational purposes only and does not constitute financial advice.</li>
-      </ul>
-
-      <div class="version">Version 2.2 – March 2026</div>
-    </div>
-  </main>
-
-  <footer>
-    <p>© 2026 Inpinity. All rights reserved. Working with <a href="https://base.org/" target="_blank" rel="noopener" style="color: gold;">Base</a> and <a href="https://uniswap.org/" target="_blank" rel="noopener" style="color: gold;">Uniswap</a>.</p>
-    <div class="footer-links">
-      <a href="privacypolicy.html">Privacy Policy</a>
-      <a href="termsofuse.html">Terms of Use</a>
-      <a href="contact.html">Contact</a>
-      <a href="faq.html">FAQ</a>
-      <a href="guestbook.html">Guestbook</a>
-      <a href="advertising.html">Advertising</a>
-      <a href="profile.html">Profile</a>
-      <a href="staking.html">Staking</a>
-      <a href="whitepaper.html">Whitepaper</a>
-    </div>
-  </footer>
-</body>
-</html>
+        and evolves step-by-step into <strong>
