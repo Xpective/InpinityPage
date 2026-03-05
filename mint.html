@@ -10,17 +10,21 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         /* ========== ROOT VARIABLES (aus game.html übernommen) ========== */
-        :root {
-            --bg-dark: #0a0a1a;
-            --bg-card: rgba(20, 20, 40, 0.8);
-            --accent-gold: #d4af37;
-            --accent-cyan: #4a90e2;
-            --accent-purple: #9b59b6;
-            --accent-red: #e74c3c;
-            --text-light: #f0f0ff;
-            --text-dim: #aaa;
-            --border-glow: rgba(212, 175, 55, 0.3);
-            --shadow-gold: 0 0 20px rgba(212, 175, 55, 0.5);
+        :root{
+          --bg-dark:#0A0A1A;
+          --bg-card: rgba(20, 20, 40, 0.78);
+        
+          /* Index-Look: purple + cyan/teal accents */
+          --accent-purple:#8A2BE2;      /* lila */
+          --accent-cyan:#00FFFF;        /* cyan */
+          --accent-teal:#16F2C3;        /* türkis/teal */
+          --accent-gold:#d4af37;        /* gold bleibt als “premium” */
+        
+          --text-light:#F0F0FF;
+          --text-dim:#B8B8D0;
+        
+          --border-glow: rgba(0,255,255,0.18);
+          --shadow-glow: 0 0 22px rgba(138,43,226,0.25);
         }
 
         /* ========== BESTEHENDE STYLES (unverändert) ========== */
@@ -30,10 +34,13 @@
             box-sizing: border-box;
         }
 
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(145deg, #0c0c24 0%, #1b1b3a 100%);
-            color: #fff;
+        body{
+            font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background:
+            radial-gradient(circle at 18% 82%, rgba(138,43,226,0.22) 0%, transparent 55%),
+            radial-gradient(circle at 82% 18%, rgba(0,255,255,0.12) 0%, transparent 55%),
+            linear-gradient(145deg, #0c0c24 0%, #16163a 100%);
+            color: var(--text-light);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -57,9 +64,9 @@
             font-size: 3rem;
             text-align: center;
             margin-bottom: 0.5rem;
-            background: linear-gradient(135deg, #4a90e2, #d4af37);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip:text;
+            -webkit-text-fill-color:transparent;
             background-clip: text;
             letter-spacing: 1px;
         }
@@ -443,7 +450,11 @@
     <div class="container">
         <h1>🏗️ INPINITY</h1>
         <div class="subtitle">The Pi-Phi Pyramid · Base Mainnet</div>
-
+        <div style="margin: 0 auto 1.5rem; max-width: 760px; color: var(--text-dim); line-height: 1.6; text-align:center;">
+          Each <strong>Pyramid Block</strong> is an on-chain NFT with fixed coordinates (Row/Col) inside the Pi-Phi Pyramid.
+          After minting you can <strong>reveal</strong> hidden Pi & Phi digits (rarity), then <strong>farm resources</strong>,
+          protect blocks with <strong>mercenaries</strong>, and interact with the world map & upcoming UE5 gameplay.
+        </div
         <div class="wallet-section">
             <div class="wallet-info">
                 <div class="wallet-status" id="walletStatus">🔴 Wallet not connected</div>
