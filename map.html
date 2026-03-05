@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>INPINITY – Pyramid Map (V3 + Attack Execution + Resource Icons)</title>
+  <title>INPINITY – Pyramid Map (V3 + Attack Execution + Resource Icons + Dismiss)</title>
   <link rel="icon" type="image/png" href="favicon.webp" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/base.css">
@@ -744,15 +744,15 @@
       return { ok: true, msg: "Started V3" };
     }
   
-    // ==================== LOAD ATTACKS (V3) – Jetzt mit attackV3s ====================
+    // ==================== LOAD ATTACKS (V3) – Jetzt mit attackV3S ====================
     async function loadUserAttacks() {
       if (!userAddress) return;
       try {
-        // AttackV3-Entities abfragen (statt "attacks")
-        const where = `{ attacker: "${userAddress.toLowerCase()}" }`;  // wir holen alle (executed + nicht executed), aber filtern später
+        // AttackV3-Entities abfragen – WICHTIG: attackV3S (großes S)
+        const where = `{ attacker: "${userAddress.toLowerCase()}" }`;
         const attacks = await fetchAllWithPagination(
           SUBGRAPH_URL_V2,
-          "attackV3s",                       // ⬅️ NEU: attackV3s
+          "attackV3S",                       // ⬅️ NEU: attackV3S
           "id attacker target attackIndex startTime endTime resource executed",
           where
         );
@@ -766,8 +766,12 @@
             startTime: parseInt(a.startTime, 10),
             endTime: parseInt(a.endTime, 10),
             executed: !!a.executed,
-            resource: parseInt(a.resource, 10)   // ⬅️ direkt aus Subgraph
+            resource: parseInt(a.resource, 10)   // direkt aus Subgraph
           }));
+  
+        // Dismissed-Attacks aus localStorage entfernen
+        const dismissed = loadDismissedAttacks();
+        userAttacks = userAttacks.filter(a => !dismissed.has(a.id));
   
         displayUserAttacks();
         drawPyramid();
@@ -805,6 +809,7 @@
               ${ready ? "Ready" : "⏳ " + formatTime(timeLeft)}
             </span>
             <button class="execute-btn"
+              data-attackid="${attack.id}"
               data-targetid="${attack.targetTokenId}"
               data-attackindex="${attack.attackIndex}"
               data-resource="${attack.resource}"
@@ -819,10 +824,11 @@
       container.querySelectorAll(".execute-btn").forEach(btn => {
         btn.addEventListener("click", async () => {
           if (btn.disabled) return;
+          const attackId = btn.dataset.attackid;
           const targetTokenId = parseInt(btn.dataset.targetid, 10);
           const attackIndex = parseInt(btn.dataset.attackindex, 10);
           const resource = parseInt(btn.dataset.resource, 10);
-          await executeAttack({ targetTokenId, attackIndex, resource });
+          await executeAttack({ id: attackId, targetTokenId, attackIndex, resource });
         });
       });
     }
@@ -862,6 +868,18 @@
       }, 1000);
     }
   
+    // ==================== DISMISS ====================
+    function dismissAttackById(attackId) {
+      const key = "dismissedAttacks";
+      const arr = JSON.parse(localStorage.getItem(key) || "[]");
+      if (!arr.includes(attackId)) arr.push(attackId);
+      localStorage.setItem(key, JSON.stringify(arr));
+    }
+  
+    function loadDismissedAttacks() {
+      return new Set(JSON.parse(localStorage.getItem("dismissedAttacks") || "[]"));
+    }
+  
     // ✅ EXECUTE (PiratesV3.executeAttack)
     async function executeAttack(attack) {
       actionMessage.innerHTML = '<span class="success">⏳ Executing attack...</span>';
@@ -879,7 +897,9 @@
   
         actionMessage.innerHTML = '<span class="success">✅ Attack executed! Resources stolen.</span>';
   
-        // localStorage nicht mehr nötig, aber falls alte Einträge existieren, aufräumen
+        // Bei Erfolg optional auch dismiss (kann man machen, muss aber nicht)
+        // dismissAttackById(attack.id);
+  
         localStorage.removeItem(getAttackStorageKey(attack.targetTokenId));
   
         await loadUserAttacks();
@@ -888,7 +908,13 @@
       } catch (e) {
         console.error("executeAttack error:", e);
         let msg = e?.message || "Unknown error";
-        if ((msg + "").includes("execution reverted")) msg = "❌ Reverted. Attack not ready / already executed / invalid index.";
+        if ((msg + "").includes("execution reverted")) {
+          // Bei Revert nach Ablauf der Zeit -> wahrscheinlich "nichts zu stehlen"
+          if (attack.id) dismissAttackById(attack.id);
+          await loadUserAttacks();
+          actionMessage.innerHTML = `<span class="error">❌ Attack failed – nothing to steal (target empty).</span>`;
+          return;
+        }
         actionMessage.innerHTML = `<span class="error">${msg}</span>`;
       }
     }
@@ -985,7 +1011,6 @@
       let html = "";
       for (const r of userResources) {
         const name = resourceNames[r.resourceId] || `Resource ${r.resourceId}`;
-        // Bild-URL: https://inpinity.online/img/{id}.PNG (Großschreibung beachten)
         const imgUrl = `https://inpinity.online/img/${r.resourceId}.PNG`;
         html += `
           <div class="resource-row">
@@ -1074,14 +1099,109 @@
       drawPyramid();
     }
   
-    // ==================== SIDEBAR ====================
+    // ==================== ATTACK-DROPDOWN (intelligent) ====================
+    function tokenIdToRowCol(tokenId) {
+      const id = Number(tokenId);
+      return { row: Math.floor(id / 2048), col: id % 2048 };
+    }
+  
+    function productionToAllowedResourceIds(productionObj) {
+      const map = {
+        OIL: 0, LEMONS: 1, IRON: 2, GOLD: 3, PLATINUM: 4,
+        COPPER: 5, CRYSTAL: 6, OBSIDIAN: 7, MYSTERIUM: 8, AETHER: 9
+      };
+      return Object.keys(productionObj)
+        .map(key => map[key])
+        .filter(id => Number.isFinite(id));
+    }
+  
+    async function getStealableResourcesForTarget(targetTokenId) {
+      let farmingActive = false;
+      try {
+        const f = await farmingV3Contract.farms(targetTokenId);
+        farmingActive = !!f.isActive;
+      } catch (e) {}
+  
+      let revealed = false;
+      try {
+        const d = await nftContract.blockData(targetTokenId);
+        revealed = !!d.revealed;
+      } catch (e) {}
+  
+      if (!revealed) {
+        return {
+          farmingActive,
+          revealed: false,
+          allowed: [0, 1, 2], // Oil, Lemons, Iron (Basics)
+          reason: "Target not revealed yet"
+        };
+      }
+  
+      let rarity = 0;
+      const { row } = tokenIdToRowCol(targetTokenId);
+      try {
+        rarity = Number(await nftContract.calculateRarity(targetTokenId));
+      } catch (e) {}
+  
+      const prod = getProduction(rarity, row);
+      const allowed = productionToAllowedResourceIds(prod);
+  
+      return {
+        farmingActive,
+        revealed: true,
+        rarity,
+        allowed,
+        reason: "OK"
+      };
+    }
+  
+    async function refreshAttackDropdown() {
+      const select = document.getElementById("attackResource");
+      const msg = document.getElementById("actionMessage");
+      if (!select || !selectedTokenId) return;
+  
+      const targetTokenId = parseInt(selectedTokenId, 10);
+  
+      if (!userAddress || !nftContract || !farmingV3Contract) {
+        select.innerHTML = "";
+        [0, 1, 2].forEach(id => {
+          const opt = document.createElement("option");
+          opt.value = id;
+          opt.textContent = resourceNames[id];
+          select.appendChild(opt);
+        });
+        return;
+      }
+  
+      msg.innerHTML = `<span class="success">⏳ Analyzing target...</span>`;
+  
+      const info = await getStealableResourcesForTarget(targetTokenId);
+  
+      select.innerHTML = "";
+      info.allowed.forEach(id => {
+        const opt = document.createElement("option");
+        opt.value = id;
+        opt.textContent = resourceNames[id] + (info.revealed ? "" : " (safe)");
+        select.appendChild(opt);
+      });
+  
+      if (!info.farmingActive) {
+        msg.innerHTML = `<span class="error">⚠️ Target farming is not active – attack may fail (no loot).</span>`;
+      } else {
+        msg.innerHTML = info.revealed
+          ? `<span class="success">✅ Target analyzed. Choose a resource that target produces.</span>`
+          : `<span class="success">✅ Target not revealed. Only safe basics shown.</span>`;
+      }
+    }
+  
+    // ==================== SIDEBAR (erweitert um Dropdown-Update) ====================
     async function updateSidebar(tokenId) {
       selectedTokenId = tokenId;
       const token = tokens[tokenId];
       const owner = token ? token.owner : null;
       selectedTokenOwner = owner;
   
-      // ✅ real V3 active (on-chain)
+      // real V3 active (on-chain)
       let v3Active = false;
       if (farmingV3Contract) {
         try {
@@ -1151,6 +1271,8 @@
         ownerActionsDiv.innerHTML = btns;
       } else if (userAddress && owner) {
         attackInput.style.display = "flex";
+        // Dropdown für Attacke aktualisieren
+        refreshAttackDropdown();
       } else {
         actionPanel.style.display = "none";
       }
@@ -1284,7 +1406,6 @@
       const targetTokenId = parseInt(selectedTokenId, 10);
       const resource = parseInt(document.getElementById("attackResource").value, 10);
   
-      // localStorage nur noch als Fallback, falls Subgraph nicht schnell genug ist – aber nicht mehr benötigt
       localStorage.setItem(getAttackStorageKey(targetTokenId), JSON.stringify({
         targetTokenId,
         resource,
@@ -1335,7 +1456,7 @@
         inpiContract = new ethers.Contract(INPI_ADDRESS, INPI_ABI, signer);
         pitroneContract = new ethers.Contract(PITRONE_ADDRESS, PITRONE_ABI, signer);
   
-        // ✅ init old farms for migration
+        // init old farms for migration
         initFarmingContracts(signer);
   
         document.getElementById("walletAddress").innerText = shortenAddress(userAddress);
