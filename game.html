@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>INPINITY – The Pi-Phi Pyramid (v0.19.0 – AttackV3S + Smart Dropdown + Dismiss)</title>
+    <title>INPINITY – The Pi-Phi Pyramid (v0.20.0 – AttackV3S + Smart Dropdown + Dismiss)</title>
     <link rel="icon" type="image/png" href="favicon.webp" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -595,7 +595,7 @@
 
         <footer>
             <p>© 2026 INPINITY. All rights reserved. Built on Base.</p>
-            <p>Version 0.19.0 – AttackV3S + Smart Dropdown + Dismiss</p>
+            <p>Version 0.20.0 – AttackV3S + Smart Dropdown + Dismiss + Farming Fix</p>
             <p><a href="whitepaper.html">Whitepaper</a> | <a href="https://discord.gg/95yj6Eg6" target="_blank">Discord</a></p>
         </footer>
     </div>
@@ -609,6 +609,7 @@
        - Ressourcen mit Bildern von inpinity.online/img/{id}.PNG
        - Intelligentes Dropdown: nur Ressourcen, die das Target produziert
        - Dismiss-Funktion für fehlgeschlagene Angriffe
+       - Farming fix: Nur V3, keine Migration von V1/V2 mehr
     ========================================================= */
     
     /* ==================== KONFIGURATION ==================== */
@@ -637,6 +638,9 @@
     const SUBGRAPH_STUDIO_URL  = "https://api.studio.thegraph.com/query/1743108/inpinity/version/latest";
     const SUBGRAPH_GATEWAY_URL = "https://gateway.thegraph.com/api/subgraphs/id/22b4uXYgs4rwTj6n3iWB4d8Vk4s7LAG7dTAtRaTXfseQ";
     const API_KEY = "059bc2832dfe50597009e556898d4ba6";
+    
+    // Farming Cooldown
+    const CLAIM_COOLDOWN_SEC = 24 * 60 * 60; // 24h
     
     /* ==================== ABIs ==================== */
     const NFT_ABI = [
@@ -752,6 +756,12 @@
     function safeText(id, txt){ const el=document.getElementById(id); if(el) el.innerText=txt; }
     function safeHTML(id, html){ const el=document.getElementById(id); if(el) el.innerHTML=html; }
     
+    function secondsUntilClaimable(farmStartTime, nowSec){
+      if (!farmStartTime) return null;
+      const age = nowSec - farmStartTime;
+      return Math.max(0, CLAIM_COOLDOWN_SEC - age);
+    }
+    
     /* ==================== SUBGRAPH ==================== */
     function getSubgraphURL(){
       return USE_STUDIO ? SUBGRAPH_STUDIO_URL : SUBGRAPH_GATEWAY_URL;
@@ -865,59 +875,42 @@
       container.innerHTML = html;
     }
     
-    /* ==================== FARM MIGRATION (V1/V2 -> V3) ==================== */
+    /* ==================== FARM MIGRATION (NUR V3) ==================== */
     function initFarmingContracts(signer){
+      // V1/V2 werden nicht mehr für Migration verwendet, aber für Kompatibilität initialisiert
       farmingV1Contract = new ethers.Contract(FARMING_V1_ADDRESS, FARMING_V1_ABI, signer);
       farmingV2Contract = new ethers.Contract(FARMING_V2_ADDRESS, FARMING_V2_ABI, signer);
       farmingV3Contract = new ethers.Contract(FARMING_V3_ADDRESS, FARMING_V3_ABI, signer);
     }
     
     async function getFarmStatus(tokenId){
-      const [v1, v2, v3] = await Promise.allSettled([
-        farmingV1Contract.farms(tokenId),
-        farmingV2Contract.farms(tokenId),
+      const [v3] = await Promise.allSettled([
         farmingV3Contract.farms(tokenId),
       ]);
     
       return {
-        v1Active: v1.status==="fulfilled" ? !!v1.value.isActive : false,
-        v2Active: v2.status==="fulfilled" ? !!v2.value.isActive : false,
         v3Active: v3.status==="fulfilled" ? !!v3.value.isActive : false,
       };
     }
     
+    // Vereinfachte migrateToV3 - nur V3
     async function migrateToV3(tokenId, msgDivId="actionMessage"){
       const msgDiv = document.getElementById(msgDivId);
       if (msgDiv) msgDiv.innerHTML = `<span class="success">⏳ Checking farms...</span>`;
     
-      const st = await getFarmStatus(tokenId);
-      if (st.v3Active){
-        if (msgDiv) msgDiv.innerHTML = `<span class="success">✅ Already on V3.</span>`;
-        return;
-      }
-    
       try {
-        if (st.v2Active){
-          if (msgDiv) msgDiv.innerHTML = `<span class="success">⏳ Migrating V2 → V3 (claim → stop → start)...</span>`;
-          await (await farmingV2Contract.claimResources(tokenId, { gasLimit: 600000 })).wait();
-          await (await farmingV2Contract.stopFarming(tokenId, { gasLimit: 600000 })).wait();
-          await (await farmingV3Contract.startFarming(tokenId, { gasLimit: 600000 })).wait();
-          if (msgDiv) msgDiv.innerHTML = `<span class="success">✅ Migrated V2 → V3.</span>`;
+        // Prüfe direkt den V3-Status
+        const farm = await farmingV3Contract.farms(tokenId);
+        if (farm.isActive){
+          if (msgDiv) msgDiv.innerHTML = `<span class="success">✅ Already on V3.</span>`;
           return;
         }
     
-        if (st.v1Active){
-          if (msgDiv) msgDiv.innerHTML = `<span class="success">⏳ Migrating V1 → V3 (claim → stop → start)...</span>`;
-          await (await farmingV1Contract.claimResources(tokenId, { gasLimit: 600000 })).wait();
-          await (await farmingV1Contract.stopFarming(tokenId, { gasLimit: 600000 })).wait();
-          await (await farmingV3Contract.startFarming(tokenId, { gasLimit: 600000 })).wait();
-          if (msgDiv) msgDiv.innerHTML = `<span class="success">✅ Migrated V1 → V3.</span>`;
-          return;
-        }
-    
-        if (msgDiv) msgDiv.innerHTML = `<span class="success">⏳ Starting V3...</span>`;
-        await (await farmingV3Contract.startFarming(tokenId, { gasLimit: 600000 })).wait();
-        if (msgDiv) msgDiv.innerHTML = `<span class="success">✅ V3 started.</span>`;
+        // Nicht auf V3 aktiv: starte direkt V3
+        if (msgDiv) msgDiv.innerHTML = `<span class="success">⏳ Starting V3 farming...</span>`;
+        const tx = await farmingV3Contract.startFarming(tokenId, { gasLimit: 500000 });
+        await tx.wait();
+        if (msgDiv) msgDiv.innerHTML = `<span class="success">✅ V3 farming started.</span>`;
       } catch (e){
         console.error(e);
         if (msgDiv) msgDiv.innerHTML = `<span class="error">❌ ${e.message}</span>`;
@@ -1118,10 +1111,16 @@
     
     async function getStealableResourcesForTarget(targetTokenId) {
       let farmingActive = false;
+      let farmStartTime = 0;
+    
       try {
         const f = await farmingV3Contract.farms(targetTokenId);
         farmingActive = !!f.isActive;
+        farmStartTime = Number(f.startTime.toString());
       } catch (e) {}
+    
+      const now = Math.floor(Date.now()/1000);
+      const claimIn = farmStartTime ? secondsUntilClaimable(farmStartTime, now) : null;
     
       let revealed = false;
       try {
@@ -1132,6 +1131,8 @@
       if (!revealed) {
         return {
           farmingActive,
+          farmStartTime,
+          claimIn,
           revealed: false,
           allowed: [0, 1, 2], // Oil, Lemons, Iron (Basics)
           reason: "Target not revealed yet"
@@ -1149,6 +1150,8 @@
     
       return {
         farmingActive,
+        farmStartTime,
+        claimIn,
         revealed: true,
         rarity,
         allowed,
@@ -1184,6 +1187,36 @@
       msg.innerHTML = `<span class="success">⏳ Analyzing target...</span>`;
     
       const info = await getStealableResourcesForTarget(targetTokenId);
+      const now = Math.floor(Date.now()/1000);
+    
+      let farmLine = "";
+      if (!info.farmingActive) {
+        farmLine = "❌ Farming inactive → likely 0 loot.";
+      } else if (info.claimIn !== null && info.claimIn > 0) {
+        farmLine = `⏳ Farming age: ${formatDuration(now - info.farmStartTime)} · Loot builds up (claim-ready in ${formatDuration(info.claimIn)}).`;
+      } else if (info.claimIn === 0) {
+        farmLine = `✅ Farming age: ${formatDuration(now - info.farmStartTime)} · Loot window is active.`;
+      } else {
+        farmLine = "✅ Farming active.";
+      }
+    
+      // Optional: Pending total (nur als Zusatzinfo, nicht blockierend)
+      let pendingLine = "";
+      try {
+        const pendingArr = await farmingV3Contract.getAllPending(targetTokenId);
+        if (pendingArr && Array.isArray(pendingArr)) {
+          const total = pendingArr.reduce((acc, bn) => acc.add(bn), ethers.BigNumber.from(0));
+          pendingLine = total.isZero()
+            ? "⚠️ Pending: 0 (target probably claimed recently)."
+            : `✅ Pending total: ${total.toString()} (there is loot).`;
+        }
+      } catch(e) {}
+    
+      msg.innerHTML = `
+        <span class="${!info.farmingActive ? 'error' : 'success'}">
+          ${farmLine}<br>${pendingLine}
+        </span>
+      `;
     
       select.innerHTML = "";
       info.allowed.forEach(id => {
@@ -1192,19 +1225,10 @@
         opt.textContent = resourceNames[id] + (info.revealed ? "" : " (safe)");
         select.appendChild(opt);
       });
-    
-      if (!info.farmingActive) {
-        msg.innerHTML = `<span class="error">⚠️ Target farming is not active – attack may fail (no loot).</span>`;
-      } else {
-        msg.innerHTML = info.revealed
-          ? `<span class="success">✅ Target analyzed. Choose a resource that target produces.</span>`
-          : `<span class="success">✅ Target not revealed. Only safe basics shown.</span>`;
-      }
     }
     
     /* ==================== ATTACKS (PiratesV3) ==================== */
     function initAttackResourceSelect(){
-      // Wird jetzt von refreshAttackDropdown überschrieben, aber initial befüllen wir es trotzdem
       const select=document.getElementById("attackResourceSelect");
       if(!select) return;
       select.innerHTML="";
@@ -1219,11 +1243,10 @@
       if (!userAddress) return;
     
       try {
-        // ✅ AttackV3 Entities (PiratesV3) – WICHTIG: attackV3S (großes S)
-        const where = `{ attacker: "${userAddress.toLowerCase()}" }`; // wir holen alle, filtern später executed
+        const where = `{ attacker: "${userAddress.toLowerCase()}" }`;
     
         const attacks = await fetchAllWithPagination(
-          "attackV3S", // ✅ LIST field aus deinem Schema
+          "attackV3S",
           "id attacker target attackIndex startTime endTime resource executed",
           where
         );
@@ -1240,7 +1263,6 @@
             resource: parseInt(a.resource || "0", 10)
           }));
     
-        // Dismissed-Attacks aus localStorage entfernen
         const dismissed = loadDismissedAttacks();
         userAttacks = userAttacks.filter(a => !dismissed.has(a.id));
     
@@ -1377,7 +1399,7 @@
       return new Set(JSON.parse(localStorage.getItem("dismissedAttacks") || "[]"));
     }
     
-    /* ==================== EXECUTE ATTACK (PiratesV3) mit Prüfung ==================== */
+    /* ==================== EXECUTE ATTACK (PiratesV3) ==================== */
     async function executeAttack(attack){
       const msgDiv=document.getElementById("attackMessage");
       if(!msgDiv) return;
@@ -1385,17 +1407,31 @@
       msgDiv.innerHTML = '<span class="success">⏳ Checking target resources...</span>';
       try {
         if (!piratesV3Contract) throw new Error("Connect wallet first.");
-
-        // Prüfe, ob das Ziel unclaimed Ressourcen des angegriffenen Typs hat
+    
         const pending = await farmingV3Contract.getAllPending(attack.targetTokenId);
-        // pending ist ein Array von 10 BigNumber (ethers v5)
         if (!pending || pending.length <= attack.resource || pending[attack.resource].isZero()) {
-          msgDiv.innerHTML = '<span class="error">❌ Target has no unclaimed resources for this resource type. Execute not possible.</span>';
+          let tip = "Tip: the target likely claimed recently or hasn't farmed long enough.";
+          try {
+            const f = await farmingV3Contract.farms(attack.targetTokenId);
+            const now = Math.floor(Date.now()/1000);
+            const startTime = Number(f.startTime.toString());
+            const claimIn = startTime ? secondsUntilClaimable(startTime, now) : null;
+    
+            if (!f.isActive) {
+              tip = "Tip: target farming is inactive → wait or pick another target.";
+            } else if (claimIn !== null && claimIn > 0) {
+              tip = `Tip: wait ~${formatDuration(claimIn)} (24h window) or attack a long-running farm.`;
+            } else {
+              tip = "Tip: loot window is active but resource is 0 → target probably claimed. Try later.";
+            }
+          } catch(e){}
+    
+          msgDiv.innerHTML = `<span class="error">❌ No loot for this resource right now.<br>${tip}</span>`;
           if (attack.id) dismissAttackById(attack.id);
           await loadUserAttacks();
           return;
         }
-
+    
         msgDiv.innerHTML = '<span class="success">⏳ Executing attack...</span>';
     
         const tx = await piratesV3Contract.executeAttack(
@@ -1417,7 +1453,6 @@
         console.error("ExecuteAttack error:", e);
         let msg = e?.message || "Unknown error";
         if((msg+"").includes("execution reverted")){
-          // Bei Revert nach Ablauf der Zeit -> wahrscheinlich "nichts zu stehlen"
           if (attack.id) dismissAttackById(attack.id);
           await loadUserAttacks();
           msgDiv.innerHTML = `<span class="error">❌ Attack failed – nothing to steal (target empty).</span>`;
@@ -1527,7 +1562,6 @@
     
         msgDiv.innerHTML = `<span class="success">✅ Attack started! Check back later.</span>`;
     
-        // Lokaler Speicher als Backup, wird aber nicht mehr für die Anzeige benötigt
         localStorage.setItem(`attack_${targetTokenId}`, JSON.stringify({
           targetTokenId, resource, startTime: Math.floor(Date.now()/1000)
         }));
@@ -1611,8 +1645,6 @@
     
       try {
         const allowance = await pitroneContract.allowance(userAddress, PITRONE_ADDRESS);
-        // (Optional approve for PIT token if required by your PIT contract; keep if you use ERC20 allowances)
-        // if (allowance.lt(amountWei)) { ... }
     
         const tx = await pitroneContract.exchangePitrone(amountWei, { gasLimit: 400000 });
         msgDiv.innerHTML = `<span class="success">⏳ Transaction sent...</span>`;
@@ -1650,7 +1682,7 @@
         }
     
         nftContract          = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
-        initFarmingContracts(signer); // v1/v2/v3 for migration + v3 main
+        initFarmingContracts(signer);
         piratesV3Contract    = new ethers.Contract(PIRATES_V3_ADDRESS, PIRATES_V3_ABI, signer);
         mercenaryV2Contract  = new ethers.Contract(MERCENARY_V2_ADDRESS, MERCENARY_V2_ABI, signer);
         partnershipV2Contract= new ethers.Contract(PARTNERSHIP_V2_ADDRESS, PARTNERSHIP_V2_ABI, signer);
@@ -1663,7 +1695,6 @@
         document.getElementById("connectWallet").innerText = "Wallet Connected";
     
         initAttackResourceSelect();
-        // Dropdown bei bestehenden Eingaben aktualisieren
         refreshAttackDropdown();
     
         await updateBalances();
@@ -1841,7 +1872,6 @@
     document.getElementById("randomBlockBtn").addEventListener("click", findRandomFreeBlock);
     document.getElementById("mintBtn").addEventListener("click", mintBlock);
     
-    // Intelligentes Dropdown bei Änderung der Koordinaten
     document.getElementById("attackRow").addEventListener("input", refreshAttackDropdown);
     document.getElementById("attackCol").addEventListener("input", refreshAttackDropdown);
     
