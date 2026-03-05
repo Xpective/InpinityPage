@@ -1121,31 +1121,40 @@
         const f = await farmingV3Contract.farms(targetTokenId);
         farmingActive = !!f.isActive;
       } catch (e) {}
-  
+    
       let revealed = false;
       try {
         const d = await nftContract.blockData(targetTokenId);
         revealed = !!d.revealed;
       } catch (e) {}
-  
+    
       if (!revealed) {
+        console.log(`Target ${targetTokenId} not revealed, returning basics`);
         return {
           farmingActive,
           revealed: false,
-          allowed: [0, 1, 2], // Oil, Lemons, Iron (Basics)
+          allowed: [0, 1, 2],
           reason: "Target not revealed yet"
         };
       }
-  
+    
       let rarity = 0;
       const { row } = tokenIdToRowCol(targetTokenId);
       try {
         rarity = Number(await nftContract.calculateRarity(targetTokenId));
-      } catch (e) {}
-  
+      } catch (e) {
+        console.warn("Failed to get rarity, using 0");
+      }
+    
       const prod = getProduction(rarity, row);
-      const allowed = productionToAllowedResourceIds(prod);
-  
+      let allowed = productionToAllowedResourceIds(prod);
+      
+      // Fallback: wenn allowed leer ist (weil z.B. production nicht stimmt), alle Ressourcen anbieten
+      if (allowed.length === 0) {
+        console.warn("No allowed resources from production, using all 0-9 as fallback");
+        allowed = [0,1,2,3,4,5,6,7,8,9];
+      }
+    
       return {
         farmingActive,
         revealed: true,
@@ -1159,9 +1168,9 @@
       const select = document.getElementById("attackResource");
       const msg = document.getElementById("actionMessage");
       if (!select || !selectedTokenId) return;
-  
+    
       const targetTokenId = parseInt(selectedTokenId, 10);
-  
+    
       if (!userAddress || !nftContract || !farmingV3Contract) {
         select.innerHTML = "";
         [0, 1, 2].forEach(id => {
@@ -1172,11 +1181,12 @@
         });
         return;
       }
-  
+    
       msg.innerHTML = `<span class="success">⏳ Analyzing target...</span>`;
-  
+    
       const info = await getStealableResourcesForTarget(targetTokenId);
-  
+      console.log("Dropdown info:", info); // 👈 Hier siehst du, was zurückkommt
+    
       select.innerHTML = "";
       info.allowed.forEach(id => {
         const opt = document.createElement("option");
@@ -1184,7 +1194,7 @@
         opt.textContent = resourceNames[id] + (info.revealed ? "" : " (safe)");
         select.appendChild(opt);
       });
-  
+    
       if (!info.farmingActive) {
         msg.innerHTML = `<span class="error">⚠️ Target farming is not active – attack may fail (no loot).</span>`;
       } else {
