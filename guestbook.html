@@ -1,779 +1,667 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inpinity - Immortal Guestbook (NFT Edition)</title>
-    <link rel="stylesheet" href="css/base.css" />
-    <link rel="stylesheet" href="css/layout.css" />
-    <link rel="stylesheet" href="css/animations.css" />
-    <link rel="stylesheet" href="css/dark.css" />
-    <link rel="stylesheet" href="css/light.css" />
-    <link rel="stylesheet" href="css/responsive.css" />
-    <link rel="stylesheet" href="css/color.css" />
-    <link rel="stylesheet" href="css/adapted_about_us.css" />
-    <link rel="stylesheet" href="css/adapted_advertisements.css" />
-    <link rel="stylesheet" href="css/adapted_combined.css"/>
-    <link rel="stylesheet" href="css/adapted_comunity_guidelines.css" />
-    <link rel="stylesheet" href="css/adapted_course_feedback.css" />
-    <link rel="stylesheet" href="css/adapted_mft_marketplace.css"/>
-    <link rel="stylesheet" href="css/adapted_profile.css"/>
-    <link rel="stylesheet" href="css/combined_latest.css"/>
-    <link rel="stylesheet" href="css/gamification.css" />
-    <link rel="stylesheet" href="css/referral.css"/>
-    <script defer src="main.js"></script>
-    <!-- Ethers.js for wallet interaction -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
-    <link rel="icon" type="image/png" href="favicon.webp">
-    <meta name="keywords" content="Inpinity, Game Design, Game Development, Platform, Collaboration, Forum, Tools, GameDesign, AI Development, Games of future, programming, programs, python gui, guestbook, INPI token, NFT">
-    <meta name="author" content="Xpective">
-    <meta property="og:title" content="Inpinity - Immortal Guestbook (NFT Edition)">
-    <meta property="og:description" content="Leave your immortal mark on the blockchain – sign the guestbook and mint your entry as an NFT.">
-    <meta property="og:image" content="logo_background.jpg">
-    <meta property="og:url" content="https://inpinity.online/guestbook.html">
-    <meta name="twitter:card" content="logo_background.webp">
-    <meta name="twitter:site" content="@unxpective">
-    <meta name="twitter:creator" content="@Inpinity1">
-    <meta name="theme-color" content="#FarbcodeIhrerWebsite">
-    <meta name="robots" content="index,follow">
-    <style>
-        /* Guestbook specific styles - enhanced */
-        .guestbook-container {
-            max-width: 900px;
-            margin: 2rem auto;
-            padding: 2rem;
-            background: rgba(20, 20, 20, 0.9);
-            border-radius: 8px;
-            border: 1px solid var(--quinary-color, gold);
-            box-shadow: 0 0 20px rgba(255,215,0,0.3);
-            color: #eee;
-        }
-        .guestbook-container h1 {
-            color: gold;
-            text-align: center;
-            margin-bottom: 2rem;
-            font-size: 2.5rem;
-        }
-        .partners-section {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1.5rem;
-            margin: 2rem 0;
-            padding: 1.5rem;
-            background: rgba(0,0,0,0.3);
-            border-radius: 12px;
-            border: 1px solid #444;
-        }
-        .partner-item {
-            text-align: center;
-        }
-        .partner-item a {
-            display: inline-block;
-            padding: 0.75rem 1.5rem;
-            background: #2a2a2a;
-            border: 1px solid gold;
-            border-radius: 40px;
-            color: gold;
-            font-weight: bold;
-            text-decoration: none;
-            transition: all 0.2s;
-        }
-        .partner-item a:hover {
-            background: gold;
-            color: black;
-            transform: scale(1.05);
-        }
-        .wallet-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            padding: 1rem;
-            background: #1a1a1a;
-            border-radius: 8px;
-        }
-        .wallet-info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-        .connect-wallet-btn {
-            background: gold;
-            color: black;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 40px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .connect-wallet-btn:hover {
-            transform: scale(1.05);
-        }
-        .wallet-details {
-            background: #222;
-            padding: 0.5rem 1rem;
-            border-radius: 40px;
-            border: 1px solid gold;
-            color: gold;
-            font-size: 0.9rem;
-        }
-        .guestbook-form {
-            background: #1a1a1a;
-            border: 1px solid gold;
-            border-radius: 8px;
-            padding: 2rem;
-            margin: 2rem 0;
-        }
-        .guestbook-form h2 {
-            color: gold;
-            margin-top: 0;
-        }
-        .form-group {
-            margin: 1.5rem 0;
-        }
-        .form-group label {
-            display: block;
-            color: gold;
-            margin-bottom: 0.5rem;
-        }
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
-            padding: 0.75rem;
-            background: #222;
-            border: 1px solid #444;
-            border-radius: 4px;
-            color: white;
-            font-size: 1rem;
-        }
-        .form-group input:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: gold;
-            box-shadow: 0 0 5px gold;
-        }
-        .fee-notice {
-            background: #2a2a2a;
-            border-left: 4px solid gold;
-            padding: 1rem;
-            margin: 1.5rem 0;
-            color: #ccc;
-        }
-        .fee-notice strong {
-            color: gold;
-        }
-        .submit-btn {
-            background: gold;
-            color: black;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 4px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            width: 100%;
-        }
-        .submit-btn:hover:not(:disabled) {
-            transform: scale(1.02);
-            box-shadow: 0 0 15px gold;
-        }
-        .submit-btn:disabled {
-            background: #666;
-            cursor: not-allowed;
-        }
-        .entries-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid gold;
-            padding-bottom: 0.5rem;
-            margin: 2rem 0 1rem;
-        }
-        .entries-header h2 {
-            color: gold;
-            margin: 0;
-        }
-        .clear-btn {
-            background: transparent;
-            border: 1px solid #ff4444;
-            color: #ff4444;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            transition: background 0.2s;
-        }
-        .clear-btn:hover {
-            background: #ff4444;
-            color: black;
-        }
-        .guestbook-entry {
-            background: #1a1a1a;
-            border-left: 4px solid gold;
-            padding: 1rem;
-            margin: 1rem 0;
-            border-radius: 4px;
-            position: relative;
-        }
-        .guestbook-entry.paid {
-            border-left-color: #00ff00;
-        }
-        .guestbook-entry.nft-minted {
-            border-left-color: var(--primary-cyan);
-            background: linear-gradient(90deg, #1a1a1a, #1a2a3a);
-        }
-        .guestbook-entry .name {
-            font-weight: bold;
-            color: gold;
-        }
-        .guestbook-entry .wallet {
-            font-family: monospace;
-            font-size: 0.8rem;
-            color: #aaa;
-            word-break: break-all;
-        }
-        .guestbook-entry .message {
-            margin: 0.5rem 0;
-            white-space: pre-wrap;
-        }
-        .guestbook-entry .timestamp {
-            font-size: 0.7rem;
-            color: #666;
-            text-align: right;
-        }
-        .paid-badge {
-            position: absolute;
-            top: 0.5rem;
-            right: 0.5rem;
-            background: #00ff00;
-            color: black;
-            padding: 0.2rem 0.5rem;
-            border-radius: 20px;
-            font-size: 0.7rem;
-            font-weight: bold;
-        }
-        .nft-badge {
-            position: absolute;
-            top: 0.5rem;
-            right: 5rem;
-            background: var(--primary-cyan);
-            color: black;
-            padding: 0.2rem 0.5rem;
-            border-radius: 20px;
-            font-size: 0.7rem;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .nft-badge:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 10px var(--primary-cyan);
-        }
-        .info-note {
-            background: #2a2a2a;
-            border: 1px solid #444;
-            border-radius: 4px;
-            padding: 1rem;
-            margin-bottom: 2rem;
-            color: #ccc;
-            font-size: 0.9rem;
-        }
-        .info-note strong {
-            color: gold;
-        }
-        .balance-warning {
-            color: #ffaa00;
-            font-weight: bold;
-        }
-        .warning-note {
-            background: #332211;
-            border: 1px solid #ffaa00;
-            border-radius: 8px;
-            padding: 1rem;
-            margin: 2rem auto;
-            max-width: 800px;
-            text-align: center;
-        }
-        .warning-note a {
-            color: gold;
-        }
-        .presale-note {
-            background: rgba(255,215,0,0.1);
-            border: 1px solid gold;
-            border-radius: 8px;
-            padding: 1rem;
-            margin: 2rem auto;
-            max-width: 800px;
-            text-align: center;
-        }
-        .presale-note a {
-            color: gold;
-            font-weight: bold;
-        }
-        .mint-panel {
-            background: #1a2a2a;
-            border: 1px solid var(--primary-cyan);
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin: 2rem 0;
-        }
-        .mint-panel h3 {
-            color: var(--primary-cyan);
-            margin-top: 0;
-        }
-        .mint-btn {
-            background: var(--primary-cyan);
-            color: black;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 4px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s;
-            margin-top: 1rem;
-        }
-        .mint-btn:hover:not(:disabled) {
-            transform: scale(1.05);
-            box-shadow: 0 0 15px var(--primary-cyan);
-        }
-        .mint-btn:disabled {
-            background: #444;
-            cursor: not-allowed;
-        }
-        .blockchain-link {
-            color: var(--primary-cyan);
-            text-decoration: underline;
-            cursor: pointer;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inpinity - Immortal Guestbook (Demo)</title>
+
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/dark.css" />
+  <link rel="stylesheet" href="css/light.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+  <link rel="stylesheet" href="css/color.css" />
+  <link rel="stylesheet" href="css/adapted_about_us.css" />
+  <link rel="stylesheet" href="css/adapted_advertisements.css" />
+  <link rel="stylesheet" href="css/adapted_combined.css"/>
+  <link rel="stylesheet" href="css/adapted_comunity_guidelines.css" />
+  <link rel="stylesheet" href="css/adapted_course_feedback.css" />
+  <link rel="stylesheet" href="css/adapted_mft_marketplace.css"/>
+  <link rel="stylesheet" href="css/adapted_profile.css"/>
+  <link rel="stylesheet" href="css/combined_latest.css"/>
+  <link rel="stylesheet" href="css/gamification.css" />
+  <link rel="stylesheet" href="css/referral.css"/>
+
+  <script defer src="main.js"></script>
+
+  <!-- Ethers.js for wallet interaction -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
+
+  <link rel="icon" type="image/png" href="favicon.webp">
+
+  <meta name="keywords" content="Inpinity, guestbook, demo, Base, INPI token, NFT, Pi Phi Pyramid">
+  <meta name="author" content="Xpective">
+  <meta property="og:title" content="Inpinity - Immortal Guestbook (Demo)">
+  <meta property="og:description" content="Guestbook is in development. This page is a demo preview of the future on-chain guestbook & NFT minting." />
+  <meta property="og:image" content="logo_background.jpg">
+  <meta property="og:url" content="https://inpinity.online/guestbook.html">
+  <meta name="twitter:card" content="logo_background.webp">
+  <meta name="twitter:site" content="@unxpective">
+  <meta name="twitter:creator" content="@Inpinity1">
+  <meta name="robots" content="index,follow">
+
+  <style>
+    /* ✅ keep content away from footer */
+    main { padding-bottom: 4rem; }
+    footer { margin-top: 3rem; padding-top: 1rem; }
+
+    /* Guestbook specific styles */
+    .guestbook-container {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background: rgba(20, 20, 20, 0.9);
+      border-radius: 8px;
+      border: 1px solid var(--quinary-color, gold);
+      box-shadow: 0 0 20px rgba(255,215,0,0.3);
+      color: #eee;
+    }
+    .guestbook-container h1 {
+      color: gold;
+      text-align: center;
+      margin-bottom: 1rem;
+      font-size: 2.3rem;
+    }
+
+    .demo-banner {
+      background: rgba(255, 215, 0, 0.08);
+      border: 1px solid rgba(255,215,0,0.65);
+      border-radius: 12px;
+      padding: 1rem 1.2rem;
+      margin: 1rem 0 1.5rem;
+      color: #ddd;
+      line-height: 1.6;
+    }
+    .demo-banner strong { color: gold; }
+    .demo-pill {
+      display:inline-block;
+      margin-left: .4rem;
+      padding: .15rem .6rem;
+      border-radius: 999px;
+      border: 1px solid rgba(0,255,255,0.55);
+      background: rgba(0,255,255,0.10);
+      color: var(--primary-cyan);
+      font-weight: 800;
+      font-size: .85rem;
+    }
+
+    .warning-note {
+      background: #332211;
+      border: 1px solid #ffaa00;
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 2rem auto;
+      max-width: 900px;
+      text-align: center;
+    }
+    .warning-note a { color: gold; }
+
+    .presale-note {
+      background: rgba(255,215,0,0.1);
+      border: 1px solid gold;
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 1.2rem auto 2rem;
+      max-width: 900px;
+      text-align: center;
+    }
+    .presale-note a { color: gold; font-weight: bold; }
+
+    .partners-section {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      margin: 1.5rem 0 2rem;
+      padding: 1.2rem;
+      background: rgba(0,0,0,0.3);
+      border-radius: 12px;
+      border: 1px solid #444;
+    }
+    .partner-item a {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      background: #2a2a2a;
+      border: 1px solid gold;
+      border-radius: 40px;
+      color: gold;
+      font-weight: bold;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .partner-item a:hover {
+      background: gold;
+      color: black;
+      transform: scale(1.05);
+    }
+
+    .wallet-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      padding: 1rem;
+      background: #1a1a1a;
+      border-radius: 8px;
+      border: 1px solid rgba(255,215,0,0.25);
+    }
+    .wallet-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .connect-wallet-btn {
+      background: gold;
+      color: black;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 40px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .connect-wallet-btn:hover { transform: scale(1.05); }
+    .wallet-details {
+      background: #222;
+      padding: 0.5rem 1rem;
+      border-radius: 40px;
+      border: 1px solid gold;
+      color: gold;
+      font-size: 0.9rem;
+    }
+
+    .guestbook-form {
+      background: #1a1a1a;
+      border: 1px solid gold;
+      border-radius: 8px;
+      padding: 2rem;
+      margin: 2rem 0;
+    }
+    .guestbook-form h2 { color: gold; margin-top: 0; }
+    .form-group { margin: 1.2rem 0; }
+    .form-group label { display:block; color: gold; margin-bottom: .5rem; font-weight: 700; }
+    .form-group input, .form-group textarea {
+      width: 100%;
+      padding: 0.75rem;
+      background: #222;
+      border: 1px solid #444;
+      border-radius: 6px;
+      color: white;
+      font-size: 1rem;
+    }
+    .form-group input:focus, .form-group textarea:focus {
+      outline: none;
+      border-color: gold;
+      box-shadow: 0 0 5px gold;
+    }
+
+    .fee-notice {
+      background: #2a2a2a;
+      border-left: 4px solid gold;
+      padding: 1rem;
+      margin: 1.2rem 0;
+      color: #ccc;
+      line-height: 1.5;
+      border-radius: 6px;
+    }
+    .fee-notice strong { color: gold; }
+
+    .submit-btn {
+      background: gold;
+      color: black;
+      border: none;
+      padding: 0.9rem 1.5rem;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      font-weight: 900;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      width: 100%;
+    }
+    .submit-btn:hover:not(:disabled) { transform: scale(1.01); box-shadow: 0 0 15px gold; }
+    .submit-btn:disabled { background: #666; cursor: not-allowed; }
+
+    .entries-header {
+      display:flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid gold;
+      padding-bottom: 0.5rem;
+      margin: 2rem 0 1rem;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .entries-header h2 { color: gold; margin: 0; }
+    .clear-btn {
+      background: transparent;
+      border: 1px solid #ff4444;
+      color: #ff4444;
+      padding: 0.35rem 0.6rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: background 0.2s;
+      font-weight: 800;
+    }
+    .clear-btn:hover { background: #ff4444; color: black; }
+
+    .guestbook-entry {
+      background: #1a1a1a;
+      border-left: 4px solid gold;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 8px;
+      position: relative;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .guestbook-entry.paid { border-left-color: #00ff00; }
+    .guestbook-entry.nft-minted {
+      border-left-color: var(--primary-cyan);
+      background: linear-gradient(90deg, #1a1a1a, #1a2a3a);
+    }
+    .guestbook-entry .name { font-weight: 900; color: gold; }
+    .guestbook-entry .wallet {
+      font-family: monospace;
+      font-size: 0.85rem;
+      color: #aaa;
+      word-break: break-all;
+      margin-top: 0.25rem;
+    }
+    .guestbook-entry .message { margin: 0.6rem 0; white-space: pre-wrap; color:#ddd; }
+    .guestbook-entry .timestamp { font-size: 0.75rem; color: #777; text-align: right; }
+
+    .paid-badge {
+      position:absolute; top:.6rem; right:.6rem;
+      background: #00ff00; color:#000;
+      padding:.2rem .55rem; border-radius: 999px;
+      font-size:.75rem; font-weight: 900;
+    }
+    .nft-badge {
+      position:absolute; top:.6rem; right:5.4rem;
+      background: var(--primary-cyan); color:#000;
+      padding:.2rem .55rem; border-radius: 999px;
+      font-size:.75rem; font-weight: 900;
+      cursor: pointer;
+    }
+    .nft-badge:hover { transform: scale(1.03); box-shadow: 0 0 10px var(--primary-cyan); }
+
+    .mint-panel {
+      background: #1a2a2a;
+      border: 1px solid var(--primary-cyan);
+      border-radius: 10px;
+      padding: 1.25rem;
+      margin: 1.5rem 0 2rem;
+    }
+    .mint-panel h3 { color: var(--primary-cyan); margin-top: 0; }
+    .mint-btn {
+      background: var(--primary-cyan);
+      color: black;
+      border: none;
+      padding: 0.75rem 1.2rem;
+      border-radius: 10px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 0.8rem;
+    }
+    .mint-btn:hover:not(:disabled) { transform: scale(1.03); box-shadow: 0 0 15px var(--primary-cyan); }
+    .mint-btn:disabled { background: #444; cursor: not-allowed; }
+  </style>
 </head>
+
 <body>
-    <header>
-        <nav>
-            <ul>
-                <li><a aria-label="Home" href="index.html">Home</a></li>
-                <li><a aria-label="Features" href="features.html">Features</a></li>
-                <li><a aria-label="Game" href="game.html">Game</a></li>
-                <li><a aria-label="Forum" href="forum.html">Forum</a></li>
-                <li><a aria-label="Collaboration" href="collaboration.html">Collaboration</a></li>
-                <li><a aria-label="Register" href="register.html">Register</a></li>
-                <li><a aria-label="About" href="about.html">About</a></li>
-                <li><a aria-label="Whitepaper" href="whitepaper.html">Whitepaper</a></li>
-                <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
-                <li><a aria-label="Guestbook" href="guestbook.html">Guestbook</a></li>
-                <li><a aria-label="Advertising" href="advertising.html">Advertising</a></li>
-                <li><a aria-label="Profile" href="profile.html">Profile</a></li>
-                <li><a aria-label="Staking" href="staking.html">Staking</a></li>
-                <div class="themeDots">
-                    <div class="dot light" title="Light Theme"></div>
-                    <div class="dot dark" title="Dark Theme"></div>
-                    <div class="dot basic" title="Basic Theme"></div>
-                </div>
-            </ul>
-        </nav>
-        <style>
-            .themeDots .dot {
-                display: inline-block;
-                width: 20px;
-                height: 20px;
-                border-radius: 50%;
-                margin: 5px;
-                cursor: pointer;
-                transition: transform 0.2s;
-            }
-            .themeDots .dot.light { background-color: #FFFFFF; }
-            .themeDots .dot.dark { background-color: #000000; }
-            .themeDots .dot.basic { background-color: var(--quinary-color); }
-            .themeDots .dot:hover { transform: scale(1.2); }
-        </style>
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                document.querySelector('.themeDots .dot.light')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'light'));
-                document.querySelector('.themeDots .dot.dark')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'dark'));
-                document.querySelector('.themeDots .dot.basic')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'basic'));
-            });
-        </script>
-    </header>
+  <header>
+    <nav>
+      <ul>
+        <li><a aria-label="Home" href="index.html">Home</a></li>
+        <li><a aria-label="Features" href="features.html">Features</a></li>
+        <li><a aria-label="Game" href="game.html">Game</a></li>
+        <li><a aria-label="Mint" href="mint.html">Mint</a></li>
+        <li><a aria-label="Pyramid Map" href="map.html">Pyramid Map</a></li>
+        <li><a aria-label="Collaboration" href="collaboration.html">Collaboration</a></li>
+        <li><a aria-label="About" href="about.html">About</a></li>
+        <li><a aria-label="Whitepaper" href="whitepaper.html">Whitepaper</a></li>
+        <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
+        <li><a aria-label="Guestbook" href="guestbook.html">Guestbook</a></li>
+        <li><a aria-label="Advertising" href="advertising.html">Advertising</a></li>
+        <li><a aria-label="Staking" href="staking.html">Staking</a></li>
 
-    <main>
-        <!-- Warning about ToshiMart -->
-        <div class="warning-note">
-            <p>⚠️ <strong>Important Update:</strong> We have withdrawn from ToshiMart due to phishing concerns. Our new INPI token is <code>0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</code>. All official contracts are listed on our <a href="index.html">homepage</a>. Do not interact with the old token or ToshiMart pools.</p>
+        <div class="themeDots">
+          <div class="dot light" title="Light Theme"></div>
+          <div class="dot dark" title="Dark Theme"></div>
+          <div class="dot basic" title="Basic Theme"></div>
         </div>
+      </ul>
+    </nav>
 
-        <!-- Presale Note -->
-        <div class="presale-note">
-            <p>🔥 <strong>PRESALE LIVE NOW:</strong> 2,000,000 INPI per 1 ETH until March 25, 2026. <a href="https://inpinity.online/token/">👉 Join the Presale</a></p>
-        </div>
-
-        <div class="guestbook-container">
-            <h1>📖 Immortal Guestbook (NFT Edition)</h1>
-
-            <!-- Partners Section -->
-            <div class="partners-section">
-                <div class="partner-item"><a href="https://base.org/" target="_blank" rel="noopener">⚡ Base L2</a></div>
-                <div class="partner-item"><a href="https://uniswap.org/" target="_blank" rel="noopener">🦄 Uniswap</a></div>
-            </div>
-
-            <!-- Wallet Connection Bar -->
-            <div class="wallet-bar">
-                <div class="wallet-info">
-                    <button id="connectWalletBtn" class="connect-wallet-btn">🔌 Connect Wallet</button>
-                    <span id="walletStatus" class="wallet-details" style="display: none;"></span>
-                </div>
-                <div id="balanceInfo" style="display: none;">
-                    <span class="wallet-details">INPI: <span id="inpiBalance">0</span></span>
-                </div>
-            </div>
-
-            <!-- Info Note -->
-            <div class="info-note">
-                <strong>✍️ Leave your immortal mark on the blockchain!</strong> Each guestbook entry requires a small fee of <strong>1 $INPI</strong> (new token). This fee supports development. After signing, you can <strong>mint your entry as an NFT</strong> for an additional 1 INPI, creating a permanent, tradeable token of your message on the Base blockchain.
-                <span style="color: gold;">Your legacy, forever on-chain!</span>
-            </div>
-
-            <!-- Entry Form -->
-            <div class="guestbook-form">
-                <h2>Sign the Guestbook</h2>
-                <form id="guestbookForm">
-                    <div class="form-group">
-                        <label for="name">Your Name / Pseudonym *</label>
-                        <input type="text" id="name" required placeholder="e.g. GameDev123">
-                    </div>
-                    <div class="form-group">
-                        <label for="wallet">Your Wallet Address (optional, for display)</label>
-                        <input type="text" id="walletInput" placeholder="0x... or ENS">
-                    </div>
-                    <div class="form-group">
-                        <label for="message">Your Message *</label>
-                        <textarea id="message" rows="4" required placeholder="Write something immortal... (will be stored on-chain when minted)"></textarea>
-                    </div>
-
-                    <div class="fee-notice">
-                        <strong>⚠️ Fee: 1 $INPI</strong> to sign (new token). Make sure you have at least 1 $INPI and are connected to Base network.<br>
-                        Old INPI token (<code>0x15ac...</code>) is not accepted.
-                    </div>
-
-                    <button type="submit" id="submitEntryBtn" class="submit-btn" disabled>💾 Sign Guestbook (1 $INPI fee)</button>
-                </form>
-            </div>
-
-            <!-- Minting Panel (appears after an entry is created) -->
-            <div id="mintPanel" class="mint-panel" style="display: none;">
-                <h3>✨ Mint Your Entry as an NFT</h3>
-                <p>Your recent entry can be turned into a permanent NFT on the Base blockchain. This creates a unique, tradeable token containing your message.</p>
-                <p><strong>Additional fee: 1 INPI</strong> (covers gas and minting costs).</p>
-                <div style="display: flex; gap: 10px; align-items: center;">
-                    <span>Last entry: <span id="lastEntryPreview"></span></span>
-                    <button id="mintEntryBtn" class="mint-btn">🖼️ Mint as NFT (1 INPI)</button>
-                </div>
-            </div>
-
-            <!-- Entries List -->
-            <div class="entries-header">
-                <h2>📝 Immortal Signatures & NFTs</h2>
-                <button id="clearEntries" class="clear-btn">Clear all (demo)</button>
-            </div>
-            <div id="entriesList" class="entries-list">
-                <!-- Entries will be injected via JavaScript -->
-            </div>
-        </div>
-    </main>
-
-    <footer>
-        <p>© 2026 Inpinity. All rights reserved. Working with <a href="https://base.org/" target="_blank" rel="noopener" style="color: gold;">Base</a> and <a href="https://uniswap.org/" target="_blank" rel="noopener" style="color: gold;">Uniswap</a>.</p>
-        <div class="footer-links">
-            <a href="privacypolicy.html">Privacy Policy</a>
-            <a href="termsofuse.html">Terms of Use</a>
-            <a href="contact.html">Contact</a>
-            <a href="faq.html">FAQ</a>
-            <a href="guestbook.html">Guestbook</a>
-            <a href="advertising.html">Advertising</a>
-            <a href="profile.html">Profile</a>
-            <a href="staking.html">Staking</a>
-            <a href="whitepaper.html">Whitepaper</a>
-        </div>
-    </footer>
+    <style>
+      .themeDots .dot {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        margin: 5px;
+        cursor: pointer;
+        transition: transform 0.2s;
+      }
+      .themeDots .dot.light { background-color: #FFFFFF; }
+      .themeDots .dot.dark { background-color: #000000; }
+      .themeDots .dot.basic { background-color: var(--quinary-color); }
+      .themeDots .dot:hover { transform: scale(1.2); }
+    </style>
 
     <script>
-        (function() {
-            // ========== Configuration ==========
-            const INPI_CONTRACT_ADDRESS = '0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D'; // new token
-            const TEAM_WALLET = '0xcbc1cf1159b4db5b407684fde0e9e635e9e3726f';
-            const REQUIRED_FEE = 1; // 1 INPI for signing
-            const MINT_FEE = 1; // 1 INPI for minting
-
-            // Minimal ERC-20 ABI for balanceOf and transfer
-            const INPI_ABI = [
-                "function balanceOf(address owner) view returns (uint256)",
-                "function decimals() view returns (uint8)",
-                "function symbol() view returns (string)",
-                "function transfer(address to, uint amount) returns (bool)"
-            ];
-
-            // ========== DOM Elements ==========
-            const connectBtn = document.getElementById('connectWalletBtn');
-            const walletStatus = document.getElementById('walletStatus');
-            const balanceInfo = document.getElementById('balanceInfo');
-            const inpiBalanceSpan = document.getElementById('inpiBalance');
-            const submitBtn = document.getElementById('submitEntryBtn');
-            const guestbookForm = document.getElementById('guestbookForm');
-            const nameInput = document.getElementById('name');
-            const walletInput = document.getElementById('walletInput');
-            const messageInput = document.getElementById('message');
-            const clearBtn = document.getElementById('clearEntries');
-            const entriesList = document.getElementById('entriesList');
-            const mintPanel = document.getElementById('mintPanel');
-            const mintBtn = document.getElementById('mintEntryBtn');
-            const lastEntryPreview = document.getElementById('lastEntryPreview');
-
-            // ========== State ==========
-            let provider, signer, userAddress = null;
-            let inpiContract;
-            let userBalance = 0;
-            let lastEntryId = null;
-
-            // LocalStorage key for entries
-            const STORAGE_KEY = 'inpinity_guestbook_nft';
-
-            // Load entries from localStorage
-            let entries = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [
-                {
-                    id: 1,
-                    name: 'Xpective Team',
-                    wallet: '0xcbc1cf1159b4db5b407684fde0e9e635e9e3726f',
-                    message: 'Welcome to the Immortal NFT Guestbook! Sign and mint your message forever on Base. 🚀',
-                    timestamp: new Date().toISOString(),
-                    paid: true,
-                    minted: true,
-                    nftId: '0x9876...5432',
-                    nftUrl: 'https://basescan.org/token/0x...'
-                }
-            ];
-
-            // ========== Helper Functions ==========
-            function saveEntries() {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
-            }
-
-            function formatAddress(address) {
-                if (!address) return '';
-                return address.substring(0, 6) + '...' + address.substring(address.length - 4);
-            }
-
-            function escapeHtml(text) {
-                const div = document.createElement('div');
-                div.textContent = text;
-                return div.innerHTML;
-            }
-
-            function renderEntries() {
-                if (!entriesList) return;
-                if (entries.length === 0) {
-                    entriesList.innerHTML = '<p style="text-align: center; color: #aaa;">No entries yet. Be the first to sign and mint!</p>';
-                    return;
-                }
-
-                const sorted = [...entries].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-                entriesList.innerHTML = sorted.map(entry => {
-                    const date = new Date(entry.timestamp).toLocaleString();
-                    const walletDisplay = entry.wallet ? `<div class="wallet">${escapeHtml(entry.wallet)}</div>` : '';
-                    const paidBadge = entry.paid ? '<span class="paid-badge">✅ PAID</span>' : '';
-                    const nftBadge = entry.minted ? `<span class="nft-badge" onclick="window.open('${entry.nftUrl || '#'}', '_blank')">🖼️ NFT</span>` : '';
-                    const entryClass = entry.minted ? 'nft-minted' : (entry.paid ? 'paid' : '');
-                    
-                    return `
-                        <div class="guestbook-entry ${entryClass}" data-id="${entry.id}">
-                            ${paidBadge}
-                            ${nftBadge}
-                            <div class="name">${escapeHtml(entry.name)}</div>
-                            ${walletDisplay}
-                            <div class="message">${escapeHtml(entry.message).replace(/\n/g, '<br>')}</div>
-                            <div class="timestamp">${escapeHtml(date)}</div>
-                        </div>
-                    `;
-                }).join('');
-            }
-
-            // ========== Wallet & Balance ==========
-            async function connectWallet() {
-                if (typeof window.ethereum === 'undefined') {
-                    alert('MetaMask or another Web3 wallet is not installed.');
-                    return;
-                }
-                try {
-                    provider = new ethers.BrowserProvider(window.ethereum);
-                    await provider.send("eth_requestAccounts", []);
-                    signer = await provider.getSigner();
-                    userAddress = await signer.getAddress();
-
-                    walletStatus.textContent = `Connected: ${formatAddress(userAddress)}`;
-                    walletStatus.style.display = 'inline-block';
-                    connectBtn.textContent = '✅ Connected';
-                    connectBtn.disabled = true;
-
-                    inpiContract = new ethers.Contract(INPI_CONTRACT_ADDRESS, INPI_ABI, signer);
-                    await updateBalance();
-                    checkBalanceAndEnable();
-
-                } catch (err) {
-                    console.error(err);
-                    alert('Connection failed.');
-                }
-            }
-
-            async function updateBalance() {
-                if (!inpiContract || !userAddress) return;
-                try {
-                    const balanceWei = await inpiContract.balanceOf(userAddress);
-                    const decimals = await inpiContract.decimals();
-                    userBalance = Number(ethers.formatUnits(balanceWei, decimals));
-                    inpiBalanceSpan.textContent = userBalance.toFixed(2);
-                    balanceInfo.style.display = 'inline-block';
-                } catch (err) {
-                    console.error('Balance fetch error:', err);
-                    inpiBalanceSpan.textContent = '?';
-                }
-            }
-
-            function checkBalanceAndEnable() {
-                if (userAddress && userBalance >= REQUIRED_FEE) {
-                    submitBtn.disabled = false;
-                } else {
-                    submitBtn.disabled = true;
-                }
-            }
-
-            // ========== Handle Form Submission ==========
-            async function handleSubmit(e) {
-                e.preventDefault();
-
-                const name = nameInput.value.trim();
-                const wallet = walletInput.value.trim();
-                const message = messageInput.value.trim();
-
-                if (!name || !message) {
-                    alert('Please provide name and message.');
-                    return;
-                }
-
-                if (!userAddress) {
-                    alert('Please connect your wallet first.');
-                    return;
-                }
-
-                if (userBalance < REQUIRED_FEE) {
-                    alert(`Insufficient INPI balance. You need at least ${REQUIRED_FEE} INPI.`);
-                    return;
-                }
-
-                try {
-                    // Simulate payment
-                    alert(`Demo: Payment of ${REQUIRED_FEE} INPI would be sent to ${TEAM_WALLET}.`);
-
-                    const newEntry = {
-                        id: Date.now(),
-                        name: name,
-                        wallet: wallet || userAddress,
-                        message: message,
-                        timestamp: new Date().toISOString(),
-                        paid: true,
-                        minted: false
-                    };
-
-                    entries.push(newEntry);
-                    saveEntries();
-                    renderEntries();
-
-                    // Show mint panel for this entry
-                    lastEntryId = newEntry.id;
-                    lastEntryPreview.textContent = `"${message.substring(0, 30)}${message.length > 30 ? '...' : ''}" by ${name}`;
-                    mintPanel.style.display = 'block';
-
-                    // Clear form
-                    nameInput.value = '';
-                    walletInput.value = '';
-                    messageInput.value = '';
-
-                    await updateBalance();
-                    checkBalanceAndEnable();
-
-                } catch (err) {
-                    console.error(err);
-                    alert('Submission failed. Please try again.');
-                }
-            }
-
-            // ========== Mint Entry as NFT ==========
-            async function mintEntry() {
-                if (!lastEntryId) {
-                    alert('No recent entry to mint. Please sign the guestbook first.');
-                    return;
-                }
-
-                if (userBalance < REQUIRED_FEE + MINT_FEE) {
-                    alert(`Insufficient INPI balance. You need at least ${REQUIRED_FEE + MINT_FEE} INPI to sign and mint.`);
-                    return;
-                }
-
-                try {
-                    alert(`Demo: Minting your entry as an NFT! In production, this would create a real NFT on Base with metadata: ${lastEntryPreview.textContent}`);
-
-                    // Find and update the entry
-                    const entryIndex = entries.findIndex(e => e.id === lastEntryId);
-                    if (entryIndex >= 0) {
-                        entries[entryIndex].minted = true;
-                        entries[entryIndex].nftId = `0x${Math.random().toString(16).substring(2, 10)}...`;
-                        entries[entryIndex].nftUrl = 'https://basescan.org/token/0x...';
-                        saveEntries();
-                        renderEntries();
-                    }
-
-                    mintPanel.style.display = 'none';
-                    lastEntryId = null;
-
-                    await updateBalance();
-
-                } catch (err) {
-                    console.error(err);
-                    alert('Minting failed. Please try again.');
-                }
-            }
-
-            // ========== Clear entries (demo) ==========
-            clearBtn.addEventListener('click', () => {
-                if (confirm('Are you sure? This will permanently delete all guestbook entries (local demo only).')) {
-                    entries = [];
-                    saveEntries();
-                    renderEntries();
-                    mintPanel.style.display = 'none';
-                    lastEntryId = null;
-                }
-            });
-
-            // ========== Event Listeners ==========
-            connectBtn.addEventListener('click', connectWallet);
-            guestbookForm.addEventListener('submit', handleSubmit);
-            mintBtn.addEventListener('click', mintEntry);
-
-            // Initial render
-            renderEntries();
-
-            // Auto-connect if previously connected
-            window.addEventListener('load', async () => {
-                if (window.ethereum && window.ethereum.selectedAddress) {
-                    await connectWallet();
-                }
-            });
-        })();
+      document.addEventListener('DOMContentLoaded', () => {
+        document.querySelector('.themeDots .dot.light')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'light'));
+        document.querySelector('.themeDots .dot.dark')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'dark'));
+        document.querySelector('.themeDots .dot.basic')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'basic'));
+      });
     </script>
+  </header>
+
+  <main>
+    <div class="warning-note">
+      <p>
+        ⚠️ <strong>Important Update:</strong> We withdrew from ToshiMart due to phishing concerns.
+        Only use the official INPI token:
+        <code>0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</code>.
+        All official contracts are listed on our <a href="index.html">homepage</a>.
+      </p>
+    </div>
+
+    <div class="presale-note">
+      <p>🔥 <strong>PRESALE LIVE NOW:</strong> 2,000,000 INPI per 1 ETH until March 25, 2026.
+        <a href="https://inpinity.online/token/" target="_blank" rel="noopener">👉 Join the Presale</a>
+      </p>
+    </div>
+
+    <div class="guestbook-container">
+      <h1>📖 Immortal Guestbook <span class="demo-pill">DEMO</span></h1>
+
+      <div class="demo-banner">
+        <p>
+          <strong>Guestbook is currently in development.</strong> This page is a <strong>demo preview</strong>:
+          entries are stored <strong>locally in your browser</strong> (localStorage) and the “NFT mint” is a <strong>simulation</strong>.
+          <br>
+          <strong>Coming soon:</strong> real on-chain guestbook entries and NFT minting on Base.
+        </p>
+      </div>
+
+      <div class="partners-section">
+        <div class="partner-item"><a href="https://base.org/" target="_blank" rel="noopener">⚡ Base L2</a></div>
+        <div class="partner-item"><a href="https://uniswap.org/" target="_blank" rel="noopener">🦄 Uniswap</a></div>
+      </div>
+
+      <div class="wallet-bar">
+        <div class="wallet-info">
+          <button id="connectWalletBtn" class="connect-wallet-btn">🔌 Connect Wallet</button>
+          <span id="walletStatus" class="wallet-details" style="display:none;"></span>
+        </div>
+        <div id="balanceInfo" style="display:none;">
+          <span class="wallet-details">INPI: <span id="inpiBalance">0</span></span>
+        </div>
+      </div>
+
+      <div class="guestbook-form">
+        <h2>Sign the Guestbook (Demo)</h2>
+        <form id="guestbookForm">
+          <div class="form-group">
+            <label for="name">Your Name / Pseudonym *</label>
+            <input type="text" id="name" required placeholder="e.g. GameDev123">
+          </div>
+
+          <div class="form-group">
+            <label for="wallet">Your Wallet Address (optional, for display)</label>
+            <input type="text" id="walletInput" placeholder="0x... or ENS">
+          </div>
+
+          <div class="form-group">
+            <label for="message">Your Message *</label>
+            <textarea id="message" rows="4" required placeholder="Write something immortal... (demo)"></textarea>
+          </div>
+
+          <div class="fee-notice">
+            <strong>Demo Notice:</strong> In production, signing will require a small fee (e.g. 1 INPI) and minting will create a real NFT.
+            For now, this is a safe preview with no real transfers.
+          </div>
+
+          <button type="submit" id="submitEntryBtn" class="submit-btn" disabled>💾 Sign Guestbook (Demo)</button>
+        </form>
+      </div>
+
+      <div id="mintPanel" class="mint-panel" style="display:none;">
+        <h3>✨ Mint Your Entry as an NFT (Demo)</h3>
+        <p>This is a demo. In production, minting will create a real NFT on Base that contains your message as metadata.</p>
+        <p><strong>Last entry:</strong> <span id="lastEntryPreview"></span></p>
+        <button id="mintEntryBtn" class="mint-btn">🖼️ Mint as NFT (Demo)</button>
+      </div>
+
+      <div class="entries-header">
+        <h2>📝 Signatures (Local Demo)</h2>
+        <button id="clearEntries" class="clear-btn">Clear all (demo)</button>
+      </div>
+
+      <div id="entriesList" class="entries-list"></div>
+    </div>
+  </main>
+
+  <footer>
+    <p>© 2026 Inpinity. All rights reserved. Working with
+      <a href="https://base.org/" target="_blank" rel="noopener" style="color: gold;">Base</a>
+      and <a href="https://uniswap.org/" target="_blank" rel="noopener" style="color: gold;">Uniswap</a>.
+    </p>
+    <div class="footer-links">
+      <a href="privacypolicy.html">Privacy Policy</a>
+      <a href="termsofuse.html">Terms of Use</a>
+      <a href="contact.html">Contact</a>
+      <a href="faq.html">FAQ</a>
+      <a href="guestbook.html">Guestbook</a>
+      <a href="advertising.html">Advertising</a>
+      <a href="staking.html">Staking</a>
+      <a href="whitepaper.html">Whitepaper</a>
+      <a href="mint.html">Mint</a>
+      <a href="map.html">Pyramid Map</a>
+      <a href="game.html">Game</a>
+    </div>
+  </footer>
+
+  <script>
+    (function() {
+      // ========== Configuration ==========
+      const INPI_CONTRACT_ADDRESS = '0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D'; // new token
+
+      // Minimal ERC-20 ABI for balanceOf/decimals
+      const INPI_ABI = [
+        "function balanceOf(address owner) view returns (uint256)",
+        "function decimals() view returns (uint8)"
+      ];
+
+      // ========== DOM Elements ==========
+      const connectBtn = document.getElementById('connectWalletBtn');
+      const walletStatus = document.getElementById('walletStatus');
+      const balanceInfo = document.getElementById('balanceInfo');
+      const inpiBalanceSpan = document.getElementById('inpiBalance');
+      const submitBtn = document.getElementById('submitEntryBtn');
+      const guestbookForm = document.getElementById('guestbookForm');
+      const nameInput = document.getElementById('name');
+      const walletInput = document.getElementById('walletInput');
+      const messageInput = document.getElementById('message');
+      const clearBtn = document.getElementById('clearEntries');
+      const entriesList = document.getElementById('entriesList');
+      const mintPanel = document.getElementById('mintPanel');
+      const mintBtn = document.getElementById('mintEntryBtn');
+      const lastEntryPreview = document.getElementById('lastEntryPreview');
+
+      // ========== State ==========
+      let provider, signer, userAddress = null;
+      let inpiContract;
+      let lastEntryId = null;
+
+      // LocalStorage key for demo entries
+      const STORAGE_KEY = 'inpinity_guestbook_demo';
+
+      // Load entries from localStorage
+      let entries = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [
+        {
+          id: 1,
+          name: 'Inpinity Demo',
+          wallet: 'local-demo',
+          message: 'Guestbook is in development. This page is a DEMO preview (localStorage only). 🚀',
+          timestamp: new Date().toISOString(),
+          paid: false,
+          minted: false
+        }
+      ];
+
+      function saveEntries() { localStorage.setItem(STORAGE_KEY, JSON.stringify(entries)); }
+      function escapeHtml(text) { const d=document.createElement('div'); d.textContent=text; return d.innerHTML; }
+      function formatAddress(a){ return a ? a.slice(0,6)+'...'+a.slice(-4) : ''; }
+
+      function renderEntries() {
+        if (!entriesList) return;
+        if (entries.length === 0) {
+          entriesList.innerHTML = '<p style="text-align:center;color:#aaa;">No entries yet. (Demo)</p>';
+          return;
+        }
+        const sorted = [...entries].sort((a,b)=> new Date(b.timestamp)-new Date(a.timestamp));
+
+        entriesList.innerHTML = sorted.map(entry => {
+          const date = new Date(entry.timestamp).toLocaleString();
+          const walletDisplay = entry.wallet ? `<div class="wallet">${escapeHtml(entry.wallet)}</div>` : '';
+          const nftBadge = entry.minted ? `<span class="nft-badge" title="Demo NFT">🖼️ NFT</span>` : '';
+          const entryClass = entry.minted ? 'nft-minted' : '';
+
+          return `
+            <div class="guestbook-entry ${entryClass}" data-id="${entry.id}">
+              ${nftBadge}
+              <div class="name">${escapeHtml(entry.name)}</div>
+              ${walletDisplay}
+              <div class="message">${escapeHtml(entry.message).replace(/\n/g,'<br>')}</div>
+              <div class="timestamp">${escapeHtml(date)}</div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      async function connectWallet() {
+        if (typeof window.ethereum === 'undefined') {
+          alert('MetaMask (or compatible wallet) is not installed.');
+          return;
+        }
+        try {
+          provider = new ethers.BrowserProvider(window.ethereum);
+          await provider.send("eth_requestAccounts", []);
+          signer = await provider.getSigner();
+          userAddress = await signer.getAddress();
+
+          walletStatus.textContent = `Connected: ${formatAddress(userAddress)}`;
+          walletStatus.style.display = 'inline-block';
+          connectBtn.textContent = '✅ Connected';
+          connectBtn.disabled = true;
+
+          // Optional: show INPI balance (read-only)
+          inpiContract = new ethers.Contract(INPI_CONTRACT_ADDRESS, INPI_ABI, signer);
+          try{
+            const balWei = await inpiContract.balanceOf(userAddress);
+            const dec = await inpiContract.decimals();
+            const bal = Number(ethers.formatUnits(balWei, dec));
+            inpiBalanceSpan.textContent = bal.toFixed(2);
+            balanceInfo.style.display = 'inline-block';
+          }catch(e){}
+
+          // In demo we only require wallet connection to enable submit
+          submitBtn.disabled = false;
+
+        } catch (err) {
+          console.error(err);
+          alert('Connection failed.');
+        }
+      }
+
+      async function handleSubmit(e) {
+        e.preventDefault();
+
+        const name = nameInput.value.trim();
+        const wallet = walletInput.value.trim();
+        const message = messageInput.value.trim();
+
+        if (!name || !message) {
+          alert('Please provide name and message.');
+          return;
+        }
+        if (!userAddress) {
+          alert('Please connect your wallet first.');
+          return;
+        }
+
+        const newEntry = {
+          id: Date.now(),
+          name,
+          wallet: wallet || userAddress,
+          message,
+          timestamp: new Date().toISOString(),
+          minted: false
+        };
+
+        entries.push(newEntry);
+        saveEntries();
+        renderEntries();
+
+        lastEntryId = newEntry.id;
+        lastEntryPreview.textContent = `"${message.substring(0, 40)}${message.length > 40 ? '...' : ''}" by ${name}`;
+        mintPanel.style.display = 'block';
+
+        nameInput.value = '';
+        walletInput.value = '';
+        messageInput.value = '';
+      }
+
+      async function mintEntry() {
+        if (!lastEntryId) {
+          alert('No recent entry to mint (demo).');
+          return;
+        }
+        alert('Demo: Minting simulated. In production this will mint a real NFT on Base.');
+
+        const idx = entries.findIndex(e => e.id === lastEntryId);
+        if (idx >= 0) {
+          entries[idx].minted = true;
+          saveEntries();
+          renderEntries();
+        }
+
+        mintPanel.style.display = 'none';
+        lastEntryId = null;
+      }
+
+      clearBtn.addEventListener('click', () => {
+        if (confirm('Delete all guestbook entries (local demo only)?')) {
+          entries = [];
+          saveEntries();
+          renderEntries();
+          mintPanel.style.display = 'none';
+          lastEntryId = null;
+        }
+      });
+
+      connectBtn.addEventListener('click', connectWallet);
+      guestbookForm.addEventListener('submit', handleSubmit);
+      mintBtn.addEventListener('click', mintEntry);
+
+      renderEntries();
+
+      window.addEventListener('load', async () => {
+        if (window.ethereum && window.ethereum.selectedAddress) {
+          await connectWallet();
+        }
+      });
+    })();
+  </script>
 </body>
 </html>
