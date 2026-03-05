@@ -1116,7 +1116,7 @@
         // AttackV3-Entities abfragen (nicht ausgeführte)
         const where = `{ attacker: "${userAddress.toLowerCase()}" }`;
         const attacks = await fetchAllWithPagination(
-          "attackV3",  
+          "attackV3S",  
           "id attacker target attackIndex startTime endTime resource executed",
           where
         );
