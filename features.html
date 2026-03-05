@@ -1,411 +1,473 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <meta content="Inpinity - Features and tools for game design, blockchain integration, and community collaboration." name="description" />
-    <title>Inpinity - Features</title>
-    <link rel="stylesheet" href="css/base.css" />
-    <link rel="stylesheet" href="css/layout.css" />
-    <link rel="stylesheet" href="css/animations.css" />
-    <link rel="stylesheet" href="css/dark.css" />
-    <link rel="stylesheet" href="css/light.css" />
-    <link rel="stylesheet" href="css/responsive.css" />
-    <link rel="stylesheet" href="css/color.css" />
-    <link rel="stylesheet" href="css/adapted_about_us.css" />
-    <link rel="stylesheet" href="css/adapted_advertisements.css" />
-    <link rel="stylesheet" href="css/adapted_combined.css"/>
-    <link rel="stylesheet" href="css/adapted_comunity_guidelines.css" />
-    <link rel="stylesheet" href="css/adapted_course_feedback.css" />
-    <link rel="stylesheet" href="css/adapted_mft_marketplace.css"/>
-    <link rel="stylesheet" href="css/adapted_profile.css"/>
-    <link rel="stylesheet" href="css/combined_latest.css"/>
-    <link rel="stylesheet" href="css/gamification.css" />
-    <link rel="stylesheet" href="css/referral.css"/>
-    <script defer src="main.js"></script>
-    <link rel="icon" type="image/png" href="favicon.webp">
-    <meta name="keywords" content="Inpinity, Game Design, Game Development, Platform, Collaboration, Forum, Tools, GameDesign, AI Development, Games of future, programming, programs, python gui">
-    <meta name="author" content="Xpective">
-    <meta property="og:title" content="Inpinity - Features">
-    <meta property="og:description" content="Explore the powerful tools and features of Inpinity: staking, NFT generator, $ADVERT advertising, and more.">
-    <meta property="og:image" content="logo_background.jpg">
-    <meta property="og:url" content="https://inpinity.online/features.html">
-    <meta name="twitter:card" content="logo_background.webp">
-    <meta name="twitter:site" content="@unxpective">
-    <meta name="twitter:creator" content="@Inpinity1">
-    <meta name="theme-color" content="#FarbcodeIhrerWebsite">
-    <meta name="robots" content="index,follow">
-    <style>
-        /* Tool card styling */
-        .tools-slider {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 2rem;
-            margin: 2rem 0;
-        }
-        .tools-container {
-            flex: 1 1 300px;
-            max-width: 350px;
-        }
-        .tool {
-            background: #1a1a1a;
-            border: 1px solid gold;
-            border-radius: 8px;
-            padding: 1.5rem;
-            text-align: center;
-            transition: transform 0.2s, box-shadow 0.2s;
-            cursor: pointer;
-        }
-        .tool:hover {
-            transform: scale(1.02);
-            box-shadow: 0 0 15px gold;
-        }
-        .tool h2 {
-            color: gold;
-            margin-bottom: 1rem;
-        }
-        .tool p {
-            color: #ccc;
-            margin-bottom: 1.5rem;
-        }
-        .xbutton {
-            background: gold;
-            color: black;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .xbutton:hover {
-            background: #ffd700;
-        }
-        /* Modal (hidden by default) */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.8);
-            align-items: center;
-            justify-content: center;
-        }
-        .modal.active {
-            display: flex;
-        }
-        .modal-content {
-            background: #222;
-            border: 2px solid gold;
-            border-radius: 8px;
-            padding: 2rem;
-            max-width: 400px;
-            text-align: center;
-            color: white;
-        }
-        .modal-content h2 {
-            color: gold;
-        }
-        .modal-content .close {
-            margin-top: 1rem;
-            background: gold;
-            color: black;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .guestbook-cta {
-            text-align: center;
-            margin: 3rem 0;
-        }
-        .guestbook-link {
-            display: inline-block;
-            background: gold;
-            color: black;
-            padding: 0.75rem 2rem;
-            border-radius: 40px;
-            font-weight: bold;
-            text-decoration: none;
-            font-size: 1.2rem;
-            transition: transform 0.2s;
-        }
-        .guestbook-link:hover {
-            transform: scale(1.05);
-        }
-        .partners-section {
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin: 2rem 0;
-            padding: 1rem;
-            background: rgba(0,0,0,0.3);
-            border-radius: 12px;
-        }
-        .partner-item a {
-            padding: 0.5rem 1rem;
-            background: #2a2a2a;
-            border: 1px solid gold;
-            border-radius: 40px;
-            color: gold;
-            text-decoration: none;
-        }
-        .partner-item a:hover {
-            background: gold;
-            color: black;
-        }
-        .warning-note {
-            background: #332211;
-            border: 1px solid #ffaa00;
-            border-radius: 8px;
-            padding: 1rem;
-            margin: 2rem auto;
-            max-width: 800px;
-            text-align: center;
-        }
-        .warning-note a {
-            color: gold;
-        }
-        .presale-note {
-            background: rgba(255,215,0,0.1);
-            border: 1px solid gold;
-            border-radius: 8px;
-            padding: 1rem;
-            margin: 2rem auto;
-            max-width: 800px;
-            text-align: center;
-        }
-        .presale-note a {
-            color: gold;
-            font-weight: bold;
-        }
-        .staking-info {
-            background: #2a2a2a;
-            border-left: 4px solid var(--primary-cyan);
-            padding: 1rem;
-            margin: 2rem 0;
-            border-radius: 0 8px 8px 0;
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <meta content="Inpinity - Features of the Pi-Phi Pyramid ecosystem on Base: NFT Blocks, Farming, Resources, Pirates, Protection & Partnerships." name="description" />
+  <title>Inpinity - Features</title>
+
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/dark.css" />
+  <link rel="stylesheet" href="css/light.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+  <link rel="stylesheet" href="css/color.css" />
+  <link rel="stylesheet" href="css/adapted_about_us.css" />
+  <link rel="stylesheet" href="css/adapted_advertisements.css" />
+  <link rel="stylesheet" href="css/adapted_combined.css"/>
+  <link rel="stylesheet" href="css/adapted_comunity_guidelines.css" />
+  <link rel="stylesheet" href="css/adapted_course_feedback.css" />
+  <link rel="stylesheet" href="css/adapted_mft_marketplace.css"/>
+  <link rel="stylesheet" href="css/adapted_profile.css"/>
+  <link rel="stylesheet" href="css/combined_latest.css"/>
+  <link rel="stylesheet" href="css/gamification.css" />
+  <link rel="stylesheet" href="css/referral.css"/>
+
+  <script defer src="main.js"></script>
+  <link rel="icon" type="image/png" href="favicon.webp">
+
+  <meta name="keywords" content="Inpinity, Pi Phi Pyramid, NFT Blocks, Farming, Pirates, Resources, ERC1155, Partnerships, UE5, Base" />
+  <meta name="author" content="Xpective" />
+
+  <meta property="og:title" content="Inpinity - Features" />
+  <meta property="og:description" content="Explore Inpinity’s Pi-Phi Pyramid: NFT blocks with rarity, farming resources, pirate attacks, protection, and partnership resources on Base." />
+  <meta property="og:image" content="logo_background.jpg" />
+  <meta property="og:url" content="https://inpinity.online/features.html" />
+
+  <meta name="twitter:card" content="logo_background.webp" />
+  <meta name="twitter:site" content="@unxpective" />
+  <meta name="twitter:creator" content="@Inpinity1" />
+
+  <meta name="robots" content="index,follow" />
+
+  <style>
+    .tools-slider {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 2rem;
+      margin: 2rem 0;
+    }
+    .tools-container {
+      flex: 1 1 320px;
+      max-width: 380px;
+    }
+    .tool {
+      background: #1a1a1a;
+      border: 1px solid gold;
+      border-radius: 12px;
+      padding: 1.6rem;
+      text-align: left;
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    .tool:hover {
+      transform: scale(1.015);
+      box-shadow: 0 0 18px rgba(255,215,0,0.35);
+    }
+    .tool h2 {
+      color: gold;
+      margin: 0 0 0.6rem 0;
+      font-size: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .tool p {
+      color: #ccc;
+      margin: 0.25rem 0;
+      line-height: 1.55;
+      font-size: 0.98rem;
+    }
+    .tag {
+      display: inline-block;
+      margin-top: 0.9rem;
+      padding: 0.25rem 0.7rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,215,0,0.6);
+      color: gold;
+      font-size: 0.8rem;
+      background: rgba(255,215,0,0.07);
+      font-weight: 700;
+    }
+    .xbutton {
+      margin-top: 1rem;
+      background: gold;
+      color: black;
+      border: none;
+      padding: 0.55rem 1.1rem;
+      border-radius: 10px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.15s, background 0.2s;
+    }
+    .xbutton:hover { background: #ffd700; transform: translateY(-1px); }
+
+    .partners-section {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin: 1.6rem auto 0.5rem;
+      padding: 1rem;
+      background: rgba(0,0,0,0.3);
+      border-radius: 12px;
+      max-width: 980px;
+    }
+    .partner-item a {
+      padding: 0.55rem 1.2rem;
+      background: #2a2a2a;
+      border: 1px solid gold;
+      border-radius: 40px;
+      color: gold;
+      text-decoration: none;
+      font-weight: 800;
+      transition: all 0.2s;
+      display: inline-block;
+    }
+    .partner-item a:hover {
+      background: gold;
+      color: black;
+      transform: scale(1.03);
+    }
+
+    .warning-note {
+      background: #332211;
+      border: 1px solid #ffaa00;
+      border-radius: 12px;
+      padding: 1rem 1.2rem;
+      margin: 2rem auto 1.2rem;
+      max-width: 980px;
+      text-align: center;
+      color: #eee;
+    }
+    .warning-note a { color: gold; }
+
+    .contracts-box {
+      max-width: 980px;
+      margin: 1rem auto 0;
+      padding: 1.2rem;
+      background: rgba(20,20,20,0.9);
+      border: 1px solid gold;
+      border-radius: 12px;
+      color: #eee;
+    }
+    .contracts-box h3 {
+      color: gold;
+      margin: 0 0 0.8rem 0;
+      font-size: 1.2rem;
+    }
+    .contracts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 0.9rem;
+    }
+    .contract-item {
+      background: #141414;
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 0.9rem;
+    }
+    .contract-item strong { color: gold; }
+    .address {
+      font-family: monospace;
+      background: #0f0f0f;
+      border: 1px solid #2a2a2a;
+      padding: 0.25rem 0.45rem;
+      border-radius: 8px;
+      display: inline-block;
+      word-break: break-all;
+      color: #ddd;
+      margin-top: 0.35rem;
+    }
+
+    .cta-row {
+      max-width: 980px;
+      margin: 1.8rem auto 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+    }
+    .cta {
+      display: inline-block;
+      text-decoration: none;
+      font-weight: 900;
+      border-radius: 999px;
+      padding: 0.9rem 1.3rem;
+      border: 1px solid rgba(255,215,0,0.6);
+      color: #fff;
+      background: linear-gradient(135deg, #8A2BE2, #00FFFF);
+      transition: transform .15s, box-shadow .2s;
+    }
+    .cta:hover { transform: translateY(-1px); box-shadow: 0 0 18px rgba(255,215,0,0.25); }
+    .cta.secondary {
+      background: rgba(255,215,0,0.08);
+      color: gold;
+    }
+
+    .section-wrap {
+      max-width: 980px;
+      margin: 2rem auto 0;
+      padding: 0 1rem;
+    }
+    .hero-title {
+      text-align: center;
+      color: gold;
+      font-size: 2.2rem;
+      margin: 0.8rem 0 0.4rem;
+    }
+    .hero-sub {
+      text-align: center;
+      color: #ccc;
+      margin: 0 0 1.3rem;
+      line-height: 1.6;
+    }
+
+    .mini-note {
+      max-width: 980px;
+      margin: 1.2rem auto 0;
+      padding: 1rem 1.2rem;
+      border-radius: 12px;
+      border: 1px solid rgba(255,215,0,0.35);
+      background: rgba(255,215,0,0.06);
+      color: #ddd;
+    }
+    .mini-note strong { color: gold; }
+  </style>
 </head>
+
 <body>
-    <header>
-        <nav>
-            <ul>
-                <li><a aria-label="Home" href="index.html">Home</a></li>
-                <li><a aria-label="Features" href="features.html">Features</a></li>
-                <li><a aria-label="Game" href="game.html">Game</a></li>
-                <li><a aria-label="Forum" href="forum.html">Forum</a></li>
-                <li><a aria-label="Collaboration" href="collaboration.html">Collaboration</a></li>
-                <li><a aria-label="Register" href="register.html">Register</a></li>
-                <li><a aria-label="About" href="about.html">About</a></li>
-                <li><a aria-label="Whitepaper" href="whitepaper.html">Whitepaper</a></li>
-                <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
-                <li><a aria-label="Guestbook" href="guestbook.html">Guestbook</a></li>
-                <li><a aria-label="Advertising" href="advertising.html">Advertising</a></li>
-                <li><a aria-label="Profile" href="profile.html">Profile</a></li>
-                <li><a aria-label="Staking" href="staking.html">Staking</a></li>
-                <div class="themeDots">
-                    <div class="dot light" title="Light Theme"></div>
-                    <div class="dot dark" title="Dark Theme"></div>
-                    <div class="dot basic" title="Basic Theme"></div>
-                </div>
-            </ul>
-        </nav>
-        <style>
-            .themeDots .dot {
-                display: inline-block;
-                width: 20px;
-                height: 20px;
-                border-radius: 50%;
-                margin: 5px;
-                cursor: pointer;
-                transition: transform 0.2s;
-            }
-            .themeDots .dot.light { background-color: #FFFFFF; }
-            .themeDots .dot.dark { background-color: #000000; }
-            .themeDots .dot.basic { background-color: var(--quinary-color); }
-            .themeDots .dot:hover { transform: scale(1.2); }
-        </style>
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                document.querySelector('.themeDots .dot.light')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'light'));
-                document.querySelector('.themeDots .dot.dark')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'dark'));
-                document.querySelector('.themeDots .dot.basic')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'basic'));
-            });
-        </script>
-    </header>
+<header>
+  <nav>
+    <ul>
+      <li><a aria-label="Home" href="index.html">Home</a></li>
+      <li><a aria-label="Features" href="features.html">Features</a></li>
+      <li><a aria-label="Game" href="game.html">Game</a></li>
+      <li><a aria-label="Mint" href="mint.html">Mint</a></li>
+      <li><a aria-label="Pyramid Map" href="map.html">Pyramid Map</a></li>
+      <li><a aria-label="Collaboration" href="collaboration.html">Collaboration</a></li>
+      <li><a aria-label="About" href="about.html">About</a></li>
+      <li><a aria-label="Whitepaper" href="whitepaper.html">Whitepaper</a></li>
+      <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
+      <li><a aria-label="Guestbook" href="guestbook.html">Guestbook</a></li>
+      <li><a aria-label="Advertising" href="advertising.html">Advertising</a></li>
+      <li><a aria-label="Staking" href="staking.html">Staking</a></li>
 
-    <main>
-        <!-- Warning about ToshiMart -->
-        <div class="warning-note">
-            <p>⚠️ <strong>Important Update:</strong> We have withdrawn from ToshiMart due to phishing concerns. Our new INPI token is <code>0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</code>. All official contracts are listed on our <a href="index.html">homepage</a>. Do not interact with the old token or ToshiMart pools.</p>
+      <div class="themeDots">
+        <div class="dot light" title="Light Theme"></div>
+        <div class="dot dark" title="Dark Theme"></div>
+        <div class="dot basic" title="Basic Theme"></div>
+      </div>
+    </ul>
+  </nav>
+
+  <style>
+    .themeDots .dot{display:inline-block;width:20px;height:20px;border-radius:50%;margin:5px;cursor:pointer;transition:transform .2s}
+    .themeDots .dot.light{background-color:#FFF}
+    .themeDots .dot.dark{background-color:#000}
+    .themeDots .dot.basic{background-color:var(--quinary-color)}
+    .themeDots .dot:hover{transform:scale(1.2)}
+  </style>
+  <script>
+    document.addEventListener('DOMContentLoaded',()=>{
+      document.querySelector('.themeDots .dot.light')?.addEventListener('click',()=>document.body.setAttribute('data-theme','light'));
+      document.querySelector('.themeDots .dot.dark')?.addEventListener('click',()=>document.body.setAttribute('data-theme','dark'));
+      document.querySelector('.themeDots .dot.basic')?.addEventListener('click',()=>document.body.setAttribute('data-theme','basic'));
+    });
+  </script>
+</header>
+
+<main>
+  <div class="warning-note">
+    <p>
+      ⚠️ <strong>Security Notice:</strong> We withdrew from ToshiMart due to phishing concerns.
+      Always use the official contracts listed on the <a href="index.html">homepage</a>.
+    </p>
+  </div>
+
+  <section class="section-wrap">
+    <h1 class="hero-title">⚡ Inpinity Features</h1>
+    <p class="hero-sub">
+      Inpinity is a <strong>Pi-Phi Pyramid</strong> on Base: mint a block, reveal its digits (rarity),
+      farm resources, defend with mercenaries, and launch pirate attacks — all on-chain.
+      <br/>Next: <strong>Infinite City</strong> upgrades & a full <strong>UE5</strong> version of the game.
+    </p>
+
+    <div class="cta-row">
+      <a class="cta" href="mint.html">⛏️ Mint a Block</a>
+      <a class="cta secondary" href="game.html">🎮 Open Game Dashboard</a>
+      <a class="cta secondary" href="map.html">🗺️ Open Pyramid Map</a>
+    </div>
+  </section>
+
+  <section>
+    <div class="partners-section">
+      <div class="partner-item"><a href="https://base.org/" target="_blank" rel="noopener">⚡ Base L2</a></div>
+      <div class="partner-item"><a href="https://uniswap.org/" target="_blank" rel="noopener">🦄 Uniswap</a></div>
+      <div class="partner-item"><a href="https://opensea.io/collection/inpinity-pyramid-447084512" target="_blank" rel="noopener">🧱 Pyramid Collection</a></div>
+      <div class="partner-item"><a href="https://opensea.io/collection/0x71e76a6065197acdd1a4d6b736712f80d1fd3d8b" target="_blank" rel="noopener">📦 Resource Collection</a></div>
+    </div>
+  </section>
+
+  <section class="contracts-box">
+    <h3>📜 Core Contracts (Base Mainnet)</h3>
+    <div class="contracts-grid">
+      <div class="contract-item">
+        <strong>Inpinity NFT (Blocks)</strong>
+        <div class="address">0x277a0D5864293C78d7387C54B48c35D5E9578Ab1</div>
+        <p style="margin:0.55rem 0 0;color:#bbb;">Mint blocks (Row/Col), reveal Pi/Phi digits, rarity & gameplay entry.</p>
+      </div>
+
+      <div class="contract-item">
+        <strong>ResourceToken (ERC1155)</strong>
+        <div class="address">0x71E76a6065197acdd1a4d6B736712F80D1Fd3D8b</div>
+        <p style="margin:0.55rem 0 0;color:#bbb;">All farmed resources live here as on-chain balances.</p>
+      </div>
+
+      <div class="contract-item">
+        <strong>FarmingV3</strong>
+        <div class="address">0xE79445C9ef97B8156BB505D784C0356E54432AD9</div>
+        <p style="margin:0.55rem 0 0;color:#bbb;">Start/stop farming, claim, boosts, and real on-chain production.</p>
+      </div>
+
+      <div class="contract-item">
+        <strong>PiratesV3</strong>
+        <div class="address">0xC3544804cea908b8Ac6752B4F47609e1c22DaF5d</div>
+        <p style="margin:0.55rem 0 0;color:#bbb;">Attack blocks and attempt to steal selected resources.</p>
+      </div>
+
+      <div class="contract-item">
+        <strong>MercenaryV2</strong>
+        <div class="address">0xFEa09ccA75dbc63cc8053739A61777Bd13fC6Bc2</div>
+        <p style="margin:0.55rem 0 0;color:#bbb;">Buy protection and defend your block against pirates.</p>
+      </div>
+
+      <div class="contract-item">
+        <strong>PartnershipV2</strong>
+        <div class="address">0xb18323efE4Cc8c36e10D664E287b4e2c82Fe3ad9</div>
+        <p style="margin:0.55rem 0 0;color:#bbb;">Special partner blocks & cross-project collaborations.</p>
+      </div>
+    </div>
+
+    <div class="mini-note">
+      <strong>How it works:</strong> Mint → Reveal → Farm → Claim → Defend → Attack.
+      The Pyramid Map + Game Dashboard are your control center.
+    </div>
+  </section>
+
+  <section class="section-wrap">
+    <div class="tools-slider">
+      <div class="tools-container">
+        <div class="tool" onclick="window.location.href='mint.html'">
+          <h2>⛏️ Mint Pyramid Blocks</h2>
+          <p>Each block is an on-chain NFT with fixed coordinates (Row/Col). Your coordinates are part of your identity in the Pyramid.</p>
+          <p>Reveal to unlock Pi/Phi digits and rarity.</p>
+          <span class="tag">Live</span><br/>
+          <button class="xbutton">Open Mint</button>
         </div>
+      </div>
 
-        <!-- Presale Note (NEW) -->
-        <div class="presale-note">
-            <p>🔥 <strong>PRESALE LIVE NOW:</strong> 2,000,000 INPI per 1 ETH until March 25, 2026. Don't miss this opportunity! <a href="https://inpinity.online/token/">👉 Join the Presale</a></p>
+      <div class="tools-container">
+        <div class="tool" onclick="window.location.href='game.html'">
+          <h2>🌾 Farming & Resources</h2>
+          <p>Start farming on your revealed block and claim resources into your ERC1155 ResourceToken balance.</p>
+          <p>Production depends on rarity + row rules (top row can unlock special drops).</p>
+          <span class="tag">Live (V3)</span><br/>
+          <button class="xbutton">Open Game</button>
         </div>
+      </div>
 
-        <section class="hero">
-            <h1 class="hero-title">🚀 Inpinity Features</h1>
-            <h2>Discover powerful tools that blend game development with blockchain technology.</h2>
-        </section>
-
-        <!-- Partners Section -->
-        <div class="partners-section">
-            <div class="partner-item"><a href="https://base.org/" target="_blank">⚡ Base L2</a></div>
-            <div class="partner-item"><a href="https://uniswap.org/" target="_blank">🦄 Uniswap</a></div>
+      <div class="tools-container">
+        <div class="tool" onclick="window.location.href='map.html'">
+          <h2>🗺️ Pyramid Map</h2>
+          <p>Explore the full Pyramid and see statuses: minted/revealed, farming active, protected, under attack, ready-to-execute.</p>
+          <p>Perfect for strategy and timing.</p>
+          <span class="tag">Live</span><br/>
+          <button class="xbutton">Open Map</button>
         </div>
+      </div>
 
-        <!-- Staking Info (NEW) -->
-        <div class="staking-info">
-            <h3 style="color: var(--primary-cyan); margin-top: 0;">⚡ Staking is Live – Earn Passive Rewards</h3>
-            <p>Stake your $INPI tokens and earn rewards continuously. Current reward rate: <strong>~0.00475 INPI per second</strong> (≈150,000 INPI per year, designed to last over 1,000 years).</p>
-            <p><a href="staking.html" style="color: gold;">👉 Go to Staking Dashboard</a></p>
+      <div class="tools-container">
+        <div class="tool" onclick="window.location.href='game.html#pirates'">
+          <h2>🏴‍☠️ Pirate Attacks</h2>
+          <p>Launch attacks against targets and choose what to steal. If the target already claimed, your execute can fail — that’s real strategy.</p>
+          <p>Next improvement: auto-detect stealable resources before attacking.</p>
+          <span class="tag">Live (V3)</span><br/>
+          <button class="xbutton">Open Attacks</button>
         </div>
+      </div>
 
-        <!-- Feature Cards -->
-        <div class="tools-slider">
-            <!-- Card 1: Staking Dashboard -->
-            <div class="tools-container">
-                <div class="tool" onclick="showModal('stakingModal')">
-                    <h2>📈 Staking Dashboard</h2>
-                    <p>Stake your $INPI tokens and earn passive rewards. Current rate: ~0.00475 INPI/sec.</p>
-                    <button class="xbutton" onclick="window.location.href='staking.html';">Go to Staking</button>
-                </div>
-            </div>
-
-            <!-- Card 2: NFT Generator -->
-            <div class="tools-container">
-                <div class="tool" onclick="showModal('nftModal')">
-                    <h2>🎨 NFT Generator</h2>
-                    <p>Upload layered PNGs and instantly generate unique NFTs – ready to be minted on Base.</p>
-                    <button class="xbutton" onclick="showModal('nftModal')">Try Generator</button>
-                </div>
-            </div>
-
-            <!-- Card 3: $ADVERT Advertising Portal -->
-            <div class="tools-container">
-                <div class="tool" onclick="showModal('advertModal')">
-                    <h2>📢 $ADVERT Portal</h2>
-                    <p>Use your $ADVERT tokens to place banner ads, promoted content, and reach our gaming community.</p>
-                    <button class="xbutton" onclick="showModal('advertModal')">Learn More</button>
-                </div>
-            </div>
-
-            <!-- Card 4: Wallet Analytics -->
-            <div class="tools-container">
-                <div class="tool" onclick="window.location.href='profile.html'">
-                    <h2>👛 Wallet Analytics</h2>
-                    <p>Connect your wallet to view your $INPI and ETH balances, transaction history, and token holdings.</p>
-                    <button class="xbutton">Go to Profile</button>
-                </div>
-            </div>
-
-            <!-- Card 5: Pregame Demo -->
-            <div class="tools-container">
-                <div class="tool" onclick="window.location.href='game.html'">
-                    <h2>🎮 Pregame Demo</h2>
-                    <p>Play our mini‑game, earn scores, and support the development of the full Inpinity game.</p>
-                    <button class="xbutton">Play Now</button>
-                </div>
-            </div>
-
-            <!-- Card 6: Collaboration Hub & Genesis Program -->
-            <div class="tools-container">
-                <div class="tool" onclick="window.location.href='collaboration.html'">
-                    <h2>🤝 Collaboration Hub</h2>
-                    <p>Find teammates, share projects, and join our exclusive Genesis Program for real‑world rewards (olive oil!).</p>
-                    <button class="xbutton">Join Hub</button>
-                </div>
-            </div>
+      <div class="tools-container">
+        <div class="tool" onclick="window.location.href='game.html#defense'">
+          <h2>🛡️ Mercenary Protection</h2>
+          <p>Hire mercenaries to protect your block. Protection changes the risk/reward for attackers and makes defense meaningful.</p>
+          <p>Defense + timing is the meta.</p>
+          <span class="tag">Live</span><br/>
+          <button class="xbutton">Open Defense</button>
         </div>
+      </div>
 
-        <!-- Modals (updated with current information) -->
-        <div id="stakingModal" class="modal">
-            <div class="modal-content">
-                <h2>Staking Dashboard</h2>
-                <p>✅ Staking is LIVE! Stake your $INPI tokens and earn rewards. Current reward rate: ~0.00475 INPI per second (≈150,000 INPI/year). The staking contract is verified and holds 150M INPI for rewards.</p>
-                <p><a href="staking.html" style="color:gold;">👉 Go to Staking Dashboard</a></p>
-                <button class="close" onclick="hideModal('stakingModal')">Close</button>
-            </div>
+      <div class="tools-container">
+        <div class="tool" onclick="window.location.href='collaboration.html'">
+          <h2>🤝 Partnerships & Cross-Resources</h2>
+          <p>We collaborate with other projects: partner tokens can become special resources in the Pyramid — similar to iconic collabs like CryptoKitties-style integrations.</p>
+          <p>Partner blocks can enable unique drops and city upgrades.</p>
+          <span class="tag">Open for Partners</span><br/>
+          <button class="xbutton">Partner with Us</button>
         </div>
+      </div>
 
-        <div id="nftModal" class="modal">
-            <div class="modal-content">
-                <h2>NFT Generator</h2>
-                <p>🧪 This tool is in beta. Upload a ZIP with layers (background, eyes, body, etc.) to preview your NFT. Full minting on Base coming soon. Genesis NFT collection planned for Q4 2026.</p>
-                <p><a href="collaboration.html#nft" style="color:gold;">Try the Generator</a></p>
-                <button class="close" onclick="hideModal('nftModal')">Close</button>
-            </div>
+      <div class="tools-container">
+        <div class="tool" onclick="window.location.href='whitepaper.html'">
+          <h2>🏙️ Infinite City (Coming)</h2>
+          <p>Use special resources (e.g., partnership-only materials) to upgrade your future Infinite City.</p>
+          <p>City buildings will provide utility, boosts, protection layers and gameplay progression.</p>
+          <span class="tag">Roadmap</span><br/>
+          <button class="xbutton">Read Roadmap</button>
         </div>
+      </div>
 
-        <div id="advertModal" class="modal">
-            <div class="modal-content">
-                <h2>$ADVERT Portal</h2>
-                <p>📅 Planned for Q2 2027. Earn $ADVERT by holding $INPI and use it to promote your projects. This will create a sustainable circular economy between gamers, developers, and advertisers.</p>
-                <p>Learn more in our <a href="whitepaper.html" style="color:gold;">Whitepaper</a>.</p>
-                <button class="close" onclick="hideModal('advertModal')">Close</button>
-            </div>
+      <div class="tools-container">
+        <div class="tool" onclick="window.location.href='whitepaper.html#ue5'">
+          <h2>🎮 UE5 Game (Coming)</h2>
+          <p>Inpinity will evolve into a UE5 experience: your on-chain Pyramid becomes your world layer.</p>
+          <p>Blocks, resources, and partnerships will be playable with real progression.</p>
+          <span class="tag">Roadmap</span><br/>
+          <button class="xbutton">Learn More</button>
         </div>
+      </div>
+    </div>
+  </section>
 
-        <div id="walletModal" class="modal">
-            <div class="modal-content">
-                <h2>Wallet Analytics</h2>
-                <p>🔌 Connect your wallet on the <a href="profile.html" style="color:gold;">Profile page</a> to see your balances and transaction history. Make sure you're using the new INPI token: <code style="font-size:0.8rem;">0x232F...7d0D</code></p>
-                <button class="close" onclick="hideModal('walletModal')">Close</button>
-            </div>
-        </div>
+  <section class="section-wrap">
+    <div class="mini-note">
+      <strong>Partner idea (simple):</strong> A partner provides a token/collection → we whitelist & map it to a new resource id →
+      partner blocks can generate it / city can consume it → both communities win.
+    </div>
+  </section>
 
-        <!-- Guestbook Call-to-Action -->
-        <div class="guestbook-cta">
-            <h2>✍️ Leave your mark</h2>
-            <p>Sign our guestbook – your message will soon be immortalized on the Base blockchain. Be part of Inpinity history!</p>
-            <a href="guestbook.html" class="guestbook-link">📖 Go to Guestbook</a>
-        </div>
-    </main>
+</main>
 
-    <footer>
-        <p>© 2026 Inpinity. All rights reserved. Working with <a href="https://base.org/" target="_blank" style="color: gold;">Base</a> and <a href="https://uniswap.org/" target="_blank" style="color: gold;">Uniswap</a>.</p>
-        <div class="footer-links">
-            <a href="privacypolicy.html">Privacy Policy</a>
-            <a href="termsofuse.html">Terms of Use</a>
-            <a href="contact.html">Contact</a>
-            <a href="faq.html">FAQ</a>
-            <a href="guestbook.html">Guestbook</a>
-            <a href="advertising.html">Advertising</a>
-            <a href="profile.html">Profile</a>
-            <a href="staking.html">Staking</a>
-            <a href="whitepaper.html">Whitepaper</a>
-        </div>
-    </footer>
+<footer>
+  <p>© 2026 Inpinity. All rights reserved. Working with <a href="https://base.org/" target="_blank" rel="noopener" style="color: gold;">Base</a> and <a href="https://uniswap.org/" target="_blank" rel="noopener" style="color: gold;">Uniswap</a>.</p>
+  <div class="footer-links">
+    <a href="privacypolicy.html">Privacy Policy</a>
+    <a href="termsofuse.html">Terms of Use</a>
+    <a href="contact.html">Contact</a>
+    <a href="faq.html">FAQ</a>
+    <a href="guestbook.html">Guestbook</a>
+    <a href="advertising.html">Advertising</a>
+    <a href="staking.html">Staking</a>
+    <a href="whitepaper.html">Whitepaper</a>
+    <a href="mint.html">Mint</a>
+    <a href="map.html">Pyramid Map</a>
+    <a href="game.html">Game</a>
+  </div>
+</footer>
 
-    <script>
-        // Theme switcher is already in header
-
-        // Modal functions
-        function showModal(id) {
-            document.getElementById(id).classList.add('active');
-        }
-
-        function hideModal(id) {
-            document.getElementById(id).classList.remove('active');
-        }
-
-        // Close modal when clicking outside content (optional)
-        window.addEventListener('click', (e) => {
-            document.querySelectorAll('.modal').forEach(modal => {
-                if (e.target === modal) {
-                    modal.classList.remove('active');
-                }
-            });
-        });
-    </script>
 </body>
 </html>
