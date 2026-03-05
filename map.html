@@ -558,11 +558,13 @@
       "function ownerOf(uint256 tokenId) view returns (address)"
     ];
   
+    // ⬇️ WICHTIG: getAllPending hinzugefügt
     const FARMING_V3_ABI = [
       "function startFarming(uint256 tokenId) external",
       "function stopFarming(uint256 tokenId) external",
       "function claimResources(uint256 tokenId) external",
-      "function farms(uint256) view returns (uint256 startTime, uint256 lastAccrualTime, uint256 boostExpiry, bool isActive)"
+      "function farms(uint256) view returns (uint256 startTime, uint256 lastAccrualTime, uint256 boostExpiry, bool isActive)",
+      "function getAllPending(uint256 tokenId) view returns (uint256[10] out)"
     ];
   
     const FARMING_V1_ABI = [
@@ -602,7 +604,6 @@
       "function approve(address spender, uint256 amount) returns (bool)"
     ];
   
-    // ==================== NEU: RESOURCE_TOKEN_ABI ====================
     const RESOURCE_TOKEN_ABI = [
       "function balanceOfBatch(address[] accounts, uint256[] ids) view returns (uint256[])"
     ];
@@ -753,17 +754,16 @@
     async function loadUserAttacks() {
       if (!userAddress) return;
       try {
-        // AttackV3-Entities abfragen – WICHTIG: attackV3S (großes S)
         const where = `{ attacker: "${userAddress.toLowerCase()}" }`;
         const attacks = await fetchAllWithPagination(
           SUBGRAPH_URL_V2,
-          "attackV3S",                       // ⬅️ NEU: attackV3S
+          "attackV3S",
           "id attacker target attackIndex startTime endTime resource executed",
           where
         );
   
         userAttacks = attacks
-          .filter(a => !a.executed)           // nur nicht ausgeführte Angriffe
+          .filter(a => !a.executed)
           .map(a => ({
             id: a.id,
             targetTokenId: parseInt(a.target, 10),
@@ -771,10 +771,9 @@
             startTime: parseInt(a.startTime, 10),
             endTime: parseInt(a.endTime, 10),
             executed: !!a.executed,
-            resource: parseInt(a.resource, 10)   // direkt aus Subgraph
+            resource: parseInt(a.resource, 10)
           }));
   
-        // Dismissed-Attacks aus localStorage entfernen
         const dismissed = loadDismissedAttacks();
         userAttacks = userAttacks.filter(a => !dismissed.has(a.id));
   
@@ -885,38 +884,37 @@
       return new Set(JSON.parse(localStorage.getItem("dismissedAttacks") || "[]"));
     }
   
-    // ✅ EXECUTE (PiratesV3.executeAttack)
+    // ✅ EXECUTE (mit getAllPending Prüfung für v6)
     async function executeAttack(attack) {
       actionMessage.innerHTML = '<span class="success">⏳ Checking target resources...</span>';
       try {
         if (!piratesV3Contract) throw new Error("Connect wallet first.");
-    
+  
         // Prüfe, ob das Ziel unclaimed Ressourcen des angegriffenen Typs hat
         const pending = await farmingV3Contract.getAllPending(attack.targetTokenId);
         // pending ist ein Array von 10 BigInt (ethers v6)
-        if (pending[attack.resource] <= 0n) {
+        if (!pending || pending.length <= attack.resource || pending[attack.resource] <= 0n) {
           actionMessage.innerHTML = '<span class="error">❌ Target has no unclaimed resources for this resource type. Execute not possible.</span>';
-          // Angriff lokal verwerfen (aus UI entfernen)
           if (attack.id) dismissAttackById(attack.id);
           await loadUserAttacks();
           return;
         }
-    
+  
         actionMessage.innerHTML = '<span class="success">⏳ Executing attack...</span>';
-    
+  
         const tx = await piratesV3Contract.executeAttack(
           attack.targetTokenId,
           attack.attackIndex,
           { gasLimit: 350000 }
         );
-    
+  
         actionMessage.innerHTML = '<span class="success">⏳ Confirming...</span>';
         await tx.wait();
-    
+  
         actionMessage.innerHTML = '<span class="success">✅ Attack executed! Resources stolen.</span>';
-    
+  
         localStorage.removeItem(getAttackStorageKey(attack.targetTokenId));
-    
+  
         await loadUserAttacks();
         await loadUserResources();
         await loadData();
@@ -963,11 +961,9 @@
         const partnerItems = await fetchAllWithPagination(SUBGRAPH_URL_V2, "partnerships", "id active").catch(() => []);
         partnerItems.forEach(p => { if (tokens[p.id]) tokens[p.id].partnerActive = !!p.active; });
   
-        // V1 farms optional
         const farmItemsV1 = await fetchAllWithPagination(SUBGRAPH_URL_V1, "farms", "id active").catch(() => []);
         farmItemsV1.forEach(f => { if (f.active && tokens[f.id] && !tokens[f.id].farmActive) tokens[f.id].farmActive = true; });
   
-        // ✅ on-chain V3 state for farmActive (override)
         if (userAddress && farmingV3Contract) {
           const ids = Object.keys(tokens);
           const mintedIds = ids.filter(id => tokens[id] && tokens[id].owner);
@@ -980,7 +976,7 @@
         }
   
         if (userAddress) {
-          await loadUserResources();   // on-chain
+          await loadUserResources();
           await loadUserAttacks();
         }
   
@@ -990,7 +986,7 @@
       }
     }
   
-    // ==================== RESSOURCEN ON-CHAIN (WIE IN GAME.HTML) ====================
+    // ==================== RESSOURCEN ON-CHAIN ====================
     async function loadUserResources() {
       if (!userAddress || !resourceTokenContract) return;
       try {
@@ -1001,7 +997,7 @@
         userResources = ids
           .map((id, idx) => ({
             resourceId: id,
-            amount: balances[idx]   // BigInt (ethers v6)
+            amount: balances[idx]
           }))
           .filter(r => r.amount > 0n);
   
@@ -1142,7 +1138,6 @@
       } catch (e) {}
     
       if (!revealed) {
-        console.log(`Target ${targetTokenId} not revealed, returning basics`);
         return {
           farmingActive,
           revealed: false,
@@ -1162,7 +1157,6 @@
       const prod = getProduction(rarity, row);
       let allowed = productionToAllowedResourceIds(prod);
       
-      // Fallback: wenn allowed leer ist (weil z.B. production nicht stimmt), alle Ressourcen anbieten
       if (allowed.length === 0) {
         console.warn("No allowed resources from production, using all 0-9 as fallback");
         allowed = [0,1,2,3,4,5,6,7,8,9];
@@ -1198,7 +1192,6 @@
       msg.innerHTML = `<span class="success">⏳ Analyzing target...</span>`;
     
       const info = await getStealableResourcesForTarget(targetTokenId);
-      console.log("Dropdown info:", info);
     
       select.innerHTML = "";
       info.allowed.forEach(id => {
@@ -1217,14 +1210,13 @@
       }
     }
   
-    // ==================== SIDEBAR (erweitert um Dropdown-Update) ====================
+    // ==================== SIDEBAR ====================
     async function updateSidebar(tokenId) {
       selectedTokenId = tokenId;
       const token = tokens[tokenId];
       const owner = token ? token.owner : null;
       selectedTokenOwner = owner;
   
-      // real V3 active (on-chain)
       let v3Active = false;
       if (farmingV3Contract) {
         try {
@@ -1294,7 +1286,6 @@
         ownerActionsDiv.innerHTML = btns;
       } else if (userAddress && owner) {
         attackInput.style.display = "flex";
-        // Dropdown für Attacke aktualisieren
         refreshAttackDropdown();
       } else {
         actionPanel.style.display = "none";
@@ -1480,7 +1471,6 @@
         pitroneContract = new ethers.Contract(PITRONE_ADDRESS, PITRONE_ABI, signer);
         resourceTokenContract = new ethers.Contract(RESOURCE_TOKEN_ADDRESS, RESOURCE_TOKEN_ABI, signer);
   
-        // init old farms for migration
         initFarmingContracts(signer);
   
         document.getElementById("walletAddress").innerText = shortenAddress(userAddress);
