@@ -1,511 +1,503 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta content="Inpinity - Collaboration in game design and development." name="description">
-    <title>Inpinity - Collaboration & Genesis Program</title>
-    <link rel="stylesheet" href="css/base.css">
-    <link rel="stylesheet" href="css/layout.css">
-    <link rel="stylesheet" href="css/animations.css">
-    <link rel="stylesheet" href="css/dark.css">
-    <link rel="stylesheet" href="css/light.css">
-    <link rel="stylesheet" href="css/responsive.css">
-    <link rel="stylesheet" href="css/color.css">
-    <link rel="stylesheet" href="css/adapted_about_us.css" />
-    <link rel="stylesheet" href="css/adapted_advertisements.css" />
-    <link rel="stylesheet" href="css/adapted_combined.css"/>
-    <link rel="stylesheet" href="css/adapted_comunity_guidelines.css" />
-    <link rel="stylesheet" href="css/adapted_course_feedback.css" />
-    <link rel="stylesheet" href="css/adapted_mft_marketplace.css"/>
-    <link rel="stylesheet" href="css/adapted_profile.css"/>
-    <link rel="stylesheet" href="css/combined_latest.css"/>
-    <link rel="stylesheet" href="css/gamification.css" />
-    <link rel="stylesheet" href="css/referral.css"/>
-    <link rel="icon" type="image/png" href="favicon.webp">
-    <meta name="keywords" content="Inpinity, Game Design, Game Development, Platform, Collaboration, Forum, Tools, GameDesign, AI Development, Games of future, programming, programs, python gui">
-    <meta name="author" content="Xpective">
-    <meta property="og:title" content="Inpinity - Collaboration & Genesis Program">
-    <meta property="og:description" content="Collaborate with game developers, designers, and blockchain innovators. Join our Genesis Program for exclusive rewards.">
-    <meta property="og:image" content="https://raw.githubusercontent.com/Xpective/InpinityPage/refs/heads/main/img/Inpioil.PNG">
-    <meta property="og:url" content="https://inpinity.online/collaboration.html">
-    <meta name="twitter:card" content="logo_background.webp">
-    <meta name="twitter:site" content="@unxpective">
-    <meta name="twitter:creator" content="@Inpinity1">
-    <meta name="theme-color" content="#FarbcodeIhrerWebsite">
-    <meta name="robots" content="index,follow">
-    <style>
-        /* Partners section */
-        .partners-section {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1.5rem;
-            margin: 2rem 0;
-            padding: 1.5rem;
-            background: rgba(0,0,0,0.3);
-            border-radius: 12px;
-            border: 1px solid #444;
-        }
-        .partner-item {
-            text-align: center;
-            flex: 1 1 200px;
-        }
-        .partner-item a {
-            display: inline-block;
-            padding: 0.75rem 1.5rem;
-            background: #2a2a2a;
-            border: 1px solid gold;
-            border-radius: 40px;
-            color: gold;
-            font-weight: bold;
-            text-decoration: none;
-            transition: all 0.2s;
-        }
-        .partner-item a:hover {
-            background: gold;
-            color: black;
-            transform: scale(1.05);
-        }
-        .partner-item p {
-            margin-top: 0.5rem;
-            font-size: 0.9rem;
-            color: #ccc;
-        }
-        .guestbook-link {
-            display: inline-block;
-            margin: 2rem auto;
-            padding: 1rem 2rem;
-            background: gold;
-            color: black;
-            font-weight: bold;
-            border-radius: 40px;
-            text-decoration: none;
-            font-size: 1.2rem;
-            transition: transform 0.2s, box-shadow 0.2s;
-            border: none;
-            cursor: pointer;
-        }
-        .guestbook-link:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 15px gold;
-        }
-        /* Warning box */
-        .warning-note {
-            background: #332211;
-            border: 1px solid #ffaa00;
-            border-radius: 8px;
-            padding: 1rem;
-            margin: 2rem auto;
-            max-width: 800px;
-            text-align: center;
-        }
-        .warning-note a {
-            color: gold;
-        }
-        /* Presale note */
-        .presale-note {
-            background: rgba(255,215,0,0.1);
-            border: 1px solid gold;
-            border-radius: 8px;
-            padding: 1rem;
-            margin: 2rem auto;
-            max-width: 800px;
-            text-align: center;
-        }
-        .presale-note a {
-            color: gold;
-            font-weight: bold;
-        }
-        /* Genesis-Programm spezifisches Styling */
-        .genesis-section {
-            max-width: 800px;
-            margin: 4rem auto;
-            padding: 2rem;
-            background: #1a1a1a;
-            border: 2px solid gold;
-            border-radius: 16px;
-            box-shadow: 0 0 30px rgba(255,215,0,0.2);
-        }
-        .genesis-image {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        .genesis-image img {
-            max-width: 250px;
-            height: auto;
-            border-radius: 12px;
-            border: 3px solid gold;
-            box-shadow: 0 0 20px rgba(255,215,0,0.3);
-        }
-        .genesis-title {
-            color: gold;
-            text-align: center;
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-        .genesis-subtitle {
-            text-align: center;
-            color: #ccc;
-            margin-bottom: 2rem;
-            font-size: 1.2rem;
-        }
-        .genesis-form label {
-            display: block;
-            color: gold;
-            margin-bottom: 0.5rem;
-            font-weight: bold;
-        }
-        .genesis-form input:not([type="checkbox"]),
-        .genesis-form textarea {
-            width: 100%;
-            padding: 0.75rem;
-            margin-bottom: 1.2rem;
-            background: #222;
-            border: 1px solid #444;
-            border-radius: 6px;
-            color: white;
-            font-size: 1rem;
-        }
-        .genesis-form input:focus,
-        .genesis-form textarea:focus {
-            outline: none;
-            border-color: gold;
-            box-shadow: 0 0 5px gold;
-        }
-        .genesis-checkbox {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 1.5rem;
-        }
-        .genesis-checkbox input {
-            width: auto;
-        }
-        .genesis-checkbox label {
-            color: #ccc;
-            font-weight: normal;
-            margin: 0;
-        }
-        .genesis-button {
-            background: gold;
-            color: black;
-            border: none;
-            padding: 1rem 2rem;
-            border-radius: 40px;
-            font-weight: bold;
-            font-size: 1.2rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            width: 100%;
-        }
-        .genesis-button:hover {
-            transform: scale(1.02);
-            box-shadow: 0 0 15px gold;
-        }
-        .genesis-note {
-            text-align: center;
-            color: #aaa;
-            font-size: 0.9rem;
-            margin-top: 1rem;
-        }
-        .genesis-note a {
-            color: gold;
-            text-decoration: none;
-        }
-        .genesis-note a:hover {
-            text-decoration: underline;
-        }
-        #form-result {
-            text-align: center;
-            margin-top: 1rem;
-            font-weight: bold;
-        }
-        .success-message {
-            color: #00aa00;
-        }
-        .error-message {
-            color: #ff4444;
-        }
-        .whitelist-badge {
-            background: gold;
-            color: black;
-            padding: 0.2rem 0.5rem;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 0.8rem;
-            display: inline-block;
-            margin-left: 0.5rem;
-        }
-        .staking-info {
-            background: #2a2a2a;
-            border-left: 4px solid var(--primary-cyan);
-            padding: 1rem;
-            margin: 2rem 0;
-            border-radius: 0 8px 8px 0;
-        }
-    </style>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <meta content="Inpinity - Collaboration, partnerships and Genesis Program for the Pi-Phi Pyramid ecosystem on Base." name="description">
+  <title>Inpinity - Collaboration & Partnerships</title>
+
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/dark.css">
+  <link rel="stylesheet" href="css/light.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <link rel="stylesheet" href="css/color.css">
+  <link rel="stylesheet" href="css/adapted_about_us.css" />
+  <link rel="stylesheet" href="css/adapted_advertisements.css" />
+  <link rel="stylesheet" href="css/adapted_combined.css"/>
+  <link rel="stylesheet" href="css/adapted_comunity_guidelines.css" />
+  <link rel="stylesheet" href="css/adapted_course_feedback.css" />
+  <link rel="stylesheet" href="css/adapted_mft_marketplace.css"/>
+  <link rel="stylesheet" href="css/adapted_profile.css"/>
+  <link rel="stylesheet" href="css/combined_latest.css"/>
+  <link rel="stylesheet" href="css/gamification.css" />
+  <link rel="stylesheet" href="css/referral.css"/>
+
+  <link rel="icon" type="image/png" href="favicon.webp">
+
+  <meta name="keywords" content="Inpinity, Pi Phi Pyramid, Partnerships, Collaboration, Genesis, Base, Uniswap, NFT Blocks, ERC1155 Resources, UE5">
+  <meta name="author" content="Xpective">
+
+  <meta property="og:title" content="Inpinity - Collaboration & Partnerships">
+  <meta property="og:description" content="Collaborate with Inpinity: partnerships, resource integrations, and Genesis Program for early supporters.">
+  <meta property="og:image" content="https://raw.githubusercontent.com/Xpective/InpinityPage/refs/heads/main/img/Inpioil.PNG">
+  <meta property="og:url" content="https://inpinity.online/collaboration.html">
+
+  <meta name="twitter:card" content="logo_background.webp">
+  <meta name="twitter:site" content="@unxpective">
+  <meta name="twitter:creator" content="@Inpinity1">
+  <meta name="robots" content="index,follow">
+
+  <style>
+    .partners-section {
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin: 1.6rem auto 0.8rem;
+      padding: 1.2rem;
+      background: rgba(0,0,0,0.3);
+      border-radius: 12px;
+      border: 1px solid #333;
+      max-width: 980px;
+    }
+    .partner-item { text-align: center; flex: 1 1 220px; }
+    .partner-item a {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      background: #2a2a2a;
+      border: 1px solid gold;
+      border-radius: 40px;
+      color: gold;
+      font-weight: 800;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .partner-item a:hover { background: gold; color: black; transform: scale(1.04); }
+    .partner-item p { margin-top: 0.6rem; font-size: 0.92rem; color: #cfcfcf; line-height: 1.45; }
+
+    .warning-note {
+      background: #332211;
+      border: 1px solid #ffaa00;
+      border-radius: 12px;
+      padding: 1rem 1.2rem;
+      margin: 2rem auto 1rem;
+      max-width: 980px;
+      text-align: center;
+      color: #eee;
+    }
+    .warning-note a { color: gold; }
+
+    .presale-note {
+      background: rgba(255,215,0,0.08);
+      border: 1px solid gold;
+      border-radius: 12px;
+      padding: 1rem 1.2rem;
+      margin: 1rem auto 1.2rem;
+      max-width: 980px;
+      text-align: center;
+      color: #eee;
+    }
+    .presale-note a { color: gold; font-weight: 900; }
+
+    .section-wrap { max-width: 980px; margin: 0 auto; padding: 0 1rem; }
+    .hero-title { text-align: center; color: gold; font-size: 2.2rem; margin: 1.2rem 0 0.4rem; }
+    .hero-sub { text-align: center; color: #ccc; margin: 0 0 1.3rem; line-height: 1.65; }
+
+    .cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+      margin: 1.2rem auto 0;
+    }
+    .cta {
+      display: inline-block;
+      text-decoration: none;
+      font-weight: 900;
+      border-radius: 999px;
+      padding: 0.85rem 1.25rem;
+      border: 1px solid rgba(255,215,0,0.55);
+      color: #fff;
+      background: linear-gradient(135deg, #8A2BE2, #00FFFF);
+      transition: transform .15s, box-shadow .2s;
+    }
+    .cta:hover { transform: translateY(-1px); box-shadow: 0 0 18px rgba(255,215,0,0.25); }
+    .cta.secondary { background: rgba(255,215,0,0.08); color: gold; }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+      margin: 2rem auto 0;
+      max-width: 980px;
+      padding: 0 1rem;
+    }
+    .card {
+      background: rgba(20,20,20,0.9);
+      border: 1px solid rgba(255,215,0,0.55);
+      border-radius: 14px;
+      padding: 1.2rem 1.2rem 1.1rem;
+      color: #eee;
+      transition: transform .15s, box-shadow .2s;
+    }
+    .card:hover { transform: scale(1.01); box-shadow: 0 0 18px rgba(255,215,0,0.18); }
+    .card h3 { margin: 0 0 0.6rem; color: gold; font-size: 1.2rem; display:flex; gap:.5rem; align-items:center; }
+    .card p { margin: 0.25rem 0; color: #cfcfcf; line-height: 1.55; }
+    .tag {
+      display: inline-block;
+      margin-top: 0.8rem;
+      padding: 0.25rem 0.7rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,215,0,0.6);
+      color: gold;
+      font-size: 0.8rem;
+      background: rgba(255,215,0,0.07);
+      font-weight: 800;
+    }
+
+    .genesis-section {
+      max-width: 900px;
+      margin: 3.2rem auto 0;
+      padding: 2rem;
+      background: #1a1a1a;
+      border: 2px solid gold;
+      border-radius: 16px;
+      box-shadow: 0 0 30px rgba(255,215,0,0.18);
+    }
+    .genesis-image { text-align: center; margin-bottom: 1.6rem; }
+    .genesis-image img {
+      max-width: 260px;
+      height: auto;
+      border-radius: 12px;
+      border: 3px solid gold;
+      box-shadow: 0 0 18px rgba(255,215,0,0.25);
+    }
+    .genesis-title { color: gold; text-align: center; font-size: 2rem; margin: 0 0 0.4rem; }
+    .genesis-subtitle { text-align: center; color: #ccc; margin: 0 0 1.4rem; font-size: 1.1rem; line-height: 1.55; }
+    .whitelist-badge {
+      background: gold;
+      color: black;
+      padding: 0.2rem 0.55rem;
+      border-radius: 20px;
+      font-weight: 900;
+      font-size: 0.8rem;
+      display: inline-block;
+      margin-left: 0.5rem;
+      vertical-align: middle;
+    }
+
+    .genesis-form label { display: block; color: gold; margin-bottom: 0.5rem; font-weight: 900; }
+    .genesis-form input:not([type="checkbox"]), .genesis-form textarea {
+      width: 100%;
+      padding: 0.75rem;
+      margin-bottom: 1.1rem;
+      background: #222;
+      border: 1px solid #444;
+      border-radius: 10px;
+      color: white;
+      font-size: 1rem;
+    }
+    .genesis-form input:focus, .genesis-form textarea:focus {
+      outline: none;
+      border-color: gold;
+      box-shadow: 0 0 6px rgba(255,215,0,0.55);
+    }
+    .genesis-checkbox { display:flex; align-items:center; gap:.55rem; margin-bottom: 1.1rem; }
+    .genesis-checkbox label { color:#ccc; font-weight: normal; margin:0; }
+    .genesis-button {
+      background: gold;
+      color: black;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 40px;
+      font-weight: 900;
+      font-size: 1.15rem;
+      cursor: pointer;
+      transition: transform .15s, box-shadow .2s;
+      width: 100%;
+    }
+    .genesis-button:hover { transform: scale(1.01); box-shadow: 0 0 16px rgba(255,215,0,0.45); }
+
+    #form-result { text-align:center; margin-top: 1rem; font-weight: 900; }
+    .success-message { color: #00aa00; }
+    .error-message { color: #ff4444; }
+
+    .mini-note {
+      max-width: 980px;
+      margin: 1.6rem auto 0;
+      padding: 1rem 1.2rem;
+      border-radius: 12px;
+      border: 1px solid rgba(255,215,0,0.3);
+      background: rgba(255,215,0,0.06);
+      color: #ddd;
+      line-height: 1.6;
+    }
+    .mini-note strong { color: gold; }
+
+    .guestbook-link {
+      display: inline-block;
+      margin: 1.6rem auto 0;
+      padding: 0.95rem 2rem;
+      background: gold;
+      color: black;
+      font-weight: 900;
+      border-radius: 40px;
+      text-decoration: none;
+      font-size: 1.15rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+    .guestbook-link:hover { transform: scale(1.04); box-shadow: 0 0 15px rgba(255,215,0,0.55); }
+  </style>
 </head>
+
 <body>
-    <header>
-        <nav>
-            <ul>
-                <li><a aria-label="Home" href="index.html">Home</a></li>
-                <li><a aria-label="Features" href="features.html">Features</a></li>
-                <li><a aria-label="Game" href="game.html">Game</a></li>
-                <li><a aria-label="Forum" href="forum.html">Forum</a></li>
-                <li><a aria-label="Collaboration" href="collaboration.html">Collaboration</a></li>
-                <li><a aria-label="Register" href="register.html">Register</a></li>
-                <li><a aria-label="About" href="about.html">About</a></li>
-                <li><a aria-label="Whitepaper" href="whitepaper.html">Whitepaper</a></li>
-                <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
-                <li><a aria-label="Guestbook" href="guestbook.html">Guestbook</a></li>
-                <li><a aria-label="Advertising" href="advertising.html">Advertising</a></li>
-                <li><a aria-label="Profile" href="profile.html">Profile</a></li>
-                <li><a aria-label="Staking" href="staking.html">Staking</a></li>
-                <div class="themeDots">
-                    <div class="dot light" title="Light Theme"></div>
-                    <div class="dot dark" title="Dark Theme"></div>
-                    <div class="dot basic" title="Basic Theme"></div>
-                </div>
-            </ul>
-        </nav>
-        <style>
-            .themeDots .dot {
-                display: inline-block;
-                width: 20px;
-                height: 20px;
-                border-radius: 50%;
-                margin: 5px;
-                cursor: pointer;
-                transition: transform 0.2s;
-            }
-            .themeDots .dot.light { background-color: #FFFFFF; }
-            .themeDots .dot.dark { background-color: #000000; }
-            .themeDots .dot.basic { background-color: var(--quinary-color); }
-            .themeDots .dot:hover { transform: scale(1.2); }
-        </style>
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                document.querySelector('.themeDots .dot.light')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'light'));
-                document.querySelector('.themeDots .dot.dark')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'dark'));
-                document.querySelector('.themeDots .dot.basic')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'basic'));
-            });
-        </script>
-    </header>
-    <main>
-        <section class="hero">
-            <h1>Unlock the power of collaboration.</h1>
-            <h2>Connect. Share. Grow.</h2>
-        </section>
+<header>
+  <nav>
+    <ul>
+      <li><a aria-label="Home" href="index.html">Home</a></li>
+      <li><a aria-label="Features" href="features.html">Features</a></li>
+      <li><a aria-label="Game" href="game.html">Game</a></li>
+      <li><a aria-label="Mint" href="mint.html">Mint</a></li>
+      <li><a aria-label="Pyramid Map" href="map.html">Pyramid Map</a></li>
+      <li><a aria-label="Collaboration" href="collaboration.html">Collaboration</a></li>
+      <li><a aria-label="About" href="about.html">About</a></li>
+      <li><a aria-label="Whitepaper" href="whitepaper.html">Whitepaper</a></li>
+      <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
+      <li><a aria-label="Guestbook" href="guestbook.html">Guestbook</a></li>
+      <li><a aria-label="Advertising" href="advertising.html">Advertising</a></li>
+      <li><a aria-label="Staking" href="staking.html">Staking</a></li>
 
-        <!-- Warning about ToshiMart -->
-        <div class="warning-note">
-            <p>⚠️ <strong>Important Update:</strong> We have withdrawn from ToshiMart due to phishing concerns. Our new INPI token is <code>0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</code>. All official contracts are listed on our <a href="index.html">homepage</a>. Do not interact with the old token or ToshiMart pools.</p>
-        </div>
+      <div class="themeDots">
+        <div class="dot light" title="Light Theme"></div>
+        <div class="dot dark" title="Dark Theme"></div>
+        <div class="dot basic" title="Basic Theme"></div>
+      </div>
+    </ul>
+  </nav>
 
-        <!-- Presale Note (NEW) -->
-        <div class="presale-note">
-            <p>🔥 <strong>PRESALE LIVE NOW:</strong> 2,000,000 INPI per 1 ETH until March 25, 2026. <a href="https://inpinity.online/token/">👉 Join the Presale</a></p>
-        </div>
+  <style>
+    .themeDots .dot{display:inline-block;width:20px;height:20px;border-radius:50%;margin:5px;cursor:pointer;transition:transform .2s}
+    .themeDots .dot.light{background-color:#FFF}
+    .themeDots .dot.dark{background-color:#000}
+    .themeDots .dot.basic{background-color:var(--quinary-color)}
+    .themeDots .dot:hover{transform:scale(1.2)}
+  </style>
+  <script>
+    document.addEventListener('DOMContentLoaded',()=>{
+      document.querySelector('.themeDots .dot.light')?.addEventListener('click',()=>document.body.setAttribute('data-theme','light'));
+      document.querySelector('.themeDots .dot.dark')?.addEventListener('click',()=>document.body.setAttribute('data-theme','dark'));
+      document.querySelector('.themeDots .dot.basic')?.addEventListener('click',()=>document.body.setAttribute('data-theme','basic'));
+    });
+  </script>
+</header>
 
-        <!-- Partners Section -->
-        <section>
-            <h2 style="text-align: center; color: gold;">Our Ecosystem Partners</h2>
-            <div class="partners-section">
-                <div class="partner-item">
-                    <a href="https://base.org/" target="_blank" rel="noopener">⚡ Base L2</a>
-                    <p>Scalable & secure L2</p>
-                </div>
-                <div class="partner-item">
-                    <a href="https://uniswap.org/" target="_blank" rel="noopener">🦄 Uniswap</a>
-                    <p>Decentralized liquidity</p>
-                </div>
-            </div>
-            <p style="text-align: center; max-width: 700px; margin: 1rem auto;">
-                Inpinity is proud to collaborate with <strong>Base</strong> and <strong>Uniswap</strong> to bring you a seamless, secure, and community-driven ecosystem. 
-                These partnerships ensure deep liquidity, low‑cost transactions, and a robust foundation for our gaming and NFT platforms.
-            </p>
-        </section>
+<main>
+  <div class="warning-note">
+    <p>
+      ⚠️ <strong>Security Notice:</strong> We withdrew from ToshiMart due to phishing concerns.
+      Always use the official contracts listed on the <a href="index.html">homepage</a>.
+    </p>
+  </div>
 
-        <!-- Staking Info (NEW) -->
-        <div class="staking-info">
-            <h3 style="color: var(--primary-cyan); margin-top: 0;">⚡ Staking is Live</h3>
-            <p>Earn passive rewards by staking your $INPI tokens. Current reward rate: <strong>~0.00475 INPI per second</strong> (≈150,000 INPI per year, designed to last over 1,000 years).</p>
-            <p><a href="staking.html" style="color: gold;">👉 Go to Staking Dashboard</a></p>
-        </div>
+  <div class="presale-note">
+    <p>
+      🔥 <strong>PRESALE LIVE:</strong> 2,000,000 INPI per 1 ETH until March 25, 2026.
+      <a href="https://inpinity.online/token/" target="_blank" rel="noopener">👉 Join the Presale</a>
+    </p>
+  </div>
 
-        <section>
-            <p>In the world of game design and development, collaboration is the key to success. At Inpinity, we believe in providing a platform that empowers creatives to come together, exchange ideas, and grow collectively. Here are some ways you can get involved:</p>
-        </section>
+  <section class="section-wrap">
+    <h1 class="hero-title">🤝 Collaboration & Partnerships</h1>
+    <p class="hero-sub">
+      Inpinity is built to collaborate: creators, communities, and projects can plug into the Pyramid.
+      Partnerships can unlock <strong>special resources</strong>, <strong>partner blocks</strong>, and future
+      <strong>Infinite City</strong> utilities — with a path into the upcoming <strong>UE5 game</strong>.
+    </p>
 
-        <section>
-            <h2>How to participate</h2>
-            <ul>
-                <li>Share projects and receive feedback</li>
-                <li>Contribute to existing projects</li>
-                <li>Start your own projects and find collaborators</li>
-            </ul>
-        </section>
+    <div class="cta-row">
+      <a class="cta" href="mint.html">⛏️ Mint a Block</a>
+      <a class="cta secondary" href="game.html">🎮 Open Game</a>
+      <a class="cta secondary" href="map.html">🗺️ Open Map</a>
+    </div>
+  </section>
 
-        <!-- NFT creation section (unchanged) -->
-        <section>
-            <h2>Create your own NFT</h2>
-            <p>Upload a ZIP file containing layer folders (background, eyes, body, mouth, ears, hair, hat, details) with PNG images. A unique NFT will be generated.</p>
-            <input type="file" id="zipFile" accept=".zip" />
-            <canvas id="nftCanvas" width="350" height="350" style="border:1px solid gold; display: block; margin: 1rem auto;"></canvas>
-            <script>
-                document.getElementById('zipFile').addEventListener('change', function() {
-                    const file = this.files[0];
-                    if (file) {
-                        generateNFT(file);
-                    }
-                });
+  <section>
+    <div class="partners-section">
+      <div class="partner-item">
+        <a href="https://base.org/" target="_blank" rel="noopener">⚡ Base L2</a>
+        <p>Fast & low-cost execution for on-chain gameplay.</p>
+      </div>
+      <div class="partner-item">
+        <a href="https://uniswap.org/" target="_blank" rel="noopener">🦄 Uniswap</a>
+        <p>Liquidity layer for the ecosystem economy.</p>
+      </div>
+      <div class="partner-item">
+        <a href="https://opensea.io/collection/inpinity-pyramid-447084512" target="_blank" rel="noopener">🧱 Pyramid NFTs</a>
+        <p>The Block collection: mint → reveal → farm → defend → attack.</p>
+      </div>
+      <div class="partner-item">
+        <a href="https://opensea.io/collection/0x71e76a6065197acdd1a4d6b736712f80d1fd3d8b" target="_blank" rel="noopener">📦 Resources</a>
+        <p>ERC1155 resources used for gameplay and upgrades.</p>
+      </div>
+    </div>
+  </section>
 
-                async function generateNFT(zipFile) {
-                    const jsZip = new JSZip();
-                    const zipContents = await jsZip.loadAsync(zipFile);
-                    const canvas = document.getElementById('nftCanvas');
-                    const ctx = canvas.getContext('2d');
+  <section class="cards">
+    <div class="card">
+      <h3>🧬 What a Partnership Means</h3>
+      <p>We can integrate partner communities directly into the Pyramid economy.</p>
+      <p><strong>Partner token / NFT → becomes a special resource</strong> (or unlocks one) used in gameplay, protection, boosts, and future city upgrades.</p>
+      <span class="tag">Open for Partners</span>
+    </div>
 
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    <div class="card">
+      <h3>📦 Partner Resources (ERC1155)</h3>
+      <p>Resources are on-chain and visible, usable and tradable. A partnership can introduce:</p>
+      <p>• new resource type<br>• special “partner-only” drops<br>• city crafting ingredients (Infinite City)</p>
+      <span class="tag">Roadmap + Live Core</span>
+    </div>
 
-                    const layerOrder = ['background', 'eyes', 'body', 'mouth', 'ears', 'hair', 'hat', 'details'];
+    <div class="card">
+      <h3>⭐ Partner Blocks</h3>
+      <p>Partner blocks can be marked as “special” and linked to collaborations.</p>
+      <p>Those blocks can unlock unique rewards, airdrops, and special production rules (event-based).</p>
+      <span class="tag">PartnershipV2</span>
+    </div>
 
-                    for (const layer of layerOrder) {
-                        for (const [path, file] of Object.entries(zipContents.files)) {
-                            if (!file.dir && path.startsWith(`${layer}/`) && path.endsWith('.png')) {
-                                const fileData = await file.async("blob");
-                                const imgUrl = URL.createObjectURL(fileData);
-                                const img = new Image();
-                                img.src = imgUrl;
-                                await new Promise((resolve) => img.onload = resolve);
-                                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                                URL.revokeObjectURL(imgUrl);
-                                break;
-                            }
-                        }
-                    }
-                }
-            </script>
-        </section>
+    <div class="card">
+      <h3>🏙️ Infinite City (Coming)</h3>
+      <p>City upgrades will consume resources and unlock utilities:</p>
+      <p>• production boosts<br>• defense layers<br>• new mechanics & quests</p>
+      <span class="tag">Roadmap</span>
+    </div>
 
-        <!-- Link to Guestbook -->
-        <section style="text-align: center; margin: 3rem 0;">
-            <h2>Leave your mark</h2>
-            <p>Visit our <strong>Guestbook</strong> to sign your name, share a message, and become part of the Inpinity history – soon to be recorded on the Base blockchain.</p>
-            <a href="guestbook.html" class="guestbook-link">📖 Go to Guestbook</a>
-        </section>
+    <div class="card">
+      <h3>🎮 UE5 Game (Coming)</h3>
+      <p>The long-term direction: play Inpinity in UE5 where your on-chain Pyramid becomes your strategy layer.</p>
+      <p>Blocks, resources, partnerships and city upgrades will become playable progression.</p>
+      <span class="tag">Roadmap</span>
+    </div>
 
-        <section>
-            <h2>Contact for collaboration</h2>
-            <p>If you're interested in partnering with us or have a project idea, reach out at <a href="mailto:xpective@inpinity.online">xpective@inpinity.online</a> or join our <a href="https://discord.gg/95yj6Eg6" target="_blank" rel="noopener">Discord</a>.</p>
-        </section>
+    <div class="card">
+      <h3>📬 Contact</h3>
+      <p>If you want a partnership or collaboration, reach out:</p>
+      <p><a href="mailto:xpective@inpinity.online" style="color:gold;">xpective@inpinity.online</a><br>
+      <a href="https://discord.gg/95yj6Eg6" target="_blank" rel="noopener" style="color:gold;">Discord</a></p>
+      <span class="tag">Fast Track</span>
+    </div>
+  </section>
 
-        <!-- 🚀 GENESIS PROGRAM SECTION für die ersten 50 Investoren -->
-        <div class="genesis-section">
-            <div class="genesis-image">
-                <img src="https://raw.githubusercontent.com/Xpective/InpinityPage/refs/heads/main/img/Inpioil.PNG" alt="Platinpinity Olivenöl – exklusive Belohnung">
-            </div>
-            <h2 class="genesis-title">🌟 Genesis Member Program <span class="whitelist-badge">WHITELISTED</span></h2>
-            <p class="genesis-subtitle">Be one of the first 50 supporters and secure your share of real‑world rewards</p>
+  <div class="mini-note section-wrap">
+    <strong>Simple partnership flow:</strong>
+    Partner provides token/collection → we define a resource mapping + rules →
+    partner blocks (or events) can generate it → Infinite City consumes it →
+    both communities gain utility and visibility.
+  </div>
 
-            <div style="background: #2a2a2a; border-left: 4px solid gold; padding: 1rem; margin-bottom: 2rem; border-radius: 0 8px 8px 0;">
-                <p style="margin:0; color:#ccc;">
-                    <strong>🎁 Your exclusive reward package:</strong><br>
-                    • 14,400 INPI instant bonus (from reserve)<br>
-                    • 1 liter premium cold‑pressed olive oil (after 6 months)<br>
-                    • 2nd liter after 12 months (total 3 liters)<br>
-                    • <strong>Whitelist status</strong> for future exclusive drops<br>
-                    • Option to stay in the pool and receive olive oil every year 🌿
-                </p>
-            </div>
+  <!-- GENESIS PROGRAM (kept, but aligned to the new page) -->
+  <div class="genesis-section">
+    <div class="genesis-image">
+      <img src="https://raw.githubusercontent.com/Xpective/InpinityPage/refs/heads/main/img/Inpioil.PNG" alt="Genesis Program Reward">
+    </div>
 
-            <p style="color: gold; text-align: center; margin-bottom: 1rem;"><strong>⚡ Limited to 50 participants – First come, first served! ⚡</strong></p>
+    <h2 class="genesis-title">🌟 Genesis Member Program <span class="whitelist-badge">WHITELIST</span></h2>
+    <p class="genesis-subtitle">
+      Early supporters help bootstrap the ecosystem and receive exclusive real-world rewards.
+      Limited slots — first come, first served.
+    </p>
 
-            <!-- Forminit-Formular -->
-            <form id="genesisForm" class="genesis-form">
-                <!-- Sender-Block Felder -->
-                <label for="firstName">First name</label>
-                <input type="text" id="firstName" name="fi-sender-firstName" required placeholder="John">
+    <div style="background:#2a2a2a;border-left:4px solid gold;padding:1rem;border-radius:0 10px 10px 0;margin-bottom:1.4rem;">
+      <p style="margin:0;color:#ddd;line-height:1.55;">
+        <strong>🎁 Genesis reward package:</strong><br>
+        • Genesis bonus (from reserve)<br>
+        • Premium olive oil reward (shipping after milestones)<br>
+        • Whitelist access for future drops & partner events
+      </p>
+    </div>
 
-                <label for="lastName">Last name</label>
-                <input type="text" id="lastName" name="fi-sender-lastName" required placeholder="Doe">
+    <form id="genesisForm" class="genesis-form">
+      <label for="firstName">First name</label>
+      <input type="text" id="firstName" name="fi-sender-firstName" required placeholder="John">
 
-                <label for="email">Email address</label>
-                <input type="email" id="email" name="fi-sender-email" required placeholder="john@example.com">
+      <label for="lastName">Last name</label>
+      <input type="text" id="lastName" name="fi-sender-lastName" required placeholder="Doe">
 
-                <!-- Weitere Felder als Field Blocks -->
-                <label for="wallet">Your wallet address (0x...)</label>
-                <input type="text" id="wallet" name="fi-text-wallet" required pattern="0x[a-fA-F0-9]{40}" placeholder="0x...">
+      <label for="email">Email address</label>
+      <input type="email" id="email" name="fi-sender-email" required placeholder="john@example.com">
 
-                <label for="address">Shipping address (street, city, postal code, country)</label>
-                <textarea id="address" name="fi-sender-address" required rows="3" placeholder="Street, 12345 City, Country"></textarea>
+      <label for="wallet">Your wallet address (0x...)</label>
+      <input type="text" id="wallet" name="fi-text-wallet" required pattern="0x[a-fA-F0-9]{40}" placeholder="0x...">
 
-                <div class="genesis-checkbox">
-                    <input type="checkbox" id="privacy" name="fi-checkbox-privacy" value="accepted" required>
-                    <label for="privacy">I have read and agree to the <a href="/privacypolicy.html" target="_blank" style="color:gold;">Privacy Policy</a>.</label>
-                </div>
+      <label for="address">Shipping address (street, city, postal code, country)</label>
+      <textarea id="address" name="fi-sender-address" required rows="3" placeholder="Street, 12345 City, Country"></textarea>
 
-                <!-- Honeypot gegen Spam (optional) -->
-                <input type="text" name="_gotcha" style="display:none;">
+      <div class="genesis-checkbox">
+        <input type="checkbox" id="privacy" name="fi-checkbox-privacy" value="accepted" required>
+        <label for="privacy">I agree to the <a href="privacypolicy.html" target="_blank" style="color:gold;">Privacy Policy</a>.</label>
+      </div>
 
-                <button type="submit" class="genesis-button">📬 Apply for Whitelist</button>
-            </form>
+      <input type="text" name="_gotcha" style="display:none;">
 
-            <!-- Ergebnisnachricht -->
-            <p id="form-result"></p>
+      <button type="submit" class="genesis-button">📬 Apply for Genesis / Whitelist</button>
+    </form>
 
-            <p class="genesis-note">
-                * Only the first 50 registrations qualify for the Genesis Program. You will receive a confirmation email with further instructions.<br>
-                <a href="/privacypolicy.html">Privacy policy</a> – <a href="/termsofuse.html">Terms</a>
-            </p>
-        </div>
-    </main>
-    
-    <footer>
-        <p>© 2026 Inpinity. All rights reserved. Working with <a href="https://base.org/" target="_blank" rel="noopener" style="color: gold;">Base</a> and <a href="https://uniswap.org/" target="_blank" rel="noopener" style="color: gold;">Uniswap</a>.</p>
-        <div class="footer-links">
-            <a href="privacypolicy.html">Privacy Policy</a>
-            <a href="termsofuse.html">Terms of Use</a>
-            <a href="contact.html">Contact</a>
-            <a href="faq.html">FAQ</a>
-            <a href="guestbook.html">Guestbook</a>
-            <a href="advertising.html">Advertising</a>
-            <a href="profile.html">Profile</a>
-            <a href="staking.html">Staking</a>
-            <a href="whitepaper.html">Whitepaper</a>
-        </div>
-    </footer>
-    
-    <!-- Forminit SDK -->
-    <script src="https://forminit.com/sdk/v1/forminit.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const forminit = new Forminit();
-            const FORM_ID = '7ktpdl3xza8'; // Die Form-ID aus der Aufgabe
-            
-            const form = document.getElementById('genesisForm');
-            const resultEl = document.getElementById('form-result');
-            
-            form.addEventListener('submit', async function(event) {
-                event.preventDefault();
-                
-                // FormData aus dem Formular erstellen – die Feldnamen haben bereits das fi- Präfix
-                const formData = new FormData(form);
-                
-                const { data, redirectUrl, error } = await forminit.submit(FORM_ID, formData);
-                
-                if (error) {
-                    resultEl.innerHTML = `<span class="error-message">❌ ${error.message}</span>`;
-                    return;
-                }
-                
-                resultEl.innerHTML = '<span class="success-message">✅ Application submitted successfully! You will receive a confirmation email soon.</span>';
-                form.reset();
-            });
-        });
-    </script>
+    <p id="form-result"></p>
+
+    <p style="text-align:center;color:#aaa;font-size:0.9rem;margin-top:1rem;">
+      <a href="privacypolicy.html" style="color:gold;text-decoration:none;">Privacy</a> ·
+      <a href="termsofuse.html" style="color:gold;text-decoration:none;">Terms</a>
+    </p>
+  </div>
+
+  <section style="text-align:center;margin:2.6rem 0 0;">
+    <h2 style="color:gold;">✍️ Leave your mark</h2>
+    <p style="max-width:720px;margin:0.6rem auto 0;color:#ccc;line-height:1.6;">
+      Sign the guestbook and become part of the Inpinity story.
+    </p>
+    <a href="guestbook.html" class="guestbook-link">📖 Go to Guestbook</a>
+  </section>
+</main>
+
+<footer>
+  <p>© 2026 Inpinity. All rights reserved. Working with
+    <a href="https://base.org/" target="_blank" rel="noopener" style="color: gold;">Base</a>
+    and <a href="https://uniswap.org/" target="_blank" rel="noopener" style="color: gold;">Uniswap</a>.
+  </p>
+  <div class="footer-links">
+    <a href="privacypolicy.html">Privacy Policy</a>
+    <a href="termsofuse.html">Terms of Use</a>
+    <a href="contact.html">Contact</a>
+    <a href="faq.html">FAQ</a>
+    <a href="guestbook.html">Guestbook</a>
+    <a href="advertising.html">Advertising</a>
+    <a href="staking.html">Staking</a>
+    <a href="whitepaper.html">Whitepaper</a>
+    <a href="mint.html">Mint</a>
+    <a href="map.html">Pyramid Map</a>
+    <a href="game.html">Game</a>
+  </div>
+</footer>
+
+<!-- Forminit SDK -->
+<script src="https://forminit.com/sdk/v1/forminit.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const forminit = new Forminit();
+    const FORM_ID = '7ktpdl3xza8';
+
+    const form = document.getElementById('genesisForm');
+    const resultEl = document.getElementById('form-result');
+
+    form.addEventListener('submit', async function(event) {
+      event.preventDefault();
+
+      const formData = new FormData(form);
+      const { error } = await forminit.submit(FORM_ID, formData);
+
+      if (error) {
+        resultEl.innerHTML = `<span class="error-message">❌ ${error.message}</span>`;
+        return;
+      }
+
+      resultEl.innerHTML = '<span class="success-message">✅ Application submitted! You will receive a confirmation email soon.</span>';
+      form.reset();
+    });
+  });
+</script>
 </body>
 </html>
