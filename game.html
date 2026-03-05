@@ -1102,31 +1102,64 @@
         select.appendChild(opt);
       }
     }
+
+    function updateUserResourcesDisplay() {
+      const container = document.getElementById("userResources"); // Stelle sicher, dass das Element existiert
+      if (!userAddress) {
+        container.innerHTML = '<p style="color:#98a9b9;">Connect wallet to see your resource tokens.</p>';
+        return;
+      }
+      if (!userResources || userResources.length === 0) {
+        container.innerHTML = '<p style="color:#98a9b9;">You have no resource tokens yet.</p>';
+        return;
+      }
+      userResources.sort((a, b) => a.resourceId - b.resourceId);
+      let html = "";
+      for (const r of userResources) {
+        const name = resourceNames[r.resourceId] || `Resource ${r.resourceId}`;
+        const imgUrl = `https://inpinity.online/img/${r.resourceId}.PNG`; // ggf. .png anpassen
+        html += `
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+            <img src="${imgUrl}" alt="${name}" style="width:24px; height:24px; object-fit:contain;" onerror="this.style.display='none'">
+            <span style="color:#d4af37; min-width:80px;">${name}</span>
+            <span style="font-weight:600;">${r.amount.toString()}</span>
+          </div>
+        `;
+      }
+      container.innerHTML = html;
+    }
     
-    async function loadUserAttacks(){
-      if(!userAddress) return;
-    
-      // AttackV3 entities abfragen (statt "attacks")
-      const where = `{ attacker: "${userAddress.toLowerCase()}", executed: false }`;
-      const attacks = await fetchAllWithPagination(
-        "attackV3s",                           // ⬅️ Entity-Name
-        "id attacker attackerTokenId target attackIndex startTime endTime resource executed",
-        where
-      );
-    
-      userAttacks = attacks.map(a => ({
-        id: a.id,
-        targetTokenId: parseInt(a.target, 10),
-        attackerTokenId: parseInt(a.attackerTokenId, 10),
-        attackIndex: parseInt(a.attackIndex, 10),
-        startTime: parseInt(a.startTime, 10),
-        endTime: parseInt(a.endTime, 10),
-        executed: !!a.executed,
-        resource: parseInt(a.resource, 10)      // ⬅️ kommt jetzt direkt vom Subgraph
-      }));
-    
-      displayUserAttacks();
-      refreshBlockMarkings();
+    async function loadUserAttacks() {
+        if (!userAddress) return;
+        
+        try {
+            // ⬇️ WICHTIG: Jetzt "attackV3s" statt "attacks"
+        const where = `{ attacker: "${userAddress.toLowerCase()}" }`;
+        const attacks = await fetchAllWithPagination(
+            SUBGRAPH_URL_V2,          // deine Subgraph-URL (V2)
+            "attackV3s",              // ⬅️ NEU: Plural, genau wie im Schema
+            "id attacker target attackIndex startTime endTime resource executed",
+            where
+        );
+        
+            // Nur nicht ausgeführte Angriffe anzeigen
+        userAttacks = attacks
+            .filter(a => !a.executed)
+            .map(a => ({
+            id: a.id,
+            targetTokenId: parseInt(a.target, 10),
+            attackIndex: parseInt(a.attackIndex, 10),
+            startTime: parseInt(a.startTime, 10),
+            endTime: parseInt(a.endTime, 10),
+            executed: !!a.executed,
+            resource: parseInt(a.resource, 10)   // ✅ direkt vom Subgraph
+            }));
+        
+        displayUserAttacks();
+        refreshBlockMarkings();
+        } catch (e) {
+        console.error("Failed to load attacks:", e);
+        }
     }
     
     
