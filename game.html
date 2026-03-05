@@ -1377,25 +1377,25 @@
       return new Set(JSON.parse(localStorage.getItem("dismissedAttacks") || "[]"));
     }
     
-    /* ==================== EXECUTE ATTACK (PiratesV3) ==================== */
-    async function executeAttack(attack) {
-      const msgDiv = document.getElementById("attackMessage");
-      if (!msgDiv) return;
+    /* ==================== EXECUTE ATTACK (PiratesV3) mit Prüfung ==================== */
+    async function executeAttack(attack){
+      const msgDiv=document.getElementById("attackMessage");
+      if(!msgDiv) return;
     
       msgDiv.innerHTML = '<span class="success">⏳ Checking target resources...</span>';
       try {
         if (!piratesV3Contract) throw new Error("Connect wallet first.");
-    
+
         // Prüfe, ob das Ziel unclaimed Ressourcen des angegriffenen Typs hat
         const pending = await farmingV3Contract.getAllPending(attack.targetTokenId);
         // pending ist ein Array von 10 BigNumber (ethers v5)
-        if (pending[attack.resource].isZero()) {
+        if (!pending || pending.length <= attack.resource || pending[attack.resource].isZero()) {
           msgDiv.innerHTML = '<span class="error">❌ Target has no unclaimed resources for this resource type. Execute not possible.</span>';
           if (attack.id) dismissAttackById(attack.id);
           await loadUserAttacks();
           return;
         }
-    
+
         msgDiv.innerHTML = '<span class="success">⏳ Executing attack...</span>';
     
         const tx = await piratesV3Contract.executeAttack(
@@ -1404,7 +1404,7 @@
           { gasLimit: 350000 }
         );
     
-        msgDiv.innerHTML = '<span class="success">⏳ Confirming...</span>';
+        msgDiv.innerHTML = '<span class="success">⏳ Confirming transaction...</span>';
         await tx.wait();
     
         msgDiv.innerHTML = '<span class="success">✅ Attack executed!</span>';
@@ -1413,10 +1413,11 @@
         await loadResourceBalancesOnchain();
         await updateBalances();
         refreshBlockMarkings();
-      } catch (e) {
+      }catch(e){
         console.error("ExecuteAttack error:", e);
         let msg = e?.message || "Unknown error";
-        if ((msg + "").includes("execution reverted")) {
+        if((msg+"").includes("execution reverted")){
+          // Bei Revert nach Ablauf der Zeit -> wahrscheinlich "nichts zu stehlen"
           if (attack.id) dismissAttackById(attack.id);
           await loadUserAttacks();
           msgDiv.innerHTML = `<span class="error">❌ Attack failed – nothing to steal (target empty).</span>`;
