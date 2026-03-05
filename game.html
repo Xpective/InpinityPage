@@ -8,19 +8,21 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/color.css">
     <style>
         /* === CSS bleibt unverändert === */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
             --bg-dark: #0a0a1a;
-            --bg-card: rgba(20, 20, 40, 0.8);
-            --accent-gold: #d4af37;
+            --bg-card: var(--quaternary-color-transparent025);
+            --accent-gold: var(--quinary-color);
             --accent-cyan: #4a90e2;
             --accent-purple: #9b59b6;
             --accent-red: #e74c3c;
-            --text-light: #f0f0ff;
-            --text-dim: #aaa;
-            --border-glow: rgba(212, 175, 55, 0.3);
+            --text-light: var(--text-color);
+            --text-dim: rgba(255,255,255,0.72);
+            --border-glow: var(--quinary-color-transparent);
             --shadow-gold: 0 0 20px rgba(212, 175, 55, 0.5);
             --rarity-bronze: #cd7f32;
             --rarity-silver: #c0c0c0;
@@ -30,7 +32,7 @@
         }
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(145deg, #0c0c24 0%, #1a1a3a 100%);
+            background: linear-gradient(145deg, var(--primary-color) 0%, #1a1a2e 100%);
             color: var(--text-light);
             min-height: 100vh;
             display: flex;
