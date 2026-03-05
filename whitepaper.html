@@ -1,38 +1,95 @@
-<meta content="width=device-width, initial-scale=1.0" name="viewport" />
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
   <meta content="Inpinity - Official Whitepaper" name="description" />
   <title>Inpinity - Whitepaper</title>
-
   <link rel="stylesheet" href="css/base.css" />
   <link rel="stylesheet" href="css/layout.css" />
   <link rel="stylesheet" href="css/animations.css" />
-@@ -22,9 +23,11 @@
+  <link rel="stylesheet" href="css/dark.css" />
+  <link rel="stylesheet" href="css/light.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+  <link rel="stylesheet" href="css/color.css" />
+  <link rel="stylesheet" href="css/adapted_about_us.css" />
+  <link rel="stylesheet" href="css/adapted_advertisements.css" />
+  <link rel="stylesheet" href="css/adapted_combined.css"/>
+  <link rel="stylesheet" href="css/adapted_comunity_guidelines.css" />
+  <link rel="stylesheet" href="css/adapted_course_feedback.css" />
+  <link rel="stylesheet" href="css/adapted_mft_marketplace.css"/>
+  <link rel="stylesheet" href="css/adapted_profile.css"/>
   <link rel="stylesheet" href="css/combined_latest.css"/>
   <link rel="stylesheet" href="css/gamification.css" />
   <link rel="stylesheet" href="css/referral.css"/>
-
   <script defer src="main.js"></script>
   <link rel="icon" type="image/png" href="favicon.webp">
   <meta content="Inpinity, Game Design, Game Development, Platform, Collaboration, Forum, Tools, GameDesign, AI Development, Games of future, programming, programs, python gui" name="keywords">
-
   <meta content="Inpinity Team" name="Xpective">
   <meta property="og:title" content="Inpinity - Whitepaper">
   <meta property="og:description" content="Official Whitepaper of Inpinity – a decentralized gaming ecosystem on Base.">
-@@ -33,9 +36,13 @@
+  <meta property="og:image" content="logo_background.jpg">
+  <meta property="og:url" content="https://inpinity.online/whitepaper.html">
   <meta name="twitter:card" content="logo_background.webp">
   <meta name="twitter:site" content="@unxpective">
   <meta name="twitter:creator" content="@Inpinity1">
   <meta name="theme-color" content="#FarbcodeIhrerWebsite">
   <meta name="robots" content="index,follow">
-
   <style>
-
-
-
-
     /* Whitepaper specific styling */
     .whitepaper-container {
       max-width: 900px;
-@@ -93,9 +100,7 @@
+      margin: 2rem auto;
+      padding: 2rem;
+      background: rgba(20,20,20,0.9);
+      border: 1px solid gold;
+      border-radius: 8px;
+      color: #eee;
+      line-height: 1.6;
+    }
+    .whitepaper-container h1, .whitepaper-container h2, .whitepaper-container h3 {
+      color: gold;
+      margin-top: 2rem;
+    }
+    .whitepaper-container h1:first-of-type {
+      margin-top: 0;
+      text-align: center;
+      font-size: 2.5rem;
+    }
+    .whitepaper-container table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+    }
+    .whitepaper-container th, .whitepaper-container td {
+      border: 1px solid #444;
+      padding: 0.5rem;
+      text-align: left;
+    }
+    .whitepaper-container th {
+      background: #222;
+      color: gold;
+    }
+    .whitepaper-container a {
+      color: gold;
+      text-decoration: underline;
+    }
+    .whitepaper-container .warning-note {
+      background: #332211;
+      border: 1px solid #ffaa00;
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 1rem 0;
+    }
+    .whitepaper-container .version {
+      text-align: right;
+      font-style: italic;
+      color: #aaa;
+      border-top: 1px solid #444;
+      padding-top: 1rem;
+      margin-top: 2rem;
+    }
+    .whitepaper-container ul {
       margin: 1rem 0;
       padding-left: 2rem;
     }
@@ -42,11 +99,25 @@
     .whitepaper-container .address {
       font-family: monospace;
       background: #111;
-@@ -118,30 +123,32 @@
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      color: #ccc;
+      word-break: break-all;
+    }
+    .whitepaper-container .pill {
+      display: inline-block;
+      padding: 0.15rem 0.6rem;
+      border-radius: 40px;
+      border: 1px solid gold;
+      color: gold;
+      font-weight: bold;
+      font-size: 0.85rem;
+      background: rgba(0,0,0,0.25);
+      margin-right: 0.4rem;
+      margin-top: 0.3rem;
     }
   </style>
 </head>
-
 <body>
   <header>
     <nav>
@@ -55,7 +126,6 @@
         <li><a aria-label="Features" href="features.html">Features</a></li>
         <li><a aria-label="Game" href="game.html">Game</a></li>
         <li><a aria-label="Forum" href="forum.html">Forum</a></li>
-
         <li><a aria-label="Collaboration" href="collaboration.html">Collaboration</a></li>
         <li><a aria-label="Register" href="register.html">Register</a></li>
         <li><a aria-label="About" href="about.html">About</a></li>
@@ -65,7 +135,6 @@
         <li><a aria-label="Advertising" href="advertising.html">Advertising</a></li>
         <li><a aria-label="Profile" href="profile.html">Profile</a></li>
         <li><a aria-label="Staking" href="staking.html">Staking</a></li>
-
         <div class="themeDots">
           <div class="dot light" title="Light Theme"></div>
           <div class="dot dark" title="Dark Theme"></div>
@@ -73,27 +142,41 @@
         </div>
       </ul>
     </nav>
-
     <style>
       .themeDots .dot {
         display: inline-block;
-@@ -157,6 +164,7 @@
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        margin: 5px;
+        cursor: pointer;
+        transition: transform 0.2s;
+      }
+      .themeDots .dot.light { background-color: #FFFFFF; }
+      .themeDots .dot.dark { background-color: #000000; }
       .themeDots .dot.basic { background-color: var(--quinary-color); }
       .themeDots .dot:hover { transform: scale(1.2); }
     </style>
-
     <script>
       document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('.themeDots .dot.light')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'light'));
-@@ -168,6 +176,7 @@
+        document.querySelector('.themeDots .dot.dark')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'dark'));
+        document.querySelector('.themeDots .dot.basic')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'basic'));
+      });
+    </script>
+  </header>
 
   <main>
     <div class="whitepaper-container">
-
       <h1>Whitepaper: Inpinity</h1>
       <p class="version"><strong>Version 2.2 – March 2026</strong></p>
 
-@@ -180,263 +189,4 @@ <h2>1. Introduction</h2>
+      <h2>1. Introduction</h2>
+      <p>
+        Inpinity is a decentralized gaming ecosystem on <strong>Base (Ethereum L2)</strong> that merges
+        <strong>on-chain ownership</strong>, <strong>gameplay loops</strong> and a long-term plan to bring everything into a
+        <strong>UE5 game world</strong>.
+      </p>
       <p>
         The ecosystem is already playable through the live web dashboards:
         <span class="pill">Mint</span><span class="pill">Map</span><span class="pill">Game</span>
