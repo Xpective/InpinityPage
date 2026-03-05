@@ -1158,61 +1158,26 @@
         farmingActive = !!f.isActive;
         farmStartTime = Number(f.startTime);
       } catch (e) {}
-    
+  
       const now = Math.floor(Date.now() / 1000);
       const claimIn = farmStartTime ? secondsUntilClaimable(farmStartTime, now) : null;
-    
+  
       let revealed = false;
       try {
         const d = await nftContract.blockData(targetTokenId);
         revealed = !!d.revealed;
       } catch (e) {}
-    
+  
       if (!revealed) {
         return {
           farmingActive,
           farmStartTime,
           claimIn,
           revealed: false,
-          allowed: [0, 1, 2], // Oil, Lemons, Iron (Basics)
+          allowed: [0, 1, 2],
           reason: "Target not revealed yet"
         };
       }
-    
-      let rarity = 0;
-      const { row } = tokenIdToRowCol(targetTokenId);
-      try {
-        rarity = Number(await nftContract.calculateRarity(targetTokenId));
-      } catch (e) {
-        console.warn("Failed to get rarity, using 0");
-      }
-    
-      const prod = getProduction(rarity, row);
-      let allowed = productionToAllowedResourceIds(prod);
-      
-      // Fallback: wenn allowed leer ist, alle Ressourcen anbieten
-      if (allowed.length === 0) {
-        console.warn("No allowed resources from production, using all 0-9 as fallback");
-        allowed = [0,1,2,3,4,5,6,7,8,9];
-      }
-    
-      // Pending total (optional, für Info)
-      let pendingArr = null;
-      try {
-        pendingArr = await farmingV3Contract.getAllPending(targetTokenId);
-      } catch(e) {}
-    
-      return {
-        farmingActive,
-        farmStartTime,
-        claimIn,
-        revealed: true,
-        rarity,
-        allowed,
-        pendingArr,
-        reason: "OK"
-      };
-    }
   
       let rarity = 0;
       const { row } = tokenIdToRowCol(targetTokenId);
@@ -1270,8 +1235,7 @@
     
       const info = await getStealableResourcesForTarget(targetTokenId);
       const now = Math.floor(Date.now() / 1000);
-    
-      // Farming Status Message
+  
       let farmLine = "";
       if (!info.farmingActive) {
         farmLine = "❌ Farming inactive → likely 0 loot.";
@@ -1282,8 +1246,7 @@
       } else {
         farmLine = "✅ Farming active.";
       }
-    
-      // Pending total message
+  
       let pendingLine = "";
       if (info.pendingArr && Array.isArray(info.pendingArr)) {
         const total = info.pendingArr.reduce((acc, val) => acc + (val || 0n), 0n);
@@ -1291,19 +1254,17 @@
           ? "⚠️ Pending: 0 (target probably claimed recently)."
           : `✅ Pending total: ${total.toString()} (there is loot).`;
       }
-    
+  
       msg.innerHTML = `
         <span class="${!info.farmingActive ? 'error' : 'success'}">
           ${farmLine}<br>${pendingLine}
         </span>
       `;
     
-      // Dropdown mit den allowed Ressourcen füllen
       select.innerHTML = "";
       info.allowed.forEach(id => {
         const opt = document.createElement("option");
         opt.value = id;
-        // Bei nicht revealed: (safe) dranhängen
         opt.textContent = resourceNames[id] + (info.revealed ? "" : " (safe)");
         select.appendChild(opt);
       });
