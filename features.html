@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-  <meta content="Inpinity - Features of the Pi-Phi Pyramid ecosystem on Base: NFT Blocks, Farming, Resources, Pirates, Protection & Partnerships." name="description" />
-  <title>Inpinity - Features</title>
+  <meta content="Inpinity - Partnership vision: how partner projects become resources, blocks and gameplay utilities in the Pi-Phi Pyramid on Base." name="description" />
+  <title>Inpinity - Partnerships</title>
 
   <link rel="stylesheet" href="css/base.css" />
   <link rel="stylesheet" href="css/layout.css" />
@@ -27,11 +27,11 @@
   <script defer src="main.js"></script>
   <link rel="icon" type="image/png" href="favicon.webp">
 
-  <meta name="keywords" content="Inpinity, Pi Phi Pyramid, NFT Blocks, Farming, Pirates, Resources, ERC1155, Partnerships, UE5, Base" />
+  <meta name="keywords" content="Inpinity, Partnerships, Pi Phi Pyramid, Partner Blocks, ERC1155 Resources, Base, Uniswap, UE5, Infinite City" />
   <meta name="author" content="Xpective" />
 
-  <meta property="og:title" content="Inpinity - Features" />
-  <meta property="og:description" content="Explore Inpinity’s Pi-Phi Pyramid: NFT blocks with rarity, farming resources, pirate attacks, protection, and partnership resources on Base." />
+  <meta property="og:title" content="Inpinity - Partnerships" />
+  <meta property="og:description" content="Inpinity partnerships turn external tokens/collections into real in-game resources and utilities inside the Pi-Phi Pyramid on Base." />
   <meta property="og:image" content="logo_background.jpg" />
   <meta property="og:url" content="https://inpinity.online/features.html" />
 
@@ -42,98 +42,6 @@
   <meta name="robots" content="index,follow" />
 
   <style>
-    .tools-slider {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 2rem;
-      margin: 2rem 0;
-    }
-    .tools-container {
-      flex: 1 1 320px;
-      max-width: 380px;
-    }
-    .tool {
-      background: #1a1a1a;
-      border: 1px solid gold;
-      border-radius: 12px;
-      padding: 1.6rem;
-      text-align: left;
-      transition: transform 0.2s, box-shadow 0.2s;
-      cursor: pointer;
-      position: relative;
-      overflow: hidden;
-    }
-    .tool:hover {
-      transform: scale(1.015);
-      box-shadow: 0 0 18px rgba(255,215,0,0.35);
-    }
-    .tool h2 {
-      color: gold;
-      margin: 0 0 0.6rem 0;
-      font-size: 1.25rem;
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-    }
-    .tool p {
-      color: #ccc;
-      margin: 0.25rem 0;
-      line-height: 1.55;
-      font-size: 0.98rem;
-    }
-    .tag {
-      display: inline-block;
-      margin-top: 0.9rem;
-      padding: 0.25rem 0.7rem;
-      border-radius: 999px;
-      border: 1px solid rgba(255,215,0,0.6);
-      color: gold;
-      font-size: 0.8rem;
-      background: rgba(255,215,0,0.07);
-      font-weight: 700;
-    }
-    .xbutton {
-      margin-top: 1rem;
-      background: gold;
-      color: black;
-      border: none;
-      padding: 0.55rem 1.1rem;
-      border-radius: 10px;
-      font-weight: 800;
-      cursor: pointer;
-      transition: transform 0.15s, background 0.2s;
-    }
-    .xbutton:hover { background: #ffd700; transform: translateY(-1px); }
-
-    .partners-section {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 1rem;
-      margin: 1.6rem auto 0.5rem;
-      padding: 1rem;
-      background: rgba(0,0,0,0.3);
-      border-radius: 12px;
-      max-width: 980px;
-    }
-    .partner-item a {
-      padding: 0.55rem 1.2rem;
-      background: #2a2a2a;
-      border: 1px solid gold;
-      border-radius: 40px;
-      color: gold;
-      text-decoration: none;
-      font-weight: 800;
-      transition: all 0.2s;
-      display: inline-block;
-    }
-    .partner-item a:hover {
-      background: gold;
-      color: black;
-      transform: scale(1.03);
-    }
-
     .warning-note {
       background: #332211;
       border: 1px solid #ffaa00;
@@ -146,47 +54,54 @@
     }
     .warning-note a { color: gold; }
 
-    .contracts-box {
-      max-width: 980px;
-      margin: 1rem auto 0;
-      padding: 1.2rem;
-      background: rgba(20,20,20,0.9);
-      border: 1px solid gold;
+    .partners-section {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin: 1.4rem auto 0.5rem;
+      padding: 1rem;
+      background: rgba(0,0,0,0.3);
       border-radius: 12px;
-      color: #eee;
-    }
-    .contracts-box h3 {
-      color: gold;
-      margin: 0 0 0.8rem 0;
-      font-size: 1.2rem;
-    }
-    .contracts-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 0.9rem;
-    }
-    .contract-item {
-      background: #141414;
+      max-width: 980px;
       border: 1px solid #333;
-      border-radius: 10px;
-      padding: 0.9rem;
     }
-    .contract-item strong { color: gold; }
-    .address {
-      font-family: monospace;
-      background: #0f0f0f;
-      border: 1px solid #2a2a2a;
-      padding: 0.25rem 0.45rem;
-      border-radius: 8px;
+    .partner-item a {
+      padding: 0.55rem 1.2rem;
+      background: #2a2a2a;
+      border: 1px solid gold;
+      border-radius: 40px;
+      color: gold;
+      text-decoration: none;
+      font-weight: 800;
+      transition: all 0.2s;
       display: inline-block;
-      word-break: break-all;
-      color: #ddd;
-      margin-top: 0.35rem;
+    }
+    .partner-item a:hover { background: gold; color: black; transform: scale(1.03); }
+
+    .section-wrap {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+
+    .hero-title {
+      text-align: center;
+      color: gold;
+      font-size: 2.2rem;
+      margin: 1rem 0 0.4rem;
+    }
+    .hero-sub {
+      text-align: center;
+      color: #ccc;
+      margin: 0 auto 1.1rem;
+      line-height: 1.65;
+      max-width: 880px;
     }
 
     .cta-row {
       max-width: 980px;
-      margin: 1.8rem auto 0;
+      margin: 1.4rem auto 0;
       display: flex;
       flex-wrap: wrap;
       gap: 1rem;
@@ -204,270 +119,55 @@
       transition: transform .15s, box-shadow .2s;
     }
     .cta:hover { transform: translateY(-1px); box-shadow: 0 0 18px rgba(255,215,0,0.25); }
-    .cta.secondary {
-      background: rgba(255,215,0,0.08);
-      color: gold;
-    }
+    .cta.secondary { background: rgba(255,215,0,0.08); color: gold; }
 
-    .section-wrap {
+    .content-block {
+      margin: 1.6rem auto 0;
       max-width: 980px;
-      margin: 2rem auto 0;
-      padding: 0 1rem;
+      background: rgba(20,20,20,0.9);
+      border: 1px solid rgba(255,215,0,0.55);
+      border-radius: 14px;
+      padding: 1.4rem 1.4rem 1.2rem;
+      color: #eee;
     }
-    .hero-title {
-      text-align: center;
+    .content-block h2 {
       color: gold;
-      font-size: 2.2rem;
-      margin: 0.8rem 0 0.4rem;
+      margin: 0 0 0.7rem;
+      font-size: 1.35rem;
     }
-    .hero-sub {
-      text-align: center;
-      color: #ccc;
-      margin: 0 0 1.3rem;
-      line-height: 1.6;
+    .content-block p {
+      color: #cfcfcf;
+      margin: 0.5rem 0;
+      line-height: 1.7;
+    }
+    .content-block ul {
+      margin: 0.8rem 0 0.2rem;
+      padding-left: 1.2rem;
+      color: #cfcfcf;
+      line-height: 1.7;
+    }
+    .content-block li { margin: 0.35rem 0; }
+
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    @media (max-width: 820px) {
+      .split { grid-template-columns: 1fr; }
     }
 
     .mini-note {
-      max-width: 980px;
-      margin: 1.2rem auto 0;
+      margin-top: 1.2rem;
       padding: 1rem 1.2rem;
       border-radius: 12px;
       border: 1px solid rgba(255,215,0,0.35);
       background: rgba(255,215,0,0.06);
       color: #ddd;
+      line-height: 1.6;
     }
     .mini-note strong { color: gold; }
-  </style>
-</head>
 
-<body>
-<header>
-  <nav>
-    <ul>
-      <li><a aria-label="Home" href="index.html">Home</a></li>
-      <li><a aria-label="Features" href="features.html">Features</a></li>
-      <li><a aria-label="Game" href="game.html">Game</a></li>
-      <li><a aria-label="Mint" href="mint.html">Mint</a></li>
-      <li><a aria-label="Pyramid Map" href="map.html">Pyramid Map</a></li>
-      <li><a aria-label="Collaboration" href="collaboration.html">Collaboration</a></li>
-      <li><a aria-label="About" href="about.html">About</a></li>
-      <li><a aria-label="Whitepaper" href="whitepaper.html">Whitepaper</a></li>
-      <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
-      <li><a aria-label="Guestbook" href="guestbook.html">Guestbook</a></li>
-      <li><a aria-label="Advertising" href="advertising.html">Advertising</a></li>
-      <li><a aria-label="Staking" href="staking.html">Staking</a></li>
-
-      <div class="themeDots">
-        <div class="dot light" title="Light Theme"></div>
-        <div class="dot dark" title="Dark Theme"></div>
-        <div class="dot basic" title="Basic Theme"></div>
-      </div>
-    </ul>
-  </nav>
-
-  <style>
-    .themeDots .dot{display:inline-block;width:20px;height:20px;border-radius:50%;margin:5px;cursor:pointer;transition:transform .2s}
-    .themeDots .dot.light{background-color:#FFF}
-    .themeDots .dot.dark{background-color:#000}
-    .themeDots .dot.basic{background-color:var(--quinary-color)}
-    .themeDots .dot:hover{transform:scale(1.2)}
-  </style>
-  <script>
-    document.addEventListener('DOMContentLoaded',()=>{
-      document.querySelector('.themeDots .dot.light')?.addEventListener('click',()=>document.body.setAttribute('data-theme','light'));
-      document.querySelector('.themeDots .dot.dark')?.addEventListener('click',()=>document.body.setAttribute('data-theme','dark'));
-      document.querySelector('.themeDots .dot.basic')?.addEventListener('click',()=>document.body.setAttribute('data-theme','basic'));
-    });
-  </script>
-</header>
-
-<main>
-  <div class="warning-note">
-    <p>
-      ⚠️ <strong>Security Notice:</strong> We withdrew from ToshiMart due to phishing concerns.
-      Always use the official contracts listed on the <a href="index.html">homepage</a>.
-    </p>
-  </div>
-
-  <section class="section-wrap">
-    <h1 class="hero-title">⚡ Inpinity Features</h1>
-    <p class="hero-sub">
-      Inpinity is a <strong>Pi-Phi Pyramid</strong> on Base: mint a block, reveal its digits (rarity),
-      farm resources, defend with mercenaries, and launch pirate attacks — all on-chain.
-      <br/>Next: <strong>Infinite City</strong> upgrades & a full <strong>UE5</strong> version of the game.
-    </p>
-
-    <div class="cta-row">
-      <a class="cta" href="mint.html">⛏️ Mint a Block</a>
-      <a class="cta secondary" href="game.html">🎮 Open Game Dashboard</a>
-      <a class="cta secondary" href="map.html">🗺️ Open Pyramid Map</a>
-    </div>
-  </section>
-
-  <section>
-    <div class="partners-section">
-      <div class="partner-item"><a href="https://base.org/" target="_blank" rel="noopener">⚡ Base L2</a></div>
-      <div class="partner-item"><a href="https://uniswap.org/" target="_blank" rel="noopener">🦄 Uniswap</a></div>
-      <div class="partner-item"><a href="https://opensea.io/collection/inpinity-pyramid-447084512" target="_blank" rel="noopener">🧱 Pyramid Collection</a></div>
-      <div class="partner-item"><a href="https://opensea.io/collection/0x71e76a6065197acdd1a4d6b736712f80d1fd3d8b" target="_blank" rel="noopener">📦 Resource Collection</a></div>
-    </div>
-  </section>
-
-  <section class="contracts-box">
-    <h3>📜 Core Contracts (Base Mainnet)</h3>
-    <div class="contracts-grid">
-      <div class="contract-item">
-        <strong>Inpinity NFT (Blocks)</strong>
-        <div class="address">0x277a0D5864293C78d7387C54B48c35D5E9578Ab1</div>
-        <p style="margin:0.55rem 0 0;color:#bbb;">Mint blocks (Row/Col), reveal Pi/Phi digits, rarity & gameplay entry.</p>
-      </div>
-
-      <div class="contract-item">
-        <strong>ResourceToken (ERC1155)</strong>
-        <div class="address">0x71E76a6065197acdd1a4d6B736712F80D1Fd3D8b</div>
-        <p style="margin:0.55rem 0 0;color:#bbb;">All farmed resources live here as on-chain balances.</p>
-      </div>
-
-      <div class="contract-item">
-        <strong>FarmingV3</strong>
-        <div class="address">0xE79445C9ef97B8156BB505D784C0356E54432AD9</div>
-        <p style="margin:0.55rem 0 0;color:#bbb;">Start/stop farming, claim, boosts, and real on-chain production.</p>
-      </div>
-
-      <div class="contract-item">
-        <strong>PiratesV3</strong>
-        <div class="address">0xC3544804cea908b8Ac6752B4F47609e1c22DaF5d</div>
-        <p style="margin:0.55rem 0 0;color:#bbb;">Attack blocks and attempt to steal selected resources.</p>
-      </div>
-
-      <div class="contract-item">
-        <strong>MercenaryV2</strong>
-        <div class="address">0xFEa09ccA75dbc63cc8053739A61777Bd13fC6Bc2</div>
-        <p style="margin:0.55rem 0 0;color:#bbb;">Buy protection and defend your block against pirates.</p>
-      </div>
-
-      <div class="contract-item">
-        <strong>PartnershipV2</strong>
-        <div class="address">0xb18323efE4Cc8c36e10D664E287b4e2c82Fe3ad9</div>
-        <p style="margin:0.55rem 0 0;color:#bbb;">Special partner blocks & cross-project collaborations.</p>
-      </div>
-    </div>
-
-    <div class="mini-note">
-      <strong>How it works:</strong> Mint → Reveal → Farm → Claim → Defend → Attack.
-      The Pyramid Map + Game Dashboard are your control center.
-    </div>
-  </section>
-
-  <section class="section-wrap">
-    <div class="tools-slider">
-      <div class="tools-container">
-        <div class="tool" onclick="window.location.href='mint.html'">
-          <h2>⛏️ Mint Pyramid Blocks</h2>
-          <p>Each block is an on-chain NFT with fixed coordinates (Row/Col). Your coordinates are part of your identity in the Pyramid.</p>
-          <p>Reveal to unlock Pi/Phi digits and rarity.</p>
-          <span class="tag">Live</span><br/>
-          <button class="xbutton">Open Mint</button>
-        </div>
-      </div>
-
-      <div class="tools-container">
-        <div class="tool" onclick="window.location.href='game.html'">
-          <h2>🌾 Farming & Resources</h2>
-          <p>Start farming on your revealed block and claim resources into your ERC1155 ResourceToken balance.</p>
-          <p>Production depends on rarity + row rules (top row can unlock special drops).</p>
-          <span class="tag">Live (V3)</span><br/>
-          <button class="xbutton">Open Game</button>
-        </div>
-      </div>
-
-      <div class="tools-container">
-        <div class="tool" onclick="window.location.href='map.html'">
-          <h2>🗺️ Pyramid Map</h2>
-          <p>Explore the full Pyramid and see statuses: minted/revealed, farming active, protected, under attack, ready-to-execute.</p>
-          <p>Perfect for strategy and timing.</p>
-          <span class="tag">Live</span><br/>
-          <button class="xbutton">Open Map</button>
-        </div>
-      </div>
-
-      <div class="tools-container">
-        <div class="tool" onclick="window.location.href='game.html#pirates'">
-          <h2>🏴‍☠️ Pirate Attacks</h2>
-          <p>Launch attacks against targets and choose what to steal. If the target already claimed, your execute can fail — that’s real strategy.</p>
-          <p>Next improvement: auto-detect stealable resources before attacking.</p>
-          <span class="tag">Live (V3)</span><br/>
-          <button class="xbutton">Open Attacks</button>
-        </div>
-      </div>
-
-      <div class="tools-container">
-        <div class="tool" onclick="window.location.href='game.html#defense'">
-          <h2>🛡️ Mercenary Protection</h2>
-          <p>Hire mercenaries to protect your block. Protection changes the risk/reward for attackers and makes defense meaningful.</p>
-          <p>Defense + timing is the meta.</p>
-          <span class="tag">Live</span><br/>
-          <button class="xbutton">Open Defense</button>
-        </div>
-      </div>
-
-      <div class="tools-container">
-        <div class="tool" onclick="window.location.href='collaboration.html'">
-          <h2>🤝 Partnerships & Cross-Resources</h2>
-          <p>We collaborate with other projects: partner tokens can become special resources in the Pyramid — similar to iconic collabs like CryptoKitties-style integrations.</p>
-          <p>Partner blocks can enable unique drops and city upgrades.</p>
-          <span class="tag">Open for Partners</span><br/>
-          <button class="xbutton">Partner with Us</button>
-        </div>
-      </div>
-
-      <div class="tools-container">
-        <div class="tool" onclick="window.location.href='whitepaper.html'">
-          <h2>🏙️ Infinite City (Coming)</h2>
-          <p>Use special resources (e.g., partnership-only materials) to upgrade your future Infinite City.</p>
-          <p>City buildings will provide utility, boosts, protection layers and gameplay progression.</p>
-          <span class="tag">Roadmap</span><br/>
-          <button class="xbutton">Read Roadmap</button>
-        </div>
-      </div>
-
-      <div class="tools-container">
-        <div class="tool" onclick="window.location.href='whitepaper.html#ue5'">
-          <h2>🎮 UE5 Game (Coming)</h2>
-          <p>Inpinity will evolve into a UE5 experience: your on-chain Pyramid becomes your world layer.</p>
-          <p>Blocks, resources, and partnerships will be playable with real progression.</p>
-          <span class="tag">Roadmap</span><br/>
-          <button class="xbutton">Learn More</button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="section-wrap">
-    <div class="mini-note">
-      <strong>Partner idea (simple):</strong> A partner provides a token/collection → we whitelist & map it to a new resource id →
-      partner blocks can generate it / city can consume it → both communities win.
-    </div>
-  </section>
-
-</main>
-
-<footer>
-  <p>© 2026 Inpinity. All rights reserved. Working with <a href="https://base.org/" target="_blank" rel="noopener" style="color: gold;">Base</a> and <a href="https://uniswap.org/" target="_blank" rel="noopener" style="color: gold;">Uniswap</a>.</p>
-  <div class="footer-links">
-    <a href="privacypolicy.html">Privacy Policy</a>
-    <a href="termsofuse.html">Terms of Use</a>
-    <a href="contact.html">Contact</a>
-    <a href="faq.html">FAQ</a>
-    <a href="guestbook.html">Guestbook</a>
-    <a href="advertising.html">Advertising</a>
-    <a href="staking.html">Staking</a>
-    <a href="whitepaper.html">Whitepaper</a>
-    <a href="mint.html">Mint</a>
-    <a href="map.html">Pyramid Map</a>
-    <a href="game.html">Game</a>
-  </div>
-</footer>
-
-</body>
-</html>
+    .contracts-box {
+     
