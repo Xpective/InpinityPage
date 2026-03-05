@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>INPINITY – The Pi-Phi Pyramid (v0.18.0 – PiratesV3 Attacken + Resource Icons)</title>
+    <title>INPINITY – The Pi-Phi Pyramid (v0.19.0 – AttackV3S + Smart Dropdown + Dismiss)</title>
     <link rel="icon" type="image/png" href="favicon.webp" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -595,7 +595,7 @@
 
         <footer>
             <p>© 2026 INPINITY. All rights reserved. Built on Base.</p>
-            <p>Version 0.18.0 – PiratesV3 Attacken + Resource Icons</p>
+            <p>Version 0.19.0 – AttackV3S + Smart Dropdown + Dismiss</p>
             <p><a href="whitepaper.html">Whitepaper</a> | <a href="https://discord.gg/95yj6Eg6" target="_blank">Discord</a></p>
         </footer>
     </div>
@@ -607,6 +607,8 @@
        - Farming main: V3
        - Pirates main: V3 (AttackV3 Entities)
        - Ressourcen mit Bildern von inpinity.online/img/{id}.PNG
+       - Intelligentes Dropdown: nur Ressourcen, die das Target produziert
+       - Dismiss-Funktion für fehlgeschlagene Angriffe
     ========================================================= */
     
     /* ==================== KONFIGURATION ==================== */
@@ -1098,8 +1100,111 @@
       return p;
     }
     
+    /* ==================== ATTACK-HELPER (intelligentes Dropdown) ==================== */
+    function tokenIdToRowCol(tokenId) {
+      const id = Number(tokenId);
+      return { row: Math.floor(id / 2048), col: id % 2048 };
+    }
+    
+    function productionToAllowedResourceIds(productionObj) {
+      const map = {
+        OIL: 0, LEMONS: 1, IRON: 2, GOLD: 3, PLATINUM: 4,
+        COPPER: 5, CRYSTAL: 6, OBSIDIAN: 7, MYSTERIUM: 8, AETHER: 9
+      };
+      return Object.keys(productionObj)
+        .map(key => map[key])
+        .filter(id => Number.isFinite(id));
+    }
+    
+    async function getStealableResourcesForTarget(targetTokenId) {
+      let farmingActive = false;
+      try {
+        const f = await farmingV3Contract.farms(targetTokenId);
+        farmingActive = !!f.isActive;
+      } catch (e) {}
+    
+      let revealed = false;
+      try {
+        const d = await nftContract.blockData(targetTokenId);
+        revealed = !!d.revealed;
+      } catch (e) {}
+    
+      if (!revealed) {
+        return {
+          farmingActive,
+          revealed: false,
+          allowed: [0, 1, 2], // Oil, Lemons, Iron (Basics)
+          reason: "Target not revealed yet"
+        };
+      }
+    
+      let rarity = 0;
+      const { row } = tokenIdToRowCol(targetTokenId);
+      try {
+        rarity = Number(await nftContract.calculateRarity(targetTokenId));
+      } catch (e) {}
+    
+      const prod = getProduction(rarity, row);
+      const allowed = productionToAllowedResourceIds(prod);
+    
+      return {
+        farmingActive,
+        revealed: true,
+        rarity,
+        allowed,
+        reason: "OK"
+      };
+    }
+    
+    async function refreshAttackDropdown() {
+      const row = parseInt(document.getElementById("attackRow").value, 10);
+      const col = parseInt(document.getElementById("attackCol").value, 10);
+      const select = document.getElementById("attackResourceSelect");
+      const msg = document.getElementById("attackMessage");
+    
+      if (!select) return;
+      if (!Number.isFinite(row) || !Number.isFinite(col) || row < 0 || row > MAX_ROW || col < 0 || col > 2 * row) {
+        select.innerHTML = "";
+        return;
+      }
+    
+      const targetTokenId = row * 2048 + col;
+    
+      if (!userAddress || !nftContract || !farmingV3Contract) {
+        select.innerHTML = "";
+        [0, 1, 2].forEach(id => {
+          const opt = document.createElement("option");
+          opt.value = id;
+          opt.textContent = resourceNames[id];
+          select.appendChild(opt);
+        });
+        return;
+      }
+    
+      msg.innerHTML = `<span class="success">⏳ Analyzing target...</span>`;
+    
+      const info = await getStealableResourcesForTarget(targetTokenId);
+    
+      select.innerHTML = "";
+      info.allowed.forEach(id => {
+        const opt = document.createElement("option");
+        opt.value = id;
+        opt.textContent = resourceNames[id] + (info.revealed ? "" : " (safe)");
+        select.appendChild(opt);
+      });
+    
+      if (!info.farmingActive) {
+        msg.innerHTML = `<span class="error">⚠️ Target farming is not active – attack may fail (no loot).</span>`;
+      } else {
+        msg.innerHTML = info.revealed
+          ? `<span class="success">✅ Target analyzed. Choose a resource that target produces.</span>`
+          : `<span class="success">✅ Target not revealed. Only safe basics shown.</span>`;
+      }
+    }
+    
     /* ==================== ATTACKS (PiratesV3) ==================== */
     function initAttackResourceSelect(){
+      // Wird jetzt von refreshAttackDropdown überschrieben, aber initial befüllen wir es trotzdem
       const select=document.getElementById("attackResourceSelect");
       if(!select) return;
       select.innerHTML="";
@@ -1114,8 +1219,8 @@
       if (!userAddress) return;
     
       try {
-        // ✅ AttackV3 Entities (PiratesV3)
-        const where = `{ attacker: "${userAddress.toLowerCase()}", executed: false }`;
+        // ✅ AttackV3 Entities (PiratesV3) – WICHTIG: attackV3S (großes S)
+        const where = `{ attacker: "${userAddress.toLowerCase()}" }`; // wir holen alle, filtern später executed
     
         const attacks = await fetchAllWithPagination(
           "attackV3S", // ✅ LIST field aus deinem Schema
@@ -1123,15 +1228,21 @@
           where
         );
     
-        userAttacks = (attacks || []).map(a => ({
-          id: a.id,
-          targetTokenId: parseInt(a.target, 10),
-          attackIndex: parseInt(a.attackIndex || "0", 10),
-          startTime: parseInt(a.startTime || "0", 10),
-          endTime: parseInt(a.endTime || "0", 10),
-          executed: !!a.executed,
-          resource: parseInt(a.resource || "0", 10)
-        }));
+        userAttacks = (attacks || [])
+          .filter(a => !a.executed)
+          .map(a => ({
+            id: a.id,
+            targetTokenId: parseInt(a.target, 10),
+            attackIndex: parseInt(a.attackIndex || "0", 10),
+            startTime: parseInt(a.startTime || "0", 10),
+            endTime: parseInt(a.endTime || "0", 10),
+            executed: !!a.executed,
+            resource: parseInt(a.resource || "0", 10)
+          }));
+    
+        // Dismissed-Attacks aus localStorage entfernen
+        const dismissed = loadDismissedAttacks();
+        userAttacks = userAttacks.filter(a => !dismissed.has(a.id));
     
         displayUserAttacks();
         refreshBlockMarkings();
@@ -1172,6 +1283,7 @@
             </div>
             <div style="min-width:140px; display:flex; justify-content:flex-end;">
               <button class="execute-btn"
+                data-attackid="${attack.id}"
                 data-targetid="${attack.targetTokenId}"
                 data-attackindex="${attack.attackIndex}"
                 ${timeLeft<=0 ? "" : "disabled"}
@@ -1187,9 +1299,10 @@
       document.querySelectorAll(".execute-btn").forEach(btn=>{
         btn.addEventListener("click", async ()=>{
           if(btn.disabled) return;
+          const attackId = btn.dataset.attackid;
           const targetTokenId = parseInt(btn.dataset.targetid, 10);
           const attackIndex = parseInt(btn.dataset.attackindex, 10);
-          await executeAttack({ targetTokenId, attackIndex });
+          await executeAttack({ id: attackId, targetTokenId, attackIndex });
         });
       });
     }
@@ -1252,6 +1365,18 @@
       });
     }
     
+    /* ==================== DISMISS ==================== */
+    function dismissAttackById(attackId) {
+      const key = "dismissedAttacks";
+      const arr = JSON.parse(localStorage.getItem(key) || "[]");
+      if (!arr.includes(attackId)) arr.push(attackId);
+      localStorage.setItem(key, JSON.stringify(arr));
+    }
+    
+    function loadDismissedAttacks() {
+      return new Set(JSON.parse(localStorage.getItem("dismissedAttacks") || "[]"));
+    }
+    
     /* ==================== EXECUTE ATTACK (PiratesV3) ==================== */
     async function executeAttack(attack){
       const msgDiv=document.getElementById("attackMessage");
@@ -1279,7 +1404,12 @@
         console.error("ExecuteAttack error:", e);
         let msg = e?.message || "Unknown error";
         if((msg+"").includes("execution reverted")){
-          msg = "❌ Transaction reverted. Attack not ready / already executed / invalid index.";
+          // Bei Revert nach Ablauf der Zeit -> wahrscheinlich "nichts zu stehlen"
+          // Wir verwerfen den Angriff lokal
+          if (attack.id) dismissAttackById(attack.id);
+          await loadUserAttacks();
+          msgDiv.innerHTML = `<span class="error">❌ Attack failed – nothing to steal (target empty).</span>`;
+          return;
         }
         msgDiv.innerHTML = `<span class="error">${msg}</span>`;
       }
@@ -1521,6 +1651,8 @@
         document.getElementById("connectWallet").innerText = "Wallet Connected";
     
         initAttackResourceSelect();
+        // Dropdown bei bestehenden Eingaben aktualisieren
+        refreshAttackDropdown();
     
         await updateBalances();
         await updatePoolInfo();
@@ -1696,6 +1828,10 @@
     document.getElementById("exchangePitBtn").addEventListener("click", exchangePit);
     document.getElementById("randomBlockBtn").addEventListener("click", findRandomFreeBlock);
     document.getElementById("mintBtn").addEventListener("click", mintBlock);
+    
+    // Intelligentes Dropdown bei Änderung der Koordinaten
+    document.getElementById("attackRow").addEventListener("input", refreshAttackDropdown);
+    document.getElementById("attackCol").addEventListener("input", refreshAttackDropdown);
     
     document.querySelectorAll('input[name="payment"]').forEach(radio=>{
       radio.addEventListener("change",(e)=>{ selectedPayment = e.target.value; });
