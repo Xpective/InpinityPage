@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <!-- Optimiertes Viewport für mobile Geräte -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover" />
-  <title>INPINITY – Pyramid Map (V3 + Mobile Optimiert + Fixes)</title>
+  <title>INPINITY – Pyramid Map (V3 ONLY)</title>
   <link rel="icon" type="image/png" href="favicon.webp" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/base.css">
@@ -465,7 +465,7 @@
   
   <script>
   (async function () {
-    // ==================== KONFIGURATION ====================
+    // ==================== KONFIGURATION (NUR V3) ====================
     const DEPLOYMENT_ID_V1 = "QmbpREskj5F7R8WpzUS6pv4XkKx1M34KAUc19fuUPtmu3o";
     const SUBGRAPH_ID_V2   = "22b4uXYgs4rwTj6n3iWB4d8Vk4s7LAG7dTAtRaTXfseQ";
     const API_KEY          = "059bc2832dfe50597009e556898d4ba6";
@@ -476,18 +476,14 @@
     const BASE_BLOCK_SIZE = 24;
     const WORKER_URL = "https://inpinity-worker-final.s-plat.workers.dev";
   
-    // ====== Contracts ======
+    // ====== NUR V3 Contracts ======
     const NFT_ADDRESS = "0x277a0D5864293C78d7387C54B48c35D5E9578Ab1";
     const RESOURCE_TOKEN_ADDRESS = "0x71E76a6065197acdd1a4d6B736712F80D1Fd3D8b";
     const INPI_ADDRESS = "0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D";
     const PITRONE_ADDRESS = "0x7240Ec5B3Ba944888E186c74D0f8B4F5F71c9AE8";
-  
     const FARMING_V3_ADDRESS = "0xE79445C9ef97B8156BB505D784C0356E54432AD9";
     const PIRATES_V3_ADDRESS = "0xC3544804cea908b8Ac6752B4F47609e1c22DaF5d";
-    const MERCENARY_V2_ADDRESS = "0xFEa09ccA75dbc63cc8053739A61777Bd13fC6Bc2";
-  
-    const FARMING_V1_ADDRESS = "0xd9722fB6e9b8e71399A970d4e8F4D628C532E94f";
-    const FARMING_V2_ADDRESS = "0x852Bce0713aAF409c4412155Ab8CE6191B525C30";
+    const MERCENARY_V2_ADDRESS = "0xFEa09ccA75dbc63cc8053739A61777Bd13fC6Bc2"; // bleibt V2
   
     const CLAIM_COOLDOWN_SEC = 24 * 60 * 60; // 24h
   
@@ -506,19 +502,6 @@
       "function claimResources(uint256 tokenId) external",
       "function farms(uint256) view returns (uint256 startTime, uint256 lastAccrualTime, uint256 boostExpiry, bool isActive)",
       "function getAllPending(uint256 tokenId) view returns (uint256[10] out)"
-    ];
-  
-    const FARMING_V1_ABI = [
-      "function farms(uint256) view returns (uint256 startTime, uint256 lastClaimTime, bool isActive)",
-      "function claimResources(uint256) external",
-      "function stopFarming(uint256) external"
-    ];
-  
-    const FARMING_V2_ABI = [
-      "function farms(uint256) view returns (uint256 startTime, uint256 lastClaimTime, bool isActive)",
-      "function claimResources(uint256) external",
-      "function stopFarming(uint256) external",
-      "function startFarming(uint256) external"
     ];
   
     const PIRATES_V3_ABI = [
@@ -562,7 +545,7 @@
     let attacksTicker = null;
   
     let nftContract, farmingV3Contract, piratesV3Contract, mercenaryV2Contract, inpiContract, pitroneContract;
-    let farmingV1Contract, farmingV2Contract, resourceTokenContract;
+    let resourceTokenContract;
   
     const canvas = document.getElementById("pyramidCanvas");
     const ctx = canvas.getContext("2d");
@@ -669,32 +652,7 @@
       return production;
     }
   
-    // ==================== FARMING ====================
-    function initFarmingContracts(signer) {
-      farmingV1Contract = new ethers.Contract(FARMING_V1_ADDRESS, FARMING_V1_ABI, signer);
-      farmingV2Contract = new ethers.Contract(FARMING_V2_ADDRESS, FARMING_V2_ABI, signer);
-      farmingV3Contract = new ethers.Contract(FARMING_V3_ADDRESS, FARMING_V3_ABI, signer);
-    }
-  
-    async function getFarmStatus(tokenId) {
-      const [v3] = await Promise.allSettled([farmingV3Contract.farms(tokenId)]);
-      return { v3Active: v3.status === "fulfilled" ? !!v3.value.isActive : false };
-    }
-  
-    async function migrateToV3(tokenId) {
-      try {
-        const farm = await farmingV3Contract.farms(tokenId);
-        if (farm.isActive) return { ok: true, msg: "Already on V3" };
-        const tx = await farmingV3Contract.startFarming(tokenId, { gasLimit: 500000 });
-        await tx.wait();
-        return { ok: true, msg: "Started V3" };
-      } catch (e) {
-        console.error(e);
-        return { ok: false, msg: e.message };
-      }
-    }
-  
-    // ==================== LOAD ATTACKS ====================
+    // ==================== LOAD ATTACKS (NUR V3) ====================
     async function loadUserAttacks() {
       if (!userAddress) return;
       try {
@@ -814,13 +772,13 @@
       return new Set(JSON.parse(localStorage.getItem("dismissedAttacks") || "[]"));
     }
   
-    // ==================== EXECUTE ATTACK ====================
+    // ==================== EXECUTE ATTACK (NUR V3) ====================
     async function executeAttack(attack) {
       actionMessage.innerHTML = '<span class="success">⏳ Checking target resources...</span>';
       try {
         if (!piratesV3Contract) throw new Error("Connect wallet first.");
     
-        // Prüfe Farming-Status und Pending-Ressourcen
+        // NUR V3 Farming-Status prüfen
         const farm = await farmingV3Contract.farms(attack.targetTokenId);
         const pending = await farmingV3Contract.getAllPending(attack.targetTokenId);
         
@@ -839,29 +797,23 @@
         console.log("Selected resource:", attack.resource, "Value:", pending?.[attack.resource]?.toString());
         console.log("==========================");
     
-        // Sammle alle Fehlergründe
-        let errorReasons = [];
-        
+        // Prüfungen
         if (!farm.isActive) {
-          errorReasons.push("❌ Farming is inactive (owner stopped)");
+          actionMessage.innerHTML = '<span class="error">❌ Farming inactive – owner stopped.</span>';
+          return;
         }
         
         if (claimIn !== null && claimIn > 0) {
-          errorReasons.push(`⏳ Need to wait ${formatDuration(claimIn)} more for resources to accumulate (24h total)`);
+          actionMessage.innerHTML = `<span class="error">⏳ Need to wait ${formatDuration(claimIn)} (24h total).</span>`;
+          return;
         }
         
-        if (pending && pending.length > attack.resource && pending[attack.resource] === 0n) {
-          errorReasons.push("💰 This resource has 0 pending – owner may have claimed it");
+        if (!pending || pending.length <= attack.resource || pending[attack.resource] === 0n) {
+          actionMessage.innerHTML = '<span class="error">💰 No loot – owner claimed or wrong resource.</span>';
+          return;
         }
     
-        // Wenn Fehler vorhanden, zeige sie an, aber NICHT dismiss
-        if (errorReasons.length > 0) {
-          const errorHtml = errorReasons.map(r => r).join('<br>');
-          actionMessage.innerHTML = `<span class="error">${errorHtml}<br><br>⏳ Attack remains in list – try again later.</span>`;
-          return; // ← KEIN dismiss, Angriff bleibt in Liste
-        }
-    
-        // Alles OK – jetzt erst Transaktion senden
+        // Alles OK – Transaktion senden
         actionMessage.innerHTML = '<span class="success">⏳ Executing attack...</span>';
         
         const tx = await piratesV3Contract.executeAttack(
@@ -884,7 +836,6 @@
         console.error("executeAttack error:", e);
         let msg = e?.message || "Unknown error";
         
-        // Nur bei on-chain Revert wirklich dismissen (weil dann der Contract den Angriff als "erledigt" betrachtet)
         if ((msg + "").includes("execution reverted")) {
           if (attack.id) dismissAttackById(attack.id);
           await loadUserAttacks();
@@ -899,29 +850,32 @@
     // ==================== LOAD MAP DATA ====================
     async function loadData() {
       try {
-        const [tokenItemsV1, tokenItemsV2] = await Promise.all([
-          fetchAllWithPagination(SUBGRAPH_URL_V1, "tokens", "id owner { id } revealed").catch(() => []),
-          fetchAllWithPagination(SUBGRAPH_URL_V2, "tokens", "id owner { id } revealed farm { active }").catch(() => [])
-        ]);
+        // NUR Subgraph V2 verwenden (hat alle V3 Daten)
+        const tokenItemsV2 = await fetchAllWithPagination(
+          SUBGRAPH_URL_V2, 
+          "tokens", 
+          "id owner { id } revealed farm { active }"
+        ).catch(() => []);
+        
         tokens = {};
-        tokenItemsV1.forEach(t => {
-          tokens[t.id] = { owner: t.owner ? t.owner.id : null, revealed: !!t.revealed, farmActive: false, protectionActive: false, partnerActive: false };
-        });
+        
         tokenItemsV2.forEach(t => {
-          if (!tokens[t.id]) {
-            tokens[t.id] = { owner: t.owner ? t.owner.id : null, revealed: !!t.revealed, farmActive: t.farm ? !!t.farm.active : false, protectionActive: false, partnerActive: false };
-          } else {
-            tokens[t.id].owner = t.owner ? t.owner.id : tokens[t.id].owner;
-            tokens[t.id].revealed = !!t.revealed || tokens[t.id].revealed;
-            if (t.farm && t.farm.active) tokens[t.id].farmActive = true;
-          }
+          tokens[t.id] = { 
+            owner: t.owner ? t.owner.id : null, 
+            revealed: !!t.revealed, 
+            farmActive: t.farm ? !!t.farm.active : false, 
+            protectionActive: false, 
+            partnerActive: false 
+          };
         });
+  
         const protectionItems = await fetchAllWithPagination(SUBGRAPH_URL_V2, "protections", "id active").catch(() => []);
         protectionItems.forEach(p => { if (tokens[p.id]) tokens[p.id].protectionActive = !!p.active; });
+  
         const partnerItems = await fetchAllWithPagination(SUBGRAPH_URL_V2, "partnerships", "id active").catch(() => []);
         partnerItems.forEach(p => { if (tokens[p.id]) tokens[p.id].partnerActive = !!p.active; });
-        const farmItemsV1 = await fetchAllWithPagination(SUBGRAPH_URL_V1, "farms", "id active").catch(() => []);
-        farmItemsV1.forEach(f => { if (f.active && tokens[f.id] && !tokens[f.id].farmActive) tokens[f.id].farmActive = true; });
+  
+        // On-chain V3 Status für farmActive (override)
         if (userAddress && farmingV3Contract) {
           const ids = Object.keys(tokens);
           const mintedIds = ids.filter(id => tokens[id] && tokens[id].owner);
@@ -932,10 +886,12 @@
             } catch (_) {}
           }
         }
+  
         if (userAddress) {
           await loadUserResources();
           await loadUserAttacks();
         }
+  
         drawPyramid();
       } catch (err) {
         console.error("Fehler beim Laden:", err);
@@ -1298,11 +1254,19 @@
       if (!selectedTokenId) return;
       actionMessage.innerHTML = '<span class="success">⏳ Starting...</span>';
       try {
-        const r = await migrateToV3(selectedTokenId);
-        actionMessage.innerHTML = `<span class="success">✅ ${r.msg}</span>`;
+        // Direkt V3 starten (keine Migration nötig)
+        const farm = await farmingV3Contract.farms(selectedTokenId);
+        if (farm.isActive) {
+          actionMessage.innerHTML = '<span class="success">✅ Already active on V3</span>';
+          return;
+        }
+        const tx = await farmingV3Contract.startFarming(selectedTokenId, { gasLimit: 500000 });
+        await tx.wait();
+        actionMessage.innerHTML = '<span class="success">✅ V3 farming started</span>';
         await loadData();
         await updateSidebar(selectedTokenId);
       } catch (e) {
+        console.error(e);
         actionMessage.innerHTML = `<span class="error">❌ ${e.message}</span>`;
       }
     }
@@ -1404,7 +1368,7 @@
         inpiContract = new ethers.Contract(INPI_ADDRESS, INPI_ABI, signer);
         pitroneContract = new ethers.Contract(PITRONE_ADDRESS, PITRONE_ABI, signer);
         resourceTokenContract = new ethers.Contract(RESOURCE_TOKEN_ADDRESS, RESOURCE_TOKEN_ABI, signer);
-        initFarmingContracts(signer);
+  
         document.getElementById("walletAddress").innerText = shortenAddress(userAddress);
         document.getElementById("connectBtn").innerText = "Connected";
         await loadData();
@@ -1423,7 +1387,7 @@
       nftReadOnlyContract = new ethers.Contract(NFT_ADDRESS, NFT_ABI, readOnlyProvider);
     }
   
-    // ==================== WHEEL HANDLER (Mausrad) ====================
+    // ==================== WHEEL HANDLER ====================
     function handleWheel(e) {
       e.preventDefault();
       const zoomFactor = 1.1;
@@ -1504,14 +1468,12 @@
     // ==================== MOBILE TOUCH HANDLER ====================
     function handleTouchStart(e) {
       if (e.touches.length === 1) {
-        // Ein-Finger-Berührung – merke Startposition für spätere Klick-Erkennung
         touchStartX = e.touches[0].clientX;
         touchStartY = e.touches[0].clientY;
         touchMoved = false;
         isDragging = false;
         e.preventDefault();
       } else if (e.touches.length === 2) {
-        // Zwei Finger = Zoom
         e.preventDefault();
         const dist = Math.hypot(
           e.touches[0].clientX - e.touches[1].clientX,
@@ -1530,12 +1492,9 @@
         const dy = e.touches[0].clientY - touchStartY;
         const distance = Math.hypot(dx, dy);
         
-        // Erst wenn mehr als Schwellwert bewegt, wird es zum Drag
         if (distance > MOVE_THRESHOLD) {
           touchMoved = true;
           isDragging = true;
-          
-          // Jetzt erst verschieben
           offsetX += dx;
           offsetY += dy;
           touchStartX = e.touches[0].clientX;
@@ -1543,7 +1502,6 @@
           drawPyramid();
         }
       } else if (e.touches.length === 2) {
-        // Pinch-Zoom
         const dist = Math.hypot(
           e.touches[0].clientX - e.touches[1].clientX,
           e.touches[0].clientY - e.touches[1].clientY
@@ -1566,16 +1524,10 @@
   
     function handleTouchEnd(e) {
       if (e.touches.length === 0) {
-        // Wenn kaum Bewegung und kein Drag, dann als Klick behandeln
         if (!touchMoved && !isDragging) {
-          // Simuliere einen Klick an der letzten Touch-Position
-          const fakeClick = {
-            clientX: touchStartX,
-            clientY: touchStartY
-          };
+          const fakeClick = { clientX: touchStartX, clientY: touchStartY };
           handleClick(fakeClick);
         }
-        
         isDragging = false;
         pinchStartDist = 0;
         touchMoved = false;
