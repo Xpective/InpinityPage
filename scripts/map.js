@@ -549,7 +549,7 @@ function drawPyramid() {
         }
         // Eigener Block überschreibt mit Cyan
         if (userAddress && token.owner.toLowerCase() === userAddress.toLowerCase()) {
-          fillColor = "#a0d6ff";
+          fillColor = "#9b59b6";
         }
 
         const attack = userAttacks.find(a => String(a.targetTokenId) === tokenId);
