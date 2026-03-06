@@ -1,10 +1,11 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <!-- Optimiertes Viewport für mobile Geräte -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover" />
-  <title>INPINITY – Pyramid Map (V3 + Mobile Optimiert)</title>
+  <title>INPINITY – Pyramid Map (V3 + Mobile Optimiert + Fixes)</title>
   <link rel="icon" type="image/png" href="favicon.webp" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/base.css">
@@ -18,7 +19,8 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      position: fixed; /* Fix für mobile Browser */
+      position: fixed;
+      touch-action: pan-x pan-y;
     }
 
     body {
@@ -46,7 +48,6 @@
     }
 
     .nav-links { display: flex; gap: 1rem; flex-wrap: wrap; }
-
     .nav-links a {
       color: #eef2f6;
       text-decoration: none;
@@ -58,24 +59,16 @@
       font-weight: 500;
       font-size: 0.95rem;
     }
-
-    .nav-links a:hover {
-      background: #2e6d5e;
-      border-color: #d4af37;
-      transform: translateY(-2px);
-    }
+    .nav-links a:hover { background: #2e6d5e; border-color: #d4af37; transform: translateY(-2px); }
 
     .logo { display: flex; align-items: center; gap: 0.8rem; }
-
     .logo h1 {
       font-weight: 600;
       font-size: 1.7rem;
-      letter-spacing: 0.5px;
       background: linear-gradient(135deg, #f5e7c8, #d4af37);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
-
     .logo span {
       font-size: 0.9rem;
       color: #98a2b3;
@@ -86,7 +79,6 @@
     }
 
     .wallet { display: flex; align-items: center; gap: 1rem; margin-left: auto; }
-
     .wallet button {
       background: linear-gradient(145deg, #1e3a3a, #1f4a3a);
       border: 1px solid #3b8b6b;
@@ -99,14 +91,12 @@
       transition: 0.2s;
       box-shadow: 0 2px 6px rgba(0, 40, 30, 0.5);
     }
-
     .wallet button:hover {
       background: #2e6d5e;
       border-color: #d4af37;
       transform: translateY(-2px);
       box-shadow: 0 6px 14px rgba(212, 175, 55, 0.3);
     }
-
     #walletAddress {
       background: #1a232c;
       padding: 0.4rem 1.2rem;
@@ -137,7 +127,8 @@
       height: 100%;
       background: #0f1318;
       overflow: hidden;
-      touch-action: none; /* Erlaubt eigenes Touch-Handling */
+      touch-action: none;
+      cursor: grab;
     }
 
     .canvas-container canvas {
@@ -198,16 +189,8 @@
       background: rgba(0, 0, 0, 0.2);
       border-radius: 24px 24px 0 0;
     }
-
-    .legend-header h3 {
-      font-size: 1.2rem;
-      color: #d4af37;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-    }
-
+    .legend-header h3 { font-size: 1.2rem; color: #d4af37; font-weight: 600; }
     .legend-controls { display: flex; gap: 0.5rem; }
-
     .legend-controls button {
       background: transparent;
       border: 1px solid #3a5060;
@@ -222,12 +205,7 @@
       transition: 0.2s;
       font-size: 1.1rem;
     }
-
-    .legend-controls button:hover {
-      background: #d4af37;
-      color: #0b0e12;
-      border-color: #d4af37;
-    }
+    .legend-controls button:hover { background: #d4af37; color: #0b0e12; border-color: #d4af37; }
 
     .legend-content {
       padding: 1.2rem 1.5rem;
@@ -235,12 +213,7 @@
       max-height: 600px;
       overflow-y: auto;
     }
-
-    .legend-content.collapsed {
-      max-height: 0;
-      padding: 0 1.5rem;
-      overflow: hidden;
-    }
+    .legend-content.collapsed { max-height: 0; padding: 0 1.5rem; overflow: hidden; }
 
     /* Detail-Karte */
     .detail-card {
@@ -250,14 +223,12 @@
       border: 1px solid #2a3f4a;
       margin-bottom: 1.5rem;
     }
-
     .detail-row { display: flex; justify-content: space-between; margin-bottom: 0.7rem; font-size: 0.95rem; }
     .detail-label { color: #98a9b9; }
     .detail-value { font-weight: 600; color: #f0f4fa; }
 
     /* Buttons & Formulare */
     .action-buttons { display: flex; flex-direction: column; gap: 0.8rem; margin: 1rem 0; }
-
     .action-btn {
       background: linear-gradient(145deg, #2a3f4a, #1b2a33);
       border: 1px solid #3b6b8b;
@@ -269,19 +240,11 @@
       transition: 0.2s;
       text-align: center;
     }
-
-    .action-btn:hover:not(:disabled) {
-      background: #3b6b8b;
-      border-color: #d4af37;
-      transform: translateY(-2px);
-    }
-
+    .action-btn:hover:not(:disabled) { background: #3b6b8b; border-color: #d4af37; transform: translateY(-2px); }
     .action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
     .input-group { display: flex; align-items: center; gap: 0.5rem; margin: 0.8rem 0; }
-
     .input-group label { font-size: 0.9rem; color: #98a9b9; min-width: 70px; }
-
     .input-group input, .input-group select {
       flex: 1;
       background: #0f1a22;
@@ -290,9 +253,8 @@
       padding: 0.6rem 1rem;
       border-radius: 30px;
       outline: none;
-      font-size: 16px; /* Verhindert Zoom auf iOS */
+      font-size: 16px;
     }
-
     .input-group input:focus, .input-group select:focus { border-color: #d4af37; }
 
     .message {
@@ -302,7 +264,6 @@
       text-align: center;
       font-size: 0.9rem;
     }
-
     .success { background: #1a3a2a; border: 1px solid #2e7d5e; color: #a0e0a0; }
     .error { background: #3a1a1a; border: 1px solid #b33a3a; color: #ffa0a0; }
 
@@ -340,15 +301,7 @@
     .execute-btn[disabled] { opacity: 0.4; cursor: not-allowed; }
 
     .legend-item { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.8rem; font-size: 0.95rem; }
-
-    .color-box {
-      width: 24px;
-      height: 24px;
-      border-radius: 6px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.4);
-      position: relative;
-    }
-
+    .color-box { width: 24px; height: 24px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.4); position: relative; }
     .color-gray { background: #3a4048; }
     .color-green { background: #2e7d5e; }
     .color-gold { background: #c9a959; }
@@ -357,15 +310,7 @@
     .border-purple { border: 3px solid #9b59b6; box-sizing: border-box; }
     .border-black { border: 3px solid #000; box-sizing: border-box; }
     .border-red { border: 3px solid #e74c3c; box-sizing: border-box; }
-
-    .star {
-      position: absolute;
-      top: -8px;
-      right: -8px;
-      font-size: 16px;
-      color: gold;
-      text-shadow: 0 0 5px black;
-    }
+    .star { position: absolute; top: -8px; right: -8px; font-size: 16px; color: gold; text-shadow: 0 0 5px black; }
 
     /* Rarity-Farben */
     .rarity-bronze { color: #cd7f32; font-weight: bold; }
@@ -423,62 +368,21 @@
 
     /* Mobile Optimierungen */
     @media (max-width: 768px) {
-      .header { 
-        padding: 0.5rem; 
-        flex-direction: row;
-        align-items: center;
-      }
+      .header { padding: 0.5rem; flex-direction: row; align-items: center; }
       .logo h1 { font-size: 1.2rem; }
       .logo span { display: none; }
-      .nav-links { 
-        display: none; /* Navigation auf mobile ausblenden */
-      }
-      .wallet { 
-        margin-left: auto;
-      }
-      .wallet button { 
-        padding: 0.3rem 1rem;
-        font-size: 0.85rem;
-      }
-      #walletAddress { 
-        display: none; 
-      }
-      
-      .legend-panel { 
-        width: 280px;
-        right: 10px;
-        top: 60px;
-        font-size: 0.85rem;
-        max-height: calc(100vh - 70px);
-      }
-      
-      .canvas-container {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-      }
-      
-      .resource-icon {
-        width: 24px;
-        height: 24px;
-        margin-right: 8px;
-      }
-      .resource-row {
-        font-size: 0.95rem;
-      }
-      
-      .legend-content {
-        padding: 0.8rem;
-        max-height: 400px;
-      }
+      .nav-links { display: none; }
+      .wallet { margin-left: auto; }
+      .wallet button { padding: 0.3rem 1rem; font-size: 0.85rem; }
+      #walletAddress { display: none; }
+      .legend-panel { width: 280px; right: 10px; top: 60px; font-size: 0.85rem; max-height: calc(100vh - 70px); }
+      .canvas-container { position: absolute; width: 100%; height: 100%; }
+      .resource-icon { width: 24px; height: 24px; margin-right: 8px; }
+      .resource-row { font-size: 0.95rem; }
+      .legend-content { padding: 0.8rem; max-height: 400px; }
     }
-
     @media (max-width: 480px) {
-      .legend-panel { 
-        width: 240px;
-        right: 5px;
-        top: 55px;
-      }
+      .legend-panel { width: 240px; right: 5px; top: 55px; }
     }
   </style>
 </head>
@@ -787,55 +691,34 @@
     }
   
     // ==================== LOAD ATTACKS ====================
-    async function loadUserResources() {
+    async function loadUserAttacks() {
       if (!userAddress) return;
-      
-      // Zuerst versuchen über Subgraph
       try {
-        const where = `{ account: "${userAddress.toLowerCase()}" }`;
-        const balanceItems = await fetchAllWithPagination(
+        const where = `{ attacker: "${userAddress.toLowerCase()}" }`;
+        const attacks = await fetchAllWithPagination(
           SUBGRAPH_URL_V2,
-          "resourceBalances",
-          "id account resourceId amount",
+          "attackV3S",
+          "id attacker target attackIndex startTime endTime resource executed",
           where
         );
-    
-        if (balanceItems && balanceItems.length > 0) {
-          userResources = balanceItems
-            .filter(b => (b.account || "").toLowerCase() === userAddress.toLowerCase())
-            .map(b => ({ 
-              resourceId: parseInt(b.resourceId, 10), 
-              amount: BigInt(b.amount) 
-            }));
-        } else {
-          // Fallback: on-chain abfragen
-          await loadUserResourcesOnChain();
-        }
-      } catch (err) {
-        console.warn("Subgraph resource fetch failed, using on-chain:", err);
-        await loadUserResourcesOnChain();
-      }
-      
-      updateUserResourcesDisplay();
-    }
-    
-    // Neue Funktion für on-chain Abfrage
-    async function loadUserResourcesOnChain() {
-      if (!userAddress || !resourceTokenContract) return;
-      try {
-        const ids = [0,1,2,3,4,5,6,7,8,9];
-        const accounts = ids.map(() => userAddress);
-        const balances = await resourceTokenContract.balanceOfBatch(accounts, ids);
-        
-        userResources = ids
-          .map((id, idx) => ({
-            resourceId: id,
-            amount: balances[idx]
-          }))
-          .filter(r => r.amount > 0n);
-      } catch (err) {
-        console.error("On-chain resource fetch failed:", err);
-        userResources = [];
+        userAttacks = attacks
+          .filter(a => !a.executed)
+          .map(a => ({
+            id: a.id,
+            targetTokenId: parseInt(a.target, 10),
+            attackIndex: parseInt(a.attackIndex, 10),
+            startTime: parseInt(a.startTime, 10),
+            endTime: parseInt(a.endTime, 10),
+            executed: !!a.executed,
+            resource: parseInt(a.resource, 10)
+          }));
+        const dismissed = loadDismissedAttacks();
+        userAttacks = userAttacks.filter(a => !dismissed.has(a.id));
+        displayUserAttacks();
+        drawPyramid();
+        startAttacksTicker();
+      } catch (e) {
+        console.error("Failed to load attacks:", e);
       }
     }
   
@@ -1039,17 +922,55 @@
       }
     }
   
-    // ==================== RESSOURCEN ON-CHAIN ====================
+    // ==================== RESSOURCEN ====================
     async function loadUserResources() {
+      if (!userAddress) return;
+      
+      // Zuerst versuchen über Subgraph
+      try {
+        const where = `{ account: "${userAddress.toLowerCase()}" }`;
+        const balanceItems = await fetchAllWithPagination(
+          SUBGRAPH_URL_V2,
+          "resourceBalances",
+          "id account resourceId amount",
+          where
+        );
+    
+        if (balanceItems && balanceItems.length > 0) {
+          userResources = balanceItems
+            .filter(b => (b.account || "").toLowerCase() === userAddress.toLowerCase())
+            .map(b => ({ 
+              resourceId: parseInt(b.resourceId, 10), 
+              amount: BigInt(b.amount) 
+            }));
+          updateUserResourcesDisplay();
+          return;
+        }
+      } catch (err) {
+        console.warn("Subgraph resource fetch failed, using on-chain:", err);
+      }
+      
+      // Fallback: On-chain
+      await loadUserResourcesOnChain();
+    }
+    
+    async function loadUserResourcesOnChain() {
       if (!userAddress || !resourceTokenContract) return;
       try {
         const ids = [0,1,2,3,4,5,6,7,8,9];
         const accounts = ids.map(() => userAddress);
         const balances = await resourceTokenContract.balanceOfBatch(accounts, ids);
-        userResources = ids.map((id, idx) => ({ resourceId: id, amount: balances[idx] })).filter(r => r.amount > 0n);
+        userResources = ids
+          .map((id, idx) => ({
+            resourceId: id,
+            amount: balances[idx]
+          }))
+          .filter(r => r.amount > 0n);
         updateUserResourcesDisplay();
       } catch (err) {
-        console.error("Fehler beim Laden der ResourceBalances:", err);
+        console.error("On-chain resource fetch failed:", err);
+        userResources = [];
+        updateUserResourcesDisplay();
       }
     }
   
