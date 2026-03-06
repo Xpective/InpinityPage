@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>INPINITY – Pyramid Map (V3 + Attack Execution + Resource Icons + Dismiss)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes" />
+  <title>INPINITY – Pyramid Map (V3 + Mobile Optimized)</title>
   <link rel="icon" type="image/png" href="favicon.webp" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/base.css">
@@ -13,6 +13,10 @@
   <style>
     /* ========== BASIS-STYLES ========== */
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
 
     body {
       font-family: 'Inter', sans-serif;
@@ -24,7 +28,7 @@
       flex-direction: column;
     }
 
-    /* Header */
+    /* Header - für mobile optimiert */
     .header {
       display: flex;
       flex-wrap: wrap;
@@ -39,7 +43,11 @@
       gap: 1rem;
     }
 
-    .nav-links { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .nav-links { 
+      display: flex; 
+      gap: 1rem; 
+      flex-wrap: wrap; 
+    }
 
     .nav-links a {
       color: #eef2f6;
@@ -51,6 +59,7 @@
       transition: 0.2s;
       font-weight: 500;
       font-size: 0.95rem;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .nav-links a:hover {
@@ -92,6 +101,7 @@
       cursor: pointer;
       transition: 0.2s;
       box-shadow: 0 2px 6px rgba(0, 40, 30, 0.5);
+      -webkit-tap-highlight-color: transparent;
     }
 
     .wallet button:hover {
@@ -111,7 +121,12 @@
     }
 
     /* Hauptbereich */
-    .main { flex: 1; display: flex; position: relative; overflow: hidden; }
+    .main { 
+      flex: 1; 
+      display: flex; 
+      position: relative; 
+      overflow: hidden; 
+    }
 
     .canvas-container {
       flex: 1;
@@ -119,10 +134,14 @@
       background: #0f1318;
       overflow: hidden;
       cursor: grab;
-      touch-action: none;
+      touch-action: none; /* Wichtig für Touch-Gesten */
     }
 
-    .canvas-container canvas { display: block; width: 100%; height: 100%; }
+    .canvas-container canvas { 
+      display: block; 
+      width: 100%; 
+      height: 100%; 
+    }
 
     .tooltip {
       position: absolute;
@@ -145,7 +164,7 @@
 
     .tooltip span { color: #d4af37; font-weight: 600; }
 
-    /* Sidebar / Legende */
+    /* Sidebar / Legende - Mobile optimiert */
     .legend-panel {
       position: absolute;
       top: 20px;
@@ -163,6 +182,7 @@
       overflow: hidden;
       cursor: move;
       user-select: none;
+      -webkit-user-select: none;
     }
 
     .legend-header {
@@ -198,6 +218,7 @@
       cursor: pointer;
       transition: 0.2s;
       font-size: 1.1rem;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .legend-controls button:hover {
@@ -211,6 +232,7 @@
       transition: max-height 0.3s ease, padding 0.3s ease;
       max-height: 600px;
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
     .legend-content.collapsed {
@@ -245,6 +267,7 @@
       cursor: pointer;
       transition: 0.2s;
       text-align: center;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .action-btn:hover:not(:disabled) {
@@ -267,6 +290,7 @@
       padding: 0.6rem 1rem;
       border-radius: 30px;
       outline: none;
+      font-size: 16px; /* Verhindert Zoom auf iOS */
     }
 
     .input-group input:focus, .input-group select:focus { border-color: #d4af37; }
@@ -290,6 +314,7 @@
       margin-top: 0.5rem;
       max-height: 150px;
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
     .attack-item {
       background: #0f1a2a;
@@ -312,6 +337,7 @@
       font-weight: 600;
       font-size: 0.8rem;
       white-space: nowrap;
+      -webkit-tap-highlight-color: transparent;
     }
     .execute-btn[disabled] { opacity: 0.4; cursor: not-allowed; }
 
@@ -391,7 +417,7 @@
       background: transparent;
     }
 
-    /* Resource-Icons - GRÖßER gemacht */
+    /* Resource-Icons */
     .resource-icon {
       width: 32px;
       height: 32px;
@@ -419,14 +445,76 @@
       color: #f0f4fa;
     }
 
-    @media (max-width: 700px) {
-      .header { padding: 0.6rem 1rem; flex-direction: column; align-items: stretch; }
-      .nav-links { justify-content: center; }
+    /* Mobile Optimierungen */
+    @media (max-width: 768px) {
+      .header { 
+        padding: 0.6rem 1rem; 
+        flex-direction: column; 
+        align-items: stretch; 
+      }
+      .nav-links { 
+        justify-content: center; 
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 0.5rem;
+      }
+      .nav-links a {
+        font-size: 0.85rem;
+        padding: 0.3rem 0.8rem;
+        white-space: nowrap;
+      }
       .logo h1 { font-size: 1.2rem; }
       .logo span { display: none; }
-      .wallet { justify-content: center; margin-left: 0; }
-      #walletAddress { display: none; }
-      .legend-panel { width: 90%; right: 5%; top: 120px; max-width: 320px; }
+      .wallet { 
+        justify-content: center; 
+        margin-left: 0; 
+        flex-wrap: wrap;
+      }
+      #walletAddress { 
+        display: none; 
+      }
+      .legend-panel { 
+        width: 90%; 
+        right: 5%; 
+        top: 80px; 
+        max-width: 350px;
+        font-size: 0.9rem;
+      }
+      .resource-icon {
+        width: 28px;
+        height: 28px;
+      }
+      .resource-row {
+        font-size: 1rem;
+      }
+      .input-group input, .input-group select {
+        font-size: 14px;
+        padding: 0.5rem;
+      }
+      .action-btn {
+        padding: 0.6rem;
+      }
+    }
+
+    /* Kleine Phones */
+    @media (max-width: 480px) {
+      .legend-panel { 
+        width: 95%; 
+        right: 2.5%; 
+        top: 70px; 
+      }
+      .resource-icon {
+        width: 24px;
+        height: 24px;
+        margin-right: 8px;
+      }
+      .resource-name {
+        min-width: 70px;
+        font-size: 0.95rem;
+      }
+      .detail-row {
+        font-size: 0.85rem;
+      }
     }
   </style>
 </head>
@@ -496,7 +584,7 @@
 
         <div style="margin: 1.5rem 0; border-top: 1px solid #2a3f4a; padding-top: 1rem;">
           <h4 style="color: #d4af37; margin-bottom: 1rem;">📦 Your Resources</h4>
-          <div id="userResources" style="max-height: 300px; overflow-y: auto;">
+          <div id="userResources" style="max-height: 300px; overflow-y: auto; -webkit-overflow-scrolling: touch;">
             <p style="color: #98a9b9;">Connect wallet to see your resource tokens.</p>
           </div>
         </div>
