@@ -1864,6 +1864,11 @@
     
     if(window.ethereum && window.ethereum.selectedAddress){
       connectWallet();
+
+    // Am Ende der Datei, nach dem letzten } aber vor dem schließenden Script-Tag:
+    window.farmingV3Contract = farmingV3Contract;
+    window.piratesV3Contract = piratesV3Contract;
+    window.userAddress = userAddress;
     }
     </script>
 </body>
