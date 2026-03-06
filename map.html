@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <!-- CRITICAL FIX: Richtiges Viewport für mobile Geräte -->
+  <!-- Optimiertes Viewport für mobile Geräte -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover" />
-  <title>INPINITY – Pyramid Map (Mobile optimiert)</title>
+  <title>INPINITY – Pyramid Map (V3 + Mobile Optimiert)</title>
   <link rel="icon" type="image/png" href="favicon.webp" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/base.css">
@@ -14,13 +14,11 @@
   <style>
     /* ========== BASIS-STYLES ========== */
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    
     html, body {
       width: 100%;
       height: 100%;
       overflow: hidden;
       position: fixed; /* Fix für mobile Browser */
-      touch-action: pan-x pan-y; /* Erlaubt standardmäßiges Scrollen */
     }
 
     body {
@@ -31,7 +29,7 @@
       flex-direction: column;
     }
 
-    /* Header - bleibt wie gehabt */
+    /* Header */
     .header {
       display: flex;
       flex-wrap: wrap;
@@ -48,6 +46,7 @@
     }
 
     .nav-links { display: flex; gap: 1rem; flex-wrap: wrap; }
+
     .nav-links a {
       color: #eef2f6;
       text-decoration: none;
@@ -59,16 +58,24 @@
       font-weight: 500;
       font-size: 0.95rem;
     }
-    .nav-links a:hover { background: #2e6d5e; border-color: #d4af37; transform: translateY(-2px); }
+
+    .nav-links a:hover {
+      background: #2e6d5e;
+      border-color: #d4af37;
+      transform: translateY(-2px);
+    }
 
     .logo { display: flex; align-items: center; gap: 0.8rem; }
+
     .logo h1 {
       font-weight: 600;
       font-size: 1.7rem;
+      letter-spacing: 0.5px;
       background: linear-gradient(135deg, #f5e7c8, #d4af37);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
+
     .logo span {
       font-size: 0.9rem;
       color: #98a2b3;
@@ -79,6 +86,7 @@
     }
 
     .wallet { display: flex; align-items: center; gap: 1rem; margin-left: auto; }
+
     .wallet button {
       background: linear-gradient(145deg, #1e3a3a, #1f4a3a);
       border: 1px solid #3b8b6b;
@@ -91,12 +99,14 @@
       transition: 0.2s;
       box-shadow: 0 2px 6px rgba(0, 40, 30, 0.5);
     }
+
     .wallet button:hover {
       background: #2e6d5e;
       border-color: #d4af37;
       transform: translateY(-2px);
       box-shadow: 0 6px 14px rgba(212, 175, 55, 0.3);
     }
+
     #walletAddress {
       background: #1a232c;
       padding: 0.4rem 1.2rem;
@@ -106,7 +116,7 @@
       color: #bcd0e0;
     }
 
-    /* Hauptbereich - CRITICAL FIX für mobile */
+    /* Hauptbereich */
     .main {
       flex: 1;
       display: flex;
@@ -114,7 +124,7 @@
       overflow: hidden;
       width: 100%;
       height: 100%;
-      min-height: 0; /* Wichtig für Flexbox */
+      min-height: 0;
     }
 
     .canvas-container {
@@ -127,14 +137,14 @@
       height: 100%;
       background: #0f1318;
       overflow: hidden;
-      touch-action: none; /* Ermöglicht eigenes Touch-Handling */
+      touch-action: none; /* Erlaubt eigenes Touch-Handling */
     }
 
     .canvas-container canvas {
       display: block;
       width: 100%;
       height: 100%;
-      object-fit: cover; /* Stellt sicher, dass Canvas den Container füllt */
+      object-fit: cover;
     }
 
     .tooltip {
@@ -178,7 +188,6 @@
       overflow-y: auto;
     }
 
-    /* Restliche Styles bleiben gleich */
     .legend-header {
       display: flex;
       justify-content: space-between;
@@ -189,8 +198,16 @@
       background: rgba(0, 0, 0, 0.2);
       border-radius: 24px 24px 0 0;
     }
-    .legend-header h3 { font-size: 1.2rem; color: #d4af37; font-weight: 600; }
+
+    .legend-header h3 {
+      font-size: 1.2rem;
+      color: #d4af37;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
     .legend-controls { display: flex; gap: 0.5rem; }
+
     .legend-controls button {
       background: transparent;
       border: 1px solid #3a5060;
@@ -205,7 +222,12 @@
       transition: 0.2s;
       font-size: 1.1rem;
     }
-    .legend-controls button:hover { background: #d4af37; color: #0b0e12; border-color: #d4af37; }
+
+    .legend-controls button:hover {
+      background: #d4af37;
+      color: #0b0e12;
+      border-color: #d4af37;
+    }
 
     .legend-content {
       padding: 1.2rem 1.5rem;
@@ -213,7 +235,12 @@
       max-height: 600px;
       overflow-y: auto;
     }
-    .legend-content.collapsed { max-height: 0; padding: 0 1.5rem; overflow: hidden; }
+
+    .legend-content.collapsed {
+      max-height: 0;
+      padding: 0 1.5rem;
+      overflow: hidden;
+    }
 
     /* Detail-Karte */
     .detail-card {
@@ -223,12 +250,14 @@
       border: 1px solid #2a3f4a;
       margin-bottom: 1.5rem;
     }
+
     .detail-row { display: flex; justify-content: space-between; margin-bottom: 0.7rem; font-size: 0.95rem; }
     .detail-label { color: #98a9b9; }
     .detail-value { font-weight: 600; color: #f0f4fa; }
 
     /* Buttons & Formulare */
     .action-buttons { display: flex; flex-direction: column; gap: 0.8rem; margin: 1rem 0; }
+
     .action-btn {
       background: linear-gradient(145deg, #2a3f4a, #1b2a33);
       border: 1px solid #3b6b8b;
@@ -240,11 +269,19 @@
       transition: 0.2s;
       text-align: center;
     }
-    .action-btn:hover:not(:disabled) { background: #3b6b8b; border-color: #d4af37; transform: translateY(-2px); }
+
+    .action-btn:hover:not(:disabled) {
+      background: #3b6b8b;
+      border-color: #d4af37;
+      transform: translateY(-2px);
+    }
+
     .action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
     .input-group { display: flex; align-items: center; gap: 0.5rem; margin: 0.8rem 0; }
+
     .input-group label { font-size: 0.9rem; color: #98a9b9; min-width: 70px; }
+
     .input-group input, .input-group select {
       flex: 1;
       background: #0f1a22;
@@ -253,7 +290,9 @@
       padding: 0.6rem 1rem;
       border-radius: 30px;
       outline: none;
+      font-size: 16px; /* Verhindert Zoom auf iOS */
     }
+
     .input-group input:focus, .input-group select:focus { border-color: #d4af37; }
 
     .message {
@@ -263,6 +302,7 @@
       text-align: center;
       font-size: 0.9rem;
     }
+
     .success { background: #1a3a2a; border: 1px solid #2e7d5e; color: #a0e0a0; }
     .error { background: #3a1a1a; border: 1px solid #b33a3a; color: #ffa0a0; }
 
@@ -300,7 +340,15 @@
     .execute-btn[disabled] { opacity: 0.4; cursor: not-allowed; }
 
     .legend-item { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.8rem; font-size: 0.95rem; }
-    .color-box { width: 24px; height: 24px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.4); position: relative; }
+
+    .color-box {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+      position: relative;
+    }
+
     .color-gray { background: #3a4048; }
     .color-green { background: #2e7d5e; }
     .color-gold { background: #c9a959; }
@@ -309,7 +357,15 @@
     .border-purple { border: 3px solid #9b59b6; box-sizing: border-box; }
     .border-black { border: 3px solid #000; box-sizing: border-box; }
     .border-red { border: 3px solid #e74c3c; box-sizing: border-box; }
-    .star { position: absolute; top: -8px; right: -8px; font-size: 16px; color: gold; text-shadow: 0 0 5px black; }
+
+    .star {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      font-size: 16px;
+      color: gold;
+      text-shadow: 0 0 5px black;
+    }
 
     /* Rarity-Farben */
     .rarity-bronze { color: #cd7f32; font-weight: bold; }
@@ -354,10 +410,18 @@
       border-radius: 8px;
       background: rgba(0,0,0,0.2);
     }
-    .resource-name { color: #d4af37; margin-right: 8px; min-width: 80px; font-weight: 600; }
-    .resource-amount { font-weight: 700; color: #f0f4fa; }
+    .resource-name {
+      color: #d4af37;
+      margin-right: 8px;
+      min-width: 80px;
+      font-weight: 600;
+    }
+    .resource-amount {
+      font-weight: 700;
+      color: #f0f4fa;
+    }
 
-    /* ===== MOBILE OPTIMIERUNGEN ===== */
+    /* Mobile Optimierungen */
     @media (max-width: 768px) {
       .header { 
         padding: 0.5rem; 
@@ -367,7 +431,7 @@
       .logo h1 { font-size: 1.2rem; }
       .logo span { display: none; }
       .nav-links { 
-        display: none; /* Navigation auf mobile verstecken - Platz sparen */
+        display: none; /* Navigation auf mobile ausblenden */
       }
       .wallet { 
         margin-left: auto;
@@ -380,7 +444,6 @@
         display: none; 
       }
       
-      /* Legend-Panel anpassen */
       .legend-panel { 
         width: 280px;
         right: 10px;
@@ -389,16 +452,10 @@
         max-height: calc(100vh - 70px);
       }
       
-      /* Canvas Container - CRITICAL FIX */
       .canvas-container {
         position: absolute;
         width: 100%;
         height: 100%;
-      }
-      
-      /* Reset für centerPyramid() */
-      canvas {
-        display: block;
       }
       
       .resource-icon {
@@ -408,30 +465,11 @@
       }
       .resource-row {
         font-size: 0.95rem;
-        padding: 0.2rem;
-      }
-      .resource-name {
-        min-width: 60px;
       }
       
       .legend-content {
         padding: 0.8rem;
         max-height: 400px;
-      }
-      
-      .detail-card {
-        padding: 0.8rem;
-        margin-bottom: 0.8rem;
-      }
-      
-      .action-btn {
-        padding: 0.5rem;
-        font-size: 0.85rem;
-      }
-      
-      .input-group input, .input-group select {
-        padding: 0.4rem;
-        font-size: 0.85rem;
       }
     }
 
@@ -441,8 +479,6 @@
         right: 5px;
         top: 55px;
       }
-      .legend-header h3 { font-size: 1rem; }
-      .legend-controls button { width: 24px; height: 24px; }
     }
   </style>
 </head>
@@ -537,20 +573,22 @@
     const BASE_BLOCK_SIZE = 24;
     const WORKER_URL = "https://inpinity-worker-final.s-plat.workers.dev";
   
-    // Contracts
+    // ====== Contracts ======
     const NFT_ADDRESS = "0x277a0D5864293C78d7387C54B48c35D5E9578Ab1";
     const RESOURCE_TOKEN_ADDRESS = "0x71E76a6065197acdd1a4d6B736712F80D1Fd3D8b";
     const INPI_ADDRESS = "0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D";
     const PITRONE_ADDRESS = "0x7240Ec5B3Ba944888E186c74D0f8B4F5F71c9AE8";
+  
     const FARMING_V3_ADDRESS = "0xE79445C9ef97B8156BB505D784C0356E54432AD9";
     const PIRATES_V3_ADDRESS = "0xC3544804cea908b8Ac6752B4F47609e1c22DaF5d";
     const MERCENARY_V2_ADDRESS = "0xFEa09ccA75dbc63cc8053739A61777Bd13fC6Bc2";
+  
     const FARMING_V1_ADDRESS = "0xd9722fB6e9b8e71399A970d4e8F4D628C532E94f";
     const FARMING_V2_ADDRESS = "0x852Bce0713aAF409c4412155Ab8CE6191B525C30";
   
-    const CLAIM_COOLDOWN_SEC = 24 * 60 * 60;
+    const CLAIM_COOLDOWN_SEC = 24 * 60 * 60; // 24h
   
-    // ABIs
+    // ==================== ABIs ====================
     const NFT_ABI = [
       "function revealBlock(uint256 tokenId, bytes32[] piProof, bytes32[] phiProof, uint8 piDigit, uint8 phiDigit) external",
       "function calculateRarity(uint256 tokenId) view returns (uint8)",
@@ -565,6 +603,19 @@
       "function claimResources(uint256 tokenId) external",
       "function farms(uint256) view returns (uint256 startTime, uint256 lastAccrualTime, uint256 boostExpiry, bool isActive)",
       "function getAllPending(uint256 tokenId) view returns (uint256[10] out)"
+    ];
+  
+    const FARMING_V1_ABI = [
+      "function farms(uint256) view returns (uint256 startTime, uint256 lastClaimTime, bool isActive)",
+      "function claimResources(uint256) external",
+      "function stopFarming(uint256) external"
+    ];
+  
+    const FARMING_V2_ABI = [
+      "function farms(uint256) view returns (uint256 startTime, uint256 lastClaimTime, bool isActive)",
+      "function claimResources(uint256) external",
+      "function stopFarming(uint256) external",
+      "function startFarming(uint256) external"
     ];
   
     const PIRATES_V3_ABI = [
@@ -598,12 +649,15 @@
     // ==================== STATE ====================
     let provider, signer, userAddress = null;
     let readOnlyProvider, nftReadOnlyContract;
+  
     let tokens = {};
     let userResources = [];
     let selectedTokenId = null;
     let selectedTokenOwner = null;
+  
     let userAttacks = [];
     let attacksTicker = null;
+  
     let nftContract, farmingV3Contract, piratesV3Contract, mercenaryV2Contract, inpiContract, pitroneContract;
     let farmingV1Contract, farmingV2Contract, resourceTokenContract;
   
@@ -660,6 +714,7 @@
       if (h > 0) return `${h}h ${m}m`;
       return `${m}m`;
     }
+    function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
     function getAttackStorageKey(targetTokenId) { return `attack_${targetTokenId}`; }
     function secondsUntilClaimable(farmStartTime, nowSec) {
       if (!farmStartTime) return null;
@@ -713,6 +768,11 @@
       farmingV3Contract = new ethers.Contract(FARMING_V3_ADDRESS, FARMING_V3_ABI, signer);
     }
   
+    async function getFarmStatus(tokenId) {
+      const [v3] = await Promise.allSettled([farmingV3Contract.farms(tokenId)]);
+      return { v3Active: v3.status === "fulfilled" ? !!v3.value.isActive : false };
+    }
+  
     async function migrateToV3(tokenId) {
       try {
         const farm = await farmingV3Contract.farms(tokenId);
@@ -731,12 +791,7 @@
       if (!userAddress) return;
       try {
         const where = `{ attacker: "${userAddress.toLowerCase()}" }`;
-        const attacks = await fetchAllWithPagination(
-          SUBGRAPH_URL_V2,
-          "attackV3S",
-          "id attacker target attackIndex startTime endTime resource executed",
-          where
-        );
+        const attacks = await fetchAllWithPagination(SUBGRAPH_URL_V2, "attackV3S", "id attacker target attackIndex startTime endTime resource executed", where);
         userAttacks = attacks
           .filter(a => !a.executed)
           .map(a => ({
@@ -869,11 +924,7 @@
           return;
         }
         actionMessage.innerHTML = '<span class="success">⏳ Executing...</span>';
-        const tx = await piratesV3Contract.executeAttack(
-          attack.targetTokenId,
-          attack.attackIndex,
-          { gasLimit: 350000 }
-        );
+        const tx = await piratesV3Contract.executeAttack(attack.targetTokenId, attack.attackIndex, { gasLimit: 350000 });
         actionMessage.innerHTML = '<span class="success">⏳ Confirming...</span>';
         await tx.wait();
         actionMessage.innerHTML = '<span class="success">✅ Attack executed!</span>';
@@ -947,9 +998,7 @@
         const ids = [0,1,2,3,4,5,6,7,8,9];
         const accounts = ids.map(() => userAddress);
         const balances = await resourceTokenContract.balanceOfBatch(accounts, ids);
-        userResources = ids
-          .map((id, idx) => ({ resourceId: id, amount: balances[idx] }))
-          .filter(r => r.amount > 0n);
+        userResources = ids.map((id, idx) => ({ resourceId: id, amount: balances[idx] })).filter(r => r.amount > 0n);
         updateUserResourcesDisplay();
       } catch (err) {
         console.error("Fehler beim Laden der ResourceBalances:", err);
@@ -1035,12 +1084,11 @@
       ctx.restore();
     }
   
-    // ==================== CENTER PYRAMID ====================
     function centerPyramid() {
       const totalWidth = 199 * BASE_BLOCK_SIZE;
       const totalHeight = 100 * BASE_BLOCK_SIZE;
-      const scaleX = (canvas.width / totalWidth) * 0.9;
-      const scaleY = (canvas.height / totalHeight) * 0.9;
+      const scaleX = (canvas.width / totalWidth) * 0.95;
+      const scaleY = (canvas.height / totalHeight) * 0.95;
       scale = Math.min(scaleX, scaleY, 1.5);
       offsetX = (canvas.width - totalWidth * scale) / 2;
       offsetY = (canvas.height - totalHeight * scale) / 2;
@@ -1054,13 +1102,8 @@
     }
   
     function productionToAllowedResourceIds(productionObj) {
-      const map = {
-        OIL: 0, LEMONS: 1, IRON: 2, GOLD: 3, PLATINUM: 4,
-        COPPER: 5, CRYSTAL: 6, OBSIDIAN: 7, MYSTERIUM: 8, AETHER: 9
-      };
-      return Object.keys(productionObj)
-        .map(key => map[key])
-        .filter(id => Number.isFinite(id));
+      const map = { OIL:0, LEMONS:1, IRON:2, GOLD:3, PLATINUM:4, COPPER:5, CRYSTAL:6, OBSIDIAN:7, MYSTERIUM:8, AETHER:9 };
+      return Object.keys(productionObj).map(key => map[key]).filter(id => Number.isFinite(id));
     }
   
     async function getStealableResourcesForTarget(targetTokenId) {
@@ -1085,14 +1128,10 @@
       const { row } = tokenIdToRowCol(targetTokenId);
       try {
         rarity = Number(await nftContract.calculateRarity(targetTokenId));
-      } catch (e) {
-        console.warn("Failed to get rarity, using 0");
-      }
+      } catch (e) { console.warn("Failed to get rarity, using 0"); }
       const prod = getProduction(rarity, row);
       let allowed = productionToAllowedResourceIds(prod);
-      if (allowed.length === 0) {
-        allowed = [0,1,2,3,4,5,6,7,8,9];
-      }
+      if (allowed.length === 0) allowed = [0,1,2,3,4,5,6,7,8,9];
       let pendingArr = null;
       try {
         pendingArr = await farmingV3Contract.getAllPending(targetTokenId);
@@ -1107,10 +1146,9 @@
       const targetTokenId = parseInt(selectedTokenId, 10);
       if (!userAddress || !nftContract || !farmingV3Contract) {
         select.innerHTML = "";
-        [0, 1, 2].forEach(id => {
+        [0,1,2].forEach(id => {
           const opt = document.createElement("option");
-          opt.value = id;
-          opt.textContent = resourceNames[id];
+          opt.value = id; opt.textContent = resourceNames[id];
           select.appendChild(opt);
         });
         return;
@@ -1284,11 +1322,7 @@
       if (!selectedTokenId) return;
       actionMessage.innerHTML = '<span class="success">⏳ Stopping...</span>';
       try {
-        await sendTx(
-          farmingV3Contract.stopFarming(selectedTokenId, { gasLimit: 500000 }),
-          actionMessage,
-          "Farming stopped."
-        );
+        await sendTx(farmingV3Contract.stopFarming(selectedTokenId, { gasLimit: 500000 }), actionMessage, "Farming stopped.");
       } catch (e) {
         actionMessage.innerHTML = `<span class="error">❌ ${e.message}</span>`;
       }
@@ -1298,11 +1332,7 @@
       if (!selectedTokenId) return;
       actionMessage.innerHTML = '<span class="success">⏳ Claiming...</span>';
       try {
-        await sendTx(
-          farmingV3Contract.claimResources(selectedTokenId, { gasLimit: 600000 }),
-          actionMessage,
-          "Resources claimed!"
-        );
+        await sendTx(farmingV3Contract.claimResources(selectedTokenId, { gasLimit: 600000 }), actionMessage, "Resources claimed!");
         await loadUserResources();
       } catch (e) {
         actionMessage.innerHTML = `<span class="error">❌ ${e.message}</span>`;
@@ -1481,11 +1511,13 @@
       drawPyramid();
     }
   
+    // Mobile Touch-Handler
     function handleTouchStart(e) {
       if (e.touches.length === 1) {
         isDragging = true;
         lastMouseX = e.touches[0].clientX;
         lastMouseY = e.touches[0].clientY;
+        e.preventDefault();
       } else if (e.touches.length === 2) {
         e.preventDefault();
         const dist = Math.hypot(
@@ -1576,7 +1608,6 @@
   
     let isResizing = false;
     resizeHandle.addEventListener("mousedown", (e) => { isResizing = true; e.preventDefault(); });
-  
     window.addEventListener("mousemove", (e) => {
       if (!isResizing) return;
       const rect = legendPanel.getBoundingClientRect();
@@ -1586,7 +1617,6 @@
         legendPanel.style.right = "auto";
       }
     });
-  
     window.addEventListener("mouseup", () => { isResizing = false; });
   
     collapseBtn.addEventListener("click", () => {
@@ -1614,8 +1644,6 @@
     });
   
     canvas.addEventListener("wheel", handleWheel, { passive: false });
-    
-    // Touch-Events für mobile
     canvas.addEventListener("touchstart", handleTouchStart, { passive: false });
     canvas.addEventListener("touchmove", handleTouchMove, { passive: false });
     canvas.addEventListener("touchend", handleTouchEnd);
