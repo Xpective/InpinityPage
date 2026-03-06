@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <!-- Optimiertes Viewport für mobile Geräte -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover" />
-  <title>INPINITY – Pyramid Map (V4)</title>
+  <title>INPINITY – Pyramid Map (V4 + Rarity Colors)</title>
   <link rel="icon" type="image/png" href="favicon.webp" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/base.css">
@@ -300,11 +300,22 @@
     .execute-btn[disabled] { opacity: 0.4; cursor: not-allowed; }
 
     .legend-item { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.8rem; font-size: 0.95rem; }
-    .color-box { width: 24px; height: 24px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.4); position: relative; }
+    .color-box {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+      position: relative;
+      border: 1px solid #888;
+    }
     .color-gray { background: #3a4048; }
     .color-green { background: #2e7d5e; }
-    .color-gold { background: #c9a959; }
     .color-cyan { background: #a0d6ff; }
+    .color-bronze { background: #cd7f32; }
+    .color-silver { background: #c0c0c0; }
+    .color-gold { background: #ffd700; }
+    .color-platinum { background: #e5e4e2; }
+    .color-diamond { background: #b9f2ff; }
     .border-blue { border: 3px solid #3498db; box-sizing: border-box; }
     .border-purple { border: 3px solid #9b59b6; box-sizing: border-box; }
     .border-black { border: 3px solid #000; box-sizing: border-box; }
@@ -453,8 +464,25 @@
           </div>
         </div>
 
+        <h4 style="color: #d4af37; margin: 1.5rem 0 0.8rem;">Legend</h4>
+        <div class="legend-item"><div class="color-box color-gray"></div> Not minted</div>
+        <div class="legend-item"><div class="color-box color-green"></div> Minted, not revealed</div>
+        <div class="legend-item"><div class="color-box color-bronze"></div> Bronze</div>
+        <div class="legend-item"><div class="color-box color-silver"></div> Silver</div>
+        <div class="legend-item"><div class="color-box color-gold"></div> Gold</div>
+        <div class="legend-item"><div class="color-box color-platinum"></div> Platinum</div>
+        <div class="legend-item"><div class="color-box color-diamond"></div> Diamond</div>
+        <div class="legend-item"><div class="color-box color-cyan"></div> Your block</div>
+        <div class="legend-item"><div class="color-box color-gold border-blue"></div> Farming active</div>
+        <div class="legend-item"><div class="color-box color-gold border-purple"></div> Protected</div>
+        <div class="legend-item"><div class="color-box color-gold border-black"></div> Under attack</div>
+        <div class="legend-item"><div class="color-box color-gold border-red"></div> Attack ready</div>
+        <div class="legend-item"><div class="color-box color-gold" style="position: relative;"><span class="star">★</span></div> Partner block</div>
+
         <div class="footer-note">
           <p>100 rows · 10,000 blocks</p>
+          <p>π · φ · Fibonacci</p>
+          <p>Map: V4 (FarmingV4 + PiratesV4)</p>
         </div>
       </div>
     </div>
@@ -537,7 +565,7 @@
     let provider, signer, userAddress = null;
     let readOnlyProvider, nftReadOnlyContract;
   
-    let tokens = {};
+    let tokens = {}; // jedes Token enthält: owner, revealed, farmActive, protectionActive, partnerActive, rarity (optional)
     let userResources = [];
     let selectedTokenId = null;
     let selectedTokenOwner = null;
@@ -575,6 +603,15 @@
     const resourceNames = ["Oil","Lemons","Iron","Gold","Platinum","Copper","Crystal","Obsidian","Mysterium","Aether"];
     const rarityNames = ["Bronze","Silver","Gold","Platinum","Diamond"];
     const rarityClass = ["rarity-bronze","rarity-silver","rarity-gold","rarity-platinum","rarity-diamond"];
+  
+    // Farben für Raritäten
+    const rarityColors = [
+      "#cd7f32", // Bronze
+      "#c0c0c0", // Silber
+      "#ffd700", // Gold
+      "#e5e4e2", // Platin
+      "#b9f2ff"  // Diamant
+    ];
   
     function populateAttackResourceSelect() {
       const select = document.getElementById("attackResource");
@@ -658,7 +695,7 @@
       try {
         const where = `{ attacker: "${userAddress.toLowerCase()}" }`;
         const attacks = await fetchAllWithPagination(
-          "attackV4S",  // ⬅️ WICHTIG: großes S
+          "attackV4S",  // ⬅️ großes S
           "id attacker attackerTokenId targetTokenId attackIndex startTime endTime resource executed protectionLevel effectiveStealPercent stolenAmount",
           where
         );
@@ -781,7 +818,6 @@
       try {
         if (!piratesV4Contract) throw new Error("Connect wallet first.");
     
-        // Prüfe Farming-Status und Pending-Ressourcen (V4)
         const farm = await farmingV4Contract.farms(attack.targetTokenId);
         const pending = await farmingV4Contract.getAllPending(attack.targetTokenId);
         
@@ -789,7 +825,6 @@
         const startTime = Number(farm.startTime);
         const claimIn = startTime ? secondsUntilClaimable(startTime, now) : null;
     
-        // ===== DEBUG =====
         console.log("===== EXECUTE DEBUG (V4) =====");
         console.log("Target Token ID:", attack.targetTokenId);
         console.log("Farm status (isActive):", farm.isActive);
@@ -800,7 +835,6 @@
         console.log("Selected resource:", attack.resource, "Value:", pending?.[attack.resource]?.toString());
         console.log("===============================");
     
-        // Prüfungen
         if (!farm.isActive) {
           actionMessage.innerHTML = '<span class="error">❌ Farming inactive – owner stopped.</span>';
           return;
@@ -816,41 +850,34 @@
           return;
         }
     
-        // Alles OK – Transaktion senden
         actionMessage.innerHTML = '<span class="success">⏳ Executing attack...</span>';
-        
         const tx = await piratesV4Contract.executeAttack(
           attack.targetTokenId,
           attack.attackIndex,
           { gasLimit: 350000 }
         );
-    
         actionMessage.innerHTML = '<span class="success">⏳ Confirming...</span>';
         await tx.wait();
-    
         actionMessage.innerHTML = '<span class="success">✅ Attack executed! Resources stolen.</span>';
     
         localStorage.removeItem(getAttackStorageKey(attack.targetTokenId));
-    
         await loadUserAttacks();
         await loadUserResources();
         await loadData();
       } catch (e) {
         console.error("executeAttack error:", e);
         let msg = e?.message || "Unknown error";
-        
         if ((msg + "").includes("execution reverted")) {
           if (attack.id) dismissAttackById(attack.id);
           await loadUserAttacks();
           actionMessage.innerHTML = '<span class="error">❌ Attack failed – nothing to steal. Good luck next time.</span>';
           return;
         }
-        
         actionMessage.innerHTML = `<span class="error">${msg}</span>`;
       }
     }
   
-    // ==================== LOAD MAP DATA (V4 Subgraph) ====================
+    // ==================== LOAD MAP DATA (V4 Subgraph + Rarity) ====================
     async function loadData() {
       try {
         // Token-Informationen (weiterhin aus V2 Subgraph, da NFT-Entitäten dort)
@@ -866,13 +893,26 @@
             revealed: !!t.revealed, 
             farmActive: false, 
             protectionActive: false, 
-            partnerActive: false 
+            partnerActive: false,
+            rarity: null // wird später gesetzt
           };
         });
   
-        // FarmingV4 Status aus Subgraph holen
+        // Lade Raritäten aus BlockRevealed-Events
+        const blockRevealedItems = await fetchAllWithPagination(
+          "blockRevealeds",
+          "tokenId rarity"
+        ).catch(() => []);
+        blockRevealedItems.forEach(br => {
+          const tokenId = br.tokenId;
+          if (tokens[tokenId]) {
+            tokens[tokenId].rarity = parseInt(br.rarity, 10);
+          }
+        });
+  
+        // FarmingV4 Status aus Subgraph
         const farmV4Items = await fetchAllWithPagination(
-          "farmV4S",  // ⬅️ WICHTIG: großes S
+          "farmV4S",  // ⬅️ großes S
           "id owner startTime lastAccrualTime boostExpiry active"
         ).catch(() => []);
         
@@ -911,8 +951,6 @@
     // ==================== RESSOURCEN ====================
     async function loadUserResources() {
       if (!userAddress) return;
-      
-      // On-chain (ResourceToken)
       await loadUserResourcesOnChain();
     }
     
@@ -978,12 +1016,23 @@
           const tokenId = String(tokenIdNum);
           const token = tokens[tokenId];
           const x = (col - row) * blockSize;
-          let fillColor = "#3a4048";
+          
+          let fillColor = "#3a4048"; // default grau
           let strokeColor = null;
           let lineWidth = 0;
+  
           if (token && token.owner) {
-            fillColor = token.revealed ? "#c9a959" : "#2e7d5e";
-            if (userAddress && token.owner.toLowerCase() === userAddress.toLowerCase()) fillColor = "#a0d6ff";
+            // Bestimme Grundfarbe
+            if (token.revealed && token.rarity !== null && token.rarity >= 0 && token.rarity <= 4) {
+              fillColor = rarityColors[token.rarity];
+            } else {
+              fillColor = token.revealed ? "#c9a959" : "#2e7d5e"; // gold oder grün
+            }
+            // Eigener Block überschreibt mit Cyan
+            if (userAddress && token.owner.toLowerCase() === userAddress.toLowerCase()) {
+              fillColor = "#a0d6ff";
+            }
+  
             const attack = userAttacks.find(a => String(a.targetTokenId) === tokenId);
             if (attack) {
               if (attack.endTime <= now) { strokeColor = "#e74c3c"; lineWidth = 4; }
@@ -993,13 +1042,16 @@
               else if (token.farmActive) { strokeColor = "#3498db"; lineWidth = 3; }
             }
           }
+  
           ctx.fillStyle = fillColor;
           ctx.fillRect(x, y, blockSize, blockSize);
+  
           if (strokeColor) {
             ctx.strokeStyle = strokeColor;
             ctx.lineWidth = lineWidth;
             ctx.strokeRect(x, y, blockSize, blockSize);
           }
+  
           if (token && token.partnerActive) {
             ctx.save();
             ctx.translate(x + blockSize - 8, y + 8);
@@ -1143,7 +1195,7 @@
         try {
           const tokenIdNum = parseInt(tokenId, 10);
           const row = Math.floor(tokenIdNum / 2048);
-          const rarity = await nftReadOnlyContract.calculateRarity(tokenIdNum);
+          const rarity = token.rarity !== null ? token.rarity : await nftReadOnlyContract.calculateRarity(tokenIdNum);
           const r = Number(rarity);
           rarityDisplay = `<div class="detail-row"><span class="detail-label">Rarity</span><span class="detail-value ${rarityClass[r]}">${rarityNames[r]}</span></div>`;
           const production = getProduction(r, row);
@@ -1414,6 +1466,7 @@
           if (token.farmActive) text += " · Farming";
           if (token.protectionActive) text += " · Protected";
           if (token.partnerActive) text += " ⭐";
+          if (token.rarity !== null) text += ` · ${rarityNames[token.rarity]}`;
           const attack = userAttacks.find(a => String(a.targetTokenId) === found);
           if (attack) {
             const now = Math.floor(Date.now() / 1000);
