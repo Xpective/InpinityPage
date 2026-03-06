@@ -1,9 +1,10 @@
 /* =========================================================
-   INPINITY GAME – V4 ONLY – Mit Subgraph‑Korrekturen
-   - Tokens, Farms, Protections separat geladen
+   INPINITY GAME – V4 ONLY – Finale Version mit allen Optimierungen
+   - Tokens, Farms, Protections separat geladen (Subgraph)
    - Matching über tokenId
-   - Farming‑Status onchain für Aktionen
-   - Angriffsliste mit besserer Query
+   - Caching von Farm-/Protection-Maps
+   - Positionen immer onchain (getBlockPosition)
+   - Farming-Status für Aktionen onchain
    ========================================================= */
 
 /* ==================== KONFIGURATION (NUR V4) ==================== */
@@ -98,6 +99,12 @@ let userBlocks = [];
 let userAttacks = [];
 let userResources = [];
 
+// Caching für Farms und Protections (wird in loadUserBlocks befüllt)
+let cachedMyFarms = [];
+let cachedProtections = [];
+let cachedFarmMap = new Map();
+let cachedProtectionMap = new Map();
+
 let attacksTicker = null;
 let attacksPoller = null;
 let isConnecting = false;
@@ -134,6 +141,12 @@ function secondsUntilClaimable(farmStartTime, nowSec){
   return Math.max(0, CLAIM_COOLDOWN_SEC - age);
 }
 
+/* ==================== NEUE ONCHAIN POSITIONSHELPER ==================== */
+async function getTokenPosition(tokenId) {
+  const pos = await nftContract.getBlockPosition(tokenId);
+  return { row: Number(pos.row), col: Number(pos.col) };
+}
+
 /* ==================== SUBGRAPH ==================== */
 async function fetchSubgraph(query){
   const headers = { "Content-Type":"application/json", "Authorization": `Bearer ${API_KEY}` };
@@ -162,7 +175,7 @@ async function fetchAllWithPagination(fieldName, subfields, where = "") {
   return all;
 }
 
-/* ==================== NEUE SUBGRAPH-LOADER ==================== */
+/* ==================== SUBGRAPH-LOADER ==================== */
 async function loadMyTokensFromSubgraph(wallet){
   const owner = wallet.toLowerCase();
   return await fetchAllWithPagination(
@@ -364,7 +377,7 @@ async function startFarmingV4(tokenId, msgDivId="actionMessage"){
   }
 }
 
-/* ==================== BLOCKS – NEUE VERSION MIT SUBGRAPH ==================== */
+/* ==================== BLOCKS – MIT CACHING ==================== */
 async function loadUserBlocks(){
   if(!userAddress || !nftContract) return;
 
@@ -378,8 +391,11 @@ async function loadUserBlocks(){
       loadProtectionsFromSubgraph()
     ]);
 
-    const farmMap = buildFarmMap(subgraphFarms);
-    const protectionMap = buildProtectionMap(subgraphProtections);
+    // Cache aktualisieren
+    cachedMyFarms = subgraphFarms || [];
+    cachedProtections = subgraphProtections || [];
+    cachedFarmMap = buildFarmMap(cachedMyFarms);
+    cachedProtectionMap = buildProtectionMap(cachedProtections);
 
     userBlocks = (subgraphTokens || []).map(t => String(t.id));
 
@@ -417,12 +433,12 @@ async function loadUserBlocks(){
         }catch(e){}
       }
 
-      const farm = farmMap.get(tokenId);
+      const farm = cachedFarmMap.get(tokenId);
       const farmingActive = !!(farm && farm.active);
       const farmStartTime = farm ? farm.startTime : 0;
       if(farmingActive) activeFarmsCount++;
 
-      const protection = protectionMap.get(tokenId);
+      const protection = cachedProtectionMap.get(tokenId);
       const protectionLevel = protection ? protection.level : 0;
       const protectionActive = !!(protection && protection.active && protection.expiresAt > now && protectionLevel > 0);
 
@@ -488,32 +504,15 @@ async function selectBlock(tokenId, row, col){
     }catch(e){}
   }
 
-  let farmingActive = false;
-  let farmStartTime = 0;
-  let boostExpiry = 0;
+  // Aus dem Cache lesen (keine neuen Subgraph-Aufrufe)
+  const farm = cachedFarmMap.get(String(tokenId));
+  const farmingActive = !!(farm && farm.active);
+  const farmStartTime = farm ? farm.startTime : 0;
+  const boostExpiry = farm ? farm.boostExpiry : 0;
 
-  try{
-    const farms = await loadMyFarmsV4FromSubgraph(userAddress);
-    const farmMap = buildFarmMap(farms);
-    const farm = farmMap.get(String(tokenId));
-    if(farm){
-      farmingActive = !!farm.active;
-      farmStartTime = farm.startTime;
-      boostExpiry = farm.boostExpiry;
-    }
-  }catch(e){}
-
-  let protectionLevel = 0;
-  let protectionActive = false;
-  try{
-    const protections = await loadProtectionsFromSubgraph();
-    const protectionMap = buildProtectionMap(protections);
-    const protection = protectionMap.get(String(tokenId));
-    if(protection){
-      protectionLevel = protection.level;
-      protectionActive = !!(protection.active && protection.expiresAt > now && protectionLevel > 0);
-    }
-  }catch(e){}
+  const protection = cachedProtectionMap.get(String(tokenId));
+  const protectionLevel = protection ? protection.level : 0;
+  const protectionActive = !!(protection && protection.active && protection.expiresAt > now && protectionLevel > 0);
 
   let partnerActive = false;
   try{
@@ -592,12 +591,7 @@ function getProduction(rarity,row){
   return p;
 }
 
-/* ==================== ATTACK-HELPER (basierend auf Rarity) ==================== */
-function tokenIdToRowCol(tokenId) {
-  const id = Number(tokenId);
-  return { row: Math.floor(id / 2048), col: id % 2048 };
-}
-
+/* ==================== ATTACK-HELPER (onchain Position) ==================== */
 function productionToAllowedResourceIds(productionObj) {
   const map = {
     OIL: 0, LEMONS: 1, IRON: 2, GOLD: 3, PLATINUM: 4,
@@ -639,7 +633,8 @@ async function getStealableResourcesForTarget(targetTokenId) {
   }
 
   let rarity = 0;
-  const { row } = tokenIdToRowCol(targetTokenId);
+  // Position onchain holen (keine tokenIdToRowCol mehr!)
+  const { row } = await getTokenPosition(targetTokenId);
   try {
     rarity = Number(await nftContract.calculateRarity(targetTokenId));
   } catch (e) {}
@@ -702,8 +697,12 @@ async function refreshAttackDropdown() {
   let pendingLine = "";
   try {
     const pendingArr = await farmingV4Contract.getAllPending(targetTokenId);
-    if (pendingArr && Array.isArray(pendingArr)) {
-      const total = pendingArr.reduce((acc, bn) => acc.add(bn), ethers.BigNumber.from(0));
+    // Sicherer Umgang mit dem zurückgegebenen Array
+    if (pendingArr && pendingArr.length !== undefined) {
+      let total = ethers.BigNumber.from(0);
+      for (let i = 0; i < pendingArr.length; i++) {
+        total = total.add(pendingArr[i]);
+      }
       pendingLine = total.isZero()
         ? "⚠️ Pending: 0 (target probably claimed recently)."
         : `✅ Pending total: ${total.toString()} (there is loot).`;
@@ -741,7 +740,8 @@ async function loadUserAttacks() {
   if (!userAddress) return;
 
   try {
-    const where = `{ attacker: "${userAddress.toLowerCase()}" }`;
+    // Direkt im Subgraph nach nicht ausgeführten Angriffen filtern
+    const where = `{ attacker: "${userAddress.toLowerCase()}", executed: false }`;
 
     const attacks = await fetchAllWithPagination(
       "attackV4S",
@@ -762,21 +762,19 @@ async function loadUserAttacks() {
       where
     );
 
-    userAttacks = (attacks || [])
-      .filter(a => !a.executed)
-      .map(a => ({
-        id: a.id,
-        targetTokenId: parseInt(a.targetTokenId, 10),
-        attackerTokenId: parseInt(a.attackerTokenId, 10),
-        attackIndex: parseInt(a.attackIndex, 10),
-        startTime: parseInt(a.startTime, 10),
-        endTime: parseInt(a.endTime, 10),
-        executed: !!a.executed,
-        resource: parseInt(a.resource, 10),
-        protectionLevel: a.protectionLevel ? parseInt(a.protectionLevel,10) : 0,
-        effectiveStealPercent: a.effectiveStealPercent ? parseInt(a.effectiveStealPercent,10) : 0,
-        stolenAmount: a.stolenAmount ? a.stolenAmount.toString() : "0"
-      }));
+    userAttacks = (attacks || []).map(a => ({
+      id: a.id,
+      targetTokenId: parseInt(a.targetTokenId, 10),
+      attackerTokenId: parseInt(a.attackerTokenId, 10),
+      attackIndex: parseInt(a.attackIndex, 10),
+      startTime: parseInt(a.startTime, 10),
+      endTime: parseInt(a.endTime, 10),
+      executed: !!a.executed,
+      resource: parseInt(a.resource, 10),
+      protectionLevel: a.protectionLevel ? parseInt(a.protectionLevel,10) : 0,
+      effectiveStealPercent: a.effectiveStealPercent ? parseInt(a.effectiveStealPercent,10) : 0,
+      stolenAmount: a.stolenAmount ? a.stolenAmount.toString() : "0"
+    }));
 
     const dismissed = loadDismissedAttacks();
     userAttacks = userAttacks.filter(a => !dismissed.has(a.id));
@@ -948,10 +946,13 @@ async function executeAttack(attack){
       pending = null;
     }
     
-    const hasLoot = pending && 
-                    Array.isArray(pending) && 
-                    pending.length > attack.resource && 
-                    !pending[attack.resource].isZero();
+    // Sichere Prüfung ohne Array.isArray
+    const hasLoot =
+      pending &&
+      pending.length !== undefined &&
+      pending.length > attack.resource &&
+      pending[attack.resource] &&
+      !pending[attack.resource].isZero();
 
     if (!hasLoot) {
       msgDiv.innerHTML = '<span class="error">❌ No loot – owner claimed or wrong resource.</span>';
@@ -971,7 +972,6 @@ async function executeAttack(attack){
 
     msgDiv.innerHTML = '<span class="success">✅ Attack executed!</span>';
 
-    // Erfolg: Angriff aus UI entfernen (optional)
     if (attack.id) dismissAttackById(attack.id);
 
     await loadUserAttacks();
@@ -1064,6 +1064,22 @@ async function claimSelected(){
       return;
     }
 
+    // Vorab prüfen, ob überhaupt etwas zu claimen ist
+    const pending = await farmingV4Contract.getAllPending(selectedBlock.tokenId);
+    let hasAnything = false;
+    if (pending && pending.length !== undefined) {
+      for (let i = 0; i < pending.length; i++) {
+        if (!pending[i].isZero()) {
+          hasAnything = true;
+          break;
+        }
+      }
+    }
+    if (!hasAnything) {
+      msgDiv.innerHTML = '<span class="error">❌ Nothing to claim.</span>';
+      return;
+    }
+
     const tx = await farmingV4Contract.claimResources(selectedBlock.tokenId, { gasLimit: 600000 });
     msgDiv.innerHTML = `<span class="success">⏳ Claiming resources...</span>`;
     await tx.wait();
@@ -1085,7 +1101,8 @@ async function attack(){
   const balance = await nftContract.balanceOf(userAddress);
   if(balance.toNumber()===0) return alert("You need a block to attack from");
 
-  const attackerTokenId = await nftContract.tokenOfOwnerByIndex(userAddress, 0);
+  // Nutze den ausgewählten Block, falls vorhanden, sonst ersten Block der Wallet
+  const attackerTokenId = selectedBlock ? selectedBlock.tokenId : await nftContract.tokenOfOwnerByIndex(userAddress, 0);
   const resource = parseInt(document.getElementById("attackResourceSelect").value, 10);
 
   const msgDiv=document.getElementById("attackMessage");
@@ -1117,6 +1134,13 @@ async function protect(){
   msgDiv.innerHTML = `<span class="success">⏳ Hiring mercenaries...</span>`;
 
   try{
+    // Prüfen, ob der Block dem User gehört
+    const owner = await nftContract.ownerOf(tokenId);
+    if (owner.toLowerCase() !== userAddress.toLowerCase()) {
+      msgDiv.innerHTML = `<span class="error">❌ Not your block.</span>`;
+      return;
+    }
+
     const cost = level * 10;
     const amount = ethers.utils.parseEther(cost.toString());
     const allowance = await inpiContract.allowance(userAddress, MERCENARY_V2_ADDRESS);
@@ -1230,13 +1254,16 @@ async function connectWallet(){
     document.getElementById("connectWallet").innerText = "Wallet Connected";
 
     initAttackResourceSelect();
-    refreshAttackDropdown();
+    // refreshAttackDropdown wird erst nach dem Laden der Daten aufgerufen (weiter unten)
 
     await updateBalances();
     await updatePoolInfo();
     await loadUserBlocks();
     await loadResourceBalancesOnchain();
     await loadUserAttacks();
+
+    // Jetzt, wo alle Daten geladen sind, können wir das Dropdown aktualisieren
+    refreshAttackDropdown();
 
     if(!attacksPoller){
       attacksPoller = setInterval(async ()=>{
