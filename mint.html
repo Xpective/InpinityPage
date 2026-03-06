@@ -289,70 +289,9 @@
       max-height: 220px;
       overflow:auto;
     }
-
-    /* Modal für QR-Code / Wallet-Auswahl */
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 1000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0,0,0,0.5);
-      backdrop-filter: blur(5px);
-    }
-    .modal-content {
-      background-color: #1a1a1a;
-      margin: 10% auto;
-      padding: 2rem;
-      border: 1px solid gold;
-      border-radius: 20px;
-      width: 90%;
-      max-width: 400px;
-      text-align: center;
-    }
-    .qr-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1rem;
-    }
-    .qr-container img {
-      width: 200px;
-      height: 200px;
-      background: white;
-      padding: 10px;
-      border-radius: 12px;
-    }
-    .wallet-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.8rem;
-      margin-top: 1.5rem;
-    }
-    .wallet-option {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      background: #222;
-      border: 1px solid #333;
-      border-radius: 12px;
-      padding: 0.8rem;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .wallet-option:hover {
-      border-color: gold;
-      background: #2a2a2a;
-    }
-    .wallet-option img {
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-    }
   </style>
 </head>
+
 <body>
   <header>
     <nav>
@@ -517,26 +456,7 @@
     </div>
   </footer>
 
-  <!-- WalletConnect Modal -->
-  <div id="walletModal" class="modal">
-    <div class="modal-content">
-      <div id="qrContainer" class="qr-container" style="display: none;">
-        <h3>Scan with WalletConnect</h3>
-        <div id="qrCode"></div>
-        <p>Or copy link:</p>
-        <input type="text" id="wcUri" readonly style="width:100%; padding:0.5rem; background:#333; color:white; border:1px solid gold; border-radius:8px;">
-      </div>
-      <div id="walletListContainer" class="wallet-list">
-        <h3>Choose Wallet</h3>
-        <!-- Wird dynamisch befüllt -->
-      </div>
-    </div>
-  </div>
-
-  <!-- Ethers und WalletConnect v2 -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3wallet@1.9.0/dist/index.umd.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
 
   <script>
     // ==================== CONFIG ====================
@@ -544,9 +464,6 @@
     const INPI_ADDRESS = "0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D";
     const WORKER_URL = "https://inpinity-worker-final.s-plat.workers.dev";
     const MAX_ROW = 99;
-
-    // ⚠️ DU MUSST EINE EIGENE PROJECT ID VON walletconnect.com HOLEN!
-    const WALLETCONNECT_PROJECT_ID = "DEINE_PROJECT_ID_HIER"; // 🔴 Ersetzen!
 
     // ==================== ABI ====================
     const NFT_ABI = [
@@ -569,49 +486,6 @@
     // ==================== STATE ====================
     let provider, signer, nftContract, inpiContract, userAddress;
     let selectedPayment = "eth";
-    let web3wallet;
-    let currentSession;
-    let isConnecting = false;
-
-    // Bekannte mobile Wallets mit Deeplinks
-    const SUPPORTED_WALLETS = [
-      {
-        id: "metamask",
-        name: "MetaMask",
-        links: {
-          native: "metamask://",
-          universal: "https://metamask.app.link/"
-        },
-        image: "https://raw.githubusercontent.com/MetaMask/brand-resources/master/SVG/metamask-fox.svg"
-      },
-      {
-        id: "trust",
-        name: "Trust Wallet",
-        links: {
-          native: "trust://",
-          universal: "https://link.trustwallet.com/"
-        },
-        image: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0/logo.png"
-      },
-      {
-        id: "rainbow",
-        name: "Rainbow",
-        links: {
-          native: "rainbow://",
-          universal: "https://rainbow.me/"
-        },
-        image: "https://rainbow.me/assets/icon-512x512.png"
-      },
-      {
-        id: "coinbase",
-        name: "Coinbase Wallet",
-        links: {
-          native: "coinbase-wallet://",
-          universal: "https://go.cb-w.com/"
-        },
-        image: "https://raw.githubusercontent.com/coinbase/coinbase-wallet-sdk/main/logo.png"
-      }
-    ];
 
     // ==================== HELPERS ====================
     function selectPayment(type){
@@ -643,155 +517,57 @@
       el.innerHTML = `<div class="msg ${type}">${text}</div>`;
     }
 
-    // ==================== WALLETCONNECT INIT ====================
-    async function initWalletConnect() {
-      if (!WALLETCONNECT_PROJECT_ID || WALLETCONNECT_PROJECT_ID === "DEINE_PROJECT_ID_HIER") {
-        alert("⚠️ Bitte eine gültige WalletConnect Project ID eintragen! (siehe walletconnect.com)");
-        return null;
-      }
-
-      try {
-        web3wallet = await window.Web3Wallet.Web3Wallet.init({
-          projectId: WALLETCONNECT_PROJECT_ID,
-          metadata: {
-            name: "INPINITY",
-            description: "Mint Pyramid Blocks",
-            url: window.location.origin,
-            icons: ["https://inpinity.online/favicon.webp"]
-          }
-        });
-        debugLog("WalletConnect initialized");
-        return web3wallet;
-      } catch (e) {
-        console.error("WalletConnect init error:", e);
-        debugLog("WalletConnect init failed", e.message);
-        return null;
-      }
-    }
-
-    // ==================== WALLET CONNECTION ====================
+    // ==================== WALLET ====================
     async function connectWallet(){
-      if(isConnecting) return;
-      if(userAddress) return;
-      isConnecting = true;
-
-      try {
-        // WalletConnect initialisieren falls nötig
-        if (!web3wallet) {
-          web3wallet = await initWalletConnect();
-          if (!web3wallet) {
-            showMintMsg("error", "WalletConnect initialization failed");
-            return;
-          }
-        }
-
-        // Neues pairing erstellen
-        const { uri, approval } = await web3wallet.core.pairing.create();
-
-        // Modal anzeigen
-        const modal = document.getElementById("walletModal");
-        const qrContainer = document.getElementById("qrContainer");
-        const walletListContainer = document.getElementById("walletListContainer");
-
-        // QR-Code generieren
-        document.getElementById("qrCode").innerHTML = "";
-        await QRCode.toCanvas(document.createElement('canvas'), uri, { width: 200 }, (err, canvas) => {
-          if (err) {
-            console.error(err);
-            return;
-          }
-          document.getElementById("qrCode").appendChild(canvas);
-        });
-        document.getElementById("wcUri").value = uri;
-
-        // Wallet-Liste befüllen
-        walletListContainer.innerHTML = '<h3>Choose Wallet</h3>';
-        SUPPORTED_WALLETS.forEach(wallet => {
-          const div = document.createElement("div");
-          div.className = "wallet-option";
-          div.innerHTML = `
-            <img src="${wallet.image}" alt="${wallet.name}" onerror="this.src='https://via.placeholder.com/32'">
-            <span>${wallet.name}</span>
-          `;
-          div.onclick = () => {
-            // Deeplink öffnen
-            const deeplink = `${wallet.links.universal}wc?uri=${encodeURIComponent(uri)}`;
-            window.location.href = deeplink;
-          };
-          walletListContainer.appendChild(div);
-        });
-
-        // QR anzeigen
-        qrContainer.style.display = "flex";
-        modal.style.display = "block";
-
-        // Auf Session warten
-        const session = await approval();
-        debugLog("WalletConnect session established", session);
-
-        // Provider aus der Session holen (ethers v5)
-        const wcProvider = new ethers.providers.Web3Provider(session.provider);
-        await wcProvider.send("eth_requestAccounts", []);
-        signer = wcProvider.getSigner();
+      if(!window.ethereum) return alert("Please install MetaMask!");
+      try{
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        signer = provider.getSigner();
         userAddress = await signer.getAddress();
 
-        // Chain auf Base prüfen
-        const network = await wcProvider.getNetwork();
-        if (network.chainId !== 8453) {
-          try {
-            await session.provider.request({
-              method: "wallet_switchEthereumChain",
-              params: [{ chainId: "0x2105" }]
-            });
-          } catch (e) {
-            if (e.code === 4902) {
-              await session.provider.request({
-                method: "wallet_addEthereumChain",
-                params: [{
-                  chainId: "0x2105",
-                  chainName: "Base Mainnet",
-                  nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 },
-                  rpcUrls: ["https://mainnet.base.org"],
-                  blockExplorerUrls: ["https://basescan.org"]
+        const network = await provider.getNetwork();
+        if(network.chainId !== 8453){
+          try{
+            await window.ethereum.request({ method:"wallet_switchEthereumChain", params:[{ chainId:"0x2105" }] });
+          }catch(e){
+            if(e.code === 4902){
+              await window.ethereum.request({
+                method:"wallet_addEthereumChain",
+                params:[{
+                  chainId:"0x2105",
+                  chainName:"Base Mainnet",
+                  nativeCurrency:{ name:"ETH", symbol:"ETH", decimals:18 },
+                  rpcUrls:["https://mainnet.base.org"],
+                  blockExplorerUrls:["https://basescan.org"]
                 }]
               });
-            } else {
-              throw e;
-            }
+            } else { throw e; }
           }
         }
 
-        provider = wcProvider;
         nftContract = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
         inpiContract = new ethers.Contract(INPI_ADDRESS, INPI_ABI, signer);
 
-        // UI aktualisieren
         document.getElementById("walletStatus").innerText = "🟢 Wallet connected";
         document.getElementById("walletAddress").innerText = userAddress.slice(0,6) + "..." + userAddress.slice(-4);
         document.getElementById("mintBtn").disabled = false;
 
-        // Modal schließen
-        modal.style.display = "none";
-
         await updateBalances();
         await loadUnrevealedBlocks();
         debugLog("Wallet connected", userAddress);
-
-      } catch(e){
+      }catch(e){
         console.error(e);
-        alert("Connection error: " + (e.message || e));
-        userAddress = null;
-        document.getElementById("walletModal").style.display = "none";
-      } finally {
-        isConnecting = false;
+        alert("Connection error: " + e.message);
       }
     }
 
     async function updateBalances(){
-      if(!userAddress || !provider) return;
+      if(!userAddress) return;
       const ethBalance = await provider.getBalance(userAddress);
       document.getElementById("walletBalance").innerText = parseFloat(ethers.utils.formatEther(ethBalance)).toFixed(4) + " ETH";
 
+      // show count (cheap)
       try{
         const bal = await nftContract.balanceOf(userAddress);
         document.getElementById("userBlocks").innerText = bal.toString();
@@ -976,13 +752,9 @@
     document.getElementById("payInpi").addEventListener("change", ()=>selectPayment("inpi"));
     document.getElementById("payMixed").addEventListener("change", ()=>selectPayment("mixed"));
 
-    // Modal schließen bei Klick außerhalb
-    window.onclick = function(event) {
-      const modal = document.getElementById("walletModal");
-      if (event.target === modal) {
-        modal.style.display = "none";
-      }
-    };
+    if(window.ethereum && window.ethereum.selectedAddress){
+      connectWallet();
+    }
   </script>
 </body>
 </html>
