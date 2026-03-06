@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>INPINITY – The Pi-Phi Pyramid (v0.20.0 – AttackV3S + Smart Dropdown + Dismiss)</title>
+    <title>INPINITY – The Pi-Phi Pyramid (v0.20.1 – Execute mit besserer Meldung)</title>
     <link rel="icon" type="image/png" href="favicon.webp" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -595,7 +595,7 @@
 
         <footer>
             <p>© 2026 INPINITY. All rights reserved. Built on Base.</p>
-            <p>Version 0.20.0 – AttackV3S + Smart Dropdown + Dismiss + Farming Fix</p>
+            <p>Version 0.20.1 – Execute mit besserer Meldung</p>
             <p><a href="whitepaper.html">Whitepaper</a> | <a href="https://discord.gg/95yj6Eg6" target="_blank">Discord</a></p>
         </footer>
     </div>
@@ -606,14 +606,12 @@
        INPINITY GAME – Clean V3 Script mit PiratesV3 Attacken + Icons
        - Farming main: V3
        - Pirates main: V3 (AttackV3 Entities)
-       - Ressourcen mit Bildern von inpinity.online/img/{id}.PNG
-       - Intelligentes Dropdown: nur Ressourcen, die das Target produziert
-       - Dismiss-Funktion für fehlgeschlagene Angriffe
-       - Farming fix: Nur V3, keine Migration von V1/V2 mehr
+       - Intelligentes Dropdown
+       - Dismiss-Funktion
+       - Bessere Execute-Meldungen
     ========================================================= */
     
     /* ==================== KONFIGURATION ==================== */
-    // ✅ Contracts (Base Mainnet)
     const NFT_ADDRESS            = "0x277a0D5864293C78d7387C54B48c35D5E9578Ab1";
     const FARMING_V1_ADDRESS     = "0xd9722fB6e9b8e71399A970d4e8F4D628C532E94f";
     const FARMING_V2_ADDRESS     = "0x852Bce0713aAF409c4412155Ab8CE6191B525C30";
@@ -626,20 +624,17 @@
     const PITRONE_ADDRESS        = "0x7240Ec5B3Ba944888E186c74D0f8B4F5F71c9AE8";
     
     const WORKER_URL = "https://inpinity-worker-final.s-plat.workers.dev";
-    // ==================== MINT CONFIG (Phase 1) ====================
-    const MAX_ROW = 99;                 // Phase 1
-    const PRICE_ETH  = "0.003";         // 0.003 ETH
-    const PRICE_INPI = "30";            // 30 INPI
-    const PRICE_ETH_MIXED  = "0.0015";  // 0.0015 ETH
-    const PRICE_INPI_MIXED = "15";      // 15 INPI
+    const MAX_ROW = 99;
+    const PRICE_ETH  = "0.003";
+    const PRICE_INPI = "30";
+    const PRICE_ETH_MIXED  = "0.0015";
+    const PRICE_INPI_MIXED = "15";
     
-    // ✅ Subgraph 0.1.0 (mit PiratesV3)
-    const USE_STUDIO = true; // true = Studio-URL (sofort aktuell), false = Production-Gateway
+    const USE_STUDIO = true;
     const SUBGRAPH_STUDIO_URL  = "https://api.studio.thegraph.com/query/1743108/inpinity/version/latest";
     const SUBGRAPH_GATEWAY_URL = "https://gateway.thegraph.com/api/subgraphs/id/22b4uXYgs4rwTj6n3iWB4d8Vk4s7LAG7dTAtRaTXfseQ";
     const API_KEY = "059bc2832dfe50597009e556898d4ba6";
     
-    // Farming Cooldown
     const CLAIM_COOLDOWN_SEC = 24 * 60 * 60; // 24h
     
     /* ==================== ABIs ==================== */
@@ -724,7 +719,7 @@
     
     let userBlocks = [];
     let userAttacks = [];
-    let userResources = []; // Array von { resourceId, amount } (BigInt)
+    let userResources = [];
     
     let attacksTicker = null;
     let attacksPoller = null;
@@ -830,7 +825,7 @@
       }catch(e){}
     }
     
-    /* ==================== RESOURCES (ERC1155 on-chain) ==================== */
+    /* ==================== RESOURCES ==================== */
     async function loadResourceBalancesOnchain(){
       if(!userAddress || !resourceTokenContract) return;
       const ids = [...Array(10).keys()];
@@ -838,7 +833,7 @@
       const balances = await resourceTokenContract.balanceOfBatch(accounts, ids);
       userResources = ids.map((id, idx) => ({
         resourceId: id,
-        amount: balances[idx] // BigNumber (ethers v5)
+        amount: balances[idx]
       })).filter(r => r.amount.gt(0));
       updateUserResourcesDisplay();
     }
@@ -857,13 +852,12 @@
         return;
       }
     
-      // Sortieren nach resourceId
       userResources.sort((a,b) => a.resourceId - b.resourceId);
     
       let html = "";
       for(const r of userResources){
         const name = resourceNames[r.resourceId] || `Resource ${r.resourceId}`;
-        const imgUrl = `https://inpinity.online/img/${r.resourceId}.PNG`; // Großschreibung wie in JSON
+        const imgUrl = `https://inpinity.online/img/${r.resourceId}.PNG`;
         html += `
           <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; background:#1b2630; border-radius:1rem; padding:0.5rem;">
             <img src="${imgUrl}" alt="${name}" style="width:32px; height:32px; object-fit:contain;" onerror="this.style.display='none'">
@@ -875,38 +869,29 @@
       container.innerHTML = html;
     }
     
-    /* ==================== FARM MIGRATION (NUR V3) ==================== */
+    /* ==================== FARM MIGRATION ==================== */
     function initFarmingContracts(signer){
-      // V1/V2 werden nicht mehr für Migration verwendet, aber für Kompatibilität initialisiert
       farmingV1Contract = new ethers.Contract(FARMING_V1_ADDRESS, FARMING_V1_ABI, signer);
       farmingV2Contract = new ethers.Contract(FARMING_V2_ADDRESS, FARMING_V2_ABI, signer);
       farmingV3Contract = new ethers.Contract(FARMING_V3_ADDRESS, FARMING_V3_ABI, signer);
     }
     
     async function getFarmStatus(tokenId){
-      const [v3] = await Promise.allSettled([
-        farmingV3Contract.farms(tokenId),
-      ]);
-    
-      return {
-        v3Active: v3.status==="fulfilled" ? !!v3.value.isActive : false,
-      };
+      const [v3] = await Promise.allSettled([farmingV3Contract.farms(tokenId)]);
+      return { v3Active: v3.status==="fulfilled" ? !!v3.value.isActive : false };
     }
     
-    // Vereinfachte migrateToV3 - nur V3
     async function migrateToV3(tokenId, msgDivId="actionMessage"){
       const msgDiv = document.getElementById(msgDivId);
       if (msgDiv) msgDiv.innerHTML = `<span class="success">⏳ Checking farms...</span>`;
     
       try {
-        // Prüfe direkt den V3-Status
         const farm = await farmingV3Contract.farms(tokenId);
         if (farm.isActive){
           if (msgDiv) msgDiv.innerHTML = `<span class="success">✅ Already on V3.</span>`;
           return;
         }
     
-        // Nicht auf V3 aktiv: starte direkt V3
         if (msgDiv) msgDiv.innerHTML = `<span class="success">⏳ Starting V3 farming...</span>`;
         const tx = await farmingV3Contract.startFarming(tokenId, { gasLimit: 500000 });
         await tx.wait();
@@ -952,7 +937,6 @@
         const data = await nftContract.blockData(tokenId);
         const revealed = data.revealed;
     
-        // FarmingV3 status ON-CHAIN
         let farmingActive = false;
         let farmStartTime = 0;
         try{
@@ -963,14 +947,12 @@
     
         if(farmingActive) activeFarmsCount++;
     
-        // protection on-chain
         let protectionActive = false;
         try{
           const pl = await mercenaryV2Contract.getProtectionLevel(tokenId);
           protectionActive = Number(pl.toString()) > 0;
         }catch(e){}
     
-        // partner on-chain
         let partnerActive = false;
         try{
           partnerActive = await partnershipV2Contract.isPartnerBlock(tokenId);
@@ -1093,7 +1075,7 @@
       return p;
     }
     
-    /* ==================== ATTACK-HELPER (intelligentes Dropdown) ==================== */
+    /* ==================== ATTACK-HELPER ==================== */
     function tokenIdToRowCol(tokenId) {
       const id = Number(tokenId);
       return { row: Math.floor(id / 2048), col: id % 2048 };
@@ -1134,7 +1116,7 @@
           farmStartTime,
           claimIn,
           revealed: false,
-          allowed: [0, 1, 2], // Oil, Lemons, Iron (Basics)
+          allowed: [0, 1, 2],
           reason: "Target not revealed yet"
         };
       }
@@ -1200,7 +1182,6 @@
         farmLine = "✅ Farming active.";
       }
     
-      // Optional: Pending total (nur als Zusatzinfo, nicht blockierend)
       let pendingLine = "";
       try {
         const pendingArr = await farmingV3Contract.getAllPending(targetTokenId);
@@ -1227,7 +1208,7 @@
       });
     }
     
-    /* ==================== ATTACKS (PiratesV3) ==================== */
+    /* ==================== ATTACKS ==================== */
     function initAttackResourceSelect(){
       const select=document.getElementById("attackResourceSelect");
       if(!select) return;
@@ -1401,39 +1382,48 @@
     
     /* ==================== EXECUTE ATTACK (PiratesV3) ==================== */
     async function executeAttack(attack){
-      const msgDiv = document.getElementById("attackMessage");
+      const msgDiv=document.getElementById("attackMessage");
       if(!msgDiv) return;
     
       msgDiv.innerHTML = '<span class="success">⏳ Checking target resources...</span>';
       try {
         if (!piratesV3Contract) throw new Error("Connect wallet first.");
     
-        // Prüfe Farming-Status und Pending-Ressourcen
+        // Farming-Status prüfen
         const farm = await farmingV3Contract.farms(attack.targetTokenId);
-        const pending = await farmingV3Contract.getAllPending(attack.targetTokenId);
-        
         const now = Math.floor(Date.now()/1000);
         const startTime = Number(farm.startTime.toString());
         const claimIn = startTime ? secondsUntilClaimable(startTime, now) : null;
-    
-        // Prüfe ob der Block überhaupt farmt
+        
         if (!farm.isActive) {
-          msgDiv.innerHTML = '<span class="error">❌ Target farming is inactive. Owner stopped farming. Good luck next time.</span>';
+          msgDiv.innerHTML = '<span class="error">❌ Farming is inactive. Owner stopped farming. Good luck next time.</span>';
           if (attack.id) dismissAttackById(attack.id);
           await loadUserAttacks();
           return;
         }
-    
-        // Prüfe ob genug Zeit vergangen ist (24h)
+        
         if (claimIn !== null && claimIn > 0) {
-          msgDiv.innerHTML = `<span class="error">❌ Farm is still building up. Wait ${formatDuration(claimIn)} for first loot.</span>`;
+          msgDiv.innerHTML = `<span class="error">❌ Farm is still building up. Wait ${formatDuration(claimIn)} for first loot. Good luck next time.</span>`;
           if (attack.id) dismissAttackById(attack.id);
           await loadUserAttacks();
           return;
         }
     
-        // Prüfe ob die spezifische Ressource verfügbar ist
-        if (!pending || pending.length <= attack.resource || pending[attack.resource].isZero()) {
+        // Pending-Ressourcen prüfen
+        let pending;
+        try {
+          pending = await farmingV3Contract.getAllPending(attack.targetTokenId);
+        } catch (e) {
+          console.warn("getAllPending failed, assuming no loot:", e);
+          pending = null;
+        }
+        
+        const hasLoot = pending && 
+                        Array.isArray(pending) && 
+                        pending.length > attack.resource && 
+                        !pending[attack.resource].isZero();
+    
+        if (!hasLoot) {
           msgDiv.innerHTML = '<span class="error">❌ No loot available. Owner already claimed. Good luck next time.</span>';
           if (attack.id) dismissAttackById(attack.id);
           await loadUserAttacks();
@@ -1457,7 +1447,7 @@
         await loadResourceBalancesOnchain();
         await updateBalances();
         refreshBlockMarkings();
-      } catch(e){
+      }catch(e){
         console.error("ExecuteAttack error:", e);
         let msg = e?.message || "Unknown error";
         if((msg+"").includes("execution reverted")){
