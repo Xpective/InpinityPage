@@ -5,6 +5,11 @@
    - Caching von Farm-/Protection-Maps
    - Positionen immer onchain (getBlockPosition)
    - Farming-Status für Aktionen onchain
+   - Request-ID für Attack-Dropdown
+   - Selbstangriffsprüfung
+   - Chain-Switch stabilisiert
+   - Cache-Fallback
+   - Nur aktive Farms geladen
    ========================================================= */
 
 /* ==================== KONFIGURATION (NUR V4) ==================== */
@@ -109,6 +114,9 @@ let attacksTicker = null;
 let attacksPoller = null;
 let isConnecting = false;
 
+// Für Request-ID im Attack-Dropdown
+let attackDropdownRequestId = 0;
+
 const resourceNames = ["Oil","Lemons","Iron","Gold","Platinum","Copper","Crystal","Obsidian","Mysterium","Aether"];
 const rarityNames   = ["Bronze","Silver","Gold","Platinum","Diamond"];
 
@@ -205,6 +213,25 @@ async function loadMyFarmsV4FromSubgraph(wallet){
       blockTimestamp
     `,
     `{ owner: "${owner}" }`
+  );
+}
+
+// NEU: Nur aktive Farms laden
+async function loadMyActiveFarmsV4FromSubgraph(wallet){
+  const owner = wallet.toLowerCase();
+  return await fetchAllWithPagination(
+    "farmV4S",
+    `
+      id
+      owner
+      startTime
+      lastAccrualTime
+      boostExpiry
+      active
+      blockNumber
+      blockTimestamp
+    `,
+    `{ owner: "${owner}", active: true }`
   );
 }
 
@@ -387,7 +414,7 @@ async function loadUserBlocks(){
   try{
     const [subgraphTokens, subgraphFarms, subgraphProtections] = await Promise.all([
       loadMyTokensFromSubgraph(userAddress),
-      loadMyFarmsV4FromSubgraph(userAddress),
+      loadMyActiveFarmsV4FromSubgraph(userAddress), // NUR aktive Farms
       loadProtectionsFromSubgraph()
     ]);
 
@@ -488,6 +515,18 @@ async function loadUserBlocks(){
 }
 
 async function selectBlock(tokenId, row, col){
+  // Cache-Fallback, falls leer
+  if (cachedFarmMap.size === 0 || cachedProtectionMap.size === 0) {
+    try {
+      cachedMyFarms = await loadMyActiveFarmsV4FromSubgraph(userAddress);
+      cachedProtections = await loadProtectionsFromSubgraph();
+      cachedFarmMap = buildFarmMap(cachedMyFarms);
+      cachedProtectionMap = buildProtectionMap(cachedProtections);
+    } catch(e) {
+      console.warn("Cache fallback failed", e);
+    }
+  }
+
   const now = Math.floor(Date.now()/1000);
 
   let revealed = false;
@@ -633,7 +672,7 @@ async function getStealableResourcesForTarget(targetTokenId) {
   }
 
   let rarity = 0;
-  // Position onchain holen (keine tokenIdToRowCol mehr!)
+  // Position onchain holen
   const { row } = await getTokenPosition(targetTokenId);
   try {
     rarity = Number(await nftContract.calculateRarity(targetTokenId));
@@ -654,14 +693,20 @@ async function getStealableResourcesForTarget(targetTokenId) {
 }
 
 async function refreshAttackDropdown() {
+  // Request-ID erhöhen
+  const requestId = ++attackDropdownRequestId;
+
   const row = parseInt(document.getElementById("attackRow").value, 10);
   const col = parseInt(document.getElementById("attackCol").value, 10);
   const select = document.getElementById("attackResourceSelect");
   const msg = document.getElementById("attackMessage");
 
   if (!select) return;
+
+  // Ungültige Koordinaten → Select und Meldung leeren
   if (!Number.isFinite(row) || !Number.isFinite(col) || row < 0 || row > MAX_ROW || col < 0 || col > 2 * row) {
     select.innerHTML = "";
+    if (msg) msg.innerHTML = "";
     return;
   }
 
@@ -681,6 +726,9 @@ async function refreshAttackDropdown() {
   msg.innerHTML = `<span class="success">⏳ Analyzing target...</span>`;
 
   const info = await getStealableResourcesForTarget(targetTokenId);
+  // Wenn eine neuere Anfrage läuft, abbrechen
+  if (requestId !== attackDropdownRequestId) return;
+
   const now = Math.floor(Date.now()/1000);
 
   let farmLine = "";
@@ -697,7 +745,6 @@ async function refreshAttackDropdown() {
   let pendingLine = "";
   try {
     const pendingArr = await farmingV4Contract.getAllPending(targetTokenId);
-    // Sicherer Umgang mit dem zurückgegebenen Array
     if (pendingArr && pendingArr.length !== undefined) {
       let total = ethers.BigNumber.from(0);
       for (let i = 0; i < pendingArr.length; i++) {
@@ -708,6 +755,9 @@ async function refreshAttackDropdown() {
         : `✅ Pending total: ${total.toString()} (there is loot).`;
     }
   } catch(e) {}
+
+  // Erneute Prüfung auf veraltete Anfrage
+  if (requestId !== attackDropdownRequestId) return;
 
   msg.innerHTML = `
     <span class="${!info.farmingActive ? 'error' : 'success'}">
@@ -740,7 +790,6 @@ async function loadUserAttacks() {
   if (!userAddress) return;
 
   try {
-    // Direkt im Subgraph nach nicht ausgeführten Angriffen filtern
     const where = `{ attacker: "${userAddress.toLowerCase()}", executed: false }`;
 
     const attacks = await fetchAllWithPagination(
@@ -946,7 +995,6 @@ async function executeAttack(attack){
       pending = null;
     }
     
-    // Sichere Prüfung ohne Array.isArray
     const hasLoot =
       pending &&
       pending.length !== undefined &&
@@ -1064,7 +1112,6 @@ async function claimSelected(){
       return;
     }
 
-    // Vorab prüfen, ob überhaupt etwas zu claimen ist
     const pending = await farmingV4Contract.getAllPending(selectedBlock.tokenId);
     let hasAnything = false;
     if (pending && pending.length !== undefined) {
@@ -1097,15 +1144,27 @@ async function attack(){
   if(isNaN(targetRow)||isNaN(targetCol)) return alert("Enter target coordinates");
 
   const targetTokenId = targetRow*2048 + targetCol;
+  const msgDiv = document.getElementById("attackMessage");
+
+  // Selbstangriff verhindern
+  try {
+    const owner = await nftContract.ownerOf(targetTokenId);
+    if (owner.toLowerCase() === userAddress.toLowerCase()) {
+      msgDiv.innerHTML = `<span class="error">❌ You cannot attack your own block.</span>`;
+      return;
+    }
+  } catch(e) {
+    // Block existiert nicht? Dann kann man ihn auch nicht angreifen.
+    msgDiv.innerHTML = `<span class="error">❌ Target block does not exist.</span>`;
+    return;
+  }
 
   const balance = await nftContract.balanceOf(userAddress);
   if(balance.toNumber()===0) return alert("You need a block to attack from");
 
-  // Nutze den ausgewählten Block, falls vorhanden, sonst ersten Block der Wallet
   const attackerTokenId = selectedBlock ? selectedBlock.tokenId : await nftContract.tokenOfOwnerByIndex(userAddress, 0);
   const resource = parseInt(document.getElementById("attackResourceSelect").value, 10);
 
-  const msgDiv=document.getElementById("attackMessage");
   msgDiv.innerHTML = `<span class="success">⏳ Starting attack...</span>`;
 
   try{
@@ -1134,7 +1193,6 @@ async function protect(){
   msgDiv.innerHTML = `<span class="success">⏳ Hiring mercenaries...</span>`;
 
   try{
-    // Prüfen, ob der Block dem User gehört
     const owner = await nftContract.ownerOf(tokenId);
     if (owner.toLowerCase() !== userAddress.toLowerCase()) {
       msgDiv.innerHTML = `<span class="error">❌ Not your block.</span>`;
@@ -1235,8 +1293,12 @@ async function connectWallet(){
     if(network.chainId !== 8453){
       try{
         await window.ethereum.request({ method:"wallet_switchEthereumChain", params:[{ chainId:"0x2105" }] });
+        // Nach Chain-Switch Provider neu initialisieren
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        signer = provider.getSigner();
+        userAddress = await signer.getAddress();
       }catch(e){
-        // optional add chain
+        throw e;
       }
     }
 
@@ -1254,7 +1316,6 @@ async function connectWallet(){
     document.getElementById("connectWallet").innerText = "Wallet Connected";
 
     initAttackResourceSelect();
-    // refreshAttackDropdown wird erst nach dem Laden der Daten aufgerufen (weiter unten)
 
     await updateBalances();
     await updatePoolInfo();
@@ -1413,6 +1474,8 @@ async function mintBlock(){
     await loadUserBlocks();
     await loadResourceBalancesOnchain();
     await loadUserAttacks();
+    // Nach Mint das Attack-Dropdown aktualisieren (falls neuer Block ausgewählt werden soll)
+    await refreshAttackDropdown();
 
   }catch(e){
     console.error("Mint error:", e);
