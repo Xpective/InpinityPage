@@ -843,21 +843,21 @@
         let errorReasons = [];
         
         if (!farm.isActive) {
-          errorReasons.push("Farming is inactive (owner stopped)");
+          errorReasons.push("❌ Farming is inactive (owner stopped)");
         }
         
         if (claimIn !== null && claimIn > 0) {
-          errorReasons.push(`Farm builds up for ${formatDuration(claimIn)} (need 24h)`);
+          errorReasons.push(`⏳ Need to wait ${formatDuration(claimIn)} more for resources to accumulate (24h total)`);
         }
         
-        if (!pending || pending.length <= attack.resource || pending[attack.resource] <= 0n) {
-          errorReasons.push("No loot available (owner claimed or wrong resource)");
+        if (pending && pending.length > attack.resource && pending[attack.resource] === 0n) {
+          errorReasons.push("💰 This resource has 0 pending – owner may have claimed it");
         }
     
         // Wenn Fehler vorhanden, zeige sie an, aber NICHT dismiss
         if (errorReasons.length > 0) {
-          const errorHtml = errorReasons.map(r => `• ${r}`).join('<br>');
-          actionMessage.innerHTML = `<span class="error">❌ Cannot execute:<br>${errorHtml}<br>Try again later.</span>`;
+          const errorHtml = errorReasons.map(r => r).join('<br>');
+          actionMessage.innerHTML = `<span class="error">${errorHtml}<br><br>⏳ Attack remains in list – try again later.</span>`;
           return; // ← KEIN dismiss, Angriff bleibt in Liste
         }
     
@@ -884,7 +884,7 @@
         console.error("executeAttack error:", e);
         let msg = e?.message || "Unknown error";
         
-        // Nur bei on-chain Revert wirklich dismissen
+        // Nur bei on-chain Revert wirklich dismissen (weil dann der Contract den Angriff als "erledigt" betrachtet)
         if ((msg + "").includes("execution reverted")) {
           if (attack.id) dismissAttackById(attack.id);
           await loadUserAttacks();
