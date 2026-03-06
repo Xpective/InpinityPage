@@ -824,29 +824,31 @@
         const startTime = Number(farm.startTime);
         const claimIn = startTime ? secondsUntilClaimable(startTime, now) : null;
     
+        // Sammle alle Fehlergründe
+        let errorReasons = [];
+        
         if (!farm.isActive) {
-          actionMessage.innerHTML = '<span class="error">❌ Target farming is inactive. Owner stopped farming. Good luck next time.</span>';
-          if (attack.id) dismissAttackById(attack.id);
-          await loadUserAttacks();
-          return;
+          errorReasons.push("Farming is inactive");
         }
-    
+        
         if (claimIn !== null && claimIn > 0) {
-          actionMessage.innerHTML = `<span class="error">❌ Farm is still building up. Wait ${formatDuration(claimIn)} for first loot.</span>`;
-          if (attack.id) dismissAttackById(attack.id);
-          await loadUserAttacks();
-          return;
+          errorReasons.push(`Farm builds up for ${formatDuration(claimIn)}`);
         }
-    
+        
         if (!pending || pending.length <= attack.resource || pending[attack.resource] <= 0n) {
-          actionMessage.innerHTML = '<span class="error">❌ No loot available. Owner already claimed. Good luck next time.</span>';
-          if (attack.id) dismissAttackById(attack.id);
-          await loadUserAttacks();
-          return;
+          errorReasons.push("No loot available (owner claimed)");
         }
     
-        actionMessage.innerHTML = '<span class="success">⏳ Executing attack...</span>';
+        // Wenn Fehler vorhanden, zeige sie an, aber NICHT dismiss
+        if (errorReasons.length > 0) {
+          const errorHtml = errorReasons.map(r => `• ${r}`).join('<br>');
+          actionMessage.innerHTML = `<span class="error">❌ Cannot execute:<br>${errorHtml}<br>Try again later.</span>`;
+          return; // ← KEIN dismiss, Angriff bleibt in Liste
+        }
     
+        // Alles OK – jetzt erst Transaktion senden
+        actionMessage.innerHTML = '<span class="success">⏳ Executing attack...</span>';
+        
         const tx = await piratesV3Contract.executeAttack(
           attack.targetTokenId,
           attack.attackIndex,
@@ -866,12 +868,15 @@
       } catch (e) {
         console.error("executeAttack error:", e);
         let msg = e?.message || "Unknown error";
+        
+        // Nur bei on-chain Revert wirklich dismissen
         if ((msg + "").includes("execution reverted")) {
           if (attack.id) dismissAttackById(attack.id);
           await loadUserAttacks();
           actionMessage.innerHTML = '<span class="error">❌ Attack failed – nothing to steal. Good luck next time.</span>';
           return;
         }
+        
         actionMessage.innerHTML = `<span class="error">${msg}</span>`;
       }
     }
@@ -1404,90 +1409,20 @@
     }
   
     // ==================== INTERACTION ====================
-    function handleMouseMove(e) {
-      if (isDragging) return;
-      const rect = canvas.getBoundingClientRect();
-      const mouseX = (e.clientX - rect.left - offsetX) / scale;
-      const mouseY = (e.clientY - rect.top - offsetY) / scale;
-      const blockSize = BASE_BLOCK_SIZE;
-      let found = null;
-      for (let row = 0; row < 100; row++) {
-        const y = row * blockSize;
-        if (mouseY < y - 5 || mouseY > y + blockSize + 5) continue;
-        const minX = -row * blockSize;
-        const maxX = (row + 1) * blockSize;
-        if (mouseX < minX - 5 || mouseX > maxX + 5) continue;
-        const col = Math.round((mouseX / blockSize) + row);
-        if (col >= 0 && col <= 2 * row) { found = String(row * 2048 + col); break; }
-      }
-      if (found) {
-        const token = tokens[found];
-        let text = `<span>Block #${found}</span><br>`;
-        if (token && token.owner) {
-          text += `Owner: ${shortenAddress(token.owner)}<br>`;
-          text += `Status: ${token.revealed ? "Revealed" : "Minted"}`;
-          if (token.farmActive) text += " · Farming";
-          if (token.protectionActive) text += " · Protected";
-          if (token.partnerActive) text += " ⭐";
-          const attack = userAttacks.find(a => String(a.targetTokenId) === found);
-          if (attack) {
-            const now = Math.floor(Date.now() / 1000);
-            if (attack.endTime <= now) text += " · 🔴 Attack ready!";
-            else text += ` · ⚔️ Attacking (${formatTime(attack.endTime - now)} left)`;
-          }
-        } else {
-          text += "Not minted";
-        }
-        tooltip.innerHTML = text;
-        tooltip.style.opacity = 1;
-        tooltip.style.left = (e.clientX + 20) + "px";
-        tooltip.style.top = (e.clientY - 50) + "px";
-      } else {
-        tooltip.style.opacity = 0;
-      }
-    }
-  
-    function handleClick(e) {
-      const rect = canvas.getBoundingClientRect();
-      const mouseX = (e.clientX - rect.left - offsetX) / scale;
-      const mouseY = (e.clientY - rect.top - offsetY) / scale;
-      const blockSize = BASE_BLOCK_SIZE;
-      for (let row = 0; row < 100; row++) {
-        const y = row * blockSize;
-        if (mouseY < y || mouseY > y + blockSize) continue;
-        const col = Math.round((mouseX / blockSize) + row);
-        if (col >= 0 && col <= 2 * row) {
-          const tokenId = String(row * 2048 + col);
-          updateSidebar(tokenId);
-          drawPyramid();
-          break;
-        }
-      }
-    }
-  
-    function handleWheel(e) {
-      e.preventDefault();
-      const zoomFactor = 1.1;
-      const delta = e.deltaY > 0 ? 1 / zoomFactor : zoomFactor;
-      const rect = canvas.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
-      const worldX = (mouseX - offsetX) / scale;
-      const worldY = (mouseY - offsetY) / scale;
-      scale = Math.max(0.2, Math.min(5, scale * delta));
-      offsetX = mouseX - worldX * scale;
-      offsetY = mouseY - worldY * scale;
-      drawPyramid();
-    }
-  
-    // Mobile Touch-Handler
+    let touchStartX = 0, touchStartY = 0;
+    let touchMoved = false;
+    const MOVE_THRESHOLD = 10; // Pixel
+    
     function handleTouchStart(e) {
       if (e.touches.length === 1) {
-        isDragging = true;
-        lastMouseX = e.touches[0].clientX;
-        lastMouseY = e.touches[0].clientY;
+        // Ein-Finger-Berührung – merke Startposition
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        touchMoved = false;
+        isDragging = false; // Noch nicht als Drag markiert
         e.preventDefault();
       } else if (e.touches.length === 2) {
+        // Zwei Finger = Zoom
         e.preventDefault();
         const dist = Math.hypot(
           e.touches[0].clientX - e.touches[1].clientX,
@@ -1497,18 +1432,29 @@
         lastTouchDistance = dist;
       }
     }
-  
+    
     function handleTouchMove(e) {
       e.preventDefault();
-      if (e.touches.length === 1 && isDragging) {
-        const dx = e.touches[0].clientX - lastMouseX;
-        const dy = e.touches[0].clientY - lastMouseY;
-        offsetX += dx;
-        offsetY += dy;
-        lastMouseX = e.touches[0].clientX;
-        lastMouseY = e.touches[0].clientY;
-        drawPyramid();
+      
+      if (e.touches.length === 1) {
+        const dx = e.touches[0].clientX - touchStartX;
+        const dy = e.touches[0].clientY - touchStartY;
+        const distance = Math.hypot(dx, dy);
+        
+        // Erst wenn mehr als Schwellwert bewegt, wird es zum Drag
+        if (distance > MOVE_THRESHOLD) {
+          touchMoved = true;
+          isDragging = true;
+          
+          // Jetzt erst verschieben
+          offsetX += dx;
+          offsetY += dy;
+          touchStartX = e.touches[0].clientX;
+          touchStartY = e.touches[0].clientY;
+          drawPyramid();
+        }
       } else if (e.touches.length === 2) {
+        // Pinch-Zoom (wie bisher)
         const dist = Math.hypot(
           e.touches[0].clientX - e.touches[1].clientX,
           e.touches[0].clientY - e.touches[1].clientY
@@ -1528,16 +1474,22 @@
         }
       }
     }
-  
+    
     function handleTouchEnd(e) {
       if (e.touches.length === 0) {
+        // Wenn kaum Bewegung und kein Drag, dann als Klick behandeln
+        if (!touchMoved && !isDragging) {
+          // Simuliere einen Klick an der letzten Touch-Position
+          const fakeClick = {
+            clientX: touchStartX,
+            clientY: touchStartY
+          };
+          handleClick(fakeClick);
+        }
+        
         isDragging = false;
         pinchStartDist = 0;
-      } else if (e.touches.length === 1) {
-        isDragging = true;
-        lastMouseX = e.touches[0].clientX;
-        lastMouseY = e.touches[0].clientY;
-        pinchStartDist = 0;
+        touchMoved = false;
       }
     }
   
