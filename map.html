@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -585,6 +584,11 @@
     let pinchStartDist = 0;
     let lastTouchDistance = 0;
   
+    // Für mobile Touch-Unterscheidung
+    let touchStartX = 0, touchStartY = 0;
+    let touchMoved = false;
+    const MOVE_THRESHOLD = 10; // Pixel
+  
     const resourceNames = ["Oil","Lemons","Iron","Gold","Platinum","Copper","Crystal","Obsidian","Mysterium","Aether"];
     const rarityNames = ["Bronze","Silver","Gold","Platinum","Diamond"];
     const rarityClass = ["rarity-bronze","rarity-silver","rarity-gold","rarity-platinum","rarity-diamond"];
@@ -824,19 +828,30 @@
         const startTime = Number(farm.startTime);
         const claimIn = startTime ? secondsUntilClaimable(startTime, now) : null;
     
+        // ===== KONSOLEN-LOGS FÜR DEBUGGING =====
+        console.log("===== EXECUTE DEBUG =====");
+        console.log("Target Token ID:", attack.targetTokenId);
+        console.log("Farm status (isActive):", farm.isActive);
+        console.log("Farm startTime:", startTime, "(", new Date(startTime * 1000).toLocaleString(), ")");
+        console.log("Claim in (seconds):", claimIn);
+        console.log("Claim in (formatted):", claimIn ? formatDuration(claimIn) : "N/A");
+        console.log("Pending array:", pending);
+        console.log("Selected resource:", attack.resource, "Value:", pending?.[attack.resource]?.toString());
+        console.log("==========================");
+    
         // Sammle alle Fehlergründe
         let errorReasons = [];
         
         if (!farm.isActive) {
-          errorReasons.push("Farming is inactive");
+          errorReasons.push("Farming is inactive (owner stopped)");
         }
         
         if (claimIn !== null && claimIn > 0) {
-          errorReasons.push(`Farm builds up for ${formatDuration(claimIn)}`);
+          errorReasons.push(`Farm builds up for ${formatDuration(claimIn)} (need 24h)`);
         }
         
         if (!pending || pending.length <= attack.resource || pending[attack.resource] <= 0n) {
-          errorReasons.push("No loot available (owner claimed)");
+          errorReasons.push("No loot available (owner claimed or wrong resource)");
         }
     
         // Wenn Fehler vorhanden, zeige sie an, aber NICHT dismiss
@@ -1408,18 +1423,92 @@
       nftReadOnlyContract = new ethers.Contract(NFT_ADDRESS, NFT_ABI, readOnlyProvider);
     }
   
-    // ==================== INTERACTION ====================
-    let touchStartX = 0, touchStartY = 0;
-    let touchMoved = false;
-    const MOVE_THRESHOLD = 10; // Pixel
-    
+    // ==================== WHEEL HANDLER (Mausrad) ====================
+    function handleWheel(e) {
+      e.preventDefault();
+      const zoomFactor = 1.1;
+      const delta = e.deltaY > 0 ? 1 / zoomFactor : zoomFactor;
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+      const worldX = (mouseX - offsetX) / scale;
+      const worldY = (mouseY - offsetY) / scale;
+      scale = Math.max(0.2, Math.min(5, scale * delta));
+      offsetX = mouseX - worldX * scale;
+      offsetY = mouseY - worldY * scale;
+      drawPyramid();
+    }
+  
+    // ==================== MOUSE HANDLER ====================
+    function handleMouseMove(e) {
+      if (isDragging) return;
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = (e.clientX - rect.left - offsetX) / scale;
+      const mouseY = (e.clientY - rect.top - offsetY) / scale;
+      const blockSize = BASE_BLOCK_SIZE;
+      let found = null;
+      for (let row = 0; row < 100; row++) {
+        const y = row * blockSize;
+        if (mouseY < y - 5 || mouseY > y + blockSize + 5) continue;
+        const minX = -row * blockSize;
+        const maxX = (row + 1) * blockSize;
+        if (mouseX < minX - 5 || mouseX > maxX + 5) continue;
+        const col = Math.round((mouseX / blockSize) + row);
+        if (col >= 0 && col <= 2 * row) { found = String(row * 2048 + col); break; }
+      }
+      if (found) {
+        const token = tokens[found];
+        let text = `<span>Block #${found}</span><br>`;
+        if (token && token.owner) {
+          text += `Owner: ${shortenAddress(token.owner)}<br>`;
+          text += `Status: ${token.revealed ? "Revealed" : "Minted"}`;
+          if (token.farmActive) text += " · Farming";
+          if (token.protectionActive) text += " · Protected";
+          if (token.partnerActive) text += " ⭐";
+          const attack = userAttacks.find(a => String(a.targetTokenId) === found);
+          if (attack) {
+            const now = Math.floor(Date.now() / 1000);
+            if (attack.endTime <= now) text += " · 🔴 Attack ready!";
+            else text += ` · ⚔️ Attacking (${formatTime(attack.endTime - now)} left)`;
+          }
+        } else {
+          text += "Not minted";
+        }
+        tooltip.innerHTML = text;
+        tooltip.style.opacity = 1;
+        tooltip.style.left = (e.clientX + 20) + "px";
+        tooltip.style.top = (e.clientY - 50) + "px";
+      } else {
+        tooltip.style.opacity = 0;
+      }
+    }
+  
+    function handleClick(e) {
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = (e.clientX - rect.left - offsetX) / scale;
+      const mouseY = (e.clientY - rect.top - offsetY) / scale;
+      const blockSize = BASE_BLOCK_SIZE;
+      for (let row = 0; row < 100; row++) {
+        const y = row * blockSize;
+        if (mouseY < y || mouseY > y + blockSize) continue;
+        const col = Math.round((mouseX / blockSize) + row);
+        if (col >= 0 && col <= 2 * row) {
+          const tokenId = String(row * 2048 + col);
+          updateSidebar(tokenId);
+          drawPyramid();
+          break;
+        }
+      }
+    }
+  
+    // ==================== MOBILE TOUCH HANDLER ====================
     function handleTouchStart(e) {
       if (e.touches.length === 1) {
-        // Ein-Finger-Berührung – merke Startposition
+        // Ein-Finger-Berührung – merke Startposition für spätere Klick-Erkennung
         touchStartX = e.touches[0].clientX;
         touchStartY = e.touches[0].clientY;
         touchMoved = false;
-        isDragging = false; // Noch nicht als Drag markiert
+        isDragging = false;
         e.preventDefault();
       } else if (e.touches.length === 2) {
         // Zwei Finger = Zoom
@@ -1432,7 +1521,7 @@
         lastTouchDistance = dist;
       }
     }
-    
+  
     function handleTouchMove(e) {
       e.preventDefault();
       
@@ -1454,7 +1543,7 @@
           drawPyramid();
         }
       } else if (e.touches.length === 2) {
-        // Pinch-Zoom (wie bisher)
+        // Pinch-Zoom
         const dist = Math.hypot(
           e.touches[0].clientX - e.touches[1].clientX,
           e.touches[0].clientY - e.touches[1].clientY
@@ -1474,7 +1563,7 @@
         }
       }
     }
-    
+  
     function handleTouchEnd(e) {
       if (e.touches.length === 0) {
         // Wenn kaum Bewegung und kein Drag, dann als Klick behandeln
@@ -1490,6 +1579,11 @@
         isDragging = false;
         pinchStartDist = 0;
         touchMoved = false;
+      } else if (e.touches.length === 1) {
+        isDragging = true;
+        lastMouseX = e.touches[0].clientX;
+        lastMouseY = e.touches[0].clientY;
+        pinchStartDist = 0;
       }
     }
   
