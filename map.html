@@ -873,7 +873,7 @@
   
         // FarmingV4 Status aus Subgraph holen
         const farmV4Items = await fetchAllWithPagination(
-          "farmV4s",
+          "farmV4S",
           "id owner startTime lastAccrualTime boostExpiry active"
         ).catch(() => []);
         
