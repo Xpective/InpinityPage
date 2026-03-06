@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>INPINITY – The Pi-Phi Pyramid (v0.21.0 – V3 ONLY)</title>
+    <title>INPINITY – The Pi-Phi Pyramid (v0.22.0 – V4)</title>
     <link rel="icon" type="image/png" href="favicon.webp" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -475,9 +475,9 @@
                     <div id="blockResources" class="resources-grid"></div>
                 </div>
 
-                <!-- Angriffsübersicht (AttackV3) -->
+                <!-- Angriffsübersicht (AttackV4) -->
                 <div class="attacks-section">
-                    <h4 style="color: var(--accent-gold); margin-bottom: 1rem;">⚔️ Your Attacks (V3)</h4>
+                    <h4 style="color: var(--accent-gold); margin-bottom: 1rem;">⚔️ Your Attacks (V4)</h4>
                     <div id="userAttacksList" class="attacks-list">
                         <p style="color: var(--text-dim);">Connect wallet to see your attacks.</p>
                     </div>
@@ -513,7 +513,7 @@
                 <div id="blockActions" style="display: none;">
                     <p><strong id="selectedActionToken">Block #?</strong></p>
                     <button class="btn-small" id="revealBtn">🔓 Reveal</button>
-                    <button class="btn-small" id="farmingStartBtn">🌾 Start Farming</button>
+                    <button class="btn-small" id="farmingStartBtn">🌾 Start Farming (V4)</button>
                     <button class="btn-small" id="farmingStopBtn">⏹️ Stop Farming</button>
                     <button class="btn-small" id="claimBtn">💰 Claim Resources</button>
                     <div id="actionMessage"></div>
@@ -523,7 +523,7 @@
 
             <!-- Pirate Attack with Resource Select -->
             <div class="card">
-                <h3>🏴‍☠️ Pirate Attack</h3>
+                <h3>🏴‍☠️ Pirate Attack (V4)</h3>
                 <div class="input-group">
                     <label>Target Row <input type="number" id="attackRow" min="0" max="99"></label>
                     <label>Target Col <input type="number" id="attackCol" min="0" max="198"></label>
@@ -595,7 +595,7 @@
 
         <footer>
             <p>© 2026 INPINITY. All rights reserved. Built on Base.</p>
-            <p>Version 0.21.0 – V3 ONLY</p>
+            <p>Version 0.22.0 – V4 ONLY</p>
             <p><a href="whitepaper.html">Whitepaper</a> | <a href="https://discord.gg/95yj6Eg6" target="_blank">Discord</a></p>
         </footer>
     </div>
@@ -603,18 +603,18 @@
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
     <script>
     /* =========================================================
-       INPINITY GAME – V3 ONLY – Clean Version
-       - Farming main: V3
-       - Pirates main: V3 (AttackV3 Entities)
+       INPINITY GAME – V4 ONLY – Clean Version
+       - Farming main: V4
+       - Pirates main: V4 (AttackV4 Entities)
        - Intelligentes Dropdown
        - Dismiss-Funktion
        - Bessere Execute-Meldungen
     ========================================================= */
     
-    /* ==================== KONFIGURATION (NUR V3) ==================== */
+    /* ==================== KONFIGURATION (NUR V4) ==================== */
     const NFT_ADDRESS            = "0x277a0D5864293C78d7387C54B48c35D5E9578Ab1";
-    const FARMING_V3_ADDRESS     = "0xE79445C9ef97B8156BB505D784C0356E54432AD9";
-    const PIRATES_V3_ADDRESS     = "0xC3544804cea908b8Ac6752B4F47609e1c22DaF5d";
+    const FARMING_V4_ADDRESS     = "0xa7F093c893aeF7dA632e5Fa23971ad3C00Cc5bEd";
+    const PIRATES_V4_ADDRESS     = "0x393726fc6f54A07bca710ed7F1c93491CE7daF03";
     const MERCENARY_V2_ADDRESS   = "0xFEa09ccA75dbc63cc8053739A61777Bd13fC6Bc2";
     const PARTNERSHIP_V2_ADDRESS = "0xb18323efE4Cc8c36e10D664E287b4e2c82Fe3ad9";
     const RESOURCE_TOKEN_ADDRESS = "0x71E76a6065197acdd1a4d6B736712F80D1Fd3D8b";
@@ -628,9 +628,8 @@
     const PRICE_ETH_MIXED  = "0.0015";
     const PRICE_INPI_MIXED = "15";
     
-    const USE_STUDIO = true;
-    const SUBGRAPH_STUDIO_URL  = "https://api.studio.thegraph.com/query/1743108/inpinity/version/latest";
-    const SUBGRAPH_GATEWAY_URL = "https://gateway.thegraph.com/api/subgraphs/id/22b4uXYgs4rwTj6n3iWB4d8Vk4s7LAG7dTAtRaTXfseQ";
+    // Subgraph (Version 0.1.2)
+    const SUBGRAPH_URL = "https://api.studio.thegraph.com/query/1743108/inpinity/version/latest";
     const API_KEY = "059bc2832dfe50597009e556898d4ba6";
     
     const CLAIM_COOLDOWN_SEC = 24 * 60 * 60; // 24h
@@ -649,17 +648,15 @@
       "function calculateRarity(uint256 tokenId) view returns (uint8)"
     ];
     
-    const FARMING_V3_ABI = [
+    const FARMING_V4_ABI = [
       "function startFarming(uint256 tokenId) external",
       "function stopFarming(uint256 tokenId) external",
       "function claimResources(uint256 tokenId) external",
       "function farms(uint256) view returns (uint256 startTime, uint256 lastAccrualTime, uint256 boostExpiry, bool isActive)",
-      "function getAllPending(uint256 tokenId) view returns (uint256[10] out)",
-      "function buyBoost(uint256 tokenId, uint256 daysAmount) external",
-      "function getDailyProduction(uint256 tokenId) view returns (uint256[10] production)"
+      "function getAllPending(uint256 tokenId) view returns (uint256[10] out)"
     ];
     
-    const PIRATES_V3_ABI = [
+    const PIRATES_V4_ABI = [
       "function startAttack(uint256 attackerTokenId, uint256 targetTokenId, uint8 resource) external",
       "function executeAttack(uint256 targetTokenId, uint256 attackIndex) external"
     ];
@@ -696,7 +693,7 @@
     
     /* ==================== GLOBALS ==================== */
     let provider, signer, userAddress;
-    let nftContract, farmingV3Contract, piratesV3Contract, mercenaryV2Contract, partnershipV2Contract;
+    let nftContract, farmingV4Contract, piratesV4Contract, mercenaryV2Contract, partnershipV2Contract;
     let inpiContract, pitroneContract, resourceTokenContract;
     
     let selectedPayment = "eth";
@@ -743,15 +740,9 @@
     }
     
     /* ==================== SUBGRAPH ==================== */
-    function getSubgraphURL(){
-      return USE_STUDIO ? SUBGRAPH_STUDIO_URL : SUBGRAPH_GATEWAY_URL;
-    }
-    
     async function fetchSubgraph(query){
-      const headers = { "Content-Type":"application/json" };
-      if (!USE_STUDIO) headers["Authorization"] = `Bearer ${API_KEY}`;
-    
-      const res = await fetch(getSubgraphURL(), { method:"POST", headers, body: JSON.stringify({ query }) });
+      const headers = { "Content-Type":"application/json", "Authorization": `Bearer ${API_KEY}` };
+      const res = await fetch(SUBGRAPH_URL, { method:"POST", headers, body: JSON.stringify({ query }) });
       const json = await res.json();
       if (!res.ok || json.errors){
         console.error("Subgraph error:", json.errors || json);
@@ -854,27 +845,27 @@
       container.innerHTML = html;
     }
     
-    /* ==================== FARM MIGRATION (NUR V3) ==================== */
+    /* ==================== FARM (NUR V4) ==================== */
     async function getFarmStatus(tokenId){
-      const [v3] = await Promise.allSettled([farmingV3Contract.farms(tokenId)]);
-      return { v3Active: v3.status==="fulfilled" ? !!v3.value.isActive : false };
+      const [v4] = await Promise.allSettled([farmingV4Contract.farms(tokenId)]);
+      return { v4Active: v4.status==="fulfilled" ? !!v4.value.isActive : false };
     }
     
-    async function startFarmingV3(tokenId, msgDivId="actionMessage"){
+    async function startFarmingV4(tokenId, msgDivId="actionMessage"){
       const msgDiv = document.getElementById(msgDivId);
       if (msgDiv) msgDiv.innerHTML = `<span class="success">⏳ Checking farms...</span>`;
     
       try {
-        const farm = await farmingV3Contract.farms(tokenId);
+        const farm = await farmingV4Contract.farms(tokenId);
         if (farm.isActive){
-          if (msgDiv) msgDiv.innerHTML = `<span class="success">✅ Already on V3.</span>`;
+          if (msgDiv) msgDiv.innerHTML = `<span class="success">✅ Already on V4.</span>`;
           return;
         }
     
-        if (msgDiv) msgDiv.innerHTML = `<span class="success">⏳ Starting V3 farming...</span>`;
-        const tx = await farmingV3Contract.startFarming(tokenId, { gasLimit: 500000 });
+        if (msgDiv) msgDiv.innerHTML = `<span class="success">⏳ Starting V4 farming...</span>`;
+        const tx = await farmingV4Contract.startFarming(tokenId, { gasLimit: 500000 });
         await tx.wait();
-        if (msgDiv) msgDiv.innerHTML = `<span class="success">✅ V3 farming started.</span>`;
+        if (msgDiv) msgDiv.innerHTML = `<span class="success">✅ V4 farming started.</span>`;
       } catch (e){
         console.error(e);
         if (msgDiv) msgDiv.innerHTML = `<span class="error">❌ ${e.message}</span>`;
@@ -919,7 +910,7 @@
         let farmingActive = false;
         let farmStartTime = 0;
         try{
-          const f = await farmingV3Contract.farms(tokenId);
+          const f = await farmingV4Contract.farms(tokenId);
           farmingActive = !!f.isActive;
           farmStartTime = Number(f.startTime.toString());
         }catch(e){}
@@ -987,7 +978,7 @@
       let farmingActive = false;
       let farmStartTime = 0;
       try{
-        const f = await farmingV3Contract.farms(tokenId);
+        const f = await farmingV4Contract.farms(tokenId);
         farmingActive = !!f.isActive;
         farmStartTime = Number(f.startTime.toString());
       }catch(e){}
@@ -1054,7 +1045,7 @@
       return p;
     }
     
-    /* ==================== ATTACK-HELPER ==================== */
+    /* ==================== ATTACK-HELPER (basierend auf Rarity) ==================== */
     function tokenIdToRowCol(tokenId) {
       const id = Number(tokenId);
       return { row: Math.floor(id / 2048), col: id % 2048 };
@@ -1075,7 +1066,7 @@
       let farmStartTime = 0;
     
       try {
-        const f = await farmingV3Contract.farms(targetTokenId);
+        const f = await farmingV4Contract.farms(targetTokenId);
         farmingActive = !!f.isActive;
         farmStartTime = Number(f.startTime.toString());
       } catch (e) {}
@@ -1134,7 +1125,7 @@
     
       const targetTokenId = row * 2048 + col;
     
-      if (!userAddress || !nftContract || !farmingV3Contract) {
+      if (!userAddress || !nftContract || !farmingV4Contract) {
         select.innerHTML = "";
         [0, 1, 2].forEach(id => {
           const opt = document.createElement("option");
@@ -1163,7 +1154,7 @@
     
       let pendingLine = "";
       try {
-        const pendingArr = await farmingV3Contract.getAllPending(targetTokenId);
+        const pendingArr = await farmingV4Contract.getAllPending(targetTokenId);
         if (pendingArr && Array.isArray(pendingArr)) {
           const total = pendingArr.reduce((acc, bn) => acc.add(bn), ethers.BigNumber.from(0));
           pendingLine = total.isZero()
@@ -1187,7 +1178,7 @@
       });
     }
     
-    /* ==================== ATTACKS ==================== */
+    /* ==================== ATTACKS (V4) ==================== */
     function initAttackResourceSelect(){
       const select=document.getElementById("attackResourceSelect");
       if(!select) return;
@@ -1206,8 +1197,8 @@
         const where = `{ attacker: "${userAddress.toLowerCase()}" }`;
     
         const attacks = await fetchAllWithPagination(
-          "attackV3S",
-          "id attacker target attackIndex startTime endTime resource executed",
+          "attackV4S",  // ⬅️ V4 mit großem S
+          "id attacker attackerTokenId targetTokenId attackIndex startTime endTime resource executed protectionLevel effectiveStealPercent stolenAmount",
           where
         );
     
@@ -1215,12 +1206,16 @@
           .filter(a => !a.executed)
           .map(a => ({
             id: a.id,
-            targetTokenId: parseInt(a.target, 10),
-            attackIndex: parseInt(a.attackIndex || "0", 10),
-            startTime: parseInt(a.startTime || "0", 10),
-            endTime: parseInt(a.endTime || "0", 10),
+            targetTokenId: parseInt(a.targetTokenId, 10),
+            attackerTokenId: parseInt(a.attackerTokenId, 10),
+            attackIndex: parseInt(a.attackIndex, 10),
+            startTime: parseInt(a.startTime, 10),
+            endTime: parseInt(a.endTime, 10),
             executed: !!a.executed,
-            resource: parseInt(a.resource || "0", 10)
+            resource: parseInt(a.resource, 10),
+            protectionLevel: a.protectionLevel ? parseInt(a.protectionLevel,10) : 0,
+            effectiveStealPercent: a.effectiveStealPercent ? parseInt(a.effectiveStealPercent,10) : 0,
+            stolenAmount: a.stolenAmount ? a.stolenAmount.toString() : "0"
           }));
     
         const dismissed = loadDismissedAttacks();
@@ -1359,39 +1354,35 @@
       return new Set(JSON.parse(localStorage.getItem("dismissedAttacks") || "[]"));
     }
     
-    /* ==================== EXECUTE ATTACK (PiratesV3) ==================== */
+    /* ==================== EXECUTE ATTACK (PiratesV4) ==================== */
     async function executeAttack(attack){
       const msgDiv=document.getElementById("attackMessage");
       if(!msgDiv) return;
     
       msgDiv.innerHTML = '<span class="success">⏳ Checking target resources...</span>';
       try {
-        if (!piratesV3Contract) throw new Error("Connect wallet first.");
+        if (!piratesV4Contract) throw new Error("Connect wallet first.");
     
         // Farming-Status prüfen
-        const farm = await farmingV3Contract.farms(attack.targetTokenId);
+        const farm = await farmingV4Contract.farms(attack.targetTokenId);
         const now = Math.floor(Date.now()/1000);
         const startTime = Number(farm.startTime.toString());
         const claimIn = startTime ? secondsUntilClaimable(startTime, now) : null;
         
         if (!farm.isActive) {
           msgDiv.innerHTML = '<span class="error">❌ Farming inactive – owner stopped.</span>';
-          if (attack.id) dismissAttackById(attack.id);
-          await loadUserAttacks();
           return;
         }
         
         if (claimIn !== null && claimIn > 0) {
           msgDiv.innerHTML = `<span class="error">❌ Need to wait ${formatDuration(claimIn)} (24h total).</span>`;
-          if (attack.id) dismissAttackById(attack.id);
-          await loadUserAttacks();
           return;
         }
     
         // Pending-Ressourcen prüfen
         let pending;
         try {
-          pending = await farmingV3Contract.getAllPending(attack.targetTokenId);
+          pending = await farmingV4Contract.getAllPending(attack.targetTokenId);
         } catch (e) {
           console.warn("getAllPending failed, assuming no loot:", e);
           pending = null;
@@ -1404,14 +1395,12 @@
     
         if (!hasLoot) {
           msgDiv.innerHTML = '<span class="error">❌ No loot – owner claimed or wrong resource.</span>';
-          if (attack.id) dismissAttackById(attack.id);
-          await loadUserAttacks();
           return;
         }
     
         msgDiv.innerHTML = '<span class="success">⏳ Executing attack...</span>';
     
-        const tx = await piratesV3Contract.executeAttack(
+        const tx = await piratesV4Contract.executeAttack(
           attack.targetTokenId,
           attack.attackIndex,
           { gasLimit: 350000 }
@@ -1421,6 +1410,9 @@
         await tx.wait();
     
         msgDiv.innerHTML = '<span class="success">✅ Attack executed!</span>';
+    
+        // Erfolg: Angriff aus UI entfernen (optional)
+        if (attack.id) dismissAttackById(attack.id);
     
         await loadUserAttacks();
         await loadResourceBalancesOnchain();
@@ -1473,7 +1465,7 @@
     
     async function startFarmingSelected(){
       if(!selectedBlock) return alert("No block selected.");
-      await startFarmingV3(selectedBlock.tokenId, "actionMessage");
+      await startFarmingV4(selectedBlock.tokenId, "actionMessage");
       await loadUserBlocks();
       await selectBlock(selectedBlock.tokenId, selectedBlock.row, selectedBlock.col);
     }
@@ -1484,12 +1476,12 @@
     
       try{
         const st = await getFarmStatus(selectedBlock.tokenId);
-        if(!st.v3Active) {
-          msgDiv.innerHTML = '<span class="error">❌ Not farming on V3.</span>';
+        if(!st.v4Active) {
+          msgDiv.innerHTML = '<span class="error">❌ Not farming on V4.</span>';
           return;
         }
     
-        const tx = await farmingV3Contract.stopFarming(selectedBlock.tokenId, { gasLimit: 500000 });
+        const tx = await farmingV4Contract.stopFarming(selectedBlock.tokenId, { gasLimit: 500000 });
         msgDiv.innerHTML = `<span class="success">⏳ Stopping farming...</span>`;
         await tx.wait();
         msgDiv.innerHTML = `<span class="success">⏹️ Farming stopped.</span>`;
@@ -1507,12 +1499,12 @@
     
       try{
         const st = await getFarmStatus(selectedBlock.tokenId);
-        if(!st.v3Active) {
-          msgDiv.innerHTML = '<span class="error">❌ Not farming on V3.</span>';
+        if(!st.v4Active) {
+          msgDiv.innerHTML = '<span class="error">❌ Not farming on V4.</span>';
           return;
         }
     
-        const tx = await farmingV3Contract.claimResources(selectedBlock.tokenId, { gasLimit: 600000 });
+        const tx = await farmingV4Contract.claimResources(selectedBlock.tokenId, { gasLimit: 600000 });
         msgDiv.innerHTML = `<span class="success">⏳ Claiming resources...</span>`;
         await tx.wait();
         msgDiv.innerHTML = `<span class="success">💰 Resources claimed!</span>`;
@@ -1540,7 +1532,7 @@
       msgDiv.innerHTML = `<span class="success">⏳ Starting attack...</span>`;
     
       try{
-        const tx = await piratesV3Contract.startAttack(attackerTokenId, targetTokenId, resource, { gasLimit: 450000 });
+        const tx = await piratesV4Contract.startAttack(attackerTokenId, targetTokenId, resource, { gasLimit: 450000 });
         await tx.wait();
     
         msgDiv.innerHTML = `<span class="success">✅ Attack started! Check back later.</span>`;
@@ -1665,8 +1657,8 @@
         }
     
         nftContract          = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
-        farmingV3Contract    = new ethers.Contract(FARMING_V3_ADDRESS, FARMING_V3_ABI, signer);
-        piratesV3Contract    = new ethers.Contract(PIRATES_V3_ADDRESS, PIRATES_V3_ABI, signer);
+        farmingV4Contract    = new ethers.Contract(FARMING_V4_ADDRESS, FARMING_V4_ABI, signer);
+        piratesV4Contract    = new ethers.Contract(PIRATES_V4_ADDRESS, PIRATES_V4_ABI, signer);
         mercenaryV2Contract  = new ethers.Contract(MERCENARY_V2_ADDRESS, MERCENARY_V2_ABI, signer);
         partnershipV2Contract= new ethers.Contract(PARTNERSHIP_V2_ADDRESS, PARTNERSHIP_V2_ABI, signer);
         inpiContract         = new ethers.Contract(INPI_ADDRESS, INPI_ABI, signer);
@@ -1864,11 +1856,6 @@
     
     if(window.ethereum && window.ethereum.selectedAddress){
       connectWallet();
-
-    // Am Ende der Datei, nach dem letzten } aber vor dem schließenden Script-Tag:
-    window.farmingV3Contract = farmingV3Contract;
-    window.piratesV3Contract = piratesV3Contract;
-    window.userAddress = userAddress;
     }
     </script>
 </body>
