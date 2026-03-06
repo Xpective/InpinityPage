@@ -3,6 +3,7 @@
    - Basierend auf map.html (Inline-Script) aber ausgelagert
    - Gleiche Verbesserungen wie in game.js
    - Zusätzlich: Polling-Steuerung, Request-ID, read‑only Fallback
+   - Letzte Hardening-Punkte eingebaut
    ========================================================= */
 
 /* ==================== KONFIGURATION (V4) ==================== */
@@ -116,6 +117,9 @@ const MOVE_THRESHOLD = 10; // Pixel
 
 // Request-ID für Attack-Dropdown
 let attackDropdownRequestId = 0;
+
+// Schutz vor Mehrfach-Connect
+let isConnecting = false;
 
 const resourceNames = ["Oil","Lemons","Iron","Gold","Platinum","Copper","Crystal","Obsidian","Mysterium","Aether"];
 const rarityNames = ["Bronze","Silver","Gold","Platinum","Diamond"];
@@ -428,10 +432,11 @@ async function loadData() {
       }
     });
 
-    // FarmingV4 Status aus Subgraph
+    // FarmingV4 Status aus Subgraph – NUR AKTIVE FARMS laden
     const farmV4Items = await fetchAllWithPagination(
       "farmV4S",
-      "id owner startTime lastAccrualTime boostExpiry active"
+      "id owner startTime lastAccrualTime boostExpiry active",
+      `{ active: true }`
     ).catch(() => []);
     
     farmV4Items.forEach(f => {
@@ -544,7 +549,7 @@ function drawPyramid() {
         }
         // Eigener Block überschreibt mit Cyan
         if (userAddress && token.owner.toLowerCase() === userAddress.toLowerCase()) {
-          fillColor = "#a0d6ff";
+          fillColor = "#9b59b6";
         }
 
         const attack = userAttacks.find(a => String(a.targetTokenId) === tokenId);
@@ -609,34 +614,50 @@ async function getTokenPosition(tokenId) {
 async function getStealableResourcesForTarget(targetTokenId) {
   let farmingActive = false;
   let farmStartTime = 0;
+
   try {
     const f = await farmingV4Contract.farms(targetTokenId);
     farmingActive = !!f.isActive;
     farmStartTime = Number(f.startTime);
   } catch (e) {}
+
   const now = Math.floor(Date.now() / 1000);
   const claimIn = farmStartTime ? secondsUntilClaimable(farmStartTime, now) : null;
+
+  // Read‑only Contract verwenden, falls nötig
+  const contract = nftContract || nftReadOnlyContract;
+  if (!contract) {
+    return { farmingActive, farmStartTime, claimIn, revealed: false, allowed: [0, 1, 2] };
+  }
+
   let revealed = false;
   try {
-    const d = await nftContract.blockData(targetTokenId);
+    const d = await contract.blockData(targetTokenId);
     revealed = !!d.revealed;
   } catch (e) {}
+
   if (!revealed) {
     return { farmingActive, farmStartTime, claimIn, revealed: false, allowed: [0, 1, 2] };
   }
+
   let rarity = 0;
-  // Position onchain holen
   const { row } = await getTokenPosition(targetTokenId);
+
   try {
-    rarity = Number(await nftContract.calculateRarity(targetTokenId));
-  } catch (e) { console.warn("Failed to get rarity, using 0"); }
+    rarity = Number(await contract.calculateRarity(targetTokenId));
+  } catch (e) {
+    console.warn("Failed to get rarity, using 0");
+  }
+
   const prod = getProduction(rarity, row);
   let allowed = productionToAllowedResourceIds(prod);
   if (allowed.length === 0) allowed = [0,1,2,3,4,5,6,7,8,9];
+
   let pendingArr = null;
   try {
     pendingArr = await farmingV4Contract.getAllPending(targetTokenId);
-  } catch(e) {}
+  } catch (e) {}
+
   return { farmingActive, farmStartTime, claimIn, revealed: true, rarity, allowed, pendingArr };
 }
 
@@ -648,7 +669,7 @@ async function refreshAttackDropdown() {
 
   const targetTokenId = parseInt(selectedTokenId, 10);
 
-  if (!userAddress || !nftContract || !farmingV4Contract) {
+  if (!userAddress || !farmingV4Contract) {
     select.innerHTML = "";
     [0,1,2].forEach(id => {
       const opt = document.createElement("option");
@@ -783,19 +804,19 @@ async function updateSidebar(tokenId) {
   }
 }
 
-/* ==================== TX HELPER ==================== */
+/* ==================== TX HELPER (null‑sicher) ==================== */
 async function sendTx(txPromise, messageDiv, successMsg) {
-  messageDiv.innerHTML = '<span class="success">⏳ Sending...</span>';
+  if (messageDiv) messageDiv.innerHTML = '<span class="success">⏳ Sending...</span>';
   try {
     const tx = await txPromise;
-    messageDiv.innerHTML = '<span class="success">⏳ Confirming...</span>';
+    if (messageDiv) messageDiv.innerHTML = '<span class="success">⏳ Confirming...</span>';
     await tx.wait();
-    messageDiv.innerHTML = `<span class="success">✅ ${successMsg}</span>`;
+    if (messageDiv) messageDiv.innerHTML = `<span class="success">✅ ${successMsg}</span>`;
     await loadData();
     if (selectedTokenId) await updateSidebar(selectedTokenId);
   } catch (err) {
     console.error(err);
-    messageDiv.innerHTML = `<span class="error">❌ ${err.message || "Tx failed"}</span>`;
+    if (messageDiv) messageDiv.innerHTML = `<span class="error">❌ ${err.message || "Tx failed"}</span>`;
   }
 }
 
@@ -907,6 +928,14 @@ async function handleProtect() {
 
 async function handleAttack() {
   if (!selectedTokenId || !userAddress) return;
+
+  // Prüfen, ob der angewählte Block existiert
+  const targetToken = tokens[selectedTokenId];
+  if (!targetToken || !targetToken.owner) {
+    if (actionMessage) actionMessage.innerHTML = '<span class="error">❌ Target block does not exist.</span>';
+    return;
+  }
+
   const ownTokens = Object.entries(tokens).filter(([id, t]) => t.owner && t.owner.toLowerCase() === userAddress.toLowerCase());
   if (ownTokens.length === 0) {
     if (actionMessage) actionMessage.innerHTML = '<span class="error">❌ Need a block to attack from</span>';
@@ -914,8 +943,7 @@ async function handleAttack() {
   }
 
   // Selbstangriff verhindern
-  const targetToken = tokens[selectedTokenId];
-  if (targetToken && targetToken.owner && targetToken.owner.toLowerCase() === userAddress.toLowerCase()) {
+  if (targetToken.owner.toLowerCase() === userAddress.toLowerCase()) {
     if (actionMessage) actionMessage.innerHTML = '<span class="error">❌ You cannot attack your own block.</span>';
     return;
   }
@@ -924,6 +952,12 @@ async function handleAttack() {
   const attackerTokenId = parseInt(ownTokens[0][0], 10);
   const targetTokenId = parseInt(selectedTokenId, 10);
   const resource = parseInt(document.getElementById("attackResource")?.value, 10);
+
+  // Resource validieren
+  if (!Number.isFinite(resource) || resource < 0 || resource > 9) {
+    if (actionMessage) actionMessage.innerHTML = '<span class="error">❌ Invalid resource selected.</span>';
+    return;
+  }
 
   localStorage.setItem(getAttackStorageKey(targetTokenId), JSON.stringify({ targetTokenId, resource, startTime: Math.floor(Date.now() / 1000) }));
 
@@ -940,9 +974,13 @@ async function handleAttack() {
   }
 }
 
-/* ==================== WALLET (mit verbessertem Chain-Switch) ==================== */
+/* ==================== WALLET (mit isConnecting) ==================== */
 async function connectWallet() {
   if (!window.ethereum) return alert("Please install MetaMask!");
+  if (isConnecting) return;
+  if (userAddress) return;
+
+  isConnecting = true;
   try {
     provider = new ethers.BrowserProvider(window.ethereum);
     await provider.send("eth_requestAccounts", []);
@@ -1000,6 +1038,8 @@ async function connectWallet() {
   } catch (err) {
     console.error(err);
     alert("Connection error: " + (err?.message || err));
+  } finally {
+    isConnecting = false;
   }
 }
 
@@ -1008,8 +1048,9 @@ async function initReadOnly() {
   nftReadOnlyContract = new ethers.Contract(NFT_ADDRESS, NFT_ABI, readOnlyProvider);
 }
 
-/* ==================== WHEEL HANDLER ==================== */
+/* ==================== WHEEL HANDLER (mit Null-Check) ==================== */
 function handleWheel(e) {
+  if (!canvas) return;
   e.preventDefault();
   const zoomFactor = 1.1;
   const delta = e.deltaY > 0 ? 1 / zoomFactor : zoomFactor;
@@ -1024,8 +1065,9 @@ function handleWheel(e) {
   drawPyramid();
 }
 
-/* ==================== MOUSE HANDLER ==================== */
+/* ==================== MOUSE HANDLER (mit Null-Check) ==================== */
 function handleMouseMove(e) {
+  if (!canvas || !tooltip) return;
   if (isDragging) return;
   const rect = canvas.getBoundingClientRect();
   const mouseX = (e.clientX - rect.left - offsetX) / scale;
@@ -1069,7 +1111,9 @@ function handleMouseMove(e) {
   }
 }
 
+/* ==================== CLICK HANDLER (mit Null-Check) ==================== */
 function handleClick(e) {
+  if (!canvas) return;
   const rect = canvas.getBoundingClientRect();
   const mouseX = (e.clientX - rect.left - offsetX) / scale;
   const mouseY = (e.clientY - rect.top - offsetY) / scale;
