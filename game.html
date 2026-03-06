@@ -1401,32 +1401,40 @@
     
     /* ==================== EXECUTE ATTACK (PiratesV3) ==================== */
     async function executeAttack(attack){
-      const msgDiv=document.getElementById("attackMessage");
+      const msgDiv = document.getElementById("attackMessage");
       if(!msgDiv) return;
     
       msgDiv.innerHTML = '<span class="success">⏳ Checking target resources...</span>';
       try {
         if (!piratesV3Contract) throw new Error("Connect wallet first.");
     
+        // Prüfe Farming-Status und Pending-Ressourcen
+        const farm = await farmingV3Contract.farms(attack.targetTokenId);
         const pending = await farmingV3Contract.getAllPending(attack.targetTokenId);
+        
+        const now = Math.floor(Date.now()/1000);
+        const startTime = Number(farm.startTime.toString());
+        const claimIn = startTime ? secondsUntilClaimable(startTime, now) : null;
+    
+        // Prüfe ob der Block überhaupt farmt
+        if (!farm.isActive) {
+          msgDiv.innerHTML = '<span class="error">❌ Target farming is inactive. Owner stopped farming. Good luck next time.</span>';
+          if (attack.id) dismissAttackById(attack.id);
+          await loadUserAttacks();
+          return;
+        }
+    
+        // Prüfe ob genug Zeit vergangen ist (24h)
+        if (claimIn !== null && claimIn > 0) {
+          msgDiv.innerHTML = `<span class="error">❌ Farm is still building up. Wait ${formatDuration(claimIn)} for first loot.</span>`;
+          if (attack.id) dismissAttackById(attack.id);
+          await loadUserAttacks();
+          return;
+        }
+    
+        // Prüfe ob die spezifische Ressource verfügbar ist
         if (!pending || pending.length <= attack.resource || pending[attack.resource].isZero()) {
-          let tip = "Tip: the target likely claimed recently or hasn't farmed long enough.";
-          try {
-            const f = await farmingV3Contract.farms(attack.targetTokenId);
-            const now = Math.floor(Date.now()/1000);
-            const startTime = Number(f.startTime.toString());
-            const claimIn = startTime ? secondsUntilClaimable(startTime, now) : null;
-    
-            if (!f.isActive) {
-              tip = "Tip: target farming is inactive → wait or pick another target.";
-            } else if (claimIn !== null && claimIn > 0) {
-              tip = `Tip: wait ~${formatDuration(claimIn)} (24h window) or attack a long-running farm.`;
-            } else {
-              tip = "Tip: loot window is active but resource is 0 → target probably claimed. Try later.";
-            }
-          } catch(e){}
-    
-          msgDiv.innerHTML = `<span class="error">❌ No loot for this resource right now.<br>${tip}</span>`;
+          msgDiv.innerHTML = '<span class="error">❌ No loot available. Owner already claimed. Good luck next time.</span>';
           if (attack.id) dismissAttackById(attack.id);
           await loadUserAttacks();
           return;
@@ -1449,13 +1457,13 @@
         await loadResourceBalancesOnchain();
         await updateBalances();
         refreshBlockMarkings();
-      }catch(e){
+      } catch(e){
         console.error("ExecuteAttack error:", e);
         let msg = e?.message || "Unknown error";
         if((msg+"").includes("execution reverted")){
           if (attack.id) dismissAttackById(attack.id);
           await loadUserAttacks();
-          msgDiv.innerHTML = `<span class="error">❌ Attack failed – nothing to steal (target empty).</span>`;
+          msgDiv.innerHTML = '<span class="error">❌ Attack failed – nothing to steal. Good luck next time.</span>';
           return;
         }
         msgDiv.innerHTML = `<span class="error">${msg}</span>`;
