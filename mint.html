@@ -456,7 +456,9 @@
     </div>
   </footer>
 
+  <!-- Ethers und MetaMask SDK -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@metamask/sdk@0/dist/metamask-sdk.js"></script>
 
   <script>
     // ==================== CONFIG ====================
@@ -486,6 +488,22 @@
     // ==================== STATE ====================
     let provider, signer, nftContract, inpiContract, userAddress;
     let selectedPayment = "eth";
+
+    // === MetaMask SDK (mobile) ===
+    let metamaskSDKInstance = null;
+    function getProvider() {
+      if (window.MetaMaskSDK && !metamaskSDKInstance) {
+        metamaskSDKInstance = new window.MetaMaskSDK.default({
+          dappMetadata: {
+            name: "INPINITY",
+            url: window.location.href,
+          },
+          checkInstallationImmediately: false,
+        });
+        return metamaskSDKInstance.getProvider();
+      }
+      return window.ethereum;
+    }
 
     // ==================== HELPERS ====================
     function selectPayment(type){
@@ -518,21 +536,35 @@
     }
 
     // ==================== WALLET ====================
+    let isConnecting = false; // Schutz vor Mehrfachaufrufen
     async function connectWallet(){
-      if(!window.ethereum) return alert("Please install MetaMask!");
-      try{
-        provider = new ethers.providers.Web3Provider(window.ethereum);
+      if(isConnecting) return;
+      if(userAddress) return;
+      isConnecting = true;
+
+      try {
+        const ethereum = getProvider();
+        if (!ethereum) {
+          alert("Please install MetaMask or another wallet!");
+          return;
+        }
+
+        provider = new ethers.providers.Web3Provider(ethereum);
         await provider.send("eth_requestAccounts", []);
         signer = provider.getSigner();
         userAddress = await signer.getAddress();
 
         const network = await provider.getNetwork();
         if(network.chainId !== 8453){
-          try{
-            await window.ethereum.request({ method:"wallet_switchEthereumChain", params:[{ chainId:"0x2105" }] });
-          }catch(e){
+          try {
+            await ethereum.request({ method:"wallet_switchEthereumChain", params:[{ chainId:"0x2105" }] });
+            // Nach Switch neu initialisieren (wichtig für manche Wallets)
+            provider = new ethers.providers.Web3Provider(ethereum);
+            signer = provider.getSigner();
+            userAddress = await signer.getAddress();
+          } catch(e){
             if(e.code === 4902){
-              await window.ethereum.request({
+              await ethereum.request({
                 method:"wallet_addEthereumChain",
                 params:[{
                   chainId:"0x2105",
@@ -542,7 +574,12 @@
                   blockExplorerUrls:["https://basescan.org"]
                 }]
               });
-            } else { throw e; }
+              provider = new ethers.providers.Web3Provider(ethereum);
+              signer = provider.getSigner();
+              userAddress = await signer.getAddress();
+            } else {
+              throw e;
+            }
           }
         }
 
@@ -556,9 +593,12 @@
         await updateBalances();
         await loadUnrevealedBlocks();
         debugLog("Wallet connected", userAddress);
-      }catch(e){
+      } catch(e){
         console.error(e);
-        alert("Connection error: " + e.message);
+        alert("Connection error: " + (e.message || e));
+        userAddress = null;
+      } finally {
+        isConnecting = false;
       }
     }
 
@@ -752,6 +792,7 @@
     document.getElementById("payInpi").addEventListener("change", ()=>selectPayment("inpi"));
     document.getElementById("payMixed").addEventListener("change", ()=>selectPayment("mixed"));
 
+    // Auto‑connect wenn Wallet bereits autorisiert (z.B. nach Rückkehr von MetaMask App)
     if(window.ethereum && window.ethereum.selectedAddress){
       connectWallet();
     }
