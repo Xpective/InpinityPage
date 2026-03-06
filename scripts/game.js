@@ -116,6 +116,22 @@ let isConnecting = false;
 
 // Für Request-ID im Attack-Dropdown
 let attackDropdownRequestId = 0;
+let metamaskSDKInstance = null;
+function getProvider() {
+  // Wenn SDK vorhanden und noch nicht instanziiert, initialisieren
+  if (window.MetaMaskSDK && !metamaskSDKInstance) {
+    metamaskSDKInstance = new window.MetaMaskSDK.default({
+      dappMetadata: {
+        name: "INPINITY",
+        url: window.location.href,
+      },
+      checkInstallationImmediately: false,
+    });
+    return metamaskSDKInstance.getProvider();
+  }
+  // Fallback auf window.ethereum (Desktop / injizierte Wallets)
+  return window.ethereum;
+}
 
 const resourceNames = ["Oil","Lemons","Iron","Gold","Platinum","Copper","Crystal","Obsidian","Mysterium","Aether"];
 const rarityNames   = ["Bronze","Silver","Gold","Platinum","Diamond"];
@@ -1277,30 +1293,136 @@ async function exchangePit(){
 
 /* ==================== WALLET ==================== */
 async function connectWallet(){
-  if(!window.ethereum) return alert("Please install MetaMask!");
-  if(isConnecting) return;
-  if(userAddress) return;
+     if(isConnecting) return;
+     if(userAddress) return;
+   
+     isConnecting = true;
+   
+     try {
+       const ethereum = getProvider();
+       if (!ethereum) {
+         alert("Please install MetaMask or another wallet!");
+         return;
+       }
+   
+       provider = new ethers.providers.Web3Provider(ethereum);
+       await provider.send("eth_requestAccounts", []);
+       signer = provider.getSigner();
+       userAddress = await signer.getAddress();
+   
+       // Prüfe, ob wir auf Base (chainId 8453) sind, sonst switch
+       const network = await provider.getNetwork();
+       if(network.chainId !== 8453){
+         try{
+           await ethereum.request({
+             method: "wallet_switchEthereumChain",
+             params: [{ chainId: "0x2105" }] // 8453 in hex
+           });
+           // Nach erfolgreichem Switch Provider neu initialisieren (wichtig für manche Wallets)
+           provider = new ethers.providers.Web3Provider(ethereum);
+           signer = provider.getSigner();
+           userAddress = await signer.getAddress();
+         } catch(switchError) {
+           // Falls die Chain nicht existiert (sollte bei Base nicht vorkommen), könnte man sie hinzufügen
+           if (switchError.code === 4902) {
+             try {
+               await ethereum.request({
+                 method: "wallet_addEthereumChain",
+                 params: [{
+                   chainId: "0x2105",
+                   chainName: "Base Mainnet",
+                   nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 },
+                   rpcUrls: ["https://mainnet.base.org"],
+                   blockExplorerUrls: ["https://basescan.org"]
+                 }]
+               });
+               provider = new ethers.providers.Web3Provider(ethereum);
+               signer = provider.getSigner();
+               userAddress = await signer.getAddress();
+             } catch (addError) {
+               throw addError;
+             }
+           } else {
+             throw switchError;
+           }
+         }
+       }
+   
+       // Contracts initialisieren
+       nftContract          = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
+       farmingV4Contract    = new ethers.Contract(FARMING_V4_ADDRESS, FARMING_V4_ABI, signer);
+       piratesV4Contract    = new ethers.Contract(PIRATES_V4_ADDRESS, PIRATES_V4_ABI, signer);
+       mercenaryV2Contract  = new ethers.Contract(MERCENARY_V2_ADDRESS, MERCENARY_V2_ABI, signer);
+       partnershipV2Contract= new ethers.Contract(PARTNERSHIP_V2_ADDRESS, PARTNERSHIP_V2_ABI, signer);
+       inpiContract         = new ethers.Contract(INPI_ADDRESS, INPI_ABI, signer);
+       pitroneContract      = new ethers.Contract(PITRONE_ADDRESS, PITRONE_ABI, signer);
+       resourceTokenContract= new ethers.Contract(RESOURCE_TOKEN_ADDRESS, RESOURCE_TOKEN_ABI, signer);
+   
+       // UI aktualisieren
+       safeHTML("walletStatus", "🟢 Connected");
+       safeHTML("walletAddress", shortenAddress(userAddress));
+       document.getElementById("connectWallet").innerText = "Wallet Connected";
+   
+       initAttackResourceSelect();
+       await updateBalances();
+       await updatePoolInfo();
+       await loadUserBlocks();
+       await loadResourceBalancesOnchain();
+       await loadUserAttacks();
+   
+       refreshAttackDropdown(); // nach dem Laden
+   
+       if(!attacksPoller){
+         attacksPoller = setInterval(async ()=>{
+           await loadUserAttacks();
+           await loadUserBlocks();
+           refreshBlockMarkings();
+         }, 30000);
+       }
+   
+     } catch(e){
+       console.error(e);
+       alert("Connection error: " + (e.message || e));
+       userAddress = null;
+     } finally {
+       isConnecting = false;
+     }
+   }
 
-  isConnecting = true;
+    nftContract          = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
+    farmingV4Contract    = new ethers.Contract(FARMING_V4_ADDRESS, FARMING_V4_ABI, signer);
+    // ... weitere Contracts
 
-  try{
-    provider = new ethers.providers.Web3Provider(window.ethereum);
-    await provider.send("eth_requestAccounts", []);
-    signer = provider.getSigner();
-    userAddress = await signer.getAddress();
+    // UI aktualisieren
+    safeHTML("walletStatus","🟢 Connected");
+    safeHTML("walletAddress", shortenAddress(userAddress));
+    document.getElementById("connectWallet").innerText = "Wallet Connected";
 
-    const network = await provider.getNetwork();
-    if(network.chainId !== 8453){
-      try{
-        await window.ethereum.request({ method:"wallet_switchEthereumChain", params:[{ chainId:"0x2105" }] });
-        // Nach Chain-Switch Provider neu initialisieren
-        provider = new ethers.providers.Web3Provider(window.ethereum);
-        signer = provider.getSigner();
-        userAddress = await signer.getAddress();
-      }catch(e){
-        throw e;
-      }
+    initAttackResourceSelect();
+    await updateBalances();
+    await updatePoolInfo();
+    await loadUserBlocks();
+    await loadResourceBalancesOnchain();
+    await loadUserAttacks();
+
+    refreshAttackDropdown(); // nach dem Laden
+
+    if(!attacksPoller){
+      attacksPoller = setInterval(async ()=>{
+        await loadUserAttacks();
+        await loadUserBlocks();
+        refreshBlockMarkings();
+      }, 30000);
     }
+
+  } catch(e){
+    console.error(e);
+    alert("Connection error: " + e.message);
+    userAddress = null;
+  } finally {
+    isConnecting = false;
+  }
+}
 
     nftContract          = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
     farmingV4Contract    = new ethers.Contract(FARMING_V4_ADDRESS, FARMING_V4_ABI, signer);
