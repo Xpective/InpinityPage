@@ -1,7 +1,8 @@
 /* =========================================================
-   INPINITY MAP – V4 ONLY – Finale Version mit allen Optimierungen
+   INPINITY MAP – V4 ONLY – FINALE Version mit allen Optimierungen
    - Basierend auf map.html (Inline-Script) aber ausgelagert
    - Gleiche Verbesserungen wie in game.js
+   - Zusätzlich: Polling-Steuerung, Request-ID, read‑only Fallback
    ========================================================= */
 
 /* ==================== KONFIGURATION (V4) ==================== */
@@ -83,6 +84,8 @@ let selectedTokenOwner = null;
 
 let userAttacks = [];
 let attacksTicker = null;
+let attacksPoller = null;
+let dataPoller = null;
 
 let nftContract, farmingV4Contract, piratesV4Contract, mercenaryV2Contract, inpiContract, pitroneContract;
 let resourceTokenContract;
@@ -110,6 +113,9 @@ let pinchStartDist = 0;
 let touchStartX = 0, touchStartY = 0;
 let touchMoved = false;
 const MOVE_THRESHOLD = 10; // Pixel
+
+// Request-ID für Attack-Dropdown
+let attackDropdownRequestId = 0;
 
 const resourceNames = ["Oil","Lemons","Iron","Gold","Platinum","Copper","Crystal","Obsidian","Mysterium","Aether"];
 const rarityNames = ["Bronze","Silver","Gold","Platinum","Diamond"];
@@ -449,11 +455,6 @@ async function loadData() {
     ).catch(() => []);
     partnerItems.forEach(p => { if (tokens[p.id]) tokens[p.id].partnerActive = !!p.active; });
 
-    if (userAddress) {
-      await loadUserResources();
-      await loadUserAttacks();
-    }
-
     drawPyramid();
   } catch (err) {
     console.error("Fehler beim Laden:", err);
@@ -591,15 +592,17 @@ function centerPyramid() {
   drawPyramid();
 }
 
-/* ==================== ATTACK-DROPDOWN (Verbessert) ==================== */
+/* ==================== ATTACK-DROPDOWN (mit Request-ID) ==================== */
 function productionToAllowedResourceIds(productionObj) {
   const map = { OIL:0, LEMONS:1, IRON:2, GOLD:3, PLATINUM:4, COPPER:5, CRYSTAL:6, OBSIDIAN:7, MYSTERIUM:8, AETHER:9 };
   return Object.keys(productionObj).map(key => map[key]).filter(id => Number.isFinite(id));
 }
 
-// NEU: Position onchain holen
+// NEU: Position onchain holen – read‑only sicher
 async function getTokenPosition(tokenId) {
-  const pos = await nftContract.getBlockPosition(tokenId);
+  const contract = nftContract || nftReadOnlyContract;
+  if (!contract) throw new Error("NFT contract not ready");
+  const pos = await contract.getBlockPosition(tokenId);
   return { row: Number(pos.row), col: Number(pos.col) };
 }
 
@@ -622,7 +625,7 @@ async function getStealableResourcesForTarget(targetTokenId) {
     return { farmingActive, farmStartTime, claimIn, revealed: false, allowed: [0, 1, 2] };
   }
   let rarity = 0;
-  // Position onchain holen (keine tokenIdToRowCol mehr!)
+  // Position onchain holen
   const { row } = await getTokenPosition(targetTokenId);
   try {
     rarity = Number(await nftContract.calculateRarity(targetTokenId));
@@ -638,27 +641,36 @@ async function getStealableResourcesForTarget(targetTokenId) {
 }
 
 async function refreshAttackDropdown() {
+  const requestId = ++attackDropdownRequestId;
   const select = document.getElementById("attackResource");
   const msg = actionMessage;
   if (!select || !selectedTokenId) return;
+
   const targetTokenId = parseInt(selectedTokenId, 10);
+
   if (!userAddress || !nftContract || !farmingV4Contract) {
     select.innerHTML = "";
     [0,1,2].forEach(id => {
       const opt = document.createElement("option");
-      opt.value = id; opt.textContent = resourceNames[id];
+      opt.value = id;
+      opt.textContent = resourceNames[id];
       select.appendChild(opt);
     });
     return;
   }
+
   msg.innerHTML = `<span class="success">⏳ Analyzing...</span>`;
+
   const info = await getStealableResourcesForTarget(targetTokenId);
+  if (requestId !== attackDropdownRequestId) return;
+
   const now = Math.floor(Date.now() / 1000);
   let farmLine = "";
   if (!info.farmingActive) farmLine = "❌ Farming inactive";
   else if (info.claimIn !== null && info.claimIn > 0) farmLine = `⏳ Ready in ${formatDuration(info.claimIn)}`;
   else if (info.claimIn === 0) farmLine = `✅ Loot window active`;
   else farmLine = "✅ Farming active";
+
   let pendingLine = "";
   if (info.pendingArr && info.pendingArr.length !== undefined) {
     let total = 0n;
@@ -667,7 +679,11 @@ async function refreshAttackDropdown() {
     }
     pendingLine = total === 0n ? "⚠️ 0 pending" : `✅ ${total.toString()} pending`;
   }
+
+  if (requestId !== attackDropdownRequestId) return;
+
   msg.innerHTML = `<span class="${!info.farmingActive ? 'error' : 'success'}">${farmLine}<br>${pendingLine}</span>`;
+
   select.innerHTML = "";
   info.allowed.forEach(id => {
     const opt = document.createElement("option");
@@ -904,19 +920,8 @@ async function handleAttack() {
     return;
   }
 
-  // Ausgewählten Block als Angreifer nutzen, falls er dem User gehört und ausgewählt ist
-  let attackerTokenId;
-  if (
-    selectedTokenId &&
-    tokens[selectedTokenId] &&
-    tokens[selectedTokenId].owner &&
-    tokens[selectedTokenId].owner.toLowerCase() === userAddress.toLowerCase()
-  ) {
-    attackerTokenId = parseInt(selectedTokenId, 10);
-  } else {
-    attackerTokenId = parseInt(ownTokens[0][0], 10);
-  }
-
+  // In der Map: Angreifer ist immer der erste eigene Block (nicht der ausgewählte, da der das Ziel ist)
+  const attackerTokenId = parseInt(ownTokens[0][0], 10);
   const targetTokenId = parseInt(selectedTokenId, 10);
   const resource = parseInt(document.getElementById("attackResource")?.value, 10);
 
@@ -979,11 +984,19 @@ async function connectWallet() {
 
     document.getElementById("walletAddress").innerText = shortenAddress(userAddress);
     document.getElementById("connectBtn").innerText = "Connected";
+    
     await loadData();
     await loadUserResources();
     await loadUserAttacks();
     drawPyramid();
-    setInterval(() => { loadUserAttacks(); }, 30000);
+
+    // Polling nur einmal starten
+    if (!attacksPoller) {
+      attacksPoller = setInterval(() => { loadUserAttacks(); }, 30000);
+    }
+    if (!dataPoller) {
+      dataPoller = setInterval(() => { loadData(); }, 30000);
+    }
   } catch (err) {
     console.error(err);
     alert("Connection error: " + (err?.message || err));
@@ -1153,17 +1166,20 @@ const legendContent = document.getElementById("legendContent");
 let isDraggingPanel = false;
 let dragStartX = 0, dragStartY = 0, panelStartLeft = 0, panelStartTop = 0;
 
-dragHandle?.addEventListener("mousedown", (e) => {
-  isDraggingPanel = true;
-  dragStartX = e.clientX; dragStartY = e.clientY;
-  const rect = legendPanel.getBoundingClientRect();
-  panelStartLeft = rect.left; panelStartTop = rect.top;
-  legendPanel.style.transition = "none";
-  e.preventDefault();
-});
+if (dragHandle) {
+  dragHandle.addEventListener("mousedown", (e) => {
+    if (!legendPanel) return;
+    isDraggingPanel = true;
+    dragStartX = e.clientX; dragStartY = e.clientY;
+    const rect = legendPanel.getBoundingClientRect();
+    panelStartLeft = rect.left; panelStartTop = rect.top;
+    legendPanel.style.transition = "none";
+    e.preventDefault();
+  });
+}
 
 window.addEventListener("mousemove", (e) => {
-  if (!isDraggingPanel) return;
+  if (!isDraggingPanel || !legendPanel) return;
   const dx = e.clientX - dragStartX;
   const dy = e.clientY - dragStartY;
   legendPanel.style.left = (panelStartLeft + dx) + "px";
@@ -1173,13 +1189,15 @@ window.addEventListener("mousemove", (e) => {
 
 window.addEventListener("mouseup", () => {
   isDraggingPanel = false;
-  legendPanel.style.transition = "";
+  if (legendPanel) legendPanel.style.transition = "";
 });
 
 let isResizing = false;
-resizeHandle?.addEventListener("mousedown", (e) => { isResizing = true; e.preventDefault(); });
+if (resizeHandle) {
+  resizeHandle.addEventListener("mousedown", (e) => { isResizing = true; e.preventDefault(); });
+}
 window.addEventListener("mousemove", (e) => {
-  if (!isResizing) return;
+  if (!isResizing || !legendPanel) return;
   const rect = legendPanel.getBoundingClientRect();
   const newWidth = rect.right - e.clientX;
   if (newWidth > 200 && newWidth < 520) {
@@ -1189,42 +1207,52 @@ window.addEventListener("mousemove", (e) => {
 });
 window.addEventListener("mouseup", () => { isResizing = false; });
 
-collapseBtn?.addEventListener("click", () => {
-  if (legendContent.classList.contains("collapsed")) {
-    legendContent.classList.remove("collapsed");
-    collapseBtn.textContent = "−";
-  } else {
-    legendContent.classList.add("collapsed");
-    collapseBtn.textContent = "+";
-  }
-});
+if (collapseBtn && legendContent) {
+  collapseBtn.addEventListener("click", () => {
+    if (legendContent.classList.contains("collapsed")) {
+      legendContent.classList.remove("collapsed");
+      collapseBtn.textContent = "−";
+    } else {
+      legendContent.classList.add("collapsed");
+      collapseBtn.textContent = "+";
+    }
+  });
+}
 
-resetPosBtn?.addEventListener("click", () => {
-  legendPanel.style.left = "auto";
-  legendPanel.style.top = "20px";
-  legendPanel.style.right = "20px";
-  legendPanel.style.width = "380px";
-});
+if (resetPosBtn && legendPanel) {
+  resetPosBtn.addEventListener("click", () => {
+    legendPanel.style.left = "auto";
+    legendPanel.style.top = "20px";
+    legendPanel.style.right = "20px";
+    legendPanel.style.width = "380px";
+  });
+}
 
 /* ==================== Canvas events ==================== */
 window.addEventListener("resize", () => {
-  canvas.width = container.clientWidth;
-  canvas.height = container.clientHeight;
-  centerPyramid();
+  if (canvas && container) {
+    canvas.width = container.clientWidth;
+    canvas.height = container.clientHeight;
+    centerPyramid();
+  }
 });
 
-canvas?.addEventListener("wheel", handleWheel, { passive: false });
-canvas?.addEventListener("touchstart", handleTouchStart, { passive: false });
-canvas?.addEventListener("touchmove", handleTouchMove, { passive: false });
-canvas?.addEventListener("touchend", handleTouchEnd);
-canvas?.addEventListener("touchcancel", handleTouchEnd);
+if (canvas) {
+  canvas.addEventListener("wheel", handleWheel, { passive: false });
+  canvas.addEventListener("touchstart", handleTouchStart, { passive: false });
+  canvas.addEventListener("touchmove", handleTouchMove, { passive: false });
+  canvas.addEventListener("touchend", handleTouchEnd);
+  canvas.addEventListener("touchcancel", handleTouchEnd);
 
-canvas?.addEventListener("mousedown", (e) => {
-  isDragging = true;
-  lastMouseX = e.clientX;
-  lastMouseY = e.clientY;
-  canvas.style.cursor = "grabbing";
-});
+  canvas.addEventListener("mousedown", (e) => {
+    isDragging = true;
+    lastMouseX = e.clientX;
+    lastMouseY = e.clientY;
+    canvas.style.cursor = "grabbing";
+  });
+
+  canvas.addEventListener("click", handleClick);
+}
 
 window.addEventListener("mousemove", (e) => {
   if (isDragging) {
@@ -1244,8 +1272,6 @@ window.addEventListener("mouseup", () => {
   isDragging = false;
   if (canvas) canvas.style.cursor = "grab";
 });
-
-canvas?.addEventListener("click", handleClick);
 
 document.getElementById("connectBtn")?.addEventListener("click", connectWallet);
 
@@ -1268,5 +1294,5 @@ document.addEventListener("click", async (e) => {
   }
   await loadData();
   centerPyramid();
-  setInterval(loadData, 30000);
+  // Kein zusätzliches setInterval hier – Polling läuft nach connectWallet.
 })();
