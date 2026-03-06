@@ -488,7 +488,7 @@
   
     const CLAIM_COOLDOWN_SEC = 24 * 60 * 60; // 24h
   
-    // ==================== ABIs (basierend auf V3, aber für V4) ====================
+    // ==================== ABIs ====================
     const NFT_ABI = [
       "function revealBlock(uint256 tokenId, bytes32[] piProof, bytes32[] phiProof, uint8 piDigit, uint8 phiDigit) external",
       "function calculateRarity(uint256 tokenId) view returns (uint8)",
@@ -497,7 +497,6 @@
       "function blockData(uint256) view returns (uint8 piDigit, uint8 phiDigit, uint256 row, uint256 col, bool revealed, uint256 farmingEndTime)"
     ];
   
-    // FarmingV4 ABI (gleiche Funktionssignaturen wie V3)
     const FARMING_V4_ABI = [
       "function startFarming(uint256 tokenId) external",
       "function stopFarming(uint256 tokenId) external",
@@ -659,7 +658,7 @@
       try {
         const where = `{ attacker: "${userAddress.toLowerCase()}" }`;
         const attacks = await fetchAllWithPagination(
-          "attackV4S",
+          "attackV4S",  // ⬅️ WICHTIG: großes S
           "id attacker attackerTokenId targetTokenId attackIndex startTime endTime resource executed protectionLevel effectiveStealPercent stolenAmount",
           where
         );
@@ -873,7 +872,7 @@
   
         // FarmingV4 Status aus Subgraph holen
         const farmV4Items = await fetchAllWithPagination(
-          "farmV4S",
+          "farmV4S",  // ⬅️ WICHTIG: großes S
           "id owner startTime lastAccrualTime boostExpiry active"
         ).catch(() => []);
         
@@ -1027,7 +1026,7 @@
       drawPyramid();
     }
   
-    // ==================== ATTACK-DROPDOWN (basierend auf Rarity) ====================
+    // ==================== ATTACK-DROPDOWN ====================
     function tokenIdToRowCol(tokenId) {
       const id = Number(tokenId);
       return { row: Math.floor(id / 2048), col: id % 2048 };
@@ -1241,7 +1240,6 @@
       if (!selectedTokenId) return;
       actionMessage.innerHTML = '<span class="success">⏳ Starting V4...</span>';
       try {
-        // Direkt V4 starten
         const farm = await farmingV4Contract.farms(selectedTokenId);
         if (farm.isActive) {
           actionMessage.innerHTML = '<span class="success">✅ Already active on V4</span>';
