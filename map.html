@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <!-- Optimiertes Viewport für mobile Geräte -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover" />
-  <title>INPINITY – Pyramid Map (V3 ONLY)</title>
+  <title>INPINITY – Pyramid Map (V4)</title>
   <link rel="icon" type="image/png" href="favicon.webp" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/base.css">
@@ -440,7 +440,7 @@
         </div>
 
         <div style="margin: 1rem 0; border-top: 1px solid #2a3f4a; padding-top: 0.8rem;">
-          <h4 style="color: #d4af37; margin-bottom: 0.5rem;">⚔️ Attacks</h4>
+          <h4 style="color: #d4af37; margin-bottom: 0.5rem;">⚔️ Attacks (V4)</h4>
           <div id="userAttacksList" class="attacks-list">
             <p style="color: #98a9b9;">Connect wallet</p>
           </div>
@@ -465,29 +465,30 @@
   
   <script>
   (async function () {
-    // ==================== KONFIGURATION (NUR V3) ====================
+    // ==================== KONFIGURATION (V4) ====================
     const DEPLOYMENT_ID_V1 = "QmbpREskj5F7R8WpzUS6pv4XkKx1M34KAUc19fuUPtmu3o";
     const SUBGRAPH_ID_V2   = "22b4uXYgs4rwTj6n3iWB4d8Vk4s7LAG7dTAtRaTXfseQ";
     const API_KEY          = "059bc2832dfe50597009e556898d4ba6";
   
-    const SUBGRAPH_URL_V1 = `https://gateway.thegraph.com/api/${API_KEY}/deployments/id/${DEPLOYMENT_ID_V1}`;
-    const SUBGRAPH_URL_V2 = `https://gateway.thegraph.com/api/${API_KEY}/subgraphs/id/${SUBGRAPH_ID_V2}`;
+    // Neue Subgraph-URL für Version 0.1.2 (Studio)
+    const SUBGRAPH_URL = "https://api.studio.thegraph.com/query/1743108/inpinity/version/latest";
   
     const BASE_BLOCK_SIZE = 24;
     const WORKER_URL = "https://inpinity-worker-final.s-plat.workers.dev";
   
-    // ====== NUR V3 Contracts ======
+    // ====== V4 Contracts ======
     const NFT_ADDRESS = "0x277a0D5864293C78d7387C54B48c35D5E9578Ab1";
     const RESOURCE_TOKEN_ADDRESS = "0x71E76a6065197acdd1a4d6B736712F80D1Fd3D8b";
     const INPI_ADDRESS = "0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D";
     const PITRONE_ADDRESS = "0x7240Ec5B3Ba944888E186c74D0f8B4F5F71c9AE8";
-    const FARMING_V3_ADDRESS = "0xE79445C9ef97B8156BB505D784C0356E54432AD9";
-    const PIRATES_V3_ADDRESS = "0xC3544804cea908b8Ac6752B4F47609e1c22DaF5d";
-    const MERCENARY_V2_ADDRESS = "0xFEa09ccA75dbc63cc8053739A61777Bd13fC6Bc2"; // bleibt V2
+  
+    const FARMING_V4_ADDRESS = "0xa7F093c893aeF7dA632e5Fa23971ad3C00Cc5bEd";
+    const PIRATES_V4_ADDRESS = "0x393726fc6f54A07bca710ed7F1c93491CE7daF03";
+    const MERCENARY_V2_ADDRESS = "0xFEa09ccA75dbc63cc8053739A61777Bd13fC6Bc2";
   
     const CLAIM_COOLDOWN_SEC = 24 * 60 * 60; // 24h
   
-    // ==================== ABIs ====================
+    // ==================== ABIs (basierend auf V3, aber für V4) ====================
     const NFT_ABI = [
       "function revealBlock(uint256 tokenId, bytes32[] piProof, bytes32[] phiProof, uint8 piDigit, uint8 phiDigit) external",
       "function calculateRarity(uint256 tokenId) view returns (uint8)",
@@ -496,7 +497,8 @@
       "function blockData(uint256) view returns (uint8 piDigit, uint8 phiDigit, uint256 row, uint256 col, bool revealed, uint256 farmingEndTime)"
     ];
   
-    const FARMING_V3_ABI = [
+    // FarmingV4 ABI (gleiche Funktionssignaturen wie V3)
+    const FARMING_V4_ABI = [
       "function startFarming(uint256 tokenId) external",
       "function stopFarming(uint256 tokenId) external",
       "function claimResources(uint256 tokenId) external",
@@ -504,7 +506,7 @@
       "function getAllPending(uint256 tokenId) view returns (uint256[10] out)"
     ];
   
-    const PIRATES_V3_ABI = [
+    const PIRATES_V4_ABI = [
       "function startAttack(uint256 attackerTokenId, uint256 targetTokenId, uint8 resource) external",
       "function executeAttack(uint256 targetTokenId, uint256 attackIndex) external"
     ];
@@ -544,7 +546,7 @@
     let userAttacks = [];
     let attacksTicker = null;
   
-    let nftContract, farmingV3Contract, piratesV3Contract, mercenaryV2Contract, inpiContract, pitroneContract;
+    let nftContract, farmingV4Contract, piratesV4Contract, mercenaryV2Contract, inpiContract, pitroneContract;
     let resourceTokenContract;
   
     const canvas = document.getElementById("pyramidCanvas");
@@ -565,7 +567,6 @@
     let isDragging = false;
     let lastMouseX = 0, lastMouseY = 0;
     let pinchStartDist = 0;
-    let lastTouchDistance = 0;
   
     // Für mobile Touch-Unterscheidung
     let touchStartX = 0, touchStartY = 0;
@@ -605,7 +606,6 @@
       if (h > 0) return `${h}h ${m}m`;
       return `${m}m`;
     }
-    function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
     function getAttackStorageKey(targetTokenId) { return `attack_${targetTokenId}`; }
     function secondsUntilClaimable(farmStartTime, nowSec) {
       if (!farmStartTime) return null;
@@ -614,10 +614,11 @@
     }
   
     // ==================== SUBGRAPH HELPERS ====================
-    async function fetchSubgraph(url, query) {
-      const response = await fetch(url, {
+    async function fetchSubgraph(query) {
+      const headers = { "Content-Type": "application/json", "Authorization": `Bearer ${API_KEY}` };
+      const response = await fetch(SUBGRAPH_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${API_KEY}` },
+        headers,
         body: JSON.stringify({ query })
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -626,13 +627,13 @@
       return json.data;
     }
   
-    async function fetchAllWithPagination(url, fieldName, subfields, where = "") {
+    async function fetchAllWithPagination(fieldName, subfields, where = "") {
       const pageSize = 1000;
       let skip = 0;
       let all = [];
       while (true) {
         const query = `{ ${fieldName}(first:${pageSize}, skip:${skip}${where ? ", where: " + where : ""}) { ${subfields} } }`;
-        const data = await fetchSubgraph(url, query);
+        const data = await fetchSubgraph(query);
         const items = data[fieldName];
         if (!items || items.length === 0) break;
         all = all.concat(items);
@@ -652,27 +653,30 @@
       return production;
     }
   
-    // ==================== LOAD ATTACKS (NUR V3) ====================
+    // ==================== LOAD ATTACKS (V4) ====================
     async function loadUserAttacks() {
       if (!userAddress) return;
       try {
         const where = `{ attacker: "${userAddress.toLowerCase()}" }`;
         const attacks = await fetchAllWithPagination(
-          SUBGRAPH_URL_V2,
-          "attackV3S",
-          "id attacker target attackIndex startTime endTime resource executed",
+          "attackV4s",
+          "id attacker attackerTokenId targetTokenId attackIndex startTime endTime resource executed protectionLevel effectiveStealPercent stolenAmount",
           where
         );
         userAttacks = attacks
           .filter(a => !a.executed)
           .map(a => ({
             id: a.id,
-            targetTokenId: parseInt(a.target, 10),
+            targetTokenId: parseInt(a.targetTokenId, 10),
+            attackerTokenId: parseInt(a.attackerTokenId, 10),
             attackIndex: parseInt(a.attackIndex, 10),
             startTime: parseInt(a.startTime, 10),
             endTime: parseInt(a.endTime, 10),
             executed: !!a.executed,
-            resource: parseInt(a.resource, 10)
+            resource: parseInt(a.resource, 10),
+            protectionLevel: a.protectionLevel ? parseInt(a.protectionLevel, 10) : 0,
+            effectiveStealPercent: a.effectiveStealPercent ? parseInt(a.effectiveStealPercent, 10) : 0,
+            stolenAmount: a.stolenAmount ? a.stolenAmount.toString() : "0"
           }));
         const dismissed = loadDismissedAttacks();
         userAttacks = userAttacks.filter(a => !dismissed.has(a.id));
@@ -772,22 +776,22 @@
       return new Set(JSON.parse(localStorage.getItem("dismissedAttacks") || "[]"));
     }
   
-    // ==================== EXECUTE ATTACK (NUR V3) ====================
+    // ==================== EXECUTE ATTACK (V4) ====================
     async function executeAttack(attack) {
       actionMessage.innerHTML = '<span class="success">⏳ Checking target resources...</span>';
       try {
-        if (!piratesV3Contract) throw new Error("Connect wallet first.");
+        if (!piratesV4Contract) throw new Error("Connect wallet first.");
     
-        // NUR V3 Farming-Status prüfen
-        const farm = await farmingV3Contract.farms(attack.targetTokenId);
-        const pending = await farmingV3Contract.getAllPending(attack.targetTokenId);
+        // Prüfe Farming-Status und Pending-Ressourcen (V4)
+        const farm = await farmingV4Contract.farms(attack.targetTokenId);
+        const pending = await farmingV4Contract.getAllPending(attack.targetTokenId);
         
         const now = Math.floor(Date.now() / 1000);
         const startTime = Number(farm.startTime);
         const claimIn = startTime ? secondsUntilClaimable(startTime, now) : null;
     
-        // ===== KONSOLEN-LOGS FÜR DEBUGGING =====
-        console.log("===== EXECUTE DEBUG =====");
+        // ===== DEBUG =====
+        console.log("===== EXECUTE DEBUG (V4) =====");
         console.log("Target Token ID:", attack.targetTokenId);
         console.log("Farm status (isActive):", farm.isActive);
         console.log("Farm startTime:", startTime, "(", new Date(startTime * 1000).toLocaleString(), ")");
@@ -795,7 +799,7 @@
         console.log("Claim in (formatted):", claimIn ? formatDuration(claimIn) : "N/A");
         console.log("Pending array:", pending);
         console.log("Selected resource:", attack.resource, "Value:", pending?.[attack.resource]?.toString());
-        console.log("==========================");
+        console.log("===============================");
     
         // Prüfungen
         if (!farm.isActive) {
@@ -804,7 +808,7 @@
         }
         
         if (claimIn !== null && claimIn > 0) {
-          actionMessage.innerHTML = `<span class="error">⏳ Need to wait ${formatDuration(claimIn)} (24h total).</span>`;
+          actionMessage.innerHTML = `<span class="error">❌ Need to wait ${formatDuration(claimIn)} (24h total).</span>`;
           return;
         }
         
@@ -816,7 +820,7 @@
         // Alles OK – Transaktion senden
         actionMessage.innerHTML = '<span class="success">⏳ Executing attack...</span>';
         
-        const tx = await piratesV3Contract.executeAttack(
+        const tx = await piratesV4Contract.executeAttack(
           attack.targetTokenId,
           attack.attackIndex,
           { gasLimit: 350000 }
@@ -847,45 +851,52 @@
       }
     }
   
-    // ==================== LOAD MAP DATA ====================
+    // ==================== LOAD MAP DATA (V4 Subgraph) ====================
     async function loadData() {
       try {
-        // NUR Subgraph V2 verwenden (hat alle V3 Daten)
-        const tokenItemsV2 = await fetchAllWithPagination(
-          SUBGRAPH_URL_V2, 
-          "tokens", 
-          "id owner { id } revealed farm { active }"
+        // Token-Informationen (weiterhin aus V2 Subgraph, da NFT-Entitäten dort)
+        const tokenItems = await fetchAllWithPagination(
+          "tokens",
+          "id owner { id } revealed"
         ).catch(() => []);
         
         tokens = {};
-        
-        tokenItemsV2.forEach(t => {
+        tokenItems.forEach(t => {
           tokens[t.id] = { 
             owner: t.owner ? t.owner.id : null, 
             revealed: !!t.revealed, 
-            farmActive: t.farm ? !!t.farm.active : false, 
+            farmActive: false, 
             protectionActive: false, 
             partnerActive: false 
           };
         });
   
-        const protectionItems = await fetchAllWithPagination(SUBGRAPH_URL_V2, "protections", "id active").catch(() => []);
+        // FarmingV4 Status aus Subgraph holen
+        const farmV4Items = await fetchAllWithPagination(
+          "farmV4s",
+          "id owner startTime lastAccrualTime boostExpiry active"
+        ).catch(() => []);
+        
+        farmV4Items.forEach(f => {
+          if (tokens[f.id]) {
+            tokens[f.id].farmActive = f.active;
+            tokens[f.id].farmStartTime = parseInt(f.startTime, 10);
+            tokens[f.id].farmOwner = f.owner;
+          }
+        });
+  
+        // Protection und Partnership (bleiben bei V2)
+        const protectionItems = await fetchAllWithPagination(
+          "protections",
+          "id active"
+        ).catch(() => []);
         protectionItems.forEach(p => { if (tokens[p.id]) tokens[p.id].protectionActive = !!p.active; });
   
-        const partnerItems = await fetchAllWithPagination(SUBGRAPH_URL_V2, "partnerships", "id active").catch(() => []);
+        const partnerItems = await fetchAllWithPagination(
+          "partnerships",
+          "id active"
+        ).catch(() => []);
         partnerItems.forEach(p => { if (tokens[p.id]) tokens[p.id].partnerActive = !!p.active; });
-  
-        // On-chain V3 Status für farmActive (override)
-        if (userAddress && farmingV3Contract) {
-          const ids = Object.keys(tokens);
-          const mintedIds = ids.filter(id => tokens[id] && tokens[id].owner);
-          for (const id of mintedIds) {
-            try {
-              const f = await farmingV3Contract.farms(id);
-              tokens[id].farmActive = !!f.isActive;
-            } catch (_) {}
-          }
-        }
   
         if (userAddress) {
           await loadUserResources();
@@ -902,31 +913,7 @@
     async function loadUserResources() {
       if (!userAddress) return;
       
-      // Zuerst versuchen über Subgraph
-      try {
-        const where = `{ account: "${userAddress.toLowerCase()}" }`;
-        const balanceItems = await fetchAllWithPagination(
-          SUBGRAPH_URL_V2,
-          "resourceBalances",
-          "id account resourceId amount",
-          where
-        );
-    
-        if (balanceItems && balanceItems.length > 0) {
-          userResources = balanceItems
-            .filter(b => (b.account || "").toLowerCase() === userAddress.toLowerCase())
-            .map(b => ({ 
-              resourceId: parseInt(b.resourceId, 10), 
-              amount: BigInt(b.amount) 
-            }));
-          updateUserResourcesDisplay();
-          return;
-        }
-      } catch (err) {
-        console.warn("Subgraph resource fetch failed, using on-chain:", err);
-      }
-      
-      // Fallback: On-chain
+      // On-chain (ResourceToken)
       await loadUserResourcesOnChain();
     }
     
@@ -1040,7 +1027,7 @@
       drawPyramid();
     }
   
-    // ==================== ATTACK-DROPDOWN ====================
+    // ==================== ATTACK-DROPDOWN (basierend auf Rarity) ====================
     function tokenIdToRowCol(tokenId) {
       const id = Number(tokenId);
       return { row: Math.floor(id / 2048), col: id % 2048 };
@@ -1055,7 +1042,7 @@
       let farmingActive = false;
       let farmStartTime = 0;
       try {
-        const f = await farmingV3Contract.farms(targetTokenId);
+        const f = await farmingV4Contract.farms(targetTokenId);
         farmingActive = !!f.isActive;
         farmStartTime = Number(f.startTime);
       } catch (e) {}
@@ -1079,7 +1066,7 @@
       if (allowed.length === 0) allowed = [0,1,2,3,4,5,6,7,8,9];
       let pendingArr = null;
       try {
-        pendingArr = await farmingV3Contract.getAllPending(targetTokenId);
+        pendingArr = await farmingV4Contract.getAllPending(targetTokenId);
       } catch(e) {}
       return { farmingActive, farmStartTime, claimIn, revealed: true, rarity, allowed, pendingArr };
     }
@@ -1089,7 +1076,7 @@
       const msg = document.getElementById("actionMessage");
       if (!select || !selectedTokenId) return;
       const targetTokenId = parseInt(selectedTokenId, 10);
-      if (!userAddress || !nftContract || !farmingV3Contract) {
+      if (!userAddress || !nftContract || !farmingV4Contract) {
         select.innerHTML = "";
         [0,1,2].forEach(id => {
           const opt = document.createElement("option");
@@ -1121,30 +1108,30 @@
       });
     }
   
-    // ==================== SIDEBAR ====================
+    // ==================== SIDEBAR (V4) ====================
     async function updateSidebar(tokenId) {
       selectedTokenId = tokenId;
       const token = tokens[tokenId];
       const owner = token ? token.owner : null;
       selectedTokenOwner = owner;
-      let v3Active = false;
+      let v4Active = false;
       let farmStartTime = 0;
       let claimIn = null;
       let pendingArr = null;
-      if (farmingV3Contract) {
+      if (farmingV4Contract) {
         try {
-          const f = await farmingV3Contract.farms(tokenId);
-          v3Active = !!f.isActive;
+          const f = await farmingV4Contract.farms(tokenId);
+          v4Active = !!f.isActive;
           farmStartTime = Number(f.startTime);
           const now = Math.floor(Date.now() / 1000);
           claimIn = farmStartTime ? secondsUntilClaimable(farmStartTime, now) : null;
         } catch (_) {}
         try {
-          pendingArr = await farmingV3Contract.getAllPending(tokenId);
+          pendingArr = await farmingV4Contract.getAllPending(tokenId);
         } catch(_) {}
       }
       const now = Math.floor(Date.now() / 1000);
-      const farmAgeTxt = (v3Active && farmStartTime) ? formatDuration(now - farmStartTime) : "-";
+      const farmAgeTxt = (v4Active && farmStartTime) ? formatDuration(now - farmStartTime) : "-";
       const claimTxt = (claimIn === null) ? "-" : (claimIn > 0 ? ("in " + formatDuration(claimIn)) : "READY");
       let pendingTotalTxt = "-";
       if (pendingArr && Array.isArray(pendingArr)) {
@@ -1175,7 +1162,7 @@
           <div class="detail-row"><span class="detail-label">Owner</span><span class="detail-value">${shortenAddress(owner)}</span></div>
           <div class="detail-row"><span class="detail-label">Revealed</span><span class="detail-value">${token.revealed ? "✅" : "❌"}</span></div>
           ${rarityDisplay}
-          <div class="detail-row"><span class="detail-label">Farming</span><span class="detail-value">${v3Active ? "Active" : "Inactive"}</span></div>
+          <div class="detail-row"><span class="detail-label">Farming (V4)</span><span class="detail-value">${v4Active ? "Active" : "Inactive"}</span></div>
           <div class="detail-row"><span class="detail-label">Farm age</span><span class="detail-value">${farmAgeTxt}</span></div>
           <div class="detail-row"><span class="detail-label">Claim-ready</span><span class="detail-value">${claimTxt}</span></div>
           <div class="detail-row"><span class="detail-label">Pending</span><span class="detail-value">${pendingTotalTxt}</span></div>
@@ -1193,7 +1180,7 @@
       if (userAddress && owner && owner.toLowerCase() === userAddress.toLowerCase()) {
         let btns = "";
         if (!token.revealed) btns += `<button class="action-btn" id="revealBtn">🔓 Reveal</button>`;
-        if (!v3Active) btns += `<button class="action-btn" id="startFarmBtn">🌾 Start Farming</button>`;
+        if (!v4Active) btns += `<button class="action-btn" id="startFarmBtn">🌾 Start Farming (V4)</button>`;
         else {
           btns += `<button class="action-btn" id="stopFarmBtn">⏹️ Stop</button>`;
           btns += `<button class="action-btn" id="claimBtn">💰 Claim</button>`;
@@ -1224,7 +1211,7 @@
       }
     }
   
-    // ==================== ACTIONS ====================
+    // ==================== ACTIONS (V4) ====================
     async function handleReveal() {
       if (!selectedTokenId || !selectedTokenOwner) return;
       const tokenIdNum = parseInt(selectedTokenId, 10);
@@ -1252,17 +1239,17 @@
   
     async function handleStartFarm() {
       if (!selectedTokenId) return;
-      actionMessage.innerHTML = '<span class="success">⏳ Starting...</span>';
+      actionMessage.innerHTML = '<span class="success">⏳ Starting V4...</span>';
       try {
-        // Direkt V3 starten (keine Migration nötig)
-        const farm = await farmingV3Contract.farms(selectedTokenId);
+        // Direkt V4 starten
+        const farm = await farmingV4Contract.farms(selectedTokenId);
         if (farm.isActive) {
-          actionMessage.innerHTML = '<span class="success">✅ Already active on V3</span>';
+          actionMessage.innerHTML = '<span class="success">✅ Already active on V4</span>';
           return;
         }
-        const tx = await farmingV3Contract.startFarming(selectedTokenId, { gasLimit: 500000 });
+        const tx = await farmingV4Contract.startFarming(selectedTokenId, { gasLimit: 500000 });
         await tx.wait();
-        actionMessage.innerHTML = '<span class="success">✅ V3 farming started</span>';
+        actionMessage.innerHTML = '<span class="success">✅ V4 farming started</span>';
         await loadData();
         await updateSidebar(selectedTokenId);
       } catch (e) {
@@ -1273,9 +1260,9 @@
   
     async function handleStopFarm() {
       if (!selectedTokenId) return;
-      actionMessage.innerHTML = '<span class="success">⏳ Stopping...</span>';
+      actionMessage.innerHTML = '<span class="success">⏳ Stopping V4...</span>';
       try {
-        await sendTx(farmingV3Contract.stopFarming(selectedTokenId, { gasLimit: 500000 }), actionMessage, "Farming stopped.");
+        await sendTx(farmingV4Contract.stopFarming(selectedTokenId, { gasLimit: 500000 }), actionMessage, "Farming stopped.");
       } catch (e) {
         actionMessage.innerHTML = `<span class="error">❌ ${e.message}</span>`;
       }
@@ -1283,9 +1270,9 @@
   
     async function handleClaim() {
       if (!selectedTokenId) return;
-      actionMessage.innerHTML = '<span class="success">⏳ Claiming...</span>';
+      actionMessage.innerHTML = '<span class="success">⏳ Claiming V4...</span>';
       try {
-        await sendTx(farmingV3Contract.claimResources(selectedTokenId, { gasLimit: 600000 }), actionMessage, "Resources claimed!");
+        await sendTx(farmingV4Contract.claimResources(selectedTokenId, { gasLimit: 600000 }), actionMessage, "Resources claimed!");
         await loadUserResources();
       } catch (e) {
         actionMessage.innerHTML = `<span class="error">❌ ${e.message}</span>`;
@@ -1327,7 +1314,7 @@
       const resource = parseInt(document.getElementById("attackResource").value, 10);
       localStorage.setItem(getAttackStorageKey(targetTokenId), JSON.stringify({ targetTokenId, resource, startTime: Math.floor(Date.now() / 1000) }));
       await sendTx(
-        piratesV3Contract.startAttack(attackerTokenId, targetTokenId, resource, { gasLimit: 450000 }),
+        piratesV4Contract.startAttack(attackerTokenId, targetTokenId, resource, { gasLimit: 450000 }),
         actionMessage,
         "Attack launched!"
       );
@@ -1362,8 +1349,8 @@
           }
         }
         nftContract = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
-        farmingV3Contract = new ethers.Contract(FARMING_V3_ADDRESS, FARMING_V3_ABI, signer);
-        piratesV3Contract = new ethers.Contract(PIRATES_V3_ADDRESS, PIRATES_V3_ABI, signer);
+        farmingV4Contract = new ethers.Contract(FARMING_V4_ADDRESS, FARMING_V4_ABI, signer);
+        piratesV4Contract = new ethers.Contract(PIRATES_V4_ADDRESS, PIRATES_V4_ABI, signer);
         mercenaryV2Contract = new ethers.Contract(MERCENARY_V2_ADDRESS, MERCENARY_V2_ABI, signer);
         inpiContract = new ethers.Contract(INPI_ADDRESS, INPI_ABI, signer);
         pitroneContract = new ethers.Contract(PITRONE_ADDRESS, PITRONE_ABI, signer);
@@ -1480,7 +1467,6 @@
           e.touches[0].clientY - e.touches[1].clientY
         );
         pinchStartDist = dist;
-        lastTouchDistance = dist;
       }
     }
   
@@ -1531,11 +1517,6 @@
         isDragging = false;
         pinchStartDist = 0;
         touchMoved = false;
-      } else if (e.touches.length === 1) {
-        isDragging = true;
-        lastMouseX = e.touches[0].clientX;
-        lastMouseY = e.touches[0].clientY;
-        pinchStartDist = 0;
       }
     }
   
@@ -1662,10 +1643,6 @@
     await loadData();
     centerPyramid();
     setInterval(loadData, 30000);
-    // Am Ende der Datei, nach dem letzten } aber vor dem schließenden Script-Tag:
-    window.farmingV3Contract = farmingV3Contract;
-    window.piratesV3Contract = piratesV3Contract;
-    window.userAddress = userAddress;
   })();
   </script>
 </body>
