@@ -11,8 +11,8 @@
   <link rel="stylesheet" href="css/layout.css">
   <link rel="stylesheet" href="css/responsive.css">
   <style>
-    /* === Styles bleiben gleich wie vorher === */
     * { margin: 0; padding: 0; box-sizing: border-box; }
+
     html, body {
       width: 100%;
       height: 100%;
@@ -20,6 +20,7 @@
       position: fixed;
       touch-action: pan-x pan-y;
     }
+
     body {
       font-family: 'Inter', sans-serif;
       background: #0b0e12;
@@ -27,6 +28,7 @@
       display: flex;
       flex-direction: column;
     }
+
     .header {
       display: flex;
       flex-wrap: wrap;
@@ -41,7 +43,21 @@
       gap: 1rem;
       flex-shrink: 0;
     }
-    .nav-links { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      min-width: 0;
+      flex-wrap: wrap;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
     .nav-links a {
       color: #eef2f6;
       text-decoration: none;
@@ -52,16 +68,31 @@
       transition: 0.2s;
       font-weight: 500;
       font-size: 0.95rem;
+      white-space: nowrap;
     }
-    .nav-links a:hover { background: #2e6d5e; border-color: #d4af37; transform: translateY(-2px); }
-    .logo { display: flex; align-items: center; gap: 0.8rem; }
+
+    .nav-links a:hover {
+      background: #2e6d5e;
+      border-color: #d4af37;
+      transform: translateY(-2px);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      min-width: 0;
+    }
+
     .logo h1 {
       font-weight: 600;
       font-size: 1.7rem;
       background: linear-gradient(135deg, #f5e7c8, #d4af37);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      white-space: nowrap;
     }
+
     .logo span {
       font-size: 0.9rem;
       color: #98a2b3;
@@ -69,8 +100,16 @@
       padding: 0.2rem 0.8rem;
       border-radius: 40px;
       border: 1px solid #2f3e4c;
+      white-space: nowrap;
     }
-    .wallet { display: flex; align-items: center; gap: 1rem; margin-left: auto; }
+
+    .wallet {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-left: auto;
+    }
+
     .wallet button {
       background: linear-gradient(145deg, #1e3a3a, #1f4a3a);
       border: 1px solid #3b8b6b;
@@ -82,13 +121,16 @@
       cursor: pointer;
       transition: 0.2s;
       box-shadow: 0 2px 6px rgba(0, 40, 30, 0.5);
+      white-space: nowrap;
     }
+
     .wallet button:hover {
       background: #2e6d5e;
       border-color: #d4af37;
       transform: translateY(-2px);
       box-shadow: 0 6px 14px rgba(212, 175, 55, 0.3);
     }
+
     #walletAddress {
       background: #1a232c;
       padding: 0.4rem 1.2rem;
@@ -96,7 +138,9 @@
       font-size: 0.9rem;
       border: 1px solid #2f4b5c;
       color: #bcd0e0;
+      white-space: nowrap;
     }
+
     .main {
       flex: 1;
       display: flex;
@@ -106,6 +150,7 @@
       height: 100%;
       min-height: 0;
     }
+
     .canvas-container {
       position: absolute;
       top: 0;
@@ -119,12 +164,14 @@
       touch-action: none;
       cursor: grab;
     }
+
     .canvas-container canvas {
       display: block;
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
+
     .tooltip {
       position: absolute;
       background: rgba(20, 30, 40, 0.95);
@@ -143,6 +190,7 @@
       border-left: 4px solid #d4af37;
       line-height: 1.5;
     }
+
     .legend-panel {
       position: absolute;
       top: 20px;
@@ -163,6 +211,7 @@
       max-height: calc(100vh - 40px);
       overflow-y: auto;
     }
+
     .legend-header {
       display: flex;
       justify-content: space-between;
@@ -173,8 +222,18 @@
       background: rgba(0, 0, 0, 0.2);
       border-radius: 24px 24px 0 0;
     }
-    .legend-header h3 { font-size: 1.2rem; color: #d4af37; font-weight: 600; }
-    .legend-controls { display: flex; gap: 0.5rem; }
+
+    .legend-header h3 {
+      font-size: 1.2rem;
+      color: #d4af37;
+      font-weight: 600;
+    }
+
+    .legend-controls {
+      display: flex;
+      gap: 0.5rem;
+    }
+
     .legend-controls button {
       background: transparent;
       border: 1px solid #3a5060;
@@ -189,14 +248,26 @@
       transition: 0.2s;
       font-size: 1.1rem;
     }
-    .legend-controls button:hover { background: #d4af37; color: #0b0e12; border-color: #d4af37; }
+
+    .legend-controls button:hover {
+      background: #d4af37;
+      color: #0b0e12;
+      border-color: #d4af37;
+    }
+
     .legend-content {
       padding: 1.2rem 1.5rem;
       transition: max-height 0.3s ease, padding 0.3s ease;
       max-height: 600px;
       overflow-y: auto;
     }
-    .legend-content.collapsed { max-height: 0; padding: 0 1.5rem; overflow: hidden; }
+
+    .legend-content.collapsed {
+      max-height: 0;
+      padding: 0 1.5rem;
+      overflow: hidden;
+    }
+
     .detail-card {
       background: #1b2630;
       border-radius: 20px;
@@ -204,10 +275,29 @@
       border: 1px solid #2a3f4a;
       margin-bottom: 1.5rem;
     }
-    .detail-row { display: flex; justify-content: space-between; margin-bottom: 0.7rem; font-size: 0.95rem; }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.7rem;
+      font-size: 0.95rem;
+      gap: 1rem;
+    }
+
     .detail-label { color: #98a9b9; }
-    .detail-value { font-weight: 600; color: #f0f4fa; }
-    .action-buttons { display: flex; flex-direction: column; gap: 0.8rem; margin: 1rem 0; }
+    .detail-value {
+      font-weight: 600;
+      color: #f0f4fa;
+      text-align: right;
+    }
+
+    .action-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      margin: 1rem 0;
+    }
+
     .action-btn {
       background: linear-gradient(145deg, #2a3f4a, #1b2a33);
       border: 1px solid #3b6b8b;
@@ -219,12 +309,33 @@
       transition: 0.2s;
       text-align: center;
     }
-    .action-btn:hover:not(:disabled) { background: #3b6b8b; border-color: #d4af37; transform: translateY(-2px); }
-    .action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    .input-group { display: flex; align-items: center; gap: 0.5rem; margin: 0.8rem 0; }
-    .input-group label { font-size: 0.9rem; color: #98a9b9; min-width: 70px; }
-    .input-group input, .input-group select {
+    .action-btn:hover:not(:disabled) {
+      background: #3b6b8b;
+      border-color: #d4af37;
+      transform: translateY(-2px);
+    }
+
+    .action-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .input-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0.8rem 0;
+    }
+
+    .input-group label {
+      font-size: 0.9rem;
+      color: #98a9b9;
+      min-width: 70px;
+    }
+
+    .input-group input,
+    .input-group select {
       flex: 1;
       background: #0f1a22;
       border: 1px solid #2a3f4a;
@@ -233,8 +344,13 @@
       border-radius: 30px;
       outline: none;
       font-size: 16px;
+      min-width: 0;
     }
-    .input-group input:focus, .input-group select:focus { border-color: #d4af37; }
+
+    .input-group input:focus,
+    .input-group select:focus {
+      border-color: #d4af37;
+    }
 
     .message {
       margin-top: 0.8rem;
@@ -243,8 +359,18 @@
       text-align: center;
       font-size: 0.9rem;
     }
-    .success { background: #1a3a2a; border: 1px solid #2e7d5e; color: #a0e0a0; }
-    .error { background: #3a1a1a; border: 1px solid #b33a3a; color: #ffa0a0; }
+
+    .success {
+      background: #1a3a2a;
+      border: 1px solid #2e7d5e;
+      color: #a0e0a0;
+    }
+
+    .error {
+      background: #3a1a1a;
+      border: 1px solid #b33a3a;
+      color: #ffa0a0;
+    }
 
     .attacks-list {
       display: flex;
@@ -254,6 +380,7 @@
       max-height: 150px;
       overflow-y: auto;
     }
+
     .attack-item {
       background: #0f1a2a;
       border-radius: 16px;
@@ -265,6 +392,7 @@
       font-size: 0.85rem;
       gap: 0.6rem;
     }
+
     .execute-btn {
       background: #e74c3c;
       border: none;
@@ -276,9 +404,20 @@
       font-size: 0.8rem;
       white-space: nowrap;
     }
-    .execute-btn[disabled] { opacity: 0.4; cursor: not-allowed; }
 
-    .legend-item { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.8rem; font-size: 0.95rem; }
+    .execute-btn[disabled] {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      margin-bottom: 0.8rem;
+      font-size: 0.95rem;
+    }
+
     .color-box {
       width: 24px;
       height: 24px;
@@ -286,7 +425,9 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.4);
       position: relative;
       border: 1px solid #888;
+      flex-shrink: 0;
     }
+
     .color-gray { background: #3a4048; }
     .color-green { background: #2e7d5e; }
     .color-cyan { background: #9b59b6; }
@@ -295,11 +436,21 @@
     .color-gold { background: #ffd700; }
     .color-platinum { background: #e5e4e2; }
     .color-diamond { background: #b9f2ff; }
+
     .border-blue { border: 3px solid #3498db; box-sizing: border-box; }
     .border-purple { border: 3px solid #9b59b6; box-sizing: border-box; }
     .border-black { border: 3px solid #000; box-sizing: border-box; }
     .border-red { border: 3px solid #e74c3c; box-sizing: border-box; }
-    .star { position: absolute; top: -8px; right: -8px; font-size: 16px; color: gold; text-shadow: 0 0 5px black; }
+
+    .star {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      font-size: 16px;
+      color: gold;
+      text-shadow: 0 0 5px black;
+    }
+
     .rarity-bronze { color: #cd7f32; font-weight: bold; }
     .rarity-silver { color: #c0c0c0; font-weight: bold; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
     .rarity-gold { color: #ffd700; font-weight: bold; text-shadow: 0 0 8px gold; }
@@ -314,6 +465,7 @@
       border-top: 1px dashed #2a3f4a;
       padding-top: 1rem;
     }
+
     .legend-panel .resize-handle {
       position: absolute;
       left: -5px;
@@ -323,6 +475,7 @@
       cursor: ew-resize;
       background: transparent;
     }
+
     .resource-icon {
       width: 32px;
       height: 32px;
@@ -330,6 +483,7 @@
       margin-right: 12px;
       vertical-align: middle;
     }
+
     .resource-row {
       display: flex;
       align-items: center;
@@ -339,12 +493,14 @@
       border-radius: 8px;
       background: rgba(0,0,0,0.2);
     }
+
     .resource-name {
       color: #d4af37;
       margin-right: 8px;
       min-width: 80px;
       font-weight: 600;
     }
+
     .resource-amount {
       font-weight: 700;
       color: #f0f4fa;
@@ -358,34 +514,135 @@
     }
 
     @media (max-width: 768px) {
-      .header { padding: 0.5rem; flex-direction: row; align-items: center; }
-      .logo h1 { font-size: 1.2rem; }
-      .logo span { display: none; }
-      .nav-links { display: none; }
-      .wallet { margin-left: auto; }
-      .wallet button { padding: 0.3rem 1rem; font-size: 0.85rem; }
-      #walletAddress { display: none; }
-      .legend-panel { width: 280px; right: 10px; top: 60px; font-size: 0.85rem; max-height: calc(100vh - 70px); }
-      .canvas-container { position: absolute; width: 100%; height: 100%; }
-      .resource-icon { width: 24px; height: 24px; margin-right: 8px; }
-      .resource-row { font-size: 0.95rem; }
-      .legend-content { padding: 0.8rem; max-height: 400px; }
+      .header {
+        padding: 0.45rem 0.6rem;
+        flex-wrap: nowrap;
+        gap: 0.5rem;
+      }
+
+      .header-left {
+        flex: 1;
+        min-width: 0;
+        gap: 0.5rem;
+        flex-wrap: nowrap;
+      }
+
+      .logo {
+        gap: 0.45rem;
+        flex-shrink: 0;
+      }
+
+      .logo h1 {
+        font-size: 1.05rem;
+      }
+
+      .logo span {
+        display: none;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 0.35rem;
+        flex-wrap: nowrap;
+        overflow: hidden;
+      }
+
+      .nav-links a {
+        padding: 0.28rem 0.55rem;
+        font-size: 0.78rem;
+        border-radius: 999px;
+      }
+
+      .wallet {
+        margin-left: 0;
+        gap: 0.4rem;
+        flex-shrink: 0;
+      }
+
+      .wallet button {
+        padding: 0.32rem 0.72rem;
+        font-size: 0.78rem;
+      }
+
+      #walletAddress {
+        display: none;
+      }
+
+      .legend-panel {
+        width: 280px;
+        right: 10px;
+        top: 60px;
+        font-size: 0.85rem;
+        max-height: calc(100vh - 70px);
+      }
+
+      .canvas-container {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+      }
+
+      .resource-icon {
+        width: 24px;
+        height: 24px;
+        margin-right: 8px;
+      }
+
+      .resource-row {
+        font-size: 0.95rem;
+      }
+
+      .legend-content {
+        padding: 0.8rem;
+        max-height: 400px;
+      }
     }
+
     @media (max-width: 480px) {
-      .legend-panel { width: 240px; right: 5px; top: 55px; }
+      .header {
+        padding: 0.4rem 0.45rem;
+      }
+
+      .logo h1 {
+        font-size: 0.98rem;
+      }
+
+      .nav-links {
+        gap: 0.25rem;
+      }
+
+      .nav-links a {
+        padding: 0.24rem 0.48rem;
+        font-size: 0.74rem;
+      }
+
+      .wallet button {
+        padding: 0.28rem 0.62rem;
+        font-size: 0.74rem;
+      }
+
+      .legend-panel {
+        width: 240px;
+        right: 5px;
+        top: 55px;
+      }
     }
   </style>
 </head>
 <body data-theme="basic">
   <div class="header">
-    <div class="logo">
-      <h1>INPINITY</h1>
-      <span>Interactive Map</span>
+    <div class="header-left">
+      <div class="logo">
+        <h1>INPINITY</h1>
+        <span>Interactive Map</span>
+      </div>
+
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="game.html">Game</a>
+      </div>
     </div>
-    <div class="nav-links">
-      <a href="index.html">Home</a>
-      <a href="game.html">Game</a>
-    </div>
+
     <div class="wallet">
       <div id="walletAddress">Not connected</div>
       <button id="connectBtn">Connect</button>
