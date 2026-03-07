@@ -5,6 +5,7 @@
    - Debounce für Attack‑Dropdown (falls vorhanden)
    - Safe‑Wrapper für getAllPending (keine Reverts mehr)
    - Ethers v5/v6 kompatibel (BigInt‑Handling)
+   - Vollständige Attack‑Prüfungen (canAttackTarget, remainingAttacks, AttackTime, callStatic)
    ========================================================= */
 
 /* ==================== KONFIGURATION (V4) ==================== */
@@ -128,7 +129,7 @@ let touchStartX = 0, touchStartY = 0;
 let touchMoved = false;
 const MOVE_THRESHOLD = 10; // Pixel
 
-// Request-ID für Attack-Dropdown (falls vorhanden)
+// Request-ID für Attack-Dropdown
 let attackDropdownRequestId = 0;
 let attackDropdownTimer = null;
 
@@ -197,18 +198,80 @@ function isGtZero(value) {
   }
 }
 
-/* ==================== SAFE GETALLPENDING ==================== */
-async function safeGetAllPending(tokenId) {
-  if (!farmingV4Contract) return null;
+/* ==================== SAFE FARM‑HELPER (V4) ==================== */
+async function safeGetFarm(tokenId) {
   try {
-    const pending = await farmingV4Contract.getAllPending(tokenId);
-    // Sicherstellen, dass wir ein Array haben (auch wenn Contract [10] zurückgibt)
-    if (pending && pending.length !== undefined) {
-      return pending;
+    const f = await farmingV4Contract.farms(tokenId);
+    return {
+      ok: true,
+      startTime: Number(f.startTime ?? 0),
+      lastAccrualTime: Number(f.lastAccrualTime ?? 0),
+      boostExpiry: Number(f.boostExpiry ?? 0),
+      isActive: !!f.isActive
+    };
+  } catch (e) {
+    console.warn(`farms() reverted for token ${tokenId}`, e);
+    return {
+      ok: false,
+      startTime: 0,
+      lastAccrualTime: 0,
+      boostExpiry: 0,
+      isActive: false
+    };
+  }
+}
+
+/* ==================== SAFE GETALLPENDING (V4) ==================== */
+async function safeGetAllPending(tokenId) {
+  try {
+    const farm = await safeGetFarm(tokenId);
+
+    if (!farm.ok) {
+      return { ok: false, pending: null, reason: "farm-read-failed" };
     }
-    return null;
+
+    if (!farm.isActive) {
+      return { ok: false, pending: null, reason: "farm-inactive" };
+    }
+
+    if (!farm.startTime || farm.startTime <= 0) {
+      return { ok: false, pending: null, reason: "farm-not-started" };
+    }
+
+    const pending = await farmingV4Contract.getAllPending(tokenId);
+    return { ok: true, pending, reason: "ok" };
   } catch (e) {
     console.warn(`getAllPending reverted for token ${tokenId}:`, e);
+    return { ok: false, pending: null, reason: "pending-reverted" };
+  }
+}
+
+/* ==================== SAFE PIRATES‑HELPER ==================== */
+async function safeCanAttack(attackerAddress, targetTokenId) {
+  try {
+    return await piratesV4Contract.canAttackTarget(attackerAddress, targetTokenId);
+  } catch (e) {
+    console.warn("canAttackTarget failed", e);
+    return false;
+  }
+}
+
+async function safeGetRemainingAttacksToday(attackerAddress) {
+  try {
+    const val = await piratesV4Contract.getRemainingAttacksToday(attackerAddress);
+    return Number(val.toString());
+  } catch (e) {
+    console.warn("getRemainingAttacksToday failed", e);
+    return null;
+  }
+}
+
+async function safeGetAttackTime(attackerTokenId, targetTokenId) {
+  try {
+    const val = await piratesV4Contract.getAttackTime(attackerTokenId, targetTokenId);
+    return Number(val.toString());
+  } catch (e) {
+    console.warn("getAttackTime failed", e);
     return null;
   }
 }
@@ -411,15 +474,18 @@ async function executeAttack(attack) {
     }
 
     // Pending mit safeGetAllPending prüfen
-    const pending = await safeGetAllPending(attack.targetTokenId);
-    const hasLoot = pending && pending.length > attack.resource && isGtZero(pending[attack.resource]);
+    const pendingInfo = await safeGetAllPending(attack.targetTokenId);
+    const hasLoot = pendingInfo.ok &&
+                    pendingInfo.pending &&
+                    pendingInfo.pending.length > attack.resource &&
+                    isGtZero(pendingInfo.pending[attack.resource]);
 
     if (!hasLoot) {
       msgDiv.innerHTML = '<span class="error">💰 No loot – owner claimed or wrong resource.</span>';
       return;
     }
 
-    // Optional: callStatic zur Simulation
+    // Simulation mit callStatic
     try {
       await piratesV4Contract.callStatic.executeAttack(
         attack.targetTokenId,
@@ -706,8 +772,21 @@ async function getStealableResourcesForTarget(targetTokenId) {
   let allowed = productionToAllowedResourceIds(prod);
   if (allowed.length === 0) allowed = [0,1,2,3,4,5,6,7,8,9];
 
-  const pendingArr = await safeGetAllPending(targetTokenId);
-  return { farmingActive, farmStartTime, claimIn, revealed: true, rarity, allowed, pendingArr };
+  const pendingInfo = await safeGetAllPending(targetTokenId);
+  const pendingArr = pendingInfo.ok ? pendingInfo.pending : null;
+  const pendingReason = pendingInfo.reason;
+
+  return {
+    farmingActive,
+    farmStartTime,
+    claimIn,
+    revealed: true,
+    rarity,
+    allowed,
+    pendingArr,
+    pendingReason,
+    reason: "OK"
+  };
 }
 
 function scheduleAttackDropdownRefresh() {
@@ -719,6 +798,7 @@ function scheduleAttackDropdownRefresh() {
 }
 
 async function refreshAttackDropdown() {
+  const requestId = ++attackDropdownRequestId;
   const select = document.getElementById("attackResource");
   const msg = actionMessage;
   if (!select || !selectedTokenId) return;
@@ -739,6 +819,7 @@ async function refreshAttackDropdown() {
   msg.innerHTML = `<span class="success">⏳ Analyzing...</span>`;
 
   const info = await getStealableResourcesForTarget(targetTokenId);
+  if (requestId !== attackDropdownRequestId) return;
 
   const now = Math.floor(Date.now() / 1000);
   let farmLine = "";
@@ -754,7 +835,17 @@ async function refreshAttackDropdown() {
       total += BigInt(info.pendingArr[i]?.toString() || 0);
     }
     pendingLine = total === 0n ? "⚠️ 0 pending" : `✅ ${total.toString()} pending`;
+  } else {
+    if (info.pendingReason === "farm-inactive") {
+      pendingLine = "⚠️ Farm inactive";
+    } else if (info.pendingReason === "farm-not-started") {
+      pendingLine = "⚠️ Farm not started";
+    } else {
+      pendingLine = "⚠️ Pending unavailable";
+    }
   }
+
+  if (requestId !== attackDropdownRequestId) return;
 
   msg.innerHTML = `<span class="${!info.farmingActive ? 'error' : 'success'}">${farmLine}<br>${pendingLine}</span>`;
 
@@ -777,19 +868,26 @@ async function updateSidebar(tokenId) {
   let farmStartTime = 0;
   let claimIn = null;
   let pendingArr = null;
+  let pendingReason = "not-requested";
+
   if (farmingV4Contract) {
-    try {
-      const f = await farmingV4Contract.farms(tokenId);
-      v4Active = !!f.isActive;
-      farmStartTime = Number(f.startTime);
+    const farmInfo = await safeGetFarm(tokenId);
+    v4Active = farmInfo.ok && farmInfo.isActive;
+    farmStartTime = farmInfo.startTime || 0;
+
+    if (v4Active && farmStartTime > 0) {
       const now = Math.floor(Date.now() / 1000);
-      claimIn = farmStartTime ? secondsUntilClaimable(farmStartTime, now) : null;
-    } catch (_) {}
-    pendingArr = await safeGetAllPending(tokenId);
+      claimIn = secondsUntilClaimable(farmStartTime, now);
+      const pendingInfo = await safeGetAllPending(tokenId);
+      pendingArr = pendingInfo.ok ? pendingInfo.pending : null;
+      pendingReason = pendingInfo.reason;
+    }
   }
+
   const now = Math.floor(Date.now() / 1000);
   const farmAgeTxt = (v4Active && farmStartTime) ? formatDuration(now - farmStartTime) : "-";
   const claimTxt = (claimIn === null) ? "-" : (claimIn > 0 ? ("in " + formatDuration(claimIn)) : "READY");
+
   let pendingTotalTxt = "-";
   if (pendingArr && pendingArr.length !== undefined) {
     let total = 0n;
@@ -797,7 +895,12 @@ async function updateSidebar(tokenId) {
       total += BigInt(pendingArr[i]?.toString() || 0);
     }
     pendingTotalTxt = total === 0n ? "0" : total.toString();
+  } else if (pendingReason === "farm-inactive") {
+    pendingTotalTxt = "inactive";
+  } else if (pendingReason === "farm-not-started") {
+    pendingTotalTxt = "not started";
   }
+
   let productionHtml = "";
   let rarityDisplay = "";
   if (token && token.owner && token.revealed && nftReadOnlyContract) {
@@ -815,6 +918,7 @@ async function updateSidebar(tokenId) {
       productionHtml = `<div class="detail-row"><span class="detail-label">Production</span></div>${prodText}`;
     } catch (_) {}
   }
+
   let detailHtml = "";
   if (token && owner) {
     detailHtml = `
@@ -831,13 +935,60 @@ async function updateSidebar(tokenId) {
   } else {
     detailHtml = `<p style="color:#98a9b9;">Block #${tokenId} not minted</p>`;
   }
+
   if (blockDetailDiv) blockDetailDiv.innerHTML = detailHtml;
   if (actionPanel) actionPanel.style.display = "block";
   if (ownerActionsDiv) ownerActionsDiv.innerHTML = "";
   if (protectionInput) protectionInput.style.display = "none";
   if (attackInput) attackInput.style.display = "none";
   if (actionMessage) actionMessage.innerHTML = "";
-  if (userAddress && owner && owner.toLowerCase() === userAddress.toLowerCase()) {
+
+  // Felder in der Attack-Info-Card aktualisieren (falls vorhanden)
+  const targetStatusEl = document.getElementById("attackTargetStatus");
+  const travelTimeEl = document.getElementById("attackTravelTime");
+  const remainingEl = document.getElementById("attackRemainingToday");
+  const pendingLootEl = document.getElementById("attackPendingLoot");
+
+  if (userAddress && owner && owner.toLowerCase() !== userAddress.toLowerCase() && attackInput) {
+    // Nur wenn der Block einem anderen gehört und wir Attack-Input haben
+    attackInput.style.display = "flex";
+    refreshAttackDropdown();
+
+    if (targetStatusEl) targetStatusEl.innerText = "Checking...";
+    if (travelTimeEl) travelTimeEl.innerText = "—";
+    if (remainingEl) remainingEl.innerText = "—";
+    if (pendingLootEl) pendingLootEl.innerText = "—";
+
+    // Zusätzliche Attack‑Infos laden (falls gewünscht)
+    (async () => {
+      if (!userAddress || !piratesV4Contract) return;
+      const targetTokenIdNum = parseInt(tokenId, 10);
+      const ownTokens = Object.entries(tokens).filter(([id, t]) => t.owner && t.owner.toLowerCase() === userAddress.toLowerCase());
+      if (ownTokens.length === 0) return;
+
+      const attackerTokenId = parseInt(ownTokens[0][0], 10);
+      const [canAttack, remaining, attackTime] = await Promise.all([
+        safeCanAttack(userAddress, targetTokenIdNum),
+        safeGetRemainingAttacksToday(userAddress),
+        safeGetAttackTime(attackerTokenId, targetTokenIdNum)
+      ]);
+
+      if (targetStatusEl) targetStatusEl.innerText = canAttack ? "✅ Attackable" : "❌ Not attackable";
+      if (remainingEl) remainingEl.innerText = remaining !== null ? String(remaining) : "?";
+      if (travelTimeEl) travelTimeEl.innerText = attackTime ? formatDuration(attackTime) : "—";
+
+      const pendingInfo = await safeGetAllPending(targetTokenIdNum);
+      let total = 0n;
+      if (pendingInfo.ok && pendingInfo.pending) {
+        for (let i = 0; i < pendingInfo.pending.length; i++) {
+          total += BigInt(pendingInfo.pending[i]?.toString() || 0);
+        }
+      }
+      if (pendingLootEl) pendingLootEl.innerText = total === 0n ? "0" : total.toString();
+    })();
+
+  } else if (userAddress && owner && owner.toLowerCase() === userAddress.toLowerCase()) {
+    // Eigener Block – Owner-Actions anzeigen
     let btns = "";
     if (!token.revealed) btns += `<button class="action-btn" id="revealBtn">🔓 Reveal</button>`;
     if (!v4Active) btns += `<button class="action-btn" id="startFarmBtn">🌾 Start Farming (V4)</button>`;
@@ -847,9 +998,6 @@ async function updateSidebar(tokenId) {
     }
     if (protectionInput) protectionInput.style.display = "flex";
     if (ownerActionsDiv) ownerActionsDiv.innerHTML = btns;
-  } else if (userAddress && owner) {
-    if (attackInput) attackInput.style.display = "flex";
-    refreshAttackDropdown();
   } else {
     if (actionPanel) actionPanel.style.display = "none";
   }
@@ -931,11 +1079,11 @@ async function handleClaim() {
   if (!selectedTokenId) return;
   if (actionMessage) actionMessage.innerHTML = '<span class="success">⏳ Claiming V4...</span>';
   try {
-    const pending = await safeGetAllPending(selectedTokenId);
+    const pendingInfo = await safeGetAllPending(selectedTokenId);
     let hasAnything = false;
-    if (pending && pending.length !== undefined) {
-      for (let i = 0; i < pending.length; i++) {
-        if (isGtZero(pending[i])) {
+    if (pendingInfo.ok && pendingInfo.pending && pendingInfo.pending.length !== undefined) {
+      for (let i = 0; i < pendingInfo.pending.length; i++) {
+        if (isGtZero(pendingInfo.pending[i])) {
           hasAnything = true;
           break;
         }
@@ -1010,9 +1158,9 @@ async function handleAttack() {
     if (!piratesV4Contract) throw new Error("Pirates contract not ready");
 
     const [canAttack, remainingAttacks, attackTime] = await Promise.all([
-      piratesV4Contract.canAttackTarget(userAddress, targetTokenId),
-      piratesV4Contract.getRemainingAttacksToday(userAddress),
-      piratesV4Contract.getAttackTime(attackerTokenId, targetTokenId)
+      safeCanAttack(userAddress, targetTokenId),
+      safeGetRemainingAttacksToday(userAddress),
+      safeGetAttackTime(attackerTokenId, targetTokenId)
     ]);
 
     if (!canAttack) {
@@ -1020,9 +1168,13 @@ async function handleAttack() {
       return;
     }
 
-    const remaining = Number(remainingAttacks.toString());
-    if (remaining <= 0) {
+    if (remainingAttacks !== null && remainingAttacks <= 0) {
       actionMessage.innerHTML = '<span class="error">❌ No attacks remaining today.</span>';
+      return;
+    }
+
+    if (attackTime === null) {
+      actionMessage.innerHTML = '<span class="error">❌ Attack path/time unavailable.</span>';
       return;
     }
 
@@ -1034,11 +1186,17 @@ async function handleAttack() {
       return;
     }
 
+    // Felder in der Attack-Info-Card aktualisieren (falls vorhanden)
+    const travelTimeEl = document.getElementById("attackTravelTime");
+    const remainingEl = document.getElementById("attackRemainingToday");
+    if (travelTimeEl) travelTimeEl.innerText = formatDuration(attackTime);
+    if (remainingEl) remainingEl.innerText = String(remainingAttacks);
+
     actionMessage.innerHTML = `
       <span class="success">
         ⏳ Starting attack...<br>
-        Travel time: ${formatDuration(Number(attackTime.toString()))}<br>
-        Remaining today: ${remainingAttacks.toString()}
+        Travel time: ${formatDuration(attackTime)}<br>
+        Remaining today: ${remainingAttacks}
       </span>
     `;
 
@@ -1392,7 +1550,7 @@ window.addEventListener("mouseup", () => {
   if (canvas) canvas.style.cursor = "grab";
 });
 
-/* ==================== EVENT LISTENERS (nur wenn Elemente existieren) ==================== */
+/* ==================== EVENT LISTENERS ==================== */
 document.getElementById("connectBtn")?.addEventListener("click", connectWallet);
 
 // Attack-Dropdown nur, wenn Inputs existieren (in der Map normalerweise nicht)
