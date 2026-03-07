@@ -117,6 +117,12 @@ let isConnecting = false;
 // Für Request-ID im Attack-Dropdown
 let attackDropdownRequestId = 0;
 
+// Debounce Timer für Attack-Dropdown
+let attackDropdownTimer = null;
+
+// Cache-Warmup Promise für parallele Aufrufe
+let cacheWarmupPromise = null;
+
 const resourceNames = ["Oil","Lemons","Iron","Gold","Platinum","Copper","Crystal","Obsidian","Mysterium","Aether"];
 const rarityNames   = ["Bronze","Silver","Gold","Platinum","Diamond"];
 
@@ -155,7 +161,7 @@ async function getTokenPosition(tokenId) {
   return { row: Number(pos.row), col: Number(pos.col) };
 }
 
-/* ==================== SUBGRAPH (mit Retry bei 429) ==================== */
+/* ==================== SUBGRAPH (mit Retry bei 429 und Jitter) ==================== */
 async function fetchSubgraph(query, retries = 3, delay = 1000) {
   const headers = { "Content-Type": "application/json", "Authorization": `Bearer ${API_KEY}` };
   
@@ -165,7 +171,7 @@ async function fetchSubgraph(query, retries = 3, delay = 1000) {
 
       if (res.status === 429) {
         if (i < retries - 1) {
-          const waitTime = delay * Math.pow(2, i);
+          const waitTime = delay * Math.pow(2, i) + Math.floor(Math.random() * 300);
           console.warn(`Subgraph 429, retry ${i+1}/${retries} after ${waitTime}ms`);
           await new Promise(resolve => setTimeout(resolve, waitTime));
           continue;
@@ -181,7 +187,7 @@ async function fetchSubgraph(query, retries = 3, delay = 1000) {
       return json.data;
     } catch (e) {
       if (i === retries - 1) throw e;
-      const waitTime = delay * Math.pow(2, i);
+      const waitTime = delay * Math.pow(2, i) + Math.floor(Math.random() * 300);
       console.warn(`Subgraph error (${e.message}), retry ${i+1}/${retries} after ${waitTime}ms`);
       await new Promise(resolve => setTimeout(resolve, waitTime));
     }
@@ -213,7 +219,6 @@ async function loadMyTokensFromSubgraph(wallet){
       id
       revealed
       owner { id }
-      farm { id }
     `,
     `{ owner_: { id: "${owner}" } }`
   );
@@ -237,7 +242,7 @@ async function loadMyFarmsV4FromSubgraph(wallet){
   );
 }
 
-// NEU: Nur aktive Farms laden
+// Nur aktive Farms laden
 async function loadMyActiveFarmsV4FromSubgraph(wallet){
   const owner = wallet.toLowerCase();
   return await fetchAllWithPagination(
@@ -273,7 +278,6 @@ async function loadAllActiveFarmsV4FromSubgraph(){
   );
 }
 
-// NEU: Protection-Caching und Filter auf aktive
 let protectionsLoadedOnce = false;
 
 async function loadProtectionsFromSubgraph(force = false){
@@ -289,7 +293,7 @@ async function loadProtectionsFromSubgraph(force = false){
       expiresAt
       active
     `,
-    `{ active: true }`   // Nur aktive Protections laden
+    `{ active: true }`
   );
 
   cachedProtections = data || [];
@@ -437,6 +441,27 @@ async function startFarmingV4(tokenId, msgDivId="actionMessage"){
   }
 }
 
+/* ==================== CACHE WARMUP ==================== */
+async function warmupCaches() {
+  if (cacheWarmupPromise) return cacheWarmupPromise;
+
+  cacheWarmupPromise = (async () => {
+    const farms = await loadMyActiveFarmsV4FromSubgraph(userAddress);
+    const protections = await loadProtectionsFromSubgraph();
+
+    cachedMyFarms = farms || [];
+    cachedProtections = protections || [];
+    cachedFarmMap = buildFarmMap(cachedMyFarms);
+    cachedProtectionMap = buildProtectionMap(cachedProtections);
+  })();
+
+  try {
+    await cacheWarmupPromise;
+  } finally {
+    cacheWarmupPromise = null;
+  }
+}
+
 /* ==================== BLOCKS – MIT CACHING ==================== */
 async function loadUserBlocks(){
   if(!userAddress || !nftContract) return;
@@ -445,7 +470,6 @@ async function loadUserBlocks(){
   if(!grid) return;
 
   try{
-    // Sequenziell statt parallel – reduziert Burst-Last
     const subgraphTokens = await loadMyTokensFromSubgraph(userAddress);
     const subgraphFarms = await loadMyActiveFarmsV4FromSubgraph(userAddress);
     const subgraphProtections = await loadProtectionsFromSubgraph();
@@ -501,10 +525,8 @@ async function loadUserBlocks(){
       const protectionLevel = protection ? protection.level : 0;
       const protectionActive = !!(protection && protection.active && protection.expiresAt > now && protectionLevel > 0);
 
+      // Partner-Status vorerst deaktiviert – kann später bei Bedarf separat geladen werden
       let partnerActive = false;
-      try{
-        partnerActive = await partnershipV2Contract.isPartnerBlock(tokenId);
-      }catch(e){}
 
       let classNames = revealed ? "revealed" : "";
       if(farmingActive) classNames += " farming";
@@ -547,13 +569,10 @@ async function loadUserBlocks(){
 }
 
 async function selectBlock(tokenId, row, col){
-  // Cache-Fallback, falls leer
+  // Cache-Fallback mit gemeinsamer Warmup-Funktion
   if (cachedFarmMap.size === 0 || cachedProtectionMap.size === 0) {
     try {
-      cachedMyFarms = await loadMyActiveFarmsV4FromSubgraph(userAddress);
-      cachedProtections = await loadProtectionsFromSubgraph();
-      cachedFarmMap = buildFarmMap(cachedMyFarms);
-      cachedProtectionMap = buildProtectionMap(cachedProtections);
+      await warmupCaches();
     } catch(e) {
       console.warn("Cache fallback failed", e);
     }
@@ -586,9 +605,6 @@ async function selectBlock(tokenId, row, col){
   const protectionActive = !!(protection && protection.active && protection.expiresAt > now && protectionLevel > 0);
 
   let partnerActive = false;
-  try{
-    partnerActive = await partnershipV2Contract.isPartnerBlock(tokenId);
-  }catch(e){}
 
   selectedBlock = {
     tokenId: String(tokenId),
@@ -722,6 +738,13 @@ async function getStealableResourcesForTarget(targetTokenId) {
     allowed,
     reason: "OK"
   };
+}
+
+function scheduleAttackDropdownRefresh() {
+  clearTimeout(attackDropdownTimer);
+  attackDropdownTimer = setTimeout(() => {
+    refreshAttackDropdown();
+  }, 400);
 }
 
 async function refreshAttackDropdown() {
@@ -1354,12 +1377,11 @@ async function connectWallet(){
     await loadResourceBalancesOnchain();
     await loadUserBlocks();
 
-    // Attacks leicht verzögert laden, um Burst zu vermeiden
+    // Attacks leicht verzögert laden
     setTimeout(() => {
       loadUserAttacks();
     }, 1500);
 
-    // Polling seltener und fehlertoleranter
     if(!attacksPoller){
       attacksPoller = setInterval(async ()=>{
         try {
@@ -1508,11 +1530,20 @@ async function mintBlock(){
     if(msgDiv) msgDiv.innerHTML = `<div class="message-box success">✅ Block minted! 🎉</div>`;
 
     await updateBalances();
-    await loadUserBlocks();
     await loadResourceBalancesOnchain();
-    await loadUserAttacks();
-    // Nach Mint das Attack-Dropdown aktualisieren (falls neuer Block ausgewählt werden soll)
-    await refreshAttackDropdown();
+    await loadUserBlocks();
+
+    // Angriffe verzögert laden
+    setTimeout(() => {
+      loadUserAttacks();
+    }, 1200);
+
+    // Attack-Dropdown nur aktualisieren, wenn bereits Koordinaten eingegeben sind
+    const attackRowEl = document.getElementById("attackRow");
+    const attackColEl = document.getElementById("attackCol");
+    if (attackRowEl?.value && attackColEl?.value) {
+      scheduleAttackDropdownRefresh();
+    }
 
   }catch(e){
     console.error("Mint error:", e);
@@ -1534,8 +1565,8 @@ document.getElementById("exchangePitBtn").addEventListener("click", exchangePit)
 document.getElementById("randomBlockBtn").addEventListener("click", findRandomFreeBlock);
 document.getElementById("mintBtn").addEventListener("click", mintBlock);
 
-document.getElementById("attackRow").addEventListener("input", refreshAttackDropdown);
-document.getElementById("attackCol").addEventListener("input", refreshAttackDropdown);
+document.getElementById("attackRow").addEventListener("input", scheduleAttackDropdownRefresh);
+document.getElementById("attackCol").addEventListener("input", scheduleAttackDropdownRefresh);
 
 document.querySelectorAll('input[name="payment"]').forEach(radio=>{
   radio.addEventListener("change",(e)=>{ selectedPayment = e.target.value; });
