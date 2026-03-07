@@ -29,10 +29,6 @@ const PRICE_INPI = "30";
 const PRICE_ETH_MIXED  = "0.0015";
 const PRICE_INPI_MIXED = "15";
 
-// Subgraph (Version 0.1.2)
-const SUBGRAPH_URL = "https://api.studio.thegraph.com/query/1743108/inpinity/version/latest";
-const API_KEY = "059bc2832dfe50597009e556898d4ba6";
-
 const CLAIM_COOLDOWN_SEC = 24 * 60 * 60; // 24h
 
 /* ==================== ABIs ==================== */
@@ -161,18 +157,20 @@ async function getTokenPosition(tokenId) {
   return { row: Number(pos.row), col: Number(pos.col) };
 }
 
-/* ==================== SUBGRAPH (mit Retry bei 429 und Jitter) ==================== */
-async function fetchSubgraph(query, retries = 3, delay = 1000) {
-  const headers = { "Content-Type": "application/json", "Authorization": `Bearer ${API_KEY}` };
-  
+/* ==================== SUBGRAPH (über Worker, mit Retry und Jitter) ==================== */
+async function fetchSubgraph(query, retries = 5, baseDelay = 1500) {
   for (let i = 0; i < retries; i++) {
     try {
-      const res = await fetch(SUBGRAPH_URL, { method: "POST", headers, body: JSON.stringify({ query }) });
+      const res = await fetch(`${WORKER_URL}/api/subgraph`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query })
+      });
 
       if (res.status === 429) {
         if (i < retries - 1) {
-          const waitTime = delay * Math.pow(2, i) + Math.floor(Math.random() * 300);
-          console.warn(`Subgraph 429, retry ${i+1}/${retries} after ${waitTime}ms`);
+          const waitTime = baseDelay * Math.pow(2, i) + Math.floor(Math.random() * 700);
+          console.warn(`Subgraph via worker 429, retry ${i+1}/${retries} after ${waitTime}ms`);
           await new Promise(resolve => setTimeout(resolve, waitTime));
           continue;
         } else {
@@ -187,8 +185,8 @@ async function fetchSubgraph(query, retries = 3, delay = 1000) {
       return json.data;
     } catch (e) {
       if (i === retries - 1) throw e;
-      const waitTime = delay * Math.pow(2, i) + Math.floor(Math.random() * 300);
-      console.warn(`Subgraph error (${e.message}), retry ${i+1}/${retries} after ${waitTime}ms`);
+      const waitTime = baseDelay * Math.pow(2, i) + Math.floor(Math.random() * 700);
+      console.warn(`Subgraph via worker error (${e.message}), retry ${i+1}/${retries} after ${waitTime}ms`);
       await new Promise(resolve => setTimeout(resolve, waitTime));
     }
   }
