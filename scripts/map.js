@@ -3,14 +3,15 @@
    - FarmingV5 und PiratesV5 als einzige aktive Contracts
    - Subgraph nur für V5 Entities (farmV5S, attackV5S)
    - Preview-Funktionen für alle Aktionen
-   - Keine V4-Reads mehr
+   - Kein V4 mehr
+   - Fremder Block = Ziel
+   - Eigener Block = Angreifer
    ========================================================= */
 
 /* ==================== KONFIGURATION (NUR V5) ==================== */
 const WORKER_URL = "https://inpinity-worker-final.s-plat.workers.dev";
 const BASE_BLOCK_SIZE = 24;
 
-// ====== V5 Contracts ======
 const NFT_ADDRESS = "0x277a0D5864293C78d7387C54B48c35D5E9578Ab1";
 const RESOURCE_TOKEN_ADDRESS = "0x71E76a6065197acdd1a4d6B736712F80D1Fd3D8b";
 const INPI_ADDRESS = "0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D";
@@ -21,7 +22,7 @@ const PIRATES_V5_ADDRESS = "0xe76b03A848dE22DdbbF34994e650d2E887426879";
 const MERCENARY_V2_ADDRESS = "0xFEa09ccA75dbc63cc8053739A61777Bd13fC6Bc2";
 const PARTNERSHIP_V2_ADDRESS = "0xb18323efE4Cc8c36e10D664E287b4e2c82Fe3ad9";
 
-/* ==================== ABIs (V5) ==================== */
+/* ==================== ABIs ==================== */
 const NFT_ABI = [
   "function revealBlock(uint256 tokenId, bytes32[] piProof, bytes32[] phiProof, uint8 piDigit, uint8 phiDigit) external",
   "function calculateRarity(uint256 tokenId) view returns (uint8)",
@@ -92,10 +93,11 @@ const RESOURCE_TOKEN_ABI = [
 let provider, signer, userAddress = null;
 let readOnlyProvider, nftReadOnlyContract;
 
-let tokens = {}; // jedes Token enthält: owner, revealed, farmActive, protectionActive, partnerActive, rarity (optional)
+let tokens = {};
 let userResources = [];
 let selectedTokenId = null;
 let selectedTokenOwner = null;
+let preferredAttackerTokenId = null;
 
 let userAttacks = [];
 let attacksTicker = null;
@@ -119,21 +121,18 @@ const actionMessage = document.getElementById("actionMessage");
 const userResourcesDiv = document.getElementById("userResources");
 
 let scale = 1.0;
-let offsetX = 0, offsetY = 0;
+let offsetX = 0;
+let offsetY = 0;
 let isDragging = false;
-let lastMouseX = 0, lastMouseY = 0;
+let lastMouseX = 0;
+let lastMouseY = 0;
 let pinchStartDist = 0;
 
-// Für mobile Touch-Unterscheidung
-let touchStartX = 0, touchStartY = 0;
+let touchStartX = 0;
+let touchStartY = 0;
 let touchMoved = false;
-const MOVE_THRESHOLD = 10; // Pixel
+const MOVE_THRESHOLD = 10;
 
-// Request-ID für Attack-Dropdown
-let attackDropdownRequestId = 0;
-let attackDropdownTimer = null;
-
-// Schutz vor Mehrfach-Connect
 let isConnecting = false;
 
 const resourceNames = ["Oil","Lemons","Iron","Gold","Platinum","Copper","Crystal","Obsidian","Mysterium","Aether"];
@@ -141,14 +140,14 @@ const rarityNames = ["Bronze","Silver","Gold","Platinum","Diamond"];
 const rarityClass = ["rarity-bronze","rarity-silver","rarity-gold","rarity-platinum","rarity-diamond"];
 
 const rarityColors = [
-  "#cd7f32", // Bronze
-  "#c0c0c0", // Silber
-  "#ffd700", // Gold
-  "#e5e4e2", // Platin
-  "#b9f2ff"  // Diamant
+  "#cd7f32",
+  "#c0c0c0",
+  "#ffd700",
+  "#e5e4e2",
+  "#b9f2ff"
 ];
 
-/* ==================== HELFER ==================== */
+/* ==================== HELPER ==================== */
 function populateAttackResourceSelect() {
   const select = document.getElementById("attackResource");
   if (!select) return;
@@ -162,13 +161,17 @@ function populateAttackResourceSelect() {
 }
 populateAttackResourceSelect();
 
-function shortenAddress(addr) { return addr ? addr.slice(0, 6) + "..." + addr.slice(-4) : ""; }
+function shortenAddress(addr) {
+  return addr ? addr.slice(0, 6) + "..." + addr.slice(-4) : "";
+}
+
 function formatTime(seconds) {
   if (seconds < 0) seconds = 0;
   if (seconds < 60) return seconds + "s";
   if (seconds < 3600) return Math.floor(seconds / 60) + "m";
   return Math.floor(seconds / 3600) + "h";
 }
+
 function formatDuration(seconds) {
   seconds = Math.max(0, Math.floor(seconds));
   const d = Math.floor(seconds / 86400);
@@ -178,9 +181,11 @@ function formatDuration(seconds) {
   if (h > 0) return `${h}h ${m}m`;
   return `${m}m`;
 }
-function getAttackStorageKey(targetTokenId) { return `attack_${targetTokenId}`; }
 
-// BigInt‑sichere Hilfsfunktion (ethers v5 & v6)
+function getAttackStorageKey(targetTokenId) {
+  return `attack_${targetTokenId}`;
+}
+
 function isGtZero(value) {
   if (value === null || value === undefined) return false;
   if (typeof value === "bigint") return value > 0n;
@@ -193,7 +198,85 @@ function isGtZero(value) {
   }
 }
 
-/* ==================== SAFE FARM‑HELPER (V5) ==================== */
+function safeText(id, txt) {
+  const el = document.getElementById(id);
+  if (el) el.innerText = txt;
+}
+
+function isOwnToken(tokenId) {
+  const token = tokens[String(tokenId)];
+  return !!(
+    userAddress &&
+    token &&
+    token.owner &&
+    token.owner.toLowerCase() === userAddress.toLowerCase()
+  );
+}
+
+function isForeignToken(tokenId) {
+  const token = tokens[String(tokenId)];
+  return !!(
+    userAddress &&
+    token &&
+    token.owner &&
+    token.owner.toLowerCase() !== userAddress.toLowerCase()
+  );
+}
+
+async function getPreferredAttackerTokenId() {
+  if (!userAddress) return null;
+
+  if (preferredAttackerTokenId && isOwnToken(preferredAttackerTokenId)) {
+    return parseInt(preferredAttackerTokenId, 10);
+  }
+
+  const ownTokens = Object.entries(tokens).filter(([_, t]) =>
+    t.owner && t.owner.toLowerCase() === userAddress.toLowerCase()
+  );
+
+  if (ownTokens.length === 0) return null;
+
+  return parseInt(ownTokens[0][0], 10);
+}
+
+function getProduction(rarity, row) {
+  const production = {};
+  if (rarity === 0) {
+    production.OIL = 10;
+    production.LEMONS = 5;
+    production.IRON = 3;
+  } else if (rarity === 1) {
+    production.OIL = 20;
+    production.LEMONS = 10;
+    production.IRON = 6;
+    production.GOLD = 1;
+  } else if (rarity === 2) {
+    production.OIL = 30;
+    production.LEMONS = 15;
+    production.IRON = 9;
+    production.GOLD = 2;
+    production.PLATINUM = 1;
+  } else if (rarity === 3) {
+    production.OIL = 40;
+    production.LEMONS = 20;
+    production.IRON = 12;
+    production.GOLD = 3;
+    production.PLATINUM = 2;
+    production.CRYSTAL = 1;
+  } else if (rarity === 4) {
+    production.OIL = 60;
+    production.LEMONS = 30;
+    production.IRON = 18;
+    production.GOLD = 5;
+    production.PLATINUM = 3;
+    production.CRYSTAL = 2;
+    production.MYSTERIUM = 1;
+    if (row === 0) production.AETHER = 1;
+  }
+  return production;
+}
+
+/* ==================== SAFE CONTRACT READS ==================== */
 async function safeGetFarm(tokenId) {
   try {
     const f = await farmingV5Contract.getFarmState(tokenId);
@@ -220,7 +303,6 @@ async function safeGetFarm(tokenId) {
   }
 }
 
-/* ==================== SAFE GETALLPENDING (V5) ==================== */
 async function safeGetAllPending(tokenId) {
   try {
     const pending = await farmingV5Contract.getAllPending(tokenId);
@@ -231,7 +313,6 @@ async function safeGetAllPending(tokenId) {
   }
 }
 
-/* ==================== SAFE PIRATES‑HELPER (V5) ==================== */
 async function safeCanAttack(attackerAddress, targetTokenId) {
   try {
     if (!attackerAddress || !targetTokenId) return false;
@@ -262,7 +343,7 @@ async function safeGetAttackTime(attackerTokenId, targetTokenId) {
   }
 }
 
-/* ==================== SUBGRAPH HELPERS (über Worker) ==================== */
+/* ==================== SUBGRAPH ==================== */
 async function fetchSubgraph(query, retries = 5, baseDelay = 1500) {
   for (let i = 0; i < retries; i++) {
     try {
@@ -275,12 +356,10 @@ async function fetchSubgraph(query, retries = 5, baseDelay = 1500) {
       if (res.status === 429) {
         if (i < retries - 1) {
           const waitTime = baseDelay * Math.pow(2, i) + Math.floor(Math.random() * 700);
-          console.warn(`Subgraph 429, retry ${i+1}/${retries} after ${waitTime}ms`);
           await new Promise(resolve => setTimeout(resolve, waitTime));
           continue;
-        } else {
-          throw new Error(`HTTP 429 – Too Many Requests (after ${retries} retries)`);
         }
+        throw new Error(`HTTP 429 after ${retries} retries`);
       }
 
       const json = await res.json();
@@ -291,7 +370,6 @@ async function fetchSubgraph(query, retries = 5, baseDelay = 1500) {
     } catch (e) {
       if (i === retries - 1) throw e;
       const waitTime = baseDelay * Math.pow(2, i) + Math.floor(Math.random() * 700);
-      console.warn(`Subgraph via worker error (${e.message}), retry ${i+1}/${retries} after ${waitTime}ms`);
       await new Promise(resolve => setTimeout(resolve, waitTime));
     }
   }
@@ -301,6 +379,7 @@ async function fetchAllWithPagination(fieldName, subfields, where = "") {
   const pageSize = 1000;
   let skip = 0;
   let all = [];
+
   while (true) {
     const query = `{ ${fieldName}(first:${pageSize}, skip:${skip}${where ? ", where: " + where : ""}) { ${subfields} } }`;
     const data = await fetchSubgraph(query);
@@ -310,22 +389,14 @@ async function fetchAllWithPagination(fieldName, subfields, where = "") {
     if (items.length < pageSize) break;
     skip += pageSize;
   }
+
   return all;
 }
 
-function getProduction(rarity, row) {
-  const production = {};
-  if (rarity === 0) { production.OIL=10; production.LEMONS=5; production.IRON=3; }
-  else if (rarity === 1) { production.OIL=20; production.LEMONS=10; production.IRON=6; production.GOLD=1; }
-  else if (rarity === 2) { production.OIL=30; production.LEMONS=15; production.IRON=9; production.GOLD=2; production.PLATINUM=1; }
-  else if (rarity === 3) { production.OIL=40; production.LEMONS=20; production.IRON=12; production.GOLD=3; production.PLATINUM=2; production.CRYSTAL=1; }
-  else if (rarity === 4) { production.OIL=60; production.LEMONS=30; production.IRON=18; production.GOLD=5; production.PLATINUM=3; production.CRYSTAL=2; production.MYSTERIUM=1; if (row === 0) production.AETHER=1; }
-  return production;
-}
-
-/* ==================== LOAD ATTACKS (V5) ==================== */
+/* ==================== ATTACKS ==================== */
 async function loadUserAttacks() {
   if (!userAddress) return;
+
   try {
     const where = `{ attacker: "${userAddress.toLowerCase()}" }`;
     const attacks = await fetchAllWithPagination(
@@ -333,25 +404,26 @@ async function loadUserAttacks() {
       "id attacker attackerTokenId targetTokenId attackIndex startTime endTime resource executed cancelled protectionLevel effectiveStealPercent stolenAmount",
       where
     );
-    
-    userAttacks = attacks.map(a => ({
-      id: a.id,
-      targetTokenId: parseInt(a.targetTokenId, 10),
-      attackerTokenId: parseInt(a.attackerTokenId, 10),
-      attackIndex: parseInt(a.attackIndex, 10),
-      startTime: parseInt(a.startTime, 10),
-      endTime: parseInt(a.endTime, 10),
-      executed: !!a.executed,
-      cancelled: !!a.cancelled,
-      resource: parseInt(a.resource, 10),
-      protectionLevel: a.protectionLevel ? parseInt(a.protectionLevel, 10) : 0,
-      effectiveStealPercent: a.effectiveStealPercent ? parseInt(a.effectiveStealPercent, 10) : 0,
-      stolenAmount: a.stolenAmount ? a.stolenAmount.toString() : "0"
-    }));
-    
-    // Nur aktive, nicht erledigte Angriffe anzeigen
-    userAttacks = userAttacks.filter(a => !a.executed && !a.cancelled);
-    
+
+    const dismissed = loadDismissedAttacks();
+
+    userAttacks = attacks
+      .map(a => ({
+        id: a.id,
+        targetTokenId: parseInt(a.targetTokenId, 10),
+        attackerTokenId: parseInt(a.attackerTokenId, 10),
+        attackIndex: parseInt(a.attackIndex, 10),
+        startTime: parseInt(a.startTime, 10),
+        endTime: parseInt(a.endTime, 10),
+        executed: !!a.executed,
+        cancelled: !!a.cancelled,
+        resource: parseInt(a.resource, 10),
+        protectionLevel: a.protectionLevel ? parseInt(a.protectionLevel, 10) : 0,
+        effectiveStealPercent: a.effectiveStealPercent ? parseInt(a.effectiveStealPercent, 10) : 0,
+        stolenAmount: a.stolenAmount ? a.stolenAmount.toString() : "0"
+      }))
+      .filter(a => !a.executed && !a.cancelled && !dismissed.has(a.id));
+
     displayUserAttacks();
     drawPyramid();
     startAttacksTicker();
@@ -363,26 +435,32 @@ async function loadUserAttacks() {
 function displayUserAttacks() {
   const container = document.getElementById("userAttacksList");
   if (!container) return;
+
   if (!userAddress) {
     container.innerHTML = '<p style="color:#98a9b9;">Connect wallet</p>';
     return;
   }
+
   if (userAttacks.length === 0) {
     container.innerHTML = '<p style="color:#98a9b9;">No active attacks</p>';
     return;
   }
+
   const now = Math.floor(Date.now() / 1000);
   let html = "";
+
   userAttacks.forEach(attack => {
     const timeLeft = attack.endTime - now;
     const ready = timeLeft <= 0;
+
     html += `
       <div class="attack-item">
         <span>#${attack.targetTokenId} (${resourceNames[attack.resource]})</span>
         <span class="attack-status" data-endtime="${attack.endTime}" style="${ready ? "color:#51cf66;" : ""}">
           ${ready ? "Ready" : "⏳ " + formatTime(timeLeft)}
         </span>
-        <button class="execute-btn"
+        <button
+          class="execute-btn"
           data-attackid="${attack.id}"
           data-targetid="${attack.targetTokenId}"
           data-attackindex="${attack.attackIndex}"
@@ -392,7 +470,9 @@ function displayUserAttacks() {
       </div>
     `;
   });
+
   container.innerHTML = html;
+
   container.querySelectorAll(".execute-btn").forEach(btn => {
     btn.addEventListener("click", async () => {
       if (btn.disabled) return;
@@ -407,8 +487,10 @@ function displayUserAttacks() {
 
 function startAttacksTicker() {
   if (attacksTicker) return;
+
   attacksTicker = setInterval(() => {
     const now = Math.floor(Date.now() / 1000);
+
     document.querySelectorAll(".attack-status").forEach(el => {
       const endTime = parseInt(el.dataset.endtime || "0", 10);
       if (!endTime) return;
@@ -421,10 +503,12 @@ function startAttacksTicker() {
         el.style.color = "";
       }
     });
+
     document.querySelectorAll(".execute-btn").forEach(btn => {
       const endTimeEl = btn.parentElement?.querySelector(".attack-status");
       const endTime = endTimeEl ? parseInt(endTimeEl.dataset.endtime || "0", 10) : 0;
       const timeLeft = endTime - now;
+
       if (timeLeft <= 0) {
         btn.disabled = false;
         btn.textContent = "⚔️";
@@ -433,22 +517,22 @@ function startAttacksTicker() {
         btn.textContent = "⏳";
       }
     });
+
     drawPyramid();
   }, 1000);
 }
 
-/* ==================== DISMISS ==================== */
 function dismissAttackById(attackId) {
   const key = "dismissedAttacks";
   const arr = JSON.parse(localStorage.getItem(key) || "[]");
   if (!arr.includes(attackId)) arr.push(attackId);
   localStorage.setItem(key, JSON.stringify(arr));
 }
+
 function loadDismissedAttacks() {
   return new Set(JSON.parse(localStorage.getItem("dismissedAttacks") || "[]"));
 }
 
-/* ==================== EXECUTE ATTACK (V5) ==================== */
 async function executeAttack(attack) {
   const msgDiv = actionMessage;
   if (!msgDiv) return;
@@ -458,7 +542,6 @@ async function executeAttack(attack) {
   try {
     if (!piratesV5Contract) throw new Error("Connect wallet first.");
 
-    // Preview Execute Attack
     const preview = await piratesV5Contract.previewExecuteAttack(
       attack.targetTokenId,
       attack.attackIndex
@@ -470,31 +553,33 @@ async function executeAttack(attack) {
     }
 
     msgDiv.innerHTML = '<span class="success">⏳ Executing attack...</span>';
+
     const tx = await piratesV5Contract.executeAttack(
       attack.targetTokenId,
       attack.attackIndex,
       { gasLimit: 350000 }
     );
-    
+
     msgDiv.innerHTML = '<span class="success">⏳ Confirming...</span>';
     await tx.wait();
-    
+
     msgDiv.innerHTML = '<span class="success">✅ Attack executed!</span>';
 
     localStorage.removeItem(getAttackStorageKey(attack.targetTokenId));
     if (attack.id) dismissAttackById(attack.id);
-    
+
     await loadUserAttacks();
     await loadUserResources();
     await loadData();
+    if (selectedTokenId) await updateSidebar(selectedTokenId);
   } catch (e) {
     console.error("executeAttack error:", e);
-    let msg = e?.reason || e?.message || "Unknown error";
+    const msg = e?.reason || e?.message || "Unknown error";
     msgDiv.innerHTML = `<span class="error">❌ ${msg}</span>`;
   }
 }
 
-/* ==================== LOAD MAP DATA (V5 Subgraph + Rarity) ==================== */
+/* ==================== MAP DATA ==================== */
 async function loadData() {
   try {
     const tokenItems = await fetchAllWithPagination(
@@ -521,6 +606,7 @@ async function loadData() {
       "blockRevealeds",
       "tokenId rarity"
     ).catch(() => []);
+
     blockRevealedItems.forEach(br => {
       const tokenId = br.tokenId;
       if (tokens[tokenId]) {
@@ -528,7 +614,6 @@ async function loadData() {
       }
     });
 
-    // V5 Farms laden
     const farmV5Items = await fetchAllWithPagination(
       "farmV5S",
       "id owner startTime lastAccrualTime lastClaimTime boostExpiry stopTime active updatedAt blockNumber",
@@ -541,7 +626,6 @@ async function loadData() {
         tokens[f.id].farmStartTime = parseInt(f.startTime, 10) || 0;
         tokens[f.id].lastClaimTime = parseInt(f.lastClaimTime, 10) || 0;
         tokens[f.id].boostExpiry = parseInt(f.boostExpiry, 10) || 0;
-        tokens[f.id].farmOwner = f.owner;
       }
     });
 
@@ -550,14 +634,20 @@ async function loadData() {
       "id active",
       `{ active: true }`
     ).catch(() => []);
-    protectionItems.forEach(p => { if (tokens[p.id]) tokens[p.id].protectionActive = !!p.active; });
+
+    protectionItems.forEach(p => {
+      if (tokens[p.id]) tokens[p.id].protectionActive = !!p.active;
+    });
 
     const partnerItems = await fetchAllWithPagination(
       "partnerships",
       "id active",
       `{ active: true }`
     ).catch(() => []);
-    partnerItems.forEach(p => { if (tokens[p.id]) tokens[p.id].partnerActive = !!p.active; });
+
+    partnerItems.forEach(p => {
+      if (tokens[p.id]) tokens[p.id].partnerActive = !!p.active;
+    });
 
     drawPyramid();
   } catch (err) {
@@ -565,7 +655,7 @@ async function loadData() {
   }
 }
 
-/* ==================== RESSOURCEN ==================== */
+/* ==================== RESOURCES ==================== */
 async function loadUserResources() {
   if (!userAddress) return;
   await loadUserResourcesOnChain();
@@ -573,16 +663,19 @@ async function loadUserResources() {
 
 async function loadUserResourcesOnChain() {
   if (!userAddress || !resourceTokenContract) return;
+
   try {
     const ids = [0,1,2,3,4,5,6,7,8,9];
     const accounts = ids.map(() => userAddress);
     const balances = await resourceTokenContract.balanceOfBatch(accounts, ids);
+
     userResources = ids
       .map((id, idx) => ({
         resourceId: id,
         amount: balances[idx]
       }))
       .filter(r => isGtZero(r.amount));
+
     updateUserResourcesDisplay();
   } catch (err) {
     console.error("On-chain resource fetch failed:", err);
@@ -593,15 +686,19 @@ async function loadUserResourcesOnChain() {
 
 function updateUserResourcesDisplay() {
   if (!userResourcesDiv) return;
+
   if (!userAddress) {
     userResourcesDiv.innerHTML = '<p style="color:#98a9b9;">Connect wallet</p>';
     return;
   }
+
   if (!userResources || userResources.length === 0) {
     userResourcesDiv.innerHTML = '<p style="color:#98a9b9;">No resources</p>';
     return;
   }
+
   userResources.sort((a, b) => a.resourceId - b.resourceId);
+
   let html = "";
   for (const r of userResources) {
     const name = resourceNames[r.resourceId] || `Resource ${r.resourceId}`;
@@ -614,21 +711,26 @@ function updateUserResourcesDisplay() {
       </div>
     `;
   }
+
   userResourcesDiv.innerHTML = html;
 }
 
-/* ==================== ZEICHNEN ==================== */
+/* ==================== DRAW ==================== */
 function drawPyramid() {
   if (!canvas || !ctx) return;
+
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.save();
   ctx.translate(offsetX, offsetY);
   ctx.scale(scale, scale);
+
   const blockSize = BASE_BLOCK_SIZE;
   const now = Math.floor(Date.now() / 1000);
+
   for (let row = 0; row < 100; row++) {
     const blocksInRow = 2 * row + 1;
     const y = row * blockSize;
+
     for (let col = 0; col < blocksInRow; col++) {
       const tokenIdNum = row * 2048 + col;
       const tokenId = String(tokenIdNum);
@@ -645,17 +747,28 @@ function drawPyramid() {
         } else {
           fillColor = token.revealed ? "#c9a959" : "#2e7d5e";
         }
+
         if (userAddress && token.owner.toLowerCase() === userAddress.toLowerCase()) {
           fillColor = "#9b59b6";
         }
 
         const attack = userAttacks.find(a => String(a.targetTokenId) === tokenId);
         if (attack) {
-          if (attack.endTime <= now) { strokeColor = "#e74c3c"; lineWidth = 4; }
-          else { strokeColor = "#000000"; lineWidth = 4; }
+          if (attack.endTime <= now) {
+            strokeColor = "#e74c3c";
+            lineWidth = 4;
+          } else {
+            strokeColor = "#000000";
+            lineWidth = 4;
+          }
         } else {
-          if (token.protectionActive) { strokeColor = "#9b59b6"; lineWidth = 3; }
-          else if (token.farmActive) { strokeColor = "#3498db"; lineWidth = 3; }
+          if (token.protectionActive) {
+            strokeColor = "#9b59b6";
+            lineWidth = 3;
+          } else if (token.farmActive) {
+            strokeColor = "#3498db";
+            lineWidth = 3;
+          }
         }
       }
 
@@ -680,6 +793,7 @@ function drawPyramid() {
       }
     }
   }
+
   ctx.restore();
 }
 
@@ -694,7 +808,7 @@ function centerPyramid() {
   drawPyramid();
 }
 
-/* ==================== ATTACK PREVIEW (V5) ==================== */
+/* ==================== ATTACK PREVIEW ==================== */
 async function loadAttackPreview(attackerTokenId, targetTokenId, resourceId) {
   try {
     return await piratesV5Contract.previewAttack(attackerTokenId, targetTokenId, resourceId);
@@ -704,14 +818,51 @@ async function loadAttackPreview(attackerTokenId, targetTokenId, resourceId) {
   }
 }
 
-/* ==================== SIDEBAR (V5) ==================== */
+async function refreshSelectedTargetAttackPreview() {
+  if (!selectedTokenId || !userAddress || !isForeignToken(selectedTokenId)) return;
+
+  const targetStatusEl = document.getElementById("attackTargetStatus");
+  const travelTimeEl = document.getElementById("attackTravelTime");
+  const remainingEl = document.getElementById("attackRemainingToday");
+  const pendingLootEl = document.getElementById("attackPendingLoot");
+  const protectionEl = document.getElementById("attackProtection");
+  const stealPercentEl = document.getElementById("attackStealPercent");
+  const attackResourceEl = document.getElementById("attackResource");
+
+  const attackerTokenId = await getPreferredAttackerTokenId();
+  if (!attackerTokenId) {
+    if (targetStatusEl) targetStatusEl.innerText = "❌ No attacker";
+    return;
+  }
+
+  const targetTokenIdNum = parseInt(selectedTokenId, 10);
+  const resourceId = parseInt(attackResourceEl?.value || "0", 10);
+
+  const preview = await loadAttackPreview(attackerTokenId, targetTokenIdNum, resourceId);
+  if (!preview) {
+    if (targetStatusEl) targetStatusEl.innerText = "⚠️ Preview failed";
+    return;
+  }
+
+  if (targetStatusEl) targetStatusEl.innerText = preview.allowed ? "✅ Attackable" : "❌ Not attackable";
+  if (travelTimeEl) travelTimeEl.innerText = formatDuration(Number(preview.travelTime || 0));
+  if (remainingEl) remainingEl.innerText = String(Number(preview.remainingAttacksToday || 0));
+  if (pendingLootEl) pendingLootEl.innerText = preview.pendingAmount ? preview.pendingAmount.toString() : "0";
+  if (protectionEl) protectionEl.innerText = `${Number(preview.protectionLevel || 0)}%`;
+  if (stealPercentEl) stealPercentEl.innerText = `${Number(preview.effectiveStealPercent || 0)}%`;
+}
+
+/* ==================== SIDEBAR ==================== */
 async function updateSidebar(tokenId) {
   selectedTokenId = tokenId;
   const token = tokens[tokenId];
   const owner = token ? token.owner : null;
   selectedTokenOwner = owner;
-  
-  // Basis-Info sofort laden
+
+  if (isOwnToken(tokenId)) {
+    preferredAttackerTokenId = tokenId;
+  }
+
   const now = Math.floor(Date.now() / 1000);
   let v5Active = false;
   let farmStartTime = 0;
@@ -719,8 +870,7 @@ async function updateSidebar(tokenId) {
   let claimTxt = "-";
   let pendingTotalTxt = "-";
   let boostTxt = "-";
-  
-  // Farm-Status laden (sicher mit V5)
+
   if (farmingV5Contract && token && token.owner) {
     const farmInfo = await safeGetFarm(tokenId);
     v5Active = farmInfo.ok && farmInfo.isActive;
@@ -730,11 +880,14 @@ async function updateSidebar(tokenId) {
       farmAgeTxt = formatDuration(now - farmStartTime);
     }
 
-    // Preview Claim für genaue Infos
     try {
       const preview = await farmingV5Contract.previewClaim(tokenId);
       pendingTotalTxt = preview.pendingAmount ? preview.pendingAmount.toString() : "0";
-      claimTxt = preview.allowed ? "READY" : (preview.secondsRemaining > 0 ? `in ${formatDuration(Number(preview.secondsRemaining))}` : "Not ready");
+      claimTxt = preview.allowed
+        ? "READY"
+        : (Number(preview.secondsRemaining || 0) > 0
+            ? `in ${formatDuration(Number(preview.secondsRemaining))}`
+            : "Not ready");
     } catch (e) {
       console.warn("previewClaim failed", e);
     }
@@ -744,16 +897,18 @@ async function updateSidebar(tokenId) {
     }
   }
 
-  // Rarity und Produktion laden
   let productionHtml = "";
   let rarityDisplay = "";
+
   if (token && token.owner && token.revealed && nftReadOnlyContract) {
     try {
       const tokenIdNum = parseInt(tokenId, 10);
       const row = Math.floor(tokenIdNum / 2048);
       const rarity = token.rarity !== null ? token.rarity : await nftReadOnlyContract.calculateRarity(tokenIdNum);
       const r = Number(rarity);
+
       rarityDisplay = `<div class="detail-row"><span class="detail-label">Rarity</span><span class="detail-value ${rarityClass[r]}">${rarityNames[r]}</span></div>`;
+
       const production = getProduction(r, row);
       let prodText = "";
       for (const [res, amount] of Object.entries(production)) {
@@ -763,7 +918,6 @@ async function updateSidebar(tokenId) {
     } catch (_) {}
   }
 
-  // HTML für Block-Detail
   let detailHtml = "";
   if (token && owner) {
     detailHtml = `
@@ -789,42 +943,10 @@ async function updateSidebar(tokenId) {
   if (attackInput) attackInput.style.display = "none";
   if (actionMessage) actionMessage.innerHTML = "";
 
-  // Attack-Info-Card updaten
-  const targetStatusEl = document.getElementById("attackTargetStatus");
-  const travelTimeEl = document.getElementById("attackTravelTime");
-  const remainingEl = document.getElementById("attackRemainingToday");
-  const pendingLootEl = document.getElementById("attackPendingLoot");
-  const protectionEl = document.getElementById("attackProtection");
-  const stealPercentEl = document.getElementById("attackStealPercent");
-
-  // Nur wenn Block einem anderen gehört
   if (userAddress && owner && owner.toLowerCase() !== userAddress.toLowerCase()) {
     if (attackInput) attackInput.style.display = "flex";
-
-    // Attack-Preview für den ersten Resource-Typ laden
-    const ownTokens = Object.entries(tokens).filter(([id, t]) => 
-      t.owner && t.owner.toLowerCase() === userAddress.toLowerCase()
-    );
-    
-    if (ownTokens.length > 0) {
-      const attackerTokenId = parseInt(ownTokens[0][0], 10);
-      const targetTokenIdNum = parseInt(tokenId, 10);
-      const resourceId = 0; // Default, kann später über Dropdown geändert werden
-      
-      const preview = await loadAttackPreview(attackerTokenId, targetTokenIdNum, resourceId);
-      
-      if (preview) {
-        if (targetStatusEl) targetStatusEl.innerText = preview.allowed ? "✅ Attackable" : "❌ Not attackable";
-        if (travelTimeEl) travelTimeEl.innerText = formatDuration(Number(preview.travelTime || 0));
-        if (remainingEl) remainingEl.innerText = String(preview.remainingAttacksToday || 0);
-        if (pendingLootEl) pendingLootEl.innerText = preview.pendingAmount ? preview.pendingAmount.toString() : "0";
-        if (protectionEl) protectionEl.innerText = preview.protectionLevel ? `${preview.protectionLevel}%` : "0%";
-        if (stealPercentEl) stealPercentEl.innerText = preview.effectiveStealPercent ? `${preview.effectiveStealPercent}%` : "0%";
-      }
-    }
-  } 
-  // Eigener Block – Owner-Actions anzeigen
-  else if (userAddress && owner && owner.toLowerCase() === userAddress.toLowerCase()) {
+    await refreshSelectedTargetAttackPreview();
+  } else if (userAddress && owner && owner.toLowerCase() === userAddress.toLowerCase()) {
     let btns = "";
     if (!token.revealed) btns += `<button class="action-btn" id="revealBtn">🔓 Reveal</button>`;
     if (!v5Active) btns += `<button class="action-btn" id="startFarmBtn">🌾 Start Farming</button>`;
@@ -855,22 +977,27 @@ async function sendTx(txPromise, messageDiv, successMsg) {
   }
 }
 
-/* ==================== ACTIONS (V5) ==================== */
+/* ==================== ACTIONS ==================== */
 async function handleReveal() {
   if (!selectedTokenId || !selectedTokenOwner) return;
+
   const tokenIdNum = parseInt(selectedTokenId, 10);
   const row = Math.floor(tokenIdNum / 2048);
   const col = tokenIdNum % 2048;
+
   try {
     const response = await fetch(`${WORKER_URL}/api/get-proof?row=${row}&col=${col}`);
     if (!response.ok) throw new Error("Proofs not found");
     const proofs = await response.json();
+
     const formatProof = (arr) => arr.map(item => {
       const v = (item.left ? item.left : item.right);
       return (v || "").startsWith("0x") ? v : ("0x" + v);
     });
+
     const piProof = formatProof(proofs.pi.proof);
     const phiProof = formatProof(proofs.phi.proof);
+
     await sendTx(
       nftContract.revealBlock(selectedTokenId, piProof, phiProof, proofs.pi.digit, proofs.phi.digit, { gasLimit: 500000 }),
       actionMessage,
@@ -924,17 +1051,23 @@ async function handleClaim() {
 
 async function handleProtect() {
   if (!selectedTokenId || !userAddress) return;
+
   const level = parseInt(document.getElementById("protectLevel")?.value, 10);
-  if (!Number.isFinite(level) || level < 0 || level > 50) return alert("Invalid level (0-50)");
+  if (!Number.isFinite(level) || level < 0 || level > 50) {
+    return alert("Invalid level (0-50)");
+  }
+
   try {
     const cost = level * 10;
     const amount = ethers.parseEther(String(cost));
     const allowance = await inpiContract.allowance(userAddress, MERCENARY_V2_ADDRESS);
+
     if (allowance < amount) {
       if (actionMessage) actionMessage.innerHTML = '<span class="success">⏳ Approving...</span>';
       const approveTx = await inpiContract.approve(MERCENARY_V2_ADDRESS, amount);
       await approveTx.wait();
     }
+
     await sendTx(
       mercenaryV2Contract.hireMercenaries(selectedTokenId, level, { gasLimit: 400000 }),
       actionMessage,
@@ -959,21 +1092,21 @@ async function handleAttack() {
     return;
   }
 
-  const ownTokens = Object.entries(tokens).filter(([id, t]) => 
-    t.owner && t.owner.toLowerCase() === userAddress.toLowerCase()
-  );
-
-  if (ownTokens.length === 0) {
-    actionMessage.innerHTML = '<span class="error">❌ Need a block to attack from.</span>';
+  const attackerTokenId = await getPreferredAttackerTokenId();
+  if (!attackerTokenId) {
+    actionMessage.innerHTML = '<span class="error">❌ Need your own block to attack from.</span>';
     return;
   }
 
-  const attackerTokenId = parseInt(ownTokens[0][0], 10);
   const targetTokenId = parseInt(selectedTokenId, 10);
   const resource = parseInt(document.getElementById("attackResource")?.value, 10);
 
+  if (!Number.isFinite(resource) || resource < 0 || resource > 9) {
+    actionMessage.innerHTML = '<span class="error">❌ Invalid resource selected.</span>';
+    return;
+  }
+
   try {
-    // Preview Attack mit V5
     const preview = await piratesV5Contract.previewAttack(attackerTokenId, targetTokenId, resource);
 
     if (!preview.allowed) {
@@ -989,20 +1122,27 @@ async function handleAttack() {
       </span>
     `;
 
-    const tx = await piratesV5Contract.startAttack(attackerTokenId, targetTokenId, resource, {
-      gasLimit: 450000
-    });
+    const tx = await piratesV5Contract.startAttack(
+      attackerTokenId,
+      targetTokenId,
+      resource,
+      { gasLimit: 450000 }
+    );
+
     await tx.wait();
 
     actionMessage.innerHTML = '<span class="success">✅ Attack launched!</span>';
-    localStorage.setItem(getAttackStorageKey(targetTokenId), JSON.stringify({ 
-      targetTokenId, 
-      resource, 
-      startTime: Math.floor(Date.now() / 1000) 
+
+    localStorage.setItem(getAttackStorageKey(targetTokenId), JSON.stringify({
+      targetTokenId,
+      attackerTokenId,
+      resource,
+      startTime: Math.floor(Date.now() / 1000)
     }));
-    
+
     await loadUserAttacks();
     await loadData();
+    if (selectedTokenId) await updateSidebar(selectedTokenId);
   } catch (e) {
     console.error("handleAttack error:", e);
     actionMessage.innerHTML = `<span class="error">❌ ${e.reason || e.message}</span>`;
@@ -1016,15 +1156,21 @@ async function connectWallet() {
   if (userAddress) return;
 
   isConnecting = true;
+
   try {
     provider = new ethers.BrowserProvider(window.ethereum);
     await provider.send("eth_requestAccounts", []);
     signer = await provider.getSigner();
     userAddress = await signer.getAddress();
+
     const network = await provider.getNetwork();
     if (network.chainId !== 8453n) {
       try {
-        await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: "0x2105" }] });
+        await window.ethereum.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: "0x2105" }]
+        });
+
         provider = new ethers.BrowserProvider(window.ethereum);
         signer = await provider.getSigner();
         userAddress = await signer.getAddress();
@@ -1040,13 +1186,16 @@ async function connectWallet() {
               blockExplorerUrls: ["https://basescan.org"]
             }]
           });
+
           provider = new ethers.BrowserProvider(window.ethereum);
           signer = await provider.getSigner();
           userAddress = await signer.getAddress();
-        } else throw switchError;
+        } else {
+          throw switchError;
+        }
       }
     }
-    
+
     nftContract = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
     farmingV5Contract = new ethers.Contract(FARMING_V5_ADDRESS, FARMING_V5_ABI, signer);
     piratesV5Contract = new ethers.Contract(PIRATES_V5_ADDRESS, PIRATES_V5_ABI, signer);
@@ -1083,9 +1232,10 @@ async function initReadOnly() {
   nftReadOnlyContract = new ethers.Contract(NFT_ADDRESS, NFT_ABI, readOnlyProvider);
 }
 
-/* ==================== WHEEL / MOUSE / TOUCH HANDLER ==================== */
+/* ==================== INPUT / CANVAS ==================== */
 function handleWheel(e) {
   if (!canvas) return;
+
   e.preventDefault();
   const zoomFactor = 1.1;
   const delta = e.deltaY > 0 ? 1 / zoomFactor : zoomFactor;
@@ -1094,20 +1244,25 @@ function handleWheel(e) {
   const mouseY = e.clientY - rect.top;
   const worldX = (mouseX - offsetX) / scale;
   const worldY = (mouseY - offsetY) / scale;
+
   scale = Math.max(0.2, Math.min(5, scale * delta));
   offsetX = mouseX - worldX * scale;
   offsetY = mouseY - worldY * scale;
+
   drawPyramid();
 }
 
 function handleMouseMove(e) {
   if (!canvas || !tooltip) return;
   if (isDragging) return;
+
   const rect = canvas.getBoundingClientRect();
   const mouseX = (e.clientX - rect.left - offsetX) / scale;
   const mouseY = (e.clientY - rect.top - offsetY) / scale;
   const blockSize = BASE_BLOCK_SIZE;
+
   let found = null;
+
   for (let row = 0; row < 100; row++) {
     const y = row * blockSize;
     if (mouseY < y - 5 || mouseY > y + blockSize + 5) continue;
@@ -1115,11 +1270,16 @@ function handleMouseMove(e) {
     const maxX = (row + 1) * blockSize;
     if (mouseX < minX - 5 || mouseX > maxX + 5) continue;
     const col = Math.round((mouseX / blockSize) + row);
-    if (col >= 0 && col <= 2 * row) { found = String(row * 2048 + col); break; }
+    if (col >= 0 && col <= 2 * row) {
+      found = String(row * 2048 + col);
+      break;
+    }
   }
+
   if (found) {
     const token = tokens[found];
     let text = `<span>Block #${found}</span><br>`;
+
     if (token && token.owner) {
       text += `Owner: ${shortenAddress(token.owner)}<br>`;
       text += `Status: ${token.revealed ? "Revealed" : "Minted"}`;
@@ -1127,6 +1287,7 @@ function handleMouseMove(e) {
       if (token.protectionActive) text += " · Protected";
       if (token.partnerActive) text += " ⭐";
       if (token.rarity !== null) text += ` · ${rarityNames[token.rarity]}`;
+
       const attack = userAttacks.find(a => String(a.targetTokenId) === found);
       if (attack) {
         const now = Math.floor(Date.now() / 1000);
@@ -1136,6 +1297,7 @@ function handleMouseMove(e) {
     } else {
       text += "Not minted";
     }
+
     tooltip.innerHTML = text;
     tooltip.style.opacity = 1;
     tooltip.style.left = (e.clientX + 20) + "px";
@@ -1147,13 +1309,16 @@ function handleMouseMove(e) {
 
 function handleClick(e) {
   if (!canvas) return;
+
   const rect = canvas.getBoundingClientRect();
   const mouseX = (e.clientX - rect.left - offsetX) / scale;
   const mouseY = (e.clientY - rect.top - offsetY) / scale;
   const blockSize = BASE_BLOCK_SIZE;
+
   for (let row = 0; row < 100; row++) {
     const y = row * blockSize;
     if (mouseY < y || mouseY > y + blockSize) continue;
+
     const col = Math.round((mouseX / blockSize) + row);
     if (col >= 0 && col <= 2 * row) {
       const tokenId = String(row * 2048 + col);
@@ -1203,14 +1368,17 @@ function handleTouchMove(e) {
       e.touches[0].clientX - e.touches[1].clientX,
       e.touches[0].clientY - e.touches[1].clientY
     );
+
     if (pinchStartDist > 0) {
       const zoomFactor = dist / pinchStartDist;
       pinchStartDist = dist;
+
       const rect = canvas.getBoundingClientRect();
       const mx = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
       const my = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
       const worldX = (mx - offsetX) / scale;
       const worldY = (my - offsetY) / scale;
+
       scale = Math.max(0.2, Math.min(5, scale * zoomFactor));
       offsetX = mx - worldX * scale;
       offsetY = my - worldY * scale;
@@ -1231,7 +1399,7 @@ function handleTouchEnd(e) {
   }
 }
 
-/* ==================== Sidebar Drag/Resize ==================== */
+/* ==================== SIDEBAR DRAG / RESIZE ==================== */
 const legendPanel = document.getElementById("legendPanel");
 const dragHandle = document.getElementById("dragHandle");
 const resizeHandle = document.getElementById("resizeHandle");
@@ -1240,15 +1408,21 @@ const resetPosBtn = document.getElementById("resetPosBtn");
 const legendContent = document.getElementById("legendContent");
 
 let isDraggingPanel = false;
-let dragStartX = 0, dragStartY = 0, panelStartLeft = 0, panelStartTop = 0;
+let dragStartX = 0;
+let dragStartY = 0;
+let panelStartLeft = 0;
+let panelStartTop = 0;
 
 if (dragHandle) {
   dragHandle.addEventListener("mousedown", (e) => {
     if (!legendPanel) return;
     isDraggingPanel = true;
-    dragStartX = e.clientX; dragStartY = e.clientY;
+    dragStartX = e.clientX;
+    dragStartY = e.clientY;
+
     const rect = legendPanel.getBoundingClientRect();
-    panelStartLeft = rect.left; panelStartTop = rect.top;
+    panelStartLeft = rect.left;
+    panelStartTop = rect.top;
     legendPanel.style.transition = "none";
     e.preventDefault();
   });
@@ -1269,9 +1443,14 @@ window.addEventListener("mouseup", () => {
 });
 
 let isResizing = false;
+
 if (resizeHandle) {
-  resizeHandle.addEventListener("mousedown", (e) => { isResizing = true; e.preventDefault(); });
+  resizeHandle.addEventListener("mousedown", (e) => {
+    isResizing = true;
+    e.preventDefault();
+  });
 }
+
 window.addEventListener("mousemove", (e) => {
   if (!isResizing || !legendPanel) return;
   const rect = legendPanel.getBoundingClientRect();
@@ -1281,7 +1460,10 @@ window.addEventListener("mousemove", (e) => {
     legendPanel.style.right = "auto";
   }
 });
-window.addEventListener("mouseup", () => { isResizing = false; });
+
+window.addEventListener("mouseup", () => {
+  isResizing = false;
+});
 
 if (collapseBtn && legendContent) {
   collapseBtn.addEventListener("click", () => {
@@ -1304,7 +1486,7 @@ if (resetPosBtn && legendPanel) {
   });
 }
 
-/* ==================== Canvas events ==================== */
+/* ==================== CANVAS EVENTS ==================== */
 window.addEventListener("resize", () => {
   if (canvas && container) {
     canvas.width = container.clientWidth;
@@ -1352,7 +1534,12 @@ window.addEventListener("mouseup", () => {
 /* ==================== EVENT LISTENERS ==================== */
 document.getElementById("connectBtn")?.addEventListener("click", connectWallet);
 
-// Event-Delegation für dynamisch erzeugte Buttons
+document.getElementById("attackResource")?.addEventListener("change", async () => {
+  if (selectedTokenId && isForeignToken(selectedTokenId)) {
+    await refreshSelectedTargetAttackPreview();
+  }
+});
+
 document.addEventListener("click", async (e) => {
   if (e.target.id === "revealBtn") await handleReveal();
   if (e.target.id === "startFarmBtn") await handleStartFarm();
