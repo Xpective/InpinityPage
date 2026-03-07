@@ -1,8 +1,15 @@
 /* =========================================================
-   INPINITY GAME – V4 ONLY – Mit Retry bei 429 und sequenziellen Aufrufen
-   - Gleiche Optimierungen wie zuvor
-   - Zusätzlich: exponentieller Backoff bei Rate-Limit
-   - Sequenzielle Subgraph-Aufrufe in loadUserBlocks / connectWallet
+   INPINITY GAME – V4 ONLY – Finale Version mit allen Optimierungen
+   - Tokens, Farms, Protections separat geladen (Subgraph)
+   - Matching über tokenId
+   - Caching von Farm-/Protection-Maps
+   - Positionen immer onchain (getBlockPosition)
+   - Farming-Status für Aktionen onchain
+   - Request-ID für Attack-Dropdown
+   - Selbstangriffsprüfung
+   - Chain-Switch stabilisiert
+   - Cache-Fallback
+   - Nur aktive Farms geladen
    ========================================================= */
 
 /* ==================== KONFIGURATION (NUR V4) ==================== */
@@ -25,9 +32,6 @@ const PRICE_INPI_MIXED = "15";
 // Subgraph (Version 0.1.2)
 const SUBGRAPH_URL = "https://api.studio.thegraph.com/query/1743108/inpinity/version/latest";
 const API_KEY = "059bc2832dfe50597009e556898d4ba6";
-
-// WalletConnect Project ID (vom Benutzer bereitgestellt)
-const WALLETCONNECT_PROJECT_ID = "fa3d1523405956c60aaed9f1432224b8";
 
 const CLAIM_COOLDOWN_SEC = 24 * 60 * 60; // 24h
 
@@ -113,68 +117,6 @@ let isConnecting = false;
 // Für Request-ID im Attack-Dropdown
 let attackDropdownRequestId = 0;
 
-// MetaMask SDK
-let metamaskSDKInstance = null;
-function getProvider() {
-  // Wenn SDK verfügbar und noch nicht instanziiert, initialisieren
-  if (window.MetaMaskSDK && !metamaskSDKInstance) {
-    metamaskSDKInstance = new window.MetaMaskSDK.default({
-      dappMetadata: {
-        name: "INPINITY",
-        url: window.location.href,
-      },
-      checkInstallationImmediately: false,
-    });
-    return metamaskSDKInstance.getProvider();
-  }
-  // Fallback auf window.ethereum (Desktop / injizierte Wallets)
-  return window.ethereum;
-}
-
-// WalletConnect
-let web3wallet;
-let currentSession;
-
-// Bekannte mobile Wallets mit Deeplinks
-const SUPPORTED_WALLETS = [
-  {
-    id: "metamask",
-    name: "MetaMask",
-    links: {
-      native: "metamask://",
-      universal: "https://metamask.app.link/"
-    },
-    image: "https://raw.githubusercontent.com/MetaMask/brand-resources/master/SVG/metamask-fox.svg"
-  },
-  {
-    id: "trust",
-    name: "Trust Wallet",
-    links: {
-      native: "trust://",
-      universal: "https://link.trustwallet.com/"
-    },
-    image: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0/logo.png"
-  },
-  {
-    id: "rainbow",
-    name: "Rainbow",
-    links: {
-      native: "rainbow://",
-      universal: "https://rainbow.me/"
-    },
-    image: "https://rainbow.me/assets/icon-512x512.png"
-  },
-  {
-    id: "coinbase",
-    name: "Coinbase Wallet",
-    links: {
-      native: "coinbase-wallet://",
-      universal: "https://go.cb-w.com/"
-    },
-    image: "https://raw.githubusercontent.com/coinbase/coinbase-wallet-sdk/main/logo.png"
-  }
-];
-
 const resourceNames = ["Oil","Lemons","Iron","Gold","Platinum","Copper","Crystal","Obsidian","Mysterium","Aether"];
 const rarityNames   = ["Bronze","Silver","Gold","Platinum","Diamond"];
 
@@ -207,26 +149,21 @@ function secondsUntilClaimable(farmStartTime, nowSec){
   return Math.max(0, CLAIM_COOLDOWN_SEC - age);
 }
 
-function debugLog(message, data=null){
-  console.log(message, data);
-}
-
 /* ==================== NEUE ONCHAIN POSITIONSHELPER ==================== */
 async function getTokenPosition(tokenId) {
   const pos = await nftContract.getBlockPosition(tokenId);
   return { row: Number(pos.row), col: Number(pos.col) };
 }
 
-/* ==================== SUBGRAPH MIT RETRY ==================== */
+/* ==================== SUBGRAPH (mit Retry bei 429) ==================== */
 async function fetchSubgraph(query, retries = 3, delay = 1000) {
   const headers = { "Content-Type": "application/json", "Authorization": `Bearer ${API_KEY}` };
   
   for (let i = 0; i < retries; i++) {
     try {
       const res = await fetch(SUBGRAPH_URL, { method: "POST", headers, body: JSON.stringify({ query }) });
-      
+
       if (res.status === 429) {
-        // Rate Limited – warte mit exponentiellem Backoff
         if (i < retries - 1) {
           const waitTime = delay * Math.pow(2, i);
           console.warn(`Subgraph 429, retry ${i+1}/${retries} after ${waitTime}ms`);
@@ -244,7 +181,6 @@ async function fetchSubgraph(query, retries = 3, delay = 1000) {
       return json.data;
     } catch (e) {
       if (i === retries - 1) throw e;
-      // bei anderen Fehlern (Netzwerk, 5xx) auch wiederholen
       const waitTime = delay * Math.pow(2, i);
       console.warn(`Subgraph error (${e.message}), retry ${i+1}/${retries} after ${waitTime}ms`);
       await new Promise(resolve => setTimeout(resolve, waitTime));
@@ -301,7 +237,7 @@ async function loadMyFarmsV4FromSubgraph(wallet){
   );
 }
 
-// Nur aktive Farms laden
+// NEU: Nur aktive Farms laden
 async function loadMyActiveFarmsV4FromSubgraph(wallet){
   const owner = wallet.toLowerCase();
   return await fetchAllWithPagination(
@@ -497,19 +433,11 @@ async function loadUserBlocks(){
   if(!grid) return;
 
   try{
-    // Sequenziell statt parallel, um Burst-Last zu reduzieren
-    const subgraphTokens = await loadMyTokensFromSubgraph(userAddress).catch(e => {
-      console.error("loadMyTokensFromSubgraph failed", e);
-      return [];
-    });
-    const subgraphFarms = await loadMyActiveFarmsV4FromSubgraph(userAddress).catch(e => {
-      console.error("loadMyActiveFarmsV4FromSubgraph failed", e);
-      return [];
-    });
-    const subgraphProtections = await loadProtectionsFromSubgraph().catch(e => {
-      console.error("loadProtectionsFromSubgraph failed", e);
-      return [];
-    });
+    const [subgraphTokens, subgraphFarms, subgraphProtections] = await Promise.all([
+      loadMyTokensFromSubgraph(userAddress),
+      loadMyActiveFarmsV4FromSubgraph(userAddress), // NUR aktive Farms
+      loadProtectionsFromSubgraph()
+    ]);
 
     // Cache aktualisieren
     cachedMyFarms = subgraphFarms || [];
@@ -611,8 +539,8 @@ async function selectBlock(tokenId, row, col){
   // Cache-Fallback, falls leer
   if (cachedFarmMap.size === 0 || cachedProtectionMap.size === 0) {
     try {
-      cachedMyFarms = await loadMyActiveFarmsV4FromSubgraph(userAddress).catch(() => []);
-      cachedProtections = await loadProtectionsFromSubgraph().catch(() => []);
+      cachedMyFarms = await loadMyActiveFarmsV4FromSubgraph(userAddress);
+      cachedProtections = await loadProtectionsFromSubgraph();
       cachedFarmMap = buildFarmMap(cachedMyFarms);
       cachedProtectionMap = buildProtectionMap(cachedProtections);
     } catch(e) {
@@ -1368,54 +1296,43 @@ async function exchangePit(){
   }
 }
 
-/* ==================== WALLETCONNECT INIT ==================== */
-async function initWalletConnect() {
-  if (!WALLETCONNECT_PROJECT_ID) {
-    alert("⚠️ WalletConnect Project ID fehlt!");
-    return null;
-  }
+/* ==================== WALLET ==================== */
+async function connectWallet(){
+  if(!window.ethereum) return alert("Please install MetaMask!");
+  if(isConnecting) return;
+  if(userAddress) return;
 
-  try {
-    web3wallet = await window.Web3Wallet.Web3Wallet.init({
-      projectId: WALLETCONNECT_PROJECT_ID,
-      metadata: {
-        name: "INPINITY",
-        description: "Game – Pyramid Blocks",
-        url: window.location.origin,
-        icons: ["https://inpinity.online/favicon.webp"]
-      }
-    });
-    debugLog("WalletConnect initialized");
-    return web3wallet;
-  } catch (e) {
-    console.error("WalletConnect init error:", e);
-    debugLog("WalletConnect init failed", e.message);
-    return null;
-  }
-}
-
-/* MetaMask Verbindung (SDK oder injected) */
-async function connectWithMetaMask() {
-  if (isConnecting) return;
   isConnecting = true;
 
-  try {
-    const ethereum = getProvider();
-    if (!ethereum) {
-      alert("Please install MetaMask or another wallet!");
-      return;
-    }
-
-    provider = new ethers.providers.Web3Provider(ethereum);
+  try{
+    provider = new ethers.providers.Web3Provider(window.ethereum);
     await provider.send("eth_requestAccounts", []);
     signer = provider.getSigner();
     userAddress = await signer.getAddress();
 
-    await ensureBaseChain(ethereum);
+    const network = await provider.getNetwork();
+    if(network.chainId !== 8453){
+      try{
+        await window.ethereum.request({ method:"wallet_switchEthereumChain", params:[{ chainId:"0x2105" }] });
+        // Nach Chain-Switch Provider neu initialisieren
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        signer = provider.getSigner();
+        userAddress = await signer.getAddress();
+      }catch(e){
+        throw e;
+      }
+    }
 
-    await initContracts();
+    nftContract          = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
+    farmingV4Contract    = new ethers.Contract(FARMING_V4_ADDRESS, FARMING_V4_ABI, signer);
+    piratesV4Contract    = new ethers.Contract(PIRATES_V4_ADDRESS, PIRATES_V4_ABI, signer);
+    mercenaryV2Contract  = new ethers.Contract(MERCENARY_V2_ADDRESS, MERCENARY_V2_ABI, signer);
+    partnershipV2Contract= new ethers.Contract(PARTNERSHIP_V2_ADDRESS, PARTNERSHIP_V2_ABI, signer);
+    inpiContract         = new ethers.Contract(INPI_ADDRESS, INPI_ABI, signer);
+    pitroneContract      = new ethers.Contract(PITRONE_ADDRESS, PITRONE_ABI, signer);
+    resourceTokenContract= new ethers.Contract(RESOURCE_TOKEN_ADDRESS, RESOURCE_TOKEN_ABI, signer);
 
-    safeHTML("walletStatus", "🟢 Connected");
+    safeHTML("walletStatus","🟢 Connected");
     safeHTML("walletAddress", shortenAddress(userAddress));
     document.getElementById("connectWallet").innerText = "Wallet Connected";
 
@@ -1427,197 +1344,24 @@ async function connectWithMetaMask() {
     await loadResourceBalancesOnchain();
     await loadUserAttacks();
 
+    // Jetzt, wo alle Daten geladen sind, können wir das Dropdown aktualisieren
     refreshAttackDropdown();
 
-    if (!attacksPoller) {
-      attacksPoller = setInterval(async () => {
+    if(!attacksPoller){
+      attacksPoller = setInterval(async ()=>{
         await loadUserAttacks();
         await loadUserBlocks();
         refreshBlockMarkings();
       }, 30000);
     }
-  } catch (e) {
+
+  }catch(e){
     console.error(e);
-    alert("Connection error: " + (e.message || e));
+    alert("Connection error: "+e.message);
     userAddress = null;
-  } finally {
+  }finally{
     isConnecting = false;
   }
-}
-
-/* WalletConnect Verbindung */
-async function connectWithWalletConnect(wallet) {
-  if (isConnecting) return;
-  isConnecting = true;
-
-  try {
-    if (!web3wallet) {
-      web3wallet = await initWalletConnect();
-      if (!web3wallet) {
-        alert("WalletConnect initialization failed");
-        return;
-      }
-    }
-
-    const { uri, approval } = await web3wallet.core.pairing.create();
-
-    const modal = document.getElementById("walletModal");
-    const qrContainer = document.getElementById("qrContainer");
-    const walletListContainer = document.getElementById("walletListContainer");
-
-    document.getElementById("qrCode").innerHTML = "";
-    await QRCode.toCanvas(document.createElement('canvas'), uri, { width: 200 }, (err, canvas) => {
-      if (err) {
-        console.error(err);
-        return;
-      }
-      document.getElementById("qrCode").appendChild(canvas);
-    });
-    document.getElementById("wcUri").value = uri;
-
-    walletListContainer.style.display = "none";
-    qrContainer.style.display = "flex";
-    modal.style.display = "block";
-
-    const deeplink = `${wallet.links.universal}wc?uri=${encodeURIComponent(uri)}`;
-    window.location.href = deeplink;
-
-    const session = await approval();
-    debugLog("WalletConnect session established", session);
-
-    const wcProvider = new ethers.providers.Web3Provider(session.provider);
-    await wcProvider.send("eth_requestAccounts", []);
-    signer = wcProvider.getSigner();
-    userAddress = await signer.getAddress();
-
-    await ensureBaseChain(session.provider);
-
-    provider = wcProvider;
-    await initContracts();
-
-    safeHTML("walletStatus", "🟢 Connected");
-    safeHTML("walletAddress", shortenAddress(userAddress));
-    document.getElementById("connectWallet").innerText = "Wallet Connected";
-
-    modal.style.display = "none";
-
-    initAttackResourceSelect();
-
-    await updateBalances();
-    await updatePoolInfo();
-    await loadUserBlocks();
-    await loadResourceBalancesOnchain();
-    await loadUserAttacks();
-
-    refreshAttackDropdown();
-
-    if (!attacksPoller) {
-      attacksPoller = setInterval(async () => {
-        await loadUserAttacks();
-        await loadUserBlocks();
-        refreshBlockMarkings();
-      }, 30000);
-    }
-  } catch (e) {
-    console.error(e);
-    alert("Connection error: " + (e.message || e));
-    userAddress = null;
-    document.getElementById("walletModal").style.display = "none";
-  } finally {
-    isConnecting = false;
-  }
-}
-
-/* Hilfsfunktion: Chain auf Base umstellen */
-async function ensureBaseChain(providerOrRequest) {
-  const network = await provider.getNetwork();
-  if (network.chainId !== 8453) {
-    try {
-      await providerOrRequest.request({
-        method: "wallet_switchEthereumChain",
-        params: [{ chainId: "0x2105" }]
-      });
-      provider = new ethers.providers.Web3Provider(providerOrRequest);
-      signer = provider.getSigner();
-      userAddress = await signer.getAddress();
-    } catch (switchError) {
-      if (switchError.code === 4902) {
-        try {
-          await providerOrRequest.request({
-            method: "wallet_addEthereumChain",
-            params: [{
-              chainId: "0x2105",
-              chainName: "Base Mainnet",
-              nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 },
-              rpcUrls: ["https://mainnet.base.org"],
-              blockExplorerUrls: ["https://basescan.org"]
-            }]
-          });
-          provider = new ethers.providers.Web3Provider(providerOrRequest);
-          signer = provider.getSigner();
-          userAddress = await signer.getAddress();
-        } catch (addError) {
-          throw addError;
-        }
-      } else {
-        throw switchError;
-      }
-    }
-  }
-}
-
-/* Contracts initialisieren */
-async function initContracts() {
-  nftContract = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
-  farmingV4Contract = new ethers.Contract(FARMING_V4_ADDRESS, FARMING_V4_ABI, signer);
-  piratesV4Contract = new ethers.Contract(PIRATES_V4_ADDRESS, PIRATES_V4_ABI, signer);
-  mercenaryV2Contract = new ethers.Contract(MERCENARY_V2_ADDRESS, MERCENARY_V2_ABI, signer);
-  partnershipV2Contract = new ethers.Contract(PARTNERSHIP_V2_ADDRESS, PARTNERSHIP_V2_ABI, signer);
-  inpiContract = new ethers.Contract(INPI_ADDRESS, INPI_ABI, signer);
-  pitroneContract = new ethers.Contract(PITRONE_ADDRESS, PITRONE_ABI, signer);
-  resourceTokenContract = new ethers.Contract(RESOURCE_TOKEN_ADDRESS, RESOURCE_TOKEN_ABI, signer);
-}
-
-/* ==================== WALLET CONNECT (Hauptfunktion) ==================== */
-async function connectWallet() {
-  if (isConnecting) return;
-  if (userAddress) return;
-
-  isConnecting = true;
-
-  const modal = document.getElementById("walletModal");
-  const qrContainer = document.getElementById("qrContainer");
-  const walletListContainer = document.getElementById("walletListContainer");
-
-  if (!modal || !qrContainer || !walletListContainer) {
-    alert("Wallet-Modal nicht gefunden. Bitte Seite neu laden.");
-    isConnecting = false;
-    return;
-  }
-
-  qrContainer.style.display = "none";
-  walletListContainer.innerHTML = '<h3>Choose Wallet</h3>';
-
-  SUPPORTED_WALLETS.forEach(wallet => {
-    const div = document.createElement("div");
-    div.className = "wallet-option";
-    div.innerHTML = `
-      <img src="${wallet.image}" alt="${wallet.name}" onerror="this.src='https://via.placeholder.com/32'">
-      <span>${wallet.name}</span>
-    `;
-    div.onclick = async () => {
-      modal.style.display = "none";
-      if (wallet.id === "metamask") {
-        await connectWithMetaMask();
-      } else {
-        await connectWithWalletConnect(wallet);
-      }
-    };
-    walletListContainer.appendChild(div);
-  });
-
-  modal.style.display = "block";
-  isConnecting = false;
 }
 
 /* ==================== RANDOM FREE BLOCK ==================== */
@@ -1751,6 +1495,7 @@ async function mintBlock(){
     await loadUserBlocks();
     await loadResourceBalancesOnchain();
     await loadUserAttacks();
+    // Nach Mint das Attack-Dropdown aktualisieren (falls neuer Block ausgewählt werden soll)
     await refreshAttackDropdown();
 
   }catch(e){
@@ -1761,29 +1506,25 @@ async function mintBlock(){
 }
 
 /* ==================== EVENT LISTENERS ==================== */
-document.getElementById("connectWallet")?.addEventListener("click", connectWallet);
-document.getElementById("attackBtn")?.addEventListener("click", attack);
-document.getElementById("protectBtn")?.addEventListener("click", protect);
-document.getElementById("revealBtn")?.addEventListener("click", revealSelected);
-document.getElementById("farmingStartBtn")?.addEventListener("click", startFarmingSelected);
-document.getElementById("farmingStopBtn")?.addEventListener("click", stopFarmingSelected);
-document.getElementById("claimBtn")?.addEventListener("click", claimSelected);
-document.getElementById("exchangeInpiBtn")?.addEventListener("click", exchangeINPI);
-document.getElementById("exchangePitBtn")?.addEventListener("click", exchangePit);
-document.getElementById("randomBlockBtn")?.addEventListener("click", findRandomFreeBlock);
-document.getElementById("mintBtn")?.addEventListener("click", mintBlock);
+document.getElementById("connectWallet").addEventListener("click", connectWallet);
+document.getElementById("attackBtn").addEventListener("click", attack);
+document.getElementById("protectBtn").addEventListener("click", protect);
+document.getElementById("revealBtn").addEventListener("click", revealSelected);
+document.getElementById("farmingStartBtn").addEventListener("click", startFarmingSelected);
+document.getElementById("farmingStopBtn").addEventListener("click", stopFarmingSelected);
+document.getElementById("claimBtn").addEventListener("click", claimSelected);
+document.getElementById("exchangeInpiBtn").addEventListener("click", exchangeINPI);
+document.getElementById("exchangePitBtn").addEventListener("click", exchangePit);
+document.getElementById("randomBlockBtn").addEventListener("click", findRandomFreeBlock);
+document.getElementById("mintBtn").addEventListener("click", mintBlock);
 
-document.getElementById("attackRow")?.addEventListener("input", refreshAttackDropdown);
-document.getElementById("attackCol")?.addEventListener("input", refreshAttackDropdown);
+document.getElementById("attackRow").addEventListener("input", refreshAttackDropdown);
+document.getElementById("attackCol").addEventListener("input", refreshAttackDropdown);
 
 document.querySelectorAll('input[name="payment"]').forEach(radio=>{
   radio.addEventListener("change",(e)=>{ selectedPayment = e.target.value; });
 });
 
-// Modal schließen bei Klick außerhalb
-window.onclick = function(event) {
-  const modal = document.getElementById("walletModal");
-  if (event.target === modal) {
-    modal.style.display = "none";
-  }
-};
+if(window.ethereum && window.ethereum.selectedAddress){
+  connectWallet();
+}
