@@ -226,10 +226,12 @@ function isForeignToken(tokenId) {
 async function getPreferredAttackerTokenId() {
   if (!userAddress) return null;
 
-  if (preferredAttackerTokenId && isOwnToken(preferredAttackerTokenId)) {
-    return parseInt(preferredAttackerTokenId, 10);
+  // Wenn der ausgewählte Block dem Benutzer gehört, nimm diesen
+  if (selectedTokenId && isOwnToken(selectedTokenId)) {
+    return parseInt(selectedTokenId, 10);
   }
 
+  // Sonst den ersten eigenen Block
   const ownTokens = Object.entries(tokens).filter(([_, t]) =>
     t.owner && t.owner.toLowerCase() === userAddress.toLowerCase()
   );
@@ -310,36 +312,6 @@ async function safeGetAllPending(tokenId) {
   } catch (e) {
     console.warn(`getAllPending failed for token ${tokenId}`, e);
     return { ok: false, pending: null, reason: "pending-failed" };
-  }
-}
-
-async function safeCanAttack(attackerAddress, targetTokenId) {
-  try {
-    if (!attackerAddress || !targetTokenId) return false;
-    return await piratesV5Contract.canAttackTarget(attackerAddress, targetTokenId);
-  } catch (e) {
-    console.warn(`canAttackTarget failed for ${targetTokenId}`, e);
-    return false;
-  }
-}
-
-async function safeGetRemainingAttacksToday(attackerAddress) {
-  try {
-    const val = await piratesV5Contract.getRemainingAttacksToday(attackerAddress);
-    return Number(val.toString());
-  } catch (e) {
-    console.warn("getRemainingAttacksToday failed", e);
-    return null;
-  }
-}
-
-async function safeGetAttackTime(attackerTokenId, targetTokenId) {
-  try {
-    const val = await piratesV5Contract.getAttackTime(attackerTokenId, targetTokenId);
-    return Number(val.toString());
-  } catch (e) {
-    console.warn("getAttackTime failed", e);
-    return null;
   }
 }
 
@@ -819,8 +791,6 @@ async function loadAttackPreview(attackerTokenId, targetTokenId, resourceId) {
 }
 
 async function refreshSelectedTargetAttackPreview() {
-  if (!selectedTokenId || !userAddress || !isForeignToken(selectedTokenId)) return;
-
   const targetStatusEl = document.getElementById("attackTargetStatus");
   const travelTimeEl = document.getElementById("attackTravelTime");
   const remainingEl = document.getElementById("attackRemainingToday");
@@ -828,10 +798,24 @@ async function refreshSelectedTargetAttackPreview() {
   const protectionEl = document.getElementById("attackProtection");
   const stealPercentEl = document.getElementById("attackStealPercent");
   const attackResourceEl = document.getElementById("attackResource");
+  const attackBtn = document.getElementById("attackBtn");
+
+  if (!selectedTokenId || !userAddress || !isForeignToken(selectedTokenId)) {
+    if (attackInput) attackInput.style.display = "none";
+    return;
+  }
+
+  if (attackInput) attackInput.style.display = "flex";
 
   const attackerTokenId = await getPreferredAttackerTokenId();
   if (!attackerTokenId) {
-    if (targetStatusEl) targetStatusEl.innerText = "❌ No attacker";
+    if (targetStatusEl) targetStatusEl.innerText = "❌ No attacker block";
+    if (travelTimeEl) travelTimeEl.innerText = "—";
+    if (remainingEl) remainingEl.innerText = "—";
+    if (pendingLootEl) pendingLootEl.innerText = "—";
+    if (protectionEl) protectionEl.innerText = "—";
+    if (stealPercentEl) stealPercentEl.innerText = "—";
+    if (attackBtn) attackBtn.disabled = true;
     return;
   }
 
@@ -841,15 +825,32 @@ async function refreshSelectedTargetAttackPreview() {
   const preview = await loadAttackPreview(attackerTokenId, targetTokenIdNum, resourceId);
   if (!preview) {
     if (targetStatusEl) targetStatusEl.innerText = "⚠️ Preview failed";
+    if (travelTimeEl) travelTimeEl.innerText = "—";
+    if (remainingEl) remainingEl.innerText = "—";
+    if (pendingLootEl) pendingLootEl.innerText = "—";
+    if (protectionEl) protectionEl.innerText = "—";
+    if (stealPercentEl) stealPercentEl.innerText = "—";
+    if (attackBtn) attackBtn.disabled = true;
     return;
   }
 
-  if (targetStatusEl) targetStatusEl.innerText = preview.allowed ? "✅ Attackable" : "❌ Not attackable";
+  // Detaillierte Status-Anzeige
+  if (targetStatusEl) {
+    if (preview.allowed) {
+      targetStatusEl.innerText = "✅ Attack allowed";
+    } else if (Number(preview.pendingAmount || 0) === 0) {
+      targetStatusEl.innerText = "⚠️ No loot available";
+    } else {
+      targetStatusEl.innerText = `❌ Blocked (Code ${preview.code})`;
+    }
+  }
+
   if (travelTimeEl) travelTimeEl.innerText = formatDuration(Number(preview.travelTime || 0));
   if (remainingEl) remainingEl.innerText = String(Number(preview.remainingAttacksToday || 0));
-  if (pendingLootEl) pendingLootEl.innerText = preview.pendingAmount ? preview.pendingAmount.toString() : "0";
+  if (pendingLootEl) pendingLootEl.innerText = (preview.pendingAmount || 0).toString();
   if (protectionEl) protectionEl.innerText = `${Number(preview.protectionLevel || 0)}%`;
   if (stealPercentEl) stealPercentEl.innerText = `${Number(preview.effectiveStealPercent || 0)}%`;
+  if (attackBtn) attackBtn.disabled = !preview.allowed;
 }
 
 /* ==================== SIDEBAR ==================== */
@@ -858,10 +859,6 @@ async function updateSidebar(tokenId) {
   const token = tokens[tokenId];
   const owner = token ? token.owner : null;
   selectedTokenOwner = owner;
-
-  if (isOwnToken(tokenId)) {
-    preferredAttackerTokenId = tokenId;
-  }
 
   const now = Math.floor(Date.now() / 1000);
   let v5Active = false;
@@ -944,7 +941,6 @@ async function updateSidebar(tokenId) {
   if (actionMessage) actionMessage.innerHTML = "";
 
   if (userAddress && owner && owner.toLowerCase() !== userAddress.toLowerCase()) {
-    if (attackInput) attackInput.style.display = "flex";
     await refreshSelectedTargetAttackPreview();
   } else if (userAddress && owner && owner.toLowerCase() === userAddress.toLowerCase()) {
     let btns = "";
@@ -1098,8 +1094,8 @@ async function handleAttack() {
     return;
   }
 
-  const targetTokenId = parseInt(selectedTokenId, 10);
-  const resource = parseInt(document.getElementById("attackResource")?.value, 10);
+  const targetTokenIdNum = parseInt(selectedTokenId, 10);
+  const resource = parseInt(document.getElementById("attackResource")?.value || "0", 10);
 
   if (!Number.isFinite(resource) || resource < 0 || resource > 9) {
     actionMessage.innerHTML = '<span class="error">❌ Invalid resource selected.</span>';
@@ -1107,10 +1103,11 @@ async function handleAttack() {
   }
 
   try {
-    const preview = await piratesV5Contract.previewAttack(attackerTokenId, targetTokenId, resource);
+    const preview = await piratesV5Contract.previewAttack(attackerTokenId, targetTokenIdNum, resource);
 
     if (!preview.allowed) {
       actionMessage.innerHTML = `<span class="error">❌ Attack not allowed. Code: ${preview.code}</span>`;
+      await refreshSelectedTargetAttackPreview();
       return;
     }
 
@@ -1118,13 +1115,14 @@ async function handleAttack() {
       <span class="success">
         ⏳ Starting attack...<br>
         Travel time: ${formatDuration(Number(preview.travelTime || 0))}<br>
-        Remaining today: ${Number(preview.remainingAttacksToday || 0)}
+        Remaining today: ${Number(preview.remainingAttacksToday || 0)}<br>
+        Pending: ${(preview.pendingAmount || 0).toString()}
       </span>
     `;
 
     const tx = await piratesV5Contract.startAttack(
       attackerTokenId,
-      targetTokenId,
+      targetTokenIdNum,
       resource,
       { gasLimit: 450000 }
     );
@@ -1133,8 +1131,8 @@ async function handleAttack() {
 
     actionMessage.innerHTML = '<span class="success">✅ Attack launched!</span>';
 
-    localStorage.setItem(getAttackStorageKey(targetTokenId), JSON.stringify({
-      targetTokenId,
+    localStorage.setItem(getAttackStorageKey(targetTokenIdNum), JSON.stringify({
+      targetTokenId: targetTokenIdNum,
       attackerTokenId,
       resource,
       startTime: Math.floor(Date.now() / 1000)
@@ -1142,7 +1140,7 @@ async function handleAttack() {
 
     await loadUserAttacks();
     await loadData();
-    if (selectedTokenId) await updateSidebar(selectedTokenId);
+    await refreshSelectedTargetAttackPreview();
   } catch (e) {
     console.error("handleAttack error:", e);
     actionMessage.innerHTML = `<span class="error">❌ ${e.reason || e.message}</span>`;
