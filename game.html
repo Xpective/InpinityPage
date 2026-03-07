@@ -473,6 +473,8 @@
                     <h4>Selected Block</h4>
                     <p id="selectedBlockText">None</p>
                     <div id="blockResources" class="resources-grid"></div>
+                    <!-- Optionaler Meta-Bereich für zusätzliche Infos -->
+                    <div id="selectedBlockMeta" class="info-note" style="display: none; margin-top: 0.8rem;"></div>
                 </div>
 
                 <!-- Angriffsübersicht (AttackV4) -->
@@ -531,6 +533,11 @@
                 <div class="attack-resource-group">
                     <label style="color: var(--accent-gold); margin-bottom: 0.5rem; display: block;">Choose resource to steal:</label>
                     <select id="attackResourceSelect"></select>
+                </div>
+                <!-- Zusätzlicher Info-Block für Attack-Checks -->
+                <div class="info-note" id="attackRulesInfo" style="margin-top: 0.8rem;">
+                    <strong>Attack Check</strong><br>
+                    Target status, pending loot, travel time and remaining daily attacks will appear here.
                 </div>
                 <button class="btn" id="attackBtn">⚔️ Start Attack</button>
                 <div id="attackMessage"></div>
