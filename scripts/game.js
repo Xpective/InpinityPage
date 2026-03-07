@@ -483,17 +483,22 @@ async function loadUserBlocks(){
       const protectionLevel = protection ? protection.level : 0;
       const protectionActive = !!(protection && protection.active && protection.expiresAt > now && protectionLevel > 0);
 
-      let classNames = revealed ? "revealed" : "";
+      let classNames = revealed ? "revealed" : "hidden";
       if(farmingActive) classNames += " farming";
       if(protectionActive) classNames += " protected";
       if(selectedBlock && String(selectedBlock.tokenId) === tokenId) classNames += " selected";
 
       const badge = revealed
         ? `<div class="rarity-badge ${rarityName.toLowerCase()}">${rarityName}</div>`
-        : `<div class="rarity">🔒 Hidden</div>`;
+        : `<div class="rarity-badge hidden-badge">🔒 Hidden</div>`;
 
       const farmDurationLine = farmingActive && farm.startTime > 0
         ? `<div style="margin-top:6px; font-size:0.78rem; color: var(--text-dim);">⏱️ Farming: ${formatDuration(now - farm.startTime)}</div>`
+        : "";
+
+      // Reveal-Button für versteckte Blöcke
+      const revealButton = !revealed 
+        ? `<button class="reveal-block-btn" data-tokenid="${tokenId}" data-row="${row}" data-col="${col}">🔓 Reveal</button>`
         : "";
 
       html += `
@@ -502,6 +507,7 @@ async function loadUserBlocks(){
           <div>R${row} C${col}</div>
           ${badge}
           ${farmDurationLine}
+          ${revealButton}
         </div>
       `;
     }
@@ -509,9 +515,31 @@ async function loadUserBlocks(){
     grid.innerHTML = html;
     safeText("activeFarms", String(activeFarmsCount));
 
+    // Event-Listener für Block-Karten (zum Auswählen)
     document.querySelectorAll(".block-card").forEach(card=>{
-      card.addEventListener("click", ()=>{
+      card.addEventListener("click", (e)=>{
+        // Verhindern, dass der Klick auf den Reveal-Button auch die Block-Auswahl auslöst
+        if(e.target.classList.contains('reveal-block-btn')) return;
         selectBlock(card.dataset.tokenid, card.dataset.row, card.dataset.col);
+      });
+    });
+
+    // Event-Listener für Reveal-Buttons
+    document.querySelectorAll(".reveal-block-btn").forEach(btn=>{
+      btn.addEventListener("click", async (e)=>{
+        e.stopPropagation(); // Verhindert, dass der Klick auch die Block-Auswahl auslöst
+        const tokenId = btn.dataset.tokenid;
+        const row = btn.dataset.row;
+        const col = btn.dataset.col;
+        
+        // Block automatisch auswählen (für Feedback)
+        await selectBlock(tokenId, row, col);
+        
+        // Reveal-Funktion aufrufen
+        await revealSelected();
+        
+        // Block-Liste neu laden nach dem Reveal
+        await loadUserBlocks();
       });
     });
 
@@ -521,7 +549,6 @@ async function loadUserBlocks(){
     grid.innerHTML = `<p style="color:var(--accent-red); text-align:center;">Failed to load blocks.</p>`;
   }
 }
-
 async function selectBlock(tokenId, row, col){
   const now = Math.floor(Date.now()/1000);
 
