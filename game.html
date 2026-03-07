@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>INPINITY – The Pi-Phi Pyramid (v0.22.0 – V4)</title>
+    <title>INPINITY – The Pi-Phi Pyramid (v0.23.0 – V5)</title>
     <link rel="icon" type="image/png" href="favicon.webp" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -411,6 +411,23 @@
         .rarity-2 { color: var(--rarity-gold); text-shadow: 0 0 5px gold; }
         .rarity-3 { color: var(--rarity-platinum); text-shadow: 0 0 5px cyan; }
         .rarity-4 { color: var(--rarity-diamond); text-shadow: 0 0 8px cyan; }
+        
+        .migrate-btn {
+            background: linear-gradient(145deg, #ff8c00, #ff4500);
+            margin-top: 0.5rem;
+        }
+        .debug-log {
+            margin-top: 1rem;
+            background:#0a0a10;
+            border:1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 1rem;
+            font-family: "Roboto Mono", monospace;
+            color:#b0b0ff;
+            font-size: .8rem;
+            max-height: 220px;
+            overflow:auto;
+        }
     </style>
 </head>
 <body>
@@ -473,20 +490,19 @@
                     <h4>Selected Block</h4>
                     <p id="selectedBlockText">None</p>
                     <div id="blockResources" class="resources-grid"></div>
-                    <!-- Optionaler Meta-Bereich für zusätzliche Infos -->
                     <div id="selectedBlockMeta" class="info-note" style="display: none; margin-top: 0.8rem;"></div>
                 </div>
 
-                <!-- Angriffsübersicht (AttackV4) -->
+                <!-- Angriffsübersicht (V5) -->
                 <div class="attacks-section">
-                    <h4 style="color: var(--accent-gold); margin-bottom: 1rem;">⚔️ Your Attacks (V4)</h4>
+                    <h4 style="color: var(--accent-gold); margin-bottom: 1rem;">⚔️ Your Attacks (V5)</h4>
                     <div id="userAttacksList" class="attacks-list">
                         <p style="color: var(--text-dim);">Connect wallet to see your attacks.</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Mint Card -->
+            <!-- Mint Card (funktioniert jetzt) -->
             <div class="card">
                 <h3>⛏️ Mint a New Block</h3>
                 <div class="info-note" style="margin-top:0.8rem;">
@@ -509,23 +525,24 @@
                 <div id="mintMessage"></div>
             </div>
 
-            <!-- Block Actions -->
+            <!-- Block Actions (V5) -->
             <div class="card">
                 <h3>🔧 Block Actions</h3>
                 <div id="blockActions" style="display: none;">
                     <p><strong id="selectedActionToken">Block #?</strong></p>
                     <button class="btn-small" id="revealBtn">🔓 Reveal</button>
-                    <button class="btn-small" id="farmingStartBtn">🌾 Start Farming (V4)</button>
+                    <button class="btn-small" id="farmingStartBtn">🌾 Start Farming</button>
                     <button class="btn-small" id="farmingStopBtn">⏹️ Stop Farming</button>
                     <button class="btn-small" id="claimBtn">💰 Claim Resources</button>
+                    <button class="btn-small migrate-btn" id="migrateFarmBtn" style="display:none;">🔄 Migrate from V4</button>
                     <div id="actionMessage"></div>
                 </div>
                 <p id="noBlockSelected" style="color: var(--text-dim);">Select a block from the pyramid.</p>
             </div>
 
-            <!-- Pirate Attack with Resource Select -->
+            <!-- Pirate Attack (V5) -->
             <div class="card">
-                <h3>🏴‍☠️ Pirate Attack (V4)</h3>
+                <h3>🏴‍☠️ Pirate Attack (V5)</h3>
                 <div class="input-group">
                     <label>Target Row <input type="number" id="attackRow" min="0" max="99"></label>
                     <label>Target Col <input type="number" id="attackCol" min="0" max="198"></label>
@@ -534,10 +551,9 @@
                     <label style="color: var(--accent-gold); margin-bottom: 0.5rem; display: block;">Choose resource to steal:</label>
                     <select id="attackResourceSelect"></select>
                 </div>
-                <!-- Zusätzlicher Info-Block für Attack-Checks -->
                 <div class="info-note" id="attackRulesInfo" style="margin-top: 0.8rem;">
                     <strong>Attack Check</strong><br>
-                    Target status, pending loot, travel time and remaining daily attacks will appear here.
+                    Enter coordinates to analyze target.
                 </div>
                 <button class="btn" id="attackBtn">⚔️ Start Attack</button>
                 <div id="attackMessage"></div>
@@ -573,7 +589,7 @@
             </div>
         </div>
 
-        <!-- Resource Overview (Classic) -->
+        <!-- Resource Overview -->
         <div class="resource-panel">
             <div class="resource-detail">
                 <span class="resource-label">💰 INPI</span>
@@ -589,10 +605,13 @@
             </div>
         </div>
 
-        <!-- Resource Token Balances (mit Icons) -->
+        <!-- Resource Token Balances -->
         <div class="user-resources" id="userResources">
             <p style="color: var(--text-dim); grid-column: 1/-1; text-align: center;">Connect wallet to see your resource tokens.</p>
         </div>
+
+        <!-- Debug Log (für Entwickler, kann später ausgeblendet werden) -->
+        <div id="debugLog" class="debug-log">[Debug] Console output will appear here.</div>
 
         <!-- Info about Copper & Obsidian -->
         <div class="info-note">
@@ -602,7 +621,7 @@
 
         <footer>
             <p>© 2026 INPINITY. All rights reserved. Built on Base.</p>
-            <p>Version 0.22.0 – V4 ONLY</p>
+            <p>Version 0.23.0 – V5</p>
             <p><a href="whitepaper.html">Whitepaper</a> | <a href="https://discord.gg/95yj6Eg6" target="_blank">Discord</a></p>
         </footer>
     </div>
