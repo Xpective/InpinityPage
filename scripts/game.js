@@ -172,21 +172,86 @@ function secondsUntilClaimable(farmStartTime, nowSec){
   return Math.max(0, CLAIM_COOLDOWN_SEC - age);
 }
 
-/* ==================== NEUE ONCHAIN POSITIONSHELPER ==================== */
+/* ==================== ONCHAIN POSITIONSHELPER ==================== */
 async function getTokenPosition(tokenId) {
   const pos = await nftContract.getBlockPosition(tokenId);
   return { row: Number(pos.row), col: Number(pos.col) };
 }
 
-/* ==================== SAFE GETALLPENDING ==================== */
-async function safeGetAllPending(tokenId) {
-  if (!farmingV4Contract) return null;
+/* ==================== SAFE FARM‑HELPER (V4) ==================== */
+async function safeGetFarm(tokenId) {
   try {
-    const pending = await farmingV4Contract.getAllPending(tokenId);
-    if (pending && pending.length !== undefined) return pending;
-    return null;
+    const f = await farmingV4Contract.farms(tokenId);
+    return {
+      ok: true,
+      startTime: Number(f.startTime?.toString?.() ?? f.startTime ?? 0),
+      lastAccrualTime: Number(f.lastAccrualTime?.toString?.() ?? f.lastAccrualTime ?? 0),
+      boostExpiry: Number(f.boostExpiry?.toString?.() ?? f.boostExpiry ?? 0),
+      isActive: !!f.isActive
+    };
   } catch (e) {
-    console.warn("getAllPending reverted for token", tokenId, e);
+    console.warn(`farms() reverted for token ${tokenId}`, e);
+    return {
+      ok: false,
+      startTime: 0,
+      lastAccrualTime: 0,
+      boostExpiry: 0,
+      isActive: false
+    };
+  }
+}
+
+/* ==================== SAFE GETALLPENDING (V4) ==================== */
+async function safeGetAllPending(tokenId) {
+  try {
+    const farm = await safeGetFarm(tokenId);
+
+    if (!farm.ok) {
+      return { ok: false, pending: null, reason: "farm-read-failed" };
+    }
+
+    if (!farm.isActive) {
+      return { ok: false, pending: null, reason: "farm-inactive" };
+    }
+
+    if (!farm.startTime || farm.startTime <= 0) {
+      return { ok: false, pending: null, reason: "farm-not-started" };
+    }
+
+    const pending = await farmingV4Contract.getAllPending(tokenId);
+    return { ok: true, pending, reason: "ok" };
+  } catch (e) {
+    console.warn(`getAllPending reverted for token ${tokenId}`, e);
+    return { ok: false, pending: null, reason: "pending-reverted" };
+  }
+}
+
+/* ==================== SAFE PIRATES‑HELPER ==================== */
+async function safeCanAttack(attackerAddress, targetTokenId) {
+  try {
+    return await piratesV4Contract.canAttackTarget(attackerAddress, targetTokenId);
+  } catch (e) {
+    console.warn("canAttackTarget failed", e);
+    return false;
+  }
+}
+
+async function safeGetRemainingAttacksToday(attackerAddress) {
+  try {
+    const val = await piratesV4Contract.getRemainingAttacksToday(attackerAddress);
+    return Number(val.toString());
+  } catch (e) {
+    console.warn("getRemainingAttacksToday failed", e);
+    return null;
+  }
+}
+
+async function safeGetAttackTime(attackerTokenId, targetTokenId) {
+  try {
+    const val = await piratesV4Contract.getAttackTime(attackerTokenId, targetTokenId);
+    return Number(val.toString());
+  } catch (e) {
+    console.warn("getAttackTime failed", e);
     return null;
   }
 }
@@ -203,7 +268,7 @@ function isGtZero(value) {
   }
 }
 
-/* ==================== SUBGRAPH (über Worker, mit Retry und Jitter) ==================== */
+/* ==================== SUBGRAPH (über Worker) ==================== */
 async function fetchSubgraph(query, retries = 5, baseDelay = 1500) {
   for (let i = 0; i < retries; i++) {
     try {
@@ -569,7 +634,7 @@ async function loadUserBlocks(){
       const protectionLevel = protection ? protection.level : 0;
       const protectionActive = !!(protection && protection.active && protection.expiresAt > now && protectionLevel > 0);
 
-      // Partner-Status vorerst deaktiviert – kann später bei Bedarf separat geladen werden
+      // Partner-Status vorerst deaktiviert
       let partnerActive = false;
 
       let classNames = revealed ? "revealed" : "";
@@ -764,7 +829,6 @@ async function getStealableResourcesForTarget(targetTokenId) {
   }
 
   let rarity = 0;
-  // Position onchain holen
   const { row } = await getTokenPosition(targetTokenId);
   try {
     rarity = Number(await nftContract.calculateRarity(targetTokenId));
@@ -774,7 +838,8 @@ async function getStealableResourcesForTarget(targetTokenId) {
   const allowed = productionToAllowedResourceIds(prod);
 
   // Nur informativ pending holen (kein Revert)
-  const pendingArr = await safeGetAllPending(targetTokenId);
+  const pendingInfo = await safeGetAllPending(targetTokenId);
+  const pendingArr = pendingInfo.ok ? pendingInfo.pending : null;
 
   return {
     farmingActive,
@@ -784,6 +849,7 @@ async function getStealableResourcesForTarget(targetTokenId) {
     rarity,
     allowed,
     pendingArr,
+    pendingReason: pendingInfo.reason,
     reason: "OK"
   };
 }
@@ -805,7 +871,6 @@ async function refreshAttackDropdown() {
 
   if (!select) return;
 
-  // Ungültige Koordinaten → Select und Meldung leeren
   if (!Number.isFinite(row) || !Number.isFinite(col) || row < 0 || row > MAX_ROW || col < 0 || col > 2 * row) {
     select.innerHTML = "";
     if (msg) msg.innerHTML = "";
@@ -845,15 +910,21 @@ async function refreshAttackDropdown() {
 
   let pendingLine = "";
   if (info.pendingArr && info.pendingArr.length !== undefined) {
-    let total = 0n;
+    let total = ethers.BigNumber.from(0);
     for (let i = 0; i < info.pendingArr.length; i++) {
-      total += BigInt(info.pendingArr[i]?.toString() || 0);
+      total = total.add(info.pendingArr[i]);
     }
-    pendingLine = total === 0n
-      ? "⚠️ Pending: 0 (target probably claimed recently)."
-      : `✅ Pending total: ${total.toString()} (there is loot).`;
+    pendingLine = total.isZero()
+      ? "⚠️ Pending: 0"
+      : `✅ Pending total: ${total.toString()}`;
   } else {
-    pendingLine = "⚠️ Pending info unavailable.";
+    if (info.pendingReason === "farm-inactive") {
+      pendingLine = "⚠️ No pending view: farm inactive.";
+    } else if (info.pendingReason === "farm-not-started") {
+      pendingLine = "⚠️ No pending view: farm not started.";
+    } else {
+      pendingLine = "⚠️ Pending unavailable for this target.";
+    }
   }
 
   if (requestId !== attackDropdownRequestId) return;
@@ -1078,12 +1149,11 @@ async function executeAttack(attack){
     }
 
     // Pending mit safeGetAllPending prüfen
-    const pending = await safeGetAllPending(attack.targetTokenId);
-    const hasLoot =
-      pending &&
-      pending.length !== undefined &&
-      pending.length > attack.resource &&
-      isGtZero(pending[attack.resource]);
+    const pendingInfo = await safeGetAllPending(attack.targetTokenId);
+    const hasLoot = pendingInfo.ok &&
+                    pendingInfo.pending &&
+                    pendingInfo.pending.length > attack.resource &&
+                    isGtZero(pendingInfo.pending[attack.resource]);
 
     if (!hasLoot) {
       msgDiv.innerHTML = '<span class="error">❌ No loot – owner claimed or wrong resource.</span>';
@@ -1207,11 +1277,11 @@ async function claimSelected(){
       return;
     }
 
-    const pending = await safeGetAllPending(selectedBlock.tokenId);
+    const pendingInfo = await safeGetAllPending(selectedBlock.tokenId);
     let hasAnything = false;
-    if (pending && pending.length !== undefined) {
-      for (let i = 0; i < pending.length; i++) {
-        if (isGtZero(pending[i])) {
+    if (pendingInfo.ok && pendingInfo.pending && pendingInfo.pending.length !== undefined) {
+      for (let i = 0; i < pendingInfo.pending.length; i++) {
+        if (isGtZero(pendingInfo.pending[i])) {
           hasAnything = true;
           break;
         }
@@ -1284,9 +1354,9 @@ async function attack(){
     msgDiv.innerHTML = `<span class="success">⏳ Checking attack rules...</span>`;
 
     const [canAttack, remainingAttacks, attackTime] = await Promise.all([
-      piratesV4Contract.canAttackTarget(userAddress, targetTokenId),
-      piratesV4Contract.getRemainingAttacksToday(userAddress),
-      piratesV4Contract.getAttackTime(attackerTokenId, targetTokenId)
+      safeCanAttack(userAddress, targetTokenId),
+      safeGetRemainingAttacksToday(userAddress),
+      safeGetAttackTime(attackerTokenId, targetTokenId)
     ]);
 
     if (!canAttack) {
@@ -1294,9 +1364,13 @@ async function attack(){
       return;
     }
 
-    const remaining = Number(remainingAttacks.toString());
-    if (remaining <= 0) {
+    if (remainingAttacks !== null && remainingAttacks <= 0) {
       msgDiv.innerHTML = `<span class="error">❌ No attacks remaining today.</span>`;
+      return;
+    }
+
+    if (attackTime === null) {
+      msgDiv.innerHTML = `<span class="error">❌ Attack path/time unavailable.</span>`;
       return;
     }
 
@@ -1311,8 +1385,8 @@ async function attack(){
     msgDiv.innerHTML = `
       <span class="success">
         ⏳ Starting attack...<br>
-        Travel time: ${formatDuration(Number(attackTime.toString()))}<br>
-        Remaining today: ${remainingAttacks.toString()}
+        Travel time: ${formatDuration(attackTime)}<br>
+        Remaining today: ${remainingAttacks}
       </span>
     `;
 
@@ -1450,7 +1524,6 @@ async function connectWallet(){
     if(network.chainId !== 8453){
       try{
         await window.ethereum.request({ method:"wallet_switchEthereumChain", params:[{ chainId:"0x2105" }] });
-        // Nach Chain-Switch Provider neu initialisieren
         provider = new ethers.providers.Web3Provider(window.ethereum);
         signer = provider.getSigner();
         userAddress = await signer.getAddress();
@@ -1635,12 +1708,10 @@ async function mintBlock(){
     await loadResourceBalancesOnchain();
     await loadUserBlocks();
 
-    // Angriffe verzögert laden
     setTimeout(() => {
       loadUserAttacks();
     }, 1200);
 
-    // Attack-Dropdown nur aktualisieren, wenn bereits Koordinaten eingegeben sind
     const attackRowEl = document.getElementById("attackRow");
     const attackColEl = document.getElementById("attackCol");
     if (attackRowEl?.value && attackColEl?.value) {
@@ -1674,7 +1745,6 @@ document.querySelectorAll('input[name="payment"]').forEach(radio=>{
   radio.addEventListener("change",(e)=>{ selectedPayment = e.target.value; });
 });
 
-// Automatischer Connect wenn Wallet bereits autorisiert
 if(window.ethereum && window.ethereum.selectedAddress){
   connectWallet();
 }
