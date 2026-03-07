@@ -273,16 +273,28 @@ async function loadAllActiveFarmsV4FromSubgraph(){
   );
 }
 
-async function loadProtectionsFromSubgraph(){
-  return await fetchAllWithPagination(
+// NEU: Protection-Caching und Filter auf aktive
+let protectionsLoadedOnce = false;
+
+async function loadProtectionsFromSubgraph(force = false){
+  if (!force && protectionsLoadedOnce && cachedProtections.length > 0) {
+    return cachedProtections;
+  }
+
+  const data = await fetchAllWithPagination(
     "protections",
     `
       id
       level
       expiresAt
       active
-    `
+    `,
+    `{ active: true }`   // Nur aktive Protections laden
   );
+
+  cachedProtections = data || [];
+  protectionsLoadedOnce = true;
+  return cachedProtections;
 }
 
 /* ==================== MAP-FUNKTIONEN ==================== */
@@ -433,11 +445,10 @@ async function loadUserBlocks(){
   if(!grid) return;
 
   try{
-    const [subgraphTokens, subgraphFarms, subgraphProtections] = await Promise.all([
-      loadMyTokensFromSubgraph(userAddress),
-      loadMyActiveFarmsV4FromSubgraph(userAddress), // NUR aktive Farms
-      loadProtectionsFromSubgraph()
-    ]);
+    // Sequenziell statt parallel – reduziert Burst-Last
+    const subgraphTokens = await loadMyTokensFromSubgraph(userAddress);
+    const subgraphFarms = await loadMyActiveFarmsV4FromSubgraph(userAddress);
+    const subgraphProtections = await loadProtectionsFromSubgraph();
 
     // Cache aktualisieren
     cachedMyFarms = subgraphFarms || [];
@@ -1340,19 +1351,24 @@ async function connectWallet(){
 
     await updateBalances();
     await updatePoolInfo();
-    await loadUserBlocks();
     await loadResourceBalancesOnchain();
-    await loadUserAttacks();
+    await loadUserBlocks();
 
-    // Jetzt, wo alle Daten geladen sind, können wir das Dropdown aktualisieren
-    refreshAttackDropdown();
+    // Attacks leicht verzögert laden, um Burst zu vermeiden
+    setTimeout(() => {
+      loadUserAttacks();
+    }, 1500);
 
+    // Polling seltener und fehlertoleranter
     if(!attacksPoller){
       attacksPoller = setInterval(async ()=>{
-        await loadUserAttacks();
-        await loadUserBlocks();
-        refreshBlockMarkings();
-      }, 30000);
+        try {
+          await loadUserAttacks();
+          refreshBlockMarkings();
+        } catch(e) {
+          console.warn("attacks poll failed", e);
+        }
+      }, 45000);
     }
 
   }catch(e){
