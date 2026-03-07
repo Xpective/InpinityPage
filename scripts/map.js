@@ -2,13 +2,13 @@
    INPINITY MAP – V4 ONLY – Finale Version mit allen Optimierungen
    - Worker für Subgraph (kein API‑Key mehr im Frontend)
    - Nur aktive Protections & Partnerships geladen
-   - Debounce für Attack‑Dropdown
-   - Ethers v6 kompatibel
+   - Debounce für Attack‑Dropdown (falls vorhanden)
+   - Safe‑Wrapper für getAllPending (keine Reverts mehr)
+   - Ethers v5/v6 kompatibel (BigInt‑Handling)
    ========================================================= */
 
 /* ==================== KONFIGURATION (V4) ==================== */
 const WORKER_URL = "https://inpinity-worker-final.s-plat.workers.dev";
-
 const BASE_BLOCK_SIZE = 24;
 
 // ====== V4 Contracts ======
@@ -23,7 +23,7 @@ const MERCENARY_V2_ADDRESS = "0xFEa09ccA75dbc63cc8053739A61777Bd13fC6Bc2";
 
 const CLAIM_COOLDOWN_SEC = 24 * 60 * 60; // 24h
 
-/* ==================== ABIs ==================== */
+/* ==================== ABIs (vollständig) ==================== */
 const NFT_ABI = [
   "function revealBlock(uint256 tokenId, bytes32[] piProof, bytes32[] phiProof, uint8 piDigit, uint8 phiDigit) external",
   "function calculateRarity(uint256 tokenId) view returns (uint8)",
@@ -37,12 +37,31 @@ const FARMING_V4_ABI = [
   "function stopFarming(uint256 tokenId) external",
   "function claimResources(uint256 tokenId) external",
   "function farms(uint256) view returns (uint256 startTime, uint256 lastAccrualTime, uint256 boostExpiry, bool isActive)",
-  "function getAllPending(uint256 tokenId) view returns (uint256[10] out)"
+  "function getAllPending(uint256 tokenId) view returns (uint256[10])",
+  "function getPending(uint256 tokenId, uint8 resourceId) view returns (uint256)",
+  "function getDailyProduction(uint256 tokenId) view returns (uint256[10])",
+  "function getFarmInfo(uint256 tokenId) view returns (uint256 startTime, uint256 lastAccrualTime, uint256 boostExpiry, bool isActive)",
+  "function getBoostMultiplier(uint256 tokenId) view returns (uint256)",
+  "function stealResources(uint256 targetTokenId, address attacker, uint8 resourceId, uint256 percent) external returns (uint256)",
+  "function piratesContract() view returns (address)",
+  "function partnershipContract() view returns (address)"
 ];
 
 const PIRATES_V4_ABI = [
   "function startAttack(uint256 attackerTokenId, uint256 targetTokenId, uint8 resource) external",
-  "function executeAttack(uint256 targetTokenId, uint256 attackIndex) external"
+  "function executeAttack(uint256 targetTokenId, uint256 attackIndex) external",
+  "function canAttackTarget(address attacker, uint256 targetTokenId) view returns (bool)",
+  "function getRemainingAttacksToday(address attacker) view returns (uint8)",
+  "function getAttackTime(uint256 attackerTokenId, uint256 targetTokenId) view returns (uint256)",
+  "function getAttackCount(uint256 targetTokenId) view returns (uint256)",
+  "function getAttack(uint256 targetTokenId, uint256 index) view returns (address attacker, uint256 attackerTokenId, uint256 targetTokenId, uint256 startTime, uint256 endTime, uint8 resource, bool executed)",
+  "function getEffectiveStealPercent(uint256 attackerTokenId, uint256 protectionLevel) view returns (uint256)",
+  "function hasPirateBoost(uint256 tokenId) view returns (bool)",
+  "function getPirateBoostExpiry(uint256 tokenId) view returns (uint256)",
+  "function attacks(uint256 targetTokenId, uint256 index) view returns (address attacker, uint256 attackerTokenId, uint256 targetTokenId, uint256 startTime, uint256 endTime, uint8 resource, bool executed)",
+  "function attackCounter(uint256 targetTokenId) view returns (uint256)",
+  "function farming() view returns (address)",
+  "function mercenary() view returns (address)"
 ];
 
 const MERCENARY_V2_ABI = [
@@ -109,10 +128,8 @@ let touchStartX = 0, touchStartY = 0;
 let touchMoved = false;
 const MOVE_THRESHOLD = 10; // Pixel
 
-// Request-ID für Attack-Dropdown
+// Request-ID für Attack-Dropdown (falls vorhanden)
 let attackDropdownRequestId = 0;
-
-// Debounce Timer für Attack-Dropdown
 let attackDropdownTimer = null;
 
 // Schutz vor Mehrfach-Connect
@@ -122,7 +139,6 @@ const resourceNames = ["Oil","Lemons","Iron","Gold","Platinum","Copper","Crystal
 const rarityNames = ["Bronze","Silver","Gold","Platinum","Diamond"];
 const rarityClass = ["rarity-bronze","rarity-silver","rarity-gold","rarity-platinum","rarity-diamond"];
 
-// Farben für Raritäten
 const rarityColors = [
   "#cd7f32", // Bronze
   "#c0c0c0", // Silber
@@ -166,6 +182,35 @@ function secondsUntilClaimable(farmStartTime, nowSec) {
   if (!farmStartTime) return null;
   const age = nowSec - farmStartTime;
   return Math.max(0, CLAIM_COOLDOWN_SEC - age);
+}
+
+// BigInt‑sichere Hilfsfunktion (ethers v5 & v6)
+function isGtZero(value) {
+  if (value === null || value === undefined) return false;
+  if (typeof value === "bigint") return value > 0n;
+  if (typeof value === "number") return value > 0;
+  try {
+    const bn = BigInt(value.toString());
+    return bn > 0n;
+  } catch {
+    return false;
+  }
+}
+
+/* ==================== SAFE GETALLPENDING ==================== */
+async function safeGetAllPending(tokenId) {
+  if (!farmingV4Contract) return null;
+  try {
+    const pending = await farmingV4Contract.getAllPending(tokenId);
+    // Sicherstellen, dass wir ein Array haben (auch wenn Contract [10] zurückgibt)
+    if (pending && pending.length !== undefined) {
+      return pending;
+    }
+    return null;
+  } catch (e) {
+    console.warn(`getAllPending reverted for token ${tokenId}:`, e);
+    return null;
+  }
 }
 
 /* ==================== SUBGRAPH HELPERS (über Worker) ==================== */
@@ -229,7 +274,7 @@ function getProduction(rarity, row) {
   return production;
 }
 
-/* ==================== LOAD ATTACKS (V4) – mit executed: false im Subgraph ==================== */
+/* ==================== LOAD ATTACKS (V4) ==================== */
 async function loadUserAttacks() {
   if (!userAddress) return;
   try {
@@ -358,32 +403,30 @@ async function executeAttack(attack) {
   try {
     if (!piratesV4Contract) throw new Error("Connect wallet first.");
 
+    // Farm‑Status prüfen
     const farm = await farmingV4Contract.farms(attack.targetTokenId);
-    const pending = await farmingV4Contract.getAllPending(attack.targetTokenId);
-    
-    const now = Math.floor(Date.now() / 1000);
-    const startTime = Number(farm.startTime);
-    const claimIn = startTime ? secondsUntilClaimable(startTime, now) : null;
-
     if (!farm.isActive) {
       msgDiv.innerHTML = '<span class="error">❌ Farming inactive – owner stopped.</span>';
       return;
     }
-    
-    if (claimIn !== null && claimIn > 0) {
-      msgDiv.innerHTML = `<span class="error">❌ Need to wait ${formatDuration(claimIn)} (24h total).</span>`;
-      return;
-    }
-    
-    const hasLoot =
-      pending &&
-      pending.length !== undefined &&
-      pending.length > attack.resource &&
-      pending[attack.resource] !== undefined &&
-      pending[attack.resource] > 0n;
+
+    // Pending mit safeGetAllPending prüfen
+    const pending = await safeGetAllPending(attack.targetTokenId);
+    const hasLoot = pending && pending.length > attack.resource && isGtZero(pending[attack.resource]);
 
     if (!hasLoot) {
       msgDiv.innerHTML = '<span class="error">💰 No loot – owner claimed or wrong resource.</span>';
+      return;
+    }
+
+    // Optional: callStatic zur Simulation
+    try {
+      await piratesV4Contract.callStatic.executeAttack(
+        attack.targetTokenId,
+        attack.attackIndex
+      );
+    } catch (simError) {
+      msgDiv.innerHTML = `<span class="error">❌ Execute would fail: ${simError.reason || simError.message}</span>`;
       return;
     }
 
@@ -404,39 +447,37 @@ async function executeAttack(attack) {
     await loadData();
   } catch (e) {
     console.error("executeAttack error:", e);
-    let msg = e?.message || "Unknown error";
+    let msg = e?.reason || e?.message || "Unknown error";
     if ((msg + "").includes("execution reverted")) {
       if (attack.id) dismissAttackById(attack.id);
       await loadUserAttacks();
       msgDiv.innerHTML = '<span class="error">❌ Attack failed – nothing to steal. Good luck next time.</span>';
       return;
     }
-    msgDiv.innerHTML = `<span class="error">${msg}</span>`;
+    msgDiv.innerHTML = `<span class="error">❌ ${msg}</span>`;
   }
 }
 
 /* ==================== LOAD MAP DATA (V4 Subgraph + Rarity) ==================== */
 async function loadData() {
   try {
-    // Token-Informationen
     const tokenItems = await fetchAllWithPagination(
       "tokens",
       "id owner { id } revealed"
     ).catch(() => []);
-    
+
     tokens = {};
     tokenItems.forEach(t => {
-      tokens[t.id] = { 
-        owner: t.owner ? t.owner.id : null, 
-        revealed: !!t.revealed, 
-        farmActive: false, 
-        protectionActive: false, 
+      tokens[t.id] = {
+        owner: t.owner ? t.owner.id : null,
+        revealed: !!t.revealed,
+        farmActive: false,
+        protectionActive: false,
         partnerActive: false,
         rarity: null
       };
     });
 
-    // Lade Raritäten aus BlockRevealed-Events
     const blockRevealedItems = await fetchAllWithPagination(
       "blockRevealeds",
       "tokenId rarity"
@@ -448,13 +489,12 @@ async function loadData() {
       }
     });
 
-    // FarmingV4 Status aus Subgraph – NUR AKTIVE FARMS laden
     const farmV4Items = await fetchAllWithPagination(
       "farmV4S",
       "id owner startTime lastAccrualTime boostExpiry active",
       `{ active: true }`
     ).catch(() => []);
-    
+
     farmV4Items.forEach(f => {
       if (tokens[f.id]) {
         tokens[f.id].farmActive = f.active;
@@ -463,7 +503,6 @@ async function loadData() {
       }
     });
 
-    // Protection und Partnership – NUR AKTIVE laden
     const protectionItems = await fetchAllWithPagination(
       "protections",
       "id active",
@@ -501,7 +540,7 @@ async function loadUserResourcesOnChain() {
         resourceId: id,
         amount: balances[idx]
       }))
-      .filter(r => r.amount > 0n);
+      .filter(r => isGtZero(r.amount));
     updateUserResourcesDisplay();
   } catch (err) {
     console.error("On-chain resource fetch failed:", err);
@@ -553,19 +592,17 @@ function drawPyramid() {
       const tokenId = String(tokenIdNum);
       const token = tokens[tokenId];
       const x = (col - row) * blockSize;
-      
-      let fillColor = "#3a4048"; // default grau
+
+      let fillColor = "#3a4048";
       let strokeColor = null;
       let lineWidth = 0;
 
       if (token && token.owner) {
-        // Bestimme Grundfarbe
         if (token.revealed && token.rarity !== null && token.rarity >= 0 && token.rarity <= 4) {
           fillColor = rarityColors[token.rarity];
         } else {
-          fillColor = token.revealed ? "#c9a959" : "#2e7d5e"; // gold oder grün
+          fillColor = token.revealed ? "#c9a959" : "#2e7d5e";
         }
-        // Eigener Block überschreibt mit Lila (zur Unterscheidung)
         if (userAddress && token.owner.toLowerCase() === userAddress.toLowerCase()) {
           fillColor = "#9b59b6";
         }
@@ -615,13 +652,12 @@ function centerPyramid() {
   drawPyramid();
 }
 
-/* ==================== ATTACK-DROPDOWN (mit Request-ID und Debounce) ==================== */
+/* ==================== ATTACK-DROPDOWN (nur wenn Inputs existieren) ==================== */
 function productionToAllowedResourceIds(productionObj) {
   const map = { OIL:0, LEMONS:1, IRON:2, GOLD:3, PLATINUM:4, COPPER:5, CRYSTAL:6, OBSIDIAN:7, MYSTERIUM:8, AETHER:9 };
   return Object.keys(productionObj).map(key => map[key]).filter(id => Number.isFinite(id));
 }
 
-// Position onchain holen – read‑only sicher
 async function getTokenPosition(tokenId) {
   const contract = nftContract || nftReadOnlyContract;
   if (!contract) throw new Error("NFT contract not ready");
@@ -642,7 +678,6 @@ async function getStealableResourcesForTarget(targetTokenId) {
   const now = Math.floor(Date.now() / 1000);
   const claimIn = farmStartTime ? secondsUntilClaimable(farmStartTime, now) : null;
 
-  // Read‑only Contract verwenden, falls nötig
   const contract = nftContract || nftReadOnlyContract;
   if (!contract) {
     return { farmingActive, farmStartTime, claimIn, revealed: false, allowed: [0, 1, 2] };
@@ -671,15 +706,12 @@ async function getStealableResourcesForTarget(targetTokenId) {
   let allowed = productionToAllowedResourceIds(prod);
   if (allowed.length === 0) allowed = [0,1,2,3,4,5,6,7,8,9];
 
-  let pendingArr = null;
-  try {
-    pendingArr = await farmingV4Contract.getAllPending(targetTokenId);
-  } catch (e) {}
-
+  const pendingArr = await safeGetAllPending(targetTokenId);
   return { farmingActive, farmStartTime, claimIn, revealed: true, rarity, allowed, pendingArr };
 }
 
 function scheduleAttackDropdownRefresh() {
+  if (!document.getElementById("attackRow") || !document.getElementById("attackCol")) return;
   clearTimeout(attackDropdownTimer);
   attackDropdownTimer = setTimeout(() => {
     refreshAttackDropdown();
@@ -687,7 +719,6 @@ function scheduleAttackDropdownRefresh() {
 }
 
 async function refreshAttackDropdown() {
-  const requestId = ++attackDropdownRequestId;
   const select = document.getElementById("attackResource");
   const msg = actionMessage;
   if (!select || !selectedTokenId) return;
@@ -708,7 +739,6 @@ async function refreshAttackDropdown() {
   msg.innerHTML = `<span class="success">⏳ Analyzing...</span>`;
 
   const info = await getStealableResourcesForTarget(targetTokenId);
-  if (requestId !== attackDropdownRequestId) return;
 
   const now = Math.floor(Date.now() / 1000);
   let farmLine = "";
@@ -721,12 +751,10 @@ async function refreshAttackDropdown() {
   if (info.pendingArr && info.pendingArr.length !== undefined) {
     let total = 0n;
     for (let i = 0; i < info.pendingArr.length; i++) {
-      total += info.pendingArr[i] || 0n;
+      total += BigInt(info.pendingArr[i]?.toString() || 0);
     }
     pendingLine = total === 0n ? "⚠️ 0 pending" : `✅ ${total.toString()} pending`;
   }
-
-  if (requestId !== attackDropdownRequestId) return;
 
   msg.innerHTML = `<span class="${!info.farmingActive ? 'error' : 'success'}">${farmLine}<br>${pendingLine}</span>`;
 
@@ -757,9 +785,7 @@ async function updateSidebar(tokenId) {
       const now = Math.floor(Date.now() / 1000);
       claimIn = farmStartTime ? secondsUntilClaimable(farmStartTime, now) : null;
     } catch (_) {}
-    try {
-      pendingArr = await farmingV4Contract.getAllPending(tokenId);
-    } catch(_) {}
+    pendingArr = await safeGetAllPending(tokenId);
   }
   const now = Math.floor(Date.now() / 1000);
   const farmAgeTxt = (v4Active && farmStartTime) ? formatDuration(now - farmStartTime) : "-";
@@ -768,7 +794,7 @@ async function updateSidebar(tokenId) {
   if (pendingArr && pendingArr.length !== undefined) {
     let total = 0n;
     for (let i = 0; i < pendingArr.length; i++) {
-      total += pendingArr[i] || 0n;
+      total += BigInt(pendingArr[i]?.toString() || 0);
     }
     pendingTotalTxt = total === 0n ? "0" : total.toString();
   }
@@ -829,7 +855,7 @@ async function updateSidebar(tokenId) {
   }
 }
 
-/* ==================== TX HELPER (null‑sicher) ==================== */
+/* ==================== TX HELPER ==================== */
 async function sendTx(txPromise, messageDiv, successMsg) {
   if (messageDiv) messageDiv.innerHTML = '<span class="success">⏳ Sending...</span>';
   try {
@@ -905,11 +931,11 @@ async function handleClaim() {
   if (!selectedTokenId) return;
   if (actionMessage) actionMessage.innerHTML = '<span class="success">⏳ Claiming V4...</span>';
   try {
-    const pending = await farmingV4Contract.getAllPending(selectedTokenId);
+    const pending = await safeGetAllPending(selectedTokenId);
     let hasAnything = false;
     if (pending && pending.length !== undefined) {
       for (let i = 0; i < pending.length; i++) {
-        if (pending[i] > 0n) {
+        if (isGtZero(pending[i])) {
           hasAnything = true;
           break;
         }
@@ -979,18 +1005,52 @@ async function handleAttack() {
     return;
   }
 
-  localStorage.setItem(getAttackStorageKey(targetTokenId), JSON.stringify({ targetTokenId, resource, startTime: Math.floor(Date.now() / 1000) }));
-
-  if (actionMessage) actionMessage.innerHTML = '<span class="success">⏳ Starting attack...</span>';
+  // V4‑Prüfungen
   try {
-    await sendTx(
-      piratesV4Contract.startAttack(attackerTokenId, targetTokenId, resource, { gasLimit: 450000 }),
-      actionMessage,
-      "Attack launched!"
-    );
+    if (!piratesV4Contract) throw new Error("Pirates contract not ready");
+
+    const [canAttack, remainingAttacks, attackTime] = await Promise.all([
+      piratesV4Contract.canAttackTarget(userAddress, targetTokenId),
+      piratesV4Contract.getRemainingAttacksToday(userAddress),
+      piratesV4Contract.getAttackTime(attackerTokenId, targetTokenId)
+    ]);
+
+    if (!canAttack) {
+      actionMessage.innerHTML = '<span class="error">❌ Contract says this target cannot be attacked right now.</span>';
+      return;
+    }
+
+    const remaining = Number(remainingAttacks.toString());
+    if (remaining <= 0) {
+      actionMessage.innerHTML = '<span class="error">❌ No attacks remaining today.</span>';
+      return;
+    }
+
+    // Simulation mit callStatic
+    try {
+      await piratesV4Contract.callStatic.startAttack(attackerTokenId, targetTokenId, resource);
+    } catch (simError) {
+      actionMessage.innerHTML = `<span class="error">❌ Attack would fail: ${simError.reason || simError.message}</span>`;
+      return;
+    }
+
+    actionMessage.innerHTML = `
+      <span class="success">
+        ⏳ Starting attack...<br>
+        Travel time: ${formatDuration(Number(attackTime.toString()))}<br>
+        Remaining today: ${remainingAttacks.toString()}
+      </span>
+    `;
+
+    const tx = await piratesV4Contract.startAttack(attackerTokenId, targetTokenId, resource, { gasLimit: 450000 });
+    await tx.wait();
+
+    actionMessage.innerHTML = '<span class="success">✅ Attack launched!</span>';
+    localStorage.setItem(getAttackStorageKey(targetTokenId), JSON.stringify({ targetTokenId, resource, startTime: Math.floor(Date.now() / 1000) }));
     await loadUserAttacks();
   } catch (e) {
-    if (actionMessage) actionMessage.innerHTML = `<span class="error">❌ ${e.message}</span>`;
+    console.error("handleAttack error:", e);
+    actionMessage.innerHTML = `<span class="error">❌ ${e.reason || e.message}</span>`;
   }
 }
 
@@ -1041,7 +1101,7 @@ async function connectWallet() {
 
     document.getElementById("walletAddress").innerText = shortenAddress(userAddress);
     document.getElementById("connectBtn").innerText = "Connected";
-    
+
     await loadData();
     await loadUserResources();
     await loadUserAttacks();
@@ -1066,7 +1126,7 @@ async function initReadOnly() {
   nftReadOnlyContract = new ethers.Contract(NFT_ADDRESS, NFT_ABI, readOnlyProvider);
 }
 
-/* ==================== WHEEL HANDLER (mit Null-Check) ==================== */
+/* ==================== WHEEL / MOUSE / TOUCH HANDLER ==================== */
 function handleWheel(e) {
   if (!canvas) return;
   e.preventDefault();
@@ -1083,7 +1143,6 @@ function handleWheel(e) {
   drawPyramid();
 }
 
-/* ==================== MOUSE HANDLER (mit Null-Check) ==================== */
 function handleMouseMove(e) {
   if (!canvas || !tooltip) return;
   if (isDragging) return;
@@ -1129,7 +1188,6 @@ function handleMouseMove(e) {
   }
 }
 
-/* ==================== CLICK HANDLER (mit Null-Check) ==================== */
 function handleClick(e) {
   if (!canvas) return;
   const rect = canvas.getBoundingClientRect();
@@ -1149,7 +1207,6 @@ function handleClick(e) {
   }
 }
 
-/* ==================== MOBILE TOUCH HANDLER ==================== */
 function handleTouchStart(e) {
   if (e.touches.length === 1) {
     touchStartX = e.touches[0].clientX;
@@ -1169,12 +1226,12 @@ function handleTouchStart(e) {
 
 function handleTouchMove(e) {
   e.preventDefault();
-  
+
   if (e.touches.length === 1) {
     const dx = e.touches[0].clientX - touchStartX;
     const dy = e.touches[0].clientY - touchStartY;
     const distance = Math.hypot(dx, dy);
-    
+
     if (distance > MOVE_THRESHOLD) {
       touchMoved = true;
       isDragging = true;
@@ -1335,13 +1392,16 @@ window.addEventListener("mouseup", () => {
   if (canvas) canvas.style.cursor = "grab";
 });
 
+/* ==================== EVENT LISTENERS (nur wenn Elemente existieren) ==================== */
 document.getElementById("connectBtn")?.addEventListener("click", connectWallet);
 
-// Attack‑Dropdown mit Debounce
-document.getElementById("attackRow")?.addEventListener("input", scheduleAttackDropdownRefresh);
-document.getElementById("attackCol")?.addEventListener("input", scheduleAttackDropdownRefresh);
+// Attack-Dropdown nur, wenn Inputs existieren (in der Map normalerweise nicht)
+if (document.getElementById("attackRow") && document.getElementById("attackCol")) {
+  document.getElementById("attackRow").addEventListener("input", scheduleAttackDropdownRefresh);
+  document.getElementById("attackCol").addEventListener("input", scheduleAttackDropdownRefresh);
+}
 
-// Event-Listener für dynamisch erzeugte Buttons (Owner-Actions) per Event-Delegation
+// Event-Delegation für dynamisch erzeugte Buttons
 document.addEventListener("click", async (e) => {
   if (e.target.id === "revealBtn") await handleReveal();
   if (e.target.id === "startFarmBtn") await handleStartFarm();
