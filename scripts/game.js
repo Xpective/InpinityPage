@@ -11,7 +11,8 @@
    - Cache-Fallback
    - Nur aktive Farms geladen
    - V4‑konforme Attack‑Prüfungen (canAttackTarget, remainingAttacks, AttackTime, callStatic)
-   - Safe-Wrapper für getAllPending
+   - Safe-Wrapper für getAllPending mit 24h‑Prüfung
+   - Attack‑Prüfungen in korrekter Reihenfolge
    ========================================================= */
 
 /* ==================== KONFIGURATION (NUR V4) ==================== */
@@ -201,7 +202,7 @@ async function safeGetFarm(tokenId) {
   }
 }
 
-/* ==================== SAFE GETALLPENDING (V4) ==================== */
+/* ==================== SAFE GETALLPENDING (V4) – mit 24h‑Prüfung ==================== */
 async function safeGetAllPending(tokenId) {
   try {
     const farm = await safeGetFarm(tokenId);
@@ -218,6 +219,13 @@ async function safeGetAllPending(tokenId) {
       return { ok: false, pending: null, reason: "farm-not-started" };
     }
 
+    const now = Math.floor(Date.now() / 1000);
+    const farmAge = now - farm.startTime;
+
+    if (farmAge < CLAIM_COOLDOWN_SEC) {
+      return { ok: false, pending: null, reason: "claim-window-not-reached" };
+    }
+
     const pending = await farmingV4Contract.getAllPending(tokenId);
     return { ok: true, pending, reason: "ok" };
   } catch (e) {
@@ -229,9 +237,12 @@ async function safeGetAllPending(tokenId) {
 /* ==================== SAFE PIRATES‑HELPER ==================== */
 async function safeCanAttack(attackerAddress, targetTokenId) {
   try {
+    if (!attackerAddress || targetTokenId === null || targetTokenId === undefined) {
+      return false;
+    }
     return await piratesV4Contract.canAttackTarget(attackerAddress, targetTokenId);
   } catch (e) {
-    console.warn("canAttackTarget failed", e);
+    console.warn(`canAttackTarget failed for target ${targetTokenId}`, e);
     return false;
   }
 }
@@ -251,7 +262,7 @@ async function safeGetAttackTime(attackerTokenId, targetTokenId) {
     const val = await piratesV4Contract.getAttackTime(attackerTokenId, targetTokenId);
     return Number(val.toString());
   } catch (e) {
-    console.warn("getAttackTime failed", e);
+    console.warn(`getAttackTime failed for ${attackerTokenId} -> ${targetTokenId}`, e);
     return null;
   }
 }
@@ -837,9 +848,17 @@ async function getStealableResourcesForTarget(targetTokenId) {
   const prod = getProduction(rarity, row);
   const allowed = productionToAllowedResourceIds(prod);
 
-  // Nur informativ pending holen (kein Revert)
-  const pendingInfo = await safeGetAllPending(targetTokenId);
-  const pendingArr = pendingInfo.ok ? pendingInfo.pending : null;
+  // Pending nur laden, wenn Loot-Fenster aktiv
+  let pendingArr = null;
+  let pendingReason = "not-requested";
+
+  if (claimIn === 0) {
+    const pendingInfo = await safeGetAllPending(targetTokenId);
+    pendingArr = pendingInfo.ok ? pendingInfo.pending : null;
+    pendingReason = pendingInfo.reason;
+  } else {
+    pendingReason = "claim-window-not-reached";
+  }
 
   return {
     farmingActive,
@@ -849,7 +868,7 @@ async function getStealableResourcesForTarget(targetTokenId) {
     rarity,
     allowed,
     pendingArr,
-    pendingReason: pendingInfo.reason,
+    pendingReason,
     reason: "OK"
   };
 }
@@ -922,6 +941,8 @@ async function refreshAttackDropdown() {
       pendingLine = "⚠️ No pending view: farm inactive.";
     } else if (info.pendingReason === "farm-not-started") {
       pendingLine = "⚠️ No pending view: farm not started.";
+    } else if (info.pendingReason === "claim-window-not-reached") {
+      pendingLine = "⏳ Pending hidden until loot window is active.";
     } else {
       pendingLine = "⚠️ Pending unavailable for this target.";
     }
@@ -1150,10 +1171,20 @@ async function executeAttack(attack){
 
     // Pending mit safeGetAllPending prüfen
     const pendingInfo = await safeGetAllPending(attack.targetTokenId);
-    const hasLoot = pendingInfo.ok &&
-                    pendingInfo.pending &&
-                    pendingInfo.pending.length > attack.resource &&
-                    isGtZero(pendingInfo.pending[attack.resource]);
+
+    if (!pendingInfo.ok) {
+      if (pendingInfo.reason === "claim-window-not-reached") {
+        msgDiv.innerHTML = '<span class="error">❌ Loot window not active yet.</span>';
+        return;
+      }
+      msgDiv.innerHTML = '<span class="error">❌ Pending loot unavailable.</span>';
+      return;
+    }
+
+    const hasLoot =
+      pendingInfo.pending &&
+      pendingInfo.pending.length > attack.resource &&
+      isGtZero(pendingInfo.pending[attack.resource]);
 
     if (!hasLoot) {
       msgDiv.innerHTML = '<span class="error">❌ No loot – owner claimed or wrong resource.</span>';
@@ -1278,8 +1309,18 @@ async function claimSelected(){
     }
 
     const pendingInfo = await safeGetAllPending(selectedBlock.tokenId);
+
+    if (!pendingInfo.ok) {
+      if (pendingInfo.reason === "claim-window-not-reached") {
+        msgDiv.innerHTML = '<span class="error">❌ Claim not available yet. 24h window not reached.</span>';
+        return;
+      }
+      msgDiv.innerHTML = '<span class="error">❌ Pending rewards unavailable.</span>';
+      return;
+    }
+
     let hasAnything = false;
-    if (pendingInfo.ok && pendingInfo.pending && pendingInfo.pending.length !== undefined) {
+    if (pendingInfo.pending && pendingInfo.pending.length !== undefined) {
       for (let i = 0; i < pendingInfo.pending.length; i++) {
         if (isGtZero(pendingInfo.pending[i])) {
           hasAnything = true;
@@ -1353,27 +1394,35 @@ async function attack(){
   try {
     msgDiv.innerHTML = `<span class="success">⏳ Checking attack rules...</span>`;
 
-    const [canAttack, remainingAttacks, attackTime] = await Promise.all([
-      safeCanAttack(userAddress, targetTokenId),
-      safeGetRemainingAttacksToday(userAddress),
-      safeGetAttackTime(attackerTokenId, targetTokenId)
-    ]);
-
+    // 1. canAttackTarget zuerst
+    const canAttack = await safeCanAttack(userAddress, targetTokenId);
     if (!canAttack) {
       msgDiv.innerHTML = `<span class="error">❌ Contract says this target cannot be attacked right now.</span>`;
       return;
     }
 
+    // 2. remainingAttacksToday
+    const remainingAttacks = await safeGetRemainingAttacksToday(userAddress);
     if (remainingAttacks !== null && remainingAttacks <= 0) {
       msgDiv.innerHTML = `<span class="error">❌ No attacks remaining today.</span>`;
       return;
     }
 
+    // 3. attackTime nur wenn canAttack true
+    const attackTime = await safeGetAttackTime(attackerTokenId, targetTokenId);
     if (attackTime === null) {
       msgDiv.innerHTML = `<span class="error">❌ Attack path/time unavailable.</span>`;
       return;
     }
 
+    // 4. Optional: Target-Farm grob prüfen
+    const targetFarm = await safeGetFarm(targetTokenId);
+    if (!targetFarm.ok || !targetFarm.isActive) {
+      msgDiv.innerHTML = `<span class="error">❌ Target is not actively farming.</span>`;
+      return;
+    }
+
+    // 5. Simulation mit callStatic
     try {
       await piratesV4Contract.callStatic.startAttack(attackerTokenId, targetTokenId, resource);
     } catch (simError) {
