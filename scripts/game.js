@@ -1,29 +1,24 @@
 /* =========================================================
-   INPINITY GAME – V4 ONLY – Finale Version mit allen Optimierungen
-   - Tokens, Farms, Protections separat geladen (Subgraph)
-   - Matching über tokenId
-   - Caching von Farm-/Protection-Maps
-   - Positionen immer onchain (getBlockPosition)
-   - Farming-Status für Aktionen onchain
-   - Request-ID für Attack-Dropdown
-   - Selbstangriffsprüfung
-   - Chain-Switch stabilisiert
-   - Cache-Fallback
-   - Nur aktive Farms geladen
-   - V4‑konforme Attack‑Prüfungen (canAttackTarget, remainingAttacks, AttackTime, callStatic)
-   - Safe-Wrapper für getAllPending mit 24h‑Prüfung
-   - Attack‑Prüfungen in korrekter Reihenfolge
+   INPINITY GAME – V5 ONLY (mit V4→V5 Migration)
+   - FarmingV5 und PiratesV5 als einzige aktive Contracts
+   - Migration von V4-Farms zu V5 möglich
+   - Mint-Logik von mint.html übernommen (funktioniert)
+   - Subgraph nur für V5 Entities
+   - Preview-Funktionen für alle Aktionen
    ========================================================= */
 
-/* ==================== KONFIGURATION (NUR V4) ==================== */
+/* ==================== KONFIGURATION (NUR V5) ==================== */
 const NFT_ADDRESS            = "0x277a0D5864293C78d7387C54B48c35D5E9578Ab1";
-const FARMING_V4_ADDRESS     = "0xa7F093c893aeF7dA632e5Fa23971ad3C00Cc5bEd";
-const PIRATES_V4_ADDRESS     = "0x393726fc6f54A07bca710ed7F1c93491CE7daF03";
+const FARMING_V5_ADDRESS     = "0xe0246dC9c553E9cD741013C21BD217912a9DA0B2";
+const PIRATES_V5_ADDRESS     = "0xe76b03A848dE22DdbbF34994e650d2E887426879";
 const MERCENARY_V2_ADDRESS   = "0xFEa09ccA75dbc63cc8053739A61777Bd13fC6Bc2";
 const PARTNERSHIP_V2_ADDRESS = "0xb18323efE4Cc8c36e10D664E287b4e2c82Fe3ad9";
 const RESOURCE_TOKEN_ADDRESS = "0x71E76a6065197acdd1a4d6B736712F80D1Fd3D8b";
 const INPI_ADDRESS           = "0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D";
 const PITRONE_ADDRESS        = "0x7240Ec5B3Ba944888E186c74D0f8B4F5F71c9AE8";
+
+// V4 Adressen für Migration (nur Lesenzwecke)
+const FARMING_V4_ADDRESS     = "0xa7F093c893aeF7dA632e5Fa23971ad3C00Cc5bEd";
 
 const WORKER_URL = "https://inpinity-worker-final.s-plat.workers.dev";
 const MAX_ROW = 99;
@@ -32,9 +27,7 @@ const PRICE_INPI = "30";
 const PRICE_ETH_MIXED  = "0.0015";
 const PRICE_INPI_MIXED = "15";
 
-const CLAIM_COOLDOWN_SEC = 24 * 60 * 60; // 24h
-
-/* ==================== ABIs (VOLLSTÄNDIG) ==================== */
+/* ==================== ABIs ==================== */
 const NFT_ABI = [
   "function mintWithETH(uint256 row, uint256 col) payable",
   "function mintWithINPI(uint256 row, uint256 col) external",
@@ -48,36 +41,41 @@ const NFT_ABI = [
   "function calculateRarity(uint256 tokenId) view returns (uint8)"
 ];
 
-const FARMING_V4_ABI = [
+const FARMING_V5_ABI = [
   "function startFarming(uint256 tokenId) external",
   "function stopFarming(uint256 tokenId) external",
   "function claimResources(uint256 tokenId) external",
-  "function farms(uint256) view returns (uint256 startTime, uint256 lastAccrualTime, uint256 boostExpiry, bool isActive)",
-  "function getAllPending(uint256 tokenId) view returns (uint256[10])",
+  "function buyBoost(uint256 tokenId, uint256 daysAmount) external",
+  "function getFarmState(uint256 tokenId) view returns ((uint256 startTime, uint256 lastAccrualTime, uint256 lastClaimTime, uint256 boostExpiry, uint256 stopTime, bool isActive))",
+  "function getFarmStatusCode(uint256 tokenId) view returns (uint8)",
   "function getPending(uint256 tokenId, uint8 resourceId) view returns (uint256)",
-  "function getDailyProduction(uint256 tokenId) view returns (uint256[10])",
-  "function getFarmInfo(uint256 tokenId) view returns ((uint256 startTime, uint256 lastAccrualTime, uint256 boostExpiry, bool isActive))",
+  "function getAllPending(uint256 tokenId) view returns (uint256[10])",
+  "function getClaimableResources(uint256 tokenId) view returns (uint8[] ids, uint256[] amounts)",
   "function getBoostMultiplier(uint256 tokenId) view returns (uint256)",
-  "function stealResources(uint256 targetTokenId, address attacker, uint8 resourceId, uint256 percent) external returns (uint256)",
-  "function piratesContract() view returns (address)",
-  "function partnershipContract() view returns (address)"
+  "function isClaimMature(uint256 tokenId) view returns (bool)",
+  "function secondsUntilClaimable(uint256 tokenId) view returns (uint256)",
+  "function previewClaim(uint256 tokenId) view returns (uint8 code, bool allowed, uint256 pendingAmount, uint256 travelTime, uint256 remainingAttacksToday, uint256 protectionLevel, uint256 effectiveStealPercent, uint256 secondsRemaining)"
 ];
 
-const PIRATES_V4_ABI = [
-  "function startAttack(uint256 attackerTokenId, uint256 targetTokenId, uint8 resource) external",
+const PIRATES_V5_ABI = [
+  "function startAttack(uint256 attackerTokenId, uint256 targetTokenId, uint8 resourceId) external",
   "function executeAttack(uint256 targetTokenId, uint256 attackIndex) external",
+  "function previewAttack(uint256 attackerTokenId, uint256 targetTokenId, uint8 resourceId) view returns (uint8 code, bool allowed, uint256 pendingAmount, uint256 travelTime, uint256 remainingAttacksToday, uint256 protectionLevel, uint256 effectiveStealPercent, uint256 secondsRemaining)",
+  "function previewExecuteAttack(uint256 targetTokenId, uint256 attackIndex) view returns (uint8 code, bool allowed, uint256 pendingAmount, uint256 travelTime, uint256 remainingAttacksToday, uint256 protectionLevel, uint256 effectiveStealPercent, uint256 secondsRemaining)",
   "function canAttackTarget(address attacker, uint256 targetTokenId) view returns (bool)",
   "function getRemainingAttacksToday(address attacker) view returns (uint8)",
   "function getAttackTime(uint256 attackerTokenId, uint256 targetTokenId) view returns (uint256)",
   "function getAttackCount(uint256 targetTokenId) view returns (uint256)",
-  "function getAttack(uint256 targetTokenId, uint256 index) view returns ((address attacker, uint256 attackerTokenId, uint256 targetTokenId, uint256 startTime, uint256 endTime, uint8 resource, bool executed))",
+  "function getAttack(uint256 targetTokenId, uint256 index) view returns (address attacker, uint256 attackerTokenId, uint256 targetTokenId, uint256 startTime, uint256 endTime, uint8 resource, bool executed, bool cancelled)",
   "function getEffectiveStealPercent(uint256 attackerTokenId, uint256 protectionLevel) view returns (uint256)",
   "function hasPirateBoost(uint256 tokenId) view returns (bool)",
-  "function getPirateBoostExpiry(uint256 tokenId) view returns (uint256)",
-  "function attacks(uint256 targetTokenId, uint256 index) view returns (address attacker, uint256 attackerTokenId, uint256 targetTokenId, uint256 startTime, uint256 endTime, uint8 resource, bool executed)",
-  "function attackCounter(uint256 targetTokenId) view returns (uint256)",
-  "function farming() view returns (address)",
-  "function mercenary() view returns (address)"
+  "function getPirateBoostExpiry(uint256 tokenId) view returns (uint256)"
+];
+
+// V4 ABI nur für Migration (read-only)
+const FARMING_V4_ABI = [
+  "function farms(uint256) view returns (uint256 startTime, uint256 lastAccrualTime, uint256 boostExpiry, bool isActive)",
+  "function getAllPending(uint256 tokenId) view returns (uint256[10])"
 ];
 
 const MERCENARY_V2_ABI = [
@@ -112,8 +110,9 @@ const RESOURCE_TOKEN_ABI = [
 
 /* ==================== GLOBALS ==================== */
 let provider, signer, userAddress;
-let nftContract, farmingV4Contract, piratesV4Contract, mercenaryV2Contract, partnershipV2Contract;
+let nftContract, farmingV5Contract, piratesV5Contract, mercenaryV2Contract, partnershipV2Contract;
 let inpiContract, pitroneContract, resourceTokenContract;
+let farmingV4Contract; // nur für Migration
 
 let selectedPayment = "eth";
 let selectedBlock = null;
@@ -122,10 +121,10 @@ let userBlocks = [];
 let userAttacks = [];
 let userResources = [];
 
-// Caching für Farms und Protections (wird in loadUserBlocks befüllt)
-let cachedMyFarms = [];
+// Caching für Farms (V5) und Protections
+let cachedFarmsV5 = [];
 let cachedProtections = [];
-let cachedFarmMap = new Map();
+let cachedFarmV5Map = new Map();
 let cachedProtectionMap = new Map();
 
 let attacksTicker = null;
@@ -134,12 +133,7 @@ let isConnecting = false;
 
 // Für Request-ID im Attack-Dropdown
 let attackDropdownRequestId = 0;
-
-// Debounce Timer für Attack-Dropdown
 let attackDropdownTimer = null;
-
-// Cache-Warmup Promise für parallele Aufrufe
-let cacheWarmupPromise = null;
 
 const resourceNames = ["Oil","Lemons","Iron","Gold","Platinum","Copper","Crystal","Obsidian","Mysterium","Aether"];
 const rarityNames   = ["Bronze","Silver","Gold","Platinum","Diamond"];
@@ -167,10 +161,17 @@ function formatDuration(seconds){
 function safeText(id, txt){ const el=document.getElementById(id); if(el) el.innerText=txt; }
 function safeHTML(id, html){ const el=document.getElementById(id); if(el) el.innerHTML=html; }
 
-function secondsUntilClaimable(farmStartTime, nowSec){
-  if (!farmStartTime) return null;
-  const age = nowSec - farmStartTime;
-  return Math.max(0, CLAIM_COOLDOWN_SEC - age);
+/* ==================== DEBUG LOG (wie mint.html) ==================== */
+function debugLog(message, data=null){
+  const logDiv = document.getElementById("debugLog");
+  if(!logDiv) return;
+  let line = `[${new Date().toLocaleTimeString()}] ${message}`;
+  if (data){
+    try{ line += " " + JSON.stringify(data).substring(0,200); }
+    catch{ line += " " + String(data); }
+  }
+  logDiv.innerHTML = line + "\n" + logDiv.innerHTML;
+  console.log(message, data);
 }
 
 /* ==================== ONCHAIN POSITIONSHELPER ==================== */
@@ -179,8 +180,35 @@ async function getTokenPosition(tokenId) {
   return { row: Number(pos.row), col: Number(pos.col) };
 }
 
-/* ==================== SAFE FARM‑HELPER (V4) ==================== */
-async function safeGetFarm(tokenId) {
+/* ==================== V5 FARM STATE ==================== */
+async function getFarmStateV5(tokenId) {
+  try {
+    const state = await farmingV5Contract.getFarmState(tokenId);
+    return {
+      ok: true,
+      startTime: Number(state.startTime),
+      lastAccrualTime: Number(state.lastAccrualTime),
+      lastClaimTime: Number(state.lastClaimTime),
+      boostExpiry: Number(state.boostExpiry),
+      stopTime: Number(state.stopTime),
+      isActive: state.isActive
+    };
+  } catch (e) {
+    console.warn(`getFarmState failed for token ${tokenId}`, e);
+    return {
+      ok: false,
+      startTime: 0,
+      lastAccrualTime: 0,
+      lastClaimTime: 0,
+      boostExpiry: 0,
+      stopTime: 0,
+      isActive: false
+    };
+  }
+}
+
+/* ==================== V4 FARM STATE (für Migration) ==================== */
+async function getFarmStateV4(tokenId) {
   try {
     const f = await farmingV4Contract.farms(tokenId);
     return {
@@ -191,91 +219,7 @@ async function safeGetFarm(tokenId) {
       isActive: !!f.isActive
     };
   } catch (e) {
-    console.warn(`farms() reverted for token ${tokenId}`, e);
-    return {
-      ok: false,
-      startTime: 0,
-      lastAccrualTime: 0,
-      boostExpiry: 0,
-      isActive: false
-    };
-  }
-}
-
-/* ==================== SAFE GETALLPENDING (V4) – mit 24h‑Prüfung ==================== */
-async function safeGetAllPending(tokenId) {
-  try {
-    const farm = await safeGetFarm(tokenId);
-
-    if (!farm.ok) {
-      return { ok: false, pending: null, reason: "farm-read-failed" };
-    }
-
-    if (!farm.isActive) {
-      return { ok: false, pending: null, reason: "farm-inactive" };
-    }
-
-    if (!farm.startTime || farm.startTime <= 0) {
-      return { ok: false, pending: null, reason: "farm-not-started" };
-    }
-
-    const now = Math.floor(Date.now() / 1000);
-    const farmAge = now - farm.startTime;
-
-    if (farmAge < CLAIM_COOLDOWN_SEC) {
-      return { ok: false, pending: null, reason: "claim-window-not-reached" };
-    }
-
-    const pending = await farmingV4Contract.getAllPending(tokenId);
-    return { ok: true, pending, reason: "ok" };
-  } catch (e) {
-    console.warn(`getAllPending reverted for token ${tokenId}`, e);
-    return { ok: false, pending: null, reason: "pending-reverted" };
-  }
-}
-
-/* ==================== SAFE PIRATES‑HELPER ==================== */
-async function safeCanAttack(attackerAddress, targetTokenId) {
-  try {
-    if (!attackerAddress || targetTokenId === null || targetTokenId === undefined) {
-      return false;
-    }
-    return await piratesV4Contract.canAttackTarget(attackerAddress, targetTokenId);
-  } catch (e) {
-    console.warn(`canAttackTarget failed for target ${targetTokenId}`, e);
-    return false;
-  }
-}
-
-async function safeGetRemainingAttacksToday(attackerAddress) {
-  try {
-    const val = await piratesV4Contract.getRemainingAttacksToday(attackerAddress);
-    return Number(val.toString());
-  } catch (e) {
-    console.warn("getRemainingAttacksToday failed", e);
-    return null;
-  }
-}
-
-async function safeGetAttackTime(attackerTokenId, targetTokenId) {
-  try {
-    const val = await piratesV4Contract.getAttackTime(attackerTokenId, targetTokenId);
-    return Number(val.toString());
-  } catch (e) {
-    console.warn(`getAttackTime failed for ${attackerTokenId} -> ${targetTokenId}`, e);
-    return null;
-  }
-}
-
-function isGtZero(value) {
-  if (value === null || value === undefined) return false;
-  if (typeof value === "bigint") return value > 0n;
-  if (typeof value === "number") return value > 0;
-  try {
-    const bn = BigInt(value.toString());
-    return bn > 0n;
-  } catch {
-    return false;
+    return { ok: false, isActive: false };
   }
 }
 
@@ -330,99 +274,44 @@ async function fetchAllWithPagination(fieldName, subfields, where = "") {
   return all;
 }
 
-/* ==================== SUBGRAPH-LOADER ==================== */
+/* ==================== SUBGRAPH-LOADER (NUR V5) ==================== */
 async function loadMyTokensFromSubgraph(wallet){
   const owner = wallet.toLowerCase();
   return await fetchAllWithPagination(
     "tokens",
-    `
-      id
-      revealed
-      owner { id }
-    `,
+    `id revealed owner { id }`,
     `{ owner_: { id: "${owner}" } }`
   );
 }
 
-async function loadMyFarmsV4FromSubgraph(wallet){
+async function loadMyFarmsV5FromSubgraph(wallet){
   const owner = wallet.toLowerCase();
   return await fetchAllWithPagination(
-    "farmV4S",
-    `
-      id
-      owner
-      startTime
-      lastAccrualTime
-      boostExpiry
-      active
-      blockNumber
-      blockTimestamp
-    `,
+    "farmV5S",
+    `id owner startTime lastAccrualTime lastClaimTime boostExpiry stopTime active updatedAt blockNumber`,
     `{ owner: "${owner}" }`
   );
 }
 
-// Nur aktive Farms laden
-async function loadMyActiveFarmsV4FromSubgraph(wallet){
+async function loadProtectionsFromSubgraph(){
+  return await fetchAllWithPagination(
+    "protections",
+    `id level expiresAt active`,
+    `{ active: true }`
+  );
+}
+
+async function loadMyAttacksV5FromSubgraph(wallet){
   const owner = wallet.toLowerCase();
   return await fetchAllWithPagination(
-    "farmV4S",
-    `
-      id
-      owner
-      startTime
-      lastAccrualTime
-      boostExpiry
-      active
-      blockNumber
-      blockTimestamp
-    `,
-    `{ owner: "${owner}", active: true }`
+    "attackV5S",
+    `id attacker attackerTokenId targetTokenId attackIndex resource startTime endTime executed cancelled protectionLevel effectiveStealPercent stolenAmount`,
+    `{ attacker: "${owner}" }`
   );
-}
-
-async function loadAllActiveFarmsV4FromSubgraph(){
-  return await fetchAllWithPagination(
-    "farmV4S",
-    `
-      id
-      owner
-      startTime
-      lastAccrualTime
-      boostExpiry
-      active
-      blockNumber
-      blockTimestamp
-    `,
-    `{ active: true }`
-  );
-}
-
-let protectionsLoadedOnce = false;
-
-async function loadProtectionsFromSubgraph(force = false){
-  if (!force && protectionsLoadedOnce && cachedProtections.length > 0) {
-    return cachedProtections;
-  }
-
-  const data = await fetchAllWithPagination(
-    "protections",
-    `
-      id
-      level
-      expiresAt
-      active
-    `,
-    `{ active: true }`
-  );
-
-  cachedProtections = data || [];
-  protectionsLoadedOnce = true;
-  return cachedProtections;
 }
 
 /* ==================== MAP-FUNKTIONEN ==================== */
-function buildFarmMap(farms){
+function buildFarmV5Map(farms){
   const map = new Map();
   for(const farm of farms || []){
     map.set(String(farm.id), {
@@ -430,10 +319,12 @@ function buildFarmMap(farms){
       owner: (farm.owner || "").toLowerCase(),
       startTime: Number(farm.startTime || 0),
       lastAccrualTime: Number(farm.lastAccrualTime || 0),
+      lastClaimTime: Number(farm.lastClaimTime || 0),
       boostExpiry: Number(farm.boostExpiry || 0),
+      stopTime: Number(farm.stopTime || 0),
       active: !!farm.active,
-      blockNumber: Number(farm.blockNumber || 0),
-      blockTimestamp: Number(farm.blockTimestamp || 0)
+      updatedAt: Number(farm.updatedAt || 0),
+      blockNumber: Number(farm.blockNumber || 0)
     });
   }
   return map;
@@ -495,7 +386,7 @@ async function loadResourceBalancesOnchain(){
   userResources = ids.map((id, idx) => ({
     resourceId: id,
     amount: balances[idx]
-  })).filter(r => isGtZero(r.amount));
+  })).filter(r => !r.amount.isZero());
   updateUserResourcesDisplay();
 }
 
@@ -530,59 +421,7 @@ function updateUserResourcesDisplay(){
   container.innerHTML = html;
 }
 
-/* ==================== FARM (NUR V4) – Onchain für Aktionen ==================== */
-async function getFarmStatus(tokenId){
-  try{
-    const f = await farmingV4Contract.farms(tokenId);
-    return { v4Active: !!f.isActive };
-  }catch(e){
-    return { v4Active: false };
-  }
-}
-
-async function startFarmingV4(tokenId, msgDivId="actionMessage"){
-  const msgDiv = document.getElementById(msgDivId);
-  if (msgDiv) msgDiv.innerHTML = `<span class="success">⏳ Checking farms...</span>`;
-
-  try {
-    const farm = await farmingV4Contract.farms(tokenId);
-    if (farm.isActive){
-      if (msgDiv) msgDiv.innerHTML = `<span class="success">✅ Already on V4.</span>`;
-      return;
-    }
-
-    if (msgDiv) msgDiv.innerHTML = `<span class="success">⏳ Starting V4 farming...</span>`;
-    const tx = await farmingV4Contract.startFarming(tokenId, { gasLimit: 500000 });
-    await tx.wait();
-    if (msgDiv) msgDiv.innerHTML = `<span class="success">✅ V4 farming started.</span>`;
-  } catch (e){
-    console.error(e);
-    if (msgDiv) msgDiv.innerHTML = `<span class="error">❌ ${e.message}</span>`;
-  }
-}
-
-/* ==================== CACHE WARMUP ==================== */
-async function warmupCaches() {
-  if (cacheWarmupPromise) return cacheWarmupPromise;
-
-  cacheWarmupPromise = (async () => {
-    const farms = await loadMyActiveFarmsV4FromSubgraph(userAddress);
-    const protections = await loadProtectionsFromSubgraph();
-
-    cachedMyFarms = farms || [];
-    cachedProtections = protections || [];
-    cachedFarmMap = buildFarmMap(cachedMyFarms);
-    cachedProtectionMap = buildProtectionMap(cachedProtections);
-  })();
-
-  try {
-    await cacheWarmupPromise;
-  } finally {
-    cacheWarmupPromise = null;
-  }
-}
-
-/* ==================== BLOCKS – MIT CACHING ==================== */
+/* ==================== BLOCKS – MIT V5 CACHING ==================== */
 async function loadUserBlocks(){
   if(!userAddress || !nftContract) return;
 
@@ -591,13 +430,13 @@ async function loadUserBlocks(){
 
   try{
     const subgraphTokens = await loadMyTokensFromSubgraph(userAddress);
-    const subgraphFarms = await loadMyActiveFarmsV4FromSubgraph(userAddress);
+    const subgraphFarmsV5 = await loadMyFarmsV5FromSubgraph(userAddress);
     const subgraphProtections = await loadProtectionsFromSubgraph();
 
     // Cache aktualisieren
-    cachedMyFarms = subgraphFarms || [];
+    cachedFarmsV5 = subgraphFarmsV5 || [];
     cachedProtections = subgraphProtections || [];
-    cachedFarmMap = buildFarmMap(cachedMyFarms);
+    cachedFarmV5Map = buildFarmV5Map(cachedFarmsV5);
     cachedProtectionMap = buildProtectionMap(cachedProtections);
 
     userBlocks = (subgraphTokens || []).map(t => String(t.id));
@@ -636,17 +475,13 @@ async function loadUserBlocks(){
         }catch(e){}
       }
 
-      const farm = cachedFarmMap.get(tokenId);
+      const farm = cachedFarmV5Map.get(tokenId);
       const farmingActive = !!(farm && farm.active);
-      const farmStartTime = farm ? farm.startTime : 0;
       if(farmingActive) activeFarmsCount++;
 
       const protection = cachedProtectionMap.get(tokenId);
       const protectionLevel = protection ? protection.level : 0;
       const protectionActive = !!(protection && protection.active && protection.expiresAt > now && protectionLevel > 0);
-
-      // Partner-Status vorerst deaktiviert
-      let partnerActive = false;
 
       let classNames = revealed ? "revealed" : "";
       if(farmingActive) classNames += " farming";
@@ -657,8 +492,8 @@ async function loadUserBlocks(){
         ? `<div class="rarity-badge ${rarityName.toLowerCase()}">${rarityName}</div>`
         : `<div class="rarity">🔒 Hidden</div>`;
 
-      const farmDurationLine = farmingActive && farmStartTime > 0
-        ? `<div style="margin-top:6px; font-size:0.78rem; color: var(--text-dim);">⏱️ Farming: ${formatDuration(now - farmStartTime)}</div>`
+      const farmDurationLine = farmingActive && farm.startTime > 0
+        ? `<div style="margin-top:6px; font-size:0.78rem; color: var(--text-dim);">⏱️ Farming: ${formatDuration(now - farm.startTime)}</div>`
         : "";
 
       html += `
@@ -667,7 +502,6 @@ async function loadUserBlocks(){
           <div>R${row} C${col}</div>
           ${badge}
           ${farmDurationLine}
-          ${partnerActive ? '<span class="star" style="position:absolute; top:-5px; right:-5px;">★</span>' : ''}
         </div>
       `;
     }
@@ -689,15 +523,6 @@ async function loadUserBlocks(){
 }
 
 async function selectBlock(tokenId, row, col){
-  // Cache-Fallback mit gemeinsamer Warmup-Funktion
-  if (cachedFarmMap.size === 0 || cachedProtectionMap.size === 0) {
-    try {
-      await warmupCaches();
-    } catch(e) {
-      console.warn("Cache fallback failed", e);
-    }
-  }
-
   const now = Math.floor(Date.now()/1000);
 
   let revealed = false;
@@ -714,8 +539,8 @@ async function selectBlock(tokenId, row, col){
     }catch(e){}
   }
 
-  // Aus dem Cache lesen (keine neuen Subgraph-Aufrufe)
-  const farm = cachedFarmMap.get(String(tokenId));
+  // Aus dem Cache lesen
+  const farm = cachedFarmV5Map.get(String(tokenId));
   const farmingActive = !!(farm && farm.active);
   const farmStartTime = farm ? farm.startTime : 0;
   const boostExpiry = farm ? farm.boostExpiry : 0;
@@ -723,8 +548,6 @@ async function selectBlock(tokenId, row, col){
   const protection = cachedProtectionMap.get(String(tokenId));
   const protectionLevel = protection ? protection.level : 0;
   const protectionActive = !!(protection && protection.active && protection.expiresAt > now && protectionLevel > 0);
-
-  let partnerActive = false;
 
   selectedBlock = {
     tokenId: String(tokenId),
@@ -735,7 +558,6 @@ async function selectBlock(tokenId, row, col){
     farmingActive,
     protectionLevel,
     protectionActive,
-    partnerActive,
     farmStartTime,
     boostExpiry
   };
@@ -759,6 +581,23 @@ async function selectBlock(tokenId, row, col){
   const stopBtn  = document.getElementById("farmingStopBtn");
   startBtn.disabled = farmingActive;
   stopBtn.disabled  = !farmingActive;
+
+  // Prüfen ob V4 Farm existiert für Migration
+  let hasV4Farm = false;
+  if(farmingV4Contract) {
+    const v4Farm = await getFarmStateV4(tokenId);
+    hasV4Farm = v4Farm.ok && v4Farm.isActive;
+  }
+  
+  const migrateBtn = document.getElementById("migrateFarmBtn");
+  if(migrateBtn) {
+    if(hasV4Farm && !farmingActive) {
+      migrateBtn.style.display = "inline-block";
+      migrateBtn.disabled = false;
+    } else {
+      migrateBtn.style.display = "none";
+    }
+  }
 
   const resDiv = document.getElementById("blockResources");
   if(revealed && rarity !== null){
@@ -798,79 +637,17 @@ function getProduction(rarity,row){
   return p;
 }
 
-/* ==================== ATTACK-HELPER (onchain Position) ==================== */
-function productionToAllowedResourceIds(productionObj) {
-  const map = {
-    OIL: 0, LEMONS: 1, IRON: 2, GOLD: 3, PLATINUM: 4,
-    COPPER: 5, CRYSTAL: 6, OBSIDIAN: 7, MYSTERIUM: 8, AETHER: 9
-  };
-  return Object.keys(productionObj)
-    .map(key => map[key])
-    .filter(id => Number.isFinite(id));
-}
-
-async function getStealableResourcesForTarget(targetTokenId) {
-  let farmingActive = false;
-  let farmStartTime = 0;
-
-  try {
-    const f = await farmingV4Contract.farms(targetTokenId);
-    farmingActive = !!f.isActive;
-    farmStartTime = Number(f.startTime.toString());
-  } catch (e) {}
-
-  const now = Math.floor(Date.now()/1000);
-  const claimIn = farmStartTime ? secondsUntilClaimable(farmStartTime, now) : null;
-
-  let revealed = false;
-  try {
-    const d = await nftContract.blockData(targetTokenId);
-    revealed = !!d.revealed;
-  } catch (e) {}
-
-  if (!revealed) {
-    return {
-      farmingActive,
-      farmStartTime,
-      claimIn,
-      revealed: false,
-      allowed: [0, 1, 2],
-      reason: "Target not revealed yet"
-    };
+/* ==================== ATTACK-DROPDOWN (V5) ==================== */
+function initAttackResourceSelect(){
+  const select = document.getElementById("attackResourceSelect");
+  if(!select) return;
+  select.innerHTML = "";
+  for(let i=0; i<resourceNames.length; i++){
+    const opt = document.createElement("option");
+    opt.value = i;
+    opt.textContent = resourceNames[i];
+    select.appendChild(opt);
   }
-
-  let rarity = 0;
-  const { row } = await getTokenPosition(targetTokenId);
-  try {
-    rarity = Number(await nftContract.calculateRarity(targetTokenId));
-  } catch (e) {}
-
-  const prod = getProduction(rarity, row);
-  const allowed = productionToAllowedResourceIds(prod);
-
-  // Pending nur laden, wenn Loot-Fenster aktiv
-  let pendingArr = null;
-  let pendingReason = "not-requested";
-
-  if (claimIn === 0) {
-    const pendingInfo = await safeGetAllPending(targetTokenId);
-    pendingArr = pendingInfo.ok ? pendingInfo.pending : null;
-    pendingReason = pendingInfo.reason;
-  } else {
-    pendingReason = "claim-window-not-reached";
-  }
-
-  return {
-    farmingActive,
-    farmStartTime,
-    claimIn,
-    revealed: true,
-    rarity,
-    allowed,
-    pendingArr,
-    pendingReason,
-    reason: "OK"
-  };
 }
 
 function scheduleAttackDropdownRefresh() {
@@ -887,23 +664,25 @@ async function refreshAttackDropdown() {
   const col = parseInt(document.getElementById("attackCol")?.value, 10);
   const select = document.getElementById("attackResourceSelect");
   const msg = document.getElementById("attackMessage");
+  const info = document.getElementById("attackRulesInfo");
 
   if (!select) return;
 
   if (!Number.isFinite(row) || !Number.isFinite(col) || row < 0 || row > MAX_ROW || col < 0 || col > 2 * row) {
     select.innerHTML = "";
     if (msg) msg.innerHTML = "";
+    if (info) info.innerHTML = `<strong>Attack Check</strong><br>Enter valid coordinates.`;
     return;
   }
 
   const targetTokenId = row * 2048 + col;
 
-  if (!userAddress || !nftContract || !farmingV4Contract) {
+  if (!userAddress || !nftContract || !piratesV5Contract) {
     select.innerHTML = "";
-    [0, 1, 2].forEach(id => {
+    resourceNames.forEach((name, id) => {
       const opt = document.createElement("option");
       opt.value = id;
-      opt.textContent = resourceNames[id];
+      opt.textContent = name;
       select.appendChild(opt);
     });
     return;
@@ -911,98 +690,111 @@ async function refreshAttackDropdown() {
 
   msg.innerHTML = `<span class="success">⏳ Analyzing target...</span>`;
 
-  const info = await getStealableResourcesForTarget(targetTokenId);
-  if (requestId !== attackDropdownRequestId) return;
-
-  const now = Math.floor(Date.now()/1000);
-
-  let farmLine = "";
-  if (!info.farmingActive) {
-    farmLine = "❌ Farming inactive → likely 0 loot.";
-  } else if (info.claimIn !== null && info.claimIn > 0) {
-    farmLine = `⏳ Farming age: ${formatDuration(now - info.farmStartTime)} · Loot builds up (claim-ready in ${formatDuration(info.claimIn)}).`;
-  } else if (info.claimIn === 0) {
-    farmLine = `✅ Farming age: ${formatDuration(now - info.farmStartTime)} · Loot window is active.`;
-  } else {
-    farmLine = "✅ Farming active.";
-  }
-
-  let pendingLine = "";
-  if (info.pendingArr && info.pendingArr.length !== undefined) {
-    let total = ethers.BigNumber.from(0);
-    for (let i = 0; i < info.pendingArr.length; i++) {
-      total = total.add(info.pendingArr[i]);
+  try {
+    // Prüfen ob Target existiert
+    let targetOwner;
+    try {
+      targetOwner = await nftContract.ownerOf(targetTokenId);
+    } catch(e) {
+      if (requestId !== attackDropdownRequestId) return;
+      msg.innerHTML = `<span class="error">❌ Target block does not exist.</span>`;
+      if (info) info.innerHTML = `<strong>Attack Check</strong><br>Block not minted.`;
+      return;
     }
-    pendingLine = total.isZero()
-      ? "⚠️ Pending: 0"
-      : `✅ Pending total: ${total.toString()}`;
-  } else {
-    if (info.pendingReason === "farm-inactive") {
-      pendingLine = "⚠️ No pending view: farm inactive.";
-    } else if (info.pendingReason === "farm-not-started") {
-      pendingLine = "⚠️ No pending view: farm not started.";
-    } else if (info.pendingReason === "claim-window-not-reached") {
-      pendingLine = "⏳ Pending hidden until loot window is active.";
-    } else {
-      pendingLine = "⚠️ Pending unavailable for this target.";
+
+    // Attacker Token ID bestimmen
+    const balance = await nftContract.balanceOf(userAddress);
+    if (balance.toNumber() === 0) {
+      if (requestId !== attackDropdownRequestId) return;
+      msg.innerHTML = `<span class="error">❌ You need a block to attack from.</span>`;
+      if (info) info.innerHTML = `<strong>Attack Check</strong><br>No attacker block.`;
+      return;
     }
+
+    const attackerTokenId = selectedBlock
+      ? parseInt(selectedBlock.tokenId, 10)
+      : (await nftContract.tokenOfOwnerByIndex(userAddress, 0)).toNumber();
+
+    if (requestId !== attackDropdownRequestId) return;
+
+    // Preview für jeden Resource-Typ laden
+    const previewPromises = [];
+    for(let resourceId = 0; resourceId < 10; resourceId++) {
+      previewPromises.push(
+        piratesV5Contract.previewAttack(attackerTokenId, targetTokenId, resourceId)
+          .catch(() => null)
+      );
+    }
+    
+    const previews = await Promise.all(previewPromises);
+    
+    if (requestId !== attackDropdownRequestId) return;
+
+    // Resource Select befüllen mit denen, die allowed sind
+    select.innerHTML = "";
+    const allowedResources = [];
+    
+    for(let resourceId = 0; resourceId < 10; resourceId++) {
+      const preview = previews[resourceId];
+      if (preview && preview.allowed) {
+        allowedResources.push(resourceId);
+        const opt = document.createElement("option");
+        opt.value = resourceId;
+        opt.textContent = resourceNames[resourceId];
+        select.appendChild(opt);
+      }
+    }
+
+    if (allowedResources.length === 0) {
+      // Fallback: alle anzeigen, aber mit Warnung
+      resourceNames.forEach((name, id) => {
+        const opt = document.createElement("option");
+        opt.value = id;
+        opt.textContent = name + " ⚠️";
+        select.appendChild(opt);
+      });
+    }
+
+    // Info-Box aktualisieren (mit Preview des ersten erlaubten oder ersten generell)
+    const previewToShow = allowedResources.length > 0 
+      ? previews[allowedResources[0]] 
+      : previews[0];
+
+    if (previewToShow && info) {
+      let html = `<strong>Attack Check</strong><br>`;
+      if (targetOwner.toLowerCase() === userAddress.toLowerCase()) {
+        html += `<span style="color:#ff6b6b;">⚠️ Cannot attack own block</span>`;
+      } else {
+        html += previewToShow.allowed 
+          ? `<span style="color:#51cf66;">✅ Attack allowed</span><br>`
+          : `<span style="color:#ff6b6b;">❌ Attack not allowed</span><br>`;
+        
+        html += `Travel time: ${formatDuration(previewToShow.travelTime)}<br>`;
+        html += `Remaining attacks: ${previewToShow.remainingAttacksToday}<br>`;
+        html += `Protection: ${previewToShow.protectionLevel}%<br>`;
+        html += `Steal %: ${previewToShow.effectiveStealPercent}%<br>`;
+        html += `Pending: ${previewToShow.pendingAmount}`;
+      }
+      info.innerHTML = html;
+    }
+
+    msg.innerHTML = `<span class="success">✅ Target analyzed</span>`;
+
+  } catch(e) {
+    console.warn("refreshAttackDropdown error:", e);
+    if (requestId !== attackDropdownRequestId) return;
+    msg.innerHTML = `<span class="error">❌ Error analyzing target</span>`;
+    if (info) info.innerHTML = `<strong>Attack Check</strong><br>Error: ${e.message}`;
   }
-
-  if (requestId !== attackDropdownRequestId) return;
-
-  msg.innerHTML = `
-    <span class="${!info.farmingActive ? 'error' : 'success'}">
-      ${farmLine}<br>${pendingLine}
-    </span>
-  `;
-
-  select.innerHTML = "";
-  info.allowed.forEach(id => {
-    const opt = document.createElement("option");
-    opt.value = id;
-    opt.textContent = resourceNames[id] + (info.revealed ? "" : " (safe)");
-    select.appendChild(opt);
-  });
 }
 
-/* ==================== ATTACKS (V4) – Verbesserte Query ==================== */
-function initAttackResourceSelect(){
-  const select = document.getElementById("attackResourceSelect");
-  if(!select) return;
-  select.innerHTML = "";
-  for(let i=0; i<resourceNames.length; i++){
-    const opt = document.createElement("option");
-    opt.value = i;
-    opt.textContent = resourceNames[i];
-    select.appendChild(opt);
-  }
-}
-
+/* ==================== ATTACKS (V5) ==================== */
 async function loadUserAttacks() {
   if (!userAddress) return;
 
   try {
-    const where = `{ attacker: "${userAddress.toLowerCase()}", executed: false }`;
-
-    const attacks = await fetchAllWithPagination(
-      "attackV4S",
-      `
-        id
-        attacker
-        attackerTokenId
-        targetTokenId
-        attackIndex
-        startTime
-        endTime
-        resource
-        executed
-        protectionLevel
-        effectiveStealPercent
-        stolenAmount
-      `,
-      where
-    );
-
+    const attacks = await loadMyAttacksV5FromSubgraph(userAddress);
+    
     userAttacks = (attacks || []).map(a => ({
       id: a.id,
       targetTokenId: parseInt(a.targetTokenId, 10),
@@ -1011,14 +803,12 @@ async function loadUserAttacks() {
       startTime: parseInt(a.startTime, 10),
       endTime: parseInt(a.endTime, 10),
       executed: !!a.executed,
+      cancelled: !!a.cancelled,
       resource: parseInt(a.resource, 10),
       protectionLevel: a.protectionLevel ? parseInt(a.protectionLevel,10) : 0,
       effectiveStealPercent: a.effectiveStealPercent ? parseInt(a.effectiveStealPercent,10) : 0,
       stolenAmount: a.stolenAmount ? a.stolenAmount.toString() : "0"
-    }));
-
-    const dismissed = loadDismissedAttacks();
-    userAttacks = userAttacks.filter(a => !dismissed.has(a.id));
+    })).filter(a => !a.executed && !a.cancelled);
 
     displayUserAttacks();
     refreshBlockMarkings();
@@ -1078,7 +868,7 @@ function displayUserAttacks(){
       const attackId = btn.dataset.attackid;
       const targetTokenId = parseInt(btn.dataset.targetid, 10);
       const attackIndex = parseInt(btn.dataset.attackindex, 10);
-      await executeAttack({ id: attackId, targetTokenId, attackIndex });
+      await executeAttack(targetTokenId, attackIndex, attackId);
     });
   });
 }
@@ -1141,82 +931,29 @@ function refreshBlockMarkings(){
   });
 }
 
-/* ==================== DISMISS ==================== */
-function dismissAttackById(attackId) {
-  const key = "dismissedAttacks";
-  const arr = JSON.parse(localStorage.getItem(key) || "[]");
-  if (!arr.includes(attackId)) arr.push(attackId);
-  localStorage.setItem(key, JSON.stringify(arr));
-}
-
-function loadDismissedAttacks() {
-  return new Set(JSON.parse(localStorage.getItem("dismissedAttacks") || "[]"));
-}
-
-/* ==================== EXECUTE ATTACK (PiratesV4) ==================== */
-async function executeAttack(attack){
+/* ==================== EXECUTE ATTACK (V5) ==================== */
+async function executeAttack(targetTokenId, attackIndex, attackId){
   const msgDiv = document.getElementById("attackMessage");
   if(!msgDiv) return;
 
-  msgDiv.innerHTML = '<span class="success">⏳ Checking target resources...</span>';
+  msgDiv.innerHTML = '<span class="success">⏳ Checking attack...</span>';
   try {
-    if (!piratesV4Contract) throw new Error("Connect wallet first.");
+    if (!piratesV5Contract) throw new Error("Connect wallet first.");
 
-    // Farming-Status prüfen
-    const farm = await farmingV4Contract.farms(attack.targetTokenId);
-    if (!farm.isActive) {
-      msgDiv.innerHTML = '<span class="error">❌ Farming inactive – owner stopped.</span>';
-      return;
-    }
-
-    // Pending mit safeGetAllPending prüfen
-    const pendingInfo = await safeGetAllPending(attack.targetTokenId);
-
-    if (!pendingInfo.ok) {
-      if (pendingInfo.reason === "claim-window-not-reached") {
-        msgDiv.innerHTML = '<span class="error">❌ Loot window not active yet.</span>';
-        return;
-      }
-      msgDiv.innerHTML = '<span class="error">❌ Pending loot unavailable.</span>';
-      return;
-    }
-
-    const hasLoot =
-      pendingInfo.pending &&
-      pendingInfo.pending.length > attack.resource &&
-      isGtZero(pendingInfo.pending[attack.resource]);
-
-    if (!hasLoot) {
-      msgDiv.innerHTML = '<span class="error">❌ No loot – owner claimed or wrong resource.</span>';
-      return;
-    }
-
-    // Simulation der executeAttack
-    try {
-      await piratesV4Contract.callStatic.executeAttack(
-        attack.targetTokenId,
-        attack.attackIndex
-      );
-    } catch (simError) {
-      console.error("executeAttack simulation failed:", simError);
-      msgDiv.innerHTML = `<span class="error">❌ Execute would fail: ${simError.reason || simError.message}</span>`;
+    // Preview
+    const preview = await piratesV5Contract.previewExecuteAttack(targetTokenId, attackIndex);
+    
+    if (!preview.allowed) {
+      msgDiv.innerHTML = `<span class="error">❌ Cannot execute: Code ${preview.code}</span>`;
       return;
     }
 
     msgDiv.innerHTML = '<span class="success">⏳ Executing attack...</span>';
 
-    const tx = await piratesV4Contract.executeAttack(
-      attack.targetTokenId,
-      attack.attackIndex,
-      { gasLimit: 350000 }
-    );
-
-    msgDiv.innerHTML = '<span class="success">⏳ Confirming transaction...</span>';
+    const tx = await piratesV5Contract.executeAttack(targetTokenId, attackIndex, { gasLimit: 350000 });
     await tx.wait();
 
     msgDiv.innerHTML = '<span class="success">✅ Attack executed!</span>';
-
-    if (attack.id) dismissAttackById(attack.id);
 
     await loadUserAttacks();
     await loadResourceBalancesOnchain();
@@ -1224,18 +961,66 @@ async function executeAttack(attack){
     refreshBlockMarkings();
   } catch(e){
     console.error("ExecuteAttack error:", e);
-    let msg = e?.reason || e?.message || "Unknown error";
-    if ((msg+"").includes("execution reverted")) {
-      if (attack.id) dismissAttackById(attack.id);
-      await loadUserAttacks();
-      msgDiv.innerHTML = '<span class="error">❌ Attack failed – nothing to steal or contract rule blocked it.</span>';
-      return;
-    }
-    msgDiv.innerHTML = `<span class="error">❌ ${msg}</span>`;
+    msgDiv.innerHTML = `<span class="error">❌ ${e.reason || e.message}</span>`;
   }
 }
 
-/* ==================== ACTIONS ==================== */
+/* ==================== MIGRATION V4 → V5 ==================== */
+async function migrateFarmToV5() {
+  if(!selectedBlock) return alert("No block selected.");
+  const msgDiv = document.getElementById("actionMessage");
+
+  try {
+    // Prüfen ob V4 Farm aktiv
+    const v4Farm = await getFarmStateV4(selectedBlock.tokenId);
+    if (!v4Farm.ok || !v4Farm.isActive) {
+      msgDiv.innerHTML = '<span class="error">❌ No active V4 farm found.</span>';
+      return;
+    }
+
+    // Prüfen ob bereits V5 Farm aktiv
+    const v5Farm = await getFarmStateV5(selectedBlock.tokenId);
+    if (v5Farm.ok && v5Farm.isActive) {
+      msgDiv.innerHTML = '<span class="error">❌ Already farming on V5.</span>';
+      return;
+    }
+
+    msgDiv.innerHTML = '<span class="success">⏳ Migrating farm from V4 to V5...</span>';
+    
+    // Claim V4 Resources first (optional, aber empfohlen)
+    try {
+      const pendingInfo = await farmingV4Contract.getAllPending(selectedBlock.tokenId);
+      const hasPending = pendingInfo.some((val) => !val.isZero());
+      if (hasPending) {
+        msgDiv.innerHTML = '<span class="success">⏳ Claiming V4 resources first...</span>';
+        const claimTx = await farmingV4Contract.claimResources(selectedBlock.tokenId, { gasLimit: 600000 });
+        await claimTx.wait();
+      }
+    } catch(e) {
+      console.warn("Claim before migration failed:", e);
+    }
+
+    // Stop V4 Farming
+    msgDiv.innerHTML = '<span class="success">⏳ Stopping V4 farm...</span>';
+    const stopTx = await farmingV4Contract.stopFarming(selectedBlock.tokenId, { gasLimit: 500000 });
+    await stopTx.wait();
+
+    // Start V5 Farming
+    msgDiv.innerHTML = '<span class="success">⏳ Starting V5 farm...</span>';
+    const startTx = await farmingV5Contract.startFarming(selectedBlock.tokenId, { gasLimit: 500000 });
+    await startTx.wait();
+
+    msgDiv.innerHTML = '<span class="success">✅ Migration successful! Now farming on V5.</span>';
+    
+    await loadUserBlocks();
+    await selectBlock(selectedBlock.tokenId, selectedBlock.row, selectedBlock.col);
+  } catch(e) {
+    console.error("Migration error:", e);
+    msgDiv.innerHTML = `<span class="error">❌ ${e.message}</span>`;
+  }
+}
+
+/* ==================== ACTIONS (V5) ==================== */
 async function revealSelected(){
   if(!selectedBlock) return alert("No block selected.");
   const { tokenId,row,col } = selectedBlock;
@@ -1269,9 +1054,23 @@ async function revealSelected(){
 
 async function startFarmingSelected(){
   if(!selectedBlock) return alert("No block selected.");
-  await startFarmingV4(selectedBlock.tokenId, "actionMessage");
-  await loadUserBlocks();
-  await selectBlock(selectedBlock.tokenId, selectedBlock.row, selectedBlock.col);
+  const msgDiv = document.getElementById("actionMessage");
+
+  try{
+    // Preview Claim um Status zu prüfen
+    const preview = await farmingV5Contract.previewClaim(selectedBlock.tokenId);
+    
+    msgDiv.innerHTML = `<span class="success">⏳ Starting V5 farming...</span>`;
+    const tx = await farmingV5Contract.startFarming(selectedBlock.tokenId, { gasLimit: 500000 });
+    await tx.wait();
+    
+    msgDiv.innerHTML = `<span class="success">✅ V5 farming started.</span>`;
+    await loadUserBlocks();
+    await selectBlock(selectedBlock.tokenId, selectedBlock.row, selectedBlock.col);
+  }catch(e){
+    console.error(e);
+    msgDiv.innerHTML = `<span class="error">❌ ${e.message}</span>`;
+  }
 }
 
 async function stopFarmingSelected(){
@@ -1279,13 +1078,13 @@ async function stopFarmingSelected(){
   const msgDiv = document.getElementById("actionMessage");
 
   try{
-    const st = await getFarmStatus(selectedBlock.tokenId);
-    if(!st.v4Active) {
-      msgDiv.innerHTML = '<span class="error">❌ Not farming on V4.</span>';
+    const state = await getFarmStateV5(selectedBlock.tokenId);
+    if(!state.isActive) {
+      msgDiv.innerHTML = '<span class="error">❌ Not farming on V5.</span>';
       return;
     }
 
-    const tx = await farmingV4Contract.stopFarming(selectedBlock.tokenId, { gasLimit: 500000 });
+    const tx = await farmingV5Contract.stopFarming(selectedBlock.tokenId, { gasLimit: 500000 });
     msgDiv.innerHTML = `<span class="success">⏳ Stopping farming...</span>`;
     await tx.wait();
     msgDiv.innerHTML = `<span class="success">⏹️ Farming stopped.</span>`;
@@ -1302,39 +1101,25 @@ async function claimSelected(){
   const msgDiv = document.getElementById("actionMessage");
 
   try{
-    const st = await getFarmStatus(selectedBlock.tokenId);
-    if(!st.v4Active) {
-      msgDiv.innerHTML = '<span class="error">❌ Not farming on V4.</span>';
+    // Preview Claim
+    const preview = await farmingV5Contract.previewClaim(selectedBlock.tokenId);
+    
+    if (!preview.allowed) {
+      if (preview.secondsRemaining > 0) {
+        msgDiv.innerHTML = `<span class="error">❌ Claim not ready. Wait ${formatDuration(preview.secondsRemaining)}.</span>`;
+      } else {
+        msgDiv.innerHTML = `<span class="error">❌ Cannot claim: Code ${preview.code}</span>`;
+      }
       return;
     }
 
-    const pendingInfo = await safeGetAllPending(selectedBlock.tokenId);
-
-    if (!pendingInfo.ok) {
-      if (pendingInfo.reason === "claim-window-not-reached") {
-        msgDiv.innerHTML = '<span class="error">❌ Claim not available yet. 24h window not reached.</span>';
-        return;
-      }
-      msgDiv.innerHTML = '<span class="error">❌ Pending rewards unavailable.</span>';
-      return;
-    }
-
-    let hasAnything = false;
-    if (pendingInfo.pending && pendingInfo.pending.length !== undefined) {
-      for (let i = 0; i < pendingInfo.pending.length; i++) {
-        if (isGtZero(pendingInfo.pending[i])) {
-          hasAnything = true;
-          break;
-        }
-      }
-    }
-    if (!hasAnything) {
+    if (preview.pendingAmount === 0) {
       msgDiv.innerHTML = '<span class="error">❌ Nothing to claim.</span>';
       return;
     }
 
-    const tx = await farmingV4Contract.claimResources(selectedBlock.tokenId, { gasLimit: 600000 });
-    msgDiv.innerHTML = `<span class="success">⏳ Claiming resources...</span>`;
+    const tx = await farmingV5Contract.claimResources(selectedBlock.tokenId, { gasLimit: 600000 });
+    msgDiv.innerHTML = `<span class="success">⏳ Claiming resources... ${preview.pendingAmount} total</span>`;
     await tx.wait();
     msgDiv.innerHTML = `<span class="success">💰 Resources claimed!</span>`;
     await loadResourceBalancesOnchain();
@@ -1392,69 +1177,28 @@ async function attack(){
   }
 
   try {
-    msgDiv.innerHTML = `<span class="success">⏳ Checking attack rules...</span>`;
+    msgDiv.innerHTML = `<span class="success">⏳ Preview attack...</span>`;
 
-    // 1. canAttackTarget zuerst
-    const canAttack = await safeCanAttack(userAddress, targetTokenId);
-    if (!canAttack) {
-      msgDiv.innerHTML = `<span class="error">❌ Contract says this target cannot be attacked right now.</span>`;
-      return;
-    }
-
-    // 2. remainingAttacksToday
-    const remainingAttacks = await safeGetRemainingAttacksToday(userAddress);
-    if (remainingAttacks !== null && remainingAttacks <= 0) {
-      msgDiv.innerHTML = `<span class="error">❌ No attacks remaining today.</span>`;
-      return;
-    }
-
-    // 3. attackTime nur wenn canAttack true
-    const attackTime = await safeGetAttackTime(attackerTokenId, targetTokenId);
-    if (attackTime === null) {
-      msgDiv.innerHTML = `<span class="error">❌ Attack path/time unavailable.</span>`;
-      return;
-    }
-
-    // 4. Optional: Target-Farm grob prüfen
-    const targetFarm = await safeGetFarm(targetTokenId);
-    if (!targetFarm.ok || !targetFarm.isActive) {
-      msgDiv.innerHTML = `<span class="error">❌ Target is not actively farming.</span>`;
-      return;
-    }
-
-    // 5. Simulation mit callStatic
-    try {
-      await piratesV4Contract.callStatic.startAttack(attackerTokenId, targetTokenId, resource);
-    } catch (simError) {
-      console.error("startAttack simulation failed:", simError);
-      msgDiv.innerHTML = `<span class="error">❌ Attack would fail: ${simError.reason || simError.message}</span>`;
+    // Preview Attack
+    const preview = await piratesV5Contract.previewAttack(attackerTokenId, targetTokenId, resource);
+    
+    if (!preview.allowed) {
+      msgDiv.innerHTML = `<span class="error">❌ Attack not allowed: Code ${preview.code}</span>`;
       return;
     }
 
     msgDiv.innerHTML = `
       <span class="success">
         ⏳ Starting attack...<br>
-        Travel time: ${formatDuration(attackTime)}<br>
-        Remaining today: ${remainingAttacks}
+        Travel time: ${formatDuration(preview.travelTime)}<br>
+        Remaining today: ${preview.remainingAttacksToday}
       </span>
     `;
 
-    const tx = await piratesV4Contract.startAttack(
-      attackerTokenId,
-      targetTokenId,
-      resource,
-      { gasLimit: 450000 }
-    );
-
+    const tx = await piratesV5Contract.startAttack(attackerTokenId, targetTokenId, resource, { gasLimit: 450000 });
     await tx.wait();
 
     msgDiv.innerHTML = `<span class="success">✅ Attack started! Check back later.</span>`;
-
-    localStorage.setItem(`attack_${targetTokenId}`, JSON.stringify({
-      targetTokenId,
-      resource,
-      startTime: Math.floor(Date.now()/1000)
-    }));
 
     await loadUserAttacks();
     refreshBlockMarkings();
@@ -1541,8 +1285,6 @@ async function exchangePit(){
   msgDiv.innerHTML = `<span class="success">⏳ Exchanging...</span>`;
 
   try {
-    const allowance = await pitroneContract.allowance(userAddress, PITRONE_ADDRESS);
-
     const tx = await pitroneContract.exchangePitrone(amountWei, { gasLimit: 400000 });
     msgDiv.innerHTML = `<span class="success">⏳ Transaction sent...</span>`;
     await tx.wait();
@@ -1555,78 +1297,7 @@ async function exchangePit(){
   }
 }
 
-/* ==================== WALLET ==================== */
-async function connectWallet(){
-  if(!window.ethereum) return alert("Please install MetaMask!");
-  if(isConnecting) return;
-  if(userAddress) return;
-
-  isConnecting = true;
-
-  try{
-    provider = new ethers.providers.Web3Provider(window.ethereum);
-    await provider.send("eth_requestAccounts", []);
-    signer = provider.getSigner();
-    userAddress = await signer.getAddress();
-
-    const network = await provider.getNetwork();
-    if(network.chainId !== 8453){
-      try{
-        await window.ethereum.request({ method:"wallet_switchEthereumChain", params:[{ chainId:"0x2105" }] });
-        provider = new ethers.providers.Web3Provider(window.ethereum);
-        signer = provider.getSigner();
-        userAddress = await signer.getAddress();
-      }catch(e){
-        throw e;
-      }
-    }
-
-    nftContract          = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
-    farmingV4Contract    = new ethers.Contract(FARMING_V4_ADDRESS, FARMING_V4_ABI, signer);
-    piratesV4Contract    = new ethers.Contract(PIRATES_V4_ADDRESS, PIRATES_V4_ABI, signer);
-    mercenaryV2Contract  = new ethers.Contract(MERCENARY_V2_ADDRESS, MERCENARY_V2_ABI, signer);
-    partnershipV2Contract= new ethers.Contract(PARTNERSHIP_V2_ADDRESS, PARTNERSHIP_V2_ABI, signer);
-    inpiContract         = new ethers.Contract(INPI_ADDRESS, INPI_ABI, signer);
-    pitroneContract      = new ethers.Contract(PITRONE_ADDRESS, PITRONE_ABI, signer);
-    resourceTokenContract= new ethers.Contract(RESOURCE_TOKEN_ADDRESS, RESOURCE_TOKEN_ABI, signer);
-
-    safeHTML("walletStatus","🟢 Connected");
-    safeHTML("walletAddress", shortenAddress(userAddress));
-    document.getElementById("connectWallet").innerText = "Wallet Connected";
-
-    initAttackResourceSelect();
-
-    await updateBalances();
-    await updatePoolInfo();
-    await loadResourceBalancesOnchain();
-    await loadUserBlocks();
-
-    // Attacks leicht verzögert laden
-    setTimeout(() => {
-      loadUserAttacks();
-    }, 1500);
-
-    if(!attacksPoller){
-      attacksPoller = setInterval(async ()=>{
-        try {
-          await loadUserAttacks();
-          refreshBlockMarkings();
-        } catch(e) {
-          console.warn("attacks poll failed", e);
-        }
-      }, 45000);
-    }
-
-  }catch(e){
-    console.error(e);
-    alert("Connection error: "+e.message);
-    userAddress = null;
-  }finally{
-    isConnecting = false;
-  }
-}
-
-/* ==================== RANDOM FREE BLOCK ==================== */
+/* ==================== MINT (von mint.html übernommen) ==================== */
 async function findRandomFreeBlock(){
   const msgDiv = document.getElementById("mintMessage");
   if(!userAddress || !nftContract){
@@ -1656,7 +1327,6 @@ async function findRandomFreeBlock(){
   if(msgDiv) msgDiv.innerHTML = `<div class="message-box error">❌ Could not find a free block fast. Try again or pick manually.</div>`;
 }
 
-/* ==================== MINT ==================== */
 async function mintBlock(){
   const msgDiv = document.getElementById("mintMessage");
 
@@ -1774,6 +1444,80 @@ async function mintBlock(){
   }
 }
 
+/* ==================== WALLET ==================== */
+async function connectWallet(){
+  if(!window.ethereum) return alert("Please install MetaMask!");
+  if(isConnecting) return;
+  if(userAddress) return;
+
+  isConnecting = true;
+
+  try{
+    provider = new ethers.providers.Web3Provider(window.ethereum);
+    await provider.send("eth_requestAccounts", []);
+    signer = provider.getSigner();
+    userAddress = await signer.getAddress();
+
+    const network = await provider.getNetwork();
+    if(network.chainId !== 8453){
+      try{
+        await window.ethereum.request({ method:"wallet_switchEthereumChain", params:[{ chainId:"0x2105" }] });
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        signer = provider.getSigner();
+        userAddress = await signer.getAddress();
+      }catch(e){
+        throw e;
+      }
+    }
+
+    nftContract          = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
+    farmingV5Contract    = new ethers.Contract(FARMING_V5_ADDRESS, FARMING_V5_ABI, signer);
+    piratesV5Contract    = new ethers.Contract(PIRATES_V5_ADDRESS, PIRATES_V5_ABI, signer);
+    mercenaryV2Contract  = new ethers.Contract(MERCENARY_V2_ADDRESS, MERCENARY_V2_ABI, signer);
+    partnershipV2Contract= new ethers.Contract(PARTNERSHIP_V2_ADDRESS, PARTNERSHIP_V2_ABI, signer);
+    inpiContract         = new ethers.Contract(INPI_ADDRESS, INPI_ABI, signer);
+    pitroneContract      = new ethers.Contract(PITRONE_ADDRESS, PITRONE_ABI, signer);
+    resourceTokenContract= new ethers.Contract(RESOURCE_TOKEN_ADDRESS, RESOURCE_TOKEN_ABI, signer);
+    
+    // V4 Contract nur für Migration
+    farmingV4Contract    = new ethers.Contract(FARMING_V4_ADDRESS, FARMING_V4_ABI, signer);
+
+    safeHTML("walletStatus","🟢 Connected");
+    safeHTML("walletAddress", shortenAddress(userAddress));
+    document.getElementById("connectWallet").innerText = "Wallet Connected";
+
+    initAttackResourceSelect();
+
+    await updateBalances();
+    await updatePoolInfo();
+    await loadResourceBalancesOnchain();
+    await loadUserBlocks();
+
+    // Attacks leicht verzögert laden
+    setTimeout(() => {
+      loadUserAttacks();
+    }, 1500);
+
+    if(!attacksPoller){
+      attacksPoller = setInterval(async ()=>{
+        try {
+          await loadUserAttacks();
+          refreshBlockMarkings();
+        } catch(e) {
+          console.warn("attacks poll failed", e);
+        }
+      }, 45000);
+    }
+
+  }catch(e){
+    console.error(e);
+    alert("Connection error: "+e.message);
+    userAddress = null;
+  }finally{
+    isConnecting = false;
+  }
+}
+
 /* ==================== EVENT LISTENERS ==================== */
 document.getElementById("connectWallet")?.addEventListener("click", connectWallet);
 document.getElementById("attackBtn")?.addEventListener("click", attack);
@@ -1786,6 +1530,9 @@ document.getElementById("exchangeInpiBtn")?.addEventListener("click", exchangeIN
 document.getElementById("exchangePitBtn")?.addEventListener("click", exchangePit);
 document.getElementById("randomBlockBtn")?.addEventListener("click", findRandomFreeBlock);
 document.getElementById("mintBtn")?.addEventListener("click", mintBlock);
+
+// Migration Button
+document.getElementById("migrateFarmBtn")?.addEventListener("click", migrateFarmToV5);
 
 document.getElementById("attackRow")?.addEventListener("input", scheduleAttackDropdownRefresh);
 document.getElementById("attackCol")?.addEventListener("input", scheduleAttackDropdownRefresh);
