@@ -97,7 +97,6 @@ let tokens = {};
 let userResources = [];
 let selectedTokenId = null;
 let selectedTokenOwner = null;
-let preferredAttackerTokenId = null;
 
 let userAttacks = [];
 let attacksTicker = null;
@@ -191,8 +190,7 @@ function isGtZero(value) {
   if (typeof value === "bigint") return value > 0n;
   if (typeof value === "number") return value > 0;
   try {
-    const bn = BigInt(value.toString());
-    return bn > 0n;
+    return BigInt(value.toString()) > 0n;
   } catch {
     return false;
   }
@@ -226,18 +224,15 @@ function isForeignToken(tokenId) {
 async function getPreferredAttackerTokenId() {
   if (!userAddress) return null;
 
-  // Wenn der ausgewählte Block dem Benutzer gehört, nimm diesen
   if (selectedTokenId && isOwnToken(selectedTokenId)) {
     return parseInt(selectedTokenId, 10);
   }
 
-  // Sonst den ersten eigenen Block
   const ownTokens = Object.entries(tokens).filter(([_, t]) =>
     t.owner && t.owner.toLowerCase() === userAddress.toLowerCase()
   );
 
   if (ownTokens.length === 0) return null;
-
   return parseInt(ownTokens[0][0], 10);
 }
 
@@ -791,6 +786,7 @@ async function loadAttackPreview(attackerTokenId, targetTokenId, resourceId) {
 }
 
 async function refreshSelectedTargetAttackPreview() {
+  const attackerBlockEl = document.getElementById("attackAttackerBlock");
   const targetStatusEl = document.getElementById("attackTargetStatus");
   const travelTimeEl = document.getElementById("attackTravelTime");
   const remainingEl = document.getElementById("attackRemainingToday");
@@ -809,6 +805,7 @@ async function refreshSelectedTargetAttackPreview() {
 
   const attackerTokenId = await getPreferredAttackerTokenId();
   if (!attackerTokenId) {
+    if (attackerBlockEl) attackerBlockEl.innerText = "—";
     if (targetStatusEl) targetStatusEl.innerText = "❌ No attacker block";
     if (travelTimeEl) travelTimeEl.innerText = "—";
     if (remainingEl) remainingEl.innerText = "—";
@@ -818,6 +815,8 @@ async function refreshSelectedTargetAttackPreview() {
     if (attackBtn) attackBtn.disabled = true;
     return;
   }
+
+  if (attackerBlockEl) attackerBlockEl.innerText = `#${attackerTokenId}`;
 
   const targetTokenIdNum = parseInt(selectedTokenId, 10);
   const resourceId = parseInt(attackResourceEl?.value || "0", 10);
@@ -834,7 +833,6 @@ async function refreshSelectedTargetAttackPreview() {
     return;
   }
 
-  // Detaillierte Status-Anzeige
   if (targetStatusEl) {
     if (preview.allowed) {
       targetStatusEl.innerText = "✅ Attack allowed";
@@ -1203,8 +1201,8 @@ async function connectWallet() {
     pitroneContract = new ethers.Contract(PITRONE_ADDRESS, PITRONE_ABI, signer);
     resourceTokenContract = new ethers.Contract(RESOURCE_TOKEN_ADDRESS, RESOURCE_TOKEN_ABI, signer);
 
-    document.getElementById("walletAddress").innerText = shortenAddress(userAddress);
-    document.getElementById("connectBtn").innerText = "Connected";
+    safeText("walletAddress", shortenAddress(userAddress));
+    safeText("connectBtn", "Connected");
 
     await loadData();
     await loadUserResources();
@@ -1215,7 +1213,10 @@ async function connectWallet() {
       attacksPoller = setInterval(() => { loadUserAttacks(); }, 30000);
     }
     if (!dataPoller) {
-      dataPoller = setInterval(() => { loadData(); }, 30000);
+      dataPoller = setInterval(async () => {
+        await loadData();
+        if (selectedTokenId) await updateSidebar(selectedTokenId);
+      }, 30000);
     }
   } catch (err) {
     console.error(err);
@@ -1410,6 +1411,7 @@ let dragStartX = 0;
 let dragStartY = 0;
 let panelStartLeft = 0;
 let panelStartTop = 0;
+let isResizing = false;
 
 if (dragHandle) {
   dragHandle.addEventListener("mousedown", (e) => {
@@ -1426,22 +1428,6 @@ if (dragHandle) {
   });
 }
 
-window.addEventListener("mousemove", (e) => {
-  if (!isDraggingPanel || !legendPanel) return;
-  const dx = e.clientX - dragStartX;
-  const dy = e.clientY - dragStartY;
-  legendPanel.style.left = (panelStartLeft + dx) + "px";
-  legendPanel.style.top = (panelStartTop + dy) + "px";
-  legendPanel.style.right = "auto";
-});
-
-window.addEventListener("mouseup", () => {
-  isDraggingPanel = false;
-  if (legendPanel) legendPanel.style.transition = "";
-});
-
-let isResizing = false;
-
 if (resizeHandle) {
   resizeHandle.addEventListener("mousedown", (e) => {
     isResizing = true;
@@ -1450,17 +1436,28 @@ if (resizeHandle) {
 }
 
 window.addEventListener("mousemove", (e) => {
-  if (!isResizing || !legendPanel) return;
-  const rect = legendPanel.getBoundingClientRect();
-  const newWidth = rect.right - e.clientX;
-  if (newWidth > 200 && newWidth < 520) {
-    legendPanel.style.width = newWidth + "px";
+  if (isDraggingPanel && legendPanel) {
+    const dx = e.clientX - dragStartX;
+    const dy = e.clientY - dragStartY;
+    legendPanel.style.left = (panelStartLeft + dx) + "px";
+    legendPanel.style.top = (panelStartTop + dy) + "px";
     legendPanel.style.right = "auto";
+  }
+
+  if (isResizing && legendPanel) {
+    const rect = legendPanel.getBoundingClientRect();
+    const newWidth = rect.right - e.clientX;
+    if (newWidth > 200 && newWidth < 520) {
+      legendPanel.style.width = newWidth + "px";
+      legendPanel.style.right = "auto";
+    }
   }
 });
 
 window.addEventListener("mouseup", () => {
+  isDraggingPanel = false;
   isResizing = false;
+  if (legendPanel) legendPanel.style.transition = "";
 });
 
 if (collapseBtn && legendContent) {
