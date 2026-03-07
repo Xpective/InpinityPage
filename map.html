@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover" />
-  <title>INPINITY – Pyramid Map (V4 + Rarity Colors)</title>
+  <title>INPINITY – Pyramid Map (V5)</title>
   <link rel="icon" type="image/png" href="favicon.webp" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/base.css">
@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="css/layout.css">
   <link rel="stylesheet" href="css/responsive.css">
   <style>
+    /* === Styles bleiben gleich wie vorher === */
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
       width: 100%;
@@ -444,6 +445,14 @@
                 <span class="detail-label">Pending loot</span>
                 <span class="detail-value" id="attackPendingLoot">—</span>
               </div>
+              <div class="detail-row">
+                <span class="detail-label">Protection</span>
+                <span class="detail-value" id="attackProtection">—</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Steal %</span>
+                <span class="detail-value" id="attackStealPercent">—</span>
+              </div>
             </div>
 
             <button class="action-btn" id="attackBtn">Attack</button>
@@ -453,7 +462,7 @@
         </div>
 
         <div style="margin: 1rem 0; border-top: 1px solid #2a3f4a; padding-top: 0.8rem;">
-          <h4 style="color: #d4af37; margin-bottom: 0.5rem;">⚔️ Attacks (V4)</h4>
+          <h4 style="color: #d4af37; margin-bottom: 0.5rem;">⚔️ Attacks (V5)</h4>
           <div id="userAttacksList" class="attacks-list">
             <p style="color: #98a9b9;">Connect wallet</p>
           </div>
@@ -484,14 +493,13 @@
         <div class="footer-note">
           <p>100 rows · 10,000 blocks</p>
           <p>π · φ ·</p>
-          <p>Map: V4 (FarmingV4 + PiratesV4)</p>
+          <p>Map: V5 (FarmingV5 + PiratesV5)</p>
         </div>
       </div>
     </div>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@metamask/sdk@0/dist/metamask-sdk.js"></script>
   <script src="scripts/map.js"></script>
 </body>
 </html>
