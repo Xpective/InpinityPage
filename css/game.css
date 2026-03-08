@@ -12,7 +12,8 @@
   --accent-danger: #c95a5a;
 
   --text-main: var(--text-color);
-  --text-soft: rgba(255, 255, 255, 0.78);
+  --text-soft: var(--text-soft, rgba(255, 255, 255, 0.78));
+
   --input-bg: rgba(0, 0, 0, 0.14);
   --card-inner-bg: rgba(255, 255, 255, 0.04);
   --card-inner-strong: rgba(255, 255, 255, 0.06);
@@ -30,7 +31,7 @@
   --panel-shadow: 0 10px 24px rgba(58, 38, 92, 0.10);
 
   --text-main: #241a36;
-  --text-soft: rgba(36, 26, 54, 0.72);
+  --text-soft: #5e5374;
 
   --input-bg: rgba(106, 79, 179, 0.08);
   --card-inner-bg: rgba(106, 79, 179, 0.05);
@@ -43,7 +44,7 @@
   --panel-shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
 
   --text-main: var(--text-color);
-  --text-soft: rgba(248, 248, 251, 0.78);
+  --text-soft: #c9c2d6;
 
   --input-bg: rgba(0, 0, 0, 0.18);
   --card-inner-bg: rgba(255, 255, 255, 0.04);
@@ -136,6 +137,7 @@ body {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   opacity: 0.82;
+  color: var(--text-soft);
 }
 
 .hero-copy h1 {
@@ -146,6 +148,7 @@ body {
   max-width: 900px;
   margin: 0 auto;
   line-height: 1.75;
+  color: var(--text-soft);
 }
 
 .card-shell,
@@ -208,7 +211,7 @@ body {
 
 .balance-label {
   font-size: 0.82rem;
-  opacity: 0.8;
+  color: var(--text-soft);
 }
 
 .balance-value {
@@ -232,12 +235,19 @@ body {
 .random-btn,
 .attack-item .execute-btn {
   background: var(--quinary-color);
-  color: var(--text-color);
+  color: #ffffff;
   border: none;
   border-radius: 999px;
   font-weight: 700;
   cursor: pointer;
   transition: transform 0.2s ease, opacity 0.2s ease, background 0.2s ease;
+}
+
+[data-theme="dark"] .btn,
+[data-theme="dark"] .action-button,
+[data-theme="dark"] .random-btn,
+[data-theme="dark"] .attack-item .execute-btn {
+  color: #0f1220;
 }
 
 .btn {
@@ -253,7 +263,7 @@ body {
 }
 
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--card-inner-bg);
   color: var(--text-main);
   border: 1px solid var(--panel-border);
 }
@@ -306,7 +316,8 @@ body {
 }
 
 .block-card {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--card-inner-bg);
+  color: var(--text-main);
   border-radius: 18px;
   padding: 1rem;
   text-align: center;
@@ -352,7 +363,7 @@ body {
 }
 
 .block-card.hidden {
-  border-color: rgba(255, 255, 255, 0.08);
+  border-color: var(--panel-border);
   opacity: 0.92;
 }
 
@@ -378,14 +389,14 @@ body {
 .rarity-badge.diamond { background: var(--rarity-diamond); }
 
 .hidden-badge {
-  background: rgba(255, 255, 255, 0.08);
-  color: #ccc;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--card-inner-strong);
+  color: var(--text-soft);
+  border: 1px solid var(--panel-border);
 }
 
 .reveal-block-btn {
   background: var(--quinary-color);
-  color: var(--text-color);
+  color: #ffffff;
   border: none;
   padding: 0.45rem 0.8rem;
   border-radius: 999px;
@@ -395,6 +406,10 @@ body {
   margin-top: 0.5rem;
   width: 100%;
   transition: transform 0.2s, opacity 0.2s;
+}
+
+[data-theme="dark"] .reveal-block-btn {
+  color: #0f1220;
 }
 
 .reveal-block-btn:hover {
@@ -619,11 +634,12 @@ body {
 }
 
 .resource-card {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--card-inner-bg);
   border-radius: 14px;
   padding: 0.9rem;
   text-align: center;
   border: 1px solid var(--panel-border);
+  color: var(--text-main);
 }
 
 .resource-name {
@@ -649,6 +665,13 @@ body {
   line-height: 1.7;
 }
 
+.info-note strong,
+.info-note p,
+.info-note span,
+.info-note li {
+  color: var(--text-main);
+}
+
 .wallet-status,
 .section-subtitle,
 .empty-state,
@@ -663,13 +686,12 @@ body {
 }
 
 .empty-state {
-  color: var(--text-soft);
   text-align: center;
 }
 
 .debug-log {
   margin-top: 0.5rem;
-  background: rgba(0, 0, 0, 0.18);
+  background: var(--input-bg);
   border: 1px solid var(--panel-border);
   border-radius: 12px;
   padding: 1rem;
@@ -802,30 +824,4 @@ body {
     margin-top: 4rem;
     padding-top: 2rem;
   }
-}
-
-[data-theme="light"] .btn-secondary {
-  background: rgba(106, 79, 179, 0.10);
-  color: #241a36;
-  border: 1px solid rgba(106, 79, 179, 0.18);
-}
-
-[data-theme="light"] .block-card.hidden {
-  border-color: rgba(106, 79, 179, 0.12);
-  opacity: 1;
-}
-
-[data-theme="light"] .hidden-badge {
-  background: rgba(106, 79, 179, 0.10);
-  color: #4b3970;
-  border: 1px solid rgba(106, 79, 179, 0.12);
-}
-
-[data-theme="light"] .debug-log {
-  background: rgba(106, 79, 179, 0.05);
-  color: #3d2c61;
-}
-
-[data-theme="light"] .footer-links a {
-  color: var(--quinary-color);
 }
