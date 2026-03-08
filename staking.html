@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="basic">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -23,234 +23,30 @@
     <link rel="stylesheet" href="css/combined_latest.css"/>
     <link rel="stylesheet" href="css/gamification.css" />
     <link rel="stylesheet" href="css/referral.css"/>
-    <script defer src="main.js"></script>
+    <link rel="stylesheet" href="css/staking.css" />
 
-    <!-- Ethers.js for blockchain interaction -->
+    <script defer src="main.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
 
     <link rel="icon" type="image/png" href="favicon.webp">
+    <meta name="description" content="Stake your INPI tokens on Base and earn passive rewards in the Inpinity ecosystem.">
     <meta name="keywords" content="Inpinity, staking, INPI, Base, Uniswap">
     <meta name="author" content="Xpective">
     <meta property="og:title" content="Inpinity - Staking">
-    <meta property="og:description" content="Stake your $INPI tokens and earn passive rewards.">
+    <meta property="og:description" content="Stake your INPI tokens and earn passive rewards.">
     <meta property="og:image" content="logo_background.jpg">
     <meta property="og:url" content="https://inpinity.online/staking.html">
     <meta name="twitter:card" content="logo_background.webp">
     <meta name="twitter:site" content="@unxpective">
     <meta name="twitter:creator" content="@Inpinity1">
-    <meta name="theme-color" content="#FarbcodeIhrerWebsite">
+    <meta name="theme-color" content="#140f1f">
     <meta name="robots" content="index,follow">
-
-    <style>
-        /* ✅ prevent footer overlap / add breathing room */
-        main { padding-bottom: 4rem; }
-        footer { margin-top: 3rem; padding-top: 1rem; }
-
-        /* Staking page specific styles */
-        .staking-container {
-            max-width: 900px;
-            margin: 2rem auto;
-            padding: 2rem;
-            background: rgba(20, 20, 20, 0.9);
-            border-radius: 8px;
-            border: 1px solid var(--quinary-color, gold);
-            box-shadow: 0 0 20px rgba(255,215,0,0.3);
-            color: #eee;
-        }
-        .staking-container h1 {
-            color: gold;
-            text-align: center;
-            margin-bottom: 2rem;
-            font-size: 2.5rem;
-        }
-        .partners-section {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 1.5rem;
-            margin: 2rem auto;
-            padding: 1rem;
-            background: rgba(0,0,0,0.3);
-            border-radius: 12px;
-            max-width: 600px;
-        }
-        .partner-item a {
-            display: inline-block;
-            padding: 0.5rem 1.5rem;
-            background: #2a2a2a;
-            border: 1px solid gold;
-            border-radius: 40px;
-            color: gold;
-            text-decoration: none;
-            font-weight: bold;
-            transition: all 0.2s;
-        }
-        .partner-item a:hover {
-            background: gold;
-            color: black;
-            transform: scale(1.05);
-        }
-        .wallet-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            padding: 1rem;
-            background: #1a1a1a;
-            border-radius: 8px;
-        }
-        .wallet-info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-        .connect-wallet-btn {
-            background: gold;
-            color: black;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 40px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .connect-wallet-btn:hover { transform: scale(1.05); }
-        .wallet-details {
-            background: #222;
-            padding: 0.5rem 1rem;
-            border-radius: 40px;
-            border: 1px solid gold;
-            color: gold;
-            font-size: 0.9rem;
-        }
-        .balance-panel {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin: 2rem 0;
-        }
-        .balance-card {
-            background: #1a1a1a;
-            border: 1px solid gold;
-            border-radius: 8px;
-            padding: 1.5rem;
-            text-align: center;
-        }
-        .balance-card h3 {
-            color: gold;
-            margin-top: 0;
-            margin-bottom: 1rem;
-        }
-        .balance-card .value {
-            font-size: 2rem;
-            font-weight: bold;
-            color: white;
-        }
-        .balance-card .label {
-            color: #aaa;
-            font-size: 0.9rem;
-            margin-top: 0.5rem;
-        }
-        .staking-form {
-            background: #1a1a1a;
-            border: 1px solid gold;
-            border-radius: 8px;
-            padding: 2rem;
-            margin: 2rem 0;
-        }
-        .staking-form h2 { color: gold; margin-top: 0; }
-        .form-group { margin: 1.5rem 0; }
-        .form-group label {
-            display: block;
-            color: gold;
-            margin-bottom: 0.5rem;
-        }
-        .form-group input {
-            width: 100%;
-            padding: 0.75rem;
-            background: #222;
-            border: 1px solid #444;
-            border-radius: 4px;
-            color: white;
-            font-size: 1rem;
-        }
-        .form-group input:focus {
-            outline: none;
-            border-color: gold;
-            box-shadow: 0 0 5px gold;
-        }
-        .button-group {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-        .action-btn {
-            background: gold;
-            color: black;
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 4px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            flex: 1;
-            min-width: 150px;
-        }
-        .action-btn:hover:not(:disabled) {
-            transform: scale(1.02);
-            box-shadow: 0 0 15px gold;
-        }
-        .action-btn:disabled { background: #666; cursor: not-allowed; }
-        .action-btn.secondary {
-            background: #444;
-            color: gold;
-            border: 1px solid gold;
-        }
-        .action-btn.secondary:hover:not(:disabled) { background: #555; }
-        .info-note {
-            background: #2a2a2a;
-            border-left: 4px solid gold;
-            padding: 1rem;
-            margin: 1rem 0;
-            color: #ccc;
-        }
-        .info-note strong { color: gold; }
-        .warning-note {
-            background: #332211;
-            border: 1px solid #ffaa00;
-            border-radius: 8px;
-            padding: 1rem;
-            margin: 2rem auto;
-            max-width: 800px;
-            text-align: center;
-        }
-        .warning-note a { color: gold; }
-        .reward-rate {
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-            margin: 1rem 0;
-            padding: 1rem;
-            background: #222;
-            border-radius: 8px;
-        }
-        .rate-item { text-align: center; }
-        .rate-item .value {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: gold;
-        }
-    </style>
 </head>
 
-<body>
-<header>
-    <nav>
-        <ul>
+<body class="staking-page">
+<header class="site-header">
+    <nav class="site-nav" aria-label="Main navigation">
+        <ul class="nav-list">
             <li><a aria-label="Home" href="index.html">Home</a></li>
             <li><a aria-label="Features" href="features.html">Features</a></li>
             <li><a aria-label="Game" href="game.html">Game</a></li>
@@ -262,149 +58,176 @@
             <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
             <li><a aria-label="Guestbook" href="guestbook.html">Guestbook</a></li>
             <li><a aria-label="Advertising" href="advertising.html">Advertising</a></li>
-            <li><a aria-label="Staking" href="staking.html">Staking</a></li>
-
-            <div class="themeDots">
-                <div class="dot light" title="Light Theme"></div>
-                <div class="dot dark" title="Dark Theme"></div>
-                <div class="dot basic" title="Basic Theme"></div>
-            </div>
+            <li><a aria-label="Staking" href="staking.html" aria-current="page">Staking</a></li>
         </ul>
-    </nav>
 
-    <style>
-        .themeDots .dot {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            margin: 5px;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .themeDots .dot.light { background-color: #FFFFFF; }
-        .themeDots .dot.dark { background-color: #000000; }
-        .themeDots .dot.basic { background-color: var(--quinary-color); }
-        .themeDots .dot:hover { transform: scale(1.2); }
-    </style>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            document.querySelector('.themeDots .dot.light')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'light'));
-            document.querySelector('.themeDots .dot.dark')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'dark'));
-            document.querySelector('.themeDots .dot.basic')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'basic'));
-        });
-    </script>
+        <div class="themeDots" aria-label="Theme switcher">
+            <button type="button" class="dot light" title="Light Theme" aria-label="Light Theme"></button>
+            <button type="button" class="dot dark" title="Dark Theme" aria-label="Dark Theme"></button>
+            <button type="button" class="dot basic" title="Basic Theme" aria-label="Basic Theme"></button>
+        </div>
+    </nav>
 </header>
 
-<main class="container">
-    <div class="warning-note">
+<main class="page-wrap staking-main">
+    <section class="staking-hero">
+        <p class="eyebrow">Inpinity Staking</p>
+        <h1>Stake INPI and Earn Rewards</h1>
+        <p class="hero-lead">
+            Stake your INPI tokens on Base, monitor your balance, track pending rewards, and manage your position through a clean on-chain dashboard.
+        </p>
+    </section>
+
+    <section class="info-banner warning-note">
         <p>
             ⚠️ <strong>Important Update:</strong> We withdrew from ToshiMart due to phishing concerns.
             Our official INPI token is
             <code>0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</code>.
             All official contracts are listed on our <a href="index.html">homepage</a>.
         </p>
-    </div>
+    </section>
 
-    <div class="partners-section">
-        <div class="partner-item"><a href="https://base.org/" target="_blank" rel="noopener">⚡ Base L2</a></div>
-        <div class="partner-item"><a href="https://uniswap.org/" target="_blank" rel="noopener">🦄 Uniswap</a></div>
-    </div>
+    <section class="links-section">
+        <a class="link-chip" href="https://base.org/" target="_blank" rel="noopener">⚡ Base L2</a>
+        <a class="link-chip" href="https://uniswap.org/" target="_blank" rel="noopener">🦄 Uniswap</a>
+    </section>
 
-    <div class="staking-container">
-        <h1>⚡ Stake $INPI, Earn Rewards</h1>
+    <section class="staking-shell">
+        <div class="staking-container">
+            <div class="wallet-bar">
+                <div class="wallet-left">
+                    <div class="wallet-status" id="walletStatusText">🔴 Wallet not connected</div>
+                    <div class="wallet-address" id="walletStatus" style="display:none;"></div>
+                </div>
 
-        <div class="wallet-bar">
-            <div class="wallet-info">
-                <button id="connectWalletBtn" class="connect-wallet-btn">🔌 Connect Wallet</button>
-                <span id="walletStatus" class="wallet-details" style="display: none;"></span>
+                <div class="wallet-balance-group" id="tokenBalanceInfo" style="display:none;">
+                    <div class="wallet-balance-label">INPI Balance</div>
+                    <div class="wallet-balance" id="tokenBalance">0</div>
+                </div>
+
+                <button id="connectWalletBtn" class="btn">🔌 Connect Wallet</button>
             </div>
-            <div id="tokenBalanceInfo" style="display: none;">
-                <span class="wallet-details">INPI: <span id="tokenBalance">0</span></span>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Your Staked INPI</h3>
+                    <div class="stat-value" id="stakedBalance">0</div>
+                    <div class="stat-label">Currently staked</div>
+                </div>
+
+                <div class="stat-card">
+                    <h3>Pending Rewards</h3>
+                    <div class="stat-value" id="pendingRewards">0</div>
+                    <div class="stat-label">Claimable INPI</div>
+                </div>
+
+                <div class="stat-card">
+                    <h3>Total Staked</h3>
+                    <div class="stat-value" id="totalStaked">0</div>
+                    <div class="stat-label">Across all users</div>
+                </div>
+            </div>
+
+            <div class="rate-panel">
+                <div class="rate-item">
+                    <div class="rate-value" id="ratePerSecond">0</div>
+                    <div class="rate-label">INPI / sec</div>
+                </div>
+                <div class="rate-item">
+                    <div class="rate-value" id="ratePerDay">0</div>
+                    <div class="rate-label">INPI / day</div>
+                </div>
+                <div class="rate-item">
+                    <div class="rate-value" id="ratePerYear">0</div>
+                    <div class="rate-label">INPI / year</div>
+                </div>
+            </div>
+
+            <div class="staking-card">
+                <h2>Stake or Unstake</h2>
+
+                <div class="form-group">
+                    <label for="stakeAmount">Amount</label>
+                    <input type="number" id="stakeAmount" placeholder="e.g. 1000" step="any">
+                </div>
+
+                <div class="button-group">
+                    <button id="stakeBtn" class="btn" disabled>🔒 Stake</button>
+                    <button id="unstakeBtn" class="btn btn-secondary" disabled>🔓 Unstake</button>
+                </div>
+
+                <div class="info-note">
+                    <strong>Note:</strong> Rewards accumulate continuously based on your share of the total staking pool.
+                    You can claim rewards without unstaking your tokens.
+                </div>
+            </div>
+
+            <div class="staking-card">
+                <h2>Claim Rewards</h2>
+
+                <div class="claim-box">
+                    <span class="claim-label">Available now</span>
+                    <span class="claim-value"><span id="claimableAmount">0</span> INPI</span>
+                </div>
+
+                <button id="claimBtn" class="btn claim-btn" disabled>💰 Claim Rewards</button>
+
+                <div class="info-note">
+                    <strong>Tip:</strong> Claiming sends only your earned rewards to your wallet. Your staked INPI stays active until you manually unstake.
+                </div>
             </div>
         </div>
-
-        <div class="balance-panel">
-            <div class="balance-card">
-                <h3>Your Staked INPI</h3>
-                <div class="value" id="stakedBalance">0</div>
-                <div class="label">Currently staked</div>
-            </div>
-            <div class="balance-card">
-                <h3>Pending Rewards</h3>
-                <div class="value" id="pendingRewards">0</div>
-                <div class="label">Claimable INPI</div>
-            </div>
-            <div class="balance-card">
-                <h3>Total Staked</h3>
-                <div class="value" id="totalStaked">0</div>
-                <div class="label">Across all users</div>
-            </div>
-        </div>
-
-        <div class="reward-rate">
-            <div class="rate-item">
-                <div class="value" id="ratePerSecond">0</div>
-                <div>INPI/sec</div>
-            </div>
-            <div class="rate-item">
-                <div class="value" id="ratePerDay">0</div>
-                <div>INPI/day</div>
-            </div>
-            <div class="rate-item">
-                <div class="value" id="ratePerYear">0</div>
-                <div>INPI/year</div>
-            </div>
-        </div>
-
-        <div class="staking-form">
-            <h2>Stake INPI</h2>
-            <div class="form-group">
-                <label for="stakeAmount">Amount to Stake</label>
-                <input type="number" id="stakeAmount" placeholder="e.g. 1000" step="any">
-            </div>
-            <div class="button-group">
-                <button id="stakeBtn" class="action-btn" disabled>🔒 Stake</button>
-                <button id="unstakeBtn" class="action-btn secondary" disabled>🔓 Unstake</button>
-            </div>
-            <div class="info-note">
-                <strong>Note:</strong> Staking rewards accumulate continuously based on your share of the total staked pool.
-                You can claim rewards at any time.
-            </div>
-        </div>
-
-        <div class="staking-form">
-            <h2>Claim Rewards</h2>
-            <div class="form-group">
-                <label>Available: <span id="claimableAmount">0</span> INPI</label>
-            </div>
-            <button id="claimBtn" class="action-btn" disabled>💰 Claim Rewards</button>
-            <div class="info-note">
-                <strong>Tip:</strong> Claiming does not unstake your tokens. Rewards are sent directly to your wallet.
-            </div>
-        </div>
-    </div>
+    </section>
 </main>
 
-<footer>
-    <p>© 2026 Inpinity. All rights reserved. Working with
-        <a href="https://base.org/" target="_blank" rel="noopener" style="color: gold;">Base</a>
-        and <a href="https://uniswap.org/" target="_blank" rel="noopener" style="color: gold;">Uniswap</a>.
-    </p>
+<footer class="site-footer">
+    <p>© 2026 INPINITY. All rights reserved. Built on Base.</p>
     <div class="footer-links">
-        <a href="privacypolicy.html">Privacy Policy</a>
-        <a href="termsofuse.html">Terms of Use</a>
-        <a href="contact.html">Contact</a>
+        <a href="whitepaper.html">Whitepaper</a>
         <a href="faq.html">FAQ</a>
         <a href="guestbook.html">Guestbook</a>
         <a href="advertising.html">Advertising</a>
         <a href="staking.html">Staking</a>
-        <a href="whitepaper.html">Whitepaper</a>
         <a href="mint.html">Mint</a>
         <a href="map.html">Pyramid Map</a>
         <a href="game.html">Game</a>
+        <a href="contact.html">Contact</a>
     </div>
+    <p class="footer-version">Version 0.23.0</p>
 </footer>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const root = document.documentElement;
+    const dots = document.querySelectorAll(".themeDots .dot");
+
+    function applyTheme(theme) {
+        root.setAttribute("data-theme", theme);
+        try {
+            localStorage.setItem("inpinity-theme", theme);
+        } catch (_) {}
+
+        dots.forEach(dot => {
+            const active =
+                (theme === "light" && dot.classList.contains("light")) ||
+                (theme === "dark" && dot.classList.contains("dark")) ||
+                (theme === "basic" && dot.classList.contains("basic"));
+            dot.classList.toggle("active", active);
+        });
+    }
+
+    let savedTheme = "basic";
+    try {
+        savedTheme = localStorage.getItem("inpinity-theme") || "basic";
+    } catch (_) {}
+
+    applyTheme(savedTheme);
+
+    document.querySelector(".themeDots .dot.light")?.addEventListener("click", () => applyTheme("light"));
+    document.querySelector(".themeDots .dot.dark")?.addEventListener("click", () => applyTheme("dark"));
+    document.querySelector(".themeDots .dot.basic")?.addEventListener("click", () => applyTheme("basic"));
+});
+</script>
 
 <script>
 (function() {
@@ -430,6 +253,7 @@
 
     const connectBtn = document.getElementById('connectWalletBtn');
     const walletStatus = document.getElementById('walletStatus');
+    const walletStatusText = document.getElementById('walletStatusText');
     const tokenBalanceInfo = document.getElementById('tokenBalanceInfo');
     const tokenBalanceSpan = document.getElementById('tokenBalance');
     const stakedBalanceSpan = document.getElementById('stakedBalance');
@@ -452,6 +276,7 @@
     function formatAddress(address) {
         return address ? address.substring(0, 6) + '...' + address.substring(address.length - 4) : '';
     }
+
     function fmt(value) {
         return Number(ethers.formatUnits(value, decimals)).toLocaleString(undefined, { maximumFractionDigits: 2 });
     }
@@ -492,13 +317,15 @@
             alert('MetaMask or another Web3 wallet is not installed.');
             return;
         }
+
         try {
             provider = new ethers.BrowserProvider(window.ethereum);
             await provider.send("eth_requestAccounts", []);
             signer = await provider.getSigner();
             userAddress = await signer.getAddress();
 
-            walletStatus.textContent = `Connected: ${formatAddress(userAddress)}`;
+            walletStatusText.textContent = "🟢 Wallet connected";
+            walletStatus.textContent = formatAddress(userAddress);
             walletStatus.style.display = 'inline-block';
             connectBtn.textContent = '✅ Connected';
             connectBtn.disabled = true;
@@ -508,7 +335,7 @@
 
             decimals = await tokenContract.decimals();
 
-            tokenBalanceInfo.style.display = 'inline-block';
+            tokenBalanceInfo.style.display = 'block';
 
             await updateBalances();
 
@@ -522,8 +349,11 @@
 
     async function stake() {
         if (!userAddress) return alert('Please connect wallet.');
+
         const amount = stakeAmountInput.value.trim();
-        if (!amount || isNaN(amount) || Number(amount) <= 0) return alert('Enter a valid amount.');
+        if (!amount || isNaN(amount) || Number(amount) <= 0) {
+            return alert('Enter a valid amount.');
+        }
 
         try {
             const amountWei = ethers.parseUnits(amount.toString(), decimals);
@@ -548,8 +378,11 @@
 
     async function unstake() {
         if (!userAddress) return alert('Please connect wallet.');
+
         const amount = stakeAmountInput.value.trim();
-        if (!amount || isNaN(amount) || Number(amount) <= 0) return alert('Enter a valid amount.');
+        if (!amount || isNaN(amount) || Number(amount) <= 0) {
+            return alert('Enter a valid amount.');
+        }
 
         try {
             const amountWei = ethers.parseUnits(amount.toString(), decimals);
@@ -567,6 +400,7 @@
 
     async function claim() {
         if (!userAddress) return alert('Please connect wallet.');
+
         try {
             const tx = await stakingContract.getReward();
             await tx.wait();
@@ -590,6 +424,5 @@
     });
 })();
 </script>
-
 </body>
 </html>
