@@ -87,6 +87,28 @@
   min-width: 240px;
 }
 
+.brand-section {
+  margin-top: 0.5rem;
+}
+
+.feature-logo-container {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 180px;
+  position: relative;
+}
+
+.feature-logo-container .logo-image,
+.feature-logo-container .logo-glow {
+  width: min(320px, 42vw);
+  min-width: 180px;
+  margin: 0 auto;
+}
+
 .highlight-strip {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -311,5 +333,15 @@
 
   .workflow {
     grid-template-columns: 1fr;
+  }
+
+  .feature-logo-container {
+    min-height: 140px;
+  }
+
+  .feature-logo-container .logo-image,
+  .feature-logo-container .logo-glow {
+    width: min(240px, 60vw);
+    min-width: 140px;
   }
 }
