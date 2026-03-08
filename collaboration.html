@@ -208,4 +208,80 @@
       <p>Sign the guestbook and become part of the Inpinity story.</p>
       <a href="guestbook.html" class="guestbook-link">📖 Go to Guestbook</a>
     </section>
- 
+  </main>
+
+  <footer class="site-footer">
+    <p>© 2026 INPINITY. All rights reserved. Built on Base.</p>
+    <div class="footer-links">
+      <a href="privacypolicy.html">Privacy Policy</a>
+      <a href="termsofuse.html">Terms of Use</a>
+      <a href="contact.html">Contact</a>
+      <a href="faq.html">FAQ</a>
+      <a href="guestbook.html">Guestbook</a>
+      <a href="advertising.html">Advertising</a>
+      <a href="staking.html">Staking</a>
+      <a href="whitepaper.html">Whitepaper</a>
+      <a href="mint.html">Mint</a>
+      <a href="map.html">Pyramid Map</a>
+      <a href="game.html">Game</a>
+    </div>
+    <p class="footer-version">Version 0.23.0</p>
+  </footer>
+
+  <script src="https://forminit.com/sdk/v1/forminit.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const root = document.documentElement;
+      const dots = document.querySelectorAll(".themeDots .dot");
+
+      function applyTheme(theme) {
+        root.setAttribute("data-theme", theme);
+        try {
+          localStorage.setItem("inpinity-theme", theme);
+        } catch (_) {}
+
+        dots.forEach(dot => {
+          const active =
+            (theme === "light" && dot.classList.contains("light")) ||
+            (theme === "dark" && dot.classList.contains("dark")) ||
+            (theme === "basic" && dot.classList.contains("basic"));
+          dot.classList.toggle("active", active);
+        });
+      }
+
+      let savedTheme = "basic";
+      try {
+        savedTheme = localStorage.getItem("inpinity-theme") || "basic";
+      } catch (_) {}
+
+      applyTheme(savedTheme);
+
+      document.querySelector(".themeDots .dot.light")?.addEventListener("click", () => applyTheme("light"));
+      document.querySelector(".themeDots .dot.dark")?.addEventListener("click", () => applyTheme("dark"));
+      document.querySelector(".themeDots .dot.basic")?.addEventListener("click", () => applyTheme("basic"));
+
+      const forminit = new Forminit();
+      const FORM_ID = "7ktpdl3xza8";
+
+      const form = document.getElementById("genesisForm");
+      const resultEl = document.getElementById("form-result");
+
+      form?.addEventListener("submit", async function(event) {
+        event.preventDefault();
+
+        const formData = new FormData(form);
+        const { error } = await forminit.submit(FORM_ID, formData);
+
+        if (error) {
+          resultEl.innerHTML = `<span class="error-message">❌ ${error.message}</span>`;
+          return;
+        }
+
+        resultEl.innerHTML = '<span class="success-message">✅ Application submitted! You will receive a confirmation email soon.</span>';
+        form.reset();
+      });
+    });
+  </script>
+</body>
+</html>
