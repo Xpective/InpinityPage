@@ -99,7 +99,7 @@
 
         <div class="wallet-actions">
           <button class="btn" id="connectWallet">Connect Wallet</button>
-          <button class="btn btn-secondary" id="disconnectWallet">Disconnect</button>
+          <button class="btn btn-secondary" id="disconnectWallet" type="button">Disconnect</button>
         </div>
       </div>
     </section>
@@ -139,12 +139,14 @@
           </div>
 
           <div class="action-group">
-            <button class="btn btn-small" id="revealBtn">Reveal</button>
-            <button class="btn btn-small" id="farmingStartBtn">Start Farming</button>
-            <button class="btn btn-small" id="farmingStopBtn">Stop Farming</button>
-            <button class="btn btn-small" id="claimBtn">Claim Resources</button>
-            <button class="btn btn-small migrate-btn" id="migrateFarmBtn" style="display:none;">Migrate from V4</button>
+            <button class="btn btn-small" id="revealBtn" type="button">Reveal</button>
+            <button class="btn btn-small" id="farmingStartBtn" type="button">Start Farming</button>
+            <button class="btn btn-small" id="farmingStopBtn" type="button">Stop Farming</button>
+            <button class="btn btn-small" id="claimBtn" type="button">Claim Resources</button>
+            <button class="btn btn-small migrate-btn" id="migrateFarmBtn" type="button" style="display:none;">Migrate from V4</button>
           </div>
+
+          <div id="actionMessage"></div>
 
           <div class="divider"></div>
 
@@ -158,9 +160,7 @@
             <label>Protection % <input type="number" id="protectLevel" min="0" max="50" value="10"></label>
           </div>
 
-          <button class="btn" id="protectBtn">Hire Mercenaries</button>
-
-          <div id="actionMessage"></div>
+          <button class="btn" id="protectBtn" type="button">Hire Mercenaries</button>
           <div id="protectMessage"></div>
         </div>
 
@@ -185,7 +185,7 @@
         <div class="input-group">
           <label>Row <input type="number" id="row" min="0" max="99" value="0"></label>
           <label>Col <input type="number" id="col" min="0" max="198" value="0"></label>
-          <button class="random-btn" id="randomBlockBtn">🎲 Random free</button>
+          <button class="random-btn" id="randomBlockBtn" type="button">🎲 Random free</button>
         </div>
 
         <div class="payment-options">
@@ -194,7 +194,7 @@
           <label><input type="radio" name="payment" value="mixed"> 0.0015 ETH + 15 INPI</label>
         </div>
 
-        <button class="action-button" id="mintBtn">Mint Block</button>
+        <button class="action-button" id="mintBtn" type="button">Mint Block</button>
         <div id="mintMessage"></div>
       </section>
 
@@ -214,7 +214,7 @@
             </div>
 
             <div class="attack-resource-group">
-              <label class="select-label">Choose resource to steal:</label>
+              <label class="select-label" for="attackResourceSelect">Choose resource to steal:</label>
               <select id="attackResourceSelect"></select>
             </div>
 
@@ -223,7 +223,7 @@
               Enter coordinates to analyze the target and see whether an attack path makes sense.
             </div>
 
-            <button class="btn" id="attackBtn">Start Attack</button>
+            <button class="btn" id="attackBtn" type="button">Start Attack</button>
             <div id="attackMessage"></div>
           </div>
 
@@ -287,7 +287,7 @@
             <div class="input-group">
               <label>INPI amount <input type="number" id="inpiAmount" min="0" step="0.0001" value="10"></label>
             </div>
-            <button class="btn btn-small" id="exchangeInpiBtn">Swap to PIT</button>
+            <button class="btn btn-small" id="exchangeInpiBtn" type="button">Swap to PIT</button>
           </div>
 
           <div class="swap-card">
@@ -295,7 +295,7 @@
             <div class="input-group">
               <label>PIT amount <input type="number" id="pitAmount" min="0" step="0.0001" value="1000"></label>
             </div>
-            <button class="btn btn-small" id="exchangePitBtn">Swap to INPI</button>
+            <button class="btn btn-small" id="exchangePitBtn" type="button">Swap to INPI</button>
           </div>
         </div>
 
