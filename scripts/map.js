@@ -147,18 +147,60 @@ const rarityColors = [
 ];
 
 /* ==================== HELPER ==================== */
-function populateAttackResourceSelect() {
+function populateAttackResourceSelect(resourceIds = null, selectedValue = null) {
   const select = document.getElementById("attackResource");
   if (!select) return;
+
   select.innerHTML = "";
-  for (let i = 0; i < resourceNames.length; i++) {
+
+  const ids = Array.isArray(resourceIds)
+    ? resourceIds
+    : resourceNames.map((_, i) => i);
+
+  if (ids.length === 0) {
     const option = document.createElement("option");
-    option.value = String(i);
-    option.textContent = resourceNames[i];
+    option.value = "";
+    option.textContent = "No loot available";
+    option.disabled = true;
+    option.selected = true;
     select.appendChild(option);
+    select.disabled = true;
+    return;
+  }
+
+  select.disabled = false;
+
+  ids.forEach((id, idx) => {
+    const option = document.createElement("option");
+    option.value = String(id);
+    option.textContent = resourceNames[id] || `Resource ${id}`;
+    if (selectedValue !== null && Number(selectedValue) === Number(id)) {
+      option.selected = true;
+    } else if (selectedValue === null && idx === 0) {
+      option.selected = true;
+    }
+    select.appendChild(option);
+  });
+}
+async function getLootableResourceIds(targetTokenId) {
+  if (!farmingV5Contract) return [];
+
+  try {
+    const pending = await farmingV5Contract.getAllPending(targetTokenId);
+    const ids = [];
+
+    for (let i = 0; i < pending.length; i++) {
+      const val = pending[i];
+      const amount = typeof val === "bigint" ? val : BigInt(val.toString());
+      if (amount > 0n) ids.push(i);
+    }
+
+    return ids;
+  } catch (e) {
+    console.warn("getLootableResourceIds failed", e);
+    return [];
   }
 }
-populateAttackResourceSelect();
 
 function shortenAddress(addr) {
   return addr ? addr.slice(0, 6) + "..." + addr.slice(-4) : "";
@@ -236,43 +278,63 @@ async function getPreferredAttackerTokenId() {
   return parseInt(ownTokens[0][0], 10);
 }
 
-function getProduction(rarity, row) {
+function getProduction(rarity) {
   const production = {};
+
   if (rarity === 0) {
-    production.OIL = 10;
-    production.LEMONS = 5;
-    production.IRON = 3;
+    production.OIL = 12;
+    production.LEMONS = 8;
+    production.IRON = 5;
+    production.COPPER = 1;
   } else if (rarity === 1) {
-    production.OIL = 20;
+    production.OIL = 14;
     production.LEMONS = 10;
-    production.IRON = 6;
+    production.IRON = 7;
     production.GOLD = 1;
+    production.COPPER = 2;
   } else if (rarity === 2) {
-    production.OIL = 30;
-    production.LEMONS = 15;
+    production.OIL = 16;
+    production.LEMONS = 12;
     production.IRON = 9;
     production.GOLD = 2;
     production.PLATINUM = 1;
+    production.COPPER = 3;
+    production.CRYSTAL = 1;
   } else if (rarity === 3) {
-    production.OIL = 40;
-    production.LEMONS = 20;
-    production.IRON = 12;
+    production.OIL = 18;
+    production.LEMONS = 14;
+    production.IRON = 11;
     production.GOLD = 3;
     production.PLATINUM = 2;
-    production.CRYSTAL = 1;
-  } else if (rarity === 4) {
-    production.OIL = 60;
-    production.LEMONS = 30;
-    production.IRON = 18;
-    production.GOLD = 5;
-    production.PLATINUM = 3;
+    production.COPPER = 4;
     production.CRYSTAL = 2;
     production.MYSTERIUM = 1;
-    if (row === 0) production.AETHER = 1;
+  } else if (rarity === 4) {
+    production.OIL = 20;
+    production.LEMONS = 15;
+    production.IRON = 12;
+    production.GOLD = 5;
+    production.PLATINUM = 3;
+    production.COPPER = 5;
+    production.CRYSTAL = 3;
+    production.OBSIDIAN = 1;
+    production.MYSTERIUM = 1;
+    production.AETHER = 1;
+  } else {
+    production.OIL = 22;
+    production.LEMONS = 16;
+    production.IRON = 14;
+    production.GOLD = 7;
+    production.PLATINUM = 5;
+    production.COPPER = 6;
+    production.CRYSTAL = 5;
+    production.OBSIDIAN = 2;
+    production.MYSTERIUM = 2;
+    production.AETHER = 2;
   }
+
   return production;
 }
-
 /* ==================== SAFE CONTRACT READS ==================== */
 async function safeGetFarm(tokenId) {
   try {
@@ -812,6 +874,7 @@ async function refreshSelectedTargetAttackPreview() {
     if (pendingLootEl) pendingLootEl.innerText = "—";
     if (protectionEl) protectionEl.innerText = "—";
     if (stealPercentEl) stealPercentEl.innerText = "—";
+    populateAttackResourceSelect([]);
     if (attackBtn) attackBtn.disabled = true;
     return;
   }
@@ -819,7 +882,35 @@ async function refreshSelectedTargetAttackPreview() {
   if (attackerBlockEl) attackerBlockEl.innerText = `#${attackerTokenId}`;
 
   const targetTokenIdNum = parseInt(selectedTokenId, 10);
-  const resourceId = parseInt(attackResourceEl?.value || "0", 10);
+
+  // 1) echte pending Ressourcen holen
+  const lootableIds = await getLootableResourceIds(targetTokenIdNum);
+
+  // aktuell ausgewählten Wert merken
+  let selectedResourceId = attackResourceEl?.value ?? null;
+  if (
+    selectedResourceId === null ||
+    selectedResourceId === "" ||
+    !lootableIds.includes(Number(selectedResourceId))
+  ) {
+    selectedResourceId = lootableIds.length > 0 ? lootableIds[0] : null;
+  }
+
+  // 2) Dropdown dynamisch nur mit lootbaren Ressourcen füllen
+  populateAttackResourceSelect(lootableIds, selectedResourceId);
+
+  if (!lootableIds.length) {
+    if (targetStatusEl) targetStatusEl.innerText = "⚠️ No loot available";
+    if (travelTimeEl) travelTimeEl.innerText = "—";
+    if (remainingEl) remainingEl.innerText = "—";
+    if (pendingLootEl) pendingLootEl.innerText = "0";
+    if (protectionEl) protectionEl.innerText = "—";
+    if (stealPercentEl) stealPercentEl.innerText = "—";
+    if (attackBtn) attackBtn.disabled = true;
+    return;
+  }
+
+  const resourceId = parseInt(document.getElementById("attackResource")?.value || "0", 10);
 
   const preview = await loadAttackPreview(attackerTokenId, targetTokenIdNum, resourceId);
   if (!preview) {
@@ -904,7 +995,7 @@ async function updateSidebar(tokenId) {
 
       rarityDisplay = `<div class="detail-row"><span class="detail-label">Rarity</span><span class="detail-value ${rarityClass[r]}">${rarityNames[r]}</span></div>`;
 
-      const production = getProduction(r, row);
+      const production = getProduction(r);
       let prodText = "";
       for (const [res, amount] of Object.entries(production)) {
         prodText += `<div class="detail-row"><span class="detail-label">${res}</span><span class="detail-value">${amount}/d</span></div>`;
