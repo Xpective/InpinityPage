@@ -17,16 +17,8 @@
   <link rel="stylesheet" href="css/light.css" />
   <link rel="stylesheet" href="css/responsive.css" />
   <link rel="stylesheet" href="css/color.css" />
-  <link rel="stylesheet" href="css/adapted_about_us.css" />
-  <link rel="stylesheet" href="css/adapted_advertisements.css" />
-  <link rel="stylesheet" href="css/adapted_combined.css" />
-  <link rel="stylesheet" href="css/adapted_comunity_guidelines.css" />
-  <link rel="stylesheet" href="css/adapted_course_feedback.css" />
-  <link rel="stylesheet" href="css/adapted_mft_marketplace.css" />
-  <link rel="stylesheet" href="css/adapted_profile.css" />
-  <link rel="stylesheet" href="css/combined_latest.css" />
-  <link rel="stylesheet" href="css/gamification.css" />
-  <link rel="stylesheet" href="css/referral.css" />
+
+  <link rel="stylesheet" href="css/mint.css" />
 
   <meta name="description" content="Mint Pyramid Blocks on Base, reveal Pi and Phi digits, and prepare your block for farming and gameplay in the Inpinity ecosystem." />
   <meta name="keywords" content="Inpinity, Mint, Pyramid Block, NFT, Base, INPI, Reveal, Pi, Phi" />
@@ -40,436 +32,6 @@
   <meta name="robots" content="index,follow" />
 
   <script defer src="main.js"></script>
-
-  <style>
-    .page-wrap{
-      max-width:1100px;
-      margin:0 auto;
-      padding:2rem 1rem 3rem;
-    }
-
-    .site-header{
-      position:relative;
-      z-index:20;
-    }
-
-    .site-nav{
-      display:flex;
-      flex-direction:column;
-      gap:1rem;
-    }
-
-    .nav-list{
-      width:100%;
-    }
-
-    .themeDots{
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      gap:.5rem;
-      margin-top:.25rem;
-    }
-
-    .themeDots .dot{
-      width:20px;
-      height:20px;
-      border:none;
-      border-radius:50%;
-      cursor:pointer;
-      transition:transform .2s ease;
-      padding:0;
-      appearance:none;
-      -webkit-appearance:none;
-    }
-
-    .themeDots .dot:hover{
-      transform:scale(1.15);
-    }
-
-    .themeDots .dot.light{ background:#ffffff; }
-    .themeDots .dot.dark{ background:#111111; }
-    .themeDots .dot.basic{ background:var(--quinary-color); }
-
-    .mint-hero{
-      text-align:center;
-      margin-bottom:1.5rem;
-    }
-
-    .eyebrow{
-      margin:0 0 .75rem;
-      font-size:.95rem;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-      opacity:.82;
-    }
-
-    .hero-lead{
-      max-width:900px;
-      margin:0 auto;
-      line-height:1.75;
-    }
-
-    .links-section{
-      display:flex;
-      justify-content:center;
-      flex-wrap:wrap;
-      gap:1rem;
-      margin:1.6rem auto 0;
-      padding:1rem;
-      background:rgba(255,255,255,.04);
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:16px;
-      max-width:900px;
-    }
-
-    .link-chip{
-      display:inline-block;
-      padding:.65rem 1.2rem;
-      background:var(--quinary-color);
-      border-radius:999px;
-      color:#fff;
-      text-decoration:none;
-      font-weight:800;
-      transition:transform .15s ease, opacity .2s ease;
-    }
-
-    .link-chip:hover{
-      transform:translateY(-1px);
-      opacity:.95;
-    }
-
-    .mint-grid{
-      display:grid;
-      grid-template-columns:1.15fr .85fr;
-      gap:1.5rem;
-      margin-top:1.6rem;
-    }
-
-    @media (max-width: 980px){
-      .mint-grid{ grid-template-columns:1fr; }
-    }
-
-    .card-box{
-      background:rgba(255,255,255,.04);
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:18px;
-      box-shadow:0 10px 24px rgba(0,0,0,.16);
-      padding:1.6rem;
-    }
-
-    .card-box h2{
-      color:var(--quinary-color);
-      margin:0 0 1rem;
-      font-size:1.6rem;
-    }
-
-    .muted{
-      color:var(--text-color);
-      opacity:.82;
-      line-height:1.6;
-    }
-
-    .wallet-bar{
-      display:flex;
-      flex-wrap:wrap;
-      justify-content:space-between;
-      align-items:center;
-      gap:1rem;
-      background:rgba(255,255,255,.04);
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:16px;
-      padding:1rem 1.2rem;
-      margin-top:1rem;
-    }
-
-    .wallet-left{
-      display:flex;
-      flex-direction:column;
-      gap:.35rem;
-    }
-
-    .wallet-status{
-      font-size:.95rem;
-      opacity:.85;
-    }
-
-    .wallet-address{
-      font-family:"Roboto Mono", monospace;
-      background:rgba(0,0,0,.18);
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:999px;
-      padding:.3rem .7rem;
-      word-break:break-all;
-      display:inline-block;
-      max-width:340px;
-    }
-
-    .wallet-balance{
-      font-weight:800;
-      color:var(--quinary-color);
-      font-size:1.1rem;
-      text-align:right;
-    }
-
-    .btn{
-      background:var(--quinary-color);
-      color:#fff;
-      border:none;
-      padding:.75rem 1.2rem;
-      border-radius:999px;
-      font-weight:800;
-      cursor:pointer;
-      transition:transform .15s ease, opacity .2s ease;
-    }
-
-    .btn:hover{
-      transform:translateY(-1px);
-      opacity:.95;
-    }
-
-    .btn:disabled{
-      opacity:.4;
-      cursor:not-allowed;
-      transform:none;
-    }
-
-    .seg-title{
-      color:var(--quinary-color);
-      margin:1.2rem 0 .6rem;
-      font-size:1.05rem;
-      font-weight:900;
-    }
-
-    .stats-row{
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:.8rem;
-      margin-top:.8rem;
-    }
-
-    @media (max-width: 640px){
-      .stats-row{ grid-template-columns:1fr; }
-    }
-
-    .stat{
-      background:rgba(255,255,255,.04);
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:14px;
-      padding:.9rem;
-      text-align:center;
-    }
-
-    .stat .label{
-      opacity:.72;
-      font-size:.85rem;
-    }
-
-    .stat .value{
-      color:var(--quinary-color);
-      font-size:1.4rem;
-      font-weight:900;
-      margin-top:.25rem;
-    }
-
-    .payment-box{
-      background:rgba(255,255,255,.04);
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:16px;
-      padding:1rem;
-      margin-top:.9rem;
-    }
-
-    .pay-row{
-      display:flex;
-      gap:.8rem;
-      align-items:center;
-      padding:.8rem .9rem;
-      border-radius:14px;
-      border:1px solid transparent;
-      cursor:pointer;
-      background:rgba(0,0,0,.14);
-      margin:.6rem 0;
-      transition:border-color .2s ease, transform .15s ease;
-    }
-
-    .pay-row:hover{
-      border-color:var(--quinary-color);
-      transform:translateY(-1px);
-    }
-
-    .pay-row input{
-      accent-color:var(--quinary-color);
-      width:18px;
-      height:18px;
-    }
-
-    .pay-row .t{
-      font-weight:800;
-    }
-
-    .pay-row .v{
-      color:var(--quinary-color);
-      font-weight:800;
-      margin-left:auto;
-    }
-
-    .coord-row{
-      display:flex;
-      flex-wrap:wrap;
-      gap:.8rem;
-      align-items:center;
-      margin-top:1rem;
-    }
-
-    .coord-row label{
-      display:flex;
-      align-items:center;
-      gap:.4rem;
-      background:rgba(0,0,0,.14);
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:999px;
-      padding:.55rem .95rem;
-      font-weight:700;
-    }
-
-    .coord-row input{
-      width:86px;
-      background:transparent;
-      border:none;
-      border-bottom:2px solid var(--quinary-color);
-      color:inherit;
-      outline:none;
-      text-align:center;
-      font-weight:800;
-    }
-
-    .random-btn{
-      background:rgba(255,255,255,.04);
-      border:1px solid var(--quinary-color);
-      color:var(--quinary-color);
-      padding:.65rem 1rem;
-      border-radius:999px;
-      cursor:pointer;
-      font-weight:900;
-      transition:transform .15s ease, opacity .2s ease;
-    }
-
-    .random-btn:hover{
-      transform:translateY(-1px);
-      opacity:.95;
-    }
-
-    .mint-main{
-      width:100%;
-      margin-top:1rem;
-      padding:1rem 1.25rem;
-      font-size:1.15rem;
-    }
-
-    .msg{
-      margin-top:.9rem;
-      border-radius:12px;
-      padding:.85rem 1rem;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(0,0,0,.14);
-    }
-
-    .msg.success{
-      border-color:#2ecc71;
-      color:#2ecc71;
-    }
-
-    .msg.error{
-      border-color:#ff6b6b;
-      color:#ff6b6b;
-    }
-
-    .info-note{
-      margin-top:1rem;
-      border-left:4px solid var(--quinary-color);
-      background:rgba(255,255,255,.04);
-      padding:1rem;
-      border-radius:16px;
-      line-height:1.7;
-    }
-        .reveal-list .item{
-      display:flex;
-      flex-wrap:wrap;
-      gap:.8rem;
-      align-items:center;
-      justify-content:space-between;
-      background:rgba(255,255,255,.04);
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:14px;
-      padding:.9rem 1rem;
-      margin-top:.7rem;
-      font-weight:700;
-    }
-
-    .reveal-btn{
-      background:rgba(255,255,255,.04);
-      border:1px solid var(--quinary-color);
-      color:var(--quinary-color);
-      padding:.55rem .95rem;
-      border-radius:999px;
-      cursor:pointer;
-      font-weight:900;
-      transition:transform .15s ease, opacity .2s ease;
-    }
-
-    .reveal-btn:hover{
-      transform:translateY(-1px);
-      opacity:.95;
-    }
-
-    .debug-log{
-      margin-top:1rem;
-      background:rgba(0,0,0,.18);
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:12px;
-      padding:1rem;
-      font-family:"Roboto Mono", monospace;
-      color:#b0b0ff;
-      font-size:.8rem;
-      max-height:220px;
-      overflow:auto;
-    }
-
-    .site-footer{
-      position:relative;
-      z-index:5;
-      margin-top:5rem;
-      padding-top:2.5rem;
-      padding-bottom:2.5rem;
-      border-top:1px solid rgba(255,255,255,.12);
-      text-align:center;
-    }
-
-    .footer-links{
-      display:flex;
-      justify-content:center;
-      gap:1rem;
-      flex-wrap:wrap;
-      position:relative;
-      z-index:6;
-      margin-top:.75rem;
-    }
-
-    .footer-links a{
-      color:var(--quinary-color);
-      text-decoration:none;
-    }
-
-    .footer-links a:hover{
-      text-decoration:underline;
-    }
-
-    .footer-version{
-      opacity:.8;
-      margin-top:.75rem;
-    }
-  </style>
 </head>
 
 <body>
@@ -498,7 +60,7 @@
     </nav>
   </header>
 
-  <main class="page-wrap">
+  <main class="page-wrap mint-page">
     <section class="mint-hero">
       <p class="eyebrow">Inpinity Mint</p>
       <h1>Mint a Pyramid Block</h1>
@@ -548,30 +110,30 @@
 
         <div class="seg-title">💎 Payment method</div>
         <div class="payment-box">
-          <div class="pay-row" onclick="document.getElementById('payEth').click(); selectPayment('eth');">
+          <label class="pay-row" for="payEth">
             <input type="radio" name="payment" id="payEth" checked />
             <div class="t">Only ETH</div>
             <div class="v">0.003 ETH</div>
-          </div>
+          </label>
 
-          <div class="pay-row" onclick="document.getElementById('payInpi').click(); selectPayment('inpi');">
+          <label class="pay-row" for="payInpi">
             <input type="radio" name="payment" id="payInpi" />
             <div class="t">Only INPI</div>
             <div class="v">30 INPI</div>
-          </div>
+          </label>
 
-          <div class="pay-row" onclick="document.getElementById('payMixed').click(); selectPayment('mixed');">
+          <label class="pay-row" for="payMixed">
             <input type="radio" name="payment" id="payMixed" />
             <div class="t">Mixed</div>
             <div class="v">0.0015 ETH + 15 INPI</div>
-          </div>
+          </label>
         </div>
 
         <div class="seg-title">📍 Coordinates</div>
         <div class="coord-row">
           <label>Row <input type="number" id="row" min="0" max="99" value="0"></label>
           <label>Col <input type="number" id="col" min="0" max="198" value="0"></label>
-          <button id="randomBlockBtn" class="random-btn">🎲 Random free</button>
+          <button id="randomBlockBtn" class="random-btn" type="button">🎲 Random free</button>
         </div>
 
         <div class="info-note">
@@ -579,7 +141,7 @@
           Mint first, reveal second. Revealed blocks expose hidden Pi and Phi digits and are needed for the wider ecosystem flow.
         </div>
 
-        <button class="btn mint-main" id="mintBtn" disabled>🚀 Mint your Block</button>
+        <button class="btn mint-main" id="mintBtn" disabled type="button">🚀 Mint your Block</button>
         <div id="mintMessage"></div>
       </div>
 
@@ -590,8 +152,8 @@
           Revealed blocks are needed for farming and advanced gameplay.
         </p>
 
-        <div id="unrevealedList" class="reveal-list" style="margin-top: 1rem;">
-          <p class="muted" style="text-align:center;">Connect wallet to see your unrevealed blocks.</p>
+        <div id="unrevealedList" class="reveal-list reveal-list-spacing">
+          <p class="muted text-center">Connect wallet to see your unrevealed blocks.</p>
         </div>
 
         <div id="revealMessage"></div>
@@ -649,6 +211,23 @@
 
     let provider, signer, nftContract, inpiContract, userAddress;
     let selectedPayment = "eth";
+
+    function applyTheme(theme) {
+      document.documentElement.setAttribute("data-theme", theme);
+      localStorage.setItem("theme", theme);
+
+      document.querySelectorAll(".themeDots .dot").forEach(dot => dot.classList.remove("active"));
+      document.querySelector(`.themeDots .dot.${theme}`)?.classList.add("active");
+    }
+
+    function initTheme() {
+      const savedTheme = localStorage.getItem("theme") || document.documentElement.getAttribute("data-theme") || "basic";
+      applyTheme(savedTheme);
+
+      document.querySelector(".themeDots .dot.light")?.addEventListener("click", () => applyTheme("light"));
+      document.querySelector(".themeDots .dot.dark")?.addEventListener("click", () => applyTheme("dark"));
+      document.querySelector(".themeDots .dot.basic")?.addEventListener("click", () => applyTheme("basic"));
+    }
 
     function selectPayment(type){
       selectedPayment = type;
@@ -743,13 +322,13 @@
     async function loadUnrevealedBlocks(){
       const listDiv = document.getElementById("unrevealedList");
       if(!userAddress || !nftContract){
-        listDiv.innerHTML = `<p class="muted" style="text-align:center;">Connect wallet to see your unrevealed blocks.</p>`;
+        listDiv.innerHTML = `<p class="muted text-center">Connect wallet to see your unrevealed blocks.</p>`;
         return;
       }
 
       const balance = await nftContract.balanceOf(userAddress);
       if(balance.toNumber() === 0){
-        listDiv.innerHTML = `<p class="muted" style="text-align:center;">You don’t own any blocks yet.</p>`;
+        listDiv.innerHTML = `<p class="muted text-center">You don’t own any blocks yet.</p>`;
         return;
       }
 
@@ -768,7 +347,7 @@
       }
 
       if(rows.length === 0){
-        listDiv.innerHTML = `<p class="muted" style="text-align:center;">All your blocks are already revealed.</p>`;
+        listDiv.innerHTML = `<p class="muted text-center">All your blocks are already revealed.</p>`;
         return;
       }
 
@@ -777,7 +356,7 @@
         html += `
           <div class="item">
             <div>Block #${r.tokenId} (R${r.row} C${r.col})</div>
-            <button class="reveal-btn" onclick="revealBlock(${r.tokenId})">🔓 Reveal</button>
+            <button class="reveal-btn" onclick="revealBlock(${r.tokenId})" type="button">🔓 Reveal</button>
           </div>
         `;
       }
@@ -921,17 +500,21 @@
       }
     }
 
-    document.getElementById("connectWallet").addEventListener("click", connectWallet);
-    document.getElementById("randomBlockBtn").addEventListener("click", findRandomFreeBlock);
-    document.getElementById("mintBtn").addEventListener("click", mint);
+    document.addEventListener("DOMContentLoaded", () => {
+      initTheme();
 
-    document.getElementById("payEth").addEventListener("change", ()=>selectPayment("eth"));
-    document.getElementById("payInpi").addEventListener("change", ()=>selectPayment("inpi"));
-    document.getElementById("payMixed").addEventListener("change", ()=>selectPayment("mixed"));
+      document.getElementById("connectWallet")?.addEventListener("click", connectWallet);
+      document.getElementById("randomBlockBtn")?.addEventListener("click", findRandomFreeBlock);
+      document.getElementById("mintBtn")?.addEventListener("click", mint);
 
-    if(window.ethereum && window.ethereum.selectedAddress){
-      connectWallet();
-    }
+      document.getElementById("payEth")?.addEventListener("change", ()=>selectPayment("eth"));
+      document.getElementById("payInpi")?.addEventListener("change", ()=>selectPayment("inpi"));
+      document.getElementById("payMixed")?.addEventListener("change", ()=>selectPayment("mixed"));
+
+      if(window.ethereum && window.ethereum.selectedAddress){
+        connectWallet();
+      }
+    });
   </script>
 </body>
 </html>
