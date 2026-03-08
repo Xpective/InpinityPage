@@ -154,6 +154,7 @@ body {
   border: 1px solid var(--panel-border);
   border-radius: 18px;
   box-shadow: var(--panel-shadow);
+  color: var(--text-main);
 }
 
 .wallet-bar {
@@ -177,7 +178,8 @@ body {
 
 .wallet-address {
   font-family: "Roboto Mono", monospace;
-  background: rgba(0, 0, 0, 0.14);
+  background: var(--input-bg);
+  color: var(--text-main);
   padding: 0.5rem 1rem;
   border-radius: 999px;
   border: 1px solid var(--panel-border);
@@ -407,9 +409,10 @@ body {
 .user-resources,
 .attack-item,
 .debug-panel details {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--card-inner-bg);
   border: 1px solid var(--panel-border);
   border-radius: 16px;
+  color: var(--text-main);
 }
 
 .selected-block-info {
@@ -429,7 +432,8 @@ body {
 }
 
 .resource-item {
-  background: rgba(0, 0, 0, 0.14);
+  background: var(--input-bg);
+  color: var(--text-main);
   padding: 0.5rem;
   border-radius: 12px;
   text-align: center;
@@ -447,7 +451,8 @@ body {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: rgba(0, 0, 0, 0.14);
+  background: var(--input-bg);
+  color: var(--text-main);
   padding: 0.6rem 1rem;
   border-radius: 999px;
 }
@@ -522,7 +527,7 @@ body {
   width: 100%;
   padding: 0.9rem 1rem;
   border-radius: 999px;
-  background: rgba(0, 0, 0, 0.14);
+  background: var(--input-bg);
   border: 1px solid var(--panel-border);
   color: var(--text-main);
   font-size: 1rem;
@@ -634,13 +639,23 @@ body {
 }
 
 .info-note {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--card-inner-bg);
   border-left: 4px solid var(--accent-main);
+  color: var(--text-main);
   padding: 1rem;
   border-radius: 16px;
   margin: 1rem 0;
   font-size: 0.95rem;
   line-height: 1.7;
+}
+
+.wallet-status,
+.section-subtitle,
+.empty-state,
+.balance-label,
+.footer-version,
+.eyebrow {
+  color: var(--text-soft);
 }
 
 .compact-note {
@@ -787,4 +802,30 @@ body {
     margin-top: 4rem;
     padding-top: 2rem;
   }
+}
+
+[data-theme="light"] .btn-secondary {
+  background: rgba(106, 79, 179, 0.10);
+  color: #241a36;
+  border: 1px solid rgba(106, 79, 179, 0.18);
+}
+
+[data-theme="light"] .block-card.hidden {
+  border-color: rgba(106, 79, 179, 0.12);
+  opacity: 1;
+}
+
+[data-theme="light"] .hidden-badge {
+  background: rgba(106, 79, 179, 0.10);
+  color: #4b3970;
+  border: 1px solid rgba(106, 79, 179, 0.12);
+}
+
+[data-theme="light"] .debug-log {
+  background: rgba(106, 79, 179, 0.05);
+  color: #3d2c61;
+}
+
+[data-theme="light"] .footer-links a {
+  color: var(--quinary-color);
 }
