@@ -48,7 +48,7 @@
 }
 
 .themeDots .dot.active {
-  box-shadow: 0 0 0 2px var(--quinary-color-transparent), 0 0 0 4px rgba(255,255,255,0.08);
+  box-shadow: 0 0 0 2px var(--quinary-color-transparent), 0 0 0 4px rgba(255, 255, 255, 0.08);
 }
 
 .themeDots .dot.light {
@@ -96,10 +96,9 @@
 .tv-container {
   position: relative;
   width: min(92vw, 720px);
-  aspect-ratio: 1 / 1;
-  background-color: transparent;
-  overflow: visible;
+  height: min(78vh, 720px);
   margin: 0 auto;
+  overflow: visible;
 }
 
 .tv-image {
@@ -118,10 +117,10 @@
 .tv-screen {
   position: absolute;
   z-index: 1;
-  top: 13%;
+  top: 13.5%;
   left: 13%;
   width: 74%;
-  height: 56%;
+  height: 55%;
   background: #000;
   overflow: hidden;
   border-radius: 12px;
@@ -135,7 +134,7 @@
   position: absolute;
   bottom: 0;
   width: 100%;
-  animation: aboutScroll 55s linear infinite;
+  animation: aboutScroll 60s linear infinite;
   font-size: 0.95rem;
   line-height: 1.45;
 }
@@ -150,7 +149,7 @@
     transform: translateY(110%);
   }
   100% {
-    transform: translateY(-260%);
+    transform: translateY(-240%);
   }
 }
 
@@ -160,7 +159,7 @@
   margin-top: 3rem;
   padding-top: 2.5rem;
   padding-bottom: 2.5rem;
-  border-top: 1px solid rgba(255,255,255,0.12);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
   text-align: center;
 }
 
@@ -189,32 +188,29 @@
 }
 
 /* Light Theme */
-[data-theme="light"] .tv-screen {
-  box-shadow: 0 0 0 1px rgba(106,79,179,0.18);
-}
-
 [data-theme="light"] .site-footer {
-  border-top-color: rgba(106,79,179,0.12);
+  border-top-color: rgba(106, 79, 179, 0.12);
 }
 
 /* Dark Theme */
 [data-theme="dark"] .site-footer {
-  border-top-color: rgba(255,255,255,0.10);
+  border-top-color: rgba(255, 255, 255, 0.10);
 }
 
 /* Basic Theme */
 [data-theme="basic"] .site-footer {
-  border-top-color: rgba(255,255,255,0.12);
+  border-top-color: rgba(255, 255, 255, 0.12);
 }
 
 @media (max-width: 768px) {
   .tv-container {
     width: min(96vw, 620px);
+    height: min(72vh, 620px);
   }
 
   .scrolling-text {
     font-size: 0.88rem;
     line-height: 1.4;
-    animation-duration: 62s;
+    animation-duration: 68s;
   }
 }
