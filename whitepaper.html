@@ -5,7 +5,7 @@
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
   <meta content="Inpinity - Official Whitepaper" name="description" />
   <title>Inpinity - Whitepaper</title>
-  
+
   <!-- CSS Imports -->
   <link rel="stylesheet" href="css/base.css" />
   <link rel="stylesheet" href="css/layout.css" />
@@ -25,9 +25,9 @@
   <link rel="stylesheet" href="css/gamification.css" />
   <link rel="stylesheet" href="css/referral.css" />
   <link rel="stylesheet" href="css/whitepaper.css" />
-  
+
   <script defer src="main.js"></script>
-  
+
   <!-- Meta Tags -->
   <link rel="icon" type="image/png" href="favicon.webp" />
   <meta name="keywords" content="Inpinity, Game Design, Game Development, Platform, Collaboration, Forum, Tools, GameDesign, AI Development, Games of future, programming, programs, python gui" />
@@ -44,34 +44,32 @@
 </head>
 
 <body>
-  <!-- HEADER with Navigation and Theme Dots -->
   <header class="site-header">
-    <nav class="site-nav">
+    <nav class="site-nav" aria-label="Main navigation">
       <ul class="nav-list">
         <li><a href="index.html">Home</a></li>
         <li><a href="features.html">Features</a></li>
         <li><a href="game.html">Game</a></li>
         <li><a href="mint.html">Mint</a></li>
-        <li><a href="map.html">Map</a></li>
+        <li><a href="map.html">Pyramid Map</a></li>
         <li><a href="collaboration.html">Collaboration</a></li>
         <li><a href="about.html">About</a></li>
-        <li><a href="whitepaper.html" class="active">Whitepaper</a></li>
+        <li><a href="whitepaper.html" class="active" aria-current="page">Whitepaper</a></li>
         <li><a href="faq.html">FAQ</a></li>
         <li><a href="guestbook.html">Guestbook</a></li>
         <li><a href="advertising.html">Advertising</a></li>
         <li><a href="profile.html">Profile</a></li>
         <li><a href="staking.html">Staking</a></li>
       </ul>
-      
-      <div class="theme-dots">
-        <button class="theme-dot light" data-theme="light" title="Light Theme" aria-label="Switch to Light Theme"></button>
-        <button class="theme-dot dark" data-theme="dark" title="Dark Theme" aria-label="Switch to Dark Theme"></button>
-        <button class="theme-dot basic" data-theme="basic" title="Basic Theme" aria-label="Switch to Basic Theme"></button>
+
+      <div class="theme-dots" aria-label="Theme switcher">
+        <button type="button" class="theme-dot light" data-theme="light" title="Light Theme" aria-label="Switch to Light Theme"></button>
+        <button type="button" class="theme-dot dark" data-theme="dark" title="Dark Theme" aria-label="Switch to Dark Theme"></button>
+        <button type="button" class="theme-dot basic" data-theme="basic" title="Basic Theme" aria-label="Switch to Basic Theme"></button>
       </div>
     </nav>
   </header>
 
-  <!-- MAIN CONTENT - Whitepaper -->
   <main>
     <div class="whitepaper-container">
       <h1>Whitepaper: Inpinity</h1>
@@ -93,7 +91,7 @@
       <div class="warning-note">
         <strong>Important:</strong> Inpinity migrated away from legacy infrastructure and now focuses on transparent,
         verifiable contracts and community-first development. Always verify addresses and interact through
-        the official website: <a href="https://inpinity.online">https://inpinity.online</a>.
+        the official website: <a href="https://inpinity.online" target="_blank" rel="noopener">https://inpinity.online</a>.
       </div>
 
       <h2>2. Project Overview</h2>
@@ -103,19 +101,25 @@
         <tr><th>Blockchain</th><td>Base (Ethereum L2)</td></tr>
         <tr><th>Contract Address (NEW)</th><td class="address">0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</td></tr>
         <tr><th>Old Contract (Deprecated)</th><td class="address">0x15ac8e2c38f0c644123e61011e7113de56038453</td></tr>
-        <tr><th>Official Website</th><td><a href="https://inpinity.online">https://inpinity.online</a></td></tr>
-        <tr><th>Live Apps</th><td>
-          <a href="mint.html">Mint</a> ·
-          <a href="map.html">Pyramid Map</a> ·
-          <a href="game.html">Game Dashboard</a> ·
-          <a href="staking.html">Staking</a>
-        </td></tr>
-        <tr><th>Community</th><td>
-          Twitter: <a href="https://twitter.com/unxpective">@unxpective</a><br />
-          Discord: <a href="https://discord.gg/95yj6Eg6">https://discord.gg/95yj6Eg6</a><br />
-          Telegram: <a href="https://t.me/+1hl5Ou-pGChhYmUy">https://t.me/+1hl5Ou-pGChhYmUy</a>
-        </td></tr>
-        <tr><th>Development</th><td>GitHub: <a href="https://github.com/Xpective">Xpective</a></td></tr>
+        <tr><th>Official Website</th><td><a href="https://inpinity.online" target="_blank" rel="noopener">https://inpinity.online</a></td></tr>
+        <tr>
+          <th>Live Apps</th>
+          <td>
+            <a href="mint.html">Mint</a> ·
+            <a href="map.html">Pyramid Map</a> ·
+            <a href="game.html">Game Dashboard</a> ·
+            <a href="staking.html">Staking</a>
+          </td>
+        </tr>
+        <tr>
+          <th>Community</th>
+          <td>
+            Twitter: <a href="https://twitter.com/unxpective" target="_blank" rel="noopener">@unxpective</a><br />
+            Discord: <a href="https://discord.gg/95yj6Eg6" target="_blank" rel="noopener">https://discord.gg/95yj6Eg6</a><br />
+            Telegram: <a href="https://t.me/+1hl5Ou-pGChhYmUy" target="_blank" rel="noopener">https://t.me/+1hl5Ou-pGChhYmUy</a>
+          </td>
+        </tr>
+        <tr><th>Development</th><td>GitHub: <a href="https://github.com/Xpective" target="_blank" rel="noopener">Xpective</a></td></tr>
       </table>
 
       <h2>3. The On-Chain Game: Pyramid Blocks, Resources & Combat</h2>
@@ -183,7 +187,10 @@
       </ol>
 
       <h2>4. Tokenomics</h2>
-      <p>The economic model of Inpinity is designed for long-term growth and stability. The total supply is fixed at <strong>1,000,000,000 (1 billion) $INPI</strong>.</p>
+      <p>
+        The economic model of Inpinity is designed for long-term growth and stability. The total supply is fixed at
+        <strong>1,000,000,000 (1 billion) $INPI</strong>.
+      </p>
 
       <h3>4.1 Supply Distribution</h3>
       <table>
@@ -311,7 +318,10 @@
       </ul>
 
       <h2>9. Team</h2>
-      <p><strong>Xpective</strong> – A dedicated team of developers, blockchain enthusiasts, and visionaries who believe that the future of gaming must be decentralized and community-driven.</p>
+      <p>
+        <strong>Xpective</strong> – A dedicated team of developers, blockchain enthusiasts, and visionaries who believe
+        that the future of gaming must be decentralized and community-driven.
+      </p>
 
       <h2>10. Security and Legal</h2>
       <ul>
@@ -324,11 +334,13 @@
     </div>
   </main>
 
-  <!-- FOOTER -->
   <footer class="site-footer">
     <div class="footer-content">
-      <p class="copyright">© 2026 INPINITY. All rights reserved. Built on <a href="https://base.org/" target="_blank" rel="noopener">Base</a>.</p>
-      
+      <p class="copyright">
+        © 2026 INPINITY. All rights reserved. Built on
+        <a href="https://base.org/" target="_blank" rel="noopener">Base</a>.
+      </p>
+
       <div class="footer-links">
         <a href="whitepaper.html">Whitepaper</a>
         <a href="faq.html">FAQ</a>
@@ -341,38 +353,30 @@
         <a href="privacypolicy.html">Privacy</a>
         <a href="termsofuse.html">Terms</a>
       </div>
-      
+
       <p class="footer-version">Whitepaper v2.2 – March 2026</p>
     </div>
   </footer>
 
-  <!-- THEME SWITCHER SCRIPT -->
   <script>
-    (function() {
-      // Theme-Switcher mit localStorage
-      document.addEventListener('DOMContentLoaded', function() {
+    (function () {
+      document.addEventListener('DOMContentLoaded', function () {
         const html = document.documentElement;
         const themeDots = document.querySelectorAll('.theme-dot');
-        
-        // Gespeichertes Theme laden
+
         const savedTheme = localStorage.getItem('theme') || 'basic';
         html.setAttribute('data-theme', savedTheme);
-        
-        // Aktiven Dot markieren
+
         themeDots.forEach(dot => {
           if (dot.dataset.theme === savedTheme) {
             dot.classList.add('active');
           }
-          
-          // Click-Event für jeden Dot
-          dot.addEventListener('click', function() {
+
+          dot.addEventListener('click', function () {
             const theme = this.dataset.theme;
-            
-            // Theme setzen
             html.setAttribute('data-theme', theme);
             localStorage.setItem('theme', theme);
-            
-            // Aktive Klasse updaten
+
             themeDots.forEach(d => d.classList.remove('active'));
             this.classList.add('active');
           });
