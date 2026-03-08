@@ -1,27 +1,14 @@
-:root {
-    --primary-color: #452554;
-    --primary-color-transparent: rgba(69, 37, 84, 0.5);
-    --secondary-color: #7967A1;
-    --tertiary-color: #E8E2E6;
-    --quaternary-color: #F8F1FA;
-    --quaternary-color-transparent05: rgba(248, 241, 250, 0.5);
-    --quaternary-color-transparent025:  rgba(248, 241, 250, 0.25);
-    --quinary-color: #1b82aa;
-    --quinary-color-transparent: rgba(27, 130, 170, 0.5); 
-    --complementary-primary: #badaab;
-    --background-color: #452554;
-    --text-color: hsl(0, 0%, 100%);
-
-    /* Hellmodus*/
-
 [data-theme="light"] {
---primary-color: #ac52a3;
---secondary-color: #e1d8f5;
---tertiary-color: #ffffff;
---quaternary-color: #ffffff;
---quinary-color: #dd4f8c;
---complementary-primary: #cbcbcb;
---background-color: #F0F0F0;  /* Ein sehr heller Grauton */
---text-color: #000000;}
+  --primary-color: #f3eef8;
+  --primary-color-transparent: rgba(243, 238, 248, 0.75);
+  --secondary-color: #d8cdea;
+  --tertiary-color: #ffffff;
+  --quaternary-color: #faf7fd;
+  --quaternary-color-transparent05: rgba(250, 247, 253, 0.5);
+  --quaternary-color-transparent025: rgba(250, 247, 253, 0.25);
+  --quinary-color: #6a4fb3;
+  --quinary-color-transparent: rgba(106, 79, 179, 0.3);
+  --complementary-primary: #d9d9d9;
+  --background-color: #f6f2fb;
+  --text-color: #1f1630;
 }
-
