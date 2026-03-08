@@ -1,294 +1,212 @@
-    /* Media Query für iPhone und ähnliche Smartphones */
 @media only screen and (max-width: 768px) {
-    /* Fügen Sie hier die spezifischen Stile für den iPhone-Bildschirm hinzu. 
-       Sie können die Eigenschaften und Werte anpassen, um besser zum Design Ihrer Website zu passen. */
+  html,
+  body {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
 
-    body, html {
-        /* Anpassungen für den Body und HTML */
-        width: 90%;
-        padding: var(--padding-small);
-        margin: var(--space-xsmall);
-        margin-right: var(--space-medium);
-        margin-left: var(--space-medium);
-    }
+  main {
+    width: calc(100% - 1.25rem);
+    margin: 0 auto;
+    padding: 0.75rem 0 2rem;
+  }
 
-    nav {
-        /* Anpassungen für die Navigation */
-        width: 90%;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        padding: var(--padding-large);
-        margin: var(--space-large);
-    }
+  header {
+    width: 100%;
+    padding: 0.75rem 0;
+  }
 
-    nav ul {
-        width: 90%;
-        flex-direction: column;
-        padding: var(--padding-small);
-    }
+  nav {
+    width: calc(100% - 1rem);
+    margin: 0 auto;
+    padding: 0;
+  }
 
-    nav li a {
-        width: 90%;
-        padding: var(--padding-xsmall);
-    }
+  nav ul {
+    width: 100%;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 0;
+    margin: 0;
+  }
 
-    #hero {
-        width: 90%;
-        margin-bottom:var(--padding-small) ;
-        margin-right: var(--space-medium);
-        margin-left: var(--space-medium);
-    }
+  nav li {
+    width: 100%;
+    margin: 0;
+  }
 
-    .hero-title {
-        font-size: var(--font-size-large);
-        width: 90%;
-    }
+  nav li a,
+  nav li button {
+    width: 100%;
+    text-align: center;
+    padding: 0.85rem 1rem;
+    box-sizing: border-box;
+  }
 
-    #hero h1 {
-        width: 90%;
-        font-size: var(--space-xxsmall);
-    }
+  section {
+    padding: 1.2rem 0.9rem;
+    margin-bottom: 1rem;
+  }
 
-    #hero p {
-        width: 90%;
-        font-size: var(--space-xxsmall);
-    }
+  #hero,
+  .hero {
+    width: 100%;
+    margin: 0;
+  }
 
-    .cta-button {
-        width: 90%;
-        font-size: var(--space-xxsmall);
-        justify-content: center;
-        align-items: center;
-        padding: var(--padding-small);
-        padding-bottom: var(--space-xxsmall);
-    }
+  .hero-title {
+    width: 100%;
+    font-size: clamp(1.6rem, 7vw, 2.4rem);
+    padding: 0.75rem;
+  }
 
+  #hero h1,
+  .hero h1 {
+    width: 100%;
+    font-size: clamp(1.8rem, 8vw, 2.6rem);
+    line-height: 1.15;
+  }
 
-    .tool h2, .tool p {
-        font-size: 1em;
-        margin: var(--space-xxlarge);
-    }
-    header {
-        width: 90%;
-        padding: var(--padding-small);
-        margin-left: var(--space-large);
-        margin-right: var(--space-large);
-    }
+  #hero p,
+  .hero p,
+  .hero h2 {
+    width: 100%;
+    font-size: 1rem;
+    line-height: 1.6;
+  }
 
-    /* Anpassungen für nav */
-    nav {
-        width: 90%;
-        flex-wrap: wrap;
-        padding: var(--padding-small);
-        margin-left: var(--space-medium);   
-        margin-right: var(--space-medium);
-        padding-left: var(--padding-base);
-        padding-right: var(--padding-large);
-    }
+  .cta-button,
+  .xbutton,
+  input[type="submit"] {
+    width: 100%;
+    max-width: 100%;
+    font-size: 1rem;
+    text-align: center;
+    box-sizing: border-box;
+  }
 
-    nav ul {
-        width: 90%;
-        flex-direction: column;
-        margin: var(--space-base);
-        padding: var(--space-base);
-        margin-right: var(--space-medium);
-        margin-left: var(--space-medium);
-    }
+  .button-wrapper {
+    min-height: auto;
+    padding: 1rem;
+  }
 
-    nav li {
-        width: 90%;
-        margin-left: var(--space-xlarge);
-        margin-right: var(--space-xlarge);
-        margin-top: var(--space-medium);
-    }
+  .button-container {
+    max-width: 100%;
+    margin: 1rem auto;
+    padding: 1rem;
+    gap: 1rem;
+    flex-direction: column;
+  }
 
-    #features-intro h1 {
-        width: 80%;
-        font-size: var(--space-base);
-        margin-right: var(--space-xxsmall);
-        margin-left: var(--space-xxsmall);
-        padding-left: var(--padding-large) ;
-        padding-right: var(--padding-large);
+  .logo-container {
+    width: 100%;
+    min-height: 120px;
+    gap: 12px;
+    margin: 0.75rem auto 1.5rem;
+    flex-wrap: wrap;
+  }
 
-    }
+  .logo-image,
+  .logo-glow {
+    width: min(220px, 42vw);
+    min-width: 120px;
+  }
 
-    #tools-wrapper {
-        max-width: 70%;
-        padding: var(--padding-small);
-        padding-left: var(--space-xxlarge);
-        padding-right: var(--space-xxlarge);
-    }
+  #features-intro {
+    width: 100%;
+    margin: 1rem 0;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
 
-    .tool {
-        width: 80%;
-        margin: var(--space-small);
-    }
+  #features-intro h1 {
+    width: 100%;
+    font-size: 1.4rem;
+    margin: 0 0 0.75rem;
+    padding: 0;
+  }
 
-    /* Forum Header Anpassungen */
-    #forum-header h1 {
-        font-size: var(--space-large);
-    }
+  #tools-wrapper {
+    max-width: 100%;
+    padding: 0.75rem;
+  }
 
-    #forum-header p {
-        font-size: var(--space-base);
-    }
+  .tool {
+    width: 100%;
+    min-height: auto;
+    margin: 0.75rem 0;
+    padding: 1rem;
+  }
 
-    /* Forum Categories Anpassungen */
-    #forum-categories {
-        gap: var(--space-large);
-        margin: var(--space-xlarge) 0;
-    }
+  .tool h2,
+  .tool p {
+    margin: 0.5rem 0;
+  }
 
-    .category h2 {
-        font-size: var(--space-large);
-        margin-bottom: var(--space-base);
-    }
+  #forum-header h1 {
+    font-size: 1.8rem;
+  }
 
-    .category p {
-        font-size: var(--space-small);
-    }
-    #hero {
-        width: 90%;
-    }
+  #forum-header p {
+    font-size: 1rem;
+  }
 
-    .hero-title {
-        width: 90%;
-        font-size: var(--font-size-xlarge);
-        padding: var(--space-xsmall);
-    }
+  #forum-categories {
+    gap: 1rem;
+    margin: 1.5rem 0;
+    padding: 1rem 0.5rem;
+  }
 
-    #hero h1 {
-        width: 90%;
-        font-size: var(--font-size-small);
-    }
+  .category {
+    padding: 1rem;
+    margin: 0;
+  }
 
-    #hero p {
-        width: 90%;
-        font-size: var(--font-size-small);
-    }
+  .category h2 {
+    font-size: 1.35rem;
+    margin-bottom: 0.75rem;
+  }
 
-    .cta-button {
-        padding: var(--padding-small);
-        font-size: var(--space-base);
-        padding-bottom: var(--space-xxsmall);
-        margin-top: var(--space-medium);
-    }
+  .category p {
+    font-size: 1rem;
+  }
 
-    button-wrapper {
-        max-width: 369px;
-        height: auto;
-        padding: var(--padding-base);
-        ;
-        font-size: var(--font-size-large);  /* Beispielwert für eine größere Schrift */
-    }
-    
-    .button-container {
-        max-width: 369px;
-        margin: var(--space-large);
-        padding: var(--space-medium);
-        font-size: var(--font-size-xlarge);  /* Beispielwert für eine größere Schrift */
-    }
+  textarea {
+    width: 100%;
+    min-height: 120px;
+    margin-left: 0;
+    margin-right: 0;
+  }
 
+  .form-group {
+    margin-bottom: 1rem;
+  }
 
-    footer {
-        padding: var(--padding-base);
-        margin-top: var(--font-size-small);
-        margin-bottom: var(--space-xxsmall);
-    }
+  .upvote,
+  .downvote {
+    font-size: 1.5rem;
+  }
 
-    #features-intro {
-        width: 90%;
-        margin: var(--space-large) 0;
-    }
+  details {
+    margin: 0.75rem 0;
+    min-width: auto;
+    padding-left: 0;
+    padding-right: 0;
+  }
 
-    .tool {
-        width: 369px ;
-        height: 800px;
-    }
+  summary {
+    margin: 0;
+    padding: 1rem;
+  }
 
-    #forum-header h1 {
-        margin-bottom: var(--space-large);
-    }
+  footer {
+    padding: 1.5rem 1rem 2rem;
+    margin-top: 2rem;
+  }
 
-    #forum-categories {
-        margin: var(--space-large) 0;
-    }
-    .category {
-        padding: var(--padding-base);
-    }
-
-    .category h2 {
-        font-size: 1.5em;
-        margin-bottom: var(--space-base);
-    }
-
-    .category p {
-        font-size: 1em;
-    }
-
-    .forum-button {
-        padding: var(--padding-small);
-        font-size: 1em;
-    }
-    .logo-container, .logo-image, .logo-glow {
-        min-width: auto;
-    }
-
-    input[type="submit"] {
-                   /* Aktiviert Flexbox */
-        
-        width: 90%;
-       
-        margin-left: var(--space-xxsmall);
-        margin-right: var(--space-xxsmall);
-    }
-    /* Sonstige Anpassungen */
-   
-
-    .logo-image, .logo-glow {
-        width: 90%;
-        min-width: 200px;
-    }
-    #connectWallet {
-        padding: var(--padding-base);
-    }
-
-    
-
-    textarea {
-        width: 100%; /* Nimmt die volle Breite des Containers ein */
-        height: 120px; /* Etwas kleinere Höhe für das Textfeld */
-        margin-left: var(--padding-xxsmall);
-        margin-right: var(var(--padding-small));
-    }
-
-    .form-group {
-        margin-bottom: var(--space-base);
-    }
-
-    .upvote, .downvote {
-        font-size: 1.5em;
-    }
-
-    details {
-        flex-direction: column;
-        ;
-        margin: var(--space-small);
-        min-width: auto;
-        padding-left: var(--space-xsmall);
-        padding-right: var(--space-xsmall);
-    }
-
-    summary {
-        flex-direction: column;
-        
-        margin: var(--space-xxsmall);
-        
-        padding-left: var(--space-xsmall);
-        padding-right: var(--space-xsmall);
-    }
-    
+  .footer-links {
+    flex-direction: column;
+    align-items: center;
+  }
 }
-    /* Weitere spezifische Stilanpassungen für kleine Bildschirme... */
-
