@@ -1,8 +1,4 @@
-Vollständige game.js mit V6 Migration
 
-Hier ist die komplett überarbeitete game.js mit allen V6-Änderungen gemäß deiner Anweisungen:
-
-```javascript
 /* =========================================================
    INPINITY GAME – V5 UI BASIS, V6 CONTRACT BACKEND
    - Bestehende V5 Frontend-Struktur bleibt erhalten
@@ -1854,19 +1850,3 @@ document.querySelectorAll('input[name="payment"]').forEach(radio => {
     connectWallet(false);
   }
 })();
-```
-
-Zusammenfassung der wichtigsten Änderungen
-
-1. Header angepasst - V5 UI Basis, V6 Contract Backend
-2. Adressen aktualisiert - V6 Adressen sind jetzt primär, V5 als Legacy
-3. ABIs erweitert - FarmingV6 und PiratesV6 mit allen V6-Funktionen
-4. Contract-Variablen umbenannt - farmingV6Contract, piratesV6Contract
-5. setupContracts() - V6 Contracts mit den neuen ABIs
-6. Subgraph-Queries - farmV6S und attackV6S mit großem S
-7. Caches - cachedFarmsV6, cachedFarmV6Map mit buildFarmV6Map()
-8. getFarmStateV5 → getFarmStateActive - Nutzt jetzt V6 Contract
-9. Farming-Funktionen - Alle Calls auf V6 umgestellt
-10. Migration - V4 → V6 mit robuster Claim-Logik
-11. Attack-Funktionen - V6 mit stealAmount und verbesserter Preview
-12. UI-Texte - Überall "V6" statt "V5"
