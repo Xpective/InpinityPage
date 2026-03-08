@@ -13,12 +13,54 @@
 
   --text-main: var(--text-color);
   --text-soft: rgba(255, 255, 255, 0.78);
+  --input-bg: rgba(0, 0, 0, 0.14);
+  --card-inner-bg: rgba(255, 255, 255, 0.04);
+  --card-inner-strong: rgba(255, 255, 255, 0.06);
 
   --rarity-bronze: #cd7f32;
   --rarity-silver: #c0c0c0;
   --rarity-gold: #ffd700;
   --rarity-platinum: #e5e4e2;
   --rarity-diamond: #b9f2ff;
+}
+
+[data-theme="light"] {
+  --bg-card: rgba(106, 79, 179, 0.06);
+  --panel-border: rgba(106, 79, 179, 0.16);
+  --panel-shadow: 0 10px 24px rgba(58, 38, 92, 0.10);
+
+  --text-main: #241a36;
+  --text-soft: rgba(36, 26, 54, 0.72);
+
+  --input-bg: rgba(106, 79, 179, 0.08);
+  --card-inner-bg: rgba(106, 79, 179, 0.05);
+  --card-inner-strong: rgba(106, 79, 179, 0.08);
+}
+
+[data-theme="dark"] {
+  --bg-card: rgba(255, 255, 255, 0.04);
+  --panel-border: rgba(255, 255, 255, 0.10);
+  --panel-shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
+
+  --text-main: var(--text-color);
+  --text-soft: rgba(248, 248, 251, 0.78);
+
+  --input-bg: rgba(0, 0, 0, 0.18);
+  --card-inner-bg: rgba(255, 255, 255, 0.04);
+  --card-inner-strong: rgba(255, 255, 255, 0.06);
+}
+
+[data-theme="basic"] {
+  --bg-card: rgba(255, 255, 255, 0.04);
+  --panel-border: rgba(255, 255, 255, 0.10);
+  --panel-shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
+
+  --text-main: var(--text-color);
+  --text-soft: rgba(255, 255, 255, 0.78);
+
+  --input-bg: rgba(0, 0, 0, 0.14);
+  --card-inner-bg: rgba(255, 255, 255, 0.04);
+  --card-inner-strong: rgba(255, 255, 255, 0.06);
 }
 
 body {
