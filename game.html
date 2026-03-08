@@ -1,29 +1,41 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="basic">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>INPINITY – Game Dashboard (V6)</title>
 
   <link rel="icon" type="image/png" href="favicon.webp" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto+Mono:wght@400;700&display=swap"
+    rel="stylesheet"
+  />
 
-  <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/layout.css">
-  <link rel="stylesheet" href="css/animations.css">
-  <link rel="stylesheet" href="css/dark.css">
-  <link rel="stylesheet" href="css/light.css">
-  <link rel="stylesheet" href="css/color.css">
-  <link rel="stylesheet" href="css/responsive.css">
-  <link rel="stylesheet" href="css/game.css">
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/dark.css" />
+  <link rel="stylesheet" href="css/light.css" />
+  <link rel="stylesheet" href="css/color.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+  <link rel="stylesheet" href="css/game.css" />
 
-  <meta name="description" content="Manage your Pyramid Blocks, farm resources, protect your territory, launch pirate attacks, and trade inside the Inpinity game dashboard." />
-  <meta name="keywords" content="Inpinity, Game, Pyramid, NFT, Base, INPI, Pitrone, Resources, Farming, Pirate Attack, V6" />
+  <meta
+    name="description"
+    content="Manage your Pyramid Blocks, farm resources, protect your territory, launch pirate attacks, and trade inside the Inpinity game dashboard."
+  />
+  <meta
+    name="keywords"
+    content="Inpinity, Game, Pyramid, NFT, Base, INPI, Pitrone, Resources, Farming, Pirate Attack, V6"
+  />
   <meta name="author" content="Inpinity Team" />
   <meta property="og:title" content="Inpinity – Game Dashboard V6" />
-  <meta property="og:description" content="Manage blocks, farming, attacks, protection, and exchange in the Inpinity ecosystem. Now with V6 contracts." />
+  <meta
+    property="og:description"
+    content="Manage blocks, farming, attacks, protection, and exchange in the Inpinity ecosystem. Now with V6 contracts."
+  />
   <meta property="og:image" content="logo_background.jpg" />
   <meta property="og:url" content="https://inpinity.online/game.html" />
   <meta name="twitter:card" content="summary_large_image" />
@@ -33,309 +45,807 @@
   <meta name="robots" content="index,follow" />
 
   <script defer src="main.js"></script>
+
   <style>
-    /* Additional V6-specific styles */
-    .boost-badge {
-      background: linear-gradient(135deg, #ffd700, #ff8c00);
-      color: #1a1a1a;
-      padding: 0.2rem 0.6rem;
-      border-radius: 1rem;
-      font-size: 0.75rem;
-      font-weight: 600;
-      display: inline-block;
-      margin-left: 0.5rem;
+    :root {
+      --gold: #d4af37;
+      --gold-soft: rgba(212, 175, 55, 0.12);
+      --blue-v6: #4a90e2;
+      --green-ok: #27ae60;
+      --orange-warn: #e67e22;
+      --red-danger: #dc3545;
+      --panel-deep: rgba(8, 14, 22, 0.75);
+      --panel-soft: rgba(255, 255, 255, 0.04);
+      --line-soft: rgba(255, 255, 255, 0.08);
     }
-    
+
+    body {
+      background:
+        radial-gradient(circle at top center, rgba(74, 144, 226, 0.08), transparent 35%),
+        radial-gradient(circle at bottom right, rgba(212, 175, 55, 0.08), transparent 25%);
+    }
+
+    .game-main {
+      width: min(1440px, calc(100% - 2rem));
+      margin: 0 auto;
+      padding: 1rem 0 3rem;
+    }
+
+    .game-hero {
+      margin: 1rem 0 1.5rem;
+      border: 1px solid var(--line-soft);
+      border-radius: 1.75rem;
+      padding: 1.6rem;
+      background:
+        linear-gradient(135deg, rgba(20, 15, 31, 0.92), rgba(12, 24, 37, 0.9)),
+        rgba(0, 0, 0, 0.25);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .game-hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -10% -35% auto;
+      width: 420px;
+      height: 420px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(74, 144, 226, 0.14), transparent 65%);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      margin: 0 0 0.7rem;
+      font-size: 0.86rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--gold);
+      font-weight: 700;
+    }
+
+    .hero-copy h1 {
+      margin: 0 0 0.8rem;
+      line-height: 1.08;
+      font-size: clamp(1.8rem, 3vw, 3rem);
+    }
+
+    .hero-lead {
+      margin: 0;
+      max-width: 980px;
+      color: var(--text-dim, #a8b2bd);
+      line-height: 1.65;
+    }
+
     .v6-badge {
-      background: #4a90e2;
-      color: white;
-      padding: 0.2rem 0.6rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #4a90e2, #2563eb);
+      color: #fff;
+      padding: 0.22rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+    }
+
+    .wallet-bar,
+    .panel,
+    .block-actions-container,
+    .selected-block-info,
+    .swap-card,
+    .economy-stat-card,
+    .action-card {
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .card-shell,
+    .panel {
+      background: linear-gradient(180deg, var(--panel-soft), rgba(0, 0, 0, 0.18));
+      border: 1px solid var(--line-soft);
+      border-radius: 1.5rem;
+      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.18);
+    }
+
+    .wallet-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .wallet-left,
+    .wallet-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .wallet-status-line {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      flex-wrap: wrap;
+    }
+
+    .wallet-address {
+      font-family: "Roboto Mono", monospace;
+      opacity: 0.9;
+    }
+
+    .balances {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .balance-item {
+      min-width: 112px;
+      padding: 0.7rem 0.9rem;
       border-radius: 1rem;
-      font-size: 0.7rem;
-      font-weight: 600;
-      margin-left: 0.5rem;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--line-soft);
     }
-    
-    .attack-preview-detail {
-      font-size: 0.85rem;
-      color: var(--text-dim);
-      margin-top: 0.5rem;
-      padding: 0.5rem;
-      background: rgba(0,0,0,0.2);
-      border-radius: 0.5rem;
+
+    .balance-label {
+      display: block;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-dim, #98a9b9);
+      margin-bottom: 0.18rem;
     }
-    
-    .boost-btn {
-      background: linear-gradient(135deg, #ffd70020, #ff8c0020);
-      border: 1px solid #ff8c00;
-      color: #ff8c00;
+
+    .balance-value {
+      font-weight: 700;
+      color: #f0f4fa;
     }
-    
-    .boost-btn:hover {
-      background: linear-gradient(135deg, #ffd70040, #ff8c0040);
-    }
-    
-    .cancel-attack-btn {
-      background: #dc354520;
-      border: 1px solid #dc3545;
-      color: #ff6b6b;
-      font-size: 0.8rem;
-      padding: 0.2rem 0.5rem;
-      margin-left: 0.5rem;
-      border-radius: 0.5rem;
-      cursor: pointer;
-    }
-    
-    .cancel-attack-btn:hover {
-      background: #dc354540;
-    }
-    
-    .action-badge {
-      display: inline-block;
-      padding: 0.2rem 0.5rem;
-      border-radius: 0.5rem;
-      font-size: 0.7rem;
-      font-weight: 600;
-      margin-left: 0.5rem;
-    }
-    
-    .badge-v6-farm {
-      background: #4a90e2;
-      color: white;
-    }
-    
-    .attacker-selector {
-      margin: 1rem 0;
-      padding: 0.8rem;
-      background: rgba(74, 144, 226, 0.1);
-      border-radius: 0.8rem;
-      border-left: 3px solid #4a90e2;
-    }
-    
-    .resource-item {
+
+    .wallet-actions {
       display: flex;
-      justify-content: space-between;
-      padding: 0.3rem 0;
-      border-bottom: 1px solid var(--border-dim);
+      gap: 0.6rem;
+      flex-wrap: wrap;
     }
-    
-    .resource-item:last-child {
-      border-bottom: none;
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1.35fr 1fr;
+      gap: 1.35rem;
+      align-items: start;
     }
-    
-    .resource-name {
-      color: var(--text-dim);
+
+    .panel {
+      padding: 1.25rem;
     }
-    
-    .resource-amount {
-      font-weight: 600;
-      color: var(--accent-primary);
+
+    .panel-wide {
+      grid-column: span 2;
     }
-    
-    .attack-item {
+
+    .panel-head {
+      margin-bottom: 1rem;
+    }
+
+    .inner-panel-head {
+      margin-bottom: 0.8rem;
+    }
+
+    .section-title,
+    .subsection-title {
+      margin: 0 0 0.35rem;
+      color: #f0f4fa;
+    }
+
+    .section-subtitle {
+      margin: 0;
+      color: var(--text-dim, #98a9b9);
+      line-height: 1.55;
+    }
+
+    .info-note,
+    .message,
+    #mintMessage,
+    #attackMessage,
+    #exchangeMessage,
+    #approveMessage,
+    #protectMessage,
+    #pirateBoostMessage {
+      font-size: 0.92rem;
+      line-height: 1.55;
+    }
+
+    .info-note {
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid var(--line-soft);
+      border-radius: 1rem;
+      padding: 0.85rem 1rem;
+      color: var(--text-dim, #98a9b9);
+    }
+
+    .blocks-section {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.8rem;
-      background: rgba(0,0,0,0.2);
-      border-radius: 0.8rem;
-      margin-bottom: 0.5rem;
+      flex-direction: column;
+      gap: 1rem;
     }
-    
-    .attack-actions {
-      display: flex;
-      gap: 0.5rem;
-      align-items: center;
+
+    .blocks-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.9rem;
     }
-    
-    .execute-btn {
-      background: #27ae60;
-      color: white;
-      border: none;
-      padding: 0.4rem 0.8rem;
-      border-radius: 0.5rem;
-      cursor: pointer;
-    }
-    
-    .execute-btn:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
-    
-    .farm-duration {
-      font-size: 0.78rem;
-      color: var(--text-dim);
-      margin-top: 0.3rem;
-    }
-    
+
     .block-card {
       position: relative;
-      padding: 0.8rem;
+      padding: 0.9rem;
       border-radius: 1rem;
-      background: rgba(0,0,0,0.2);
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--line-soft);
       cursor: pointer;
-      transition: all 0.2s;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+      min-height: 122px;
     }
-    
+
     .block-card:hover {
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      box-shadow: 0 10px 18px rgba(0, 0, 0, 0.2);
+      border-color: rgba(212, 175, 55, 0.35);
     }
-    
+
     .block-card.selected {
-      border: 2px solid #4a90e2;
+      border: 2px solid var(--blue-v6);
       background: rgba(74, 144, 226, 0.1);
     }
-    
+
     .block-card.farming {
-      border-left: 4px solid #27ae60;
+      border-left: 4px solid var(--green-ok);
     }
-    
+
     .block-card.protected {
-      border-right: 4px solid #e67e22;
+      border-right: 4px solid var(--orange-warn);
     }
-    
+
     .block-card.attacking {
       border-top: 2px solid #e74c3c;
     }
-    
+
     .block-card.executable {
-      border-top: 2px solid #27ae60;
+      border-top: 2px solid var(--green-ok);
       animation: pulse 2s infinite;
     }
-    
-    @keyframes pulse {
-      0% { opacity: 1; }
-      50% { opacity: 0.7; }
-      100% { opacity: 1; }
+
+    .block-id {
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 0.3rem;
     }
-    
+
+    .farm-duration {
+      font-size: 0.78rem;
+      color: var(--text-dim, #98a9b9);
+      margin-top: 0.35rem;
+    }
+
     .rarity-badge {
-      display: inline-block;
-      padding: 0.2rem 0.5rem;
+      display: inline-flex;
+      align-items: center;
+      padding: 0.2rem 0.52rem;
       border-radius: 0.5rem;
-      font-size: 0.7rem;
-      font-weight: 600;
-      margin-top: 0.3rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      margin-top: 0.42rem;
     }
-    
+
     .rarity-badge.bronze { background: #cd7f32; color: white; }
     .rarity-badge.silver { background: #c0c0c0; color: #1a1a1a; }
     .rarity-badge.gold { background: #ffd700; color: #1a1a1a; }
     .rarity-badge.platinum { background: #e5e4e2; color: #1a1a1a; }
     .rarity-badge.diamond { background: #b9f2ff; color: #1a1a1a; }
     .rarity-badge.hidden-badge { background: #2c3e50; color: white; }
-    
+
     .reveal-block-btn {
-      margin-top: 0.5rem;
+      margin-top: 0.65rem;
       width: 100%;
-      background: #3498db;
+      background: linear-gradient(135deg, #3498db, #2980b9);
       color: white;
       border: none;
-      padding: 0.3rem;
-      border-radius: 0.5rem;
+      padding: 0.5rem 0.7rem;
+      border-radius: 0.75rem;
       cursor: pointer;
+      font-weight: 600;
     }
-    
+
     .reveal-block-btn:hover {
-      background: #2980b9;
-    }
-
-    /* Neue Styles für Block Actions unter den NFTs */
-    .blocks-section {
-      display: flex;
-      flex-direction: column;
-      gap: 2rem;
-    }
-
-    .blocks-grid-container {
-      width: 100%;
+      filter: brightness(1.05);
     }
 
     .block-actions-container {
       width: 100%;
-      background: rgba(0,0,0,0.2);
+      background: linear-gradient(180deg, rgba(13, 22, 33, 0.9), rgba(9, 16, 24, 0.88));
       border-radius: 1.5rem;
-      padding: 1.5rem;
-      border: 1px solid var(--border-dim);
-      margin-top: 1rem;
+      padding: 1.25rem;
+      border: 1px solid var(--line-soft);
+      display: none;
     }
 
     .block-actions-container h3 {
-      color: #d4af37;
+      color: var(--gold);
       margin-top: 0;
       margin-bottom: 1rem;
-      font-size: 1.2rem;
+      font-size: 1.15rem;
       display: flex;
       align-items: center;
+      gap: 0.55rem;
+      flex-wrap: wrap;
+    }
+
+    .selected-block-info {
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid var(--line-soft);
+      border-radius: 1rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .selected-block-info p {
+      margin-top: 0;
+    }
+
+    .resources-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
       gap: 0.5rem;
+    }
+
+    .resource-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5rem;
+      padding: 0.5rem 0.6rem;
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 0.7rem;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .resource-name {
+      color: var(--text-dim, #98a9b9);
+    }
+
+    .resource-amount {
+      font-weight: 700;
+      color: var(--gold);
     }
 
     .action-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 1rem;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
     }
 
     .action-card {
-      background: rgba(26, 35, 45, 0.8);
+      background: rgba(26, 35, 45, 0.76);
       border-radius: 1rem;
       padding: 1rem;
       border: 1px solid #2a3f4a;
-      transition: all 0.2s;
+      transition: border-color 0.18s ease, transform 0.18s ease;
     }
 
     .action-card:hover {
-      border-color: #d4af37;
+      border-color: rgba(212, 175, 55, 0.55);
       transform: translateY(-2px);
     }
 
     .action-card h4 {
       color: #98a9b9;
-      margin: 0 0 0.5rem 0;
-      font-size: 0.9rem;
+      margin: 0 0 0.55rem 0;
+      font-size: 0.95rem;
     }
 
     .action-value {
-      font-size: 1.2rem;
-      font-weight: 600;
+      font-size: 1.15rem;
+      font-weight: 700;
       color: #f0f4fa;
+      min-height: 1.5rem;
+    }
+
+    .action-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.22rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      margin-left: 0.4rem;
+    }
+
+    .badge-v6-farm {
+      background: #4a90e2;
+      color: white;
+    }
+
+    .boost-btn {
+      background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 140, 0, 0.15));
+      border: 1px solid #ff8c00;
+      color: #ffb347;
+    }
+
+    .boost-btn:hover {
+      background: linear-gradient(135deg, rgba(255, 215, 0, 0.28), rgba(255, 140, 0, 0.28));
     }
 
     .protection-input-group {
-      display: flex;
-      gap: 0.5rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr auto auto;
+      gap: 0.6rem;
       align-items: center;
       margin: 1rem 0;
     }
 
-    .protection-input-group input {
-      flex: 1;
+    .input-group {
+      display: grid;
+      gap: 0.8rem;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      margin: 1rem 0;
+    }
+
+    .input-group label,
+    .attack-resource-group,
+    .select-label {
+      display: block;
+      font-size: 0.92rem;
+      color: var(--text-dim, #98a9b9);
+    }
+
+    input,
+    select {
+      width: 100%;
+      margin-top: 0.35rem;
       background: #0f1a22;
       border: 1px solid #2a3f4a;
       color: white;
-      padding: 0.6rem 1rem;
-      border-radius: 2rem;
+      padding: 0.72rem 0.95rem;
+      border-radius: 0.9rem;
       outline: none;
+      box-sizing: border-box;
     }
 
-    .protection-input-group input:focus {
-      border-color: #d4af37;
+    input:focus,
+    select:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.12);
+    }
+
+    .payment-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      margin: 1rem 0 1.2rem;
+    }
+
+    .payment-options label {
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid var(--line-soft);
+      border-radius: 999px;
+      padding: 0.65rem 0.95rem;
+      cursor: pointer;
+    }
+
+    .action-button,
+    .btn,
+    .random-btn,
+    .btn-small,
+    .execute-btn,
+    .cancel-attack-btn {
+      border: none;
+      border-radius: 0.9rem;
+      cursor: pointer;
+      font-weight: 700;
+      transition: transform 0.16s ease, opacity 0.16s ease, filter 0.16s ease;
+    }
+
+    .action-button,
+    .btn {
+      background: linear-gradient(135deg, #d4af37, #b88916);
+      color: #120e08;
+      padding: 0.8rem 1rem;
+    }
+
+    .action-button:hover,
+    .btn:hover,
+    .random-btn:hover,
+    .btn-small:hover,
+    .execute-btn:hover,
+    .cancel-attack-btn:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.04);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: #f0f4fa;
+      border: 1px solid var(--line-soft);
     }
 
     .btn-small {
-      padding: 0.5rem 1rem;
+      padding: 0.62rem 0.9rem;
       font-size: 0.9rem;
     }
 
     .btn-warning {
-      background: #e67e22;
-      border-color: #d35400;
+      background: linear-gradient(135deg, #e67e22, #c85f08);
+      color: white;
     }
 
-    .btn-warning:hover {
-      background: #d35400;
+    .random-btn {
+      background: rgba(74, 144, 226, 0.16);
+      color: #b9d7ff;
+      padding: 0.8rem 1rem;
+      border: 1px solid rgba(74, 144, 226, 0.28);
+    }
+
+    .pirate-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+    }
+
+    .attacker-selector {
+      margin: 0.9rem 0;
+      padding: 0.95rem;
+      background: rgba(74, 144, 226, 0.08);
+      border-radius: 1rem;
+      border-left: 3px solid var(--blue-v6);
+    }
+
+    .attack-preview-detail {
+      font-size: 0.88rem;
+      color: var(--text-dim, #98a9b9);
+      margin-top: 0.75rem;
+      padding: 0.8rem;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 0.85rem;
+      border: 1px solid var(--line-soft);
+    }
+
+    .attacks-list {
+      display: grid;
+      gap: 0.7rem;
+    }
+
+    .attack-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 0.9rem;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 1rem;
+      border: 1px solid var(--line-soft);
+    }
+
+    .attack-actions {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .execute-btn {
+      background: #27ae60;
+      color: white;
+      padding: 0.5rem 0.82rem;
+    }
+
+    .execute-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .cancel-attack-btn {
+      background: rgba(220, 53, 69, 0.14);
+      border: 1px solid rgba(220, 53, 69, 0.45);
+      color: #ff8a98;
+      font-size: 0.8rem;
+      padding: 0.45rem 0.62rem;
+    }
+
+    .economy-top {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.85rem;
+      margin-bottom: 1rem;
+    }
+
+    .economy-stat-card {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 1rem;
+      border-radius: 1rem;
+      border: 1px solid var(--line-soft);
+      background: rgba(255, 255, 255, 0.035);
+    }
+
+    .economy-icon {
+      width: 2.7rem;
+      height: 2.7rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      background: var(--gold-soft);
+      font-size: 1.2rem;
+    }
+
+    .exchange-info {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 0.8rem;
+      margin: 1rem 0;
+      padding: 0.85rem 1rem;
+      border-radius: 1rem;
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid var(--line-soft);
+    }
+
+    .swap-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .swap-card {
+      padding: 1rem;
+      border-radius: 1rem;
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid var(--line-soft);
+    }
+
+    .swap-card h3 {
+      margin-top: 0;
+    }
+
+    .user-resources {
+      display: grid;
+      gap: 0.55rem;
+      margin-top: 1rem;
+    }
+
+    .empty-state {
+      margin: 0;
+      padding: 1rem;
+      text-align: center;
+      border-radius: 1rem;
+      color: var(--text-dim, #98a9b9);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px dashed rgba(255, 255, 255, 0.1);
+    }
+
+    .content-details {
+      margin-bottom: 0.8rem;
+      border: 1px solid var(--line-soft);
+      border-radius: 1rem;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .content-details summary {
+      padding: 1rem;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .details-body {
+      padding: 0 1rem 1rem;
+      color: var(--text-dim, #98a9b9);
+      line-height: 1.65;
+    }
+
+    .debug-log {
+      background: #0b1118;
+      color: #b9f2ff;
+      font-family: "Roboto Mono", monospace;
+      font-size: 0.83rem;
+      line-height: 1.45;
+      padding: 1rem;
+      border-radius: 1rem;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      min-height: 120px;
+      border: 1px solid rgba(185, 242, 255, 0.12);
+    }
+
+    .site-footer {
+      width: min(1440px, calc(100% - 2rem));
+      margin: 0 auto 2rem;
+      padding-top: 1rem;
+      text-align: center;
+      color: var(--text-dim, #98a9b9);
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin: 0.5rem 0;
+    }
+
+    .footer-links a {
+      color: var(--gold);
+      text-decoration: none;
+    }
+
+    .footer-version {
+      font-size: 0.85rem;
+      opacity: 0.8;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.7; }
+      100% { opacity: 1; }
+    }
+
+    @media (max-width: 1100px) {
+      .dashboard-grid,
+      .pirate-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .panel-wide {
+        grid-column: span 1;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .game-main,
+      .site-footer {
+        width: min(100% - 1rem, 1440px);
+      }
+
+      .wallet-bar {
+        padding: 1rem;
+      }
+
+      .protection-input-group {
+        grid-template-columns: 1fr;
+      }
+
+      .attack-item {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .balances {
+        width: 100%;
+      }
+
+      .balance-item {
+        flex: 1 1 120px;
+      }
     }
   </style>
 </head>
@@ -368,12 +878,15 @@
   <main class="game-main">
     <section class="game-hero">
       <div class="hero-copy">
-        <p class="eyebrow">Inpinity Game Dashboard <span class="v6-badge">V6</span></p>
-        <h1>Manage your blocks, resources, protection, and attacks in one place.</h1>
+        <p class="eyebrow">
+          Inpinity Game Dashboard
+          <span class="v6-badge">V6</span>
+        </p>
+        <h1>Manage your blocks, resources, protection, attacks and exchange in one place.</h1>
         <p class="hero-lead">
-          This dashboard is the control center for your Pyramid activity. Connect your wallet,
-          reveal and manage blocks, start farming, protect territory, launch pirate attacks,
-          and exchange value inside the ecosystem. <strong>Now running on V6 contracts</strong> with enhanced features.
+          This dashboard is the central control room for your Pyramid activity. Connect your wallet,
+          reveal and manage blocks, start farming, protect territory, launch pirate attacks, and
+          exchange value inside the ecosystem with the active V6 contract flow.
         </p>
       </div>
     </section>
@@ -382,7 +895,7 @@
       <div class="wallet-left">
         <div class="wallet-status-line">
           <span class="wallet-status" id="walletStatus">🔴 Not connected</span>
-          <span class="version-indicator" style="font-size:0.7rem; background:#4a90e2; padding:0.2rem 0.5rem; border-radius:0.5rem; margin-left:0.5rem;">V6 ACTIVE</span>
+          <span class="v6-badge">V6 ACTIVE</span>
         </div>
         <div class="wallet-address" id="walletAddress">—</div>
       </div>
@@ -404,23 +917,21 @@
         </div>
 
         <div class="wallet-actions">
-          <button class="btn" id="connectWallet">Connect Wallet</button>
+          <button class="btn" id="connectWallet" type="button">Connect Wallet</button>
           <button class="btn btn-secondary" id="disconnectWallet" type="button">Disconnect</button>
         </div>
       </div>
     </section>
 
     <section class="dashboard-grid">
-      <!-- LEFT COLUMN: Pyramid Blocks + Block Actions -->
       <section class="panel panel-wide left-column">
         <div class="blocks-section">
-          <!-- Pyramid Blocks Grid -->
           <div class="blocks-grid-container">
             <div class="panel-head">
               <h2 class="section-title">Your Pyramid Blocks</h2>
               <p class="section-subtitle">
                 View your owned blocks, reveal hidden ones, track rarity, and select one for actions below.
-                <span class="badge-v6-farm action-badge">V6 Farming</span>
+                <span class="action-badge badge-v6-farm">V6 Farming</span>
               </p>
             </div>
 
@@ -429,66 +940,74 @@
             </div>
           </div>
 
-          <!-- Block Actions Container (direkt unter den Blöcken) -->
-          <div class="block-actions-container" id="blockActionsContainer" style="display: none;">
+          <div class="block-actions-container" id="blockActions" style="display:none;">
             <h3>
               <span>⚙️ Block Actions</span>
               <span class="v6-badge">Selected Block</span>
             </h3>
-            
-            <!-- Selected Block Info -->
-            <div id="selectedBlockInfo" class="selected-block-info">
+
+            <div id="selectedBlockInfo" class="selected-block-info" style="display:none;">
               <p id="selectedBlockText">None selected</p>
+              <div id="selectedActionToken" class="sr-only">Block #—</div>
               <div id="blockResources" class="resources-grid"></div>
-              <div id="selectedBlockMeta" class="info-note" style="display: none; margin-top: 0.8rem;"></div>
+              <div id="selectedBlockMeta" class="info-note" style="display:none; margin-top:0.8rem;"></div>
             </div>
 
-            <!-- Action Grid -->
             <div class="action-grid">
-              <!-- Reveal Card -->
               <div class="action-card">
                 <h4>🔓 Reveal</h4>
                 <div class="action-value" id="revealStatus">Hidden</div>
-                <button class="btn btn-small" id="revealBtn" style="width:100%; margin-top:0.5rem;" disabled>Reveal</button>
+                <button class="btn btn-small" id="revealBtn" type="button" style="width:100%; margin-top:0.5rem;" disabled>
+                  Reveal
+                </button>
               </div>
 
-              <!-- Farming Card -->
               <div class="action-card">
                 <h4>🌾 Farming</h4>
                 <div class="action-value" id="farmingStatus">Inactive</div>
                 <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
-                  <button class="btn btn-small" id="farmingStartBtn" style="flex:1;" disabled>Start</button>
-                  <button class="btn btn-small" id="farmingStopBtn" style="flex:1;" disabled>Stop</button>
+                  <button class="btn btn-small" id="farmingStartBtn" type="button" style="flex:1;" disabled>Start</button>
+                  <button class="btn btn-small btn-secondary" id="farmingStopBtn" type="button" style="flex:1;" disabled>Stop</button>
                 </div>
               </div>
 
-              <!-- Claim Card -->
               <div class="action-card">
                 <h4>💰 Claim</h4>
                 <div class="action-value" id="claimStatus">—</div>
-                <button class="btn btn-small" id="claimBtn" style="width:100%; margin-top:0.5rem;" disabled>Claim</button>
+                <button class="btn btn-small" id="claimBtn" type="button" style="width:100%; margin-top:0.5rem;" disabled>
+                  Claim
+                </button>
               </div>
 
-              <!-- Boost Card -->
               <div class="action-card">
                 <h4>⚡ Boost</h4>
                 <div class="action-value" id="boostStatus">Inactive</div>
                 <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
-                  <input type="number" id="boostDays" min="1" max="30" value="7" style="width:70px; background:#0f1a22; border:1px solid #2a3f4a; color:white; padding:0.3rem; border-radius:0.5rem;">
-                  <button class="btn btn-small boost-btn" id="buyBoostBtn" style="flex:1;" disabled>Buy</button>
+                  <input
+                    type="number"
+                    id="boostDays"
+                    min="1"
+                    max="30"
+                    value="7"
+                    aria-label="Boost days"
+                    style="width:78px; background:#0f1a22; border:1px solid #2a3f4a; color:white; padding:0.45rem; border-radius:0.7rem;"
+                  />
+                  <button class="btn btn-small boost-btn" id="buyBoostBtn" type="button" style="flex:1;" disabled>
+                    Buy
+                  </button>
                 </div>
+                <button id="confirmBoostBtn" type="button" style="display:none;">Confirm</button>
               </div>
             </div>
 
-            <!-- Protection Section -->
-            <div style="margin-top:1.5rem; border-top:1px solid #2a3f4a; padding-top:1.5rem;">
+            <div style="margin-top:1rem; border-top:1px solid #2a3f4a; padding-top:1.2rem;">
               <h4 style="color:#d4af37; margin-bottom:1rem;">🛡️ Mercenary Protection</h4>
-              
+
               <div class="protection-input-group">
-                <input type="number" id="protectTokenId" readonly placeholder="Block ID">
-                <input type="number" id="protectLevel" min="0" max="50" value="10" placeholder="Level %">
-                <button class="btn btn-small" id="protectBtn">Hire</button>
-                <button class="btn btn-small btn-warning" id="extendProtectionBtn">Extend</button>
+                <input type="number" id="protectTokenId" readonly placeholder="Block ID" />
+                <input type="number" id="protectLevel" min="0" max="50" value="10" placeholder="Level %" />
+                <button class="btn btn-small" id="protectBtn" type="button">Hire</button>
+                <button class="btn btn-small btn-warning" id="extendProtectionBtn" type="button">Extend</button>
               </div>
 
               <div id="protectionStatus" style="margin-top:0.5rem; font-size:0.9rem; color:#98a9b9; display:none;">
@@ -496,19 +1015,16 @@
               </div>
             </div>
 
-            <!-- Action Messages -->
             <div id="actionMessage" class="message" style="margin-top:1rem;"></div>
             <div id="protectMessage" class="message" style="margin-top:0.5rem;"></div>
           </div>
 
-          <!-- No Block Selected Message -->
           <div id="noBlockSelected" class="empty-state" style="margin-top:1rem; display:block;">
-            Select a block from the pyramid above to see actions.
+            Select a block from the pyramid above to see its V6 actions.
           </div>
         </div>
       </section>
 
-      <!-- RIGHT COLUMN: Mint, Attack, Exchange (bleibt gleich) -->
       <section class="panel">
         <div class="panel-head">
           <h2 class="section-title">Mint a New Block</h2>
@@ -518,26 +1034,26 @@
         </div>
 
         <div class="info-note">
-          <strong>Mint note:</strong><br>
+          <strong>Mint note:</strong><br />
           Blocks paid with <strong>INPI</strong> are treated as burn-based payments.
-          Blocks paid with <strong>ETH</strong> are also treated as burn-based in practice, because that ETH is not accessible again.
-          This keeps minting aligned with long-term ecosystem reduction mechanics.
+          Blocks paid with <strong>ETH</strong> are also treated as burn-based in practice,
+          because that ETH is not accessible again.
         </div>
 
         <div class="input-group">
-          <label>Row <input type="number" id="row" min="0" max="99" value="0"></label>
-          <label>Col <input type="number" id="col" min="0" max="198" value="0"></label>
+          <label>Row <input type="number" id="row" min="0" max="99" value="0" /></label>
+          <label>Col <input type="number" id="col" min="0" max="198" value="0" /></label>
           <button class="random-btn" id="randomBlockBtn" type="button">🎲 Random free</button>
         </div>
 
         <div class="payment-options">
-          <label><input type="radio" name="payment" value="eth" checked> 0.003 ETH</label>
-          <label><input type="radio" name="payment" value="inpi"> 30 INPI</label>
-          <label><input type="radio" name="payment" value="mixed"> 0.0015 ETH + 15 INPI</label>
+          <label><input type="radio" name="payment" value="eth" checked /> 0.003 ETH</label>
+          <label><input type="radio" name="payment" value="inpi" /> 30 INPI</label>
+          <label><input type="radio" name="payment" value="mixed" /> 0.0015 ETH + 15 INPI</label>
         </div>
 
         <button class="action-button" id="mintBtn" type="button">Mint Block</button>
-        <div id="mintMessage"></div>
+        <div id="mintMessage" style="margin-top:1rem;"></div>
       </section>
 
       <section class="panel panel-wide pirate-panel">
@@ -545,22 +1061,20 @@
           <h2 class="section-title">Pirate Attack <span class="v6-badge">V6</span></h2>
           <p class="section-subtitle">
             Choose a target block and resource lane to prepare an attack. Your active attacks are shown directly below.
-            <span class="action-badge" style="background:#ff8c00;">Steal Amount Preview</span>
           </p>
         </div>
 
         <div class="pirate-layout">
           <div class="pirate-left">
             <div class="input-group">
-              <label>Target Row <input type="number" id="attackRow" min="0" max="99" placeholder="e.g. 5"></label>
-              <label>Target Col <input type="number" id="attackCol" min="0" max="198" placeholder="e.g. 3"></label>
+              <label>Target Row <input type="number" id="attackRow" min="0" max="99" placeholder="e.g. 5" /></label>
+              <label>Target Col <input type="number" id="attackCol" min="0" max="198" placeholder="e.g. 3" /></label>
             </div>
 
-            <!-- Attacker info (will be shown in preview) -->
             <div class="attacker-selector" id="attackerSelector">
-              <h4 style="margin:0 0 0.5rem; font-size:0.9rem;">Attack from block:</h4>
-              <p class="info-note" style="font-size:0.75rem; margin:0.5rem 0 0;">
-                Selected block from above is used as attacker. If none selected, first owned block is used.
+              <h4 style="margin:0 0 0.5rem; font-size:0.95rem;">Attack source</h4>
+              <p class="info-note" style="font-size:0.8rem; margin:0;">
+                The selected block above is used as attacker. If none is selected, your first owned block is used.
               </p>
             </div>
 
@@ -569,31 +1083,29 @@
               <select id="attackResourceSelect"></select>
             </div>
 
-            <!-- V6: Attack preview details (shows steal amount) -->
             <div id="attackPreviewDetails" class="attack-preview-detail" style="display:none;"></div>
 
             <div class="info-note" id="attackRulesInfo">
-              <strong>Attack check</strong><br>
+              <strong>Attack check</strong><br />
               Enter coordinates to analyze the target and see whether an attack path makes sense.
             </div>
 
-            <div class="action-group">
+            <div style="margin-top:1rem;">
               <button class="btn" id="attackBtn" type="button">⚔️ Start Attack (V6)</button>
             </div>
-            
-            <div id="attackMessage"></div>
-            
-            <!-- V6: Pirate Boost -->
-            <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid var(--border-dim);">
+
+            <div id="attackMessage" style="margin-top:1rem;"></div>
+
+            <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid var(--line-soft);">
               <details>
-                <summary style="cursor:pointer; color:#ff8c00;">⚡ Pirate Boost Options</summary>
+                <summary style="cursor:pointer; color:#ffb347;">⚡ Pirate Boost Options</summary>
                 <div style="margin-top:0.8rem;">
-                  <p class="info-note">Boost increases your attack effectiveness and reduces travel time.</p>
+                  <p class="info-note">Boost increases attack effectiveness and can improve timing.</p>
                   <div class="input-group" style="grid-template-columns:1fr auto;">
-                    <input type="number" id="pirateBoostDays" min="1" max="30" value="7" placeholder="Days">
+                    <input type="number" id="pirateBoostDays" min="1" max="30" value="7" placeholder="Days" />
                     <button class="btn btn-small boost-btn" id="buyPirateBoostBtn" type="button">Buy Pirate Boost</button>
                   </div>
-                  <div id="pirateBoostMessage" style="font-size:0.8rem; margin-top:0.5rem;"></div>
+                  <div id="pirateBoostMessage" style="font-size:0.84rem; margin-top:0.5rem;"></div>
                 </div>
               </details>
             </div>
@@ -603,7 +1115,7 @@
             <div class="panel-head inner-panel-head">
               <h3 class="subsection-title">Your Attacks</h3>
               <p class="section-subtitle">
-                Review attacks you have started and execute them when they become ready.
+                Review active attacks and execute them when they become ready.
               </p>
             </div>
 
@@ -626,7 +1138,7 @@
           <div class="economy-stat-card">
             <div class="economy-icon">🪙</div>
             <div>
-              <span class="resource-name">INPI</span>
+              <span class="resource-name">INPI</span><br />
               <span class="resource-amount" id="userInpi">0</span>
             </div>
           </div>
@@ -634,7 +1146,7 @@
           <div class="economy-stat-card">
             <div class="economy-icon">🍋</div>
             <div>
-              <span class="resource-name">Pitrone</span>
+              <span class="resource-name">Pitrone</span><br />
               <span class="resource-amount" id="userPitrone">0</span>
             </div>
           </div>
@@ -642,7 +1154,7 @@
           <div class="economy-stat-card">
             <div class="economy-icon">🌾</div>
             <div>
-              <span class="resource-name">Active Farms</span>
+              <span class="resource-name">Active Farms</span><br />
               <span class="resource-amount" id="activeFarms">0</span>
             </div>
           </div>
@@ -657,7 +1169,7 @@
           <div class="swap-card">
             <h3>INPI → PIT</h3>
             <div class="input-group">
-              <label>INPI amount <input type="number" id="inpiAmount" min="0" step="0.0001" value="10"></label>
+              <label>INPI amount <input type="number" id="inpiAmount" min="0" step="0.0001" value="10" /></label>
             </div>
             <button class="btn btn-small" id="exchangeInpiBtn" type="button">Swap to PIT</button>
           </div>
@@ -665,7 +1177,7 @@
           <div class="swap-card">
             <h3>PIT → INPI</h3>
             <div class="input-group">
-              <label>PIT amount <input type="number" id="pitAmount" min="0" step="0.0001" value="1000"></label>
+              <label>PIT amount <input type="number" id="pitAmount" min="0" step="0.0001" value="1000" /></label>
             </div>
             <button class="btn btn-small" id="exchangePitBtn" type="button">Swap to INPI</button>
           </div>
@@ -673,14 +1185,13 @@
 
         <div id="exchangeMessage"></div>
 
-        <!-- Resource approval for advanced operations -->
         <div style="margin:1rem 0 0.5rem;">
           <details>
-            <summary style="cursor:pointer; color:var(--accent-primary);">🔧 Advanced: Resource Approvals</summary>
+            <summary style="cursor:pointer; color:var(--gold);">🔧 Advanced: Resource Approvals</summary>
             <div style="margin-top:0.8rem; padding:0.8rem; background:rgba(0,0,0,0.2); border-radius:0.8rem;">
               <p class="info-note">Approve contracts to manage your resource tokens.</p>
               <button class="btn btn-small" id="approveResourcesBtn" type="button">Approve Farming for Resources</button>
-              <div id="approveMessage" style="font-size:0.8rem; margin-top:0.5rem;"></div>
+              <div id="approveMessage" style="font-size:0.84rem; margin-top:0.5rem;"></div>
             </div>
           </details>
         </div>
@@ -689,32 +1200,30 @@
           <p class="empty-state">Connect wallet to see your resource tokens.</p>
         </div>
 
-        <div class="info-note">
-          <strong>Special resources:</strong><br>
-          Copper and Obsidian are not produced by regular blocks. They are intended for special integration paths and later ecosystem expansion.
+        <div class="info-note" style="margin-top:1rem;">
+          <strong>Special resources:</strong><br />
+          Copper and Obsidian are not produced by regular blocks. They are intended for special integration paths
+          and later ecosystem expansion.
         </div>
       </section>
     </section>
 
-    <section class="panel faq-panel">
+    <section class="panel faq-panel" style="margin-top:1.35rem;">
       <div class="panel-head">
         <h2 class="section-title">How To / FAQ <span class="v6-badge">V6 Updates</span></h2>
         <p class="section-subtitle">
-          A quick guide to how the main gameplay loops work with V6 contracts.
+          A quick guide to the main gameplay loops inside the V6 dashboard.
         </p>
       </div>
 
       <details class="content-details">
         <summary>What's new in V6?</summary>
         <div class="details-body">
-          <p>
-            <strong>V6 brings several improvements:</strong>
-          </p>
           <ul>
-            <li>Enhanced attack preview with exact <strong>steal amount</strong></li>
-            <li>Pirate and Farming boosts with clear expiry</li>
-            <li>Improved subgraph performance with farmV6S/attackV6S</li>
-            <li>More accurate resource claiming previews</li>
+            <li>Enhanced attack preview with exact steal amount visibility</li>
+            <li>Pirate and farming boosts with clearer state handling</li>
+            <li>Better claim preview flow</li>
+            <li>Cleaner V6-only frontend structure without legacy V4/V5 mixing</li>
           </ul>
         </div>
       </details>
@@ -740,39 +1249,37 @@
       </details>
 
       <details class="content-details">
-        <summary>How do V6 attacks work differently?</summary>
+        <summary>How do attacks work?</summary>
         <div class="details-body">
           <p>
-            V6 attacks now show you the exact <strong>steal amount</strong> before you commit.
-            You also have better control over which block attacks from, and can preview
-            all resource lanes to find the most valuable target.
+            Enter target coordinates, preview the route and stealability, then start the attack.
+            Once the timer finishes, you can execute the attack from your active attacks list.
           </p>
         </div>
       </details>
 
       <details class="content-details">
-        <summary>What are boosts and how do I use them?</summary>
+        <summary>What are boosts?</summary>
         <div class="details-body">
           <p>
-            <strong>Farming Boost:</strong> Increases resource production by 2x for a selected duration.<br>
-            <strong>Pirate Boost:</strong> Enhances attack effectiveness and reduces travel time.<br>
-            Look for the ⚡ buttons in each section to activate boosts.
+            <strong>Farming Boost</strong> increases production efficiency for a selected time.<br />
+            <strong>Pirate Boost</strong> improves offensive performance for pirate actions.
           </p>
         </div>
       </details>
 
       <details class="content-details">
-        <summary>What is Pitrone Exchange used for?</summary>
+        <summary>What is the exchange for?</summary>
         <div class="details-body">
           <p>
-            The exchange area allows you to monitor the current INPI ↔ PIT relation and swap between both sides
-            according to the available pool state and configured logic.
+            The exchange area lets you view the current INPI ↔ PIT relation and swap between both
+            sides depending on pool state and contract availability.
           </p>
         </div>
       </details>
     </section>
 
-    <section class="panel debug-panel">
+    <section class="panel debug-panel" style="margin-top:1.35rem;">
       <details>
         <summary>Debug Log</summary>
         <div id="debugLog" class="debug-log">[Debug] Console output will appear here.</div>
@@ -790,13 +1297,6 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-  <!-- V6 Modules -->
-  <script type="module" src="./js/config.js"></script>
-  <script type="module" src="./js/abis.js"></script>
-  <script type="module" src="./js/state.js"></script>
-  <script type="module" src="./js/utils.js"></script>
-  <script type="module" src="./js/contracts.js"></script>
-  <script type="module" src="./js/subgraph.js"></script>
   <script type="module" src="./js/game.js"></script>
 </body>
 </html>
