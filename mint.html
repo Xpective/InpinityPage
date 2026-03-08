@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="basic">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,7 +10,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
 
-  <!-- ✅ Use same CSS stack as index -->
   <link rel="stylesheet" href="css/base.css" />
   <link rel="stylesheet" href="css/layout.css" />
   <link rel="stylesheet" href="css/animations.css" />
@@ -20,78 +19,154 @@
   <link rel="stylesheet" href="css/color.css" />
   <link rel="stylesheet" href="css/adapted_about_us.css" />
   <link rel="stylesheet" href="css/adapted_advertisements.css" />
-  <link rel="stylesheet" href="css/adapted_combined.css"/>
+  <link rel="stylesheet" href="css/adapted_combined.css" />
   <link rel="stylesheet" href="css/adapted_comunity_guidelines.css" />
   <link rel="stylesheet" href="css/adapted_course_feedback.css" />
-  <link rel="stylesheet" href="css/adapted_mft_marketplace.css"/>
-  <link rel="stylesheet" href="css/adapted_profile.css"/>
-  <link rel="stylesheet" href="css/combined_latest.css"/>
+  <link rel="stylesheet" href="css/adapted_mft_marketplace.css" />
+  <link rel="stylesheet" href="css/adapted_profile.css" />
+  <link rel="stylesheet" href="css/combined_latest.css" />
   <link rel="stylesheet" href="css/gamification.css" />
-  <link rel="stylesheet" href="css/referral.css"/>
+  <link rel="stylesheet" href="css/referral.css" />
+
+  <meta name="description" content="Mint Pyramid Blocks on Base, reveal Pi and Phi digits, and prepare your block for farming and gameplay in the Inpinity ecosystem." />
+  <meta name="keywords" content="Inpinity, Mint, Pyramid Block, NFT, Base, INPI, Reveal, Pi, Phi" />
+  <meta name="author" content="Inpinity Team" />
+  <meta property="og:title" content="Inpinity – Mint" />
+  <meta property="og:description" content="Mint a Pyramid Block, reveal rarity, and prepare it for the wider Inpinity game ecosystem." />
+  <meta property="og:image" content="logo_background.jpg" />
+  <meta property="og:url" content="https://inpinity.online/mint.html" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="theme-color" content="#140f1f" />
+  <meta name="robots" content="index,follow" />
 
   <script defer src="main.js"></script>
 
   <style>
-    /* ✅ Only small page-specific tweaks, keep index vibe */
     .page-wrap{
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 2rem 1rem 3rem;
+      max-width:1100px;
+      margin:0 auto;
+      padding:2rem 1rem 3rem;
     }
 
-    .partners-section{
+    .site-header{
+      position:relative;
+      z-index:20;
+    }
+
+    .site-nav{
+      display:flex;
+      flex-direction:column;
+      gap:1rem;
+    }
+
+    .nav-list{
+      width:100%;
+    }
+
+    .themeDots{
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:.5rem;
+      margin-top:.25rem;
+    }
+
+    .themeDots .dot{
+      width:20px;
+      height:20px;
+      border:none;
+      border-radius:50%;
+      cursor:pointer;
+      transition:transform .2s ease;
+      padding:0;
+      appearance:none;
+      -webkit-appearance:none;
+    }
+
+    .themeDots .dot:hover{
+      transform:scale(1.15);
+    }
+
+    .themeDots .dot.light{ background:#ffffff; }
+    .themeDots .dot.dark{ background:#111111; }
+    .themeDots .dot.basic{ background:var(--quinary-color); }
+
+    .mint-hero{
+      text-align:center;
+      margin-bottom:1.5rem;
+    }
+
+    .eyebrow{
+      margin:0 0 .75rem;
+      font-size:.95rem;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      opacity:.82;
+    }
+
+    .hero-lead{
+      max-width:900px;
+      margin:0 auto;
+      line-height:1.75;
+    }
+
+    .links-section{
       display:flex;
       justify-content:center;
       flex-wrap:wrap;
-      gap: 1.5rem;
-      margin: 1.6rem auto 0;
-      padding: 1rem;
-      background: rgba(0,0,0,0.3);
-      border-radius: 12px;
-      max-width: 1000px;
+      gap:1rem;
+      margin:1.6rem auto 0;
+      padding:1rem;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:16px;
+      max-width:900px;
     }
-    .partner-item a{
+
+    .link-chip{
       display:inline-block;
-      padding:.5rem 1.5rem;
-      background:#2a2a2a;
-      border:1px solid gold;
-      border-radius:40px;
-      color:gold;
+      padding:.65rem 1.2rem;
+      background:var(--quinary-color);
+      border-radius:999px;
+      color:#fff;
       text-decoration:none;
-      font-weight:bold;
-      transition:all .2s;
+      font-weight:800;
+      transition:transform .15s ease, opacity .2s ease;
     }
-    .partner-item a:hover{
-      background:gold;
-      color:black;
-      transform:scale(1.05);
+
+    .link-chip:hover{
+      transform:translateY(-1px);
+      opacity:.95;
     }
 
     .mint-grid{
       display:grid;
-      grid-template-columns: 1.15fr 0.85fr;
-      gap: 1.5rem;
-      margin-top: 1.6rem;
-    }
-    @media (max-width: 980px){
-      .mint-grid{ grid-template-columns: 1fr; }
+      grid-template-columns:1.15fr .85fr;
+      gap:1.5rem;
+      margin-top:1.6rem;
     }
 
-    /* index-like card */
+    @media (max-width: 980px){
+      .mint-grid{ grid-template-columns:1fr; }
+    }
+
     .card-box{
-      background:#1a1a1a;
-      border:1px solid gold;
-      border-radius:12px;
-      box-shadow: 0 0 20px rgba(255,215,0,0.12);
-      padding: 1.6rem;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:18px;
+      box-shadow:0 10px 24px rgba(0,0,0,.16);
+      padding:1.6rem;
     }
+
     .card-box h2{
-      color: gold;
-      margin: 0 0 1rem;
-      font-size: 1.6rem;
+      color:var(--quinary-color);
+      margin:0 0 1rem;
+      font-size:1.6rem;
     }
+
     .muted{
-      color:#ccc;
+      color:var(--text-color);
+      opacity:.82;
       line-height:1.6;
     }
 
@@ -100,206 +175,311 @@
       flex-wrap:wrap;
       justify-content:space-between;
       align-items:center;
-      gap: 1rem;
-      background:#222;
-      border: 1px solid #444;
-      border-radius: 12px;
-      padding: 1rem 1.2rem;
-      margin-top: 1rem;
+      gap:1rem;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:16px;
+      padding:1rem 1.2rem;
+      margin-top:1rem;
     }
+
     .wallet-left{
       display:flex;
       flex-direction:column;
       gap:.35rem;
     }
-    .wallet-status{ color:#ccc; font-size: .95rem; }
-    .wallet-address{
-      font-family: "Roboto Mono", monospace;
-      background:#111;
-      border:1px solid #333;
-      border-radius: 8px;
-      padding:.25rem .5rem;
-      color:#aaa;
-      word-break: break-all;
-      display:inline-block;
-      max-width: 340px;
+
+    .wallet-status{
+      font-size:.95rem;
+      opacity:.85;
     }
+
+    .wallet-address{
+      font-family:"Roboto Mono", monospace;
+      background:rgba(0,0,0,.18);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:999px;
+      padding:.3rem .7rem;
+      word-break:break-all;
+      display:inline-block;
+      max-width:340px;
+    }
+
     .wallet-balance{
-      font-weight: 800;
-      color: gold;
-      font-size: 1.1rem;
+      font-weight:800;
+      color:var(--quinary-color);
+      font-size:1.1rem;
       text-align:right;
     }
 
     .btn{
-      background: gold;
-      color:black;
+      background:var(--quinary-color);
+      color:#fff;
       border:none;
       padding:.75rem 1.2rem;
-      border-radius: 40px;
-      font-weight: 800;
+      border-radius:999px;
+      font-weight:800;
       cursor:pointer;
-      transition: transform .15s, box-shadow .2s;
+      transition:transform .15s ease, opacity .2s ease;
     }
-    .btn:hover{ transform: scale(1.02); box-shadow: 0 0 15px rgba(255,215,0,0.35); }
-    .btn:disabled{ opacity:.4; cursor:not-allowed; box-shadow:none; transform:none; }
+
+    .btn:hover{
+      transform:translateY(-1px);
+      opacity:.95;
+    }
+
+    .btn:disabled{
+      opacity:.4;
+      cursor:not-allowed;
+      transform:none;
+    }
 
     .seg-title{
-      color: gold;
-      margin: 1.2rem 0 .6rem;
-      font-size: 1.05rem;
-      font-weight: 900;
+      color:var(--quinary-color);
+      margin:1.2rem 0 .6rem;
+      font-size:1.05rem;
+      font-weight:900;
     }
 
     .stats-row{
       display:grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: .8rem;
-      margin-top: .8rem;
+      grid-template-columns:repeat(3,1fr);
+      gap:.8rem;
+      margin-top:.8rem;
     }
+
     @media (max-width: 640px){
-      .stats-row{ grid-template-columns: 1fr; }
+      .stats-row{ grid-template-columns:1fr; }
     }
+
     .stat{
-      background:#222;
-      border:1px solid #333;
-      border-radius: 10px;
-      padding: .9rem;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:14px;
+      padding:.9rem;
       text-align:center;
     }
-    .stat .label{ color:#aaa; font-size:.85rem; }
-    .stat .value{ color:gold; font-size:1.4rem; font-weight:900; margin-top:.25rem; }
+
+    .stat .label{
+      opacity:.72;
+      font-size:.85rem;
+    }
+
+    .stat .value{
+      color:var(--quinary-color);
+      font-size:1.4rem;
+      font-weight:900;
+      margin-top:.25rem;
+    }
 
     .payment-box{
-      background:#222;
-      border:1px solid #333;
-      border-radius: 12px;
-      padding: 1rem;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:16px;
+      padding:1rem;
       margin-top:.9rem;
     }
+
     .pay-row{
       display:flex;
-      gap: .8rem;
+      gap:.8rem;
       align-items:center;
-      padding:.75rem .8rem;
-      border-radius: 12px;
+      padding:.8rem .9rem;
+      border-radius:14px;
       border:1px solid transparent;
       cursor:pointer;
-      background:#1b1b1b;
+      background:rgba(0,0,0,.14);
       margin:.6rem 0;
+      transition:border-color .2s ease, transform .15s ease;
     }
-    .pay-row:hover{ border-color: gold; }
-    .pay-row input{ accent-color: gold; width: 18px; height: 18px; }
-    .pay-row .t{ color:#eee; font-weight:800; }
-    .pay-row .v{ color: gold; font-weight:800; margin-left:auto; }
+
+    .pay-row:hover{
+      border-color:var(--quinary-color);
+      transform:translateY(-1px);
+    }
+
+    .pay-row input{
+      accent-color:var(--quinary-color);
+      width:18px;
+      height:18px;
+    }
+
+    .pay-row .t{
+      font-weight:800;
+    }
+
+    .pay-row .v{
+      color:var(--quinary-color);
+      font-weight:800;
+      margin-left:auto;
+    }
 
     .coord-row{
       display:flex;
       flex-wrap:wrap;
-      gap: .8rem;
+      gap:.8rem;
       align-items:center;
-      margin-top: 1rem;
+      margin-top:1rem;
     }
+
     .coord-row label{
       display:flex;
       align-items:center;
       gap:.4rem;
-      background:#222;
-      border:1px solid #333;
-      border-radius: 999px;
-      padding:.5rem .9rem;
-      color:#ccc;
+      background:rgba(0,0,0,.14);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:999px;
+      padding:.55rem .95rem;
       font-weight:700;
     }
+
     .coord-row input{
-      width: 86px;
-      background: transparent;
+      width:86px;
+      background:transparent;
       border:none;
-      border-bottom: 2px solid gold;
-      color:#fff;
+      border-bottom:2px solid var(--quinary-color);
+      color:inherit;
       outline:none;
       text-align:center;
       font-weight:800;
     }
 
     .random-btn{
-      background: rgba(255,215,0,0.1);
-      border:1px solid gold;
-      color: gold;
-      padding:.6rem 1rem;
-      border-radius: 999px;
+      background:rgba(255,255,255,.04);
+      border:1px solid var(--quinary-color);
+      color:var(--quinary-color);
+      padding:.65rem 1rem;
+      border-radius:999px;
       cursor:pointer;
       font-weight:900;
-      transition: transform .15s, box-shadow .2s;
+      transition:transform .15s ease, opacity .2s ease;
     }
-    .random-btn:hover{ transform: translateY(-1px); box-shadow: 0 0 12px rgba(255,215,0,0.25); }
+
+    .random-btn:hover{
+      transform:translateY(-1px);
+      opacity:.95;
+    }
 
     .mint-main{
-      width: 100%;
-      margin-top: 1rem;
-      padding: 1rem 1.25rem;
-      font-size: 1.15rem;
+      width:100%;
+      margin-top:1rem;
+      padding:1rem 1.25rem;
+      font-size:1.15rem;
     }
 
     .msg{
-      margin-top: .9rem;
-      border-radius: 10px;
-      padding: .85rem 1rem;
-      border: 1px solid #333;
-      background: #111;
-      color: #ccc;
+      margin-top:.9rem;
+      border-radius:12px;
+      padding:.85rem 1rem;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(0,0,0,.14);
     }
-    .msg.success{ border-color: #2ecc71; color:#2ecc71; }
-    .msg.error{ border-color: #ff6b6b; color:#ff6b6b; }
 
-    .reveal-list .item{
+    .msg.success{
+      border-color:#2ecc71;
+      color:#2ecc71;
+    }
+
+    .msg.error{
+      border-color:#ff6b6b;
+      color:#ff6b6b;
+    }
+
+    .info-note{
+      margin-top:1rem;
+      border-left:4px solid var(--quinary-color);
+      background:rgba(255,255,255,.04);
+      padding:1rem;
+      border-radius:16px;
+      line-height:1.7;
+    }
+        .reveal-list .item{
       display:flex;
       flex-wrap:wrap;
-      gap: .8rem;
+      gap:.8rem;
       align-items:center;
       justify-content:space-between;
-      background:#222;
-      border:1px solid #333;
-      border-radius: 12px;
-      padding: .9rem 1rem;
-      margin-top: .7rem;
-      color:#ddd;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:14px;
+      padding:.9rem 1rem;
+      margin-top:.7rem;
       font-weight:700;
     }
+
     .reveal-btn{
-      background: #2a2a2a;
-      border: 1px solid gold;
-      color: gold;
-      padding: .5rem .9rem;
-      border-radius: 999px;
+      background:rgba(255,255,255,.04);
+      border:1px solid var(--quinary-color);
+      color:var(--quinary-color);
+      padding:.55rem .95rem;
+      border-radius:999px;
       cursor:pointer;
       font-weight:900;
+      transition:transform .15s ease, opacity .2s ease;
     }
-    .reveal-btn:hover{ background: gold; color:black; }
+
+    .reveal-btn:hover{
+      transform:translateY(-1px);
+      opacity:.95;
+    }
 
     .debug-log{
-      margin-top: 1rem;
-      background:#0a0a10;
-      border:1px solid #2a2a2a;
-      border-radius: 12px;
-      padding: 1rem;
-      font-family: "Roboto Mono", monospace;
+      margin-top:1rem;
+      background:rgba(0,0,0,.18);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:12px;
+      padding:1rem;
+      font-family:"Roboto Mono", monospace;
       color:#b0b0ff;
-      font-size: .8rem;
-      max-height: 220px;
+      font-size:.8rem;
+      max-height:220px;
       overflow:auto;
+    }
+
+    .site-footer{
+      position:relative;
+      z-index:5;
+      margin-top:5rem;
+      padding-top:2.5rem;
+      padding-bottom:2.5rem;
+      border-top:1px solid rgba(255,255,255,.12);
+      text-align:center;
+    }
+
+    .footer-links{
+      display:flex;
+      justify-content:center;
+      gap:1rem;
+      flex-wrap:wrap;
+      position:relative;
+      z-index:6;
+      margin-top:.75rem;
+    }
+
+    .footer-links a{
+      color:var(--quinary-color);
+      text-decoration:none;
+    }
+
+    .footer-links a:hover{
+      text-decoration:underline;
+    }
+
+    .footer-version{
+      opacity:.8;
+      margin-top:.75rem;
     }
   </style>
 </head>
 
 <body>
-  <header>
-    <nav>
-      <ul>
+  <header class="site-header">
+    <nav class="site-nav" aria-label="Main navigation">
+      <ul class="nav-list">
         <li><a aria-label="Home" href="index.html">Home</a></li>
         <li><a aria-label="Features" href="features.html">Features</a></li>
         <li><a aria-label="Game" href="game.html">Game</a></li>
-        <li><a aria-label="Mint" href="mint.html">Mint</a></li>
+        <li><a aria-label="Mint" href="mint.html" aria-current="page">Mint</a></li>
         <li><a aria-label="Pyramid Map" href="map.html">Pyramid Map</a></li>
         <li><a aria-label="Collaboration" href="collaboration.html">Collaboration</a></li>
         <li><a aria-label="About" href="about.html">About</a></li>
@@ -308,52 +488,38 @@
         <li><a aria-label="Guestbook" href="guestbook.html">Guestbook</a></li>
         <li><a aria-label="Advertising" href="advertising.html">Advertising</a></li>
         <li><a aria-label="Staking" href="staking.html">Staking</a></li>
-
-        <div class="themeDots">
-          <div class="dot light" title="Light Theme"></div>
-          <div class="dot dark" title="Dark Theme"></div>
-          <div class="dot basic" title="Basic Theme"></div>
-        </div>
-
-        <style>
-          .themeDots .dot{display:inline-block;width:20px;height:20px;border-radius:50%;margin:5px;cursor:pointer;transition:transform .2s}
-          .themeDots .dot.light{background-color:#FFF}
-          .themeDots .dot.dark{background-color:#000}
-          .themeDots .dot.basic{background-color:var(--quinary-color)}
-          .themeDots .dot:hover{transform:scale(1.2)}
-        </style>
-        <script>
-          document.addEventListener('DOMContentLoaded',()=>{
-            document.querySelector('.themeDots .dot.light')?.addEventListener('click',()=>document.body.setAttribute('data-theme','light'));
-            document.querySelector('.themeDots .dot.dark')?.addEventListener('click',()=>document.body.setAttribute('data-theme','dark'));
-            document.querySelector('.themeDots .dot.basic')?.addEventListener('click',()=>document.body.setAttribute('data-theme','basic'));
-          });
-        </script>
       </ul>
+
+      <div class="themeDots" aria-label="Theme switcher">
+        <button type="button" class="dot light" title="Light Theme" aria-label="Light Theme"></button>
+        <button type="button" class="dot dark" title="Dark Theme" aria-label="Dark Theme"></button>
+        <button type="button" class="dot basic" title="Basic Theme" aria-label="Basic Theme"></button>
+      </div>
     </nav>
   </header>
 
   <main class="page-wrap">
-    <section>
-      <div class="hero">
-        <h1>⛏️ Mint a Pyramid Block</h1>
-        <h2>Choose coordinates (Row/Col), mint on Base, then reveal Pi & Phi digits to unlock rarity and gameplay.</h2>
-      </div>
+    <section class="mint-hero">
+      <p class="eyebrow">Inpinity Mint</p>
+      <h1>Mint a Pyramid Block</h1>
+      <h2>Choose coordinates, mint on Base, then reveal Pi & Phi digits to unlock rarity and gameplay.</h2>
+      <p class="hero-lead">
+        Every block has a fixed place in the Pi-Phi Pyramid. After minting, you can reveal it to unlock its hidden state and prepare it for farming and later game actions.
+      </p>
 
-      <div class="partners-section">
-        <div class="partner-item"><a href="https://base.org/" target="_blank" rel="noopener">⚡ Base L2</a></div>
-        <div class="partner-item"><a href="https://uniswap.org/" target="_blank" rel="noopener">🦄 Uniswap</a></div>
-        <div class="partner-item"><a href="https://basescan.org/address/0x277a0D5864293C78d7387C54B48c35D5E9578Ab1" target="_blank" rel="noopener">📄 NFT Contract</a></div>
+      <div class="links-section">
+        <a class="link-chip" href="https://basescan.org/address/0x277a0D5864293C78d7387C54B48c35D5E9578Ab1" target="_blank" rel="noopener">
+          📄 NFT Contract
+        </a>
       </div>
     </section>
 
     <section class="mint-grid">
-      <!-- LEFT: Mint -->
       <div class="card-box">
         <h2>Mint</h2>
         <p class="muted">
           Each <strong>Block</strong> is an on-chain NFT with fixed coordinates inside the Pi-Phi Pyramid.
-          After minting you can <strong>reveal</strong> hidden digits (rarity), then farm resources and use it in the strategy meta.
+          After minting you can <strong>reveal</strong> hidden digits and unlock its gameplay value.
         </p>
 
         <div class="wallet-bar">
@@ -408,15 +574,19 @@
           <button id="randomBlockBtn" class="random-btn">🎲 Random free</button>
         </div>
 
+        <div class="info-note">
+          <strong>Mint note:</strong><br>
+          Mint first, reveal second. Revealed blocks expose hidden Pi and Phi digits and are needed for the wider ecosystem flow.
+        </div>
+
         <button class="btn mint-main" id="mintBtn" disabled>🚀 Mint your Block</button>
         <div id="mintMessage"></div>
       </div>
 
-      <!-- RIGHT: Reveal -->
       <div class="card-box">
         <h2>Reveal</h2>
         <p class="muted">
-          After minting, reveal your block to unlock its hidden <strong>Pi</strong> and <strong>Phi</strong> digits (rarity).
+          After minting, reveal your block to unlock its hidden <strong>Pi</strong> and <strong>Phi</strong> digits.
           Revealed blocks are needed for farming and advanced gameplay.
         </p>
 
@@ -427,11 +597,10 @@
         <div id="revealMessage"></div>
         <div id="debugLog" class="debug-log">[Debug] Console output will appear here.</div>
 
-        <div style="margin-top: 1rem; color:#aaa; font-size:.95rem; line-height:1.5;">
-          Phase 1: 10,000 blocks · top rarity includes hidden diamonds.
-          <br/>
-          INPI Token:
-          <a href="https://basescan.org/address/0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D" target="_blank" rel="noopener" style="color:gold;">
+        <div class="info-note">
+          <strong>Phase 1:</strong> 10,000 blocks<br>
+          <strong>INPI Token:</strong>
+          <a href="https://basescan.org/address/0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D" target="_blank" rel="noopener">
             0x232F...d0D
           </a>
         </div>
@@ -439,33 +608,27 @@
     </section>
   </main>
 
-  <footer>
-    <p>© 2026 Inpinity. All rights reserved. Working with <a href="https://base.org/" target="_blank" rel="noopener" style="color: gold;">Base</a> and <a href="https://uniswap.org/" target="_blank" rel="noopener" style="color: gold;">Uniswap</a>.</p>
+  <footer class="site-footer">
+    <p>© 2026 INPINITY. All rights reserved. Built on Base.</p>
     <div class="footer-links">
-      <a href="privacypolicy.html">Privacy Policy</a>
-      <a href="termsofuse.html">Terms of Use</a>
-      <a href="contact.html">Contact</a>
-      <a href="faq.html">FAQ</a>
-      <a href="guestbook.html">Guestbook</a>
-      <a href="advertising.html">Advertising</a>
-      <a href="staking.html">Staking</a>
       <a href="whitepaper.html">Whitepaper</a>
+      <a href="faq.html">FAQ</a>
       <a href="mint.html">Mint</a>
       <a href="map.html">Pyramid Map</a>
       <a href="game.html">Game</a>
+      <a href="contact.html">Contact</a>
     </div>
+    <p class="footer-version">Version 0.23.0</p>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
   <script>
-    // ==================== CONFIG ====================
     const NFT_ADDRESS = "0x277a0D5864293C78d7387C54B48c35D5E9578Ab1";
     const INPI_ADDRESS = "0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D";
     const WORKER_URL = "https://inpinity-worker-final.s-plat.workers.dev";
     const MAX_ROW = 99;
 
-    // ==================== ABI ====================
     const NFT_ABI = [
       "function mintWithETH(uint256 row, uint256 col) payable",
       "function mintWithINPI(uint256 row, uint256 col) external",
@@ -477,17 +640,16 @@
       "function blockData(uint256) view returns (uint8 piDigit, uint8 phiDigit, uint256 row, uint256 col, bool revealed, uint256 farmingEndTime)",
       "function revealBlock(uint256 tokenId, bytes32[] piProof, bytes32[] phiProof, uint8 piDigit, uint8 phiDigit) external"
     ];
+
     const INPI_ABI = [
       "function approve(address spender, uint256 amount) returns (bool)",
       "function balanceOf(address account) view returns (uint256)",
       "function allowance(address owner, address spender) view returns (uint256)"
     ];
 
-    // ==================== STATE ====================
     let provider, signer, nftContract, inpiContract, userAddress;
     let selectedPayment = "eth";
 
-    // ==================== HELPERS ====================
     function selectPayment(type){
       selectedPayment = type;
       document.getElementById("payEth").checked = (type === "eth");
@@ -499,10 +661,10 @@
       const logDiv = document.getElementById("debugLog");
       let line = `[${new Date().toLocaleTimeString()}] ${message}`;
       if (data){
-        try{ line += " " + JSON.stringify(data).substring(0,200); }
-        catch{ line += " " + String(data); }
+        try { line += " " + JSON.stringify(data).substring(0,200); }
+        catch { line += " " + String(data); }
       }
-      logDiv.innerHTML = line + "\n" + logDiv.innerHTML;
+      logDiv.innerHTML = line + "\\n" + logDiv.innerHTML;
       console.log(message, data);
     }
 
@@ -511,13 +673,13 @@
       if(!el) return;
       el.innerHTML = `<div class="msg ${type}">${text}</div>`;
     }
+
     function showRevealMsg(type, text){
       const el = document.getElementById("revealMessage");
       if(!el) return;
       el.innerHTML = `<div class="msg ${type}">${text}</div>`;
     }
 
-    // ==================== WALLET ====================
     async function connectWallet(){
       if(!window.ethereum) return alert("Please install MetaMask!");
       try{
@@ -529,7 +691,10 @@
         const network = await provider.getNetwork();
         if(network.chainId !== 8453){
           try{
-            await window.ethereum.request({ method:"wallet_switchEthereumChain", params:[{ chainId:"0x2105" }] });
+            await window.ethereum.request({
+              method:"wallet_switchEthereumChain",
+              params:[{ chainId:"0x2105" }]
+            });
           }catch(e){
             if(e.code === 4902){
               await window.ethereum.request({
@@ -542,7 +707,9 @@
                   blockExplorerUrls:["https://basescan.org"]
                 }]
               });
-            } else { throw e; }
+            } else {
+              throw e;
+            }
           }
         }
 
@@ -567,14 +734,12 @@
       const ethBalance = await provider.getBalance(userAddress);
       document.getElementById("walletBalance").innerText = parseFloat(ethers.utils.formatEther(ethBalance)).toFixed(4) + " ETH";
 
-      // show count (cheap)
       try{
         const bal = await nftContract.balanceOf(userAddress);
         document.getElementById("userBlocks").innerText = bal.toString();
       }catch{}
     }
 
-    // ==================== UNREVEALED LIST ====================
     async function loadUnrevealedBlocks(){
       const listDiv = document.getElementById("unrevealedList");
       if(!userAddress || !nftContract){
@@ -589,12 +754,16 @@
       }
 
       let rows = [];
-      for(let i=0; i<balance; i++){
+      for(let i = 0; i < balance; i++){
         const tokenId = await nftContract.tokenOfOwnerByIndex(userAddress, i);
         const data = await nftContract.blockData(tokenId);
         if(!data.revealed){
           const pos = await nftContract.getBlockPosition(tokenId);
-          rows.push({ tokenId: tokenId.toString(), row: pos.row.toString(), col: pos.col.toString() });
+          rows.push({
+            tokenId: tokenId.toString(),
+            row: pos.row.toString(),
+            col: pos.col.toString()
+          });
         }
       }
 
@@ -615,7 +784,6 @@
       listDiv.innerHTML = html;
     }
 
-    // ==================== REVEAL ====================
     window.revealBlock = async function(tokenId){
       showRevealMsg("success", "⏳ Loading block coordinates...");
       debugLog("Reveal started", { tokenId });
@@ -639,7 +807,15 @@
         const phiProof = formatProof(proofs.phi.proof);
 
         showRevealMsg("success", "⏳ Sending reveal transaction...");
-        const tx = await nftContract.revealBlock(tokenId, piProof, phiProof, proofs.pi.digit, proofs.phi.digit, { gasLimit: 1000000 });
+        const tx = await nftContract.revealBlock(
+          tokenId,
+          piProof,
+          phiProof,
+          proofs.pi.digit,
+          proofs.phi.digit,
+          { gasLimit: 1000000 }
+        );
+
         debugLog("Reveal tx", tx.hash);
         await tx.wait();
 
@@ -652,20 +828,18 @@
       }
     };
 
-    // ==================== RANDOM FREE BLOCK ====================
     async function findRandomFreeBlock(){
       if(!nftContract) return alert("Please connect wallet first.");
       showMintMsg("success", "⏳ Searching a free block...");
 
       const MAX_ATTEMPTS = 80;
-      for(let attempt=0; attempt<MAX_ATTEMPTS; attempt++){
+      for(let attempt = 0; attempt < MAX_ATTEMPTS; attempt++){
         const row = Math.floor(Math.random() * (MAX_ROW + 1));
-        const col = Math.floor(Math.random() * (2*row + 1));
+        const col = Math.floor(Math.random() * (2 * row + 1));
         const tokenId = row * 2048 + col;
 
         try{
           await nftContract.ownerOf(tokenId);
-          // minted -> continue
         }catch{
           document.getElementById("row").value = row;
           document.getElementById("col").value = col;
@@ -673,14 +847,15 @@
           return;
         }
       }
+
       showMintMsg("error", "❌ Could not find a free block quickly. Try again or pick manually.");
     }
 
-    // ==================== MINT ====================
     async function mint(){
       const row = parseInt(document.getElementById("row").value, 10);
       const col = parseInt(document.getElementById("col").value, 10);
-      if(Number.isNaN(row) || Number.isNaN(col) || row<0 || row>MAX_ROW || col<0 || col>(2*row)){
+
+      if(Number.isNaN(row) || Number.isNaN(col) || row < 0 || row > MAX_ROW || col < 0 || col > (2 * row)){
         return showMintMsg("error", "❌ Invalid coordinates.");
       }
 
@@ -691,13 +866,15 @@
         try{
           await nftContract.ownerOf(tokenId);
           return showMintMsg("error", "❌ This block is already minted.");
-        }catch{ /* ok */ }
+        }catch{}
 
         let tx;
 
         if(selectedPayment === "eth"){
           showMintMsg("success", "⏳ Minting with ETH...");
-          tx = await nftContract.mintWithETH(row, col, { value: ethers.utils.parseEther("0.003") });
+          tx = await nftContract.mintWithETH(row, col, {
+            value: ethers.utils.parseEther("0.003")
+          });
 
         } else if(selectedPayment === "inpi"){
           const amount = ethers.utils.parseEther("30");
@@ -709,6 +886,7 @@
             showMintMsg("success", "⏳ Approving INPI...");
             await (await inpiContract.approve(NFT_ADDRESS, amount)).wait();
           }
+
           showMintMsg("success", "⏳ Minting with INPI...");
           tx = await nftContract.mintWithINPI(row, col);
 
@@ -723,6 +901,7 @@
             showMintMsg("success", "⏳ Approving INPI...");
             await (await inpiContract.approve(NFT_ADDRESS, inpiAmount)).wait();
           }
+
           showMintMsg("success", "⏳ Minting (Mixed)...");
           tx = await nftContract.mintMixed(row, col, { value: ethAmount });
         }
@@ -742,12 +921,10 @@
       }
     }
 
-    // ==================== LISTENERS ====================
     document.getElementById("connectWallet").addEventListener("click", connectWallet);
     document.getElementById("randomBlockBtn").addEventListener("click", findRandomFreeBlock);
     document.getElementById("mintBtn").addEventListener("click", mint);
 
-    // keep radios in sync if user clicks them
     document.getElementById("payEth").addEventListener("change", ()=>selectPayment("eth"));
     document.getElementById("payInpi").addEventListener("change", ()=>selectPayment("inpi"));
     document.getElementById("payMixed").addEventListener("change", ()=>selectPayment("mixed"));
