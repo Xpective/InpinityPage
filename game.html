@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>INPINITY – Game Dashboard</title>
+  <title>INPINITY – Game Dashboard (V6)</title>
 
   <link rel="icon" type="image/png" href="favicon.webp" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,10 +20,10 @@
   <link rel="stylesheet" href="css/game.css">
 
   <meta name="description" content="Manage your Pyramid Blocks, farm resources, protect your territory, launch pirate attacks, and trade inside the Inpinity game dashboard." />
-  <meta name="keywords" content="Inpinity, Game, Pyramid, NFT, Base, INPI, Pitrone, Resources, Farming, Pirate Attack" />
+  <meta name="keywords" content="Inpinity, Game, Pyramid, NFT, Base, INPI, Pitrone, Resources, Farming, Pirate Attack, V6" />
   <meta name="author" content="Inpinity Team" />
-  <meta property="og:title" content="Inpinity – Game Dashboard" />
-  <meta property="og:description" content="Manage blocks, farming, attacks, protection, and exchange in the Inpinity ecosystem." />
+  <meta property="og:title" content="Inpinity – Game Dashboard V6" />
+  <meta property="og:description" content="Manage blocks, farming, attacks, protection, and exchange in the Inpinity ecosystem. Now with V6 contracts." />
   <meta property="og:image" content="logo_background.jpg" />
   <meta property="og:url" content="https://inpinity.online/game.html" />
   <meta name="twitter:card" content="summary_large_image" />
@@ -33,6 +33,108 @@
   <meta name="robots" content="index,follow" />
 
   <script defer src="main.js"></script>
+  <style>
+    /* Additional V6-specific styles */
+    .boost-badge {
+      background: linear-gradient(135deg, #ffd700, #ff8c00);
+      color: #1a1a1a;
+      padding: 0.2rem 0.6rem;
+      border-radius: 1rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: inline-block;
+      margin-left: 0.5rem;
+    }
+    
+    .v6-badge {
+      background: #4a90e2;
+      color: white;
+      padding: 0.2rem 0.6rem;
+      border-radius: 1rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      margin-left: 0.5rem;
+    }
+    
+    .attack-preview-detail {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      margin-top: 0.5rem;
+      padding: 0.5rem;
+      background: rgba(0,0,0,0.2);
+      border-radius: 0.5rem;
+    }
+    
+    .boost-btn {
+      background: linear-gradient(135deg, #ffd70020, #ff8c0020);
+      border: 1px solid #ff8c00;
+      color: #ff8c00;
+    }
+    
+    .boost-btn:hover {
+      background: linear-gradient(135deg, #ffd70040, #ff8c0040);
+    }
+    
+    .cancel-attack-btn {
+      background: #dc354520;
+      border: 1px solid #dc3545;
+      color: #ff6b6b;
+      font-size: 0.8rem;
+      padding: 0.2rem 0.5rem;
+    }
+    
+    .action-badge {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      border-radius: 0.5rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      margin-left: 0.5rem;
+    }
+    
+    .badge-v6-farm {
+      background: #4a90e2;
+      color: white;
+    }
+    
+    .badge-v4-migrate {
+      background: #dc3545;
+      color: white;
+    }
+    
+    .attacker-selector {
+      margin: 1rem 0;
+      padding: 0.8rem;
+      background: rgba(74, 144, 226, 0.1);
+      border-radius: 0.8rem;
+      border-left: 3px solid #4a90e2;
+    }
+    
+    .attacker-option {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0.5rem 0;
+    }
+    
+    .attacker-option input[type="radio"] {
+      width: auto;
+      margin-right: 0.5rem;
+    }
+    
+    .attacker-badge {
+      background: #2c3e50;
+      padding: 0.2rem 0.5rem;
+      border-radius: 0.5rem;
+      font-size: 0.8rem;
+    }
+    
+    .attacker-badge.farming {
+      background: #27ae6020;
+      border: 1px solid #27ae60;
+      color: #27ae60;
+    }
+  </style>
 </head>
 <body>
   <header class="site-header">
@@ -63,12 +165,12 @@
   <main class="game-main">
     <section class="game-hero">
       <div class="hero-copy">
-        <p class="eyebrow">Inpinity Game Dashboard</p>
+        <p class="eyebrow">Inpinity Game Dashboard <span class="v6-badge">V6</span></p>
         <h1>Manage your blocks, resources, protection, and attacks in one place.</h1>
         <p class="hero-lead">
           This dashboard is the control center for your Pyramid activity. Connect your wallet,
           reveal and manage blocks, start farming, protect territory, launch pirate attacks,
-          and exchange value inside the ecosystem.
+          and exchange value inside the ecosystem. <strong>Now running on V6 contracts</strong> with enhanced features.
         </p>
       </div>
     </section>
@@ -77,6 +179,7 @@
       <div class="wallet-left">
         <div class="wallet-status-line">
           <span class="wallet-status" id="walletStatus">🔴 Not connected</span>
+          <span class="version-indicator" style="font-size:0.7rem; background:#4a90e2; padding:0.2rem 0.5rem; border-radius:0.5rem; margin-left:0.5rem;">V6 ACTIVE</span>
         </div>
         <div class="wallet-address" id="walletAddress">—</div>
       </div>
@@ -110,6 +213,7 @@
           <h2 class="section-title">Your Pyramid Blocks</h2>
           <p class="section-subtitle">
             View your owned blocks, reveal hidden ones, track rarity, and select one for actions below.
+            <span class="badge-v6-farm action-badge">V6 Farming</span>
           </p>
         </div>
 
@@ -118,18 +222,23 @@
         </div>
 
         <div id="selectedBlockInfo" class="selected-block-info" style="display: none;">
-          <h3>Selected Block</h3>
+          <h3>Selected Block <span class="v6-badge">Active</span></h3>
           <p id="selectedBlockText">None</p>
           <div id="blockResources" class="resources-grid"></div>
           <div id="selectedBlockMeta" class="info-note" style="display: none; margin-top: 0.8rem;"></div>
+          
+          <!-- V6 Boost Status (will be populated by JS) -->
+          <div id="boostStatus" style="margin-top:0.5rem; display:none;">
+            <span class="boost-badge">⚡ Boost Active</span>
+          </div>
         </div>
       </section>
 
       <section class="panel">
         <div class="panel-head">
-          <h2 class="section-title">Block Actions</h2>
+          <h2 class="section-title">Block Actions <span class="v6-badge">V6</span></h2>
           <p class="section-subtitle">
-            Manage the currently selected block: reveal, farm, claim, migrate, and protect it.
+            Manage the currently selected block: reveal, farm, claim, migrate (V4→V6), and protect it.
           </p>
         </div>
 
@@ -139,11 +248,22 @@
           </div>
 
           <div class="action-group">
-            <button class="btn btn-small" id="revealBtn" type="button">Reveal</button>
-            <button class="btn btn-small" id="farmingStartBtn" type="button">Start Farming</button>
-            <button class="btn btn-small" id="farmingStopBtn" type="button">Stop Farming</button>
-            <button class="btn btn-small" id="claimBtn" type="button">Claim Resources</button>
-            <button class="btn btn-small migrate-btn" id="migrateFarmBtn" type="button" style="display:none;">Migrate from V4</button>
+            <button class="btn btn-small" id="revealBtn" type="button">🔓 Reveal</button>
+            <button class="btn btn-small" id="farmingStartBtn" type="button">🌾 Start Farming (V6)</button>
+            <button class="btn btn-small" id="farmingStopBtn" type="button">⏹️ Stop Farming</button>
+            <button class="btn btn-small" id="claimBtn" type="button">💰 Claim Resources</button>
+            <button class="btn btn-small boost-btn" id="buyBoostBtn" type="button" style="display:none;">⚡ Buy Boost</button>
+            <button class="btn btn-small migrate-btn" id="migrateFarmBtn" type="button" style="display:none;">🔄 Migrate V4 → V6</button>
+          </div>
+
+          <!-- Boost options (initially hidden) -->
+          <div id="boostOptions" style="display:none; margin:1rem 0; padding:1rem; background:rgba(255,215,0,0.1); border-radius:0.8rem;">
+            <h4 style="margin-top:0;">Buy Farming Boost</h4>
+            <div class="input-group" style="grid-template-columns:1fr auto;">
+              <input type="number" id="boostDays" min="1" max="30" value="7" placeholder="Days">
+              <button class="btn btn-small" id="confirmBoostBtn" type="button">Confirm Boost</button>
+            </div>
+            <p class="info-note" style="margin:0.5rem 0 0;">Boost increases resource production by 2x for the selected duration.</p>
           </div>
 
           <div id="actionMessage"></div>
@@ -156,12 +276,21 @@
           </div>
 
           <div class="input-group">
-            <label>Block ID <input type="number" id="protectTokenId"></label>
+            <label>Block ID <input type="number" id="protectTokenId" readonly></label>
             <label>Protection % <input type="number" id="protectLevel" min="0" max="50" value="10"></label>
           </div>
-
-          <button class="btn" id="protectBtn" type="button">Hire Mercenaries</button>
+          
+          <div class="action-group" style="margin-top:0.5rem;">
+            <button class="btn btn-small" id="protectBtn" type="button">🛡️ Hire Mercenaries</button>
+            <button class="btn btn-small" id="extendProtectionBtn" type="button" style="display:none;">⏱️ Extend Protection</button>
+          </div>
+          
           <div id="protectMessage"></div>
+          
+          <!-- Protection status -->
+          <div id="protectionStatus" style="margin-top:0.5rem; font-size:0.85rem; display:none;">
+            <span>Protection active until: <span id="protectionExpiry">—</span></span>
+          </div>
         </div>
 
         <p id="noBlockSelected" class="empty-state">Select a block from the pyramid.</p>
@@ -200,17 +329,29 @@
 
       <section class="panel panel-wide pirate-panel">
         <div class="panel-head">
-          <h2 class="section-title">Pirate Attack</h2>
+          <h2 class="section-title">Pirate Attack <span class="v6-badge">V6</span></h2>
           <p class="section-subtitle">
             Choose a target block and resource lane to prepare an attack. Your active attacks are shown directly below.
+            <span class="action-badge" style="background:#ff8c00;">Steal Amount Preview</span>
           </p>
         </div>
 
         <div class="pirate-layout">
           <div class="pirate-left">
             <div class="input-group">
-              <label>Target Row <input type="number" id="attackRow" min="0" max="99"></label>
-              <label>Target Col <input type="number" id="attackCol" min="0" max="198"></label>
+              <label>Target Row <input type="number" id="attackRow" min="0" max="99" placeholder="e.g. 5"></label>
+              <label>Target Col <input type="number" id="attackCol" min="0" max="198" placeholder="e.g. 3"></label>
+            </div>
+
+            <!-- V6: Attacker block selector (important for V6) -->
+            <div class="attacker-selector" id="attackerSelector" style="display:none;">
+              <h4 style="margin:0 0 0.5rem; font-size:0.9rem;">Attack from block:</h4>
+              <div id="attackerOptions" class="attacker-options">
+                <!-- Will be populated by JS -->
+              </div>
+              <p class="info-note" style="font-size:0.75rem; margin:0.5rem 0 0;">
+                Selected block from above is used as attacker. If none selected, first owned block is used.
+              </p>
             </div>
 
             <div class="attack-resource-group">
@@ -218,13 +359,35 @@
               <select id="attackResourceSelect"></select>
             </div>
 
+            <!-- V6: Attack preview details (shows steal amount) -->
+            <div id="attackPreviewDetails" class="attack-preview-detail" style="display:none;"></div>
+
             <div class="info-note" id="attackRulesInfo">
               <strong>Attack check</strong><br>
               Enter coordinates to analyze the target and see whether an attack path makes sense.
             </div>
 
-            <button class="btn" id="attackBtn" type="button">Start Attack</button>
+            <div class="action-group">
+              <button class="btn" id="attackBtn" type="button">⚔️ Start Attack (V6)</button>
+              <button class="btn btn-small cancel-attack-btn" id="cancelAttackBtn" type="button" style="display:none;">✖️ Cancel Selected</button>
+            </div>
+            
             <div id="attackMessage"></div>
+            
+            <!-- V6: Pirate Boost -->
+            <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid var(--border-dim);">
+              <details>
+                <summary style="cursor:pointer; color:#ff8c00;">⚡ Pirate Boost Options</summary>
+                <div style="margin-top:0.8rem;">
+                  <p class="info-note">Boost increases your attack effectiveness and reduces travel time.</p>
+                  <div class="input-group" style="grid-template-columns:1fr auto;">
+                    <input type="number" id="pirateBoostDays" min="1" max="30" value="7" placeholder="Days">
+                    <button class="btn btn-small boost-btn" id="buyPirateBoostBtn" type="button">Buy Pirate Boost</button>
+                  </div>
+                  <div id="pirateBoostMessage" style="font-size:0.8rem; margin-top:0.5rem;"></div>
+                </div>
+              </details>
+            </div>
           </div>
 
           <div class="pirate-right">
@@ -238,6 +401,8 @@
             <div id="userAttacksList" class="attacks-list">
               <p class="empty-state">Connect wallet to see your attacks.</p>
             </div>
+            
+            <!-- V6: Cancel attack button will appear in each attack item via JS -->
           </div>
         </div>
       </section>
@@ -301,6 +466,18 @@
 
         <div id="exchangeMessage"></div>
 
+        <!-- Resource approval for advanced operations -->
+        <div style="margin:1rem 0 0.5rem;">
+          <details>
+            <summary style="cursor:pointer; color:var(--accent-primary);">🔧 Advanced: Resource Approvals</summary>
+            <div style="margin-top:0.8rem; padding:0.8rem; background:rgba(0,0,0,0.2); border-radius:0.8rem;">
+              <p class="info-note">Approve contracts to manage your resource tokens.</p>
+              <button class="btn btn-small" id="approveResourcesBtn" type="button">Approve Farming for Resources</button>
+              <div id="approveMessage" style="font-size:0.8rem; margin-top:0.5rem;"></div>
+            </div>
+          </details>
+        </div>
+
         <div class="user-resources" id="userResources">
           <p class="empty-state">Connect wallet to see your resource tokens.</p>
         </div>
@@ -314,11 +491,27 @@
 
     <section class="panel faq-panel">
       <div class="panel-head">
-        <h2 class="section-title">How To / FAQ</h2>
+        <h2 class="section-title">How To / FAQ <span class="v6-badge">V6 Updates</span></h2>
         <p class="section-subtitle">
-          A quick guide to how the main gameplay loops work.
+          A quick guide to how the main gameplay loops work with V6 contracts.
         </p>
       </div>
+
+      <details class="content-details">
+        <summary>What's new in V6?</summary>
+        <div class="details-body">
+          <p>
+            <strong>V6 brings several improvements:</strong>
+          </p>
+          <ul>
+            <li>Enhanced attack preview with exact <strong>steal amount</strong></li>
+            <li>Better migration path from V4 → V6</li>
+            <li>Pirate and Farming boosts with clear expiry</li>
+            <li>Improved subgraph performance with farmV6S/attackV6S</li>
+            <li>More accurate resource claiming previews</li>
+          </ul>
+        </div>
+      </details>
 
       <details class="content-details">
         <summary>How does minting work?</summary>
@@ -334,28 +527,41 @@
         <summary>What does revealing a block do?</summary>
         <div class="details-body">
           <p>
-            Revealing unlocks the block’s hidden state and exposes its rarity-related attributes.
+            Revealing unlocks the block's hidden state and exposes its rarity-related attributes.
             That makes the block fully usable in the wider game flow.
           </p>
         </div>
       </details>
 
       <details class="content-details">
-        <summary>How do attacks affect my own block timing?</summary>
+        <summary>How do V6 attacks work differently?</summary>
         <div class="details-body">
           <p>
-            When you start an attack from your own ecosystem position, that action becomes part of your active gameplay cycle.
-            The attack then needs time before it becomes executable against the foreign target block.
+            V6 attacks now show you the exact <strong>steal amount</strong> before you commit.
+            You also have better control over which block attacks from, and can preview
+            all resource lanes to find the most valuable target.
           </p>
         </div>
       </details>
 
       <details class="content-details">
-        <summary>What is the difference between farming and protection?</summary>
+        <summary>How do I migrate a V4 farm to V6?</summary>
         <div class="details-body">
           <p>
-            Farming is about producing and claiming resources over time. Protection adds a defensive layer to your selected block
-            to reduce the effect of hostile actions.
+            Select a block with an active V4 farm (marked in UI), then click 
+            <strong>"Migrate V4 → V6"</strong>. The system will automatically claim any pending
+            V4 resources, stop the V4 farm, and start a fresh V6 farm on the same block.
+          </p>
+        </div>
+      </details>
+
+      <details class="content-details">
+        <summary>What are boosts and how do I use them?</summary>
+        <div class="details-body">
+          <p>
+            <strong>Farming Boost:</strong> Increases resource production by 2x for a selected duration.<br>
+            <strong>Pirate Boost:</strong> Enhances attack effectiveness and reduces travel time.<br>
+            Look for the ⚡ buttons in each section to activate boosts.
           </p>
         </div>
       </details>
@@ -385,7 +591,7 @@
       <a href="whitepaper.html">Whitepaper</a>
       <a href="https://discord.gg/95yj6Eg6" target="_blank" rel="noopener">Discord</a>
     </div>
-    <p class="footer-version">Version 0.23.0</p>
+    <p class="footer-version">Version 0.24.0 (V6 Active)</p>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
