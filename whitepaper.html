@@ -1,10 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="basic">
 <head>
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
   <meta content="Inpinity - Official Whitepaper" name="description" />
   <title>Inpinity - Whitepaper</title>
+  
+  <!-- CSS Imports -->
   <link rel="stylesheet" href="css/base.css" />
   <link rel="stylesheet" href="css/layout.css" />
   <link rel="stylesheet" href="css/animations.css" />
@@ -14,158 +16,62 @@
   <link rel="stylesheet" href="css/color.css" />
   <link rel="stylesheet" href="css/adapted_about_us.css" />
   <link rel="stylesheet" href="css/adapted_advertisements.css" />
-  <link rel="stylesheet" href="css/adapted_combined.css"/>
+  <link rel="stylesheet" href="css/adapted_combined.css" />
   <link rel="stylesheet" href="css/adapted_comunity_guidelines.css" />
   <link rel="stylesheet" href="css/adapted_course_feedback.css" />
-  <link rel="stylesheet" href="css/adapted_mft_marketplace.css"/>
-  <link rel="stylesheet" href="css/adapted_profile.css"/>
-  <link rel="stylesheet" href="css/combined_latest.css"/>
+  <link rel="stylesheet" href="css/adapted_mft_marketplace.css" />
+  <link rel="stylesheet" href="css/adapted_profile.css" />
+  <link rel="stylesheet" href="css/combined_latest.css" />
   <link rel="stylesheet" href="css/gamification.css" />
-  <link rel="stylesheet" href="css/referral.css"/>
+  <link rel="stylesheet" href="css/referral.css" />
+  <link rel="stylesheet" href="css/whitepaper.css" />
+  
   <script defer src="main.js"></script>
-  <link rel="icon" type="image/png" href="favicon.webp">
-  <meta content="Inpinity, Game Design, Game Development, Platform, Collaboration, Forum, Tools, GameDesign, AI Development, Games of future, programming, programs, python gui" name="keywords">
-  <meta content="Inpinity Team" name="Xpective">
-  <meta property="og:title" content="Inpinity - Whitepaper">
-  <meta property="og:description" content="Official Whitepaper of Inpinity – a decentralized gaming ecosystem on Base.">
-  <meta property="og:image" content="logo_background.jpg">
-  <meta property="og:url" content="https://inpinity.online/whitepaper.html">
-  <meta name="twitter:card" content="logo_background.webp">
-  <meta name="twitter:site" content="@unxpective">
-  <meta name="twitter:creator" content="@Inpinity1">
-  <meta name="theme-color" content="#FarbcodeIhrerWebsite">
-  <meta name="robots" content="index,follow">
-  <style>
-    /* Whitepaper specific styling */
-    .whitepaper-container {
-      max-width: 900px;
-      margin: 2rem auto;
-      padding: 2rem;
-      background: rgba(20,20,20,0.9);
-      border: 1px solid gold;
-      border-radius: 8px;
-      color: #eee;
-      line-height: 1.6;
-    }
-    .whitepaper-container h1, .whitepaper-container h2, .whitepaper-container h3 {
-      color: gold;
-      margin-top: 2rem;
-    }
-    .whitepaper-container h1:first-of-type {
-      margin-top: 0;
-      text-align: center;
-      font-size: 2.5rem;
-    }
-    .whitepaper-container table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 1rem 0;
-    }
-    .whitepaper-container th, .whitepaper-container td {
-      border: 1px solid #444;
-      padding: 0.5rem;
-      text-align: left;
-    }
-    .whitepaper-container th {
-      background: #222;
-      color: gold;
-    }
-    .whitepaper-container a {
-      color: gold;
-      text-decoration: underline;
-    }
-    .whitepaper-container .warning-note {
-      background: #332211;
-      border: 1px solid #ffaa00;
-      border-radius: 8px;
-      padding: 1rem;
-      margin: 1rem 0;
-    }
-    .whitepaper-container .version {
-      text-align: right;
-      font-style: italic;
-      color: #aaa;
-      border-top: 1px solid #444;
-      padding-top: 1rem;
-      margin-top: 2rem;
-    }
-    .whitepaper-container ul {
-      margin: 1rem 0;
-      padding-left: 2rem;
-    }
-    .whitepaper-container li {
-      margin: 0.5rem 0;
-    }
-    .whitepaper-container .address {
-      font-family: monospace;
-      background: #111;
-      padding: 0.2rem 0.4rem;
-      border-radius: 4px;
-      color: #ccc;
-      word-break: break-all;
-    }
-    .whitepaper-container .pill {
-      display: inline-block;
-      padding: 0.15rem 0.6rem;
-      border-radius: 40px;
-      border: 1px solid gold;
-      color: gold;
-      font-weight: bold;
-      font-size: 0.85rem;
-      background: rgba(0,0,0,0.25);
-      margin-right: 0.4rem;
-      margin-top: 0.3rem;
-    }
-  </style>
+  
+  <!-- Meta Tags -->
+  <link rel="icon" type="image/png" href="favicon.webp" />
+  <meta name="keywords" content="Inpinity, Game Design, Game Development, Platform, Collaboration, Forum, Tools, GameDesign, AI Development, Games of future, programming, programs, python gui" />
+  <meta name="author" content="Inpinity Team" />
+  <meta property="og:title" content="Inpinity - Whitepaper" />
+  <meta property="og:description" content="Official Whitepaper of Inpinity – a decentralized gaming ecosystem on Base." />
+  <meta property="og:image" content="logo_background.jpg" />
+  <meta property="og:url" content="https://inpinity.online/whitepaper.html" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="@unxpective" />
+  <meta name="twitter:creator" content="@Inpinity1" />
+  <meta name="theme-color" content="#FFD700" />
+  <meta name="robots" content="index,follow" />
 </head>
+
 <body>
-  <header>
-    <nav>
-      <ul>
-        <li><a aria-label="Home" href="index.html">Home</a></li>
-        <li><a aria-label="Features" href="features.html">Features</a></li>
-        <li><a aria-label="Game" href="game.html">Game</a></li>
-        <li><a aria-label="Forum" href="forum.html">Forum</a></li>
-        <li><a aria-label="Collaboration" href="collaboration.html">Collaboration</a></li>
-        <li><a aria-label="Register" href="register.html">Register</a></li>
-        <li><a aria-label="About" href="about.html">About</a></li>
-        <li><a aria-label="Whitepaper" href="whitepaper.html">Whitepaper</a></li>
-        <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
-        <li><a aria-label="Guestbook" href="guestbook.html">Guestbook</a></li>
-        <li><a aria-label="Advertising" href="advertising.html">Advertising</a></li>
-        <li><a aria-label="Profile" href="profile.html">Profile</a></li>
-        <li><a aria-label="Staking" href="staking.html">Staking</a></li>
-        <div class="themeDots">
-          <div class="dot light" title="Light Theme"></div>
-          <div class="dot dark" title="Dark Theme"></div>
-          <div class="dot basic" title="Basic Theme"></div>
-        </div>
+  <!-- HEADER with Navigation and Theme Dots -->
+  <header class="site-header">
+    <nav class="site-nav">
+      <ul class="nav-list">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="features.html">Features</a></li>
+        <li><a href="game.html">Game</a></li>
+        <li><a href="mint.html">Mint</a></li>
+        <li><a href="map.html">Map</a></li>
+        <li><a href="collaboration.html">Collaboration</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="whitepaper.html" class="active">Whitepaper</a></li>
+        <li><a href="faq.html">FAQ</a></li>
+        <li><a href="guestbook.html">Guestbook</a></li>
+        <li><a href="advertising.html">Advertising</a></li>
+        <li><a href="profile.html">Profile</a></li>
+        <li><a href="staking.html">Staking</a></li>
       </ul>
+      
+      <div class="theme-dots">
+        <button class="theme-dot light" data-theme="light" title="Light Theme" aria-label="Switch to Light Theme"></button>
+        <button class="theme-dot dark" data-theme="dark" title="Dark Theme" aria-label="Switch to Dark Theme"></button>
+        <button class="theme-dot basic" data-theme="basic" title="Basic Theme" aria-label="Switch to Basic Theme"></button>
+      </div>
     </nav>
-    <style>
-      .themeDots .dot {
-        display: inline-block;
-        width: 20px;
-        height: 20px;
-        border-radius: 50%;
-        margin: 5px;
-        cursor: pointer;
-        transition: transform 0.2s;
-      }
-      .themeDots .dot.light { background-color: #FFFFFF; }
-      .themeDots .dot.dark { background-color: #000000; }
-      .themeDots .dot.basic { background-color: var(--quinary-color); }
-      .themeDots .dot:hover { transform: scale(1.2); }
-    </style>
-    <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        document.querySelector('.themeDots .dot.light')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'light'));
-        document.querySelector('.themeDots .dot.dark')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'dark'));
-        document.querySelector('.themeDots .dot.basic')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'basic'));
-      });
-    </script>
   </header>
 
+  <!-- MAIN CONTENT - Whitepaper -->
   <main>
     <div class="whitepaper-container">
       <h1>Whitepaper: Inpinity</h1>
@@ -205,8 +111,8 @@
           <a href="staking.html">Staking</a>
         </td></tr>
         <tr><th>Community</th><td>
-          Twitter: <a href="https://twitter.com/unxpective">@unxpective</a><br>
-          Discord: <a href="https://discord.gg/95yj6Eg6">https://discord.gg/95yj6Eg6</a><br>
+          Twitter: <a href="https://twitter.com/unxpective">@unxpective</a><br />
+          Discord: <a href="https://discord.gg/95yj6Eg6">https://discord.gg/95yj6Eg6</a><br />
           Telegram: <a href="https://t.me/+1hl5Ou-pGChhYmUy">https://t.me/+1hl5Ou-pGChhYmUy</a>
         </td></tr>
         <tr><th>Development</th><td>GitHub: <a href="https://github.com/Xpective">Xpective</a></td></tr>
@@ -325,7 +231,6 @@
       <h3>7.1 Roadmap Table</h3>
       <table>
         <tr><th>Phase</th><th>Focus</th><th>Deliverables</th></tr>
-
         <tr>
           <td><strong>Now (Web V3)</strong></td>
           <td>Stabilize & polish the live Pyramid module</td>
@@ -334,10 +239,9 @@
             better resource visualization, attack execution clarity, and contract transparency.
           </td>
         </tr>
-
         <tr>
           <td><strong>Inpinity City (Alpha)</strong></td>
-          <td>Persistent “upgrade/crafting” layer</td>
+          <td>Persistent "upgrade/crafting" layer</td>
           <td>
             <ul>
               <li><strong>City slots</strong> tied to blocks (buildings/upgrades use resources)</li>
@@ -347,16 +251,14 @@
             </ul>
           </td>
         </tr>
-
         <tr>
           <td><strong>Economy Expansion</strong></td>
-          <td>More depth, less “flat farming”</td>
+          <td>More depth, less "flat farming"</td>
           <td>
             Boosts, time-based events, limited drops, seasonal modifiers, balancing passes,
             and new resource utility (construction, defense, city modules).
           </td>
         </tr>
-
         <tr>
           <td><strong>UE5 Version (Prototype)</strong></td>
           <td>Bring the on-chain world into Unreal Engine 5</td>
@@ -364,11 +266,10 @@
             <ul>
               <li>UE5 client prototype that reads ownership (wallet login) + loads player city data</li>
               <li>Visual representation of blocks/city modules and resources</li>
-              <li>Deterministic “seed/DNA” systems for consistent visuals</li>
+              <li>Deterministic "seed/DNA" systems for consistent visuals</li>
             </ul>
           </td>
         </tr>
-
         <tr>
           <td><strong>UE5 Version (Playable Alpha)</strong></td>
           <td>Gameplay in 3D (strategy + exploration)</td>
@@ -377,7 +278,6 @@
             and on-chain sync points (claims, upgrades, raids).
           </td>
         </tr>
-
         <tr>
           <td><strong>UE5 Version (Multiplayer & Scale)</strong></td>
           <td>Social + economy scale-out</td>
@@ -400,7 +300,7 @@
       <ul>
         <li><strong>Visual world</strong>: your on-chain assets become a playable space.</li>
         <li><strong>Deep gameplay</strong>: strategy + exploration + crafting layers are easier to deliver in UE5.</li>
-        <li><strong>Future-proof</strong>: web stays as lightweight dashboard, UE5 becomes the “main game client”.</li>
+        <li><strong>Future-proof</strong>: web stays as lightweight dashboard, UE5 becomes the "main game client".</li>
       </ul>
 
       <h2>8. Ecosystem Partners</h2>
@@ -424,19 +324,61 @@
     </div>
   </main>
 
-  <footer>
-    <p>© 2026 Inpinity. All rights reserved. Working with <a href="https://base.org/" target="_blank" rel="noopener" style="color: gold;">Base</a> and <a href="https://uniswap.org/" target="_blank" rel="noopener" style="color: gold;">Uniswap</a>.</p>
-    <div class="footer-links">
-      <a href="privacypolicy.html">Privacy Policy</a>
-      <a href="termsofuse.html">Terms of Use</a>
-      <a href="contact.html">Contact</a>
-      <a href="faq.html">FAQ</a>
-      <a href="guestbook.html">Guestbook</a>
-      <a href="advertising.html">Advertising</a>
-      <a href="profile.html">Profile</a>
-      <a href="staking.html">Staking</a>
-      <a href="whitepaper.html">Whitepaper</a>
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="footer-content">
+      <p class="copyright">© 2026 INPINITY. All rights reserved. Built on <a href="https://base.org/" target="_blank" rel="noopener">Base</a>.</p>
+      
+      <div class="footer-links">
+        <a href="whitepaper.html">Whitepaper</a>
+        <a href="faq.html">FAQ</a>
+        <a href="mint.html">Mint</a>
+        <a href="map.html">Pyramid Map</a>
+        <a href="game.html">Game</a>
+        <a href="collaboration.html">Collaboration</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+        <a href="privacypolicy.html">Privacy</a>
+        <a href="termsofuse.html">Terms</a>
+      </div>
+      
+      <p class="footer-version">Whitepaper v2.2 – March 2026</p>
     </div>
   </footer>
+
+  <!-- THEME SWITCHER SCRIPT -->
+  <script>
+    (function() {
+      // Theme-Switcher mit localStorage
+      document.addEventListener('DOMContentLoaded', function() {
+        const html = document.documentElement;
+        const themeDots = document.querySelectorAll('.theme-dot');
+        
+        // Gespeichertes Theme laden
+        const savedTheme = localStorage.getItem('theme') || 'basic';
+        html.setAttribute('data-theme', savedTheme);
+        
+        // Aktiven Dot markieren
+        themeDots.forEach(dot => {
+          if (dot.dataset.theme === savedTheme) {
+            dot.classList.add('active');
+          }
+          
+          // Click-Event für jeden Dot
+          dot.addEventListener('click', function() {
+            const theme = this.dataset.theme;
+            
+            // Theme setzen
+            html.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            
+            // Aktive Klasse updaten
+            themeDots.forEach(d => d.classList.remove('active'));
+            this.classList.add('active');
+          });
+        });
+      });
+    })();
+  </script>
 </body>
 </html>
