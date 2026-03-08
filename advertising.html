@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="basic">
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Inpinity - Advertising (Under Construction)</title>
+  <title>Inpinity - Advertising</title>
 
   <link rel="stylesheet" href="css/base.css" />
   <link rel="stylesheet" href="css/layout.css" />
@@ -24,170 +24,31 @@
   <link rel="stylesheet" href="css/combined_latest.css"/>
   <link rel="stylesheet" href="css/gamification.css" />
   <link rel="stylesheet" href="css/referral.css"/>
+  <link rel="stylesheet" href="css/advertising.css" />
 
   <script defer src="main.js"></script>
   <link rel="icon" type="image/png" href="favicon.webp">
 
-  <meta name="keywords" content="Inpinity, advertising, under construction, Base, Uniswap, INPI" />
+  <meta name="description" content="Advertising on Inpinity is being rebuilt in a cleaner, curated, collaboration-first way for the ecosystem." />
+  <meta name="keywords" content="Inpinity, advertising, partnerships, Base, INPI, collaboration" />
   <meta name="author" content="Xpective" />
 
-  <meta property="og:title" content="Inpinity - Advertising (Under Construction)">
-  <meta property="og:description" content="Advertising on Inpinity is under construction. Contact us for early partnership opportunities.">
+  <meta property="og:title" content="Inpinity - Advertising">
+  <meta property="og:description" content="Advertising on Inpinity is being rebuilt in a clean, curated, partnership-first format." />
   <meta property="og:image" content="logo_background.jpg">
   <meta property="og:url" content="https://inpinity.online/advertising.html">
 
   <meta name="twitter:card" content="logo_background.webp">
   <meta name="twitter:site" content="@unxpective">
   <meta name="twitter:creator" content="@Inpinity1">
-
+  <meta name="theme-color" content="#140f1f">
   <meta name="robots" content="index,follow">
-
-  <style>
-    /* ✅ footer spacing so it never overlaps content */
-    main { padding-bottom: 4rem; }
-    footer { margin-top: 3rem; padding-top: 1rem; }
-
-    .warning-note {
-      background: #332211;
-      border: 1px solid #ffaa00;
-      border-radius: 8px;
-      padding: 1rem;
-      margin: 2rem auto;
-      max-width: 900px;
-      text-align: center;
-    }
-    .warning-note a { color: gold; }
-
-    .presale-note {
-      background: rgba(255,215,0,0.1);
-      border: 1px solid gold;
-      border-radius: 8px;
-      padding: 1rem;
-      margin: 1rem auto 2rem;
-      max-width: 900px;
-      text-align: center;
-    }
-    .presale-note a { color: gold; font-weight: bold; }
-
-    .partners-section {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 1rem;
-      margin: 1.6rem auto 0.5rem;
-      padding: 1rem;
-      background: rgba(0,0,0,0.3);
-      border-radius: 12px;
-      border: 1px solid #444;
-      max-width: 980px;
-    }
-    .partner-item a {
-      display: inline-block;
-      padding: 0.6rem 1.2rem;
-      background: #2a2a2a;
-      border: 1px solid gold;
-      border-radius: 40px;
-      color: gold;
-      font-weight: bold;
-      text-decoration: none;
-      transition: all 0.2s;
-    }
-    .partner-item a:hover { background: gold; color: black; transform: scale(1.05); }
-
-    .page-wrap {
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 0 1rem;
-    }
-
-    .uc-box {
-      margin: 1.6rem auto 0;
-      padding: 2rem;
-      background: rgba(20,20,20,0.9);
-      border: 1px solid rgba(255,215,0,0.55);
-      border-radius: 14px;
-      color: #eee;
-      text-align: center;
-    }
-    .uc-title {
-      color: gold;
-      font-size: 2.2rem;
-      margin: 0 0 0.6rem;
-    }
-    .uc-sub {
-      color: #ccc;
-      line-height: 1.7;
-      margin: 0 auto 1.3rem;
-      max-width: 820px;
-    }
-
-    .pill {
-      display: inline-block;
-      padding: 0.2rem 0.7rem;
-      border-radius: 999px;
-      border: 1px solid rgba(255,215,0,0.65);
-      color: gold;
-      font-weight: 800;
-      background: rgba(255,215,0,0.08);
-      margin: 0.25rem;
-      font-size: 0.9rem;
-    }
-
-    .cta-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      justify-content: center;
-      margin-top: 1.4rem;
-    }
-    .cta {
-      display: inline-block;
-      text-decoration: none;
-      font-weight: 900;
-      border-radius: 999px;
-      padding: 0.9rem 1.3rem;
-      border: 1px solid rgba(255,215,0,0.6);
-      color: #fff;
-      background: linear-gradient(135deg, #8A2BE2, #00FFFF);
-      transition: transform .15s, box-shadow .2s;
-    }
-    .cta:hover { transform: translateY(-1px); box-shadow: 0 0 18px rgba(255,215,0,0.25); }
-    .cta.secondary { background: rgba(255,215,0,0.08); color: gold; }
-
-    .info-block {
-      margin: 1.2rem auto 0;
-      padding: 1.2rem 1.4rem;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.10);
-      border-radius: 12px;
-      text-align: left;
-      max-width: 820px;
-      line-height: 1.7;
-      color: #ddd;
-    }
-    .info-block strong { color: gold; }
-    .info-block a { color: gold; }
-
-    .contact-box {
-      margin-top: 1.2rem;
-      padding: 1rem 1.2rem;
-      border-radius: 12px;
-      border: 1px solid rgba(0,255,255,0.30);
-      background: rgba(0,255,255,0.06);
-      color: #dff;
-      max-width: 820px;
-      margin-left: auto;
-      margin-right: auto;
-      line-height: 1.6;
-    }
-    .contact-box a { color: gold; }
-  </style>
 </head>
 
-<body>
-  <header>
-    <nav>
-      <ul>
+<body class="advertising-page">
+  <header class="site-header">
+    <nav class="site-nav" aria-label="Main navigation">
+      <ul class="nav-list">
         <li><a aria-label="Home" href="index.html">Home</a></li>
         <li><a aria-label="Features" href="features.html">Features</a></li>
         <li><a aria-label="Game" href="game.html">Game</a></li>
@@ -198,89 +59,78 @@
         <li><a aria-label="Whitepaper" href="whitepaper.html">Whitepaper</a></li>
         <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
         <li><a aria-label="Guestbook" href="guestbook.html">Guestbook</a></li>
-        <li><a aria-label="Advertising" href="advertising.html">Advertising</a></li>
+        <li><a aria-label="Advertising" href="advertising.html" aria-current="page">Advertising</a></li>
         <li><a aria-label="Staking" href="staking.html">Staking</a></li>
-
-        <div class="themeDots">
-          <div class="dot light" title="Light Theme"></div>
-          <div class="dot dark" title="Dark Theme"></div>
-          <div class="dot basic" title="Basic Theme"></div>
-        </div>
       </ul>
+
+      <div class="themeDots" aria-label="Theme switcher">
+        <button type="button" class="dot light" title="Light Theme" aria-label="Light Theme"></button>
+        <button type="button" class="dot dark" title="Dark Theme" aria-label="Dark Theme"></button>
+        <button type="button" class="dot basic" title="Basic Theme" aria-label="Basic Theme"></button>
+      </div>
     </nav>
-
-    <style>
-      .themeDots .dot {
-        display: inline-block;
-        width: 20px;
-        height: 20px;
-        border-radius: 50%;
-        margin: 5px;
-        cursor: pointer;
-        transition: transform 0.2s;
-      }
-      .themeDots .dot.light { background-color: #FFFFFF; }
-      .themeDots .dot.dark { background-color: #000000; }
-      .themeDots .dot.basic { background-color: var(--quinary-color); }
-      .themeDots .dot:hover { transform: scale(1.2); }
-    </style>
-
-    <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        document.querySelector('.themeDots .dot.light')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'light'));
-        document.querySelector('.themeDots .dot.dark')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'dark'));
-        document.querySelector('.themeDots .dot.basic')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'basic'));
-      });
-    </script>
   </header>
 
-  <main class="container">
-    <div class="warning-note">
+  <main class="page-wrap advertising-main">
+    <section class="advertising-hero">
+      <p class="eyebrow">Inpinity Advertising</p>
+      <h1>Curated Visibility for the Ecosystem</h1>
+      <p class="hero-lead">
+        Advertising on Inpinity is being rebuilt in a cleaner and more useful way. The goal is not spam or clutter, but curated placement that fits the Inpinity ecosystem, community trust, and future gameplay structure.
+      </p>
+    </section>
+
+    <section class="info-banner warning-note">
       <p>
         ⚠️ <strong>Important Update:</strong> We withdrew from ToshiMart due to phishing concerns.
         Only use the official INPI token:
         <code>0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</code>.
         All official contracts are listed on our <a href="index.html">homepage</a>.
       </p>
-    </div>
+    </section>
 
-    <div class="presale-note">
-      <p>🔥 <strong>PRESALE LIVE NOW:</strong> 2,000,000 INPI per 1 ETH until March 25, 2026.
+    <section class="info-banner presale-note">
+      <p>
+        🔥 <strong>PRESALE LIVE NOW:</strong> 2,000,000 INPI per 1 ETH until March 25, 2026.
         <a href="https://inpinity.online/token/" target="_blank" rel="noopener">👉 Join the Presale</a>
       </p>
-    </div>
+    </section>
 
-    <div class="page-wrap">
-      <div class="partners-section">
-        <div class="partner-item"><a href="https://base.org/" target="_blank" rel="noopener">⚡ Base L2</a></div>
-        <div class="partner-item"><a href="https://uniswap.org/" target="_blank" rel="noopener">🦄 Uniswap</a></div>
-      </div>
+    <section class="advertising-shell">
+      <div class="advertising-card">
+        <div class="pill-row">
+          <span class="pill">UNDER CONSTRUCTION</span>
+          <span class="pill">EARLY PARTNERS</span>
+          <span class="pill">CURATED ONLY</span>
+        </div>
 
-      <div class="uc-box">
-        <div class="pill">UNDER CONSTRUCTION</div>
-        <div class="pill">EARLY PARTNERS</div>
-        <h1 class="uc-title">📢 Advertising</h1>
-        <p class="uc-sub">
-          This page is currently being rebuilt. We are preparing a clean, non-intrusive way for partners
-          to get visibility inside the Inpinity ecosystem — without clutter, without spam, and aligned with gameplay.
+        <h2 class="section-title">📢 Advertising</h2>
+        <p class="section-sub">
+          We are preparing a clean, non-intrusive format for partner visibility across the Inpinity ecosystem — aligned with design, trust, and long-term utility.
         </p>
 
-        <div class="info-block">
-          <p><strong>What will “Advertising” mean in Inpinity?</strong></p>
-          <ul style="margin:0.6rem 0 0; padding-left:1.2rem;">
-            <li><strong>Partner visibility</strong> inside the Pi-Phi Pyramid dashboards (Mint / Map / Game) in a curated way.</li>
-            <li><strong>Collaboration-first</strong>: projects can become resources or events (see Partnerships on the Features page).</li>
-            <li><strong>Community safety</strong>: no shady links, no fake tokens, verified-only.</li>
+        <div class="content-box">
+          <h3>What “Advertising” will mean in Inpinity</h3>
+          <ul>
+            <li><strong>Curated partner visibility</strong> across pages like Mint, Map, Game and ecosystem hubs.</li>
+            <li><strong>Collaboration-first placement</strong> where projects can connect with partnerships, resources and future gameplay.</li>
+            <li><strong>Verified-only exposure</strong> with focus on safety, authenticity and long-term relevance.</li>
           </ul>
-          <p style="margin-top:0.8rem;">
-            Until it’s ready, please use <a href="features.html">Features</a> and <a href="collaboration.html">Collaboration</a> for partnership inquiries.
+        </div>
+
+        <div class="content-box">
+          <h3>Planned direction</h3>
+          <p>
+            Instead of noisy banners, Inpinity aims for ecosystem-native presentation: selected partnerships, curated project highlights, and integrations that feel useful inside the Pi-Phi Pyramid universe.
+          </p>
+          <p>
+            Until the full system is live, please use the <a href="collaboration.html">Collaboration</a> page and the <a href="features.html">Features</a> page for early partnership direction.
           </p>
         </div>
 
         <div class="cta-row">
           <a class="cta" href="collaboration.html">🤝 Become a Partner</a>
           <a class="cta secondary" href="features.html">✨ Partnership Vision</a>
-          <a class="cta secondary" href="game.html">🎮 Open Game</a>
         </div>
 
         <div class="contact-box">
@@ -289,27 +139,56 @@
           Discord: <a href="https://discord.gg/95yj6Eg6" target="_blank" rel="noopener">Join our Discord</a>
         </div>
       </div>
-    </div>
+    </section>
   </main>
 
-  <footer>
-    <p>© 2026 Inpinity. All rights reserved. Working with
-      <a href="https://base.org/" target="_blank" rel="noopener" style="color: gold;">Base</a>
-      and <a href="https://uniswap.org/" target="_blank" rel="noopener" style="color: gold;">Uniswap</a>.
-    </p>
+  <footer class="site-footer">
+    <p>© 2026 INPINITY. All rights reserved. Built on Base.</p>
     <div class="footer-links">
-      <a href="privacypolicy.html">Privacy Policy</a>
-      <a href="termsofuse.html">Terms of Use</a>
-      <a href="contact.html">Contact</a>
+      <a href="whitepaper.html">Whitepaper</a>
       <a href="faq.html">FAQ</a>
       <a href="guestbook.html">Guestbook</a>
       <a href="advertising.html">Advertising</a>
       <a href="staking.html">Staking</a>
-      <a href="whitepaper.html">Whitepaper</a>
       <a href="mint.html">Mint</a>
       <a href="map.html">Pyramid Map</a>
       <a href="game.html">Game</a>
+      <a href="contact.html">Contact</a>
     </div>
+    <p class="footer-version">Version 0.23.0</p>
   </footer>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const root = document.documentElement;
+      const dots = document.querySelectorAll(".themeDots .dot");
+
+      function applyTheme(theme) {
+        root.setAttribute("data-theme", theme);
+        try {
+          localStorage.setItem("inpinity-theme", theme);
+        } catch (_) {}
+
+        dots.forEach(dot => {
+          const active =
+            (theme === "light" && dot.classList.contains("light")) ||
+            (theme === "dark" && dot.classList.contains("dark")) ||
+            (theme === "basic" && dot.classList.contains("basic"));
+          dot.classList.toggle("active", active);
+        });
+      }
+
+      let savedTheme = "basic";
+      try {
+        savedTheme = localStorage.getItem("inpinity-theme") || "basic";
+      } catch (_) {}
+
+      applyTheme(savedTheme);
+
+      document.querySelector(".themeDots .dot.light")?.addEventListener("click", () => applyTheme("light"));
+      document.querySelector(".themeDots .dot.dark")?.addEventListener("click", () => applyTheme("dark"));
+      document.querySelector(".themeDots .dot.basic")?.addEventListener("click", () => applyTheme("basic"));
+    });
+  </script>
 </body>
 </html>
