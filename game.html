@@ -127,37 +127,6 @@
 
       <section class="panel">
         <div class="panel-head">
-          <h2 class="section-title">Mint a New Block</h2>
-          <p class="section-subtitle">
-            Choose coordinates, select a payment method, and mint a new Pyramid Block.
-          </p>
-        </div>
-
-        <div class="info-note">
-          <strong>Mint note:</strong><br>
-          Blocks paid with <strong>INPI</strong> are treated as burn-based payments.
-          Blocks paid with <strong>ETH</strong> are also treated as burn-based in practice, because that ETH is not accessible again.
-          This keeps minting aligned with long-term ecosystem reduction mechanics.
-        </div>
-
-        <div class="input-group">
-          <label>Row <input type="number" id="row" min="0" max="99" value="0"></label>
-          <label>Col <input type="number" id="col" min="0" max="198" value="0"></label>
-          <button class="random-btn" id="randomBlockBtn">🎲 Random free</button>
-        </div>
-
-        <div class="payment-options">
-          <label><input type="radio" name="payment" value="eth" checked> 0.003 ETH</label>
-          <label><input type="radio" name="payment" value="inpi"> 30 INPI</label>
-          <label><input type="radio" name="payment" value="mixed"> 0.0015 ETH + 15 INPI</label>
-        </div>
-
-        <button class="action-button" id="mintBtn">Mint Block</button>
-        <div id="mintMessage"></div>
-      </section>
-
-      <section class="panel">
-        <div class="panel-head">
           <h2 class="section-title">Block Actions</h2>
           <p class="section-subtitle">
             Manage the currently selected block: reveal, farm, claim, migrate, and protect it.
@@ -198,47 +167,82 @@
         <p id="noBlockSelected" class="empty-state">Select a block from the pyramid.</p>
       </section>
 
-      <section class="panel panel-wide">
-        <div class="panel-head">
-          <h2 class="section-title">Your Attacks</h2>
-          <p class="section-subtitle">
-            Review attacks you have started and execute them when they become ready.
-          </p>
-        </div>
-
-        <div id="userAttacksList" class="attacks-list">
-          <p class="empty-state">Connect wallet to see your attacks.</p>
-        </div>
-      </section>
-
       <section class="panel">
         <div class="panel-head">
-          <h2 class="section-title">Pirate Attack</h2>
+          <h2 class="section-title">Mint a New Block</h2>
           <p class="section-subtitle">
-            Choose a target block and resource lane to prepare an attack.
+            Choose coordinates, select a payment method, and mint a new Pyramid Block.
           </p>
+        </div>
+
+        <div class="info-note">
+          <strong>Mint note:</strong><br>
+          Blocks paid with <strong>INPI</strong> are treated as burn-based payments.
+          Blocks paid with <strong>ETH</strong> are also treated as burn-based in practice, because that ETH is not accessible again.
+          This keeps minting aligned with long-term ecosystem reduction mechanics.
         </div>
 
         <div class="input-group">
-          <label>Target Row <input type="number" id="attackRow" min="0" max="99"></label>
-          <label>Target Col <input type="number" id="attackCol" min="0" max="198"></label>
+          <label>Row <input type="number" id="row" min="0" max="99" value="0"></label>
+          <label>Col <input type="number" id="col" min="0" max="198" value="0"></label>
+          <button class="random-btn" id="randomBlockBtn">🎲 Random free</button>
         </div>
 
-        <div class="attack-resource-group">
-          <label class="select-label">Choose resource to steal:</label>
-          <select id="attackResourceSelect"></select>
+        <div class="payment-options">
+          <label><input type="radio" name="payment" value="eth" checked> 0.003 ETH</label>
+          <label><input type="radio" name="payment" value="inpi"> 30 INPI</label>
+          <label><input type="radio" name="payment" value="mixed"> 0.0015 ETH + 15 INPI</label>
         </div>
 
-        <div class="info-note" id="attackRulesInfo">
-          <strong>Attack check</strong><br>
-          Enter coordinates to analyze the target and see whether an attack path makes sense.
-        </div>
-
-        <button class="btn" id="attackBtn">Start Attack</button>
-        <div id="attackMessage"></div>
+        <button class="action-button" id="mintBtn">Mint Block</button>
+        <div id="mintMessage"></div>
       </section>
 
-      <section class="panel economy-panel">
+      <section class="panel panel-wide pirate-panel">
+        <div class="panel-head">
+          <h2 class="section-title">Pirate Attack</h2>
+          <p class="section-subtitle">
+            Choose a target block and resource lane to prepare an attack. Your active attacks are shown directly below.
+          </p>
+        </div>
+
+        <div class="pirate-layout">
+          <div class="pirate-left">
+            <div class="input-group">
+              <label>Target Row <input type="number" id="attackRow" min="0" max="99"></label>
+              <label>Target Col <input type="number" id="attackCol" min="0" max="198"></label>
+            </div>
+
+            <div class="attack-resource-group">
+              <label class="select-label">Choose resource to steal:</label>
+              <select id="attackResourceSelect"></select>
+            </div>
+
+            <div class="info-note" id="attackRulesInfo">
+              <strong>Attack check</strong><br>
+              Enter coordinates to analyze the target and see whether an attack path makes sense.
+            </div>
+
+            <button class="btn" id="attackBtn">Start Attack</button>
+            <div id="attackMessage"></div>
+          </div>
+
+          <div class="pirate-right">
+            <div class="panel-head inner-panel-head">
+              <h3 class="subsection-title">Your Attacks</h3>
+              <p class="section-subtitle">
+                Review attacks you have started and execute them when they become ready.
+              </p>
+            </div>
+
+            <div id="userAttacksList" class="attacks-list">
+              <p class="empty-state">Connect wallet to see your attacks.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel economy-panel panel-wide">
         <div class="panel-head">
           <h2 class="section-title">Pitrone Exchange & Resources</h2>
           <p class="section-subtitle">
