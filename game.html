@@ -81,6 +81,13 @@
       color: #ff6b6b;
       font-size: 0.8rem;
       padding: 0.2rem 0.5rem;
+      margin-left: 0.5rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+    }
+    
+    .cancel-attack-btn:hover {
+      background: #dc354540;
     }
     
     .action-badge {
@@ -97,11 +104,6 @@
       color: white;
     }
     
-    .badge-v4-migrate {
-      background: #dc3545;
-      color: white;
-    }
-    
     .attacker-selector {
       margin: 1rem 0;
       padding: 0.8rem;
@@ -110,29 +112,133 @@
       border-left: 3px solid #4a90e2;
     }
     
-    .attacker-option {
+    .resource-item {
       display: flex;
+      justify-content: space-between;
+      padding: 0.3rem 0;
+      border-bottom: 1px solid var(--border-dim);
+    }
+    
+    .resource-item:last-child {
+      border-bottom: none;
+    }
+    
+    .resource-name {
+      color: var(--text-dim);
+    }
+    
+    .resource-amount {
+      font-weight: 600;
+      color: var(--accent-primary);
+    }
+    
+    .attack-item {
+      display: flex;
+      justify-content: space-between;
       align-items: center;
+      padding: 0.8rem;
+      background: rgba(0,0,0,0.2);
+      border-radius: 0.8rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .attack-actions {
+      display: flex;
       gap: 0.5rem;
-      margin: 0.5rem 0;
+      align-items: center;
     }
     
-    .attacker-option input[type="radio"] {
-      width: auto;
-      margin-right: 0.5rem;
+    .execute-btn {
+      background: #27ae60;
+      color: white;
+      border: none;
+      padding: 0.4rem 0.8rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
     }
     
-    .attacker-badge {
-      background: #2c3e50;
+    .execute-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    
+    .farm-duration {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      margin-top: 0.3rem;
+    }
+    
+    .block-card {
+      position: relative;
+      padding: 0.8rem;
+      border-radius: 1rem;
+      background: rgba(0,0,0,0.2);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .block-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    
+    .block-card.selected {
+      border: 2px solid #4a90e2;
+      background: rgba(74, 144, 226, 0.1);
+    }
+    
+    .block-card.farming {
+      border-left: 4px solid #27ae60;
+    }
+    
+    .block-card.protected {
+      border-right: 4px solid #e67e22;
+    }
+    
+    .block-card.attacking {
+      border-top: 2px solid #e74c3c;
+    }
+    
+    .block-card.executable {
+      border-top: 2px solid #27ae60;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.7; }
+      100% { opacity: 1; }
+    }
+    
+    .rarity-badge {
+      display: inline-block;
       padding: 0.2rem 0.5rem;
       border-radius: 0.5rem;
-      font-size: 0.8rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      margin-top: 0.3rem;
     }
     
-    .attacker-badge.farming {
-      background: #27ae6020;
-      border: 1px solid #27ae60;
-      color: #27ae60;
+    .rarity-badge.bronze { background: #cd7f32; color: white; }
+    .rarity-badge.silver { background: #c0c0c0; color: #1a1a1a; }
+    .rarity-badge.gold { background: #ffd700; color: #1a1a1a; }
+    .rarity-badge.platinum { background: #e5e4e2; color: #1a1a1a; }
+    .rarity-badge.diamond { background: #b9f2ff; color: #1a1a1a; }
+    .rarity-badge.hidden-badge { background: #2c3e50; color: white; }
+    
+    .reveal-block-btn {
+      margin-top: 0.5rem;
+      width: 100%;
+      background: #3498db;
+      color: white;
+      border: none;
+      padding: 0.3rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+    }
+    
+    .reveal-block-btn:hover {
+      background: #2980b9;
     }
   </style>
 </head>
@@ -238,7 +344,7 @@
         <div class="panel-head">
           <h2 class="section-title">Block Actions <span class="v6-badge">V6</span></h2>
           <p class="section-subtitle">
-            Manage the currently selected block: reveal, farm, claim, migrate (V4→V6), and protect it.
+            Manage the currently selected block: reveal, farm, claim, and protect it.
           </p>
         </div>
 
@@ -252,12 +358,11 @@
             <button class="btn btn-small" id="farmingStartBtn" type="button">🌾 Start Farming (V6)</button>
             <button class="btn btn-small" id="farmingStopBtn" type="button">⏹️ Stop Farming</button>
             <button class="btn btn-small" id="claimBtn" type="button">💰 Claim Resources</button>
-            <button class="btn btn-small boost-btn" id="buyBoostBtn" type="button" style="display:none;">⚡ Buy Boost</button>
-            <button class="btn btn-small migrate-btn" id="migrateFarmBtn" type="button" style="display:none;">🔄 Migrate V4 → V6</button>
+            <button class="btn btn-small boost-btn" id="buyBoostBtn" type="button">⚡ Buy Boost</button>
           </div>
 
-          <!-- Boost options (initially hidden) -->
-          <div id="boostOptions" style="display:none; margin:1rem 0; padding:1rem; background:rgba(255,215,0,0.1); border-radius:0.8rem;">
+          <!-- Boost options -->
+          <div id="boostOptions" style="margin:1rem 0; padding:1rem; background:rgba(255,215,0,0.1); border-radius:0.8rem;">
             <h4 style="margin-top:0;">Buy Farming Boost</h4>
             <div class="input-group" style="grid-template-columns:1fr auto;">
               <input type="number" id="boostDays" min="1" max="30" value="7" placeholder="Days">
@@ -282,7 +387,7 @@
           
           <div class="action-group" style="margin-top:0.5rem;">
             <button class="btn btn-small" id="protectBtn" type="button">🛡️ Hire Mercenaries</button>
-            <button class="btn btn-small" id="extendProtectionBtn" type="button" style="display:none;">⏱️ Extend Protection</button>
+            <button class="btn btn-small" id="extendProtectionBtn" type="button">⏱️ Extend Protection</button>
           </div>
           
           <div id="protectMessage"></div>
@@ -343,12 +448,9 @@
               <label>Target Col <input type="number" id="attackCol" min="0" max="198" placeholder="e.g. 3"></label>
             </div>
 
-            <!-- V6: Attacker block selector (important for V6) -->
-            <div class="attacker-selector" id="attackerSelector" style="display:none;">
+            <!-- Attacker info (will be shown in preview) -->
+            <div class="attacker-selector" id="attackerSelector">
               <h4 style="margin:0 0 0.5rem; font-size:0.9rem;">Attack from block:</h4>
-              <div id="attackerOptions" class="attacker-options">
-                <!-- Will be populated by JS -->
-              </div>
               <p class="info-note" style="font-size:0.75rem; margin:0.5rem 0 0;">
                 Selected block from above is used as attacker. If none selected, first owned block is used.
               </p>
@@ -369,7 +471,6 @@
 
             <div class="action-group">
               <button class="btn" id="attackBtn" type="button">⚔️ Start Attack (V6)</button>
-              <button class="btn btn-small cancel-attack-btn" id="cancelAttackBtn" type="button" style="display:none;">✖️ Cancel Selected</button>
             </div>
             
             <div id="attackMessage"></div>
@@ -401,8 +502,6 @@
             <div id="userAttacksList" class="attacks-list">
               <p class="empty-state">Connect wallet to see your attacks.</p>
             </div>
-            
-            <!-- V6: Cancel attack button will appear in each attack item via JS -->
           </div>
         </div>
       </section>
@@ -505,7 +604,6 @@
           </p>
           <ul>
             <li>Enhanced attack preview with exact <strong>steal amount</strong></li>
-            <li>Better migration path from V4 → V6</li>
             <li>Pirate and Farming boosts with clear expiry</li>
             <li>Improved subgraph performance with farmV6S/attackV6S</li>
             <li>More accurate resource claiming previews</li>
@@ -540,17 +638,6 @@
             V6 attacks now show you the exact <strong>steal amount</strong> before you commit.
             You also have better control over which block attacks from, and can preview
             all resource lanes to find the most valuable target.
-          </p>
-        </div>
-      </details>
-
-      <details class="content-details">
-        <summary>How do I migrate a V4 farm to V6?</summary>
-        <div class="details-body">
-          <p>
-            Select a block with an active V4 farm (marked in UI), then click 
-            <strong>"Migrate V4 → V6"</strong>. The system will automatically claim any pending
-            V4 resources, stop the V4 farm, and start a fresh V6 farm on the same block.
           </p>
         </div>
       </details>
@@ -595,6 +682,13 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-  <script src="scripts/game.js"></script>
+  <!-- V6 Modules -->
+  <script type="module" src="./js/config.js"></script>
+  <script type="module" src="./js/abis.js"></script>
+  <script type="module" src="./js/state.js"></script>
+  <script type="module" src="./js/utils.js"></script>
+  <script type="module" src="./js/contracts.js"></script>
+  <script type="module" src="./js/subgraph.js"></script>
+  <script type="module" src="./js/game.js"></script>
 </body>
 </html>
