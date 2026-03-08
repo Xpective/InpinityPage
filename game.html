@@ -240,6 +240,103 @@
     .reveal-block-btn:hover {
       background: #2980b9;
     }
+
+    /* Neue Styles für Block Actions unter den NFTs */
+    .blocks-section {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .blocks-grid-container {
+      width: 100%;
+    }
+
+    .block-actions-container {
+      width: 100%;
+      background: rgba(0,0,0,0.2);
+      border-radius: 1.5rem;
+      padding: 1.5rem;
+      border: 1px solid var(--border-dim);
+      margin-top: 1rem;
+    }
+
+    .block-actions-container h3 {
+      color: #d4af37;
+      margin-top: 0;
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .action-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .action-card {
+      background: rgba(26, 35, 45, 0.8);
+      border-radius: 1rem;
+      padding: 1rem;
+      border: 1px solid #2a3f4a;
+      transition: all 0.2s;
+    }
+
+    .action-card:hover {
+      border-color: #d4af37;
+      transform: translateY(-2px);
+    }
+
+    .action-card h4 {
+      color: #98a9b9;
+      margin: 0 0 0.5rem 0;
+      font-size: 0.9rem;
+    }
+
+    .action-value {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #f0f4fa;
+    }
+
+    .protection-input-group {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      margin: 1rem 0;
+    }
+
+    .protection-input-group input {
+      flex: 1;
+      background: #0f1a22;
+      border: 1px solid #2a3f4a;
+      color: white;
+      padding: 0.6rem 1rem;
+      border-radius: 2rem;
+      outline: none;
+    }
+
+    .protection-input-group input:focus {
+      border-color: #d4af37;
+    }
+
+    .btn-small {
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+    }
+
+    .btn-warning {
+      background: #e67e22;
+      border-color: #d35400;
+    }
+
+    .btn-warning:hover {
+      background: #d35400;
+    }
   </style>
 </head>
 <body>
@@ -314,93 +411,104 @@
     </section>
 
     <section class="dashboard-grid">
-      <section class="panel panel-wide">
-        <div class="panel-head">
-          <h2 class="section-title">Your Pyramid Blocks</h2>
-          <p class="section-subtitle">
-            View your owned blocks, reveal hidden ones, track rarity, and select one for actions below.
-            <span class="badge-v6-farm action-badge">V6 Farming</span>
-          </p>
-        </div>
-
-        <div class="blocks-grid" id="blocksGrid">
-          <p class="empty-state">Connect wallet to see your blocks.</p>
-        </div>
-
-        <div id="selectedBlockInfo" class="selected-block-info" style="display: none;">
-          <h3>Selected Block <span class="v6-badge">Active</span></h3>
-          <p id="selectedBlockText">None</p>
-          <div id="blockResources" class="resources-grid"></div>
-          <div id="selectedBlockMeta" class="info-note" style="display: none; margin-top: 0.8rem;"></div>
-          
-          <!-- V6 Boost Status (will be populated by JS) -->
-          <div id="boostStatus" style="margin-top:0.5rem; display:none;">
-            <span class="boost-badge">⚡ Boost Active</span>
-          </div>
-        </div>
-      </section>
-
-      <section class="panel">
-        <div class="panel-head">
-          <h2 class="section-title">Block Actions <span class="v6-badge">V6</span></h2>
-          <p class="section-subtitle">
-            Manage the currently selected block: reveal, farm, claim, and protect it.
-          </p>
-        </div>
-
-        <div id="blockActions" style="display: none;">
-          <div class="action-context">
-            <p><strong id="selectedActionToken">Block #?</strong></p>
-          </div>
-
-          <div class="action-group">
-            <button class="btn btn-small" id="revealBtn" type="button">🔓 Reveal</button>
-            <button class="btn btn-small" id="farmingStartBtn" type="button">🌾 Start Farming (V6)</button>
-            <button class="btn btn-small" id="farmingStopBtn" type="button">⏹️ Stop Farming</button>
-            <button class="btn btn-small" id="claimBtn" type="button">💰 Claim Resources</button>
-            <button class="btn btn-small boost-btn" id="buyBoostBtn" type="button">⚡ Buy Boost</button>
-          </div>
-
-          <!-- Boost options -->
-          <div id="boostOptions" style="margin:1rem 0; padding:1rem; background:rgba(255,215,0,0.1); border-radius:0.8rem;">
-            <h4 style="margin-top:0;">Buy Farming Boost</h4>
-            <div class="input-group" style="grid-template-columns:1fr auto;">
-              <input type="number" id="boostDays" min="1" max="30" value="7" placeholder="Days">
-              <button class="btn btn-small" id="confirmBoostBtn" type="button">Confirm Boost</button>
+      <!-- LEFT COLUMN: Pyramid Blocks + Block Actions -->
+      <section class="panel panel-wide left-column">
+        <div class="blocks-section">
+          <!-- Pyramid Blocks Grid -->
+          <div class="blocks-grid-container">
+            <div class="panel-head">
+              <h2 class="section-title">Your Pyramid Blocks</h2>
+              <p class="section-subtitle">
+                View your owned blocks, reveal hidden ones, track rarity, and select one for actions below.
+                <span class="badge-v6-farm action-badge">V6 Farming</span>
+              </p>
             </div>
-            <p class="info-note" style="margin:0.5rem 0 0;">Boost increases resource production by 2x for the selected duration.</p>
+
+            <div class="blocks-grid" id="blocksGrid">
+              <p class="empty-state">Connect wallet to see your blocks.</p>
+            </div>
           </div>
 
-          <div id="actionMessage"></div>
+          <!-- Block Actions Container (direkt unter den Blöcken) -->
+          <div class="block-actions-container" id="blockActionsContainer" style="display: none;">
+            <h3>
+              <span>⚙️ Block Actions</span>
+              <span class="v6-badge">Selected Block</span>
+            </h3>
+            
+            <!-- Selected Block Info -->
+            <div id="selectedBlockInfo" class="selected-block-info">
+              <p id="selectedBlockText">None selected</p>
+              <div id="blockResources" class="resources-grid"></div>
+              <div id="selectedBlockMeta" class="info-note" style="display: none; margin-top: 0.8rem;"></div>
+            </div>
 
-          <div class="divider"></div>
+            <!-- Action Grid -->
+            <div class="action-grid">
+              <!-- Reveal Card -->
+              <div class="action-card">
+                <h4>🔓 Reveal</h4>
+                <div class="action-value" id="revealStatus">Hidden</div>
+                <button class="btn btn-small" id="revealBtn" style="width:100%; margin-top:0.5rem;" disabled>Reveal</button>
+              </div>
 
-          <h3 class="subsection-title">Mercenary Protection</h3>
-          <div class="info-note compact-note">
-            Protection applies to your selected block and can help reduce losses from attacks.
+              <!-- Farming Card -->
+              <div class="action-card">
+                <h4>🌾 Farming</h4>
+                <div class="action-value" id="farmingStatus">Inactive</div>
+                <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
+                  <button class="btn btn-small" id="farmingStartBtn" style="flex:1;" disabled>Start</button>
+                  <button class="btn btn-small" id="farmingStopBtn" style="flex:1;" disabled>Stop</button>
+                </div>
+              </div>
+
+              <!-- Claim Card -->
+              <div class="action-card">
+                <h4>💰 Claim</h4>
+                <div class="action-value" id="claimStatus">—</div>
+                <button class="btn btn-small" id="claimBtn" style="width:100%; margin-top:0.5rem;" disabled>Claim</button>
+              </div>
+
+              <!-- Boost Card -->
+              <div class="action-card">
+                <h4>⚡ Boost</h4>
+                <div class="action-value" id="boostStatus">Inactive</div>
+                <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
+                  <input type="number" id="boostDays" min="1" max="30" value="7" style="width:70px; background:#0f1a22; border:1px solid #2a3f4a; color:white; padding:0.3rem; border-radius:0.5rem;">
+                  <button class="btn btn-small boost-btn" id="buyBoostBtn" style="flex:1;" disabled>Buy</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Protection Section -->
+            <div style="margin-top:1.5rem; border-top:1px solid #2a3f4a; padding-top:1.5rem;">
+              <h4 style="color:#d4af37; margin-bottom:1rem;">🛡️ Mercenary Protection</h4>
+              
+              <div class="protection-input-group">
+                <input type="number" id="protectTokenId" readonly placeholder="Block ID">
+                <input type="number" id="protectLevel" min="0" max="50" value="10" placeholder="Level %">
+                <button class="btn btn-small" id="protectBtn">Hire</button>
+                <button class="btn btn-small btn-warning" id="extendProtectionBtn">Extend</button>
+              </div>
+
+              <div id="protectionStatus" style="margin-top:0.5rem; font-size:0.9rem; color:#98a9b9; display:none;">
+                Active until: <span id="protectionExpiry">—</span>
+              </div>
+            </div>
+
+            <!-- Action Messages -->
+            <div id="actionMessage" class="message" style="margin-top:1rem;"></div>
+            <div id="protectMessage" class="message" style="margin-top:0.5rem;"></div>
           </div>
 
-          <div class="input-group">
-            <label>Block ID <input type="number" id="protectTokenId" readonly></label>
-            <label>Protection % <input type="number" id="protectLevel" min="0" max="50" value="10"></label>
-          </div>
-          
-          <div class="action-group" style="margin-top:0.5rem;">
-            <button class="btn btn-small" id="protectBtn" type="button">🛡️ Hire Mercenaries</button>
-            <button class="btn btn-small" id="extendProtectionBtn" type="button">⏱️ Extend Protection</button>
-          </div>
-          
-          <div id="protectMessage"></div>
-          
-          <!-- Protection status -->
-          <div id="protectionStatus" style="margin-top:0.5rem; font-size:0.85rem; display:none;">
-            <span>Protection active until: <span id="protectionExpiry">—</span></span>
+          <!-- No Block Selected Message -->
+          <div id="noBlockSelected" class="empty-state" style="margin-top:1rem; display:block;">
+            Select a block from the pyramid above to see actions.
           </div>
         </div>
-
-        <p id="noBlockSelected" class="empty-state">Select a block from the pyramid.</p>
       </section>
 
+      <!-- RIGHT COLUMN: Mint, Attack, Exchange (bleibt gleich) -->
       <section class="panel">
         <div class="panel-head">
           <h2 class="section-title">Mint a New Block</h2>
