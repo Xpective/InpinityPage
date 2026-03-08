@@ -23,17 +23,19 @@
 }
 
 /* Grundlayout */
-[data-theme="dark"] body,
-[data-theme="dark"] html {
+[data-theme="dark"] html,
+[data-theme="dark"] body {
   background: var(--background-color);
   color: var(--text-color);
 }
 
+[data-theme="dark"] body,
 [data-theme="dark"] main,
 [data-theme="dark"] section,
 [data-theme="dark"] article,
-[data-theme="dark"] aside {
-  color: var(--text-color);
+[data-theme="dark"] aside,
+[data-theme="dark"] div {
+  color: inherit;
 }
 
 /* Headings */
@@ -44,28 +46,74 @@
 [data-theme="dark"] h5,
 [data-theme="dark"] h6,
 [data-theme="dark"] .section-title,
-[data-theme="dark"] .hero-title {
+[data-theme="dark"] .hero-title,
+[data-theme="dark"] .subsection-title {
   color: var(--quinary-color);
   text-shadow: none;
 }
 
-/* Texte */
+/* Fließtext */
 [data-theme="dark"] p,
 [data-theme="dark"] li,
-[data-theme="dark"] span,
 [data-theme="dark"] strong,
-[data-theme="dark"] label,
-[data-theme="dark"] summary,
+[data-theme="dark"] em,
+[data-theme="dark"] blockquote,
+[data-theme="dark"] td,
+[data-theme="dark"] th,
+[data-theme="dark"] .details-body,
+[data-theme="dark"] .details-body p,
+[data-theme="dark"] .details-body li,
+[data-theme="dark"] .details-body strong,
+[data-theme="dark"] .selected-block-info,
+[data-theme="dark"] .swap-card,
+[data-theme="dark"] .economy-stat-card,
+[data-theme="dark"] .exchange-info,
+[data-theme="dark"] .user-resources,
+[data-theme="dark"] .attack-item,
+[data-theme="dark"] .wallet-bar,
+[data-theme="dark"] .panel,
+[data-theme="dark"] .card-shell,
+[data-theme="dark"] .content-details,
+[data-theme="dark"] .token-card,
+[data-theme="dark"] .feature-card,
+[data-theme="dark"] .use-case-card,
+[data-theme="dark"] .audience-card,
+[data-theme="dark"] .contract-card,
+[data-theme="dark"] .tokenomics-section,
+[data-theme="dark"] .feature-panel,
+[data-theme="dark"] .next-step-panel,
+[data-theme="dark"] .highlight-item {
+  color: var(--text-color);
+}
+
+/* Nebentexte */
 [data-theme="dark"] .hero-lead,
 [data-theme="dark"] .section-subtitle,
 [data-theme="dark"] .eyebrow,
 [data-theme="dark"] .wallet-status,
 [data-theme="dark"] .empty-state,
 [data-theme="dark"] .hint,
-[data-theme="dark"] .details-body p,
-[data-theme="dark"] .info-note,
+[data-theme="dark"] .label,
+[data-theme="dark"] .balance-label,
+[data-theme="dark"] .resource-label,
+[data-theme="dark"] .footer-version,
+[data-theme="dark"] .chart-item .label,
+[data-theme="dark"] .presale-status p,
 [data-theme="dark"] .tokenomics-intro {
   color: var(--text-soft);
+}
+
+/* Kein globales Umfärben von spans */
+[data-theme="dark"] span {
+  color: inherit;
+}
+
+/* Labels */
+[data-theme="dark"] label,
+[data-theme="dark"] form label,
+[data-theme="dark"] .select-label {
+  color: var(--text-color);
+  font-weight: 600;
 }
 
 /* Navigation */
@@ -129,10 +177,32 @@
 [data-theme="dark"] .tokenomics-section,
 [data-theme="dark"] .feature-panel,
 [data-theme="dark"] .next-step-panel,
-[data-theme="dark"] .highlight-item {
+[data-theme="dark"] .highlight-item,
+[data-theme="dark"] details {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid var(--panel-border-dark);
   box-shadow: var(--panel-shadow-dark);
+  color: var(--text-color);
+}
+
+/* Details / FAQ */
+[data-theme="dark"] details,
+[data-theme="dark"] .content-details {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--panel-border-dark);
+}
+
+[data-theme="dark"] details summary,
+[data-theme="dark"] .content-details summary,
+[data-theme="dark"] summary {
+  color: var(--quinary-color);
+  font-weight: 700;
+}
+
+[data-theme="dark"] .details-body,
+[data-theme="dark"] .details-body p,
+[data-theme="dark"] .details-body li,
+[data-theme="dark"] .details-body strong {
   color: var(--text-color);
 }
 
@@ -169,7 +239,8 @@
 [data-theme="dark"] .presale-button,
 [data-theme="dark"] .cta-button,
 [data-theme="dark"] .reveal-block-btn,
-[data-theme="dark"] .copy-btn {
+[data-theme="dark"] .copy-btn,
+[data-theme="dark"] .attack-item .execute-btn {
   background: var(--quinary-color);
   color: #0f1220;
   border: none;
@@ -181,7 +252,8 @@
 [data-theme="dark"] .presale-button:hover,
 [data-theme="dark"] .cta-button:hover,
 [data-theme="dark"] .reveal-block-btn:hover,
-[data-theme="dark"] .copy-btn:hover {
+[data-theme="dark"] .copy-btn:hover,
+[data-theme="dark"] .attack-item .execute-btn:hover {
   opacity: 0.96;
 }
 
@@ -204,7 +276,14 @@
 [data-theme="dark"] .info-note {
   background: rgba(255, 255, 255, 0.04);
   border-left: 4px solid var(--quinary-color);
-  color: var(--text-soft);
+  color: var(--text-color);
+}
+
+[data-theme="dark"] .info-note strong,
+[data-theme="dark"] .info-note p,
+[data-theme="dark"] .info-note span,
+[data-theme="dark"] .info-note li {
+  color: var(--text-color);
 }
 
 /* Blockkarten */
@@ -258,7 +337,8 @@
 [data-theme="dark"] .balance-eth,
 [data-theme="dark"] .balance-pit,
 [data-theme="dark"] .live-badge,
-[data-theme="dark"] .percent {
+[data-theme="dark"] .percent,
+[data-theme="dark"] .section-title {
   color: var(--quinary-color);
 }
 
@@ -280,18 +360,6 @@
   color: var(--quinary-color);
 }
 
-/* Details / FAQ */
-[data-theme="dark"] details,
-[data-theme="dark"] .content-details {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--panel-border-dark);
-}
-
-[data-theme="dark"] details summary,
-[data-theme="dark"] .content-details summary {
-  color: var(--quinary-color);
-}
-
 /* Debug */
 [data-theme="dark"] .debug-log {
   color: #b7c8ff;
@@ -305,6 +373,17 @@
 
 [data-theme="dark"] .chart-item .label {
   color: var(--text-soft);
+}
+
+/* Formfelder */
+[data-theme="dark"] .contact-form input,
+[data-theme="dark"] .contact-form textarea,
+[data-theme="dark"] .contact-form select,
+[data-theme="dark"] form input,
+[data-theme="dark"] form textarea,
+[data-theme="dark"] form select {
+  color: var(--text-color);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 /* Mobile */
