@@ -23,17 +23,19 @@
 }
 
 /* Grundlayout */
-[data-theme="light"] body,
-[data-theme="light"] html {
+[data-theme="light"] html,
+[data-theme="light"] body {
   background: var(--background-color);
   color: var(--text-color);
 }
 
+[data-theme="light"] body,
 [data-theme="light"] main,
 [data-theme="light"] section,
 [data-theme="light"] article,
-[data-theme="light"] aside {
-  color: var(--text-color);
+[data-theme="light"] aside,
+[data-theme="light"] div {
+  color: inherit;
 }
 
 /* Headings */
@@ -44,28 +46,76 @@
 [data-theme="light"] h5,
 [data-theme="light"] h6,
 [data-theme="light"] .section-title,
-[data-theme="light"] .hero-title {
+[data-theme="light"] .hero-title,
+[data-theme="light"] .subsection-title {
   color: var(--quinary-color);
   text-shadow: none;
 }
 
-/* Normale Texte */
+/* Fließtext */
 [data-theme="light"] p,
 [data-theme="light"] li,
-[data-theme="light"] span,
 [data-theme="light"] strong,
-[data-theme="light"] label,
-[data-theme="light"] summary,
+[data-theme="light"] em,
+[data-theme="light"] blockquote,
+[data-theme="light"] td,
+[data-theme="light"] th,
+[data-theme="light"] .details-body,
+[data-theme="light"] .details-body p,
+[data-theme="light"] .details-body li,
+[data-theme="light"] .details-body strong,
+[data-theme="light"] .info-note,
+[data-theme="light"] .tokenomics-intro,
+[data-theme="light"] .wallet-address,
+[data-theme="light"] .resource-item,
+[data-theme="light"] .exchange-info,
+[data-theme="light"] .swap-card,
+[data-theme="light"] .selected-block-info,
+[data-theme="light"] .attack-item,
+[data-theme="light"] .economy-stat-card,
+[data-theme="light"] .user-resources,
+[data-theme="light"] .panel,
+[data-theme="light"] .card-shell,
+[data-theme="light"] .content-details,
+[data-theme="light"] .token-card,
+[data-theme="light"] .feature-card,
+[data-theme="light"] .use-case-card,
+[data-theme="light"] .audience-card,
+[data-theme="light"] .contract-card,
+[data-theme="light"] .feature-panel,
+[data-theme="light"] .highlight-item,
+[data-theme="light"] .next-step-panel {
+  color: var(--text-color);
+}
+
+/* Nebentexte */
 [data-theme="light"] .hero-lead,
 [data-theme="light"] .section-subtitle,
 [data-theme="light"] .eyebrow,
 [data-theme="light"] .wallet-status,
 [data-theme="light"] .empty-state,
 [data-theme="light"] .hint,
-[data-theme="light"] .details-body p,
-[data-theme="light"] .info-note,
-[data-theme="light"] .tokenomics-intro {
+[data-theme="light"] .label,
+[data-theme="light"] .balance-label,
+[data-theme="light"] .resource-label,
+[data-theme="light"] .footer-version,
+[data-theme="light"] .chart-item .label,
+[data-theme="light"] .token-card p + p,
+[data-theme="light"] .presale-status p {
   color: var(--text-soft);
+}
+
+/* Verhindert globales Verfärben von spans */
+[data-theme="light"] span {
+  color: inherit;
+}
+
+/* Labels */
+[data-theme="light"] label,
+[data-theme="light"] form label,
+[data-theme="light"] .select-label {
+  color: var(--text-color);
+  font-weight: 600;
 }
 
 /* Navigation */
@@ -128,10 +178,32 @@
 [data-theme="light"] .tokenomics-section,
 [data-theme="light"] .feature-panel,
 [data-theme="light"] .next-step-panel,
-[data-theme="light"] .highlight-item {
+[data-theme="light"] .highlight-item,
+[data-theme="light"] details {
   background: rgba(255, 255, 255, 0.68);
   border: 1px solid var(--panel-border-light);
   box-shadow: var(--panel-shadow-light);
+  color: var(--text-color);
+}
+
+/* Details / FAQ */
+[data-theme="light"] details,
+[data-theme="light"] .content-details {
+  background: rgba(255, 255, 255, 0.68);
+  border: 1px solid var(--panel-border-light);
+}
+
+[data-theme="light"] details summary,
+[data-theme="light"] .content-details summary,
+[data-theme="light"] summary {
+  color: var(--quinary-color);
+  font-weight: 700;
+}
+
+[data-theme="light"] .details-body,
+[data-theme="light"] .details-body p,
+[data-theme="light"] .details-body li,
+[data-theme="light"] .details-body strong {
   color: var(--text-color);
 }
 
@@ -168,7 +240,8 @@
 [data-theme="light"] .presale-button,
 [data-theme="light"] .cta-button,
 [data-theme="light"] .reveal-block-btn,
-[data-theme="light"] .copy-btn {
+[data-theme="light"] .copy-btn,
+[data-theme="light"] .attack-item .execute-btn {
   background: var(--quinary-color);
   color: #ffffff;
   border: none;
@@ -180,7 +253,8 @@
 [data-theme="light"] .presale-button:hover,
 [data-theme="light"] .cta-button:hover,
 [data-theme="light"] .reveal-block-btn:hover,
-[data-theme="light"] .copy-btn:hover {
+[data-theme="light"] .copy-btn:hover,
+[data-theme="light"] .attack-item .execute-btn:hover {
   opacity: 0.95;
 }
 
@@ -203,7 +277,7 @@
 [data-theme="light"] .info-note {
   background: rgba(106, 79, 179, 0.06);
   border-left: 4px solid var(--quinary-color);
-  color: var(--text-soft);
+  color: var(--text-color);
 }
 
 /* Blockkarten */
@@ -257,7 +331,8 @@
 [data-theme="light"] .balance-eth,
 [data-theme="light"] .balance-pit,
 [data-theme="light"] .live-badge,
-[data-theme="light"] .percent {
+[data-theme="light"] .percent,
+[data-theme="light"] .section-title {
   color: var(--quinary-color);
 }
 
@@ -279,18 +354,6 @@
   color: var(--quinary-color);
 }
 
-/* Details / FAQ */
-[data-theme="light"] details,
-[data-theme="light"] .content-details {
-  background: rgba(255, 255, 255, 0.68);
-  border: 1px solid var(--panel-border-light);
-}
-
-[data-theme="light"] details summary,
-[data-theme="light"] .content-details summary {
-  color: var(--quinary-color);
-}
-
 /* Debug */
 [data-theme="light"] .debug-log {
   color: #4b4370;
@@ -304,6 +367,17 @@
 
 [data-theme="light"] .chart-item .label {
   color: var(--text-soft);
+}
+
+/* Forms innerhalb von Light sauber lesbar */
+[data-theme="light"] .contact-form input,
+[data-theme="light"] .contact-form textarea,
+[data-theme="light"] .contact-form select,
+[data-theme="light"] form input,
+[data-theme="light"] form textarea,
+[data-theme="light"] form select {
+  color: var(--text-color);
+  background: rgba(255, 255, 255, 0.88);
 }
 
 /* Mobile */
