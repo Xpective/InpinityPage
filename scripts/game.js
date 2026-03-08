@@ -6,6 +6,7 @@
    - Reveal direkt in game.html
    - Subgraph nutzt farmV5S / attackV5S
    - ethers v5 kompatibel
+   - Wallet remember + disconnect
    ========================================================= */
 
 /* ==================== KONFIGURATION ==================== */
@@ -30,6 +31,7 @@ const PRICE_ETH_MIXED   = "0.0015";
 const PRICE_INPI_MIXED  = "15";
 
 const CLAIM_COOLDOWN_SEC = 24 * 60 * 60;
+const STORAGE_WALLET_FLAG = "inpinity_wallet_autoreconnect";
 
 /* ==================== ABIs ==================== */
 const NFT_ABI = [
@@ -154,6 +156,11 @@ function safeHTML(id, html){
   if(el) el.innerHTML = html;
 }
 
+function safeValue(id, val){
+  const el = document.getElementById(id);
+  if(el) el.value = val;
+}
+
 function formatTime(seconds){
   seconds = Math.max(0, Number(seconds || 0));
   if (seconds < 60) return seconds + "s";
@@ -197,6 +204,60 @@ function debugLog(message, data = null){
     logDiv.innerHTML = line + "\n" + logDiv.innerHTML;
   }
   console.log(message, data);
+}
+
+function setWalletUIConnected(addr){
+  safeHTML("walletStatus", "🟢 Connected");
+  safeHTML("walletAddress", shortenAddress(addr));
+
+  const connectBtn = document.getElementById("connectWallet");
+  if(connectBtn) connectBtn.innerText = "Wallet Connected";
+
+  const disconnectBtn = document.getElementById("disconnectWallet");
+  if(disconnectBtn) disconnectBtn.disabled = false;
+}
+
+function setWalletUIDisconnected(){
+  safeHTML("walletStatus", "🔴 Not connected");
+  safeHTML("walletAddress", "—");
+
+  safeText("balanceEth", "0 ETH");
+  safeText("balanceInpi", "0 INPI");
+  safeText("balancePit", "0 PIT");
+  safeText("userInpi", "0");
+  safeText("userPitrone", "0");
+  safeText("activeFarms", "0");
+
+  const connectBtn = document.getElementById("connectWallet");
+  if(connectBtn) connectBtn.innerText = "Connect Wallet";
+
+  const disconnectBtn = document.getElementById("disconnectWallet");
+  if(disconnectBtn) disconnectBtn.disabled = true;
+
+  const blocksGrid = document.getElementById("blocksGrid");
+  if(blocksGrid){
+    blocksGrid.innerHTML = `<p class="empty-state">Connect wallet to see your blocks.</p>`;
+  }
+
+  const userAttacksList = document.getElementById("userAttacksList");
+  if(userAttacksList){
+    userAttacksList.innerHTML = `<p class="empty-state">Connect wallet to see your attacks.</p>`;
+  }
+
+  const userResourcesEl = document.getElementById("userResources");
+  if(userResourcesEl){
+    userResourcesEl.innerHTML = `<p class="empty-state">Connect wallet to see your resource tokens.</p>`;
+  }
+
+  const selectedBlockInfo = document.getElementById("selectedBlockInfo");
+  const blockActions = document.getElementById("blockActions");
+  const noBlockSelected = document.getElementById("noBlockSelected");
+
+  if(selectedBlockInfo) selectedBlockInfo.style.display = "none";
+  if(blockActions) blockActions.style.display = "none";
+  if(noBlockSelected) noBlockSelected.style.display = "block";
+
+  safeValue("protectTokenId", "");
 }
 
 function getProduction(rarity, row){
@@ -425,12 +486,12 @@ function updateUserResourcesDisplay(){
   if(!container) return;
 
   if(!userAddress){
-    container.innerHTML = `<p style="color: var(--text-dim); grid-column: 1/-1; text-align:center;">Connect wallet to see your resource tokens.</p>`;
+    container.innerHTML = `<p class="empty-state">Connect wallet to see your resource tokens.</p>`;
     return;
   }
 
   if(!userResources || userResources.length === 0){
-    container.innerHTML = `<p style="color: var(--text-dim); grid-column: 1/-1; text-align:center;">You have no resource tokens yet. Start farming!</p>`;
+    container.innerHTML = `<p class="empty-state">You have no resource tokens yet. Start farming!</p>`;
     return;
   }
 
@@ -441,7 +502,7 @@ function updateUserResourcesDisplay(){
     const name = resourceNames[r.resourceId] || `Resource ${r.resourceId}`;
     const imgUrl = `https://inpinity.online/img/${r.resourceId}.PNG`;
     html += `
-      <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; background:#1b2630; border-radius:1rem; padding:0.5rem;">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; background:#1b2630; border-radius:1rem; padding:0.65rem;">
         <img src="${imgUrl}" alt="${name}" style="width:32px;height:32px;object-fit:contain;" onerror="this.style.display='none'">
         <span style="color:#d4af37; min-width:80px; font-weight:600;">${name}</span>
         <span style="font-weight:600; color:#f0f4fa;">${r.amount.toString()}</span>
@@ -471,7 +532,7 @@ async function loadUserBlocks(){
     userBlocks = (subgraphTokens || []).map(t => String(t.id));
 
     if(userBlocks.length === 0){
-      grid.innerHTML = `<p style="color:var(--text-dim); text-align:center;">You don’t own any blocks yet.</p>`;
+      grid.innerHTML = `<p class="empty-state">You don’t own any blocks yet.</p>`;
       safeText("activeFarms", "0");
       return;
     }
@@ -562,7 +623,7 @@ async function loadUserBlocks(){
     refreshBlockMarkings();
   }catch(e){
     console.error("loadUserBlocks error:", e);
-    grid.innerHTML = `<p style="color:var(--accent-red); text-align:center;">Failed to load blocks.</p>`;
+    grid.innerHTML = `<p style="color:var(--accent-danger); text-align:center;">Failed to load blocks.</p>`;
   }
 }
 
@@ -620,6 +681,7 @@ async function selectBlock(tokenId, row, col){
 
   safeText("selectedBlockText", `Block #${tokenId} (R${row}, C${col})${farmDur}`);
   safeText("selectedActionToken", `Block #${tokenId}`);
+  safeValue("protectTokenId", tokenId);
 
   const revealBtn = document.getElementById("revealBtn");
   if(revealBtn){
@@ -853,12 +915,12 @@ function displayUserAttacks(){
   if(!container) return;
 
   if(!userAddress){
-    container.innerHTML = `<p style="color: var(--text-dim);">Connect wallet to see your attacks.</p>`;
+    container.innerHTML = `<p class="empty-state">Connect wallet to see your attacks.</p>`;
     return;
   }
 
   if(userAttacks.length === 0){
-    container.innerHTML = `<p style="color: var(--text-dim);">No active attacks.</p>`;
+    container.innerHTML = `<p class="empty-state">No active attacks.</p>`;
     return;
   }
 
@@ -896,10 +958,9 @@ function displayUserAttacks(){
   document.querySelectorAll(".execute-btn").forEach(btn=>{
     btn.addEventListener("click", async ()=>{
       if(btn.disabled) return;
-      const attackId = btn.dataset.attackid;
       const targetTokenId = parseInt(btn.dataset.targetid, 10);
       const attackIndex = parseInt(btn.dataset.attackindex, 10);
-      await executeAttack(targetTokenId, attackIndex, attackId);
+      await executeAttack(targetTokenId, attackIndex);
     });
   });
 }
@@ -1173,7 +1234,6 @@ async function migrateFarmToV5(){
     msgDiv.innerHTML = `<span class="error">❌ ${e.reason || e.message}</span>`;
   }
 }
-
 /* ==================== ATTACK START ==================== */
 async function attack(){
   const attackRowEl = document.getElementById("attackRow");
@@ -1480,7 +1540,75 @@ async function mintBlock(){
 }
 
 /* ==================== WALLET ==================== */
-async function connectWallet(){
+function clearContracts(){
+  provider = null;
+  signer = null;
+  userAddress = null;
+
+  nftContract = null;
+  farmingV5Contract = null;
+  piratesV5Contract = null;
+  mercenaryV2Contract = null;
+  partnershipV2Contract = null;
+  inpiContract = null;
+  pitroneContract = null;
+  resourceTokenContract = null;
+  farmingV4Contract = null;
+
+  selectedBlock = null;
+  userBlocks = [];
+  userAttacks = [];
+  userResources = [];
+  cachedFarmsV5 = [];
+  cachedProtections = [];
+  cachedFarmV5Map = new Map();
+  cachedProtectionMap = new Map();
+}
+
+async function setupContracts(){
+  nftContract           = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
+  farmingV5Contract     = new ethers.Contract(FARMING_V5_ADDRESS, FARMING_V5_ABI, signer);
+  piratesV5Contract     = new ethers.Contract(PIRATES_V5_ADDRESS, PIRATES_V5_ABI, signer);
+  mercenaryV2Contract   = new ethers.Contract(MERCENARY_V2_ADDRESS, MERCENARY_V2_ABI, signer);
+  partnershipV2Contract = new ethers.Contract(PARTNERSHIP_V2_ADDRESS, PARTNERSHIP_V2_ABI, signer);
+  inpiContract          = new ethers.Contract(INPI_ADDRESS, INPI_ABI, signer);
+  pitroneContract       = new ethers.Contract(PITRONE_ADDRESS, PITRONE_ABI, signer);
+  resourceTokenContract = new ethers.Contract(RESOURCE_TOKEN_ADDRESS, RESOURCE_TOKEN_ABI, signer);
+  farmingV4Contract     = new ethers.Contract(FARMING_V4_ADDRESS, FARMING_V4_ABI, signer);
+}
+
+async function ensureBaseNetwork(){
+  const network = await provider.getNetwork();
+  if(network.chainId === 8453) return;
+
+  try{
+    await window.ethereum.request({
+      method:"wallet_switchEthereumChain",
+      params:[{ chainId:"0x2105" }]
+    });
+  }catch(e){
+    if(e.code === 4902){
+      await window.ethereum.request({
+        method: "wallet_addEthereumChain",
+        params: [{
+          chainId: "0x2105",
+          chainName: "Base Mainnet",
+          nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 },
+          rpcUrls: ["https://mainnet.base.org"],
+          blockExplorerUrls: ["https://basescan.org"]
+        }]
+      });
+    } else {
+      throw e;
+    }
+  }
+
+  provider = new ethers.providers.Web3Provider(window.ethereum);
+  signer = provider.getSigner();
+  userAddress = await signer.getAddress();
+}
+
+async function connectWallet(forceRequest = true){
   if(!window.ethereum) return alert("Please install MetaMask!");
   if(isConnecting) return;
   if(userAddress) return;
@@ -1489,56 +1617,26 @@ async function connectWallet(){
 
   try{
     provider = new ethers.providers.Web3Provider(window.ethereum);
-    await provider.send("eth_requestAccounts", []);
-    signer = provider.getSigner();
-    userAddress = await signer.getAddress();
 
-    const network = await provider.getNetwork();
-    if(network.chainId !== 8453){
-      try{
-        await window.ethereum.request({
-          method:"wallet_switchEthereumChain",
-          params:[{ chainId:"0x2105" }]
-        });
-        provider = new ethers.providers.Web3Provider(window.ethereum);
-        signer = provider.getSigner();
-        userAddress = await signer.getAddress();
-      }catch(e){
-        if(e.code === 4902){
-          await window.ethereum.request({
-            method: "wallet_addEthereumChain",
-            params: [{
-              chainId: "0x2105",
-              chainName: "Base Mainnet",
-              nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 },
-              rpcUrls: ["https://mainnet.base.org"],
-              blockExplorerUrls: ["https://basescan.org"]
-            }]
-          });
-          provider = new ethers.providers.Web3Provider(window.ethereum);
-          signer = provider.getSigner();
-          userAddress = await signer.getAddress();
-        } else {
-          throw e;
-        }
+    let accounts = [];
+    if(forceRequest){
+      accounts = await provider.send("eth_requestAccounts", []);
+    }else{
+      accounts = await provider.listAccounts();
+      if(!accounts || !accounts.length){
+        isConnecting = false;
+        return;
       }
     }
 
-    nftContract           = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
-    farmingV5Contract     = new ethers.Contract(FARMING_V5_ADDRESS, FARMING_V5_ABI, signer);
-    piratesV5Contract     = new ethers.Contract(PIRATES_V5_ADDRESS, PIRATES_V5_ABI, signer);
-    mercenaryV2Contract   = new ethers.Contract(MERCENARY_V2_ADDRESS, MERCENARY_V2_ABI, signer);
-    partnershipV2Contract = new ethers.Contract(PARTNERSHIP_V2_ADDRESS, PARTNERSHIP_V2_ABI, signer);
-    inpiContract          = new ethers.Contract(INPI_ADDRESS, INPI_ABI, signer);
-    pitroneContract       = new ethers.Contract(PITRONE_ADDRESS, PITRONE_ABI, signer);
-    resourceTokenContract = new ethers.Contract(RESOURCE_TOKEN_ADDRESS, RESOURCE_TOKEN_ABI, signer);
-    farmingV4Contract     = new ethers.Contract(FARMING_V4_ADDRESS, FARMING_V4_ABI, signer);
+    signer = provider.getSigner();
+    userAddress = accounts[0] || await signer.getAddress();
 
-    safeHTML("walletStatus", "🟢 Connected");
-    safeHTML("walletAddress", shortenAddress(userAddress));
+    await ensureBaseNetwork();
+    await setupContracts();
 
-    const connectBtn = document.getElementById("connectWallet");
-    if(connectBtn) connectBtn.innerText = "Wallet Connected";
+    localStorage.setItem(STORAGE_WALLET_FLAG, "1");
+    setWalletUIConnected(userAddress);
 
     initAttackResourceSelect();
 
@@ -1554,6 +1652,7 @@ async function connectWallet(){
     if(!attacksPoller){
       attacksPoller = setInterval(async ()=>{
         try{
+          if(!userAddress) return;
           await loadUserAttacks();
           refreshBlockMarkings();
         }catch(e){
@@ -1566,14 +1665,58 @@ async function connectWallet(){
   }catch(e){
     console.error(e);
     alert("Connection error: " + (e.reason || e.message));
-    userAddress = null;
+    clearContracts();
+    setWalletUIDisconnected();
   }finally{
     isConnecting = false;
   }
 }
 
+function disconnectWallet(){
+  localStorage.removeItem(STORAGE_WALLET_FLAG);
+
+  if(attacksTicker){
+    clearInterval(attacksTicker);
+    attacksTicker = null;
+  }
+
+  if(attacksPoller){
+    clearInterval(attacksPoller);
+    attacksPoller = null;
+  }
+
+  clearContracts();
+  setWalletUIDisconnected();
+  debugLog("Wallet disconnected");
+}
+
+/* ==================== WALLET EVENTS ==================== */
+function bindEthereumEvents(){
+  if(!window.ethereum || window.ethereum.__inpinityBound) return;
+
+  window.ethereum.on("accountsChanged", async (accounts) => {
+    if(!accounts || accounts.length === 0){
+      disconnectWallet();
+      return;
+    }
+
+    if(userAddress && accounts[0].toLowerCase() !== userAddress.toLowerCase()){
+      disconnectWallet();
+      await connectWallet(false);
+    }
+  });
+
+  window.ethereum.on("chainChanged", () => {
+    window.location.reload();
+  });
+
+  window.ethereum.__inpinityBound = true;
+}
+
 /* ==================== EVENT LISTENERS ==================== */
-document.getElementById("connectWallet")?.addEventListener("click", connectWallet);
+document.getElementById("connectWallet")?.addEventListener("click", () => connectWallet(true));
+document.getElementById("disconnectWallet")?.addEventListener("click", disconnectWallet);
+
 document.getElementById("attackBtn")?.addEventListener("click", attack);
 document.getElementById("protectBtn")?.addEventListener("click", protect);
 document.getElementById("revealBtn")?.addEventListener("click", revealSelected);
@@ -1595,6 +1738,14 @@ document.querySelectorAll('input[name="payment"]').forEach(radio => {
   });
 });
 
-if(window.ethereum && window.ethereum.selectedAddress){
-  connectWallet();
-}
+/* ==================== INIT ==================== */
+(function initGamePage(){
+  setWalletUIDisconnected();
+  initAttackResourceSelect();
+  bindEthereumEvents();
+
+  const shouldReconnect = localStorage.getItem(STORAGE_WALLET_FLAG) === "1";
+  if(shouldReconnect){
+    connectWallet(false);
+  }
+})();
