@@ -106,7 +106,7 @@
       <div class="card">
         <h3>📦 Partner Resources (ERC1155)</h3>
         <p>Resources are on-chain and visible, usable and tradable. A partnership can introduce:</p>
-        <p>• new resource type<br>• special “partner-only” drops<br>• city crafting ingredients for <strong>Inpinity City</strong></p>
+        <p>• new resource type<br>• special partner-only drops<br>• city crafting ingredients for <strong>Inpinity City</strong></p>
         <span class="tag">Roadmap + Live Core</span>
       </div>
 
@@ -135,21 +135,21 @@
         <h3>📬 Contact</h3>
         <p>If you want a partnership or collaboration, reach out:</p>
         <p>
-          <a href="mailto:xpective@inpinity.online" style="color:gold;">xpective@inpinity.online</a><br>
-          <a href="https://discord.gg/95yj6Eg6" target="_blank" rel="noopener" style="color:gold;">Discord</a>
+          <a href="mailto:xpective@inpinity.online">xpective@inpinity.online</a><br>
+          <a href="https://discord.gg/95yj6Eg6" target="_blank" rel="noopener">Discord</a>
         </p>
         <span class="tag">Fast Track</span>
       </div>
     </section>
 
-    <div class="mini-note section-wrap">
+    <div class="mini-note">
       <strong>Simple partnership flow:</strong>
       Partner provides token/collection → we define a resource mapping + rules →
       partner blocks (or events) can generate it → Inpinity City consumes it →
       both communities gain utility and visibility.
     </div>
 
-    <div class="genesis-section">
+    <section class="genesis-section">
       <div class="genesis-image">
         <img src="img/Inpioil.PNG" alt="Genesis Program Reward">
       </div>
@@ -187,7 +187,7 @@
 
         <div class="genesis-checkbox">
           <input type="checkbox" id="privacy" name="fi-checkbox-privacy" value="accepted" required>
-          <label for="privacy">I agree to the <a href="privacypolicy.html" target="_blank">Privacy Policy</a>.</label>
+          <label for="privacy">I agree to the <a href="privacypolicy.html" target="_blank" rel="noopener">Privacy Policy</a>.</label>
         </div>
 
         <input type="text" name="_gotcha" style="display:none;">
@@ -201,59 +201,11 @@
         <a href="privacypolicy.html">Privacy</a> ·
         <a href="termsofuse.html">Terms</a>
       </p>
-    </div>
+    </section>
 
     <section class="guestbook-section">
       <h2>✍️ Leave your mark</h2>
-      <p>
-        Sign the guestbook and become part of the Inpinity story.
-      </p>
+      <p>Sign the guestbook and become part of the Inpinity story.</p>
       <a href="guestbook.html" class="guestbook-link">📖 Go to Guestbook</a>
     </section>
-  </main>
-
-  <footer class="site-footer">
-    <p>© 2026 INPINITY. All rights reserved. Built on Base.</p>
-    <div class="footer-links">
-      <a href="privacypolicy.html">Privacy Policy</a>
-      <a href="termsofuse.html">Terms of Use</a>
-      <a href="contact.html">Contact</a>
-      <a href="faq.html">FAQ</a>
-      <a href="guestbook.html">Guestbook</a>
-      <a href="advertising.html">Advertising</a>
-      <a href="staking.html">Staking</a>
-      <a href="whitepaper.html">Whitepaper</a>
-      <a href="mint.html">Mint</a>
-      <a href="map.html">Pyramid Map</a>
-      <a href="game.html">Game</a>
-    </div>
-    <p class="footer-version">Version 0.23.0</p>
-  </footer>
-
-  <script src="https://forminit.com/sdk/v1/forminit.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const forminit = new Forminit();
-      const FORM_ID = '7ktpdl3xza8';
-
-      const form = document.getElementById('genesisForm');
-      const resultEl = document.getElementById('form-result');
-
-      form?.addEventListener('submit', async function(event) {
-        event.preventDefault();
-
-        const formData = new FormData(form);
-        const { error } = await forminit.submit(FORM_ID, formData);
-
-        if (error) {
-          resultEl.innerHTML = `<span class="error-message">❌ ${error.message}</span>`;
-          return;
-        }
-
-        resultEl.innerHTML = '<span class="success-message">✅ Application submitted! You will receive a confirmation email soon.</span>';
-        form.reset();
-      });
-    });
-  </script>
-</body>
-</html>
+ 
