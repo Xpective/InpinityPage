@@ -1,12 +1,12 @@
-=========================================================
-   INPINITY MAP – V5 ONLY
-   - FarmingV5 und PiratesV5 als einzige aktive Contracts
-   - Subgraph nur für V5 Entities (farmV5S, attackV5S)
-   - Preview-Funktionen für alle Aktionen
-   - Kein V4 mehr
-   - Fremder Block = Ziel
-   - Eigener Block = Angreifer
-   ========================================================= */
+// =========================================================
+// INPINITY MAP – V5 ONLY
+// - FarmingV5 und PiratesV5 als einzige aktive Contracts
+// - Subgraph nur für V5 Entities (farmV5S, attackV5S)
+// - Preview-Funktionen für alle Aktionen
+// - Kein V4 mehr
+// - Fremder Block = Ziel
+// - Eigener Block = Angreifer
+// =========================================================
 
 /* ==================== KONFIGURATION (NUR V5) ==================== */
 const WORKER_URL = "https://inpinity-worker-final.s-plat.workers.dev";
