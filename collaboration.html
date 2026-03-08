@@ -1,503 +1,211 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="basic">
 <head>
-  <meta charset="utf-8">
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <meta content="Inpinity - Collaboration, partnerships and Genesis Program for the Pi-Phi Pyramid ecosystem on Base." name="description">
-  <title>Inpinity - Collaboration & Partnerships</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>INPINITY – Collaboration</title>
 
-  <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/layout.css">
-  <link rel="stylesheet" href="css/animations.css">
-  <link rel="stylesheet" href="css/dark.css">
-  <link rel="stylesheet" href="css/light.css">
-  <link rel="stylesheet" href="css/responsive.css">
-  <link rel="stylesheet" href="css/color.css">
-  <link rel="stylesheet" href="css/adapted_about_us.css" />
-  <link rel="stylesheet" href="css/adapted_advertisements.css" />
-  <link rel="stylesheet" href="css/adapted_combined.css"/>
-  <link rel="stylesheet" href="css/adapted_comunity_guidelines.css" />
-  <link rel="stylesheet" href="css/adapted_course_feedback.css" />
-  <link rel="stylesheet" href="css/adapted_mft_marketplace.css"/>
-  <link rel="stylesheet" href="css/adapted_profile.css"/>
-  <link rel="stylesheet" href="css/combined_latest.css"/>
-  <link rel="stylesheet" href="css/gamification.css" />
-  <link rel="stylesheet" href="css/referral.css"/>
+  <link rel="icon" type="image/png" href="favicon.webp" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
 
-  <link rel="icon" type="image/png" href="favicon.webp">
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/dark.css" />
+  <link rel="stylesheet" href="css/light.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+  <link rel="stylesheet" href="css/color.css" />
+  <link rel="stylesheet" href="css/collaboration.css" />
 
-  <meta name="keywords" content="Inpinity, Pi Phi Pyramid, Partnerships, Collaboration, Genesis, Base, Uniswap, NFT Blocks, ERC1155 Resources, UE5">
-  <meta name="author" content="Xpective">
+  <meta name="description" content="Collaborate with Inpinity across development, art, resources, and Inpinity City." />
+  <meta name="keywords" content="Inpinity, Collaboration, Inpinity City, NFT, Game, Base, Resources, Partnership" />
+  <meta name="author" content="Inpinity Team" />
+  <meta property="og:title" content="Inpinity – Collaboration" />
+  <meta property="og:description" content="Build with Inpinity and contribute to the ecosystem, resources, and Inpinity City." />
+  <meta property="og:image" content="logo_background.jpg" />
+  <meta property="og:url" content="https://inpinity.online/collaboration.html" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="theme-color" content="#140f1f" />
+  <meta name="robots" content="index,follow" />
 
-  <meta property="og:title" content="Inpinity - Collaboration & Partnerships">
-  <meta property="og:description" content="Collaborate with Inpinity: partnerships, resource integrations, and Genesis Program for early supporters.">
-  <meta property="og:image" content="https://raw.githubusercontent.com/Xpective/InpinityPage/refs/heads/main/img/Inpioil.PNG">
-  <meta property="og:url" content="https://inpinity.online/collaboration.html">
-
-  <meta name="twitter:card" content="logo_background.webp">
-  <meta name="twitter:site" content="@unxpective">
-  <meta name="twitter:creator" content="@Inpinity1">
-  <meta name="robots" content="index,follow">
-
-  <style>
-    .partners-section {
-      display: flex;
-      justify-content: center;
-      align-items: stretch;
-      flex-wrap: wrap;
-      gap: 1rem;
-      margin: 1.6rem auto 0.8rem;
-      padding: 1.2rem;
-      background: rgba(0,0,0,0.3);
-      border-radius: 12px;
-      border: 1px solid #333;
-      max-width: 980px;
-    }
-    .partner-item { text-align: center; flex: 1 1 220px; }
-    .partner-item a {
-      display: inline-block;
-      padding: 0.75rem 1.5rem;
-      background: #2a2a2a;
-      border: 1px solid gold;
-      border-radius: 40px;
-      color: gold;
-      font-weight: 800;
-      text-decoration: none;
-      transition: all 0.2s;
-    }
-    .partner-item a:hover { background: gold; color: black; transform: scale(1.04); }
-    .partner-item p { margin-top: 0.6rem; font-size: 0.92rem; color: #cfcfcf; line-height: 1.45; }
-
-    .warning-note {
-      background: #332211;
-      border: 1px solid #ffaa00;
-      border-radius: 12px;
-      padding: 1rem 1.2rem;
-      margin: 2rem auto 1rem;
-      max-width: 980px;
-      text-align: center;
-      color: #eee;
-    }
-    .warning-note a { color: gold; }
-
-    .presale-note {
-      background: rgba(255,215,0,0.08);
-      border: 1px solid gold;
-      border-radius: 12px;
-      padding: 1rem 1.2rem;
-      margin: 1rem auto 1.2rem;
-      max-width: 980px;
-      text-align: center;
-      color: #eee;
-    }
-    .presale-note a { color: gold; font-weight: 900; }
-
-    .section-wrap { max-width: 980px; margin: 0 auto; padding: 0 1rem; }
-    .hero-title { text-align: center; color: gold; font-size: 2.2rem; margin: 1.2rem 0 0.4rem; }
-    .hero-sub { text-align: center; color: #ccc; margin: 0 0 1.3rem; line-height: 1.65; }
-
-    .cta-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      justify-content: center;
-      margin: 1.2rem auto 0;
-    }
-    .cta {
-      display: inline-block;
-      text-decoration: none;
-      font-weight: 900;
-      border-radius: 999px;
-      padding: 0.85rem 1.25rem;
-      border: 1px solid rgba(255,215,0,0.55);
-      color: #fff;
-      background: linear-gradient(135deg, #8A2BE2, #00FFFF);
-      transition: transform .15s, box-shadow .2s;
-    }
-    .cta:hover { transform: translateY(-1px); box-shadow: 0 0 18px rgba(255,215,0,0.25); }
-    .cta.secondary { background: rgba(255,215,0,0.08); color: gold; }
-
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1rem;
-      margin: 2rem auto 0;
-      max-width: 980px;
-      padding: 0 1rem;
-    }
-    .card {
-      background: rgba(20,20,20,0.9);
-      border: 1px solid rgba(255,215,0,0.55);
-      border-radius: 14px;
-      padding: 1.2rem 1.2rem 1.1rem;
-      color: #eee;
-      transition: transform .15s, box-shadow .2s;
-    }
-    .card:hover { transform: scale(1.01); box-shadow: 0 0 18px rgba(255,215,0,0.18); }
-    .card h3 { margin: 0 0 0.6rem; color: gold; font-size: 1.2rem; display:flex; gap:.5rem; align-items:center; }
-    .card p { margin: 0.25rem 0; color: #cfcfcf; line-height: 1.55; }
-    .tag {
-      display: inline-block;
-      margin-top: 0.8rem;
-      padding: 0.25rem 0.7rem;
-      border-radius: 999px;
-      border: 1px solid rgba(255,215,0,0.6);
-      color: gold;
-      font-size: 0.8rem;
-      background: rgba(255,215,0,0.07);
-      font-weight: 800;
-    }
-
-    .genesis-section {
-      max-width: 900px;
-      margin: 3.2rem auto 0;
-      padding: 2rem;
-      background: #1a1a1a;
-      border: 2px solid gold;
-      border-radius: 16px;
-      box-shadow: 0 0 30px rgba(255,215,0,0.18);
-    }
-    .genesis-image { text-align: center; margin-bottom: 1.6rem; }
-    .genesis-image img {
-      max-width: 260px;
-      height: auto;
-      border-radius: 12px;
-      border: 3px solid gold;
-      box-shadow: 0 0 18px rgba(255,215,0,0.25);
-    }
-    .genesis-title { color: gold; text-align: center; font-size: 2rem; margin: 0 0 0.4rem; }
-    .genesis-subtitle { text-align: center; color: #ccc; margin: 0 0 1.4rem; font-size: 1.1rem; line-height: 1.55; }
-    .whitelist-badge {
-      background: gold;
-      color: black;
-      padding: 0.2rem 0.55rem;
-      border-radius: 20px;
-      font-weight: 900;
-      font-size: 0.8rem;
-      display: inline-block;
-      margin-left: 0.5rem;
-      vertical-align: middle;
-    }
-
-    .genesis-form label { display: block; color: gold; margin-bottom: 0.5rem; font-weight: 900; }
-    .genesis-form input:not([type="checkbox"]), .genesis-form textarea {
-      width: 100%;
-      padding: 0.75rem;
-      margin-bottom: 1.1rem;
-      background: #222;
-      border: 1px solid #444;
-      border-radius: 10px;
-      color: white;
-      font-size: 1rem;
-    }
-    .genesis-form input:focus, .genesis-form textarea:focus {
-      outline: none;
-      border-color: gold;
-      box-shadow: 0 0 6px rgba(255,215,0,0.55);
-    }
-    .genesis-checkbox { display:flex; align-items:center; gap:.55rem; margin-bottom: 1.1rem; }
-    .genesis-checkbox label { color:#ccc; font-weight: normal; margin:0; }
-    .genesis-button {
-      background: gold;
-      color: black;
-      border: none;
-      padding: 1rem 2rem;
-      border-radius: 40px;
-      font-weight: 900;
-      font-size: 1.15rem;
-      cursor: pointer;
-      transition: transform .15s, box-shadow .2s;
-      width: 100%;
-    }
-    .genesis-button:hover { transform: scale(1.01); box-shadow: 0 0 16px rgba(255,215,0,0.45); }
-
-    #form-result { text-align:center; margin-top: 1rem; font-weight: 900; }
-    .success-message { color: #00aa00; }
-    .error-message { color: #ff4444; }
-
-    .mini-note {
-      max-width: 980px;
-      margin: 1.6rem auto 0;
-      padding: 1rem 1.2rem;
-      border-radius: 12px;
-      border: 1px solid rgba(255,215,0,0.3);
-      background: rgba(255,215,0,0.06);
-      color: #ddd;
-      line-height: 1.6;
-    }
-    .mini-note strong { color: gold; }
-
-    .guestbook-link {
-      display: inline-block;
-      margin: 1.6rem auto 0;
-      padding: 0.95rem 2rem;
-      background: gold;
-      color: black;
-      font-weight: 900;
-      border-radius: 40px;
-      text-decoration: none;
-      font-size: 1.15rem;
-      transition: transform 0.2s, box-shadow 0.2s;
-      border: none;
-      cursor: pointer;
-    }
-    .guestbook-link:hover { transform: scale(1.04); box-shadow: 0 0 15px rgba(255,215,0,0.55); }
-  </style>
+  <script defer src="main.js"></script>
 </head>
 
-<body>
-<header>
-  <nav>
-    <ul>
-      <li><a aria-label="Home" href="index.html">Home</a></li>
-      <li><a aria-label="Features" href="features.html">Features</a></li>
-      <li><a aria-label="Game" href="game.html">Game</a></li>
-      <li><a aria-label="Mint" href="mint.html">Mint</a></li>
-      <li><a aria-label="Pyramid Map" href="map.html">Pyramid Map</a></li>
-      <li><a aria-label="Collaboration" href="collaboration.html">Collaboration</a></li>
-      <li><a aria-label="About" href="about.html">About</a></li>
-      <li><a aria-label="Whitepaper" href="whitepaper.html">Whitepaper</a></li>
-      <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
-      <li><a aria-label="Guestbook" href="guestbook.html">Guestbook</a></li>
-      <li><a aria-label="Advertising" href="advertising.html">Advertising</a></li>
-      <li><a aria-label="Staking" href="staking.html">Staking</a></li>
+<body class="collaboration-page">
+  <header class="site-header">
+    <nav class="site-nav" aria-label="Main navigation">
+      <ul class="nav-list">
+        <li><a aria-label="Home" href="index.html">Home</a></li>
+        <li><a aria-label="Features" href="features.html">Features</a></li>
+        <li><a aria-label="Game" href="game.html">Game</a></li>
+        <li><a aria-label="Mint" href="mint.html">Mint</a></li>
+        <li><a aria-label="Pyramid Map" href="map.html">Pyramid Map</a></li>
+        <li><a aria-label="Collaboration" href="collaboration.html" aria-current="page">Collaboration</a></li>
+        <li><a aria-label="About" href="about.html">About</a></li>
+        <li><a aria-label="Whitepaper" href="whitepaper.html">Whitepaper</a></li>
+        <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
+        <li><a aria-label="Guestbook" href="guestbook.html">Guestbook</a></li>
+        <li><a aria-label="Advertising" href="advertising.html">Advertising</a></li>
+        <li><a aria-label="Staking" href="staking.html">Staking</a></li>
+      </ul>
 
-      <div class="themeDots">
-        <div class="dot light" title="Light Theme"></div>
-        <div class="dot dark" title="Dark Theme"></div>
-        <div class="dot basic" title="Basic Theme"></div>
+      <div class="themeDots" aria-label="Theme switcher">
+        <button type="button" class="dot light" title="Light Theme" aria-label="Light Theme"></button>
+        <button type="button" class="dot dark" title="Dark Theme" aria-label="Dark Theme"></button>
+        <button type="button" class="dot basic" title="Basic Theme" aria-label="Basic Theme"></button>
       </div>
-    </ul>
-  </nav>
+    </nav>
+  </header>
 
-  <style>
-    .themeDots .dot{display:inline-block;width:20px;height:20px;border-radius:50%;margin:5px;cursor:pointer;transition:transform .2s}
-    .themeDots .dot.light{background-color:#FFF}
-    .themeDots .dot.dark{background-color:#000}
-    .themeDots .dot.basic{background-color:var(--quinary-color)}
-    .themeDots .dot:hover{transform:scale(1.2)}
-  </style>
-  <script>
-    document.addEventListener('DOMContentLoaded',()=>{
-      document.querySelector('.themeDots .dot.light')?.addEventListener('click',()=>document.body.setAttribute('data-theme','light'));
-      document.querySelector('.themeDots .dot.dark')?.addEventListener('click',()=>document.body.setAttribute('data-theme','dark'));
-      document.querySelector('.themeDots .dot.basic')?.addEventListener('click',()=>document.body.setAttribute('data-theme','basic'));
-    });
-  </script>
-</header>
-
-<main>
-  <div class="warning-note">
-    <p>
-      ⚠️ <strong>Security Notice:</strong> We withdrew from ToshiMart due to phishing concerns.
-      Always use the official contracts listed on the <a href="index.html">homepage</a>.
-    </p>
-  </div>
-
-  <div class="presale-note">
-    <p>
-      🔥 <strong>PRESALE LIVE:</strong> 2,000,000 INPI per 1 ETH until March 25, 2026.
-      <a href="https://inpinity.online/token/" target="_blank" rel="noopener">👉 Join the Presale</a>
-    </p>
-  </div>
-
-  <section class="section-wrap">
-    <h1 class="hero-title">🤝 Collaboration & Partnerships</h1>
-    <p class="hero-sub">
-      Inpinity is built to collaborate: creators, communities, and projects can plug into the Pyramid.
-      Partnerships can unlock <strong>special resources</strong>, <strong>partner blocks</strong>, and future
-      <strong>Infinite City</strong> utilities — with a path into the upcoming <strong>UE5 game</strong>.
-    </p>
-
-    <div class="cta-row">
-      <a class="cta" href="mint.html">⛏️ Mint a Block</a>
-      <a class="cta secondary" href="game.html">🎮 Open Game</a>
-      <a class="cta secondary" href="map.html">🗺️ Open Map</a>
-    </div>
-  </section>
-
-  <section>
-    <div class="partners-section">
-      <div class="partner-item">
-        <a href="https://base.org/" target="_blank" rel="noopener">⚡ Base L2</a>
-        <p>Fast & low-cost execution for on-chain gameplay.</p>
-      </div>
-      <div class="partner-item">
-        <a href="https://uniswap.org/" target="_blank" rel="noopener">🦄 Uniswap</a>
-        <p>Liquidity layer for the ecosystem economy.</p>
-      </div>
-      <div class="partner-item">
-        <a href="https://opensea.io/collection/inpinity-pyramid-447084512" target="_blank" rel="noopener">🧱 Pyramid NFTs</a>
-        <p>The Block collection: mint → reveal → farm → defend → attack.</p>
-      </div>
-      <div class="partner-item">
-        <a href="https://opensea.io/collection/0x71e76a6065197acdd1a4d6b736712f80d1fd3d8b" target="_blank" rel="noopener">📦 Resources</a>
-        <p>ERC1155 resources used for gameplay and upgrades.</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="cards">
-    <div class="card">
-      <h3>🧬 What a Partnership Means</h3>
-      <p>We can integrate partner communities directly into the Pyramid economy.</p>
-      <p><strong>Partner token / NFT → becomes a special resource</strong> (or unlocks one) used in gameplay, protection, boosts, and future city upgrades.</p>
-      <span class="tag">Open for Partners</span>
-    </div>
-
-    <div class="card">
-      <h3>📦 Partner Resources (ERC1155)</h3>
-      <p>Resources are on-chain and visible, usable and tradable. A partnership can introduce:</p>
-      <p>• new resource type<br>• special “partner-only” drops<br>• city crafting ingredients (Infinite City)</p>
-      <span class="tag">Roadmap + Live Core</span>
-    </div>
-
-    <div class="card">
-      <h3>⭐ Partner Blocks</h3>
-      <p>Partner blocks can be marked as “special” and linked to collaborations.</p>
-      <p>Those blocks can unlock unique rewards, airdrops, and special production rules (event-based).</p>
-      <span class="tag">PartnershipV2</span>
-    </div>
-
-    <div class="card">
-      <h3>🏙️ Infinite City (Coming)</h3>
-      <p>City upgrades will consume resources and unlock utilities:</p>
-      <p>• production boosts<br>• defense layers<br>• new mechanics & quests</p>
-      <span class="tag">Roadmap</span>
-    </div>
-
-    <div class="card">
-      <h3>🎮 UE5 Game (Coming)</h3>
-      <p>The long-term direction: play Inpinity in UE5 where your on-chain Pyramid becomes your strategy layer.</p>
-      <p>Blocks, resources, partnerships and city upgrades will become playable progression.</p>
-      <span class="tag">Roadmap</span>
-    </div>
-
-    <div class="card">
-      <h3>📬 Contact</h3>
-      <p>If you want a partnership or collaboration, reach out:</p>
-      <p><a href="mailto:xpective@inpinity.online" style="color:gold;">xpective@inpinity.online</a><br>
-      <a href="https://discord.gg/95yj6Eg6" target="_blank" rel="noopener" style="color:gold;">Discord</a></p>
-      <span class="tag">Fast Track</span>
-    </div>
-  </section>
-
-  <div class="mini-note section-wrap">
-    <strong>Simple partnership flow:</strong>
-    Partner provides token/collection → we define a resource mapping + rules →
-    partner blocks (or events) can generate it → Infinite City consumes it →
-    both communities gain utility and visibility.
-  </div>
-
-  <!-- GENESIS PROGRAM (kept, but aligned to the new page) -->
-  <div class="genesis-section">
-    <div class="genesis-image">
-      <img src="https://raw.githubusercontent.com/Xpective/InpinityPage/refs/heads/main/img/Inpioil.PNG" alt="Genesis Program Reward">
-    </div>
-
-    <h2 class="genesis-title">🌟 Genesis Member Program <span class="whitelist-badge">WHITELIST</span></h2>
-    <p class="genesis-subtitle">
-      Early supporters help bootstrap the ecosystem and receive exclusive real-world rewards.
-      Limited slots — first come, first served.
-    </p>
-
-    <div style="background:#2a2a2a;border-left:4px solid gold;padding:1rem;border-radius:0 10px 10px 0;margin-bottom:1.4rem;">
-      <p style="margin:0;color:#ddd;line-height:1.55;">
-        <strong>🎁 Genesis reward package:</strong><br>
-        • Genesis bonus (from reserve)<br>
-        • Premium olive oil reward (shipping after milestones)<br>
-        • Whitelist access for future drops & partner events
+  <main class="page-wrap">
+    <section class="collab-hero">
+      <p class="eyebrow">Inpinity Collaboration</p>
+      <h1>Build with Inpinity</h1>
+      <h2>Development, art, resources, and ecosystem expansion around Inpinity City.</h2>
+      <p class="hero-lead">
+        Inpinity is designed as a growing ecosystem where creators, developers, strategists, and builders can contribute to a shared vision.
+        Collaboration is not only about promotion — it is about shaping systems, assets, mechanics, and long-term value together.
       </p>
-    </div>
+    </section>
 
-    <form id="genesisForm" class="genesis-form">
-      <label for="firstName">First name</label>
-      <input type="text" id="firstName" name="fi-sender-firstName" required placeholder="John">
+    <section class="oil-spotlight card-box">
+      <div class="oil-spotlight-media">
+        <img src="img/oil.png" alt="Inpinity Oil Resource" class="oil-image" />
+      </div>
+      <div class="oil-spotlight-copy">
+        <p class="eyebrow">Central Resource</p>
+        <h2>Oil at the center</h2>
+        <p class="muted">
+          Oil stands as one of the key strategic resources in the ecosystem and represents energy, growth, movement, and expansion.
+          It connects resource production, crafting potential, and the long-term vision behind <strong>Inpinity City</strong>.
+        </p>
+      </div>
+    </section>
 
-      <label for="lastName">Last name</label>
-      <input type="text" id="lastName" name="fi-sender-lastName" required placeholder="Doe">
-
-      <label for="email">Email address</label>
-      <input type="email" id="email" name="fi-sender-email" required placeholder="john@example.com">
-
-      <label for="wallet">Your wallet address (0x...)</label>
-      <input type="text" id="wallet" name="fi-text-wallet" required pattern="0x[a-fA-F0-9]{40}" placeholder="0x...">
-
-      <label for="address">Shipping address (street, city, postal code, country)</label>
-      <textarea id="address" name="fi-sender-address" required rows="3" placeholder="Street, 12345 City, Country"></textarea>
-
-      <div class="genesis-checkbox">
-        <input type="checkbox" id="privacy" name="fi-checkbox-privacy" value="accepted" required>
-        <label for="privacy">I agree to the <a href="privacypolicy.html" target="_blank" style="color:gold;">Privacy Policy</a>.</label>
+    <section class="section-block">
+      <div class="section-head">
+        <h2 class="section-title">Why collaborate with Inpinity?</h2>
+        <p class="section-subtitle">
+          The ecosystem brings together game systems, resource mechanics, NFTs, strategy, and future city-building structures in one evolving framework.
+        </p>
       </div>
 
-      <input type="text" name="_gotcha" style="display:none;">
+      <div class="collab-grid">
+        <article class="card-box collab-card">
+          <h3>Development</h3>
+          <p class="muted">
+            Collaborate on frontend systems, smart contract integration, gameplay loops, UI improvements, dashboards, map logic, and ecosystem tools.
+          </p>
+        </article>
 
-      <button type="submit" class="genesis-button">📬 Apply for Genesis / Whitelist</button>
-    </form>
+        <article class="card-box collab-card">
+          <h3>Art & Assets</h3>
+          <p class="muted">
+            Help shape the visual identity of resources, city systems, items, block presentation, and future world-building assets.
+          </p>
+        </article>
 
-    <p id="form-result"></p>
+        <article class="card-box collab-card">
+          <h3>Economy & Resources</h3>
+          <p class="muted">
+            Contribute to balancing, exchange ideas, resource flows, progression loops, and meaningful interactions between assets and strategy.
+          </p>
+        </article>
 
-    <p style="text-align:center;color:#aaa;font-size:0.9rem;margin-top:1rem;">
-      <a href="privacypolicy.html" style="color:gold;text-decoration:none;">Privacy</a> ·
-      <a href="termsofuse.html" style="color:gold;text-decoration:none;">Terms</a>
-    </p>
-  </div>
+        <article class="card-box collab-card">
+          <h3>Community & Vision</h3>
+          <p class="muted">
+            Join in building the culture, direction, partnerships, and expansion paths around Inpinity and Inpinity City.
+          </p>
+        </article>
+      </div>
+    </section>
 
-  <section style="text-align:center;margin:2.6rem 0 0;">
-    <h2 style="color:gold;">✍️ Leave your mark</h2>
-    <p style="max-width:720px;margin:0.6rem auto 0;color:#ccc;line-height:1.6;">
-      Sign the guestbook and become part of the Inpinity story.
-    </p>
-    <a href="guestbook.html" class="guestbook-link">📖 Go to Guestbook</a>
-  </section>
-</main>
+    <section class="section-block">
+      <div class="section-head">
+        <h2 class="section-title">Inpinity City</h2>
+        <p class="section-subtitle">
+          Inpinity City is the collaborative layer where shared structures, resources, and strategic development come together.
+        </p>
+      </div>
 
-<footer>
-  <p>© 2026 Inpinity. All rights reserved. Working with
-    <a href="https://base.org/" target="_blank" rel="noopener" style="color: gold;">Base</a>
-    and <a href="https://uniswap.org/" target="_blank" rel="noopener" style="color: gold;">Uniswap</a>.
-  </p>
-  <div class="footer-links">
-    <a href="privacypolicy.html">Privacy Policy</a>
-    <a href="termsofuse.html">Terms of Use</a>
-    <a href="contact.html">Contact</a>
-    <a href="faq.html">FAQ</a>
-    <a href="guestbook.html">Guestbook</a>
-    <a href="advertising.html">Advertising</a>
-    <a href="staking.html">Staking</a>
-    <a href="whitepaper.html">Whitepaper</a>
-    <a href="mint.html">Mint</a>
-    <a href="map.html">Pyramid Map</a>
-    <a href="game.html">Game</a>
-  </div>
-</footer>
+      <div class="city-layout">
+        <article class="card-box city-card">
+          <h3>Shared construction</h3>
+          <p class="muted">
+            Inpinity City is intended as a space for collective growth, where systems, buildings, and long-term expansion can emerge through contribution and coordination.
+          </p>
+        </article>
 
-<!-- Forminit SDK -->
-<script src="https://forminit.com/sdk/v1/forminit.js"></script>
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const forminit = new Forminit();
-    const FORM_ID = '7ktpdl3xza8';
+        <article class="card-box city-card">
+          <h3>Resource-driven expansion</h3>
+          <p class="muted">
+            Core resources like Oil, Lemons, Iron, Gold, and others can become the foundation for city structures, upgrades, and advanced strategic systems.
+          </p>
+        </article>
 
-    const form = document.getElementById('genesisForm');
-    const resultEl = document.getElementById('form-result');
+        <article class="card-box city-card">
+          <h3>Future gameplay layer</h3>
+          <p class="muted">
+            The city layer can grow into a broader system of ownership, collaboration, crafting, exchange, defense, and coordinated progression.
+          </p>
+        </article>
+      </div>
+    </section>
 
-    form.addEventListener('submit', async function(event) {
-      event.preventDefault();
+    <section class="section-block">
+      <div class="section-head">
+        <h2 class="section-title">Who can collaborate?</h2>
+        <p class="section-subtitle">
+          Inpinity is open to different kinds of contributors who want to help shape the ecosystem.
+        </p>
+      </div>
 
-      const formData = new FormData(form);
-      const { error } = await forminit.submit(FORM_ID, formData);
+      <div class="collab-grid three-cols">
+        <article class="card-box role-card">
+          <h3>Developers</h3>
+          <p class="muted">Frontend, contracts, integrations, UI systems, tools, and game-support logic.</p>
+        </article>
 
-      if (error) {
-        resultEl.innerHTML = `<span class="error-message">❌ ${error.message}</span>`;
-        return;
-      }
+        <article class="card-box role-card">
+          <h3>Designers & Artists</h3>
+          <p class="muted">Resources, items, city visuals, icons, branding, and ecosystem identity.</p>
+        </article>
 
-      resultEl.innerHTML = '<span class="success-message">✅ Application submitted! You will receive a confirmation email soon.</span>';
-      form.reset();
-    });
-  });
-</script>
+        <article class="card-box role-card">
+          <h3>Strategic Partners</h3>
+          <p class="muted">Community growth, aligned projects, content collaboration, and ecosystem support.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="collab-cta card-box">
+      <p class="eyebrow">Next step</p>
+      <h2>Start a collaboration</h2>
+      <p class="muted">
+        If you want to contribute to the ecosystem, help shape Inpinity City, or explore a strategic partnership, get in touch and describe how you want to build with Inpinity.
+      </p>
+
+      <div class="cta-row">
+        <a class="btn" href="contact.html">Contact Inpinity</a>
+        <a class="btn btn-secondary" href="whitepaper.html">Read Whitepaper</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>© 2026 INPINITY. All rights reserved. Built on Base.</p>
+    <div class="footer-links">
+      <a href="whitepaper.html">Whitepaper</a>
+      <a href="faq.html">FAQ</a>
+      <a href="mint.html">Mint</a>
+      <a href="map.html">Pyramid Map</a>
+      <a href="game.html">Game</a>
+      <a href="contact.html">Contact</a>
+    </div>
+    <p class="footer-version">Version 0.23.0</p>
+  </footer>
 </body>
 </html>
