@@ -2,544 +2,300 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-  <meta content="Inpinity - Tools and resources for game design and development, powered by blockchain." name="description" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta
+    name="description"
+    content="Inpinity is a growing on-chain ecosystem connecting digital ownership, collectible identity, and future gameplay."
+  />
   <title>Inpinity - Home</title>
 
+  <link rel="icon" type="image/png" href="favicon.webp" />
+
+  <!-- Core CSS only -->
   <link rel="stylesheet" href="css/base.css" />
   <link rel="stylesheet" href="css/layout.css" />
   <link rel="stylesheet" href="css/animations.css" />
   <link rel="stylesheet" href="css/dark.css" />
   <link rel="stylesheet" href="css/light.css" />
-  <link rel="stylesheet" href="css/responsive.css" />
   <link rel="stylesheet" href="css/color.css" />
-  <link rel="stylesheet" href="css/adapted_about_us.css" />
-  <link rel="stylesheet" href="css/adapted_advertisements.css" />
-  <link rel="stylesheet" href="css/adapted_combined.css"/>
-  <link rel="stylesheet" href="css/adapted_comunity_guidelines.css" />
-  <link rel="stylesheet" href="css/adapted_course_feedback.css" />
-  <link rel="stylesheet" href="css/adapted_mft_marketplace.css"/>
-  <link rel="stylesheet" href="css/adapted_profile.css"/>
-  <link rel="stylesheet" href="css/combined_latest.css"/>
-  <link rel="stylesheet" href="css/gamification.css" />
-  <link rel="stylesheet" href="css/referral.css"/>
+  <link rel="stylesheet" href="css/responsive.css" />
+
+  <!-- Page specific -->
+  <link rel="stylesheet" href="css/index.css" />
+
+  <meta
+    name="keywords"
+    content="Inpinity, Blockchain, NFT, Token, Game, Pyramid, Base, On-chain, Web3, Game Development"
+  />
+  <meta name="author" content="Inpinity Team" />
+  <meta property="og:title" content="Inpinity - Home" />
+  <meta
+    property="og:description"
+    content="Explore the Inpinity ecosystem: token, Pyramid NFTs, map, game modules, and future on-chain expansion."
+  />
+  <meta property="og:image" content="logo_background.jpg" />
+  <meta property="og:url" content="https://inpinity.online" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="@unxpective" />
+  <meta name="twitter:creator" content="@Inpinity1" />
+  <meta name="theme-color" content="#140f1f" />
+  <meta name="robots" content="index,follow" />
 
   <script defer src="main.js"></script>
-  <script src="https://forminit.com/sdk/v1/forminit.js"></script>
-
-  <link rel="icon" type="image/png" href="favicon.webp">
-  <meta content="Inpinity, Game Design, Game Development, Platform, Collaboration, Forum, Tools, GameDesign, AI Development, Games of future, programming, programs, python gui, Base, Uniswap" name="keywords">
-  <meta content="Inpinity Team" name="Xpective">
-  <meta property="og:title" content="Inpinity - The Community for Game Design and Blockchain">
-  <meta property="og:description" content="Exchange designs, knowledge and experience in programming and game design. Become part of a growing community building the future of gaming on Base.">
-  <meta property="og:image" content="logo_background.jpg">
-  <meta property="og:url" content="https://inpinity.online">
-  <meta name="twitter:card" content="logo_background.webp">
-  <meta name="twitter:site" content="@unxpective">
-  <meta name="twitter:creator" content="@Inpinity1">
-  <meta name="theme-color" content="#0f0f0f">
-  <meta name="robots" content="index,follow">
-
-  <style>
-    .marketplace-row{
-      display:flex;
-      justify-content:center;
-      flex-wrap:wrap;
-      gap:1.2rem;
-      margin: 2rem auto 0;
-      max-width: 1000px;
-      padding: 0 1rem;
-    }
-    .marketplace-row a{
-      display:inline-block;
-      padding: 0.7rem 1.5rem;
-      background:#2a2a2a;
-      border:1px solid gold;
-      border-radius: 40px;
-      color: gold;
-      text-decoration:none;
-      font-weight:bold;
-      transition: all .2s;
-    }
-    .marketplace-row a:hover{
-      background: gold;
-      color:black;
-      transform: scale(1.05);
-    }
-
-    .tokenomics-section {
-      max-width: 1000px;
-      margin: 3rem auto;
-      padding: 2rem;
-      background: #1a1a1a;
-      border: 1px solid gold;
-      border-radius: 12px;
-      box-shadow: 0 0 20px rgba(255,215,0,0.18);
-    }
-    .tokenomics-section h2 {
-      color: gold;
-      text-align: center;
-      font-size: 2rem;
-      margin-bottom: 1.5rem;
-    }
-    .tokenomics-intro{
-      text-align:center;
-      color:#d2d2d2;
-      line-height:1.7;
-      max-width: 760px;
-      margin: 0 auto 1.5rem;
-    }
-    .token-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.5rem;
-      margin-top: 2rem;
-    }
-    .token-card {
-      background: #222;
-      border-left: 4px solid gold;
-      padding: 1.2rem;
-      border-radius: 8px;
-    }
-    .token-card h3 {
-      color: gold;
-      margin-top: 0;
-      margin-bottom: 0.8rem;
-      font-size: 1.3rem;
-    }
-    .token-card p {
-      margin: 0.45rem 0;
-      color: #ccc;
-      line-height: 1.65;
-    }
-    .token-card .address {
-      font-family: monospace;
-      background: #111;
-      padding: 0.6rem 0.75rem;
-      border-radius: 4px;
-      word-break: break-all;
-      color: #aaa;
-      border: 1px solid #333;
-      margin-top: 0.5rem;
-    }
-
-    .tokenomics-chart {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 2rem;
-      margin: 2rem 0 1rem;
-    }
-    .chart-item {
-      text-align: center;
-      min-width: 120px;
-    }
-    .chart-item .percent {
-      font-size: 2rem;
-      font-weight: bold;
-      color: gold;
-      line-height: 1.2;
-    }
-    .chart-item .label {
-      color: #ccc;
-      font-size: 0.95rem;
-    }
-
-    .presale-status {
-      background: #2a2a2a;
-      border: 1px solid #444;
-      border-radius: 8px;
-      padding: 1.5rem;
-      margin: 2rem 0 1rem;
-      text-align: center;
-    }
-    .presale-status .live-badge {
-      background: #00aa00;
-      color: white;
-      padding: 0.25rem 1rem;
-      border-radius: 20px;
-      font-weight: bold;
-      display: inline-block;
-      margin-bottom: 0.75rem;
-    }
-    .presale-status .time-info {
-      color: gold;
-      font-weight: bold;
-    }
-    .presale-button-wrap{
-      margin-top: 1rem;
-    }
-    .presale-button{
-      display:inline-block;
-      padding: 0.9rem 1.6rem;
-      border-radius: 40px;
-      text-decoration:none;
-      font-weight:bold;
-      color:black;
-      background: gold;
-      transition: all .2s ease;
-    }
-    .presale-button:hover{
-      transform: translateY(-2px) scale(1.02);
-      box-shadow: 0 0 18px rgba(255,215,0,0.3);
-    }
-
-    .addr-row{
-      display:flex;
-      gap:0.6rem;
-      align-items:center;
-      flex-wrap:wrap;
-      margin-top: 0.6rem;
-    }
-    .copy-btn{
-      background: transparent;
-      border: 1px solid gold;
-      color: gold;
-      padding: 0.3rem 0.8rem;
-      border-radius: 40px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: all .2s;
-      font-size: 0.9rem;
-    }
-    .copy-btn:hover{
-      background: gold;
-      color: black;
-      transform: translateY(-1px);
-    }
-    .hint{
-      color:#999;
-      font-size:0.92rem;
-    }
-
-    .contact-form {
-      max-width: 600px;
-      margin: 2rem 0;
-    }
-    .contact-form label {
-      display: block;
-      color: gold;
-      margin-bottom: 0.3rem;
-      font-weight: bold;
-    }
-    .contact-form input,
-    .contact-form textarea {
-      width: 100%;
-      padding: 0.75rem;
-      margin-bottom: 1rem;
-      background: #222;
-      border: 1px solid #444;
-      border-radius: 6px;
-      color: white;
-      font-size: 1rem;
-      box-sizing: border-box;
-    }
-    .contact-form input:focus,
-    .contact-form textarea:focus {
-      outline: none;
-      border-color: gold;
-      box-shadow: 0 0 5px gold;
-    }
-    .contact-form button {
-      background: gold;
-      color: black;
-      border: none;
-      padding: 0.75rem 1.5rem;
-      border-radius: 40px;
-      font-weight: bold;
-      font-size: 1.1rem;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .contact-form button:hover {
-      transform: scale(1.02);
-      box-shadow: 0 0 15px gold;
-    }
-    #form-result {
-      margin-top: 1rem;
-      font-weight: bold;
-    }
-    .success-message {
-      color: #00aa00;
-    }
-    .error-message {
-      color: #ff4444;
-    }
-
-    .logo-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 20px;
-      margin: 1rem auto 2rem;
-      flex-wrap: wrap;
-    }
-    .logo-svg,
-    .token-logo-small {
-      height: 32px;
-      width: auto;
-    }
-
-    .content-details{
-      max-width: 900px;
-      margin: 1.35rem auto;
-      background: rgba(0,0,0,0.18);
-      border: 1px solid rgba(255,215,0,0.18);
-      border-radius: 12px;
-      padding: 0.25rem 0.75rem;
-    }
-    .content-details summary{
-      cursor: pointer;
-      color: gold;
-      font-weight: bold;
-      font-size: 1.1rem;
-      padding: 0.9rem 0.5rem;
-      list-style: none;
-    }
-    .content-details summary::-webkit-details-marker{
-      display:none;
-    }
-    .content-details p{
-      line-height: 1.78;
-      color: #d6d6d6;
-      padding: 0 0.5rem 1rem;
-      margin: 0;
-    }
-
-    footer{
-      margin-top: 5rem;
-      padding-top: 2.5rem;
-      border-top: 1px solid rgba(255,215,0,.18);
-    }
-
-    @media (max-width: 768px){
-      .tokenomics-section{
-        padding: 1.3rem;
-        margin: 2rem 1rem;
-      }
-      .marketplace-row{
-        margin-top: 1.5rem;
-      }
-      .content-details{
-        margin-left: 1rem;
-        margin-right: 1rem;
-      }
-    }
-  </style>
+  <script defer src="https://forminit.com/sdk/v1/forminit.js"></script>
 </head>
 
-<body>
-  <header>
-    <nav>
-      <ul>
-        <li><a aria-label="Home" href="index.html">Home</a></li>
-        <li><a aria-label="Features" href="features.html">Features</a></li>
-        <li><a aria-label="Game" href="game.html">Game</a></li>
-        <li><a aria-label="Mint" href="mint.html">Mint</a></li>
-        <li><a aria-label="Pyramid Map" href="map.html">Pyramid Map</a></li>
-        <li><a aria-label="Collaboration" href="collaboration.html">Collaboration</a></li>
-        <li><a aria-label="About" href="about.html">About</a></li>
-        <li><a aria-label="Whitepaper" href="whitepaper.html">Whitepaper</a></li>
-        <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
-        <li><a aria-label="Guestbook" href="guestbook.html">Guestbook</a></li>
-        <li><a aria-label="Advertising" href="advertising.html">Advertising</a></li>
-        <li><a aria-label="Staking" href="staking.html">Staking</a></li>
-
-        <div class="themeDots">
-          <div class="dot light" title="Light Theme"></div>
-          <div class="dot dark" title="Dark Theme"></div>
-          <div class="dot basic" title="Basic Theme"></div>
-        </div>
-
-        <style>
-          .themeDots .dot{display:inline-block;width:20px;height:20px;border-radius:50%;margin:5px;cursor:pointer;transition:transform .2s}
-          .themeDots .dot.light{background-color:#FFF}
-          .themeDots .dot.dark{background-color:#000}
-          .themeDots .dot.basic{background-color:var(--quinary-color)}
-          .themeDots .dot:hover{transform:scale(1.2)}
-        </style>
-        <script>
-          document.addEventListener('DOMContentLoaded',()=>{
-            document.querySelector('.themeDots .dot.light')?.addEventListener('click',()=>document.body.setAttribute('data-theme','light'));
-            document.querySelector('.themeDots .dot.dark')?.addEventListener('click',()=>document.body.setAttribute('data-theme','dark'));
-            document.querySelector('.themeDots .dot.basic')?.addEventListener('click',()=>document.body.setAttribute('data-theme','basic'));
-          });
-        </script>
+<body data-theme="basic">
+  <header class="site-header">
+    <nav class="site-nav" aria-label="Main navigation">
+      <ul class="nav-list">
+        <li><a href="index.html" aria-current="page">Home</a></li>
+        <li><a href="features.html">Features</a></li>
+        <li><a href="game.html">Game</a></li>
+        <li><a href="mint.html">Mint</a></li>
+        <li><a href="map.html">Pyramid Map</a></li>
+        <li><a href="collaboration.html">Collaboration</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="whitepaper.html">Whitepaper</a></li>
+        <li><a href="faq.html">FAQ</a></li>
+        <li><a href="guestbook.html">Guestbook</a></li>
+        <li><a href="advertising.html">Advertising</a></li>
+        <li><a href="staking.html">Staking</a></li>
       </ul>
+
+      <div class="themeDots" aria-label="Theme switcher">
+        <button type="button" class="dot light" title="Light Theme" aria-label="Light Theme"></button>
+        <button type="button" class="dot dark" title="Dark Theme" aria-label="Dark Theme"></button>
+        <button type="button" class="dot basic" title="Basic Theme" aria-label="Basic Theme"></button>
+      </div>
     </nav>
   </header>
 
-  <main>
-    <section>
+  <main class="index-main">
+    <section class="hero-section">
       <div class="hero">
-        <h1>Develop games more efficiently with Inpinity.</h1>
-        <h2>The best platform for game developers. Create, Share, Grow.</h2>
+        <h1>Inpinity is building a structured on-chain world.</h1>
+        <p>
+          A growing ecosystem where token utility, collectible Pyramid NFTs, visible map identity,
+          and future gameplay belong together in one direction.
+        </p>
       </div>
 
-      <div class="button-wrapper">
-        <a class="cta-button" href="https://inpinity.online/token/" target="_blank" rel="noopener" style="background: linear-gradient(135deg, #8A2BE2, #00FFFF); padding: 1rem 2rem; border-radius: 50px; font-size: 1.3rem;">
+      <div class="hero-actions">
+        <a class="cta-button hero-cta" href="https://inpinity.online/token/" target="_blank" rel="noopener">
           Go to INPI Token Hub
         </a>
       </div>
 
       <div class="marketplace-row">
-        <a href="https://opensea.io/collection/inpinity-pyramid-447084512" target="_blank" rel="noopener">OpenSea: Pyramid Blocks</a>
-        <a href="https://opensea.io/collection/0x71e76a6065197acdd1a4d6b736712f80d1fd3d8b" target="_blank" rel="noopener">OpenSea: Resources</a>
+        <a href="https://opensea.io/collection/inpinity-pyramid-447084512" target="_blank" rel="noopener">
+          OpenSea: Pyramid Blocks
+        </a>
+        <a href="https://opensea.io/collection/0x71e76a6065197acdd1a4d6b736712f80d1fd3d8b" target="_blank" rel="noopener">
+          OpenSea: Resources
+        </a>
       </div>
     </section>
 
     <section class="tokenomics-section">
-      <h2>Inpinity Token & NFT</h2>
-      <p class="tokenomics-intro">
-        Inpinity combines digital ownership, collectible structure, and long-term ecosystem growth.
-        The token supports the wider project direction, while the Pyramid Block NFTs form the visible on-chain identity of the world.
-      </p>
+      <div class="section-head">
+        <h2>Inpinity Token & NFT</h2>
+        <p class="tokenomics-intro">
+          Inpinity combines digital ownership, collectible structure, and long-term ecosystem growth.
+          The token supports the wider direction of the project, while Pyramid Block NFTs form the visible on-chain identity of the world.
+        </p>
+      </div>
 
-      <div class="tokenomics-chart">
-        <div class="chart-item"><span class="percent">20%</span><div class="label">Liquidity (Locked till 3033)</div></div>
-        <div class="chart-item"><span class="percent">10%</span><div class="label">Team (Vesting)</div></div>
-        <div class="chart-item"><span class="percent">15%</span><div class="label">Staking</div></div>
-        <div class="chart-item"><span class="percent">5%</span><div class="label">Events & Drops</div></div>
-        <div class="chart-item"><span class="percent">50%</span><div class="label">Reserve & Ecosystem</div></div>
+      <div class="tokenomics-chart" aria-label="Token distribution">
+        <div class="chart-item">
+          <span class="percent">20%</span>
+          <span class="label">Liquidity</span>
+        </div>
+        <div class="chart-item">
+          <span class="percent">10%</span>
+          <span class="label">Team</span>
+        </div>
+        <div class="chart-item">
+          <span class="percent">15%</span>
+          <span class="label">Staking</span>
+        </div>
+        <div class="chart-item">
+          <span class="percent">5%</span>
+          <span class="label">Events & Drops</span>
+        </div>
+        <div class="chart-item">
+          <span class="percent">50%</span>
+          <span class="label">Reserve & Ecosystem</span>
+        </div>
       </div>
 
       <div class="presale-status">
-        <span class="live-badge">PRESALE LIVE</span>
+        <span class="live-badge">Presale Live</span>
         <p>
-          Until <span class="time-info">March 25, 2026, 20:20 UTC</span><br>
-          Rate: <strong>2,000,000 INPI per 1 ETH</strong> | Min: 0.01 ETH | Max: 2 ETH
+          Until <strong>March 25, 2026, 20:20 UTC</strong><br />
+          Rate: <strong>2,000,000 INPI per 1 ETH</strong> · Min: 0.01 ETH · Max: 2 ETH
         </p>
         <div class="presale-button-wrap">
-          <a class="presale-button" href="https://inpinity.online/token/" target="_blank" rel="noopener">Open Presale</a>
+          <a class="presale-button" href="https://inpinity.online/token/" target="_blank" rel="noopener">
+            Open Presale
+          </a>
         </div>
       </div>
 
       <div class="token-grid">
-        <div class="token-card">
-          <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
-            <img src="img/Logo200.svg" alt="INPI Logo" class="token-logo-small">
-            <h3 style="margin:0;">INPI Token</h3>
+        <article class="token-card">
+          <div class="token-card-header">
+            <img src="img/Logo200.svg" alt="INPI Logo" class="token-logo-small" />
+            <h3>INPI Token</h3>
           </div>
 
           <p>
-            INPI is the main token of the Inpinity ecosystem. It represents the economic layer of the project and supports future growth across staking, platform utility, and broader ecosystem expansion.
+            INPI is the main token of the Inpinity ecosystem. It supports the economic layer of the project
+            and provides a foundation for staking, platform utility, and future ecosystem growth.
           </p>
 
-          <p><strong>Address:</strong></p>
+          <p><strong>Address</strong></p>
           <div class="address">0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</div>
 
           <div class="addr-row">
-            <button class="copy-btn" data-copy="0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D">Copy</button>
+            <button type="button" class="copy-btn" data-copy="0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D">
+              Copy
+            </button>
             <span class="hint">Main token of the ecosystem</span>
           </div>
 
-          <p>Total Supply: 1,000,000,000 INPI<br>Decimals: 18</p>
-          <p><a href="https://basescan.org/address/0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D" target="_blank" rel="noopener" style="color:gold;">View on BaseScan →</a></p>
-        </div>
-
-        <div class="token-card">
-          <h3>InpinityNFT</h3>
+          <p>Total Supply: 1,000,000,000 INPI<br />Decimals: 18</p>
 
           <p>
-            InpinityNFT is the collectible core of the Pyramid system. Each block represents a visible part of the project world and gives the ecosystem a recognizable on-chain structure that can continue to grow over time.
+            <a href="https://basescan.org/address/0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D" target="_blank" rel="noopener">
+              View on BaseScan →
+            </a>
           </p>
+        </article>
 
-          <p><strong>Address:</strong></p>
-          <div class="address">0x277a0D5864293C78d7387C54B48c35D5E9578Ab1</div>
-
-          <div class="addr-row">
-            <button class="copy-btn" data-copy="0x277a0D5864293C78d7387C54B48c35D5E9578Ab1">Copy</button>
-            <span class="hint">Core Pyramid Block NFT contract</span>
+        <article class="token-card">
+          <div class="token-card-header">
+            <h3>InpinityNFT</h3>
           </div>
 
           <p>
-            <a href="mint.html" style="color:gold;">Mint →</a> &nbsp;|&nbsp;
-            <a href="game.html" style="color:gold;">Game →</a> &nbsp;|&nbsp;
-            <a href="map.html" style="color:gold;">Map →</a>
+            InpinityNFT is the collectible core of the Pyramid system. Each block represents a visible part of the project world
+            and contributes to a recognizable on-chain structure that can continue to grow over time.
+          </p>
+
+          <p><strong>Address</strong></p>
+          <div class="address">0x277a0D5864293C78d7387C54B48c35D5E9578Ab1</div>
+
+          <div class="addr-row">
+            <button type="button" class="copy-btn" data-copy="0x277a0D5864293C78d7387C54B48c35D5E9578Ab1">
+              Copy
+            </button>
+            <span class="hint">Core Pyramid Block NFT contract</span>
+          </div>
+
+          <p class="token-links">
+            <a href="mint.html">Mint →</a>
+            <a href="game.html">Game →</a>
+            <a href="map.html">Map →</a>
           </p>
 
           <p>
-            <a href="https://basescan.org/address/0x277a0D5864293C78d7387C54B48c35D5E9578Ab1" target="_blank" rel="noopener" style="color:gold;">Verified on BaseScan →</a><br>
-            <a href="https://opensea.io/collection/inpinity-pyramid-447084512" target="_blank" rel="noopener" style="color:gold;">OpenSea Collection →</a>
+            <a href="https://basescan.org/address/0x277a0D5864293C78d7387C54B48c35D5E9578Ab1" target="_blank" rel="noopener">
+              Verified on BaseScan →
+            </a><br />
+            <a href="https://opensea.io/collection/inpinity-pyramid-447084512" target="_blank" rel="noopener">
+              OpenSea Collection →
+            </a>
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section class="brand-section">
+      <div class="logo-container">
+        <img src="logo3.webp" class="logo-image" alt="Inpinity logo" />
+        <img src="logo_transparent.webp" class="logo-glow" alt="Inpinity logo glow" />
+      </div>
+    </section>
+
+    <section class="content-panels">
+      <details class="content-details">
+        <summary>Welcome to Inpinity</summary>
+        <div class="details-body">
+          <p>
+            Inpinity is a growing digital ecosystem that connects blockchain structure, visual identity,
+            and community-driven development. It is designed as more than a simple website or token page.
+            The goal is to create a place where collectible assets, platform tools, and future gameplay systems
+            belong to one coherent world.
           </p>
         </div>
-      </div>
+      </details>
+
+      <details class="content-details">
+        <summary>Our Vision</summary>
+        <div class="details-body">
+          <p>
+            Our vision is to shape an ecosystem where blockchain is not the final product,
+            but the underlying framework for something larger. Inpinity is intended to evolve
+            into a connected digital world that combines ownership, identity, interaction, and future expansion.
+          </p>
+        </div>
+      </details>
+
+      <details class="content-details">
+        <summary>Why Inpinity?</summary>
+        <div class="details-body">
+          <p>
+            Inpinity does not only present contracts or token data in isolation. It brings several layers together:
+            a token, a collectible Pyramid system, a growing platform, and a community that can develop with it.
+            That creates a clearer and stronger long-term structure.
+          </p>
+        </div>
+      </details>
+
+      <details class="content-details">
+        <summary>Join us</summary>
+        <div class="details-body">
+          <p>
+            Whether you are discovering the token, exploring Pyramid Blocks, following the map,
+            or simply learning about the project for the first time, you are welcome to become part of Inpinity.
+            The ecosystem is growing step by step, and early supporters help shape its direction.
+          </p>
+        </div>
+      </details>
+
+      <details class="content-details">
+        <summary>Contact</summary>
+        <div class="details-body">
+          <p>Do you have questions or want to learn more about us? Contact us and let's stay connected.</p>
+
+          <form id="contact-form" class="contact-form">
+            <label for="firstName">First name *</label>
+            <input type="text" id="firstName" name="fi-sender-firstName" required placeholder="John" />
+
+            <label for="lastName">Last name *</label>
+            <input type="text" id="lastName" name="fi-sender-lastName" required placeholder="Doe" />
+
+            <label for="email">Email *</label>
+            <input type="email" id="email" name="fi-sender-email" required placeholder="you@example.com" />
+
+            <label for="subject">Subject</label>
+            <input type="text" id="subject" name="fi-text-subject" placeholder="Your subject" />
+
+            <label for="message">Message *</label>
+            <textarea id="message" name="fi-text-message" rows="5" required placeholder="Your message..."></textarea>
+
+            <input type="text" name="_gotcha" class="hidden-trap" tabindex="-1" autocomplete="off" />
+            <button type="submit" class="contact-submit">Send Message</button>
+          </form>
+
+          <p id="form-result"></p>
+        </div>
+      </details>
     </section>
-
-    <section>
-      <div class="logo-container">
-        <img src="logo3.webp" class="logo-image" alt="Logo">
-        <img src="logo_transparent.webp" class="logo-image logo-glow" alt="Logo">
-      </div>
-    </section>
-
-    <details class="content-details">
-      <summary>Welcome to Inpinity</summary>
-      <p>
-        Inpinity is a growing digital ecosystem that connects blockchain structure, visual identity, and community-driven development.
-        It is designed as more than a simple website or token page. The goal is to create a place where collectible assets, platform tools,
-        and future gameplay systems belong to one coherent world. Inpinity is built step by step, with each module adding clarity, utility,
-        and a stronger long-term foundation.
-      </p>
-    </details>
-
-    <details class="content-details">
-      <summary>Our Vision</summary>
-      <p>
-        Our vision is to shape an ecosystem where blockchain is not the final product, but the underlying framework for something larger.
-        Inpinity is meant to evolve into a connected digital world that combines ownership, identity, interaction, and future game-oriented expansion.
-        The Pyramid concept is only the beginning. Over time, the project is intended to grow into a broader structure that links token utility,
-        NFT identity, and creative worldbuilding in a way that remains understandable and accessible.
-      </p>
-    </details>
-
-    <details class="content-details">
-      <summary>Why Inpinity?</summary>
-      <p>
-        Inpinity stands out because it does not only present contracts or token data in isolation. It brings different elements together into one
-        recognizable direction: a token, a collectible Pyramid system, a developing platform, and a community that can grow with it.
-        Instead of overwhelming visitors with too many technical layers at once, the project can be understood as a foundation that becomes richer over time.
-        This makes it easier for newcomers to enter while still giving long-term supporters something meaningful to follow.
-      </p>
-    </details>
-
-    <details class="content-details">
-      <summary>Join us!</summary>
-      <p>
-        Whether you are discovering the token, exploring the Pyramid Blocks, following the map, or simply learning about the project for the first time,
-        you are welcome to become part of Inpinity. The ecosystem is expanding step by step, and every early supporter helps shape its direction.
-        Join the journey, explore the live modules, and stay connected as Inpinity continues to grow into a larger and more structured experience.
-      </p>
-    </details>
-
-    <details class="content-details">
-      <summary>Contact</summary>
-      <p>Do you have questions or want to learn more about us? Contact us and let's stay connected!</p>
-
-      <form id="contact-form" class="contact-form">
-        <label for="firstName">First name *</label>
-        <input type="text" id="firstName" name="fi-sender-firstName" required placeholder="John">
-
-        <label for="lastName">Last name *</label>
-        <input type="text" id="lastName" name="fi-sender-lastName" required placeholder="Doe">
-
-        <label for="email">Email *</label>
-        <input type="email" id="email" name="fi-sender-email" required placeholder="you@example.com">
-
-        <label for="subject">Subject</label>
-        <input type="text" id="subject" name="fi-text-subject" placeholder="Your subject">
-
-        <label for="message">Message *</label>
-        <textarea id="message" name="fi-text-message" rows="4" required placeholder="Your message..."></textarea>
-
-        <input type="text" name="_gotcha" style="display:none;">
-        <button type="submit">Send Message</button>
-      </form>
-      <p id="form-result"></p>
-    </details>
   </main>
 
-  <footer>
+  <footer class="site-footer">
     <p>© 2026 Inpinity. All rights reserved.</p>
     <div class="footer-links">
       <a href="privacypolicy.html">Privacy Policy</a>
@@ -554,52 +310,5 @@
       <a href="game.html">Game</a>
     </div>
   </footer>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const forminit = new Forminit();
-      const FORM_ID = '7ktpdl3xza8';
-
-      const form = document.getElementById('contact-form');
-      const resultEl = document.getElementById('form-result');
-
-      if (form) {
-        form.addEventListener('submit', async function(event) {
-          event.preventDefault();
-
-          const formData = new FormData(form);
-          const { error } = await forminit.submit(FORM_ID, formData);
-
-          if (error) {
-            resultEl.innerHTML = `<span class="error-message">❌ ${error.message}</span>`;
-            return;
-          }
-
-          resultEl.innerHTML = '<span class="success-message">✅ Message sent successfully! We will get back to you soon.</span>';
-          form.reset();
-        });
-      }
-    });
-  </script>
-
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      document.querySelectorAll(".copy-btn").forEach(btn => {
-        btn.addEventListener("click", async () => {
-          const value = btn.getAttribute("data-copy");
-          try {
-            await navigator.clipboard.writeText(value);
-            const old = btn.textContent;
-            btn.textContent = "Copied ✅";
-            setTimeout(() => btn.textContent = old, 1200);
-          } catch (e) {
-            const old = btn.textContent;
-            btn.textContent = "Copy failed";
-            setTimeout(() => btn.textContent = old, 1200);
-          }
-        });
-      });
-    });
-  </script>
 </body>
 </html>
