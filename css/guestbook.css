@@ -1,0 +1,556 @@
+.page-wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1rem 3rem;
+}
+
+.guestbook-page {
+  color: var(--text-color);
+}
+
+.guestbook-main {
+  padding-bottom: 4rem;
+}
+
+.site-header {
+  position: relative;
+  z-index: 20;
+}
+
+.site-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.nav-list {
+  width: 100%;
+}
+
+.themeDots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.themeDots .dot {
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+  padding: 0;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.themeDots .dot:hover {
+  transform: scale(1.15);
+}
+
+.themeDots .dot.active {
+  box-shadow: 0 0 0 2px var(--quinary-color-transparent), 0 0 0 4px rgba(255, 255, 255, 0.08);
+}
+
+.themeDots .dot.light {
+  background: #ffffff;
+}
+
+.themeDots .dot.dark {
+  background: #111111;
+}
+
+.themeDots .dot.basic {
+  background: var(--quinary-color);
+}
+
+.guestbook-hero {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.eyebrow {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.82;
+}
+
+.hero-lead {
+  max-width: 900px;
+  margin: 0 auto;
+  line-height: 1.75;
+}
+
+.demo-pill {
+  display: inline-block;
+  margin-left: 0.4rem;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 255, 255, 0.55);
+  background: rgba(0, 255, 255, 0.1);
+  color: var(--primary-cyan);
+  font-weight: 800;
+  font-size: 0.85rem;
+  vertical-align: middle;
+}
+
+.info-banner {
+  max-width: 900px;
+  margin: 1rem auto 1.2rem;
+  padding: 1rem 1.2rem;
+  border-radius: 12px;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.warning-note {
+  background: #332211;
+  border: 1px solid #ffaa00;
+}
+
+.warning-note a {
+  color: gold;
+}
+
+.warning-note code {
+  font-family: "Roboto Mono", monospace;
+  font-size: 0.9rem;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 0.2rem 0.45rem;
+  border-radius: 6px;
+  word-break: break-all;
+}
+
+.presale-note {
+  background: rgba(255, 215, 0, 0.1);
+  border: 1px solid gold;
+}
+
+.presale-note a {
+  color: gold;
+  font-weight: 800;
+}
+
+.guestbook-container {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: rgba(20, 20, 20, 0.9);
+  border-radius: 18px;
+  border: 1px solid var(--quinary-color, gold);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+  color: var(--text-color);
+}
+
+.demo-banner {
+  background: rgba(255, 215, 0, 0.08);
+  border: 1px solid rgba(255, 215, 0, 0.65);
+  border-radius: 12px;
+  padding: 1rem 1.2rem;
+  margin: 1rem 0 1.5rem;
+  line-height: 1.6;
+}
+
+.demo-banner strong {
+  color: var(--quinary-color);
+}
+
+.wallet-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.wallet-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.balance-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.connect-wallet-btn {
+  background: var(--quinary-color);
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 999px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.connect-wallet-btn:hover {
+  transform: scale(1.03);
+  opacity: 0.95;
+}
+
+.wallet-details {
+  background: rgba(0, 0, 0, 0.18);
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--quinary-color);
+  font-size: 0.9rem;
+  font-family: "Roboto Mono", monospace;
+}
+
+.guestbook-form {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  padding: 2rem;
+  margin: 2rem 0;
+}
+
+.guestbook-form h2 {
+  color: var(--quinary-color);
+  margin-top: 0;
+}
+
+.form-group {
+  margin: 1.2rem 0;
+}
+
+.form-group label {
+  display: block;
+  color: var(--quinary-color);
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 0.75rem;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  color: var(--text-color);
+  font-size: 1rem;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--quinary-color);
+  box-shadow: 0 0 8px rgba(106, 79, 179, 0.22);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.fee-notice {
+  background: rgba(255, 255, 255, 0.04);
+  border-left: 4px solid var(--quinary-color);
+  padding: 1rem;
+  margin: 1.2rem 0;
+  line-height: 1.6;
+  border-radius: 10px;
+}
+
+.fee-notice strong {
+  color: var(--quinary-color);
+}
+
+.submit-btn,
+.mint-btn {
+  background: var(--quinary-color);
+  color: #fff;
+  border: none;
+  padding: 0.95rem 1.5rem;
+  border-radius: 12px;
+  font-size: 1.05rem;
+  font-weight: 900;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease;
+}
+
+.submit-btn {
+  width: 100%;
+}
+
+.submit-btn:hover:not(:disabled),
+.mint-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  opacity: 0.96;
+  box-shadow: 0 0 16px rgba(106, 79, 179, 0.2);
+}
+
+.submit-btn:disabled,
+.mint-btn:disabled {
+  background: #666;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.mint-panel {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--primary-cyan);
+  border-radius: 16px;
+  padding: 1.25rem;
+  margin: 1.5rem 0 2rem;
+}
+
+.mint-panel h3 {
+  color: var(--primary-cyan);
+  margin-top: 0;
+}
+
+.entries-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(106, 79, 179, 0.45);
+  padding-bottom: 0.75rem;
+  margin: 2rem 0 1rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.entries-header h2 {
+  color: var(--quinary-color);
+  margin: 0;
+}
+
+.clear-btn {
+  background: transparent;
+  border: 1px solid #ff4444;
+  color: #ff4444;
+  padding: 0.4rem 0.75rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background 0.2s ease, color 0.2s ease;
+  font-weight: 800;
+}
+
+.clear-btn:hover {
+  background: #ff4444;
+  color: #111;
+}
+
+.entries-list {
+  margin-top: 1rem;
+}
+
+.empty-state {
+  text-align: center;
+  color: var(--text-soft);
+  padding: 1rem 0;
+}
+
+.guestbook-entry {
+  background: rgba(255, 255, 255, 0.04);
+  border-left: 4px solid var(--quinary-color);
+  padding: 1rem;
+  margin: 1rem 0;
+  border-radius: 12px;
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.guestbook-entry.nft-minted {
+  border-left-color: var(--primary-cyan);
+  background: linear-gradient(90deg, rgba(255,255,255,0.04), rgba(0,255,255,0.08));
+}
+
+.guestbook-entry .name {
+  font-weight: 900;
+  color: var(--quinary-color);
+}
+
+.guestbook-entry .wallet {
+  font-family: "Roboto Mono", monospace;
+  font-size: 0.85rem;
+  color: var(--text-soft);
+  word-break: break-all;
+  margin-top: 0.25rem;
+}
+
+.guestbook-entry .message {
+  margin: 0.6rem 0;
+  white-space: pre-wrap;
+  color: var(--text-color);
+  line-height: 1.6;
+}
+
+.guestbook-entry .timestamp {
+  font-size: 0.75rem;
+  color: var(--text-soft);
+  text-align: right;
+}
+
+.nft-badge {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.7rem;
+  background: var(--primary-cyan);
+  color: #000;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 900;
+  cursor: default;
+}
+
+.site-footer {
+  position: relative;
+  z-index: 5;
+  margin-top: 5rem;
+  padding-top: 2.5rem;
+  padding-bottom: 2.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  text-align: center;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 6;
+  margin-top: 0.75rem;
+}
+
+.footer-links a {
+  color: var(--quinary-color);
+  text-decoration: none;
+}
+
+.footer-links a:hover {
+  text-decoration: underline;
+}
+
+.footer-version {
+  opacity: 0.8;
+  margin-top: 0.75rem;
+}
+
+/* Light Theme */
+[data-theme="light"] .guestbook-container,
+[data-theme="light"] .wallet-bar,
+[data-theme="light"] .guestbook-form,
+[data-theme="light"] .guestbook-entry,
+[data-theme="light"] .demo-banner,
+[data-theme="light"] .fee-notice,
+[data-theme="light"] .mint-panel {
+  background: rgba(106, 79, 179, 0.06);
+  border-color: rgba(106, 79, 179, 0.16);
+  box-shadow: 0 10px 24px rgba(70, 52, 110, 0.08);
+}
+
+[data-theme="light"] .wallet-details,
+[data-theme="light"] .form-group input,
+[data-theme="light"] .form-group textarea {
+  background: rgba(106, 79, 179, 0.05);
+  border-color: rgba(106, 79, 179, 0.14);
+  color: var(--text-color);
+}
+
+[data-theme="light"] .site-footer {
+  border-top-color: rgba(106, 79, 179, 0.12);
+}
+
+/* Dark Theme */
+[data-theme="dark"] .guestbook-container,
+[data-theme="dark"] .wallet-bar,
+[data-theme="dark"] .guestbook-form,
+[data-theme="dark"] .guestbook-entry,
+[data-theme="dark"] .demo-banner,
+[data-theme="dark"] .fee-notice,
+[data-theme="dark"] .mint-panel {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .wallet-details,
+[data-theme="dark"] .form-group input,
+[data-theme="dark"] .form-group textarea {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .site-footer {
+  border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Basic Theme */
+[data-theme="basic"] .guestbook-container,
+[data-theme="basic"] .wallet-bar,
+[data-theme="basic"] .guestbook-form,
+[data-theme="basic"] .guestbook-entry,
+[data-theme="basic"] .demo-banner,
+[data-theme="basic"] .fee-notice,
+[data-theme="basic"] .mint-panel {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="basic"] .wallet-details,
+[data-theme="basic"] .form-group input,
+[data-theme="basic"] .form-group textarea {
+  background: rgba(0, 0, 0, 0.18);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="basic"] .site-footer {
+  border-top-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .wallet-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .wallet-info,
+  .balance-info {
+    width: 100%;
+  }
+
+  .connect-wallet-btn,
+  .wallet-details {
+    width: 100%;
+    text-align: center;
+  }
+
+  .guestbook-container,
+  .guestbook-form {
+    padding: 1.2rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .entries-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .clear-btn,
+  .mint-btn {
+    width: 100%;
+  }
+}
