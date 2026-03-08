@@ -182,22 +182,26 @@ function populateAttackResourceSelect(resourceIds = null, selectedValue = null) 
     select.appendChild(option);
   });
 }
-async function getLootableResourceIds(targetTokenId) {
-  if (!farmingV5Contract) return [];
+async function getAttackableResourceIds(attackerTokenId, targetTokenId) {
+  if (!piratesV5Contract) return [];
 
   try {
-    const pending = await farmingV5Contract.getAllPending(targetTokenId);
     const ids = [];
 
-    for (let i = 0; i < pending.length; i++) {
-      const val = pending[i];
-      const amount = typeof val === "bigint" ? val : BigInt(val.toString());
-      if (amount > 0n) ids.push(i);
+    for (let i = 0; i < resourceNames.length; i++) {
+      try {
+        const preview = await piratesV5Contract.previewAttack(attackerTokenId, targetTokenId, i);
+        if (preview && preview.allowed) {
+          ids.push(i);
+        }
+      } catch (err) {
+        console.warn(`previewAttack failed for resource ${i}`, err);
+      }
     }
 
     return ids;
   } catch (e) {
-    console.warn("getLootableResourceIds failed", e);
+    console.warn("getAttackableResourceIds failed", e);
     return [];
   }
 }
@@ -884,8 +888,8 @@ async function refreshSelectedTargetAttackPreview() {
   const targetTokenIdNum = parseInt(selectedTokenId, 10);
 
   // 1) echte pending Ressourcen holen
-  const lootableIds = await getLootableResourceIds(targetTokenIdNum);
-
+  const lootableIds = await getAttackableResourceIds(attackerTokenId, targetTokenIdNum);
+  
   // aktuell ausgewählten Wert merken
   let selectedResourceId = attackResourceEl?.value ?? null;
   if (
