@@ -18,6 +18,7 @@
   justify-content: center;
   align-items: center;
   gap: 0.5rem;
+  margin-top: 0.25rem;
 }
 
 .themeDots .dot {
@@ -51,6 +52,8 @@
 .features-main {
   width: min(1100px, calc(100% - 2rem));
   margin: 0 auto;
+  position: relative;
+  z-index: 1;
 }
 
 .features-hero {
@@ -85,28 +88,6 @@
 
 .feature-cta {
   min-width: 240px;
-}
-
-.brand-section {
-  margin-top: 0.5rem;
-}
-
-.feature-logo-container {
-  width: 100%;
-  max-width: 900px;
-  margin: 0 auto 1.5rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 180px;
-  position: relative;
-}
-
-.feature-logo-container .logo-image,
-.feature-logo-container .logo-glow {
-  width: min(320px, 42vw);
-  min-width: 180px;
-  margin: 0 auto;
 }
 
 .highlight-strip {
@@ -296,6 +277,25 @@
   line-height: 1.75;
 }
 
+.site-footer {
+  position: relative;
+  z-index: 5;
+  margin-top: 5rem;
+  padding-top: 2.5rem;
+  padding-bottom: 2.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.footer-links {
+  position: relative;
+  z-index: 6;
+}
+
+.footer-links a {
+  position: relative;
+  z-index: 6;
+}
+
 @media (max-width: 1000px) {
   .workflow {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -335,13 +335,8 @@
     grid-template-columns: 1fr;
   }
 
-  .feature-logo-container {
-    min-height: 140px;
-  }
-
-  .feature-logo-container .logo-image,
-  .feature-logo-container .logo-glow {
-    width: min(240px, 60vw);
-    min-width: 140px;
+  .site-footer {
+    margin-top: 4rem;
+    padding-top: 2rem;
   }
 }
