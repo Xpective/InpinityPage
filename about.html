@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="basic">
 <head>
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
@@ -23,213 +23,125 @@
   <link rel="stylesheet" href="css/combined_latest.css"/>
   <link rel="stylesheet" href="css/gamification.css" />
   <link rel="stylesheet" href="css/referral.css"/>
+  <link rel="stylesheet" href="css/about.css" />
 
   <script defer src="main.js"></script>
   <link rel="icon" type="image/png" href="favicon.webp">
 
-  <meta name="keywords" content="Inpinity, Game Design, Game Development, Platform, Collaboration, Tools, GameDesign, AI Development, Unreal Engine, Base, Uniswap">
+  <meta name="keywords" content="Inpinity, Game Design, Game Development, Platform, Collaboration, Tools, GameDesign, AI Development, Unreal Engine, Base">
   <meta name="author" content="Xpective">
   <meta property="og:title" content="Inpinity - The Community for Game Design and Programming">
   <meta property="og:description" content="Exchange designs, knowledge and experience in programming and game design. Become part of a growing community specializing in Unreal Engine and many other technologies.">
   <meta property="og:image" content="logo_background.jpg">
-  <meta property="og:url" content="https://inpinity.online">
-  <meta name="twitter:card" content="logo_background.webp">
+  <meta property="og:url" content="https://inpinity.online/about.html">
+  <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@unxpective">
   <meta name="twitter:creator" content="@Inpinity1">
   <meta name="robots" content="index,follow">
-
-  <style>
-    /* ✅ Fix: give page breathing room so footer never overlaps */
-    main { padding-bottom: 4rem; }
-
-    footer { margin-top: 3rem; padding-top: 1rem; }
-
-    /* Warning box */
-    .warning-note {
-      background: #332211;
-      border: 1px solid #ffaa00;
-      border-radius: 8px;
-      padding: 1rem;
-      margin: 2rem auto;
-      max-width: 900px;
-      text-align: center;
-    }
-    .warning-note a { color: gold; }
-
-    /* ✅ TV container: show full tv image + full “screen” area */
-    #tv-container {
-      position: relative;
-      width: 90%;
-      max-width: 720px;
-      height: min(70vh, 640px);
-      background-color: black;
-      overflow: visible; /* ✅ allow tv frame to fully show */
-      margin: 2rem auto 0;
-      border: 2px solid var(--quinary-color, gold);
-      border-radius: 12px;
-    }
-
-    /* TV overlay frame */
-    #tv-image {
-      position: absolute;
-      z-index: 3;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      background-image: url('tv.webp');
-      background-size: cover;
-      background-position: center;
-      pointer-events: none;
-      border-radius: 10px;
-    }
-
-    /* ✅ Screen: fill almost entire tv area (no more cropping) */
-    #screen {
-      position: absolute;
-      z-index: 1;
-      inset: 6% 6% 10% 6%; /* top right bottom left */
-      background: #000;
-      overflow: hidden;
-      border-radius: 10px;
-    }
-
-    /* scrolling text */
-    #scrolling-text {
-      color: white;
-      word-wrap: break-word;
-      overflow-wrap: break-word;
-      padding: 5%;
-      position: absolute;
-      bottom: 0;
-      width: 100%;
-      animation: scroll 36.9s linear infinite;
-      font-size: 0.95rem;
-      line-height: 1.45;
-    }
-
-    /* ✅ Better scroll range (no extreme -600% which can look cut) */
-    @keyframes scroll {
-      0%   { transform: translateY(110%); }
-      100% { transform: translateY(-220%); }
-    }
-
-    /* ✅ Keep footer links from sticking to content */
-    .footer-links { margin-top: 1rem; }
-  </style>
 </head>
 
-<body>
-  <header>
-    <nav>
-      <ul>
+<body class="about-page">
+  <header class="site-header">
+    <nav class="site-nav" aria-label="Main navigation">
+      <ul class="nav-list">
         <li><a aria-label="Home" href="index.html">Home</a></li>
         <li><a aria-label="Features" href="features.html">Features</a></li>
         <li><a aria-label="Game" href="game.html">Game</a></li>
         <li><a aria-label="Mint" href="mint.html">Mint</a></li>
         <li><a aria-label="Pyramid Map" href="map.html">Pyramid Map</a></li>
         <li><a aria-label="Collaboration" href="collaboration.html">Collaboration</a></li>
-        <li><a aria-label="About" href="about.html">About</a></li>
+        <li><a aria-label="About" href="about.html" aria-current="page">About</a></li>
         <li><a aria-label="Whitepaper" href="whitepaper.html">Whitepaper</a></li>
         <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
         <li><a aria-label="Guestbook" href="guestbook.html">Guestbook</a></li>
         <li><a aria-label="Advertising" href="advertising.html">Advertising</a></li>
         <li><a aria-label="Staking" href="staking.html">Staking</a></li>
-
-        <div class="themeDots">
-          <div class="dot light" title="Light Theme"></div>
-          <div class="dot dark" title="Dark Theme"></div>
-          <div class="dot basic" title="Basic Theme"></div>
-        </div>
       </ul>
+
+      <div class="themeDots" aria-label="Theme switcher">
+        <button type="button" class="dot light" title="Light Theme" aria-label="Light Theme"></button>
+        <button type="button" class="dot dark" title="Dark Theme" aria-label="Dark Theme"></button>
+        <button type="button" class="dot basic" title="Basic Theme" aria-label="Basic Theme"></button>
+      </div>
     </nav>
-
-    <style>
-      .themeDots .dot{display:inline-block;width:20px;height:20px;border-radius:50%;margin:5px;cursor:pointer;transition:transform .2s}
-      .themeDots .dot.light{background-color:#FFF}
-      .themeDots .dot.dark{background-color:#000}
-      .themeDots .dot.basic{background-color:var(--quinary-color)}
-      .themeDots .dot:hover{transform:scale(1.2)}
-    </style>
-
-    <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        document.querySelector('.themeDots .dot.light')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'light'));
-        document.querySelector('.themeDots .dot.dark')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'dark'));
-        document.querySelector('.themeDots .dot.basic')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'basic'));
-      });
-    </script>
   </header>
 
-  <div class="warning-note">
-    <p>
-      ⚠️ <strong>Important:</strong> We have withdrawn from ToshiMart due to phishing concerns.
-      Our new INPI token is <code>0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</code>.
-      All official contracts are listed on our <a href="index.html">homepage</a>.
-      Do not interact with the old token or ToshiMart pools.
-    </p>
-  </div>
+  <main class="page-wrap about-main">
+    <section class="about-hero">
+      <p class="eyebrow">Inpinity About</p>
+      <h1>About Inpinity</h1>
+      <p class="hero-lead">
+        A place where ideas grow into systems, communities, and long-term worlds —
+        from programming and AI to game design, automation, and the evolving Inpinity ecosystem.
+      </p>
+    </section>
 
-  <main style="display:flex; justify-content:center; align-items:center; min-height:70vh; flex-direction:column;">
-    <div id="tv-container">
-      <div id="screen">
-        <div id="scrolling-text">
-          <strong>About Inpinity.Online</strong><br><br>
-          Welcome to Inpinity.Online,<br>
-          where ideas come to life and communities flourish.<br>
-          Just like a tiny seed that grows into a majestic<br>
-          tree through collective effort,<br>
-          Inpinity.Online began as a mere idea. But ideas...<br><br>
-          much like seeds, need nurturing and constant<br>
-          care to thrive.<br><br><br>
-          In the realm of Inpinity,<br>
-          distinctions of nationality, origin, race, or religion fade away.<br>
-          Here, you're invited to be a part of something greater<br>
-          – a collaborative journey of development.<br><br>
-          Together,<br>
-          we're embarking on a quest to transform our shared visions into reality.<br>
-          Let's connect, learn, and grow alongside one another.<br><br>
-          This platform is a haven for those with an inventive spirit,<br>
-          ready to embark on colossal projects we collectively conceive.<br>
-          As we stand at the dawn of this endeavor,<br>
-          it's the year 0 for Inpinity,<br>
-          even though the concept has long dwelled in our thoughts.<br><br>
-          The seed has been sown, and now it's time for it to flourish.<br><br>
-          I am excited to introduce "Inpinity" to you all.<br><br>
-          It's an honor to be part of something grand,<br>
-          to share this sense of community with you.<br>
-          I have faith that this project will prosper and succeed.<br><br>
-          The coming years hold boundless opportunities for growth, development, and innovation.<br>
-          From programming and artificial intelligence to automation, robotics, cloud technologies, and cybersecurity<br>
-          – all crucial components in the ever-evolving landscape of technology.<br>
-          Our special focus on game design makes Inpinity.Online the perfect platform for anyone intrigued by this realm.<br>
-          United, we have the power to achieve greatness.<br>
-          As we strive for new heights, even Elon's rockets might find a renewed purpose.<br>
-          September 2023 marked the beginning of an exciting journey.<br><br>
-          ---<br>
-          <span style="color: gold;">Recent Update (Feb 2026):</span><br>
-          We have withdrawn our collaboration with ToshiMart due to phishing suspicions.<br>
-          A new, independent INPI token has been launched on Base, with fully transparent tokenomics:<br>
-          • 20% Liquidity (locked till 3033)<br>
-          • 10% Team (vesting)<br>
-          • 15% Staking (reward rate: ~0.00475 INPI/sec)<br>
-          • 5% Events & Drops<br>
-          • 50% Reserve & Ecosystem<br><br>
-          All official contracts are verifiable on BaseScan. We now operate solely on Base and Uniswap.<br>
-          <span style="color: var(--primary-cyan);">✨ New Presale: 2,000,000 INPI per 1 ETH until March 25, 2026! ✨</span>
+    <section class="tv-section">
+      <div id="tv-container" class="tv-container">
+        <div id="screen" class="tv-screen">
+          <div id="scrolling-text" class="scrolling-text">
+            <strong>About Inpinity.Online</strong><br><br>
+            Welcome to Inpinity.Online,<br>
+            where ideas come to life and communities flourish.<br>
+            Just like a tiny seed that grows into a majestic<br>
+            tree through collective effort,<br>
+            Inpinity.Online began as a mere idea. But ideas...<br><br>
+
+            much like seeds, need nurturing and constant<br>
+            care to thrive.<br><br><br>
+
+            In the realm of Inpinity,<br>
+            distinctions of nationality, origin, race, or religion fade away.<br>
+            Here, you're invited to be a part of something greater<br>
+            – a collaborative journey of development.<br><br>
+
+            Together,<br>
+            we're embarking on a quest to transform our shared visions into reality.<br>
+            Let's connect, learn, and grow alongside one another.<br><br>
+
+            This platform is a haven for those with an inventive spirit,<br>
+            ready to embark on colossal projects we collectively conceive.<br>
+            As we stand at the dawn of this endeavor,<br>
+            it's the year 0 for Inpinity,<br>
+            even though the concept has long dwelled in our thoughts.<br><br>
+
+            The seed has been sown, and now it's time for it to flourish.<br><br>
+
+            I am excited to introduce "Inpinity" to you all.<br><br>
+
+            It's an honor to be part of something grand,<br>
+            to share this sense of community with you.<br>
+            I have faith that this project will prosper and succeed.<br><br>
+
+            The coming years hold boundless opportunities for growth, development, and innovation.<br>
+            From programming and artificial intelligence to automation, robotics, cloud technologies, and cybersecurity<br>
+            – all crucial components in the ever-evolving landscape of technology.<br>
+            Our special focus on game design makes Inpinity.Online the perfect platform for anyone intrigued by this realm.<br>
+            United, we have the power to achieve greatness.<br>
+            As we strive for new heights, even rockets might find a renewed purpose.<br>
+            September 2023 marked the beginning of an exciting journey.<br><br>
+
+            ---<br>
+            <span class="about-highlight">Recent Development:</span><br>
+            Inpinity continues to evolve as an ecosystem that connects on-chain assets,
+            strategy gameplay, future city systems, and long-term Unreal Engine integration.<br><br>
+
+            The goal is not only to build a token or a collection,
+            but a living framework where blocks, resources, progression,
+            collaboration, and community utility all connect together.<br><br>
+
+            This is still the beginning.<br>
+            And the beginning matters.
+          </div>
         </div>
-      </div>
 
-      <div id="tv-image"></div>
-    </div>
+        <div id="tv-image" class="tv-image"></div>
+      </div>
+    </section>
   </main>
 
-  <footer>
-    <p>
-      © 2026 Inpinity. All rights reserved. Working with
-      <a href="https://base.org/" target="_blank" rel="noopener" style="color: gold;">Base</a>
-      and <a href="https://uniswap.org/" target="_blank" rel="noopener" style="color: gold;">Uniswap</a>.
-    </p>
-
+  <footer class="site-footer">
+    <p>© 2026 INPINITY. All rights reserved. Built on Base.</p>
     <div class="footer-links">
       <a href="privacypolicy.html">Privacy Policy</a>
       <a href="termsofuse.html">Terms of Use</a>
@@ -243,6 +155,7 @@
       <a href="map.html">Pyramid Map</a>
       <a href="game.html">Game</a>
     </div>
+    <p class="footer-version">Version 0.23.0</p>
   </footer>
 </body>
 </html>
