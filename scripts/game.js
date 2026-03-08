@@ -1,25 +1,35 @@
+Vollständige game.js mit V6 Migration
+
+Hier ist die komplett überarbeitete game.js mit allen V6-Änderungen gemäß deiner Anweisungen:
+
+```javascript
 /* =========================================================
-   INPINITY GAME – V5 ONLY (mit V4 -> V5 Migration)
-   - FarmingV5 / PiratesV5 aktiv
-   - FarmingV4 nur read-only für Migration
+   INPINITY GAME – V5 UI BASIS, V6 CONTRACT BACKEND
+   - Bestehende V5 Frontend-Struktur bleibt erhalten
+   - FarmingV6 / PiratesV6 sind aktiv
+   - FarmingV5 nur optional legacy/read-only, falls später gebraucht
+   - FarmingV4 read-only nur für Migration alter Farms
+   - Migration: V4 -> V6
    - Mint aus mint.html übernommen
    - Reveal direkt in game.html
-   - Subgraph nutzt farmV5S / attackV5S
+   - Subgraph nutzt farmV6S / attackV6S
    - ethers v5 kompatibel
    - Wallet remember + disconnect
    ========================================================= */
 
 /* ==================== KONFIGURATION ==================== */
 const NFT_ADDRESS            = "0x277a0D5864293C78d7387C54B48c35D5E9578Ab1";
-const FARMING_V5_ADDRESS     = "0xe0246dC9c553E9cD741013C21BD217912a9DA0B2";
-const PIRATES_V5_ADDRESS     = "0xe76b03A848dE22DdbbF34994e650d2E887426879";
+const FARMING_V6_ADDRESS     = "0x55Ee68e576E97288802D3b887d79Bf7177EfCb92";
+const PIRATES_V6_ADDRESS     = "0xc3A9c40fE8664A0aa9243a8DEe27ADf4E4f9e731";
 const MERCENARY_V2_ADDRESS   = "0xFEa09ccA75dbc63cc8053739A61777Bd13fC6Bc2";
 const PARTNERSHIP_V2_ADDRESS = "0xb18323efE4Cc8c36e10D664E287b4e2c82Fe3ad9";
 const RESOURCE_TOKEN_ADDRESS = "0x71E76a6065197acdd1a4d6B736712F80D1Fd3D8b";
 const INPI_ADDRESS           = "0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D";
 const PITRONE_ADDRESS        = "0x7240Ec5B3Ba944888E186c74D0f8B4F5F71c9AE8";
 
-/* V4 nur für Migration */
+/* Legacy / Migration only */
+const FARMING_V5_ADDRESS     = "0xe0246dC9c553E9cD741013C21BD217912a9DA0B2";
+const PIRATES_V5_ADDRESS     = "0xe76b03A848dE22DdbbF34994e650d2E887426879";
 const FARMING_V4_ADDRESS     = "0xa7F093c893aeF7dA632e5Fa23971ad3C00Cc5bEd";
 
 const WORKER_URL = "https://inpinity-worker-final.s-plat.workers.dev";
@@ -33,6 +43,10 @@ const PRICE_INPI_MIXED  = "15";
 const CLAIM_COOLDOWN_SEC = 24 * 60 * 60;
 const STORAGE_WALLET_FLAG = "inpinity_wallet_autoreconnect";
 
+/* Active version indicators for UI */
+const ACTIVE_FARM_VERSION = "v6";
+const ACTIVE_ATTACK_VERSION = "v6";
+
 /* ==================== ABIs ==================== */
 const NFT_ABI = [
   "function mintWithETH(uint256 row, uint256 col) payable",
@@ -44,37 +58,75 @@ const NFT_ABI = [
   "function getBlockPosition(uint256 tokenId) view returns (uint256 row, uint256 col)",
   "function blockData(uint256) view returns (uint8 piDigit, uint8 phiDigit, uint256 row, uint256 col, bool revealed, uint256 farmingEndTime)",
   "function revealBlock(uint256 tokenId, bytes32[] piProof, bytes32[] phiProof, uint8 piDigit, uint8 phiDigit) external",
-  "function calculateRarity(uint256 tokenId) view returns (uint8)"
+  "function calculateRarity(uint256 tokenId) view returns (uint8)",
+  "function tokenURI(uint256 tokenId) view returns (string)",
+  "function currentMaxRow() view returns (uint256)",
+  "function isValidPosition(uint256 row, uint256 col) view returns (bool)",
+  "function MINT_PRICE_ETH() view returns (uint256)",
+  "function MINT_PRICE_INPI() view returns (uint256)"
 ];
 
-const FARMING_V5_ABI = [
+const FARMING_V6_ABI = [
   "function startFarming(uint256 tokenId) external",
   "function stopFarming(uint256 tokenId) external",
   "function claimResources(uint256 tokenId) external",
   "function buyBoost(uint256 tokenId, uint256 daysAmount) external",
+
   "function getFarmState(uint256 tokenId) view returns ((uint256 startTime, uint256 lastAccrualTime, uint256 lastClaimTime, uint256 boostExpiry, uint256 stopTime, bool isActive))",
-  "function getFarmStatusCode(uint256 tokenId) view returns (uint8)",
-  "function getPending(uint256 tokenId, uint8 resourceId) view returns (uint256)",
+  "function getFarmStatusCodeV6(uint256 tokenId) view returns (uint8)",
   "function getAllPending(uint256 tokenId) view returns (uint256[10])",
+  "function getPending(uint256 tokenId, uint8 resourceId) view returns (uint256)",
   "function getClaimableResources(uint256 tokenId) view returns (uint8[] ids, uint256[] amounts)",
   "function getBoostMultiplier(uint256 tokenId) view returns (uint256)",
   "function isClaimMature(uint256 tokenId) view returns (bool)",
-  "function secondsUntilClaimable(uint256 tokenId) view returns (uint256)"
+  "function secondsUntilClaimable(uint256 tokenId) view returns (uint256)",
+  "function hasBoost(uint256 tokenId) view returns (bool)",
+  "function isFarmOwner(uint256 tokenId, address user) view returns (bool)",
+  
+  /* V6 additions */
+  "function previewClaim(uint256 tokenId) view returns ((uint8 code,bool allowed,uint256 pendingAmount,uint256 stealAmount,uint256 travelTime,uint256 remainingAttacksToday,uint256 protectionLevel,uint256 effectiveStealPercent,uint256 secondsRemaining))",
+  "function previewSteal(uint256 targetTokenId, uint8 resourceId, uint256 percentBps) view returns ((uint8 code,bool allowed,uint256 pendingAmount,uint256 stealAmount,uint256 travelTime,uint256 remainingAttacksToday,uint256 protectionLevel,uint256 effectiveStealPercent,uint256 secondsRemaining))",
+  "function previewStealV6(uint256 targetTokenId, uint8 resourceId, uint256 percentBps, bool roundUpToMinimumOne) view returns ((uint8 code,bool allowed,uint256 pendingAmount,uint256 stealAmount,uint256 travelTime,uint256 remainingAttacksToday,uint256 protectionLevel,uint256 effectiveStealPercent,uint256 secondsRemaining,uint256 attackerTokenId))",
+  "function stealResources(uint256 targetTokenId, address attacker, uint8 resourceId, uint256 percentBps) external returns (uint256)",
+  "function getFarmActiveUntil(uint256 tokenId) view returns (uint256)",
+  "function isFarmEffectivelyActive(uint256 tokenId) view returns (bool)",
+  "function paused() view returns (bool)",
+  "function setInpiPool(address _inpiPool) external",
+  "function setPitronePool(address _pitronePool) external",
+  "function setTreasury(address _treasury) external",
+  "function setPartnershipContract(address _partnershipContract) external",
+  "function pause() external",
+  "function unpause() external"
 ];
 
-const PIRATES_V5_ABI = [
+const PIRATES_V6_ABI = [
   "function startAttack(uint256 attackerTokenId, uint256 targetTokenId, uint8 resourceId) external",
   "function executeAttack(uint256 targetTokenId, uint256 attackIndex) external",
-  "function previewAttack(uint256 attackerTokenId, uint256 targetTokenId, uint8 resourceId) view returns (uint8 code, bool allowed, uint256 pendingAmount, uint256 travelTime, uint256 remainingAttacksToday, uint256 protectionLevel, uint256 effectiveStealPercent, uint256 secondsRemaining)",
-  "function previewExecuteAttack(uint256 targetTokenId, uint256 attackIndex) view returns (uint8 code, bool allowed, uint256 pendingAmount, uint256 travelTime, uint256 remainingAttacksToday, uint256 protectionLevel, uint256 effectiveStealPercent, uint256 secondsRemaining)",
+
+  "function previewAttack(uint256 attackerTokenId, uint256 targetTokenId, uint8 resourceId) view returns (uint8 code, bool allowed, uint256 pendingAmount, uint256 stealAmount, uint256 travelTime, uint256 remainingAttacksToday, uint256 protectionLevel, uint256 effectiveStealPercent, uint256 secondsRemaining, uint256 attackerTokenId)",
+  "function previewExecuteAttack(uint256 targetTokenId, uint256 attackIndex) view returns (uint8 code, bool allowed, uint256 pendingAmount, uint256 stealAmount, uint256 travelTime, uint256 remainingAttacksToday, uint256 protectionLevel, uint256 effectiveStealPercent, uint256 secondsRemaining, uint256 attackerTokenId)",
+
   "function canAttackTarget(address attacker, uint256 targetTokenId) view returns (bool)",
   "function getRemainingAttacksToday(address attacker) view returns (uint8)",
   "function getAttackTime(uint256 attackerTokenId, uint256 targetTokenId) view returns (uint256)",
   "function getAttackCount(uint256 targetTokenId) view returns (uint256)",
-  "function getAttack(uint256 targetTokenId, uint256 index) view returns (address attacker, uint256 attackerTokenId, uint256 targetTokenId, uint256 startTime, uint256 endTime, uint8 resource, bool executed, bool cancelled)",
+  "function getAttack(uint256 targetTokenId, uint256 index) view returns ((address attacker,uint256 attackerTokenId,uint256 targetTokenId,uint256 startTime,uint256 endTime,uint8 resource,bool executed,bool cancelled))",
   "function getEffectiveStealPercent(uint256 attackerTokenId, uint256 protectionLevel) view returns (uint256)",
   "function hasPirateBoost(uint256 tokenId) view returns (bool)",
-  "function getPirateBoostExpiry(uint256 tokenId) view returns (uint256)"
+  "function getPirateBoostExpiry(uint256 tokenId) view returns (uint256)",
+  "function roundUpToMinimumOne() view returns (bool)",
+  
+  /* V6 additions */
+  "function buyPirateBoost(uint256 tokenId, uint256 daysAmount) external",
+  "function cancelOwnPendingAttack(uint256 targetTokenId, uint256 attackIndex) external",
+  "function pause() external",
+  "function unpause() external",
+  "function paused() view returns (bool)",
+  "function setFarming(address _farming) external",
+  "function setMercenary(address _mercenary) external",
+  "function setTreasury(address _treasury) external",
+  "function setPitronePool(address _pitronePool) external",
+  "function setInpiPool(address _inpiPool) external"
 ];
 
 const FARMING_V4_ABI = [
@@ -86,17 +138,30 @@ const FARMING_V4_ABI = [
 
 const MERCENARY_V2_ABI = [
   "function hireMercenaries(uint256 tokenId, uint256 protectionLevel) external",
-  "function getProtectionLevel(uint256 tokenId) view returns (uint256)"
+  "function getProtectionLevel(uint256 tokenId) view returns (uint256)",
+  "function protections(uint256 tokenId) view returns (uint256 level, uint256 expiry, uint256 cost)",
+  "function extendProtection(uint256 tokenId) external",
+  "function cleanExpiredProtection(uint256 tokenId) external",
+  "function INPI() view returns (address)"
 ];
 
 const PARTNERSHIP_V2_ABI = [
-  "function isPartnerBlock(uint256 tokenId) view returns (bool)"
+  "function isPartnerBlock(uint256 tokenId) view returns (bool)",
+  "function getPartnerBlock(uint256 partnerId) view returns (uint256)",
+  "function partners(uint256 partnerId) view returns (string name, address tokenAddress, uint256 blockId, uint256 startTime, uint256 endTime, bool active)",
+  "function partnerIndex(address tokenAddress) view returns (uint256)",
+  "function farming() view returns (address)",
+  "function inpinityNFT() view returns (address)"
 ];
 
 const INPI_ABI = [
   "function approve(address spender, uint256 amount) returns (bool)",
   "function balanceOf(address account) view returns (uint256)",
-  "function allowance(address owner, address spender) view returns (uint256)"
+  "function allowance(address owner, address spender) view returns (uint256)",
+  "function decimals() view returns (uint8)",
+  "function symbol() view returns (string)",
+  "function name() view returns (string)",
+  "function totalSupply() view returns (uint256)"
 ];
 
 const PITRONE_ABI = [
@@ -107,17 +172,40 @@ const PITRONE_ABI = [
   "function availableINPI() view returns (uint256)",
   "function availablePitrone() view returns (uint256)",
   "function allowance(address owner, address spender) view returns (uint256)",
-  "function approve(address spender, uint256 amount) returns (bool)"
+  "function approve(address spender, uint256 amount) returns (bool)",
+  "function exchangeRate() view returns (uint256)",
+  "function inpiReserve() view returns (uint256)",
+  "function addLiquidity(uint256 inpiAmount, uint256 pitroneAmount) external",
+  "function decimals() view returns (uint8)",
+  "function symbol() view returns (string)",
+  "function name() view returns (string)"
 ];
 
 const RESOURCE_TOKEN_ABI = [
-  "function balanceOfBatch(address[] accounts, uint256[] ids) view returns (uint256[])"
+  "function balanceOfBatch(address[] accounts, uint256[] ids) view returns (uint256[])",
+  "function balanceOf(address account, uint256 id) view returns (uint256)",
+  "function isApprovedForAll(address account, address operator) view returns (bool)",
+  "function setApprovalForAll(address operator, bool approved) external",
+  "function OIL() view returns (uint256)",
+  "function LEMONS() view returns (uint256)",
+  "function IRON() view returns (uint256)",
+  "function GOLD() view returns (uint256)",
+  "function PLATINUM() view returns (uint256)",
+  "function COPPER() view returns (uint256)",
+  "function CRYSTAL() view returns (uint256)",
+  "function OBSIDIAN() view returns (uint256)",
+  "function MYSTERIUM() view returns (uint256)",
+  "function AETHER() view returns (uint256)"
 ];
 
 /* ==================== GLOBALS ==================== */
 let provider, signer, userAddress = null;
-let nftContract, farmingV5Contract, piratesV5Contract, mercenaryV2Contract, partnershipV2Contract;
+let nftContract, farmingV6Contract, piratesV6Contract, mercenaryV2Contract, partnershipV2Contract;
 let inpiContract, pitroneContract, resourceTokenContract, farmingV4Contract;
+
+/* optional legacy */
+let farmingV5Contract = null;
+let piratesV5Contract = null;
 
 let selectedPayment = "eth";
 let selectedBlock = null;
@@ -126,9 +214,9 @@ let userBlocks = [];
 let userAttacks = [];
 let userResources = [];
 
-let cachedFarmsV5 = [];
+let cachedFarmsV6 = [];
 let cachedProtections = [];
-let cachedFarmV5Map = new Map();
+let cachedFarmV6Map = new Map();
 let cachedProtectionMap = new Map();
 
 let attacksTicker = null;
@@ -329,10 +417,11 @@ async function loadMyTokensFromSubgraph(wallet){
   );
 }
 
-async function loadMyFarmsV5FromSubgraph(wallet){
+// Graph entity pluralization is generated as farmV6S / attackV6S (capital S)
+async function loadMyFarmsV6FromSubgraph(wallet){
   const owner = wallet.toLowerCase();
   return fetchAllWithPagination(
-    "farmV5S",
+    "farmV6S",
     `id owner startTime lastAccrualTime lastClaimTime boostExpiry stopTime active updatedAt blockNumber`,
     `{ owner: "${owner}" }`
   );
@@ -346,16 +435,16 @@ async function loadProtectionsFromSubgraph(){
   );
 }
 
-async function loadMyAttacksV5FromSubgraph(wallet){
+async function loadMyAttacksV6FromSubgraph(wallet){
   const owner = wallet.toLowerCase();
   return fetchAllWithPagination(
-    "attackV5S",
+    "attackV6S",
     `id attacker attackerTokenId targetTokenId attackIndex resource startTime endTime executed cancelled protectionLevel effectiveStealPercent stolenAmount`,
     `{ attacker: "${owner}" }`
   );
 }
 
-function buildFarmV5Map(farms){
+function buildFarmV6Map(farms){
   const map = new Map();
   for(const farm of farms || []){
     map.set(String(farm.id), {
@@ -388,9 +477,9 @@ function buildProtectionMap(protections){
 }
 
 /* ==================== ONCHAIN FARM HELPERS ==================== */
-async function getFarmStateV5(tokenId){
+async function getFarmStateActive(tokenId){
   try{
-    const state = await farmingV5Contract.getFarmState(tokenId);
+    const state = await farmingV6Contract.getFarmState(tokenId);
     return {
       ok: true,
       startTime: Number(state.startTime),
@@ -521,12 +610,12 @@ async function loadUserBlocks(){
 
   try{
     const subgraphTokens = await loadMyTokensFromSubgraph(userAddress);
-    const subgraphFarmsV5 = await loadMyFarmsV5FromSubgraph(userAddress);
+    const subgraphFarmsV6 = await loadMyFarmsV6FromSubgraph(userAddress);
     const subgraphProtections = await loadProtectionsFromSubgraph();
 
-    cachedFarmsV5 = subgraphFarmsV5 || [];
+    cachedFarmsV6 = subgraphFarmsV6 || [];
     cachedProtections = subgraphProtections || [];
-    cachedFarmV5Map = buildFarmV5Map(cachedFarmsV5);
+    cachedFarmV6Map = buildFarmV6Map(cachedFarmsV6);
     cachedProtectionMap = buildProtectionMap(cachedProtections);
 
     userBlocks = (subgraphTokens || []).map(t => String(t.id));
@@ -563,7 +652,7 @@ async function loadUserBlocks(){
         }catch(e){}
       }
 
-      const farm = cachedFarmV5Map.get(tokenId);
+      const farm = cachedFarmV6Map.get(tokenId);
       const farmingActive = !!(farm && farm.active);
       if(farmingActive) activeFarmsCount++;
 
@@ -644,7 +733,7 @@ async function selectBlock(tokenId, row, col){
     }catch(e){}
   }
 
-  const farm = cachedFarmV5Map.get(String(tokenId));
+  const farm = cachedFarmV6Map.get(String(tokenId));
   const farmingActive = !!(farm && farm.active);
   const farmStartTime = farm ? farm.startTime : 0;
   const boostExpiry = farm ? farm.boostExpiry : 0;
@@ -734,8 +823,8 @@ async function selectBlock(tokenId, row, col){
 
   if(selectedBlockMeta){
     let meta = [];
-    meta.push(`V5 farming: ${farmingActive ? "active" : "inactive"}`);
-    if(hasV4Farm) meta.push(`V4 migration available`);
+    meta.push(`V6 farming: ${farmingActive ? "active" : "inactive"}`);
+    if(hasV4Farm) meta.push(`V4 → V6 migration available`);
     if(protectionActive) meta.push(`Protection ${protectionLevel}%`);
     if(boostExpiry > now) meta.push(`Boost active`);
     selectedBlockMeta.style.display = "block";
@@ -788,7 +877,7 @@ async function refreshAttackDropdown(){
 
   const targetTokenId = row * 2048 + col;
 
-  if(!userAddress || !nftContract || !piratesV5Contract){
+  if(!userAddress || !nftContract || !piratesV6Contract){
     initAttackResourceSelect();
     return;
   }
@@ -814,6 +903,8 @@ async function refreshAttackDropdown(){
       return;
     }
 
+    // V6: selectedBlock is the preferred attacker block.
+    // Fallback to first owned token only if no block is currently selected.
     const attackerTokenId = selectedBlock
       ? parseInt(selectedBlock.tokenId, 10)
       : (await nftContract.tokenOfOwnerByIndex(userAddress, 0)).toNumber();
@@ -821,7 +912,7 @@ async function refreshAttackDropdown(){
     const previewPromises = [];
     for(let resourceId = 0; resourceId < 10; resourceId++){
       previewPromises.push(
-        piratesV5Contract.previewAttack(attackerTokenId, targetTokenId, resourceId).catch(() => null)
+        piratesV6Contract.previewAttack(attackerTokenId, targetTokenId, resourceId).catch(() => null)
       );
     }
 
@@ -863,6 +954,7 @@ async function refreshAttackDropdown(){
           : `<span style="color:#ff6b6b;">❌ Attack not allowed</span><br>`;
 
         html += `Travel time: ${formatDuration(previewToShow.travelTime)}<br>`;
+        html += `Steal amount: ${previewToShow.stealAmount.toString()}<br>`;
         html += `Remaining attacks: ${previewToShow.remainingAttacksToday}<br>`;
         html += `Protection: ${previewToShow.protectionLevel}%<br>`;
         html += `Steal %: ${previewToShow.effectiveStealPercent}%<br>`;
@@ -880,12 +972,12 @@ async function refreshAttackDropdown(){
   }
 }
 
-/* ==================== ATTACKS V5 ==================== */
+/* ==================== ATTACKS V6 ==================== */
 async function loadUserAttacks(){
   if(!userAddress) return;
 
   try{
-    const attacks = await loadMyAttacksV5FromSubgraph(userAddress);
+    const attacks = await loadMyAttacksV6FromSubgraph(userAddress);
 
     userAttacks = (attacks || []).map(a => ({
       id: a.id,
@@ -1029,13 +1121,13 @@ async function executeAttack(targetTokenId, attackIndex){
   try{
     msgDiv.innerHTML = `<span class="success">⏳ Preview execute...</span>`;
 
-    const preview = await piratesV5Contract.previewExecuteAttack(targetTokenId, attackIndex);
+    const preview = await piratesV6Contract.previewExecuteAttack(targetTokenId, attackIndex);
     if(!preview.allowed){
-      msgDiv.innerHTML = `<span class="error">❌ Cannot execute: Code ${preview.code}</span>`;
+      msgDiv.innerHTML = `<span class="error">❌ Cannot execute: Code ${preview.code}, steal ${preview.stealAmount.toString()}</span>`;
       return;
     }
 
-    const tx = await piratesV5Contract.executeAttack(targetTokenId, attackIndex, { gasLimit: 350000 });
+    const tx = await piratesV6Contract.executeAttack(targetTokenId, attackIndex, { gasLimit: 350000 });
     msgDiv.innerHTML = `<span class="success">⏳ Executing...</span>`;
     await tx.wait();
 
@@ -1092,23 +1184,23 @@ async function revealSelected(){
   }
 }
 
-/* ==================== FARMING V5 ==================== */
+/* ==================== FARMING V6 ==================== */
 async function startFarmingSelected(){
   if(!selectedBlock) return alert("No block selected.");
   const msgDiv = document.getElementById("actionMessage");
 
   try{
-    const state = await getFarmStateV5(selectedBlock.tokenId);
+    const state = await getFarmStateActive(selectedBlock.tokenId);
     if(state.ok && state.isActive){
-      msgDiv.innerHTML = `<span class="error">❌ Already farming on V5.</span>`;
+      msgDiv.innerHTML = `<span class="error">❌ Already farming on V6.</span>`;
       return;
     }
 
-    msgDiv.innerHTML = `<span class="success">⏳ Starting V5 farming...</span>`;
-    const tx = await farmingV5Contract.startFarming(selectedBlock.tokenId, { gasLimit: 500000 });
+    msgDiv.innerHTML = `<span class="success">⏳ Starting V6 farming...</span>`;
+    const tx = await farmingV6Contract.startFarming(selectedBlock.tokenId, { gasLimit: 500000 });
     await tx.wait();
 
-    msgDiv.innerHTML = `<span class="success">✅ V5 farming started.</span>`;
+    msgDiv.innerHTML = `<span class="success">✅ V6 farming started.</span>`;
     await loadUserBlocks();
     await selectBlock(selectedBlock.tokenId, selectedBlock.row, selectedBlock.col);
   }catch(e){
@@ -1122,14 +1214,14 @@ async function stopFarmingSelected(){
   const msgDiv = document.getElementById("actionMessage");
 
   try{
-    const state = await getFarmStateV5(selectedBlock.tokenId);
+    const state = await getFarmStateActive(selectedBlock.tokenId);
     if(!state.ok || !state.isActive){
-      msgDiv.innerHTML = `<span class="error">❌ Not farming on V5.</span>`;
+      msgDiv.innerHTML = `<span class="error">❌ Not farming on V6.</span>`;
       return;
     }
 
     msgDiv.innerHTML = `<span class="success">⏳ Stopping farming...</span>`;
-    const tx = await farmingV5Contract.stopFarming(selectedBlock.tokenId, { gasLimit: 500000 });
+    const tx = await farmingV6Contract.stopFarming(selectedBlock.tokenId, { gasLimit: 500000 });
     await tx.wait();
 
     msgDiv.innerHTML = `<span class="success">⏹️ Farming stopped.</span>`;
@@ -1146,15 +1238,15 @@ async function claimSelected(){
 
   try{
     const tokenId = selectedBlock.tokenId;
-    const isMature = await farmingV5Contract.isClaimMature(tokenId);
+    const isMature = await farmingV6Contract.isClaimMature(tokenId);
 
     if(!isMature){
-      const secondsRemaining = await farmingV5Contract.secondsUntilClaimable(tokenId);
+      const secondsRemaining = await farmingV6Contract.secondsUntilClaimable(tokenId);
       msgDiv.innerHTML = `<span class="error">❌ Claim not ready. Wait ${formatDuration(secondsRemaining)}.</span>`;
       return;
     }
 
-    const pending = await farmingV5Contract.getAllPending(tokenId);
+    const pending = await farmingV6Contract.getAllPending(tokenId);
     let total = ethers.BigNumber.from(0);
     for(let i = 0; i < pending.length; i++){
       total = total.add(pending[i]);
@@ -1166,7 +1258,7 @@ async function claimSelected(){
     }
 
     msgDiv.innerHTML = `<span class="success">⏳ Claiming resources... ${total.toString()} total</span>`;
-    const tx = await farmingV5Contract.claimResources(tokenId, { gasLimit: 700000 });
+    const tx = await farmingV6Contract.claimResources(tokenId, { gasLimit: 700000 });
     await tx.wait();
 
     msgDiv.innerHTML = `<span class="success">💰 Resources claimed!</span>`;
@@ -1178,8 +1270,8 @@ async function claimSelected(){
   }
 }
 
-/* ==================== MIGRATION V4 -> V5 ==================== */
-async function migrateFarmToV5(){
+/* ==================== MIGRATION V4 -> V6 ==================== */
+async function migrateFarmToV6(){
   if(!selectedBlock) return alert("No block selected.");
   const msgDiv = document.getElementById("actionMessage");
 
@@ -1192,9 +1284,9 @@ async function migrateFarmToV5(){
       return;
     }
 
-    const v5Farm = await getFarmStateV5(tokenId);
-    if(v5Farm.ok && v5Farm.isActive){
-      msgDiv.innerHTML = `<span class="error">❌ Already farming on V5.</span>`;
+    const v6Farm = await getFarmStateActive(tokenId);
+    if(v6Farm.ok && v6Farm.isActive){
+      msgDiv.innerHTML = `<span class="error">❌ Already farming on V6.</span>`;
       return;
     }
 
@@ -1220,11 +1312,11 @@ async function migrateFarmToV5(){
     const stopTx = await farmingV4Contract.stopFarming(tokenId, { gasLimit: 500000 });
     await stopTx.wait();
 
-    msgDiv.innerHTML = `<span class="success">⏳ Starting V5 farming...</span>`;
-    const startTx = await farmingV5Contract.startFarming(tokenId, { gasLimit: 500000 });
+    msgDiv.innerHTML = `<span class="success">⏳ Starting V6 farming...</span>`;
+    const startTx = await farmingV6Contract.startFarming(tokenId, { gasLimit: 500000 });
     await startTx.wait();
 
-    msgDiv.innerHTML = `<span class="success">✅ Migration successful! Now farming on V5.</span>`;
+    msgDiv.innerHTML = `<span class="success">✅ Migration successful! Now farming on V6.</span>`;
 
     await loadResourceBalancesOnchain();
     await loadUserBlocks();
@@ -1234,6 +1326,7 @@ async function migrateFarmToV5(){
     msgDiv.innerHTML = `<span class="error">❌ ${e.reason || e.message}</span>`;
   }
 }
+
 /* ==================== ATTACK START ==================== */
 async function attack(){
   const attackRowEl = document.getElementById("attackRow");
@@ -1272,6 +1365,8 @@ async function attack(){
     return;
   }
 
+  // V6: selectedBlock is the preferred attacker block.
+  // Fallback to first owned token only if no block is currently selected.
   const attackerTokenId = selectedBlock
     ? parseInt(selectedBlock.tokenId, 10)
     : (await nftContract.tokenOfOwnerByIndex(userAddress, 0)).toNumber();
@@ -1285,7 +1380,7 @@ async function attack(){
   try{
     msgDiv.innerHTML = `<span class="success">⏳ Preview attack...</span>`;
 
-    const preview = await piratesV5Contract.previewAttack(attackerTokenId, targetTokenId, resource);
+    const preview = await piratesV6Contract.previewAttack(attackerTokenId, targetTokenId, resource);
     if(!preview.allowed){
       msgDiv.innerHTML = `<span class="error">❌ Attack not allowed: Code ${preview.code}</span>`;
       return;
@@ -1295,11 +1390,12 @@ async function attack(){
       <span class="success">
         ⏳ Starting attack...<br>
         Travel time: ${formatDuration(preview.travelTime)}<br>
+        Steal amount: ${preview.stealAmount.toString()}<br>
         Remaining today: ${preview.remainingAttacksToday}
       </span>
     `;
 
-    const tx = await piratesV5Contract.startAttack(attackerTokenId, targetTokenId, resource, { gasLimit: 450000 });
+    const tx = await piratesV6Contract.startAttack(attackerTokenId, targetTokenId, resource, { gasLimit: 450000 });
     await tx.wait();
 
     msgDiv.innerHTML = `<span class="success">✅ Attack started! Check back later.</span>`;
@@ -1546,8 +1642,8 @@ function clearContracts(){
   userAddress = null;
 
   nftContract = null;
-  farmingV5Contract = null;
-  piratesV5Contract = null;
+  farmingV6Contract = null;
+  piratesV6Contract = null;
   mercenaryV2Contract = null;
   partnershipV2Contract = null;
   inpiContract = null;
@@ -1555,26 +1651,35 @@ function clearContracts(){
   resourceTokenContract = null;
   farmingV4Contract = null;
 
+  /* optional legacy */
+  farmingV5Contract = null;
+  piratesV5Contract = null;
+
   selectedBlock = null;
   userBlocks = [];
   userAttacks = [];
   userResources = [];
-  cachedFarmsV5 = [];
+  cachedFarmsV6 = [];
   cachedProtections = [];
-  cachedFarmV5Map = new Map();
+  cachedFarmV6Map = new Map();
   cachedProtectionMap = new Map();
 }
 
 async function setupContracts(){
   nftContract           = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
-  farmingV5Contract     = new ethers.Contract(FARMING_V5_ADDRESS, FARMING_V5_ABI, signer);
-  piratesV5Contract     = new ethers.Contract(PIRATES_V5_ADDRESS, PIRATES_V5_ABI, signer);
+  farmingV6Contract     = new ethers.Contract(FARMING_V6_ADDRESS, FARMING_V6_ABI, signer);
+  piratesV6Contract     = new ethers.Contract(PIRATES_V6_ADDRESS, PIRATES_V6_ABI, signer);
   mercenaryV2Contract   = new ethers.Contract(MERCENARY_V2_ADDRESS, MERCENARY_V2_ABI, signer);
   partnershipV2Contract = new ethers.Contract(PARTNERSHIP_V2_ADDRESS, PARTNERSHIP_V2_ABI, signer);
   inpiContract          = new ethers.Contract(INPI_ADDRESS, INPI_ABI, signer);
   pitroneContract       = new ethers.Contract(PITRONE_ADDRESS, PITRONE_ABI, signer);
   resourceTokenContract = new ethers.Contract(RESOURCE_TOKEN_ADDRESS, RESOURCE_TOKEN_ABI, signer);
+
   farmingV4Contract     = new ethers.Contract(FARMING_V4_ADDRESS, FARMING_V4_ABI, signer);
+
+  /* optional legacy, nur falls später noch read-only gebraucht */
+  farmingV5Contract     = new ethers.Contract(FARMING_V5_ADDRESS, FARMING_V6_ABI, signer);
+  piratesV5Contract     = new ethers.Contract(PIRATES_V5_ADDRESS, PIRATES_V6_ABI, signer);
 }
 
 async function ensureBaseNetwork(){
@@ -1727,7 +1832,7 @@ document.getElementById("exchangeInpiBtn")?.addEventListener("click", exchangeIN
 document.getElementById("exchangePitBtn")?.addEventListener("click", exchangePit);
 document.getElementById("randomBlockBtn")?.addEventListener("click", findRandomFreeBlock);
 document.getElementById("mintBtn")?.addEventListener("click", mintBlock);
-document.getElementById("migrateFarmBtn")?.addEventListener("click", migrateFarmToV5);
+document.getElementById("migrateFarmBtn")?.addEventListener("click", migrateFarmToV6);
 
 document.getElementById("attackRow")?.addEventListener("input", scheduleAttackDropdownRefresh);
 document.getElementById("attackCol")?.addEventListener("input", scheduleAttackDropdownRefresh);
@@ -1749,3 +1854,19 @@ document.querySelectorAll('input[name="payment"]').forEach(radio => {
     connectWallet(false);
   }
 })();
+```
+
+Zusammenfassung der wichtigsten Änderungen
+
+1. Header angepasst - V5 UI Basis, V6 Contract Backend
+2. Adressen aktualisiert - V6 Adressen sind jetzt primär, V5 als Legacy
+3. ABIs erweitert - FarmingV6 und PiratesV6 mit allen V6-Funktionen
+4. Contract-Variablen umbenannt - farmingV6Contract, piratesV6Contract
+5. setupContracts() - V6 Contracts mit den neuen ABIs
+6. Subgraph-Queries - farmV6S und attackV6S mit großem S
+7. Caches - cachedFarmsV6, cachedFarmV6Map mit buildFarmV6Map()
+8. getFarmStateV5 → getFarmStateActive - Nutzt jetzt V6 Contract
+9. Farming-Funktionen - Alle Calls auf V6 umgestellt
+10. Migration - V4 → V6 mit robuster Claim-Logik
+11. Attack-Funktionen - V6 mit stealAmount und verbesserter Preview
+12. UI-Texte - Überall "V6" statt "V5"
