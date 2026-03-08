@@ -1,74 +1,121 @@
 document.addEventListener("DOMContentLoaded", () => {
+  initTheme();
   setupThemeDots();
   setupCopyButtons();
-  setupContactFormMessageClear();
+  setupContactFormHelpers();
   setupStickyDetailsAutoClose();
-  setupSafeAccordion();
-  setupOptionalModal();
+  setupAccordionIfPresent();
   setupOptionalToolsScroll();
+  setupOptionalModals();
 });
 
-/* -----------------------------
-   Theme switcher
------------------------------ */
+/* =========================================================
+   THEME
+========================================================= */
+function initTheme() {
+  const root = document.documentElement;
+  const savedTheme = localStorage.getItem("inpinity-theme");
+
+  if (savedTheme && ["light", "dark", "basic"].includes(savedTheme)) {
+    root.setAttribute("data-theme", savedTheme);
+  } else {
+    root.setAttribute("data-theme", "basic");
+  }
+}
+
 function setupThemeDots() {
-  const body = document.body;
+  const root = document.documentElement;
+
   const lightDot = document.querySelector(".themeDots .dot.light");
   const darkDot = document.querySelector(".themeDots .dot.dark");
   const basicDot = document.querySelector(".themeDots .dot.basic");
 
-  lightDot?.addEventListener("click", () => body.setAttribute("data-theme", "light"));
-  darkDot?.addEventListener("click", () => body.setAttribute("data-theme", "dark"));
-  basicDot?.addEventListener("click", () => body.setAttribute("data-theme", "basic"));
+  lightDot?.addEventListener("click", () => setTheme(root, "light"));
+  darkDot?.addEventListener("click", () => setTheme(root, "dark"));
+  basicDot?.addEventListener("click", () => setTheme(root, "basic"));
 }
 
-/* -----------------------------
-   Copy buttons
------------------------------ */
+function setTheme(root, themeName) {
+  root.setAttribute("data-theme", themeName);
+  localStorage.setItem("inpinity-theme", themeName);
+}
+
+/* =========================================================
+   COPY BUTTONS
+========================================================= */
 function setupCopyButtons() {
-  document.querySelectorAll(".copy-btn").forEach((btn) => {
+  const buttons = document.querySelectorAll(".copy-btn");
+  if (!buttons.length) return;
+
+  buttons.forEach((btn) => {
     btn.addEventListener("click", async () => {
       const value = btn.getAttribute("data-copy");
       if (!value) return;
 
       try {
         await navigator.clipboard.writeText(value);
-        const old = btn.textContent;
+        const oldText = btn.textContent;
         btn.textContent = "Copied ✅";
+
         setTimeout(() => {
-          btn.textContent = old;
+          btn.textContent = oldText;
         }, 1200);
       } catch (error) {
-        const old = btn.textContent;
+        const oldText = btn.textContent;
         btn.textContent = "Copy failed";
+
         setTimeout(() => {
-          btn.textContent = old;
+          btn.textContent = oldText;
         }, 1200);
       }
     });
   });
 }
 
-/* -----------------------------
-   Contact helper
------------------------------ */
-function setupContactFormMessageClear() {
+/* =========================================================
+   CONTACT FORM
+========================================================= */
+function setupContactFormHelpers() {
   const form = document.getElementById("contact-form");
   const resultEl = document.getElementById("form-result");
 
   if (!form || !resultEl) return;
 
-  form.querySelectorAll("input, textarea").forEach((field) => {
+  const fields = form.querySelectorAll("input, textarea");
+
+  fields.forEach((field) => {
     field.addEventListener("input", () => {
       resultEl.textContent = "";
       resultEl.className = "";
     });
   });
+
+  if (typeof Forminit !== "undefined") {
+    const forminit = new Forminit();
+    const FORM_ID = "7ktpdl3xza8";
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const formData = new FormData(form);
+      const response = await forminit.submit(FORM_ID, formData);
+      const error = response?.error;
+
+      if (error) {
+        resultEl.innerHTML = `<span class="error-message">❌ ${error.message}</span>`;
+        return;
+      }
+
+      resultEl.innerHTML =
+        '<span class="success-message">✅ Message sent successfully! We will get back to you soon.</span>';
+      form.reset();
+    });
+  }
 }
 
-/* -----------------------------
-   Sticky details auto close
------------------------------ */
+/* =========================================================
+   DETAILS / STICKY
+========================================================= */
 function setupStickyDetailsAutoClose() {
   window.addEventListener("scroll", () => {
     const stickyDetails = document.querySelector("details.sticky[open]");
@@ -78,25 +125,28 @@ function setupStickyDetailsAutoClose() {
   });
 }
 
-/* -----------------------------
-   Optional accordion support
-   Only runs if such elements exist
------------------------------ */
-function setupSafeAccordion() {
+/* =========================================================
+   OPTIONAL ACCORDION
+   Runs only if accordion exists on a page
+========================================================= */
+function setupAccordionIfPresent() {
   const accordionItems = document.querySelectorAll(".accordion-item");
   if (!accordionItems.length) return;
 
   accordionItems.forEach((item) => {
     item.addEventListener("click", () => {
-      const currentActive = document.querySelector(".accordion-item.active");
+      const activeItem = document.querySelector(".accordion-item.active");
 
-      if (currentActive && currentActive !== item) {
-        currentActive.classList.remove("active");
-        const currentContent = currentActive.querySelector(".accordion-content");
-        if (currentContent) currentContent.style.maxHeight = "0px";
+      if (activeItem && activeItem !== item) {
+        activeItem.classList.remove("active");
+        const activeContent = activeItem.querySelector(".accordion-content");
+        if (activeContent) {
+          activeContent.style.maxHeight = "0px";
+        }
       }
 
       item.classList.toggle("active");
+
       const content = item.querySelector(".accordion-content");
       if (!content) return;
 
@@ -109,9 +159,9 @@ function setupSafeAccordion() {
   });
 }
 
-/* -----------------------------
-   Optional tools scroll logic
------------------------------ */
+/* =========================================================
+   OPTIONAL TOOLS SCROLL
+========================================================= */
 function setupOptionalToolsScroll() {
   const container = document.getElementById("tools-scroll-container");
   if (!container) return;
@@ -139,19 +189,27 @@ function focusTool(selectedTool) {
   });
 
   selectedTool.style.backgroundColor = "rgba(255, 255, 255, 0.08)";
-
-  const scrollLeft = selectedTool.offsetLeft - (containerWidth / 2) + (toolWidth / 2);
-  container.style.transform = `translateX(-${scrollLeft}px)`;
-
   selectedTool.style.transform = "scale(1.05)";
+
+  const scrollLeft =
+    selectedTool.offsetLeft - containerWidth / 2 + toolWidth / 2;
+
+  container.style.transform = `translateX(-${scrollLeft}px)`;
 }
 
-/* -----------------------------
-   Optional modal logic
------------------------------ */
-function setupOptionalModal() {
+/* =========================================================
+   OPTIONAL MODALS
+========================================================= */
+function setupOptionalModals() {
   window.addEventListener("click", (event) => {
-    ["constructionModal", "constructionModal1", "constructionModal2", "constructionModal3"].forEach((id) => {
+    const modalIds = [
+      "constructionModal",
+      "constructionModal1",
+      "constructionModal2",
+      "constructionModal3"
+    ];
+
+    modalIds.forEach((id) => {
       const modal = document.getElementById(id);
       if (modal && event.target === modal) {
         modal.style.display = "none";
