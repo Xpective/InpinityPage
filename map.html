@@ -1,34 +1,32 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="basic">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>INPINITY – Pyramid Map</title>
 
   <link rel="icon" type="image/png" href="favicon.webp" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/layout.css">
-  <link rel="stylesheet" href="css/animations.css">
-  <link rel="stylesheet" href="css/dark.css">
-  <link rel="stylesheet" href="css/light.css">
-  <link rel="stylesheet" href="css/color.css">
-  <link rel="stylesheet" href="css/responsive.css">
-  <link rel="stylesheet" href="css/map.css">
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/dark.css" />
+  <link rel="stylesheet" href="css/light.css" />
+  <link rel="stylesheet" href="css/color.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+  <link rel="stylesheet" href="css/map.css" />
 
-  <meta name="description" content="Explore the Inpinity Pyramid Map and inspect blocks, coordinates, ownership, and future gameplay structure." />
-  <meta name="keywords" content="Inpinity, Pyramid Map, NFT Map, Blocks, Coordinates, Base, Web3, Game Map" />
+  <meta name="description" content="Explore the INPINITY Pyramid Map, inspect blocks, reveal rarity, manage farming, protection, and pirate actions." />
+  <meta name="keywords" content="Inpinity, Pyramid Map, NFT, Base, Farming, Pirates, Resources, Game" />
   <meta name="author" content="Inpinity Team" />
   <meta property="og:title" content="Inpinity – Pyramid Map" />
-  <meta property="og:description" content="Explore the Inpinity Pyramid structure and inspect blocks on the map." />
+  <meta property="og:description" content="Live V5 Pyramid Map with block details, farming, protection, attacks and wallet integration." />
   <meta property="og:image" content="logo_background.jpg" />
   <meta property="og:url" content="https://inpinity.online/map.html" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:site" content="@unxpective" />
-  <meta name="twitter:creator" content="@Inpinity1" />
   <meta name="theme-color" content="#140f1f" />
   <meta name="robots" content="index,follow" />
 
@@ -41,17 +39,8 @@
         <li><a href="index.html">Home</a></li>
         <li><a href="features.html">Features</a></li>
         <li><a href="game.html">Game</a></li>
-
-        <li class="nav-theme-inline">
-          <div class="themeDots" aria-label="Theme switcher">
-            <button type="button" class="dot light" title="Light Theme" aria-label="Light Theme"></button>
-            <button type="button" class="dot dark" title="Dark Theme" aria-label="Dark Theme"></button>
-            <button type="button" class="dot basic" title="Basic Theme" aria-label="Basic Theme"></button>
-          </div>
-        </li>
-
-        <li><a href="https://inpinity.online/mint" target="_blank" rel="noopener">Mint</a></li>
         <li><a href="map.html" aria-current="page">Pyramid Map</a></li>
+        <li><a href="https://inpinity.online/mint">Mint</a></li>
         <li><a href="collaboration.html">Collaboration</a></li>
         <li><a href="about.html">About</a></li>
         <li><a href="whitepaper.html">Whitepaper</a></li>
@@ -60,179 +49,149 @@
         <li><a href="advertising.html">Advertising</a></li>
         <li><a href="staking.html">Staking</a></li>
       </ul>
+
+      <div class="nav-extras">
+        <div class="themeDots" aria-label="Theme switcher">
+          <button type="button" class="dot light" title="Light Theme" aria-label="Light Theme"></button>
+          <button type="button" class="dot dark" title="Dark Theme" aria-label="Dark Theme"></button>
+          <button type="button" class="dot basic" title="Basic Theme" aria-label="Basic Theme"></button>
+        </div>
+      </div>
     </nav>
   </header>
 
   <main class="map-main">
     <section class="map-hero">
-      <div class="hero-copy">
-        <p class="eyebrow">Inpinity Pyramid Map</p>
-        <h1>Explore the structure of the Pyramid Block world.</h1>
-        <p class="hero-lead">
-          The map is the visual layer of the Inpinity ecosystem. Inspect coordinates, discover block positions,
-          review ownership structure, and prepare for future gameplay integration.
-        </p>
-      </div>
+      <p class="eyebrow">INPINITY Pyramid Map</p>
+      <h1>Inspect blocks, manage your territory, and act directly from the live V5 map.</h1>
+      <p class="hero-lead">
+        This view combines ownership, reveal state, rarity, farming, protection and pirate activity
+        into one interactive pyramid map. Select any block to inspect it and manage it instantly.
+      </p>
     </section>
 
     <section class="map-toolbar card-shell">
       <div class="toolbar-left">
-        <div class="toolbar-group">
-          <label for="mapSearch">Search Block</label>
-          <input type="number" id="mapSearch" placeholder="Token ID" min="0">
-          <button class="btn btn-small" id="searchBlockBtn" type="button">Search</button>
+        <div class="wallet-status-line">
+          <span class="wallet-status" id="walletStatus">🔴 Not connected</span>
+          <span class="wallet-address" id="walletAddress">—</span>
         </div>
+      </div>
 
-        <div class="toolbar-group">
-          <label for="jumpRow">Jump to Row / Col</label>
-          <div class="inline-fields">
-            <input type="number" id="jumpRow" placeholder="Row" min="0" max="99">
-            <input type="number" id="jumpCol" placeholder="Col" min="0">
-            <button class="btn btn-small" id="jumpToCoordsBtn" type="button">Jump</button>
-          </div>
+      <div class="toolbar-center">
+        <div class="map-search">
+          <label for="jumpTokenId">Block ID</label>
+          <input type="number" id="jumpTokenId" min="0" placeholder="e.g. 2048" />
+          <button class="btn btn-small" id="jumpBtn">Jump</button>
+          <button class="btn btn-small btn-secondary" id="centerBtn">Center</button>
         </div>
       </div>
 
       <div class="toolbar-right">
-        <button class="btn btn-secondary" id="resetViewBtn" type="button">Reset View</button>
-        <a class="btn" href="https://inpinity.online/mint" target="_blank" rel="noopener">Open Mint</a>
+        <button class="btn" id="connectBtn">Connect Wallet</button>
       </div>
     </section>
 
-    <section class="map-grid">
-      <section class="panel panel-wide map-stage-panel">
+    <section class="map-layout">
+      <section class="map-canvas-panel panel panel-wide">
         <div class="panel-head">
-          <h2 class="section-title">Pyramid View</h2>
+          <h2 class="section-title">Live Pyramid Map</h2>
           <p class="section-subtitle">
-            Inspect the active layout of the Pyramid. Click a block to show details in the side panel.
+            Drag to move, use the mouse wheel or touch pinch to zoom, and click any block to inspect it.
           </p>
         </div>
 
-        <div class="map-stage">
-          <div id="mapViewport" class="map-viewport">
-            <div id="mapCanvas" class="map-canvas">
-              <div class="map-placeholder">
-                <strong>Map Canvas</strong>
-                <span>Your live map renderer / map.js output can mount here.</span>
-              </div>
-            </div>
-          </div>
+        <div id="canvasContainer" class="canvas-container">
+          <canvas id="pyramidCanvas"></canvas>
+          <div id="tooltip" class="map-tooltip"></div>
+        </div>
+
+        <div class="map-legend">
+          <div class="legend-item"><span class="legend-color own"></span><span>Your block</span></div>
+          <div class="legend-item"><span class="legend-color minted"></span><span>Minted</span></div>
+          <div class="legend-item"><span class="legend-color hidden"></span><span>Hidden</span></div>
+          <div class="legend-item"><span class="legend-color farm"></span><span>Farming</span></div>
+          <div class="legend-item"><span class="legend-color protect"></span><span>Protected</span></div>
+          <div class="legend-item"><span class="legend-color attack"></span><span>Attack running</span></div>
+          <div class="legend-item"><span class="legend-color execute"></span><span>Attack ready</span></div>
+          <div class="legend-item"><span class="legend-color partner"></span><span>Partner block</span></div>
         </div>
       </section>
 
-      <aside class="panel map-sidebar">
-        <div class="panel-head">
-          <h2 class="section-title">Block Details</h2>
-          <p class="section-subtitle">
-            Selected map data appears here.
-          </p>
+      <aside id="legendPanel" class="map-sidebar panel">
+        <div id="dragHandle" class="sidebar-topbar">
+          <div class="sidebar-title-wrap">
+            <h2 class="section-title sidebar-title">Block Control</h2>
+            <p class="section-subtitle sidebar-subtitle">Live details and actions for the selected block.</p>
+          </div>
+
+          <div class="sidebar-controls">
+            <button class="sidebar-icon-btn" id="collapseBtn" type="button">−</button>
+            <button class="sidebar-icon-btn" id="resetPosBtn" type="button">↺</button>
+          </div>
         </div>
 
-        <div class="info-card">
-          <span class="info-label">Token ID</span>
-          <span class="info-value" id="detailTokenId">—</span>
+        <div id="legendContent" class="sidebar-content">
+          <div id="blockDetail" class="block-detail">
+            <p class="empty-state">Select a block on the map.</p>
+          </div>
+
+          <div id="actionPanel" class="action-panel" style="display:none;">
+            <div id="ownerActions" class="owner-actions"></div>
+
+            <div id="protectionInput" class="action-box" style="display:none;">
+              <h3 class="subsection-title">Protection</h3>
+              <div class="inline-form">
+                <label for="protectLevel">Level %</label>
+                <input type="number" id="protectLevel" min="0" max="50" value="10" />
+                <button class="btn btn-small" id="protectBtn" type="button">Hire</button>
+              </div>
+            </div>
+
+            <div id="attackInput" class="action-box" style="display:none;">
+              <h3 class="subsection-title">Pirate Attack</h3>
+
+              <div class="attack-preview-grid">
+                <div class="detail-row"><span class="detail-label">Attacker</span><span class="detail-value" id="attackAttackerBlock">—</span></div>
+                <div class="detail-row"><span class="detail-label">Status</span><span class="detail-value" id="attackTargetStatus">—</span></div>
+                <div class="detail-row"><span class="detail-label">Travel</span><span class="detail-value" id="attackTravelTime">—</span></div>
+                <div class="detail-row"><span class="detail-label">Remaining today</span><span class="detail-value" id="attackRemainingToday">—</span></div>
+                <div class="detail-row"><span class="detail-label">Pending</span><span class="detail-value" id="attackPendingLoot">—</span></div>
+                <div class="detail-row"><span class="detail-label">Protection</span><span class="detail-value" id="attackProtection">—</span></div>
+                <div class="detail-row"><span class="detail-label">Steal %</span><span class="detail-value" id="attackStealPercent">—</span></div>
+              </div>
+
+              <div class="inline-form attack-form">
+                <label for="attackResource">Resource</label>
+                <select id="attackResource"></select>
+                <button class="btn btn-small" id="attackBtn" type="button">Start Attack</button>
+              </div>
+            </div>
+
+            <div id="actionMessage" class="action-message"></div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="sidebar-section">
+            <h3 class="subsection-title">Your Active Attacks</h3>
+            <div id="userAttacksList" class="user-attacks-list">
+              <p class="empty-state">Connect wallet to see attacks.</p>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="sidebar-section">
+            <h3 class="subsection-title">Your Resources</h3>
+            <div id="userResources" class="user-resources-list">
+              <p class="empty-state">Connect wallet to see resources.</p>
+            </div>
+          </div>
         </div>
 
-        <div class="info-card">
-          <span class="info-label">Coordinates</span>
-          <span class="info-value" id="detailCoords">—</span>
-        </div>
-
-        <div class="info-card">
-          <span class="info-label">Owner</span>
-          <span class="info-value mono" id="detailOwner">—</span>
-        </div>
-
-        <div class="info-card">
-          <span class="info-label">Status</span>
-          <span class="info-value" id="detailStatus">—</span>
-        </div>
-
-        <div class="info-card">
-          <span class="info-label">Rarity</span>
-          <span class="info-value" id="detailRarity">—</span>
-        </div>
-
-        <div class="info-note">
-          <strong>Map note:</strong><br>
-          This page is meant to match the same visual direction as the Home and Game pages while keeping the map area flexible
-          for your existing JS renderer and future upgrades.
-        </div>
+        <div id="resizeHandle" class="resize-handle"></div>
       </aside>
-    </section>
-
-    <section class="panel legend-panel">
-      <div class="panel-head">
-        <h2 class="section-title">Legend</h2>
-        <p class="section-subtitle">
-          Quick visual reference for map states.
-        </p>
-      </div>
-
-      <div class="legend-grid">
-        <div class="legend-item">
-          <span class="legend-swatch swatch-default"></span>
-          <span>Default Block</span>
-        </div>
-        <div class="legend-item">
-          <span class="legend-swatch swatch-revealed"></span>
-          <span>Revealed</span>
-        </div>
-        <div class="legend-item">
-          <span class="legend-swatch swatch-farming"></span>
-          <span>Farming</span>
-        </div>
-        <div class="legend-item">
-          <span class="legend-swatch swatch-protected"></span>
-          <span>Protected</span>
-        </div>
-        <div class="legend-item">
-          <span class="legend-swatch swatch-attack"></span>
-          <span>Attack Route</span>
-        </div>
-        <div class="legend-item">
-          <span class="legend-swatch swatch-selected"></span>
-          <span>Selected</span>
-        </div>
-      </div>
-    </section>
-
-    <section class="panel faq-panel">
-      <div class="panel-head">
-        <h2 class="section-title">Map FAQ</h2>
-        <p class="section-subtitle">
-          Quick overview of what the map is for.
-        </p>
-      </div>
-
-      <details class="content-details">
-        <summary>What is the Pyramid Map?</summary>
-        <div class="details-body">
-          <p>
-            The Pyramid Map is the visual overview of the Inpinity block structure. It helps you inspect positions,
-            ownership, and the broader world layout of the ecosystem.
-          </p>
-        </div>
-      </details>
-
-      <details class="content-details">
-        <summary>Can I use this map before owning a block?</summary>
-        <div class="details-body">
-          <p>
-            Yes. The map can still be explored as a world overview, while ownership and interaction become more relevant once you mint blocks.
-          </p>
-        </div>
-      </details>
-
-      <details class="content-details">
-        <summary>Does the map connect to future gameplay?</summary>
-        <div class="details-body">
-          <p>
-            Yes. The map is intended to become a stronger gameplay layer over time, especially for block identity,
-            territory logic, and future game-oriented modules.
-          </p>
-        </div>
-      </details>
     </section>
   </main>
 
@@ -240,11 +199,12 @@
     <p>© 2026 INPINITY. All rights reserved. Built on Base.</p>
     <div class="footer-links">
       <a href="whitepaper.html">Whitepaper</a>
-      <a href="game.html">Game</a>
-      <a href="https://inpinity.online/mint" target="_blank" rel="noopener">Mint</a>
+      <a href="https://discord.gg/95yj6Eg6" target="_blank" rel="noopener">Discord</a>
     </div>
+    <p class="footer-version">Version 0.23.0</p>
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <script src="scripts/map.js"></script>
 </body>
 </html>
