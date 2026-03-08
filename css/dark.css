@@ -1,14 +1,319 @@
 [data-theme="dark"] {
   --primary-color: #1f1530;
-  --primary-color-transparent: rgba(31, 21, 48, 0.7);
+  --primary-color-transparent: rgba(31, 21, 48, 0.78);
+
   --secondary-color: #32224d;
   --tertiary-color: #d8d0e3;
   --quaternary-color: #f2edf7;
-  --quaternary-color-transparent05: rgba(242, 237, 247, 0.5);
-  --quaternary-color-transparent025: rgba(242, 237, 247, 0.25);
+  --quaternary-color-transparent05: rgba(242, 237, 247, 0.14);
+  --quaternary-color-transparent025: rgba(242, 237, 247, 0.08);
+
   --quinary-color: #4da8da;
-  --quinary-color-transparent: rgba(77, 168, 218, 0.4);
+  --quinary-color-transparent: rgba(77, 168, 218, 0.34);
+
   --complementary-primary: #9fd3c7;
   --background-color: #140f1f;
+
   --text-color: #f8f8fb;
+  --text-soft: #c9c2d6;
+  --text-muted: #9b92ad;
+
+  --panel-border-dark: rgba(255, 255, 255, 0.10);
+  --panel-shadow-dark: 0 10px 24px rgba(0, 0, 0, 0.22);
+}
+
+/* Grundlayout */
+[data-theme="dark"] body,
+[data-theme="dark"] html {
+  background: var(--background-color);
+  color: var(--text-color);
+}
+
+[data-theme="dark"] main,
+[data-theme="dark"] section,
+[data-theme="dark"] article,
+[data-theme="dark"] aside {
+  color: var(--text-color);
+}
+
+/* Headings */
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] h4,
+[data-theme="dark"] h5,
+[data-theme="dark"] h6,
+[data-theme="dark"] .section-title,
+[data-theme="dark"] .hero-title {
+  color: var(--quinary-color);
+  text-shadow: none;
+}
+
+/* Texte */
+[data-theme="dark"] p,
+[data-theme="dark"] li,
+[data-theme="dark"] span,
+[data-theme="dark"] strong,
+[data-theme="dark"] label,
+[data-theme="dark"] summary,
+[data-theme="dark"] .hero-lead,
+[data-theme="dark"] .section-subtitle,
+[data-theme="dark"] .eyebrow,
+[data-theme="dark"] .wallet-status,
+[data-theme="dark"] .empty-state,
+[data-theme="dark"] .hint,
+[data-theme="dark"] .details-body p,
+[data-theme="dark"] .info-note,
+[data-theme="dark"] .tokenomics-intro {
+  color: var(--text-soft);
+}
+
+/* Navigation */
+[data-theme="dark"] header,
+[data-theme="dark"] nav,
+[data-theme="dark"] .site-header,
+[data-theme="dark"] .site-nav {
+  background: transparent;
+}
+
+[data-theme="dark"] .nav-list a,
+[data-theme="dark"] nav li a,
+[data-theme="dark"] .footer-links a {
+  color: var(--text-color);
+}
+
+[data-theme="dark"] .nav-list a:hover,
+[data-theme="dark"] nav li a:hover {
+  background: var(--quinary-color);
+  color: #0f1220;
+}
+
+[data-theme="dark"] .nav-list a[aria-current="page"] {
+  background: rgba(77, 168, 218, 0.14);
+  color: var(--quinary-color);
+  border-radius: 10px;
+}
+
+/* Theme dots */
+[data-theme="dark"] .themeDots .dot.light {
+  background: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+[data-theme="dark"] .themeDots .dot.dark {
+  background: #111111;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+[data-theme="dark"] .themeDots .dot.basic {
+  background: var(--quinary-color);
+}
+
+/* Panels / Karten */
+[data-theme="dark"] .panel,
+[data-theme="dark"] .card-shell,
+[data-theme="dark"] .content-details,
+[data-theme="dark"] .token-card,
+[data-theme="dark"] .feature-card,
+[data-theme="dark"] .use-case-card,
+[data-theme="dark"] .audience-card,
+[data-theme="dark"] .contract-card,
+[data-theme="dark"] .selected-block-info,
+[data-theme="dark"] .swap-card,
+[data-theme="dark"] .economy-stat-card,
+[data-theme="dark"] .exchange-info,
+[data-theme="dark"] .user-resources,
+[data-theme="dark"] .attack-item,
+[data-theme="dark"] .debug-panel details,
+[data-theme="dark"] .wallet-bar,
+[data-theme="dark"] .tokenomics-section,
+[data-theme="dark"] .feature-panel,
+[data-theme="dark"] .next-step-panel,
+[data-theme="dark"] .highlight-item {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--panel-border-dark);
+  box-shadow: var(--panel-shadow-dark);
+  color: var(--text-color);
+}
+
+/* Inputs / Selects / Textareas */
+[data-theme="dark"] input,
+[data-theme="dark"] textarea,
+[data-theme="dark"] select {
+  color: var(--text-color);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .input-group label,
+[data-theme="dark"] .payment-options label,
+[data-theme="dark"] .wallet-address,
+[data-theme="dark"] .resource-item,
+[data-theme="dark"] .block-card,
+[data-theme="dark"] .debug-log,
+[data-theme="dark"] .attack-resource-group select {
+  color: var(--text-color);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.10);
+}
+
+/* Buttons */
+[data-theme="dark"] .btn,
+[data-theme="dark"] .action-button,
+[data-theme="dark"] .random-btn,
+[data-theme="dark"] .presale-button,
+[data-theme="dark"] .cta-button,
+[data-theme="dark"] .reveal-block-btn,
+[data-theme="dark"] .copy-btn {
+  background: var(--quinary-color);
+  color: #0f1220;
+  border: none;
+}
+
+[data-theme="dark"] .btn:hover,
+[data-theme="dark"] .action-button:hover,
+[data-theme="dark"] .random-btn:hover,
+[data-theme="dark"] .presale-button:hover,
+[data-theme="dark"] .cta-button:hover,
+[data-theme="dark"] .reveal-block-btn:hover,
+[data-theme="dark"] .copy-btn:hover {
+  opacity: 0.96;
+}
+
+[data-theme="dark"] .btn-secondary {
+  color: var(--text-color);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+/* Links */
+[data-theme="dark"] a {
+  color: var(--quinary-color);
+}
+
+[data-theme="dark"] a:hover {
+  color: #7cc2e8;
+}
+
+/* Info-Boxen */
+[data-theme="dark"] .info-note {
+  background: rgba(255, 255, 255, 0.04);
+  border-left: 4px solid var(--quinary-color);
+  color: var(--text-soft);
+}
+
+/* Blockkarten */
+[data-theme="dark"] .block-id {
+  color: var(--quinary-color);
+}
+
+[data-theme="dark"] .block-card {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+[data-theme="dark"] .block-card.revealed {
+  border-color: var(--quinary-color);
+  box-shadow: 0 0 12px rgba(77, 168, 218, 0.20);
+}
+
+[data-theme="dark"] .block-card.farming {
+  border-color: #59c07a;
+  box-shadow: 0 0 12px rgba(89, 192, 122, 0.24);
+}
+
+[data-theme="dark"] .block-card.protected {
+  border-color: #9f7ae6;
+  box-shadow: 0 0 12px rgba(159, 122, 230, 0.24);
+}
+
+[data-theme="dark"] .block-card.selected {
+  border-color: var(--quinary-color);
+  box-shadow: 0 0 14px rgba(77, 168, 218, 0.28);
+}
+
+[data-theme="dark"] .block-card.attacking {
+  border-color: #7d6aa8;
+  box-shadow: 0 0 14px rgba(125, 106, 168, 0.24);
+}
+
+[data-theme="dark"] .block-card.executable {
+  border-color: #c95a5a;
+  box-shadow: 0 0 14px rgba(201, 90, 90, 0.28);
+}
+
+[data-theme="dark"] .hidden-badge {
+  background: rgba(255, 255, 255, 0.08);
+  color: #cfc8d9;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+/* Badges / Werte */
+[data-theme="dark"] .resource-name,
+[data-theme="dark"] .balance-inpi,
+[data-theme="dark"] .balance-eth,
+[data-theme="dark"] .balance-pit,
+[data-theme="dark"] .live-badge,
+[data-theme="dark"] .percent {
+  color: var(--quinary-color);
+}
+
+[data-theme="dark"] .label,
+[data-theme="dark"] .balance-label,
+[data-theme="dark"] .resource-label {
+  color: var(--text-soft);
+}
+
+/* Footer */
+[data-theme="dark"] .site-footer,
+[data-theme="dark"] footer {
+  color: var(--text-soft);
+  border-top-color: rgba(255, 255, 255, 0.10);
+}
+
+[data-theme="dark"] .site-footer a,
+[data-theme="dark"] footer a {
+  color: var(--quinary-color);
+}
+
+/* Details / FAQ */
+[data-theme="dark"] details,
+[data-theme="dark"] .content-details {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--panel-border-dark);
+}
+
+[data-theme="dark"] details summary,
+[data-theme="dark"] .content-details summary {
+  color: var(--quinary-color);
+}
+
+/* Debug */
+[data-theme="dark"] .debug-log {
+  color: #b7c8ff;
+  background: rgba(0, 0, 0, 0.24);
+}
+
+/* Charts */
+[data-theme="dark"] .chart-item .percent {
+  color: var(--quinary-color);
+}
+
+[data-theme="dark"] .chart-item .label {
+  color: var(--text-soft);
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  [data-theme="dark"] .panel,
+  [data-theme="dark"] .card-shell,
+  [data-theme="dark"] .wallet-bar,
+  [data-theme="dark"] .tokenomics-section,
+  [data-theme="dark"] .feature-panel {
+    background: rgba(255, 255, 255, 0.05);
+  }
 }
