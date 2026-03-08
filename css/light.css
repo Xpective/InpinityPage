@@ -18,8 +18,8 @@
   --text-soft: #5e5374;
   --text-muted: #7b7190;
 
-  --panel-border-light: rgba(90, 74, 130, 0.16);
-  --panel-shadow-light: 0 10px 24px rgba(70, 52, 110, 0.08);
+  --panel-border: rgba(90, 74, 130, 0.16);
+  --panel-shadow: 0 10px 24px rgba(70, 52, 110, 0.08);
 }
 
 /* Grundlayout */
@@ -29,16 +29,7 @@
   color: var(--text-color);
 }
 
-[data-theme="light"] body,
-[data-theme="light"] main,
-[data-theme="light"] section,
-[data-theme="light"] article,
-[data-theme="light"] aside,
-[data-theme="light"] div {
-  color: inherit;
-}
-
-/* Headings */
+/* Headlines */
 [data-theme="light"] h1,
 [data-theme="light"] h2,
 [data-theme="light"] h3,
@@ -64,16 +55,6 @@
 [data-theme="light"] .details-body p,
 [data-theme="light"] .details-body li,
 [data-theme="light"] .details-body strong,
-[data-theme="light"] .info-note,
-[data-theme="light"] .tokenomics-intro,
-[data-theme="light"] .wallet-address,
-[data-theme="light"] .resource-item,
-[data-theme="light"] .exchange-info,
-[data-theme="light"] .swap-card,
-[data-theme="light"] .selected-block-info,
-[data-theme="light"] .attack-item,
-[data-theme="light"] .economy-stat-card,
-[data-theme="light"] .user-resources,
 [data-theme="light"] .panel,
 [data-theme="light"] .card-shell,
 [data-theme="light"] .content-details,
@@ -82,10 +63,23 @@
 [data-theme="light"] .use-case-card,
 [data-theme="light"] .audience-card,
 [data-theme="light"] .contract-card,
+[data-theme="light"] .selected-block-info,
+[data-theme="light"] .swap-card,
+[data-theme="light"] .economy-stat-card,
+[data-theme="light"] .exchange-info,
+[data-theme="light"] .user-resources,
+[data-theme="light"] .attack-item,
+[data-theme="light"] .wallet-bar,
+[data-theme="light"] .tokenomics-section,
 [data-theme="light"] .feature-panel,
+[data-theme="light"] .next-step-panel,
 [data-theme="light"] .highlight-item,
-[data-theme="light"] .next-step-panel {
+[data-theme="light"] .info-note {
   color: var(--text-color);
+}
+
+[data-theme="light"] span {
+  color: inherit;
 }
 
 /* Nebentexte */
@@ -100,32 +94,20 @@
 [data-theme="light"] .resource-label,
 [data-theme="light"] .footer-version,
 [data-theme="light"] .chart-item .label,
-[data-theme="light"] .token-card p + p,
-[data-theme="light"] .presale-status p {
+[data-theme="light"] .presale-status p,
+[data-theme="light"] .tokenomics-intro {
   color: var(--text-soft);
-}
-
-/* Verhindert globales Verfärben von spans */
-[data-theme="light"] span {
-  color: inherit;
 }
 
 /* Labels */
 [data-theme="light"] label,
 [data-theme="light"] form label,
-[data-theme="light"] .select-label {
+[data-theme="light"] .select-label,
+[data-theme="light"] summary {
   color: var(--text-color);
-  font-weight: 600;
 }
 
 /* Navigation */
-[data-theme="light"] header,
-[data-theme="light"] nav,
-[data-theme="light"] .site-header,
-[data-theme="light"] .site-nav {
-  background: transparent;
-}
-
 [data-theme="light"] .nav-list a,
 [data-theme="light"] nav li a,
 [data-theme="light"] .footer-links a {
@@ -158,7 +140,7 @@
   background: var(--quinary-color);
 }
 
-/* Panels / Karten */
+/* Panels */
 [data-theme="light"] .panel,
 [data-theme="light"] .card-shell,
 [data-theme="light"] .content-details,
@@ -181,16 +163,16 @@
 [data-theme="light"] .highlight-item,
 [data-theme="light"] details {
   background: rgba(255, 255, 255, 0.68);
-  border: 1px solid var(--panel-border-light);
-  box-shadow: var(--panel-shadow-light);
+  border: 1px solid var(--panel-border);
+  box-shadow: var(--panel-shadow);
   color: var(--text-color);
 }
 
-/* Details / FAQ */
+/* FAQ / Details */
 [data-theme="light"] details,
 [data-theme="light"] .content-details {
   background: rgba(255, 255, 255, 0.68);
-  border: 1px solid var(--panel-border-light);
+  border: 1px solid var(--panel-border);
 }
 
 [data-theme="light"] details summary,
@@ -207,12 +189,12 @@
   color: var(--text-color);
 }
 
-/* Inputs / Selects / Textareas */
+/* Inputs */
 [data-theme="light"] input,
 [data-theme="light"] textarea,
 [data-theme="light"] select {
   color: var(--text-color);
-  background: rgba(255, 255, 255, 0.86);
+  background: rgba(255, 255, 255, 0.88);
   border: 1px solid rgba(106, 79, 179, 0.14);
 }
 
@@ -247,17 +229,6 @@
   border: none;
 }
 
-[data-theme="light"] .btn:hover,
-[data-theme="light"] .action-button:hover,
-[data-theme="light"] .random-btn:hover,
-[data-theme="light"] .presale-button:hover,
-[data-theme="light"] .cta-button:hover,
-[data-theme="light"] .reveal-block-btn:hover,
-[data-theme="light"] .copy-btn:hover,
-[data-theme="light"] .attack-item .execute-btn:hover {
-  opacity: 0.95;
-}
-
 [data-theme="light"] .btn-secondary {
   color: var(--text-color);
   background: rgba(106, 79, 179, 0.08);
@@ -273,15 +244,29 @@
   color: #4f3892;
 }
 
-/* Info-Boxen */
+/* Notes */
 [data-theme="light"] .info-note {
   background: rgba(106, 79, 179, 0.06);
   border-left: 4px solid var(--quinary-color);
   color: var(--text-color);
 }
 
-/* Blockkarten */
-[data-theme="light"] .block-id {
+[data-theme="light"] .info-note strong,
+[data-theme="light"] .info-note p,
+[data-theme="light"] .info-note span,
+[data-theme="light"] .info-note li {
+  color: var(--text-color);
+}
+
+/* Blockcards */
+[data-theme="light"] .block-id,
+[data-theme="light"] .resource-name,
+[data-theme="light"] .balance-inpi,
+[data-theme="light"] .balance-eth,
+[data-theme="light"] .balance-pit,
+[data-theme="light"] .live-badge,
+[data-theme="light"] .percent,
+[data-theme="light"] .section-title {
   color: var(--quinary-color);
 }
 
@@ -325,23 +310,6 @@
   border: 1px solid rgba(106, 79, 179, 0.12);
 }
 
-/* Badges / Labels */
-[data-theme="light"] .resource-name,
-[data-theme="light"] .balance-inpi,
-[data-theme="light"] .balance-eth,
-[data-theme="light"] .balance-pit,
-[data-theme="light"] .live-badge,
-[data-theme="light"] .percent,
-[data-theme="light"] .section-title {
-  color: var(--quinary-color);
-}
-
-[data-theme="light"] .label,
-[data-theme="light"] .balance-label,
-[data-theme="light"] .resource-label {
-  color: var(--text-soft);
-}
-
 /* Footer */
 [data-theme="light"] .site-footer,
 [data-theme="light"] footer {
@@ -360,27 +328,6 @@
   background: rgba(106, 79, 179, 0.05);
 }
 
-/* Tabellen / Charts / Stats */
-[data-theme="light"] .chart-item .percent {
-  color: var(--quinary-color);
-}
-
-[data-theme="light"] .chart-item .label {
-  color: var(--text-soft);
-}
-
-/* Forms innerhalb von Light sauber lesbar */
-[data-theme="light"] .contact-form input,
-[data-theme="light"] .contact-form textarea,
-[data-theme="light"] .contact-form select,
-[data-theme="light"] form input,
-[data-theme="light"] form textarea,
-[data-theme="light"] form select {
-  color: var(--text-color);
-  background: rgba(255, 255, 255, 0.88);
-}
-
-/* Mobile */
 @media (max-width: 768px) {
   [data-theme="light"] .panel,
   [data-theme="light"] .card-shell,
