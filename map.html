@@ -242,10 +242,12 @@
       border: 1px solid rgba(212, 175, 55, 0.28);
       box-shadow: 0 16px 36px rgba(0, 0, 0, 0.46);
       z-index: 15;
-      transition: width 0.2s ease, right 0.2s ease;
       overflow: hidden;
-      cursor: move;
-      user-select: none;
+      transition: width 0.2s ease, max-height 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .legend-panel.collapsed {
+      max-height: 66px;
     }
 
     .legend-panel .resize-handle {
@@ -265,10 +267,11 @@
       align-items: center;
       padding: 1rem 1.2rem;
       border-bottom: 1px solid #2a3a48;
-      cursor: move;
       background: rgba(0, 0, 0, 0.18);
       border-radius: 24px 24px 0 0;
       gap: 0.6rem;
+      cursor: move;
+      user-select: none;
     }
 
     .legend-header h3 {
@@ -281,6 +284,8 @@
     .legend-controls {
       display: flex;
       gap: 0.45rem;
+      align-items: center;
+      flex-shrink: 0;
     }
 
     .legend-controls button {
@@ -297,6 +302,7 @@
       transition: 0.2s ease;
       font-size: 1rem;
       padding: 0;
+      font-weight: 700;
     }
 
     .legend-controls button:hover {
@@ -307,15 +313,18 @@
 
     .legend-content {
       padding: 1rem 1.2rem 1.2rem;
-      transition: max-height 0.3s ease, padding 0.3s ease;
       max-height: calc(100vh - 110px);
       overflow-y: auto;
+      transition: max-height 0.25s ease, padding 0.25s ease, opacity 0.2s ease;
+      opacity: 1;
     }
 
     .legend-content.collapsed {
       max-height: 0;
-      padding: 0 1.2rem;
+      padding-top: 0;
+      padding-bottom: 0;
       overflow: hidden;
+      opacity: 0;
     }
 
     .detail-card {
@@ -390,11 +399,6 @@
       background: linear-gradient(145deg, rgba(255, 215, 0, 0.12), rgba(255, 140, 0, 0.12));
       border: 1px solid #ff8c00;
       color: #ffb347;
-    }
-
-    .boost-btn:hover:not(:disabled) {
-      background: linear-gradient(145deg, rgba(255, 215, 0, 0.22), rgba(255, 140, 0, 0.22));
-      border-color: #ff8c00;
     }
 
     .input-group {
@@ -751,26 +755,23 @@
         <div id="actionPanel" style="display:none;">
           <div class="action-buttons" id="ownerActions"></div>
 
-          <div
-            id="boostOptions"
-            style="display:none; margin:1rem 0; padding:1rem; background:rgba(255,215,0,0.08); border-radius:0.8rem;"
-          >
-            <h4 style="margin-top:0; color:#ffd700;">Buy Farming Boost</h4>
-            <div class="input-group">
-              <label for="boostDays">Days</label>
-              <input type="number" id="boostDays" min="1" max="30" value="7" />
-            </div>
-            <button class="action-btn boost-btn" id="confirmBoostBtn" type="button">Confirm Boost</button>
-            <p style="margin:0.5rem 0 0; font-size:0.8rem; color:#98a9b9;">2x production for selected duration</p>
-          </div>
-
           <div class="input-group" id="protectionInput" style="display:none;">
             <label for="protectLevel">Protection</label>
             <input type="number" id="protectLevel" min="0" max="50" value="10" />
             <button class="action-btn" id="protectBtn" type="button" style="width:auto; min-width:84px;">Buy</button>
           </div>
 
+          <div class="input-group" id="boostOptions" style="display:none;">
+            <label for="boostDays">Boost Days</label>
+            <input type="number" id="boostDays" min="1" max="30" value="7" />
+          </div>
+
           <div id="attackInput" class="attack-section" style="display:none;">
+            <div class="input-group">
+              <label for="attackAttackerSelect">Attacker</label>
+              <select id="attackAttackerSelect"></select>
+            </div>
+
             <div class="input-group">
               <label for="attackResource">Resource</label>
               <select id="attackResource"></select>
@@ -818,9 +819,7 @@
         </div>
 
         <div style="margin:1rem 0; border-top:1px solid #2a3f4a; padding-top:0.8rem;">
-          <h4 style="color:#d4af37; margin-bottom:0.5rem;">
-            ⚔️ Attacks (V6) <span class="v6-badge">Cancelable</span>
-          </h4>
+          <h4 style="color:#d4af37; margin-bottom:0.5rem;">⚔️ Attacks (V6)</h4>
           <div id="userAttacksList" class="attacks-list">
             <p style="color:#98a9b9;">Connect wallet</p>
           </div>
@@ -856,6 +855,110 @@
       </div>
     </div>
   </div>
+
+  <script>
+    (() => {
+      const panel = document.getElementById("legendPanel");
+      const content = document.getElementById("legendContent");
+      const collapseBtn = document.getElementById("collapseBtn");
+      const resetPosBtn = document.getElementById("resetPosBtn");
+      const dragHandle = document.getElementById("dragHandle");
+      const resizeHandle = document.getElementById("resizeHandle");
+
+      if (!panel || !content) return;
+
+      let isCollapsed = false;
+      let isDragging = false;
+      let isResizing = false;
+      let startX = 0;
+      let startY = 0;
+      let startRight = 20;
+      let startTop = 20;
+      let startWidth = 390;
+
+      function setCollapsed(next) {
+        isCollapsed = !!next;
+        panel.classList.toggle("collapsed", isCollapsed);
+        content.classList.toggle("collapsed", isCollapsed);
+        if (collapseBtn) collapseBtn.textContent = isCollapsed ? "+" : "−";
+      }
+
+      collapseBtn?.addEventListener("click", (e) => {
+        e.stopPropagation();
+        setCollapsed(!isCollapsed);
+      });
+
+      resetPosBtn?.addEventListener("click", (e) => {
+        e.stopPropagation();
+        panel.style.top = "20px";
+        panel.style.right = "20px";
+        panel.style.left = "auto";
+        panel.style.width = window.innerWidth <= 480
+          ? "245px"
+          : window.innerWidth <= 768
+            ? "285px"
+            : "390px";
+      });
+
+      dragHandle?.addEventListener("mousedown", (e) => {
+        if (e.target.closest(".legend-controls")) return;
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+
+        const rect = panel.getBoundingClientRect();
+        panel.style.left = rect.left + "px";
+        panel.style.top = rect.top + "px";
+        panel.style.right = "auto";
+
+        startRight = rect.left;
+        startTop = rect.top;
+
+        document.body.style.userSelect = "none";
+      });
+
+      resizeHandle?.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        isResizing = true;
+        startX = e.clientX;
+        startWidth = panel.getBoundingClientRect().width;
+        document.body.style.userSelect = "none";
+      });
+
+      window.addEventListener("mousemove", (e) => {
+        if (isDragging) {
+          const dx = e.clientX - startX;
+          const dy = e.clientY - startY;
+
+          let newLeft = startRight + dx;
+          let newTop = startTop + dy;
+
+          const rect = panel.getBoundingClientRect();
+          const maxLeft = window.innerWidth - rect.width - 8;
+          const maxTop = window.innerHeight - 60;
+
+          newLeft = Math.max(8, Math.min(maxLeft, newLeft));
+          newTop = Math.max(8, Math.min(maxTop, newTop));
+
+          panel.style.left = `${newLeft}px`;
+          panel.style.top = `${newTop}px`;
+        }
+
+        if (isResizing) {
+          const dx = startX - e.clientX;
+          const newWidth = Math.max(245, Math.min(620, startWidth + dx));
+          panel.style.width = `${newWidth}px`;
+        }
+      });
+
+      window.addEventListener("mouseup", () => {
+        isDragging = false;
+        isResizing = false;
+        document.body.style.userSelect = "";
+      });
+    })();
+  </script>
 
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <script type="module" src="./js/map.js"></script>
