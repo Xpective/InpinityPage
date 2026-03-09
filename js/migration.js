@@ -7,7 +7,7 @@ export const PIRATES_V5_ADDRESS = "0xe76b03A848dE22DdbbF34994e650d2E887426879";
 
 export const FARMING_V5_ABI = [
   "function getFarmState(uint256 tokenId) view returns ((uint256 startTime,uint256 lastAccrualTime,uint256 lastClaimTime,uint256 boostExpiry,uint256 stopTime,bool isActive))",
-  "function previewClaim(uint256 tokenId) view returns ((uint8 code,bool allowed,uint256 pendingAmount,uint256 stealAmount,uint256 travelTime,uint256 remainingAttacksToday,uint256 protectionLevel,uint256 effectiveStealPercent,uint256 secondsRemaining))",
+  "function previewClaim(uint256 tokenId) view returns ((uint8 code,bool allowed,uint256 pendingAmount,uint256 travelTime,uint256 remainingAttacksToday,uint256 protectionLevel,uint256 effectiveStealPercent,uint256 secondsRemaining))",
   "function claimResources(uint256 tokenId) external",
   "function stopFarming(uint256 tokenId) external",
   "function getAllPending(uint256 tokenId) view returns (uint256[10])"
@@ -31,11 +31,13 @@ function bn0() {
 
 export function setupLegacyMigrationContracts() {
   if (!state.signer) throw new Error("Wallet not connected");
+
   farmingV5Contract = new ethers.Contract(
     FARMING_V5_ADDRESS,
     FARMING_V5_ABI,
     state.signer
   );
+
   debugLog("Legacy migration contracts initialized", {
     farmingV5: FARMING_V5_ADDRESS
   });
@@ -119,16 +121,19 @@ export async function isTokenActiveOnV6(tokenId) {
   return !!(farm.ok && farm.isActive);
 }
 
-export async function previewV5Claim(tokenId) {
-  const c = getFarmingV5Contract();
-  return c.previewClaim(tokenId);
+export async function isTokenRevealedOnNFT(tokenId) {
+  if (!state.nftContract) {
+    throw new Error("NFT contract not initialized");
+  }
+
+  const data = await state.nftContract.blockData(tokenId);
+  return !!data.revealed;
 }
 
 export async function getV5PendingTotal(tokenId) {
   try {
     const c = getFarmingV5Contract();
     const pending = await c.getAllPending(tokenId);
-
     return pending.reduce((acc, v) => acc.add(v), bn0());
   } catch {
     return bn0();
@@ -154,7 +159,8 @@ export async function migrateSingleFarmV5ToV6(tokenId, options = {}) {
     startedOnV6: false,
     skippedClaim: false,
     skippedStop: false,
-    skippedStart: false
+    skippedStart: false,
+    needsRevealOnV6: false
   };
 
   const v5 = getFarmingV5Contract();
@@ -198,32 +204,16 @@ export async function migrateSingleFarmV5ToV6(tokenId, options = {}) {
       });
 
       if (preview.allowed && totalPending.gt(0)) {
-        debugLog("V5 claim before migration - sending tx", {
-          tokenId: String(tokenId),
-          totalPending: totalPending.toString()
-        });
-
         const claimTx = await v5.claimResources(tokenId, { gasLimit: gasLimitClaim });
-
         debugLog("V5 claim before migration - tx sent", {
           tokenId: String(tokenId),
           hash: claimTx.hash
         });
-
         await claimTx.wait();
-
-        debugLog("V5 claim before migration - tx confirmed", {
-          tokenId: String(tokenId)
-        });
-
+        debugLog("V5 claim before migration - tx confirmed", { tokenId: String(tokenId) });
         result.claimedOnV5 = true;
       } else {
         result.skippedClaim = true;
-        debugLog("V5 claim skipped", {
-          tokenId: String(tokenId),
-          allowed: !!preview.allowed,
-          totalPending: totalPending.toString()
-        });
       }
     } catch (e) {
       result.skippedClaim = true;
@@ -248,9 +238,19 @@ export async function migrateSingleFarmV5ToV6(tokenId, options = {}) {
         hash: stopTx.hash
       });
 
-      await stopTx.wait();
+      const stopReceipt = await stopTx.wait();
 
-      debugLog("Stopping V5 farm - tx confirmed", { tokenId: String(tokenId) });
+      debugLog("Stopping V5 farm - receipt", {
+        tokenId: String(tokenId),
+        hash: stopTx.hash,
+        status: stopReceipt.status,
+        blockNumber: stopReceipt.blockNumber
+      });
+
+      if (stopReceipt.status !== 1) {
+        throw new Error(`V5 stop tx failed onchain for ${tokenId}`);
+      }
+
       result.stoppedOnV5 = true;
     } catch (e) {
       debugLog("Stopping V5 farm - FAILED", {
@@ -261,45 +261,65 @@ export async function migrateSingleFarmV5ToV6(tokenId, options = {}) {
     }
   } else {
     result.skippedStop = true;
-    debugLog("V5 stop disabled by options", { tokenId: String(tokenId) });
   }
 
   if (startOnV6) {
+    const revealed = await isTokenRevealedOnNFT(tokenId).catch(() => false);
+
+    if (!revealed) {
+      result.skippedStart = true;
+      result.needsRevealOnV6 = true;
+
+      debugLog("Starting V6 farm skipped - token not revealed", {
+        tokenId: String(tokenId)
+      });
+
+      return result;
+    }
+
     const v6FarmAfterStopCheck = await getV6FarmState(tokenId);
 
     if (v6FarmAfterStopCheck.ok && v6FarmAfterStopCheck.isActive) {
       result.skippedStart = true;
-      result.startedOnV6 = false;
-
       debugLog("Starting V6 farm skipped - already active on V6", {
         tokenId: String(tokenId)
       });
-    } else {
-      try {
-        debugLog("Starting V6 farm - sending tx", { tokenId: String(tokenId) });
+      return result;
+    }
 
-        const startTx = await v6.startFarming(tokenId, { gasLimit: gasLimitStart });
+    try {
+      debugLog("Starting V6 farm - sending tx", { tokenId: String(tokenId) });
 
-        debugLog("Starting V6 farm - tx sent", {
-          tokenId: String(tokenId),
-          hash: startTx.hash
-        });
+      const startTx = await v6.startFarming(tokenId, { gasLimit: gasLimitStart });
 
-        await startTx.wait();
+      debugLog("Starting V6 farm - tx sent", {
+        tokenId: String(tokenId),
+        hash: startTx.hash
+      });
 
-        debugLog("Starting V6 farm - tx confirmed", { tokenId: String(tokenId) });
-        result.startedOnV6 = true;
-      } catch (e) {
-        debugLog("Starting V6 farm - FAILED", {
-          tokenId: String(tokenId),
-          error: getErrorMessage(e)
-        });
-        throw new Error(`V6 start failed for ${tokenId}: ${getErrorMessage(e)}`);
+      const startReceipt = await startTx.wait();
+
+      debugLog("Starting V6 farm - receipt", {
+        tokenId: String(tokenId),
+        hash: startTx.hash,
+        status: startReceipt.status,
+        blockNumber: startReceipt.blockNumber
+      });
+
+      if (startReceipt.status !== 1) {
+        throw new Error(`V6 start tx failed onchain for ${tokenId}`);
       }
+
+      result.startedOnV6 = true;
+    } catch (e) {
+      debugLog("Starting V6 farm - FAILED", {
+        tokenId: String(tokenId),
+        error: getErrorMessage(e)
+      });
+      throw new Error(`V6 start failed for ${tokenId}: ${getErrorMessage(e)}`);
     }
   } else {
     result.skippedStart = true;
-    debugLog("V6 start disabled by options", { tokenId: String(tokenId) });
   }
 
   debugLog("Migration complete", result);
