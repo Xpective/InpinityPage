@@ -33,7 +33,9 @@
      if (!btn) return null;
    
      if (busy) {
-       btn.dataset.originalText = btn.textContent;
+       if (!btn.dataset.originalText) {
+         btn.dataset.originalText = btn.textContent;
+       }
        btn.disabled = true;
        btn.textContent = busyText;
      } else {
@@ -57,6 +59,13 @@
        lower.includes("action_rejected")
      ) {
        return "Transaction cancelled in wallet.";
+     }
+   
+     if (e?.code === "TRANSACTION_REPLACED") {
+       if (e?.cancelled) {
+         return "Transaction was cancelled/replaced in wallet after sending.";
+       }
+       return "Transaction was replaced in wallet.";
      }
    
      if (lower.includes("nonce too high")) {

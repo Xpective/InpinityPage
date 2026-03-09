@@ -46,8 +46,59 @@ function isNonceError(e) {
   );
 }
 
+function isTxReplacedError(e) {
+  return e?.code === "TRANSACTION_REPLACED";
+}
+
 function bn0() {
   return ethers.BigNumber.from(0);
+}
+
+async function waitForTxHandled(tx, label, tokenId) {
+  try {
+    const receipt = await tx.wait();
+
+    debugLog(`${label} - receipt`, {
+      tokenId: String(tokenId),
+      hash: tx.hash,
+      status: receipt.status,
+      blockNumber: receipt.blockNumber
+    });
+
+    if (receipt.status !== 1) {
+      throw new Error(`${label} failed onchain for ${tokenId}`);
+    }
+
+    return receipt;
+  } catch (e) {
+    if (isTxReplacedError(e)) {
+      debugLog(`${label} - transaction replaced`, {
+        tokenId: String(tokenId),
+        originalHash: tx.hash,
+        cancelled: !!e.cancelled,
+        replacementHash: e?.replacement?.hash || null,
+        replacementReason: e?.reason || null
+      });
+
+      if (e.cancelled) {
+        throw new Error(`${label} was cancelled in wallet after sending.`);
+      }
+
+      const replacementReceipt = e?.receipt;
+      if (replacementReceipt && replacementReceipt.status === 1) {
+        debugLog(`${label} - replacement confirmed`, {
+          tokenId: String(tokenId),
+          replacementHash: e?.replacement?.hash || null,
+          blockNumber: replacementReceipt.blockNumber
+        });
+        return replacementReceipt;
+      }
+
+      throw new Error(`${label} was replaced but not confirmed successfully.`);
+    }
+
+    throw e;
+  }
 }
 
 export function setupLegacyMigrationContracts() {
@@ -241,19 +292,7 @@ export async function migrateSingleFarmV5ToV6(tokenId, options = {}) {
           hash: claimTx.hash
         });
 
-        const claimReceipt = await claimTx.wait();
-
-        debugLog("V5 claim before migration - tx confirmed", {
-          tokenId: String(tokenId),
-          hash: claimTx.hash,
-          status: claimReceipt.status,
-          blockNumber: claimReceipt.blockNumber
-        });
-
-        if (claimReceipt.status !== 1) {
-          throw new Error(`V5 claim tx failed onchain for ${tokenId}`);
-        }
-
+        await waitForTxHandled(claimTx, "V5 claim before migration", tokenId);
         result.claimedOnV5 = true;
       } else {
         result.skippedClaim = true;
@@ -279,6 +318,10 @@ export async function migrateSingleFarmV5ToV6(tokenId, options = {}) {
         throw new Error(`V5 claim failed due to nonce/pending transaction issue: ${errMsg}`);
       }
 
+      if (isTxReplacedError(e)) {
+        throw e;
+      }
+
       result.skippedClaim = true;
     }
   } else {
@@ -297,19 +340,7 @@ export async function migrateSingleFarmV5ToV6(tokenId, options = {}) {
         hash: stopTx.hash
       });
 
-      const stopReceipt = await stopTx.wait();
-
-      debugLog("Stopping V5 farm - receipt", {
-        tokenId: String(tokenId),
-        hash: stopTx.hash,
-        status: stopReceipt.status,
-        blockNumber: stopReceipt.blockNumber
-      });
-
-      if (stopReceipt.status !== 1) {
-        throw new Error(`V5 stop tx failed onchain for ${tokenId}`);
-      }
-
+      await waitForTxHandled(stopTx, "Stopping V5 farm", tokenId);
       result.stoppedOnV5 = true;
     } catch (e) {
       const errMsg = getErrorMessage(e);
@@ -370,19 +401,7 @@ export async function migrateSingleFarmV5ToV6(tokenId, options = {}) {
         hash: startTx.hash
       });
 
-      const startReceipt = await startTx.wait();
-
-      debugLog("Starting V6 farm - receipt", {
-        tokenId: String(tokenId),
-        hash: startTx.hash,
-        status: startReceipt.status,
-        blockNumber: startReceipt.blockNumber
-      });
-
-      if (startReceipt.status !== 1) {
-        throw new Error(`V6 start tx failed onchain for ${tokenId}`);
-      }
-
+      await waitForTxHandled(startTx, "Starting V6 farm", tokenId);
       result.startedOnV6 = true;
     } catch (e) {
       const errMsg = getErrorMessage(e);
