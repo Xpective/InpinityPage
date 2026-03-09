@@ -106,12 +106,9 @@ function setWalletUIDisconnected() {
   }
 
   const selectedBlockInfo = byId("selectedBlockInfo");
-  const blockActions = byId("blockActions");
-  const noBlockSelected = byId("noBlockSelected");
   const blockActionsContainer = byId("blockActionsContainer");
 
   if (selectedBlockInfo) selectedBlockInfo.style.display = "none";
-  if (blockActions) blockActions.style.display = "none";
   if (blockActionsContainer) blockActionsContainer.style.display = "none";
   if (noBlockSelected) noBlockSelected.style.display = "block";
 

@@ -940,7 +940,7 @@
             </div>
           </div>
 
-          <div class="block-actions-container" id="blockActions" style="display:none;">
+          <div class="block-actions-container" id="blockActionsContainer" style="display:none;">
             <h3>
               <span>⚙️ Block Actions</span>
               <span class="v6-badge">Selected Block</span>
@@ -951,6 +951,25 @@
               <div id="selectedActionToken" class="sr-only">Block #—</div>
               <div id="blockResources" class="resources-grid"></div>
               <div id="selectedBlockMeta" class="info-note" style="display:none; margin-top:0.8rem;"></div>
+            </div>
+            <div style="display:flex; gap:0.6rem; flex-wrap:wrap; margin-bottom:1rem;">
+              <button
+                class="btn btn-small boost-btn"
+                id="migrateFarmBtn"
+                type="button"
+                style="display:none;"
+              >
+                🔄 Migrate selected V5 Farm to V6
+              </button>
+            
+              <button
+                class="btn btn-small boost-btn"
+                id="migrateAllV5Btn"
+                type="button"
+                style="display:none;"
+              >
+                🔄 Migrate all V5 Farms to V6
+              </button>
             </div>
 
             <div class="action-grid">
