@@ -37,6 +37,14 @@
     fetchAllWithPagination
   } from "./subgraph.js";
   
+  import {
+    setupLegacyMigrationContracts,
+    isTokenActiveOnV5,
+    migrateSingleFarmV5ToV6
+  } from "./migration.js";
+
+  setupLegacyMigrationContracts();
+  
   /* ==================== KONSTANTEN ==================== */
   const BASE_BLOCK_SIZE = 24;
   const MOVE_THRESHOLD = 10;
