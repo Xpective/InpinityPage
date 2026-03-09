@@ -11,8 +11,7 @@
    } from "./utils.js";
    import {
      mapState,
-     MAP_CONST,
-     getMapDom
+     MAP_CONST
    } from "./map-state.js";
    import {
      getAllMapTokens,
@@ -23,6 +22,13 @@
      getReadOnlyNFTContract
    } from "./map-data.js";
    import { populateAttackerSelect } from "./map-ui.js";
+   
+   const blockDetailDiv = byId("blockDetail");
+   const actionPanel = byId("actionPanel");
+   const ownerActionsDiv = byId("ownerActions");
+   const protectionInput = byId("protectionInput");
+   const attackInput = byId("attackInput");
+   const actionMessage = byId("actionMessage");
    
    function getProduction(rarity) {
      const p = {};
@@ -43,13 +49,6 @@
    }
    
    export function clearActionArea() {
-     const {
-       ownerActionsDiv,
-       protectionInput,
-       attackInput,
-       actionMessage
-     } = getMapDom();
-   
      if (ownerActionsDiv) ownerActionsDiv.innerHTML = "";
      if (protectionInput) protectionInput.style.display = "none";
      if (attackInput) attackInput.style.display = "none";
@@ -58,7 +57,6 @@
    
    export async function refreshSelectedTargetAttackPreview() {
      const tokens = getAllMapTokens();
-     const { attackInput } = getMapDom();
    
      const attackerBlockEl = byId("attackAttackerBlock");
      const targetStatusEl = byId("attackTargetStatus");
@@ -84,6 +82,8 @@
      }
    
      if (attackInput) attackInput.style.display = "flex";
+   
+     populateAttackerSelect();
    
      const attackerTokenId = await getPreferredAttackerTokenId();
    
@@ -179,13 +179,6 @@
      const tokens = getAllMapTokens();
      const nftReadOnlyContract = getReadOnlyNFTContract();
    
-     const {
-       blockDetailDiv,
-       actionPanel,
-       ownerActionsDiv,
-       protectionInput
-     } = getMapDom();
-   
      mapState.selectedTokenId = String(tokenId);
      const token = tokens[mapState.selectedTokenId];
      const owner = token ? token.owner : null;
@@ -266,7 +259,7 @@
          rarityDisplay = `
            <div class="detail-row">
              <span class="detail-label">Rarity</span>
-             <span class="detail-value ${MAP_CONST.rarityClass[r] || ""}">${rarityNames[r] || r}</span>
+             <span class="detail-value ${MAP_CONST.rarityClass[r]}">${rarityNames[r]}</span>
            </div>
          `;
    
@@ -284,7 +277,7 @@
        } catch {}
      }
    
-     if (token?.owner && blockDetailDiv) {
+     if (token?.owner) {
        blockDetailDiv.innerHTML = `
          <div class="detail-row"><span class="detail-label">Block</span><span class="detail-value">${mapState.selectedTokenId}</span></div>
          <div class="detail-row"><span class="detail-label">Owner</span><span class="detail-value">${shortenAddress(owner)}</span></div>
@@ -297,7 +290,7 @@
          <div class="detail-row"><span class="detail-label">Pending</span><span class="detail-value">${pendingTotalTxt}</span></div>
          ${productionHtml}
        `;
-     } else if (blockDetailDiv) {
+     } else {
        blockDetailDiv.innerHTML = `<p style="color:#98a9b9;">Block #${mapState.selectedTokenId} not minted</p>`;
      }
    
