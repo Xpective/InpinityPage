@@ -1,51 +1,63 @@
-<!DOCTYPE html>
-<html lang="en" data-theme="basic">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>INPINITY – Game Dashboard (V6)</title>
-
-  <link rel="icon" type="image/png" href="favicon.webp" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto+Mono:wght@400;700&display=swap"
-    rel="stylesheet"
-  />
-
-  <link rel="stylesheet" href="css/base.css" />
-  <link rel="stylesheet" href="css/layout.css" />
-  <link rel="stylesheet" href="css/animations.css" />
-  <link rel="stylesheet" href="css/dark.css" />
-  <link rel="stylesheet" href="css/light.css" />
-  <link rel="stylesheet" href="css/color.css" />
-  <link rel="stylesheet" href="css/responsive.css" />
-  <link rel="stylesheet" href="css/game.css" />
-
-  <meta
-    name="description"
-    content="Manage your Pyramid Blocks, farm resources, protect your territory, launch pirate attacks, and trade inside the Inpinity game dashboard."
-  />
-  <meta
-    name="keywords"
-    content="Inpinity, Game, Pyramid, NFT, Base, INPI, Pitrone, Resources, Farming, Pirate Attack, V6"
-  />
-  <meta name="author" content="Inpinity Team" />
-  <meta property="og:title" content="Inpinity – Game Dashboard V6" />
-  <meta
-    property="og:description"
-    content="Manage blocks, farming, attacks, protection, and exchange in the Inpinity ecosystem. Now with V6 contracts."
-  />
-  <meta property="og:image" content="logo_background.jpg" />
-  <meta property="og:url" content="https://inpinity.online/game.html" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:site" content="@unxpective" />
-  <meta name="twitter:creator" content="@Inpinity1" />
-  <meta name="theme-color" content="#140f1f" />
-  <meta name="robots" content="index,follow" />
+  <!DOCTYPE html>
+  <html lang="en" data-theme="basic">
+  <head>
+    <script>
+      (function preloadTheme() {
+        const savedTheme = localStorage.getItem("inpinity-theme");
+        const theme =
+          savedTheme && ["light", "dark", "basic"].includes(savedTheme)
+            ? savedTheme
+            : "basic";
   
-  <script defer src="main.js"></script>
-</head>
+        document.documentElement.setAttribute("data-theme", theme);
+      })();
+    </script>
+  
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>INPINITY – Game Dashboard (V6)</title>
+  
+    <link rel="icon" type="image/png" href="favicon.webp" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+  
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+    <link rel="stylesheet" href="css/animations.css" />
+    <link rel="stylesheet" href="css/dark.css" />
+    <link rel="stylesheet" href="css/light.css" />
+    <link rel="stylesheet" href="css/color.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+    <link rel="stylesheet" href="css/game.css" />
+  
+    <meta
+      name="description"
+      content="Manage your Pyramid Blocks, farm resources, protect your territory, launch pirate attacks, and trade inside the Inpinity game dashboard."
+    />
+    <meta
+      name="keywords"
+      content="Inpinity, Game, Pyramid, NFT, Base, INPI, Pitrone, Resources, Farming, Pirate Attack, V6"
+    />
+    <meta name="author" content="Inpinity Team" />
+    <meta property="og:title" content="Inpinity – Game Dashboard V6" />
+    <meta
+      property="og:description"
+      content="Manage blocks, farming, attacks, protection, and exchange in the Inpinity ecosystem. Now with V6 contracts."
+    />
+    <meta property="og:image" content="logo_background.jpg" />
+    <meta property="og:url" content="https://inpinity.online/game.html" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@unxpective" />
+    <meta name="twitter:creator" content="@Inpinity1" />
+    <meta name="theme-color" content="#140f1f" />
+    <meta name="robots" content="index,follow" />
+  
+    <script defer src="main.js"></script>
+  </head>
 <body>
   <header class="site-header">
     <nav class="site-nav" aria-label="Main navigation">

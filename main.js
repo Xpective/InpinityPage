@@ -1,3 +1,16 @@
+/* =========================================================
+   THEME PRELOAD
+========================================================= */
+(function preloadTheme() {
+  const savedTheme = localStorage.getItem("inpinity-theme");
+  const theme =
+    savedTheme && ["light", "dark", "basic"].includes(savedTheme)
+      ? savedTheme
+      : "basic";
+
+  document.documentElement.setAttribute("data-theme", theme);
+})();
+
 document.addEventListener("DOMContentLoaded", () => {
   initTheme();
   setupThemeDots();
@@ -14,11 +27,9 @@ document.addEventListener("DOMContentLoaded", () => {
 ========================================================= */
 function initTheme() {
   const root = document.documentElement;
-  const savedTheme = localStorage.getItem("inpinity-theme");
+  const currentTheme = root.getAttribute("data-theme");
 
-  if (savedTheme && ["light", "dark", "basic"].includes(savedTheme)) {
-    root.setAttribute("data-theme", savedTheme);
-  } else {
+  if (!currentTheme || !["light", "dark", "basic"].includes(currentTheme)) {
     root.setAttribute("data-theme", "basic");
   }
 }
@@ -33,6 +44,11 @@ function setupThemeDots() {
   lightDot?.addEventListener("click", () => setTheme(root, "light"));
   darkDot?.addEventListener("click", () => setTheme(root, "dark"));
   basicDot?.addEventListener("click", () => setTheme(root, "basic"));
+}
+
+function setTheme(root, themeName) {
+  root.setAttribute("data-theme", themeName);
+  localStorage.setItem("inpinity-theme", themeName);
 }
 
 function setTheme(root, themeName) {
