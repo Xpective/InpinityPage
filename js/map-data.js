@@ -501,6 +501,14 @@
        `;
      }).join("");
    }
+  export function getUserAttacks() {
+      return mapState.userAttacks;
+    }
+  
+  export const initReadOnly = initMapReadOnly;
+  export const loadData = loadMapData;
+  export const loadUserResources = loadMapUserResources;
+  export const loadUserAttacks = loadMapUserAttacks;
    
    export function startMapAttacksTicker() {
      if (mapState.attacksTicker) return;
@@ -541,7 +549,28 @@
        mapState.attacksTicker = null;
      }
    }
-   
+   export function getFarmingV5Contract() {
+    return state.farmingV5Contract || null;
+  }
+  
+  export async function getV5PendingTotal(tokenId) {
+    if (!state.farmingV5Contract) {
+      return ethers.BigNumber.from(0);
+    }
+  
+    try {
+      const pending = await state.farmingV5Contract.pendingResources(tokenId);
+      if (Array.isArray(pending)) {
+        return pending.reduce(
+          (acc, v) => acc.add(ethers.BigNumber.from(v || 0)),
+          ethers.BigNumber.from(0)
+        );
+      }
+      return ethers.BigNumber.from(pending || 0);
+    } catch {
+      return ethers.BigNumber.from(0);
+    }
+  }
    /* =========================================================
       ATTACK PREVIEW
       ========================================================= */
@@ -643,6 +672,8 @@
       TOOLTIP
       ========================================================= */
    
+
+
    export function getMapTooltipHtml(foundTokenId) {
      const token = mapState.tokens[foundTokenId];
      let html = `<span>Block #${foundTokenId}</span><br>`;

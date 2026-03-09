@@ -4,9 +4,20 @@
 
    import { byId } from "./utils.js";
 
+   export const BASE_BLOCK_SIZE = 24;
+   export const MOVE_THRESHOLD = 10;
+   
+   export const rarityColors = [
+     "#cd7f32",
+     "#c0c0c0",
+     "#ffd700",
+     "#e5e4e2",
+     "#b9f2ff"
+   ];
+   
    export const MAP_CONST = {
-     BASE_BLOCK_SIZE: 24,
-     MOVE_THRESHOLD: 10,
+     BASE_BLOCK_SIZE,
+     MOVE_THRESHOLD,
      rarityClass: [
        "rarity-bronze",
        "rarity-silver",
@@ -14,13 +25,7 @@
        "rarity-platinum",
        "rarity-diamond"
      ],
-     rarityColors: [
-       "#cd7f32",
-       "#c0c0c0",
-       "#ffd700",
-       "#e5e4e2",
-       "#b9f2ff"
-     ]
+     rarityColors
    };
    
    export const mapState = {
