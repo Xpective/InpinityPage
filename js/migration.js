@@ -15,9 +15,30 @@ export const FARMING_V5_ABI = [
 
 let farmingV5Contract = null;
 
+function getErrorMessage(e) {
+  return (
+    e?.reason ||
+    e?.error?.message ||
+    e?.data?.message ||
+    e?.message ||
+    String(e)
+  );
+}
+
+function bn0() {
+  return ethers.BigNumber.from(0);
+}
+
 export function setupLegacyMigrationContracts() {
   if (!state.signer) throw new Error("Wallet not connected");
-  farmingV5Contract = new ethers.Contract(FARMING_V5_ADDRESS, FARMING_V5_ABI, state.signer);
+  farmingV5Contract = new ethers.Contract(
+    FARMING_V5_ADDRESS,
+    FARMING_V5_ABI,
+    state.signer
+  );
+  debugLog("Legacy migration contracts initialized", {
+    farmingV5: FARMING_V5_ADDRESS
+  });
 }
 
 export function getFarmingV5Contract() {
@@ -29,6 +50,7 @@ export async function getV5FarmState(tokenId) {
   try {
     const c = getFarmingV5Contract();
     const farm = await c.getFarmState(tokenId);
+
     return {
       ok: true,
       tokenId: String(tokenId),
@@ -49,13 +71,51 @@ export async function getV5FarmState(tokenId) {
       boostExpiry: 0,
       stopTime: 0,
       isActive: false,
-      error: e
+      error: getErrorMessage(e)
+    };
+  }
+}
+
+export async function getV6FarmState(tokenId) {
+  try {
+    if (!state.farmingV6Contract) {
+      throw new Error("FarmingV6 contract not initialized");
+    }
+
+    const farm = await state.farmingV6Contract.getFarmState(tokenId);
+
+    return {
+      ok: true,
+      tokenId: String(tokenId),
+      startTime: Number(farm.startTime || 0),
+      lastAccrualTime: Number(farm.lastAccrualTime || 0),
+      lastClaimTime: Number(farm.lastClaimTime || 0),
+      boostExpiry: Number(farm.boostExpiry || 0),
+      stopTime: Number(farm.stopTime || 0),
+      isActive: !!farm.isActive
+    };
+  } catch (e) {
+    return {
+      ok: false,
+      tokenId: String(tokenId),
+      startTime: 0,
+      lastAccrualTime: 0,
+      lastClaimTime: 0,
+      boostExpiry: 0,
+      stopTime: 0,
+      isActive: false,
+      error: getErrorMessage(e)
     };
   }
 }
 
 export async function isTokenActiveOnV5(tokenId) {
   const farm = await getV5FarmState(tokenId);
+  return !!(farm.ok && farm.isActive);
+}
+
+export async function isTokenActiveOnV6(tokenId) {
+  const farm = await getV6FarmState(tokenId);
   return !!(farm.ok && farm.isActive);
 }
 
@@ -68,18 +128,16 @@ export async function getV5PendingTotal(tokenId) {
   try {
     const c = getFarmingV5Contract();
     const pending = await c.getAllPending(tokenId);
-    return pending.reduce(
-      (acc, v) => acc.add(v),
-      ethers.BigNumber.from(0)
-    );
+
+    return pending.reduce((acc, v) => acc.add(v), bn0());
   } catch {
-    return ethers.BigNumber.from(0);
+    return bn0();
   }
 }
 
 export async function migrateSingleFarmV5ToV6(tokenId, options = {}) {
   const {
-    claimIfPossible = true,
+    claimIfPossible = false,
     stopOnV5 = true,
     startOnV6 = true,
     gasLimitClaim = 700000,
@@ -90,9 +148,13 @@ export async function migrateSingleFarmV5ToV6(tokenId, options = {}) {
   const result = {
     tokenId: String(tokenId),
     v5WasActive: false,
+    v6WasActive: false,
     claimedOnV5: false,
     stoppedOnV5: false,
-    startedOnV6: false
+    startedOnV6: false,
+    skippedClaim: false,
+    skippedStop: false,
+    skippedStart: false
   };
 
   const v5 = getFarmingV5Contract();
@@ -100,44 +162,147 @@ export async function migrateSingleFarmV5ToV6(tokenId, options = {}) {
 
   if (!v6) throw new Error("FarmingV6 contract not initialized");
 
+  debugLog("Migration begin", { tokenId: String(tokenId) });
+
   const v5Farm = await getV5FarmState(tokenId);
-  if (!v5Farm.ok || !v5Farm.isActive) {
-    debugLog(`Migration skip: token ${tokenId} not active on V5`);
+  const v6FarmBefore = await getV6FarmState(tokenId);
+
+  result.v5WasActive = !!(v5Farm.ok && v5Farm.isActive);
+  result.v6WasActive = !!(v6FarmBefore.ok && v6FarmBefore.isActive);
+
+  if (!v5Farm.ok) {
+    throw new Error(`Could not read V5 farm state for ${tokenId}: ${v5Farm.error}`);
+  }
+
+  if (!v5Farm.isActive) {
+    debugLog("Migration skip: token not active on V5", { tokenId: String(tokenId) });
+    result.skippedStop = true;
+    result.skippedClaim = true;
+    if (v6FarmBefore.isActive) result.skippedStart = true;
     return result;
   }
 
-  result.v5WasActive = true;
-
   if (claimIfPossible) {
     try {
+      debugLog("V5 claim preview - reading", { tokenId: String(tokenId) });
+
       const preview = await v5.previewClaim(tokenId);
       const totalPending = await getV5PendingTotal(tokenId);
 
+      debugLog("V5 claim preview - result", {
+        tokenId: String(tokenId),
+        allowed: !!preview.allowed,
+        code: Number(preview.code || 0),
+        pendingAmount: preview.pendingAmount?.toString?.() || "0",
+        totalPending: totalPending.toString()
+      });
+
       if (preview.allowed && totalPending.gt(0)) {
-        debugLog(`V5 claim before migration`, { tokenId, totalPending: totalPending.toString() });
-        const tx = await v5.claimResources(tokenId, { gasLimit: gasLimitClaim });
-        await tx.wait();
+        debugLog("V5 claim before migration - sending tx", {
+          tokenId: String(tokenId),
+          totalPending: totalPending.toString()
+        });
+
+        const claimTx = await v5.claimResources(tokenId, { gasLimit: gasLimitClaim });
+
+        debugLog("V5 claim before migration - tx sent", {
+          tokenId: String(tokenId),
+          hash: claimTx.hash
+        });
+
+        await claimTx.wait();
+
+        debugLog("V5 claim before migration - tx confirmed", {
+          tokenId: String(tokenId)
+        });
+
         result.claimedOnV5 = true;
+      } else {
+        result.skippedClaim = true;
+        debugLog("V5 claim skipped", {
+          tokenId: String(tokenId),
+          allowed: !!preview.allowed,
+          totalPending: totalPending.toString()
+        });
       }
     } catch (e) {
-      debugLog(`V5 claim failed before migration`, { tokenId, error: e.message });
+      result.skippedClaim = true;
+      debugLog("V5 claim failed before migration", {
+        tokenId: String(tokenId),
+        error: getErrorMessage(e)
+      });
     }
+  } else {
+    result.skippedClaim = true;
+    debugLog("V5 claim disabled by options", { tokenId: String(tokenId) });
   }
 
   if (stopOnV5) {
-    debugLog(`Stopping V5 farm`, { tokenId });
-    const tx = await v5.stopFarming(tokenId, { gasLimit: gasLimitStop });
-    await tx.wait();
-    result.stoppedOnV5 = true;
+    try {
+      debugLog("Stopping V5 farm - sending tx", { tokenId: String(tokenId) });
+
+      const stopTx = await v5.stopFarming(tokenId, { gasLimit: gasLimitStop });
+
+      debugLog("Stopping V5 farm - tx sent", {
+        tokenId: String(tokenId),
+        hash: stopTx.hash
+      });
+
+      await stopTx.wait();
+
+      debugLog("Stopping V5 farm - tx confirmed", { tokenId: String(tokenId) });
+      result.stoppedOnV5 = true;
+    } catch (e) {
+      debugLog("Stopping V5 farm - FAILED", {
+        tokenId: String(tokenId),
+        error: getErrorMessage(e)
+      });
+      throw new Error(`V5 stop failed for ${tokenId}: ${getErrorMessage(e)}`);
+    }
+  } else {
+    result.skippedStop = true;
+    debugLog("V5 stop disabled by options", { tokenId: String(tokenId) });
   }
 
   if (startOnV6) {
-    debugLog(`Starting V6 farm`, { tokenId });
-    const tx = await v6.startFarming(tokenId, { gasLimit: gasLimitStart });
-    await tx.wait();
-    result.startedOnV6 = true;
+    const v6FarmAfterStopCheck = await getV6FarmState(tokenId);
+
+    if (v6FarmAfterStopCheck.ok && v6FarmAfterStopCheck.isActive) {
+      result.skippedStart = true;
+      result.startedOnV6 = false;
+
+      debugLog("Starting V6 farm skipped - already active on V6", {
+        tokenId: String(tokenId)
+      });
+    } else {
+      try {
+        debugLog("Starting V6 farm - sending tx", { tokenId: String(tokenId) });
+
+        const startTx = await v6.startFarming(tokenId, { gasLimit: gasLimitStart });
+
+        debugLog("Starting V6 farm - tx sent", {
+          tokenId: String(tokenId),
+          hash: startTx.hash
+        });
+
+        await startTx.wait();
+
+        debugLog("Starting V6 farm - tx confirmed", { tokenId: String(tokenId) });
+        result.startedOnV6 = true;
+      } catch (e) {
+        debugLog("Starting V6 farm - FAILED", {
+          tokenId: String(tokenId),
+          error: getErrorMessage(e)
+        });
+        throw new Error(`V6 start failed for ${tokenId}: ${getErrorMessage(e)}`);
+      }
+    }
+  } else {
+    result.skippedStart = true;
+    debugLog("V6 start disabled by options", { tokenId: String(tokenId) });
   }
 
+  debugLog("Migration complete", result);
   return result;
 }
 
@@ -146,16 +311,28 @@ export async function migrateManyFarmsV5ToV6(tokenIds = [], options = {}) {
 
   for (const tokenId of tokenIds) {
     try {
+      debugLog("Batch migration - next token", { tokenId: String(tokenId) });
       const res = await migrateSingleFarmV5ToV6(tokenId, options);
       results.push({ ok: true, ...res });
     } catch (e) {
       results.push({
         ok: false,
         tokenId: String(tokenId),
-        error: e.reason || e.message || String(e)
+        error: getErrorMessage(e)
+      });
+
+      debugLog("Batch migration - token failed", {
+        tokenId: String(tokenId),
+        error: getErrorMessage(e)
       });
     }
   }
+
+  debugLog("Batch migration finished", {
+    total: results.length,
+    success: results.filter(r => r.ok).length,
+    failed: results.filter(r => !r.ok).length
+  });
 
   return results;
 }
