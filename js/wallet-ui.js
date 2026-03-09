@@ -11,7 +11,6 @@
     shortenAddress,
     debugLog
   } from "./utils.js";
-  
   import { setupLegacyMigrationContracts } from "./migration.js";
   
   export function setWalletUIConnected(addr) {

@@ -1,0 +1,266 @@
+/* =========================================================
+   FARMING / MIGRATION / PROTECTION
+   ========================================================= */
+
+   import { state } from "./state.js";
+   import { MERCENARY_V2_ADDRESS } from "./config.js";
+   import { byId, formatDuration, debugLog } from "./utils.js";
+   import { ensureFarmingApproval, ensureInpiApprovalForMercenary } from "./approvals.js";
+   import { loadResourceBalancesOnchain } from "./resources.js";
+   import { loadUserBlocks, selectBlock } from "./blocks.js";
+   import { loadUserAttacks, refreshBlockMarkings } from "./attacks.js";
+   import {
+     isTokenActiveOnV5,
+     migrateSingleFarmV5ToV6,
+     migrateManyFarmsV5ToV6
+   } from "./migration.js";
+   
+   function getActionMessageDiv() {
+     return byId("actionMessage");
+   }
+   
+   async function refreshSelectedBlockView() {
+     if (!state.selectedBlock) return;
+     await loadUserBlocks({ onRevealSelected: null, onRefreshBlockMarkings: refreshBlockMarkings });
+     await selectBlock(state.selectedBlock.tokenId, state.selectedBlock.row, state.selectedBlock.col);
+   }
+   
+   export async function startFarmingSelected() {
+     if (!state.selectedBlock) return;
+     const msgDiv = getActionMessageDiv();
+   
+     try {
+       if (state.selectedBlock.activeOnV5) {
+         msgDiv.innerHTML = `<span class="error">❌ Block is still active on V5. Use Migrate button first.</span>`;
+         return;
+       }
+   
+       const owner = await state.nftContract.ownerOf(state.selectedBlock.tokenId);
+       if (owner.toLowerCase() !== state.userAddress.toLowerCase()) {
+         msgDiv.innerHTML = `<span class="error">❌ Not your block.</span>`;
+         return;
+       }
+   
+       const approved = await ensureFarmingApproval();
+       if (!approved) {
+         msgDiv.innerHTML = `<span class="error">❌ Failed to approve farming.</span>`;
+         return;
+       }
+   
+       msgDiv.innerHTML = `<span class="success">⏳ Starting V6 farming...</span>`;
+       const tx = await state.farmingV6Contract.startFarming(state.selectedBlock.tokenId, { gasLimit: 500000 });
+       debugLog("startFarming tx", tx.hash);
+       await tx.wait();
+   
+       msgDiv.innerHTML = `<span class="success">✅ V6 farming started.</span>`;
+       await refreshSelectedBlockView();
+     } catch (e) {
+       console.error("Farming error:", e);
+       msgDiv.innerHTML = `<span class="error">❌ ${e.reason || e.message || "Unknown error"}</span>`;
+     }
+   }
+   
+   export async function stopFarmingSelected() {
+     if (!state.selectedBlock) return;
+     const msgDiv = getActionMessageDiv();
+   
+     try {
+       msgDiv.innerHTML = `<span class="success">⏳ Stopping V6 farming...</span>`;
+       const tx = await state.farmingV6Contract.stopFarming(state.selectedBlock.tokenId, { gasLimit: 500000 });
+       debugLog("stopFarming tx", tx.hash);
+       await tx.wait();
+   
+       msgDiv.innerHTML = `<span class="success">⏹️ Farming stopped.</span>`;
+       await refreshSelectedBlockView();
+     } catch (e) {
+       console.error("Stop farming error:", e);
+       msgDiv.innerHTML = `<span class="error">❌ ${e.reason || e.message}</span>`;
+     }
+   }
+   
+   export async function claimSelected() {
+     if (!state.selectedBlock) return;
+     const msgDiv = getActionMessageDiv();
+   
+     try {
+       const preview = await state.farmingV6Contract.previewClaim(state.selectedBlock.tokenId);
+       if (!preview.allowed) {
+         msgDiv.innerHTML = `<span class="error">❌ Claim not ready. Code ${preview.code}. Wait ${formatDuration(preview.secondsRemaining)}.</span>`;
+         return;
+       }
+   
+       const pending = await state.farmingV6Contract.getAllPending(state.selectedBlock.tokenId);
+       let total = ethers.BigNumber.from(0);
+       for (let i = 0; i < pending.length; i++) {
+         total = total.add(pending[i]);
+       }
+   
+       if (total.isZero()) {
+         msgDiv.innerHTML = `<span class="error">❌ Nothing to claim.</span>`;
+         return;
+       }
+   
+       msgDiv.innerHTML = `<span class="success">⏳ Claiming resources... ${total.toString()} total</span>`;
+       const tx = await state.farmingV6Contract.claimResources(state.selectedBlock.tokenId, { gasLimit: 700000 });
+       debugLog("claim tx", tx.hash);
+       await tx.wait();
+   
+       msgDiv.innerHTML = `<span class="success">💰 Resources claimed!</span>`;
+       await loadResourceBalancesOnchain();
+       await refreshSelectedBlockView();
+     } catch (e) {
+       console.error("Claim error:", e);
+       msgDiv.innerHTML = `<span class="error">❌ ${e.reason || e.message}</span>`;
+     }
+   }
+   
+   export async function buyBoost() {
+     if (!state.selectedBlock) {
+       alert("No block selected.");
+       return;
+     }
+   
+     const days = parseInt(byId("boostDays")?.value, 10);
+     if (isNaN(days) || days < 1 || days > 30) {
+       alert("Please enter valid days (1-30)");
+       return;
+     }
+   
+     const msgDiv = getActionMessageDiv();
+   
+     try {
+       msgDiv.innerHTML = `<span class="success">⏳ Buying boost for ${days} days...</span>`;
+       const tx = await state.farmingV6Contract.buyBoost(state.selectedBlock.tokenId, days, { gasLimit: 300000 });
+       debugLog("buyBoost tx", tx.hash);
+       await tx.wait();
+   
+       msgDiv.innerHTML = `<span class="success">✅ Boost activated for ${days} days!</span>`;
+       await refreshSelectedBlockView();
+     } catch (e) {
+       console.error("Boost error:", e);
+       msgDiv.innerHTML = `<span class="error">❌ ${e.reason || e.message}</span>`;
+     }
+   }
+   
+   export async function migrateSelectedFarmToV6() {
+     if (!state.selectedBlock) return;
+   
+     const msgDiv = getActionMessageDiv();
+     try {
+       msgDiv.innerHTML = `<span class="success">⏳ Migrating V5 → V6...</span>`;
+   
+       const result = await migrateSingleFarmV5ToV6(state.selectedBlock.tokenId, {
+         claimIfPossible: true,
+         stopOnV5: true,
+         startOnV6: true
+       });
+   
+       msgDiv.innerHTML = `
+         <span class="success">
+           ✅ Migration complete.<br>
+           Claimed on V5: ${result.claimedOnV5 ? "yes" : "no"}<br>
+           Stopped on V5: ${result.stoppedOnV5 ? "yes" : "no"}<br>
+           Started on V6: ${result.startedOnV6 ? "yes" : "no"}
+         </span>
+       `;
+   
+       await loadResourceBalancesOnchain();
+       await loadUserAttacks();
+       await refreshSelectedBlockView();
+     } catch (e) {
+       console.error("Migration error:", e);
+       msgDiv.innerHTML = `<span class="error">❌ ${e.reason || e.message}</span>`;
+     }
+   }
+   
+   export async function migrateAllMyV5Farms() {
+     const msgDiv = getActionMessageDiv();
+   
+     try {
+       msgDiv.innerHTML = `<span class="success">⏳ Scanning V5 farms...</span>`;
+   
+       const checks = await Promise.all(
+         state.userBlocks.map(async (tokenId) => ({
+           tokenId,
+           active: await isTokenActiveOnV5(tokenId).catch(() => false)
+         }))
+       );
+   
+       const toMigrate = checks.filter((x) => x.active).map((x) => x.tokenId);
+   
+       if (!toMigrate.length) {
+         msgDiv.innerHTML = `<span class="success">✅ No active V5 farms found.</span>`;
+         return;
+       }
+   
+       msgDiv.innerHTML = `<span class="success">⏳ Migrating ${toMigrate.length} V5 farms...</span>`;
+   
+       const results = await migrateManyFarmsV5ToV6(toMigrate, {
+         claimIfPossible: true,
+         stopOnV5: true,
+         startOnV6: true
+       });
+   
+       const successCount = results.filter((r) => r.ok && r.startedOnV6).length;
+       const failCount = results.length - successCount;
+   
+       msgDiv.innerHTML = `
+         <span class="success">
+           ✅ Migration finished.<br>
+           Success: ${successCount}<br>
+           Failed: ${failCount}
+         </span>
+       `;
+   
+       await loadResourceBalancesOnchain();
+       await loadUserBlocks({ onRevealSelected: null, onRefreshBlockMarkings: refreshBlockMarkings });
+       await loadUserAttacks();
+     } catch (e) {
+       console.error("Migration error:", e);
+       msgDiv.innerHTML = `<span class="error">❌ ${e.reason || e.message}</span>`;
+     }
+   }
+   
+   export async function protect() {
+     const tokenId = parseInt(byId("protectTokenId")?.value, 10);
+     const level = parseInt(byId("protectLevel")?.value, 10);
+     const msgDiv = byId("protectMessage");
+   
+     if (isNaN(tokenId) || isNaN(level)) {
+       alert("Invalid input");
+       return;
+     }
+   
+     try {
+       msgDiv.innerHTML = `<span class="success">⏳ Hiring mercenaries...</span>`;
+   
+       const owner = await state.nftContract.ownerOf(tokenId);
+       if (owner.toLowerCase() !== state.userAddress.toLowerCase()) {
+         msgDiv.innerHTML = `<span class="error">❌ Not your block.</span>`;
+         return;
+       }
+   
+       const cost = level * 10;
+       const amount = ethers.utils.parseEther(cost.toString());
+   
+       const ok = await ensureInpiApprovalForMercenary(amount);
+       if (!ok) {
+         msgDiv.innerHTML = `<span class="error">❌ INPI approval failed.</span>`;
+         return;
+       }
+   
+       const tx = await state.mercenaryV2Contract.hireMercenaries(tokenId, level, { gasLimit: 400000 });
+       debugLog("hireMercenaries tx", { tokenId, level, spender: MERCENARY_V2_ADDRESS, hash: tx.hash });
+       await tx.wait();
+   
+       msgDiv.innerHTML = `<span class="success">✅ Protection active for 3.14 days.</span>`;
+   
+       await loadUserBlocks({ onRevealSelected: null, onRefreshBlockMarkings: refreshBlockMarkings });
+       if (state.selectedBlock && String(state.selectedBlock.tokenId) === String(tokenId)) {
+         await selectBlock(state.selectedBlock.tokenId, state.selectedBlock.row, state.selectedBlock.col);
+       }
+     } catch (e) {
+       console.error("Protection error:", e);
+       msgDiv.innerHTML = `<span class="error">❌ ${e.reason || e.message}</span>`;
+     }
+   }
