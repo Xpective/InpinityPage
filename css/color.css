@@ -1,14 +1,33 @@
 [data-theme="basic"] {
   --primary-color: #452554;
   --primary-color-transparent: rgba(69, 37, 84, 0.5);
+
   --secondary-color: #7967A1;
   --tertiary-color: #E8E2E6;
   --quaternary-color: #F8F1FA;
   --quaternary-color-transparent05: rgba(248, 241, 250, 0.5);
   --quaternary-color-transparent025: rgba(248, 241, 250, 0.25);
+
   --quinary-color: #1b82aa;
   --quinary-color-transparent: rgba(27, 130, 170, 0.5);
+
   --complementary-primary: #badaab;
   --background-color: #452554;
   --text-color: #ffffff;
+
+  --text-soft: rgba(255, 255, 255, 0.78);
+  --text-muted: rgba(255, 255, 255, 0.58);
+
+  --panel-border: rgba(255, 255, 255, 0.12);
+  --panel-shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
+
+  --heading-color: #1b82aa;
+  --summary-color: #E8E2E6;
+  --summary-bg: rgba(121, 103, 161, 0.14);
+  --summary-bg-hover: rgba(121, 103, 161, 0.22);
+
+  --card-bg: rgba(255, 255, 255, 0.04);
+  --card-bg-soft: rgba(255, 255, 255, 0.05);
+  --inner-bg: rgba(255, 255, 255, 0.05);
+  --inner-bg-strong: rgba(255, 255, 255, 0.07);
 }
