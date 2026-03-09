@@ -15,6 +15,9 @@
      migrateManyFarmsV5ToV6
    } from "./migration.js";
    
+   let isMigrationRunning = false;
+   let isBatchMigrationRunning = false;
+   
    function getActionMessageDiv() {
      return byId("actionMessage");
    }
@@ -23,6 +26,56 @@
      if (!state.selectedBlock) return;
      await loadUserBlocks({ onRevealSelected: null, onRefreshBlockMarkings: refreshBlockMarkings });
      await selectBlock(state.selectedBlock.tokenId, state.selectedBlock.row, state.selectedBlock.col);
+   }
+   
+   function setButtonBusy(buttonId, busy, busyText = "Processing...") {
+     const btn = byId(buttonId);
+     if (!btn) return null;
+   
+     if (busy) {
+       btn.dataset.originalText = btn.textContent;
+       btn.disabled = true;
+       btn.textContent = busyText;
+     } else {
+       btn.disabled = false;
+       if (btn.dataset.originalText) {
+         btn.textContent = btn.dataset.originalText;
+       }
+     }
+   
+     return btn;
+   }
+   
+   function friendlyErrorMessage(e) {
+     const msg = e?.reason || e?.message || "Unknown error";
+     const lower = String(msg).toLowerCase();
+   
+     if (
+       e?.code === 4001 ||
+       lower.includes("user rejected") ||
+       lower.includes("denied transaction signature") ||
+       lower.includes("action_rejected")
+     ) {
+       return "Transaction cancelled in wallet.";
+     }
+   
+     if (lower.includes("nonce too high")) {
+       return "Nonce too high. Please check pending transactions in MetaMask and try again.";
+     }
+   
+     if (lower.includes("nonce has already been used")) {
+       return "Nonce already used. Please wait for pending transactions or reset activity in MetaMask.";
+     }
+   
+     if (lower.includes("replacement transaction underpriced")) {
+       return "Replacement transaction underpriced. Please wait a moment and try again.";
+     }
+   
+     if (lower.includes("already known")) {
+       return "This transaction is already known by the network. Please wait.";
+     }
+   
+     return msg;
    }
    
    export async function startFarmingSelected() {
@@ -56,7 +109,7 @@
        await refreshSelectedBlockView();
      } catch (e) {
        console.error("Farming error:", e);
-       msgDiv.innerHTML = `<span class="error">❌ ${e.reason || e.message || "Unknown error"}</span>`;
+       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
      }
    }
    
@@ -74,7 +127,7 @@
        await refreshSelectedBlockView();
      } catch (e) {
        console.error("Stop farming error:", e);
-       msgDiv.innerHTML = `<span class="error">❌ ${e.reason || e.message}</span>`;
+       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
      }
    }
    
@@ -110,7 +163,7 @@
        await refreshSelectedBlockView();
      } catch (e) {
        console.error("Claim error:", e);
-       msgDiv.innerHTML = `<span class="error">❌ ${e.reason || e.message}</span>`;
+       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
      }
    }
    
@@ -138,29 +191,38 @@
        await refreshSelectedBlockView();
      } catch (e) {
        console.error("Boost error:", e);
-       msgDiv.innerHTML = `<span class="error">❌ ${e.reason || e.message}</span>`;
+       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
      }
    }
    
    export async function migrateSelectedFarmToV6() {
      if (!state.selectedBlock) return;
+     if (isMigrationRunning) return;
    
      const msgDiv = getActionMessageDiv();
+     isMigrationRunning = true;
+     setButtonBusy("migrateFarmBtn", true, "⏳ Migrating...");
+   
      try {
        msgDiv.innerHTML = `<span class="success">⏳ Migrating V5 → V6...</span>`;
    
        const result = await migrateSingleFarmV5ToV6(state.selectedBlock.tokenId, {
-         claimIfPossible: true,
+         claimIfPossible: false,
          stopOnV5: true,
          startOnV6: true
        });
+   
+       let extra = "";
+       if (result.needsRevealOnV6) {
+         extra = `<br>Reveal needed on V6 before farming can start.`;
+       }
    
        msgDiv.innerHTML = `
          <span class="success">
            ✅ Migration complete.<br>
            Claimed on V5: ${result.claimedOnV5 ? "yes" : "no"}<br>
            Stopped on V5: ${result.stoppedOnV5 ? "yes" : "no"}<br>
-           Started on V6: ${result.startedOnV6 ? "yes" : "no"}
+           Started on V6: ${result.startedOnV6 ? "yes" : "no"}${extra}
          </span>
        `;
    
@@ -169,12 +231,19 @@
        await refreshSelectedBlockView();
      } catch (e) {
        console.error("Migration error:", e);
-       msgDiv.innerHTML = `<span class="error">❌ ${e.reason || e.message}</span>`;
+       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+     } finally {
+       isMigrationRunning = false;
+       setButtonBusy("migrateFarmBtn", false);
      }
    }
    
    export async function migrateAllMyV5Farms() {
+     if (isBatchMigrationRunning) return;
+   
      const msgDiv = getActionMessageDiv();
+     isBatchMigrationRunning = true;
+     setButtonBusy("migrateAllV5Btn", true, "⏳ Migrating...");
    
      try {
        msgDiv.innerHTML = `<span class="success">⏳ Scanning V5 farms...</span>`;
@@ -196,19 +265,21 @@
        msgDiv.innerHTML = `<span class="success">⏳ Migrating ${toMigrate.length} V5 farms...</span>`;
    
        const results = await migrateManyFarmsV5ToV6(toMigrate, {
-         claimIfPossible: true,
+         claimIfPossible: false,
          stopOnV5: true,
          startOnV6: true
        });
    
-       const successCount = results.filter((r) => r.ok && r.startedOnV6).length;
+       const successCount = results.filter((r) => r.ok && (r.startedOnV6 || r.needsRevealOnV6)).length;
        const failCount = results.length - successCount;
+       const revealCount = results.filter((r) => r.ok && r.needsRevealOnV6).length;
    
        msgDiv.innerHTML = `
          <span class="success">
            ✅ Migration finished.<br>
            Success: ${successCount}<br>
-           Failed: ${failCount}
+           Failed: ${failCount}<br>
+           Need reveal before V6 start: ${revealCount}
          </span>
        `;
    
@@ -217,7 +288,10 @@
        await loadUserAttacks();
      } catch (e) {
        console.error("Migration error:", e);
-       msgDiv.innerHTML = `<span class="error">❌ ${e.reason || e.message}</span>`;
+       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+     } finally {
+       isBatchMigrationRunning = false;
+       setButtonBusy("migrateAllV5Btn", false);
      }
    }
    
@@ -250,7 +324,12 @@
        }
    
        const tx = await state.mercenaryV2Contract.hireMercenaries(tokenId, level, { gasLimit: 400000 });
-       debugLog("hireMercenaries tx", { tokenId, level, spender: MERCENARY_V2_ADDRESS, hash: tx.hash });
+       debugLog("hireMercenaries tx", {
+         tokenId,
+         level,
+         spender: MERCENARY_V2_ADDRESS,
+         hash: tx.hash
+       });
        await tx.wait();
    
        msgDiv.innerHTML = `<span class="success">✅ Protection active for 3.14 days.</span>`;
@@ -261,6 +340,6 @@
        }
      } catch (e) {
        console.error("Protection error:", e);
-       msgDiv.innerHTML = `<span class="error">❌ ${e.reason || e.message}</span>`;
+       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
      }
    }
