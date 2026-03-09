@@ -3,9 +3,9 @@
   --game-accent-strong: var(--secondary-color, #7967A1);
   --game-gold: var(--tertiary-color, #E8E2E6);
   --game-bg: var(--background-color, #452554);
-  --game-text: var(--text-color, #ffffff);
-  --game-text-soft: var(--text-soft, rgba(255, 255, 255, 0.82));
-  --game-text-muted: var(--text-muted, rgba(255, 255, 255, 0.68));
+  --game-text: var(--text-color, #1f0606);
+  --game-text-soft: var(--text-soft, rgba(7, 3, 3, 0.82));
+  --game-text-muted: var(--text-muted, rgba(20, 6, 6, 0.68));
 
   --green-ok: #27ae60;
   --orange-warn: #e67e22;
