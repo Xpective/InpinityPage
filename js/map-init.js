@@ -18,14 +18,16 @@
    import { refreshSelectedTargetAttackPreview } from "./map-selection.js";
    import { initMapUI, populateAttackerSelect } from "./map-ui.js";
    import {
-     handleReveal,
-     handleStartFarm,
-     handleStopFarm,
-     handleClaim,
-     handleBuyBoost,
-     handleProtect,
-     handleAttack,
-     handleMigrateToV6
+    handleReveal,
+    handleStartFarm,
+    handleStopFarm,
+    handleClaim,
+    handleBuyBoost,
+    handleProtect,
+    handleAttack,
+    handleMigrateToV6,
+    executeAttack,
+    cancelAttack
    } from "./map-actions.js";
    
    async function connectWallet(forceRequest = true) {
@@ -78,25 +80,56 @@
    }
    
    function bindMapEvents() {
-     byId("connectBtn")?.addEventListener("click", () => connectWallet(true));
-   
-     byId("attackResource")?.addEventListener("change", async () => {
-       if (mapState.selectedTokenId) {
-         await refreshSelectedTargetAttackPreview();
-       }
-     });
-   
-     document.addEventListener("click", async (e) => {
-       if (e.target.id === "revealBtn") await handleReveal();
-       if (e.target.id === "startFarmBtn") await handleStartFarm();
-       if (e.target.id === "stopFarmBtn") await handleStopFarm();
-       if (e.target.id === "claimBtn") await handleClaim();
-       if (e.target.id === "buyBoostBtn") await handleBuyBoost();
-       if (e.target.id === "protectBtn") await handleProtect();
-       if (e.target.id === "attackBtn") await handleAttack();
-       if (e.target.id === "migrateFarmBtn") await handleMigrateToV6();
-     });
-   }
+    byId("connectBtn")?.addEventListener("click", () => connectWallet(true));
+  
+    byId("attackResource")?.addEventListener("change", async () => {
+      if (mapState.selectedTokenId) {
+        await refreshSelectedTargetAttackPreview();
+      }
+    });
+  
+    document.addEventListener("click", async (e) => {
+      const target = e.target.closest("button");
+      if (!target) return;
+  
+      if (target.id === "revealBtn") return await handleReveal();
+      if (target.id === "startFarmBtn") return await handleStartFarm();
+      if (target.id === "stopFarmBtn") return await handleStopFarm();
+      if (target.id === "claimBtn") return await handleClaim();
+      if (target.id === "buyBoostBtn") return await handleBuyBoost();
+      if (target.id === "protectBtn") return await handleProtect();
+      if (target.id === "attackBtn") return await handleAttack();
+      if (target.id === "migrateFarmBtn") return await handleMigrateToV6();
+  
+      if (target.classList.contains("execute-btn")) {
+        const attack = {
+          id: target.dataset.attackid || null,
+          targetTokenId: parseInt(target.dataset.targetid || "0", 10),
+          attackIndex: parseInt(target.dataset.attackindex || "0", 10),
+          resource: parseInt(target.dataset.resource || "0", 10)
+        };
+  
+        if (!Number.isFinite(attack.targetTokenId) || !Number.isFinite(attack.attackIndex)) {
+          console.warn("Invalid execute attack payload", target.dataset);
+          return;
+        }
+  
+        return await executeAttack(attack);
+      }
+  
+      if (target.classList.contains("cancel-attack-btn")) {
+        const targetTokenId = parseInt(target.dataset.targetid || "0", 10);
+        const attackIndex = parseInt(target.dataset.attackindex || "0", 10);
+  
+        if (!Number.isFinite(targetTokenId) || !Number.isFinite(attackIndex)) {
+          console.warn("Invalid cancel attack payload", target.dataset);
+          return;
+        }
+  
+        return await cancelAttack(targetTokenId, attackIndex);
+      }
+    });
+  }
    
    export async function initMapPage() {
      await initReadOnly();
