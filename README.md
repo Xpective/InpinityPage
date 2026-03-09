@@ -1,153 +1,185 @@
-Inpinity – The Future of Game Development & Blockchain
+# InpinityPage
 
-Welcome to Inpinity – a decentralized ecosystem bridging game design, blockchain technology, and community collaboration.
-Founded by the Xpective team, Inpinity empowers developers, artists, and enthusiasts to create, share, and grow together.
+Official website and frontend hub for the **Inpinity** ecosystem.
 
-🌐 Website: https://inpinity.online
-📄 Whitepaper: Download PDF
-🔗 Contract Address: 0x15ac8e2c38f0c644123e61011e7113de56038453
-👛 Team Wallet: 0xcbc1cf1159b4db5b407684fde0e9e635e9e3726f
+InpinityPage is the public web interface for the Inpinity universe — combining website content, token pages, game dashboards, map interaction, wallet-connected features, and ecosystem information in one repository.
 
----
-
-📌 Table of Contents
-
-· Overview
-· Tokenomics
-· Roadmap
-· Ecosystem & Partners
-· Features
-· Community & Support
-· Installation (for developers)
-· Contributing
-· License
+🌐 **Website:** https://inpinity.online  
+📄 **Whitepaper:** `Whitepaper.pdf` / `whitepaper.html`  
+🎮 **Game Dashboard:** `game.html`  
+🗺️ **Pyramid Map:** `map.html`
 
 ---
 
-Overview
+## Overview
 
-Inpinity is more than a platform – it’s a home for visionary game creators. We combine traditional game development tools with cutting‑edge blockchain technology to build a sustainable, community‑driven ecosystem.
+Inpinity is a growing ecosystem built around:
 
-Core principles:
+- **Pyramid NFT ownership**
+- **on-chain resources**
+- **farming mechanics**
+- **pirate attacks**
+- **mercenary protection**
+- **partnership systems**
+- **ecosystem currencies**
+- **future city-building and strategy expansion**
 
-· Community First: Every voice matters – from governance to guestbook entries.
-· Transparency: Open‑source development, locked team tokens until “Judgment Day”.
-· Innovation: Integration with Base L2, ToshiMart, and Uniswap for low‑cost, secure transactions.
-
----
-
-Tokenomics
-
-The native token $INPI powers the entire Inpinity universe. Total supply is 1,000,000,000 (1 billion) tokens.
-
-Category Percentage Amount Description
-Public Sale 15% 150,000,000 Initial liquidity and public launch
-Team & Advisors 20% 200,000,000 Locked until “Judgment Day”, then 24‑month vesting
-Ecosystem & Development 25% 250,000,000 Grants, partnerships, development
-Liquidity & CEX Listings 15% 150,000,000 DEX/CEX liquidity
-Staking & Rewards 15% 150,000,000 Rewards for stakers and active community
-Marketing & Partnerships 10% 100,000,000 Brand awareness and collaborations
-
-Utilities:
-
-· Staking (passive rewards)
-· Governance (vote on proposals)
-· In‑game currency (pregame, future full game)
-· Access to exclusive content / NFTs
-· Generate the $ADVERT sub‑token for advertising
+This repository contains the **website and frontend layer** of that ecosystem.  
+It is the place where users discover the project, connect wallets, navigate ecosystem pages, and interact with the game-related interfaces.
 
 ---
 
-Roadmap
+## What This Repository Contains
 
-Quarter Milestone
-Q1 2026 Launch, smart contract audit, initial liquidity
-Q2 2026 Staking launch, first exchange listings, governance introduction
-Q3 2026 Website upgrade, strategic partnerships
-Q4 2026 Mini‑game release, Genesis NFT collection
-Q1 2027 Marketplace launch, on‑chain governance
-Q2 2027 $ADVERT sub‑token (earn by holding $INPI, spend on ads)
-Q3 2027 NFT in‑game utility
-Q4 2027 Community‑driven milestones
+This repo currently includes:
 
----
+- public landing and content pages
+- feature and ecosystem pages
+- whitepaper pages and PDF hosting
+- mint and game dashboard pages
+- the interactive Pyramid map page
+- wallet-connected frontend scripts
+- CSS theme system with `basic`, `dark`, and `light`
+- modular JavaScript for game and map systems
+- static assets and media
 
-Ecosystem & Partners
+Examples of current pages in this repo include:
 
-We are proud to collaborate with leading projects to ensure scalability, liquidity, and user experience.
-
-Partner Role Link
-Base Scalable L2 blockchain infrastructure base.org
-ToshiMart Native marketplace on Base toshimart.xyz
-Uniswap Decentralised liquidity & swapping uniswap.org
-
----
-
-Features
-
-Explore our growing set of tools and dApps:
-
-· 🎮 Pregame Demo – Play a simple game, earn scores, and support development with $INPI donations.
-  Play now
-· 📖 Immortal Guestbook – Leave a message forever (requires 1 $INPI fee, proceeds go to team wallet).
-  Sign the guestbook
-· 📢 Advertising Portal – Use $ADVERT tokens to place banner ads, promoted content, and reach our community.
-  Learn more
-· 🗳️ Forum (wallet‑authenticated) – Create signed topics, discuss game dev, and showcase projects.
-  Join the discussion
-· 🤝 Collaboration Hub – Find teammates, share resources, and co‑create.
-  Collaborate
-· 👤 Profile & Wallet Integration – Connect your wallet, view $INPI / ETH balances, and manage your profile.
-  Your profile
-· 🎨 NFT Generator – Upload layered PNGs and preview unique NFTs (minting coming soon).
-  Try it (under Collaboration)
-· 🔐 Wallet Registration – Register with your wallet and access community features.
-  Register
+- `index.html`
+- `features.html`
+- `game.html`
+- `map.html`
+- `mint.html`
+- `staking.html`
+- `faq.html`
+- `whitepaper.html`
+- `collaboration.html`
+- `guestbook.html`
+- `advertising.html`  
+  and more.  [oai_citation:1‡GitHub](https://github.com/Xpective/InpinityPage)
 
 ---
 
-Community & Support
+## Core Frontend Directions
 
-· Discord: https://discord.gg/95yj6Eg6
-· Twitter: @unxpective
-· Telegram: https://t.me/+1hl5Ou-pGChhYmUy
-· GitHub: Xpective
-· Email: xpective@inpinity.online
+The website is evolving toward a unified frontend for the full Inpinity ecosystem.
 
----
+### Current frontend focus
+- stronger structure across website pages
+- unified theming across `basic`, `dark`, and `light`
+- modular JavaScript architecture
+- wallet integration and interaction flows
+- improved game and map UI
+- stable contract-connected dashboards
 
-Installation (for developers)
+### Game-related focus
+- **Game Dashboard (`game.html`)**
+  - block management
+  - farming
+  - claiming
+  - boosts
+  - protection
+  - attacks
+  - exchange / resource views
 
-The Inpinity website is a static HTML/CSS/JS project. To run it locally:
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/Xpective/InpinityPage.git
-   cd InpinityPage
-   ```
-2. Open any .html file in your browser – no build step required.
-
-If you wish to modify the CSS, all style files are located in the /css directory.
-
----
-
-Contributing
-
-We welcome contributions! Whether it’s code, design, translations, or ideas:
-
-· Fork the repository and submit a pull request.
-· Join our Discord to discuss features and improvements.
-· Report issues or suggest enhancements via GitHub Issues.
-
-Please read our Code of Conduct before contributing.
+- **Pyramid Map (`map.html`)**
+  - visual block map
+  - owner / rarity / farming state display
+  - attack preview
+  - selected block sidebar
+  - future city-linked strategic expansion
 
 ---
 
-License
+## Inpinity Ecosystem Layers
 
-This project is licensed under the MIT License – see the LICENSE file for details.
+Inpinity is designed as a multi-layer system.
+
+### Ownership Layer
+- **Inpinity NFT**
+  - Pyramid block ownership
+  - revealable block progression
+  - core entry point into the ecosystem
+
+### Resource Layer
+- **ResourceToken**
+  - on-chain resources used for progression
+  - supports farming, attacks, defense, and future building systems
+
+### Production Layer
+- **Farming**
+  - generates resources from owned blocks
+  - supports farming boosts and claim flow
+
+### Combat Layer
+- **Pirates**
+  - enables attacks on other blocks
+  - supports resource targeting, travel time, execution windows, and pirate boosts
+
+### Defense Layer
+- **Mercenary**
+  - defensive protection system
+  - helps reduce attack effectiveness and protect resources
+
+### Cooperation Layer
+- **Partnership**
+  - alliance / relationship layer
+  - designed for future cooperative strategy mechanics
+
+### Currency Layer
+- **INPI**
+  - main ecosystem currency
+- **Pitrone**
+  - supporting utility / ecosystem token
+
+### Future Expansion Layer
+- **Inpinity City**
+  - city-building and shared progression systems
+  - planned use of resources for plots, structures, upgrades, trade, and broader strategy
 
 ---
 
-Inpinity – Unite, Create, Experience.
-© 2026 Inpinity Team. All rights reserved.
+## Project Vision
+
+Inpinity is not intended to be just a static token site.
+
+The long-term direction is to connect:
+
+- website
+- NFTs
+- resources
+- contracts
+- token flows
+- gameplay systems
+- worldbuilding
+- city mechanics
+- strategy loops
+
+into a broader on-chain game and ecosystem experience.
+
+The frontend in this repository is the public interface that moves users from discovery into interaction.
+
+---
+
+## Repository Structure
+
+A simplified view of the project structure:
+
+```text
+InpinityPage/
+├── css/
+├── img/
+├── js/
+├── scripts/
+├── register/
+├── index.html
+├── features.html
+├── game.html
+├── map.html
+├── mint.html
+├── staking.html
+├── whitepaper.html
+├── Whitepaper.pdf
+├── main.js
+├── README.md
+└── package.json
