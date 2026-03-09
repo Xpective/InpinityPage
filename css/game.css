@@ -11,10 +11,11 @@
   --orange-warn: #e67e22;
   --red-danger: #dc3545;
 
-  --panel-soft: var(--card-bg, rgba(255, 255, 255, 0.04));
-  --panel-soft-2: var(--card-bg-soft, rgba(255, 255, 255, 0.05));
-  --panel-inner: var(--inner-bg, rgba(255, 255, 255, 0.05));
-  --panel-inner-strong: var(--inner-bg-strong, rgba(255, 255, 255, 0.07));
+  /* darker panel system for basic theme */
+  --panel-soft: color-mix(in srgb, var(--primary-color) 82%, transparent);
+  --panel-soft-2: color-mix(in srgb, var(--primary-color) 88%, transparent);
+  --panel-inner: color-mix(in srgb, var(--primary-color) 72%, black 28%);
+  --panel-inner-strong: color-mix(in srgb, var(--primary-color) 78%, black 22%);
   --line-soft: var(--panel-border, rgba(255, 255, 255, 0.12));
   --panel-shadow: var(--panel-shadow, 0 10px 24px rgba(0, 0, 0, 0.16));
 
@@ -34,7 +35,8 @@ body {
 }
 
 body {
-  background:
+  background-color: var(--background-color);
+  background-image:
     radial-gradient(circle at top center, var(--game-blue-glow), transparent 35%),
     radial-gradient(circle at bottom right, var(--game-gold-glow), transparent 25%);
 }
@@ -129,7 +131,11 @@ body {
 
 .card-shell,
 .panel {
-  background: linear-gradient(180deg, var(--panel-soft), rgba(0, 0, 0, 0.12));
+  background: linear-gradient(
+    180deg,
+    var(--panel-soft),
+    color-mix(in srgb, var(--primary-color) 78%, black 22%)
+  );
   border: 1px solid var(--line-soft);
   border-radius: 1.5rem;
   box-shadow: var(--panel-shadow);
@@ -352,7 +358,11 @@ body {
 
 .block-actions-container {
   width: 100%;
-  background: linear-gradient(180deg, var(--panel-soft-2), rgba(0, 0, 0, 0.12));
+  background: linear-gradient(
+    180deg,
+    var(--panel-soft-2),
+    color-mix(in srgb, var(--primary-color) 82%, black 18%)
+  );
   border-radius: 1.5rem;
   padding: 1.25rem;
   border: 1px solid var(--line-soft);
@@ -415,7 +425,7 @@ body {
 }
 
 .action-card {
-  background: color-mix(in srgb, var(--panel-inner-strong) 88%, transparent);
+  background: var(--panel-inner-strong);
   border-radius: 1rem;
   padding: 1rem;
   border: 1px solid var(--line-soft);
