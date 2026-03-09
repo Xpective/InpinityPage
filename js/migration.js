@@ -7,7 +7,7 @@ export const PIRATES_V5_ADDRESS = "0xe76b03A848dE22DdbbF34994e650d2E887426879";
 
 export const FARMING_V5_ABI = [
   "function getFarmState(uint256 tokenId) view returns ((uint256 startTime,uint256 lastAccrualTime,uint256 lastClaimTime,uint256 boostExpiry,uint256 stopTime,bool isActive))",
-  "function previewClaim(uint256 tokenId) view returns ((uint8 code,bool allowed,uint256 pendingAmount,uint256 stealAmount,uint256 travelTime,uint256 remainingAttacksToday,uint256 protectionLevel,uint256 effectiveStealPercent,uint256 secondsRemaining))",
+  "function previewClaim(uint256 tokenId) view returns ((uint8 code,bool allowed,uint256 pendingAmount,uint256 stealAmount,uint256 travelTime,uint256 remainingAttacksToday,uint256 protectionLevel,uint256 effectiveStealPercent,uint256 secondsRemaining))" ,
   "function claimResources(uint256 tokenId) external",
   "function stopFarming(uint256 tokenId) external",
   "function getAllPending(uint256 tokenId) view returns (uint256[10])"
