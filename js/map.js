@@ -1,8 +1,9 @@
 /* =========================================================
-   INPINITY MAP – CLEAN V6 ONLY (MODULE VERSION)
+   INPINITY MAP – V6 mit V5-Migrationsunterstützung
    - nutzt config.js / state.js / contracts.js / subgraph.js / utils.js
    - ethers v5 kompatibel
-   - FarmingV6 / PiratesV6 only
+   - FarmingV6 / PiratesV6 aktiv
+   - V5-Erkennung für Migration alter Farms
    - eigener Block = Angreifer
    - fremder Block = Ziel
    ========================================================= */
@@ -42,8 +43,6 @@
     isTokenActiveOnV5,
     migrateSingleFarmV5ToV6
   } from "./migration.js";
-
-  setupLegacyMigrationContracts();
   
   /* ==================== KONSTANTEN ==================== */
   const BASE_BLOCK_SIZE = 24;
@@ -243,12 +242,20 @@
       const [
         tokenItems,
         blockRevealedItems,
+        farmV5Items,
         farmV6Items,
         protectionItems,
         partnerItems
       ] = await Promise.all([
         fetchAllWithPagination("tokens", "id owner { id } revealed").catch(() => []),
         fetchAllWithPagination("blockRevealeds", "tokenId rarity").catch(() => []),
+        // Legacy V5 farms
+        fetchAllWithPagination(
+          "farmV5S",
+          "id owner startTime lastAccrualTime lastClaimTime boostExpiry stopTime active updatedAt blockNumber",
+          `{ active: true }`
+        ).catch(() => []),
+        // Active V6 farms
         fetchAllWithPagination(
           "farmV6S",
           "id owner startTime lastAccrualTime lastClaimTime boostExpiry stopTime active updatedAt blockNumber",
@@ -265,12 +272,15 @@
           owner: t.owner ? t.owner.id : null,
           revealed: !!t.revealed,
           farmActive: false,
+          farmV5Active: false,
           protectionActive: false,
           partnerActive: false,
           rarity: null,
           farmStartTime: 0,
           lastClaimTime: 0,
-          boostExpiry: 0
+          boostExpiry: 0,
+          farmV5StartTime: 0,
+          farmV5LastClaimTime: 0
         };
       });
   
@@ -281,6 +291,17 @@
         }
       });
   
+      // V5 farms
+      farmV5Items.forEach(f => {
+        const tokenId = String(f.id);
+        if (tokens[tokenId]) {
+          tokens[tokenId].farmV5Active = !!f.active;
+          tokens[tokenId].farmV5StartTime = parseInt(f.startTime || "0", 10);
+          tokens[tokenId].farmV5LastClaimTime = parseInt(f.lastClaimTime || "0", 10);
+        }
+      });
+  
+      // V6 farms
       farmV6Items.forEach(f => {
         const tokenId = String(f.id);
         if (tokens[tokenId]) {
@@ -300,6 +321,29 @@
         const tokenId = String(p.id);
         if (tokens[tokenId]) tokens[tokenId].partnerActive = !!p.active;
       });
+  
+      // On-chain Fallback für V5 (eigene Tokens)
+      if (state.userAddress) {
+        const ownTokenIds = Object.entries(tokens)
+          .filter(([_, t]) => t.owner && t.owner.toLowerCase() === state.userAddress.toLowerCase())
+          .map(([tokenId]) => tokenId);
+  
+        const checks = await Promise.all(
+          ownTokenIds.map(async tokenId => {
+            try {
+              return { tokenId, active: await isTokenActiveOnV5(tokenId) };
+            } catch {
+              return { tokenId, active: false };
+            }
+          })
+        );
+  
+        checks.forEach(({ tokenId, active }) => {
+          if (tokens[tokenId] && active) {
+            tokens[tokenId].farmV5Active = true;
+          }
+        });
+      }
   
       drawPyramid();
     } catch (err) {
@@ -751,33 +795,53 @@
     selectedTokenOwner = owner;
   
     const now = Math.floor(Date.now() / 1000);
+    let v5Active = !!(token && token.farmV5Active);
     let v6Active = false;
+  
+    let farmVersionTxt = "-";
     let farmAgeTxt = "-";
     let claimTxt = "-";
     let pendingTotalTxt = "-";
     let boostTxt = "-";
   
+    if (v5Active) {
+      farmVersionTxt = "V5 Legacy";
+      if (token.farmV5StartTime > 0) {
+        farmAgeTxt = formatDuration(now - token.farmV5StartTime);
+      }
+      claimTxt = "Migrate to V6";
+      pendingTotalTxt = "check on migrate";
+    }
+  
     if (state.farmingV6Contract && token && token.owner) {
       const farmInfo = await safeGetFarm(selectedTokenId);
       v6Active = farmInfo.ok && farmInfo.isActive;
   
-      if (v6Active && farmInfo.startTime > 0) {
-        farmAgeTxt = formatDuration(now - farmInfo.startTime);
-      }
+      if (v6Active) {
+        farmVersionTxt = "V6 Active";
   
-      try {
-        const preview = await state.farmingV6Contract.previewClaim(selectedTokenId);
-        pendingTotalTxt = preview.pendingAmount ? preview.pendingAmount.toString() : "0";
-        claimTxt = preview.allowed
-          ? "READY"
-          : (Number(preview.secondsRemaining || 0) > 0
-              ? `in ${formatDuration(Number(preview.secondsRemaining))}`
-              : "Not ready");
-      } catch {}
+        if (farmInfo.startTime > 0) {
+          farmAgeTxt = formatDuration(now - farmInfo.startTime);
+        }
   
-      if (farmInfo.boostExpiry && farmInfo.boostExpiry > now) {
-        boostTxt = "active";
+        try {
+          const preview = await state.farmingV6Contract.previewClaim(selectedTokenId);
+          pendingTotalTxt = preview.pendingAmount ? preview.pendingAmount.toString() : "0";
+          claimTxt = preview.allowed
+            ? "READY"
+            : (Number(preview.secondsRemaining || 0) > 0
+                ? `in ${formatDuration(Number(preview.secondsRemaining))}`
+                : "Not ready");
+        } catch {}
+  
+        if (farmInfo.boostExpiry && farmInfo.boostExpiry > now) {
+          boostTxt = "active";
+        }
       }
+    }
+  
+    if (!v5Active && !v6Active) {
+      farmVersionTxt = "Inactive";
     }
   
     let productionHtml = "";
@@ -807,7 +871,7 @@
         <div class="detail-row"><span class="detail-label">Owner</span><span class="detail-value">${shortenAddress(owner)}</span></div>
         <div class="detail-row"><span class="detail-label">Revealed</span><span class="detail-value">${token.revealed ? "✅" : "❌"}</span></div>
         ${rarityDisplay}
-        <div class="detail-row"><span class="detail-label">Farming (V6)</span><span class="detail-value">${v6Active ? "Active" : "Inactive"}</span></div>
+        <div class="detail-row"><span class="detail-label">Farming</span><span class="detail-value">${farmVersionTxt}</span></div>
         <div class="detail-row"><span class="detail-label">Farm age</span><span class="detail-value">${farmAgeTxt}</span></div>
         <div class="detail-row"><span class="detail-label">Boost</span><span class="detail-value">${boostTxt}</span></div>
         <div class="detail-row"><span class="detail-label">Claim-ready</span><span class="detail-value">${claimTxt}</span></div>
@@ -828,9 +892,16 @@
       await refreshSelectedTargetAttackPreview();
     } else if (state.userAddress && owner && owner.toLowerCase() === state.userAddress.toLowerCase()) {
       let btns = "";
-      if (!token.revealed) btns += `<button class="action-btn" id="revealBtn">🔓 Reveal</button>`;
-      if (!v6Active) btns += `<button class="action-btn" id="startFarmBtn">🌾 Start Farming (V6)</button>`;
-      else {
+  
+      if (!token.revealed) {
+        btns += `<button class="action-btn" id="revealBtn">🔓 Reveal</button>`;
+      }
+  
+      if (v5Active && !v6Active) {
+        btns += `<button class="action-btn boost-btn" id="migrateFarmBtn">🔄 Migrate V5 → V6</button>`;
+      } else if (!v6Active) {
+        btns += `<button class="action-btn" id="startFarmBtn">🌾 Start Farming (V6)</button>`;
+      } else {
         btns += `<button class="action-btn" id="stopFarmBtn">⏹️ Stop</button>`;
         btns += `<button class="action-btn" id="claimBtn">💰 Claim</button>`;
         btns += `<button class="action-btn boost-btn" id="buyBoostBtn">⚡ Buy Boost</button>`;
@@ -838,6 +909,44 @@
   
       if (protectionInput) protectionInput.style.display = "flex";
       if (ownerActionsDiv) ownerActionsDiv.innerHTML = btns;
+    }
+  }
+  
+  /* ==================== MIGRATION ==================== */
+  async function handleMigrateToV6() {
+    if (!selectedTokenId) return;
+  
+    try {
+      if (actionMessage) {
+        actionMessage.innerHTML = `<span class="success">⏳ Migrating V5 → V6...</span>`;
+      }
+  
+      const result = await migrateSingleFarmV5ToV6(selectedTokenId, {
+        claimIfPossible: true,
+        stopOnV5: true,
+        startOnV6: true
+      });
+  
+      if (actionMessage) {
+        actionMessage.innerHTML = `
+          <span class="success">
+            ✅ Migration complete.<br>
+            Claimed on V5: ${result.claimedOnV5 ? "yes" : "no"}<br>
+            Stopped on V5: ${result.stoppedOnV5 ? "yes" : "no"}<br>
+            Started on V6: ${result.startedOnV6 ? "yes" : "no"}
+          </span>
+        `;
+      }
+  
+      await loadData();
+      await loadUserResources();
+      await loadUserAttacks();
+      if (selectedTokenId) await updateSidebar(selectedTokenId);
+    } catch (e) {
+      console.error("handleMigrateToV6 error:", e);
+      if (actionMessage) {
+        actionMessage.innerHTML = `<span class="error">❌ ${e.reason || e.message}</span>`;
+      }
     }
   }
   
@@ -898,6 +1007,15 @@
   
   async function handleStartFarm() {
     if (!selectedTokenId) return;
+  
+    const token = tokens[String(selectedTokenId)];
+    if (token?.farmV5Active) {
+      if (actionMessage) {
+        actionMessage.innerHTML = `<span class="error">❌ This block is still active on V5. Migrate it first.</span>`;
+      }
+      return;
+    }
+  
     await sendTx(
       state.farmingV6Contract.startFarming(selectedTokenId, { gasLimit: 500000 }),
       "Farming started."
@@ -1101,7 +1219,12 @@
               strokeColor = "#9b59b6";
               lineWidth = 3;
             } else if (token.farmActive) {
+              // V6 active
               strokeColor = "#3498db";
+              lineWidth = 3;
+            } else if (token.farmV5Active) {
+              // Legacy V5 active
+              strokeColor = "#ff8c00";
               lineWidth = 3;
             }
           }
@@ -1124,6 +1247,16 @@
           ctx.shadowColor = "#000";
           ctx.shadowBlur = 4;
           ctx.fillText("★", -8, 4);
+          ctx.restore();
+        }
+  
+        // V5-Marker (kleiner Punkt)
+        if (token && token.farmV5Active) {
+          ctx.save();
+          ctx.fillStyle = "#ff8c00";
+          ctx.beginPath();
+          ctx.arc(x + 6, y + 6, 4, 0, Math.PI * 2);
+          ctx.fill();
           ctx.restore();
         }
       }
@@ -1221,7 +1354,9 @@
       html += `Owner: ${shortenAddress(token.owner)}<br>`;
       html += `Status: ${token.revealed ? "Revealed" : "Minted"}`;
   
-      if (token.farmActive) html += " · Farming";
+      if (token.farmActive) html += " · Farming V6";
+      else if (token.farmV5Active) html += " · Farming V5";
+  
       if (token.protectionActive) html += " · Protected";
       if (token.partnerActive) html += " ⭐";
       if (token.rarity !== null) html += ` · ${rarityNames[token.rarity]}`;
@@ -1326,6 +1461,9 @@
       const ok = await connectWalletCore(forceRequest);
       if (!ok) return;
   
+      // Migration-Contracts initialisieren
+      setupLegacyMigrationContracts();
+  
       localStorage.setItem(STORAGE_WALLET_FLAG, "1");
   
       safeText("walletAddress", shortenAddress(state.userAddress));
@@ -1420,6 +1558,7 @@
     if (e.target.id === "buyBoostBtn") await handleBuyBoost();
     if (e.target.id === "protectBtn") await handleProtect();
     if (e.target.id === "attackBtn") await handleAttack();
+    if (e.target.id === "migrateFarmBtn") await handleMigrateToV6();
   });
   
   /* ==================== INIT ==================== */
