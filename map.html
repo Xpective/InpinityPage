@@ -742,8 +742,8 @@
       <div class="legend-header" id="dragHandle">
         <h3>🔷 Block Control <span class="v6-badge">V6</span></h3>
         <div class="legend-controls">
-          <button id="collapseBtn" type="button" aria-label="Collapse panel">−</button>
-          <button id="resetPosBtn" type="button" aria-label="Reset panel position">↺</button>
+          <button id="collapseBtn" type="button" aria-label="Collapse panel" title="Collapse">−</button>
+          <button id="resetPosBtn" type="button" aria-label="Reset panel position" title="Reset position">↺</button>
         </div>
       </div>
 
@@ -855,110 +855,6 @@
       </div>
     </div>
   </div>
-
-  <script>
-    (() => {
-      const panel = document.getElementById("legendPanel");
-      const content = document.getElementById("legendContent");
-      const collapseBtn = document.getElementById("collapseBtn");
-      const resetPosBtn = document.getElementById("resetPosBtn");
-      const dragHandle = document.getElementById("dragHandle");
-      const resizeHandle = document.getElementById("resizeHandle");
-
-      if (!panel || !content) return;
-
-      let isCollapsed = false;
-      let isDragging = false;
-      let isResizing = false;
-      let startX = 0;
-      let startY = 0;
-      let startRight = 20;
-      let startTop = 20;
-      let startWidth = 390;
-
-      function setCollapsed(next) {
-        isCollapsed = !!next;
-        panel.classList.toggle("collapsed", isCollapsed);
-        content.classList.toggle("collapsed", isCollapsed);
-        if (collapseBtn) collapseBtn.textContent = isCollapsed ? "+" : "−";
-      }
-
-      collapseBtn?.addEventListener("click", (e) => {
-        e.stopPropagation();
-        setCollapsed(!isCollapsed);
-      });
-
-      resetPosBtn?.addEventListener("click", (e) => {
-        e.stopPropagation();
-        panel.style.top = "20px";
-        panel.style.right = "20px";
-        panel.style.left = "auto";
-        panel.style.width = window.innerWidth <= 480
-          ? "245px"
-          : window.innerWidth <= 768
-            ? "285px"
-            : "390px";
-      });
-
-      dragHandle?.addEventListener("mousedown", (e) => {
-        if (e.target.closest(".legend-controls")) return;
-        isDragging = true;
-        startX = e.clientX;
-        startY = e.clientY;
-
-        const rect = panel.getBoundingClientRect();
-        panel.style.left = rect.left + "px";
-        panel.style.top = rect.top + "px";
-        panel.style.right = "auto";
-
-        startRight = rect.left;
-        startTop = rect.top;
-
-        document.body.style.userSelect = "none";
-      });
-
-      resizeHandle?.addEventListener("mousedown", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        isResizing = true;
-        startX = e.clientX;
-        startWidth = panel.getBoundingClientRect().width;
-        document.body.style.userSelect = "none";
-      });
-
-      window.addEventListener("mousemove", (e) => {
-        if (isDragging) {
-          const dx = e.clientX - startX;
-          const dy = e.clientY - startY;
-
-          let newLeft = startRight + dx;
-          let newTop = startTop + dy;
-
-          const rect = panel.getBoundingClientRect();
-          const maxLeft = window.innerWidth - rect.width - 8;
-          const maxTop = window.innerHeight - 60;
-
-          newLeft = Math.max(8, Math.min(maxLeft, newLeft));
-          newTop = Math.max(8, Math.min(maxTop, newTop));
-
-          panel.style.left = `${newLeft}px`;
-          panel.style.top = `${newTop}px`;
-        }
-
-        if (isResizing) {
-          const dx = startX - e.clientX;
-          const newWidth = Math.max(245, Math.min(620, startWidth + dx));
-          panel.style.width = `${newWidth}px`;
-        }
-      });
-
-      window.addEventListener("mouseup", () => {
-        isDragging = false;
-        isResizing = false;
-        document.body.style.userSelect = "";
-      });
-    })();
-  </script>
 
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <script type="module" src="./js/map.js"></script>

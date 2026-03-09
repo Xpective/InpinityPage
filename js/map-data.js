@@ -131,30 +131,28 @@
    }
    
    export async function getPreferredAttackerTokenId() {
-     if (!state.userAddress) return null;
-   
-     if (
-       mapState.selectedAttackerTokenId &&
-       isOwnToken(mapState.selectedAttackerTokenId)
-     ) {
-       return parseInt(mapState.selectedAttackerTokenId, 10);
-     }
-   
-     if (
-       mapState.selectedTokenId &&
-       isOwnToken(mapState.selectedTokenId)
-     ) {
-       return parseInt(mapState.selectedTokenId, 10);
-     }
-   
-     const ownTokens = Object.entries(mapState.tokens).filter(([_, t]) =>
-       t.owner && t.owner.toLowerCase() === state.userAddress.toLowerCase()
-     );
-   
-     if (!ownTokens.length) return null;
-   
-     return parseInt(ownTokens[0][0], 10);
-   }
+    if (!state.userAddress) return null;
+  
+    if (
+      mapState.selectedAttackAttackerTokenId &&
+      isOwnToken(mapState.selectedAttackAttackerTokenId)
+    ) {
+      return parseInt(mapState.selectedAttackAttackerTokenId, 10);
+    }
+  
+    if (mapState.selectedTokenId && isOwnToken(mapState.selectedTokenId)) {
+      return parseInt(mapState.selectedTokenId, 10);
+    }
+  
+    const ownTokens = Object.entries(mapState.tokens).filter(([_, t]) =>
+      t.owner && t.owner.toLowerCase() === state.userAddress.toLowerCase()
+    );
+  
+    if (!ownTokens.length) return null;
+  
+    mapState.selectedAttackAttackerTokenId = String(ownTokens[0][0]);
+    return parseInt(ownTokens[0][0], 10);
+  }
    
    export function getProduction(rarity) {
      const p = {};

@@ -33,7 +33,7 @@
    
      selectedTokenId: null,
      selectedTokenOwner: null,
-     selectedAttackerTokenId: null,
+     selectedAttackAttackerTokenId: null,
    
      attacksTicker: null,
      attacksPoller: null,
@@ -50,7 +50,17 @@
    
      touchStartX: 0,
      touchStartY: 0,
-     touchMoved: false
+     touchMoved: false,
+   
+     legendCollapsed: false,
+     legendDragActive: false,
+     legendResizeActive: false,
+     legendDragStartX: 0,
+     legendDragStartY: 0,
+     legendResizeStartX: 0,
+     legendPanelStartLeft: 0,
+     legendPanelStartTop: 0,
+     legendPanelStartWidth: 390
    };
    
    export function getMapDom() {
@@ -61,6 +71,13 @@
        ctx: canvas?.getContext("2d") || null,
        container: byId("canvasContainer"),
        tooltip: byId("tooltip"),
+   
+       legendPanel: byId("legendPanel"),
+       legendContent: byId("legendContent"),
+       collapseBtn: byId("collapseBtn"),
+       resetPosBtn: byId("resetPosBtn"),
+       dragHandle: byId("dragHandle"),
+       resizeHandle: byId("resizeHandle"),
    
        blockDetailDiv: byId("blockDetail"),
        actionPanel: byId("actionPanel"),

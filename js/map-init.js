@@ -8,9 +8,15 @@
    import { connectWalletCore, clearContracts } from "./contracts.js";
    import { setupLegacyMigrationContracts } from "./migration.js";
    import { mapState } from "./map-state.js";
-   import { initReadOnly, loadData, loadUserResources, loadUserAttacks } from "./map-data.js";
+   import {
+     initReadOnly,
+     loadMapData,
+     loadMapUserResources,
+     loadMapUserAttacks
+   } from "./map-data.js";
    import { bindMapRenderEvents, resizeCanvas, drawPyramid } from "./map-render.js";
    import { refreshSelectedTargetAttackPreview } from "./map-selection.js";
+   import { initMapUI, populateAttackerSelect } from "./map-ui.js";
    import {
      handleReveal,
      handleStartFarm,
@@ -43,26 +49,28 @@
        safeText("connectBtn", "Connected");
    
        await Promise.all([
-         loadData(),
-         loadUserResources(),
-         loadUserAttacks()
+         loadMapData(),
+         loadMapUserResources(),
+         loadMapUserAttacks()
        ]);
    
+       populateAttackerSelect();
        drawPyramid();
    
        if (!mapState.attacksPoller) {
-         mapState.attacksPoller = setInterval(() => loadUserAttacks(), 30000);
+         mapState.attacksPoller = setInterval(() => loadMapUserAttacks(), 30000);
        }
    
        if (!mapState.dataPoller) {
          mapState.dataPoller = setInterval(async () => {
-           await loadData();
+           await loadMapData();
+           populateAttackerSelect();
          }, 30000);
        }
    
        debugLog("Map wallet connected", state.userAddress);
      } catch (err) {
-       alert("Connection error: " + (err.reason || err.message || err));
+       alert("Connection error: " + (err?.reason || err?.message || err));
        clearContracts();
      } finally {
        mapState.isConnecting = false;
@@ -95,8 +103,11 @@
      resizeCanvas();
      bindMapRenderEvents();
      bindMapEvents();
+     initMapUI();
    
-     await loadData();
+     await loadMapData();
+     populateAttackerSelect();
+     drawPyramid();
    
      const shouldReconnect = localStorage.getItem(STORAGE_WALLET_FLAG) === "1";
      if (shouldReconnect) {
