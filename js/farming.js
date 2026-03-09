@@ -216,7 +216,7 @@
        msgDiv.innerHTML = `<span class="success">⏳ Migrating V5 → V6...</span>`;
    
        const result = await migrateSingleFarmV5ToV6(state.selectedBlock.tokenId, {
-         claimIfPossible: false,
+         claimIfPossible: true,
          stopOnV5: true,
          startOnV6: true
        });
@@ -274,7 +274,7 @@
        msgDiv.innerHTML = `<span class="success">⏳ Migrating ${toMigrate.length} V5 farms...</span>`;
    
        const results = await migrateManyFarmsV5ToV6(toMigrate, {
-         claimIfPossible: false,
+         claimIfPossible: true,
          stopOnV5: true,
          startOnV6: true
        });
