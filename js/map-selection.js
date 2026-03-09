@@ -22,7 +22,6 @@
      getReadOnlyNFTContract
    } from "./map-data.js";
    import { populateAttackerSelect } from "./map-ui.js";
-
    
    const blockDetailDiv = byId("blockDetail");
    const actionPanel = byId("actionPanel");
@@ -72,32 +71,7 @@
      const attackResourceEl = byId("attackResource");
      const attackBtn = byId("attackBtn");
      const pirateBoostStatusEl = byId("pirateBoostStatus");
-const pirateBoostExpiryEl = byId("pirateBoostExpiry");
-
-if (attackerTokenId && state.piratesV6Contract) {
-  try {
-    const hasBoost = await state.piratesV6Contract.hasPirateBoost(attackerTokenId);
-    const expiry = await state.piratesV6Contract.getPirateBoostExpiry(attackerTokenId);
-    const expiryNum = Number(expiry || 0);
-    const now = Math.floor(Date.now() / 1000);
-
-    if (pirateBoostInput) pirateBoostInput.style.display = "flex";
-    if (pirateBoostStatusEl) pirateBoostStatusEl.innerText = hasBoost ? "✅ Active" : "❌ Inactive";
-
-    if (pirateBoostExpiryEl) {
-      pirateBoostExpiryEl.innerText =
-        expiryNum > now
-          ? `${formatDuration(expiryNum - now)} left`
-          : "Expired";
-    }
-  } catch {
-    if (pirateBoostInput) pirateBoostInput.style.display = "flex";
-    if (pirateBoostStatusEl) pirateBoostStatusEl.innerText = "⚠️ Unknown";
-    if (pirateBoostExpiryEl) pirateBoostExpiryEl.innerText = "—";
-  }
-} else {
-  if (pirateBoostInput) pirateBoostInput.style.display = "none";
-}
+     const pirateBoostExpiryEl = byId("pirateBoostExpiry");
    
      const token = tokens[mapState.selectedTokenId];
    
@@ -108,6 +82,7 @@ if (attackerTokenId && state.piratesV6Contract) {
        token.owner.toLowerCase() === state.userAddress.toLowerCase()
      ) {
        if (attackInput) attackInput.style.display = "none";
+       if (pirateBoostInput) pirateBoostInput.style.display = "none";
        return;
      }
    
@@ -133,6 +108,31 @@ if (attackerTokenId && state.piratesV6Contract) {
      }
    
      if (attackerBlockEl) attackerBlockEl.innerText = `#${attackerTokenId}`;
+   
+     if (state.piratesV6Contract) {
+       try {
+         const hasBoost = await state.piratesV6Contract.hasPirateBoost(attackerTokenId);
+         const expiry = await state.piratesV6Contract.getPirateBoostExpiry(attackerTokenId);
+         const expiryNum = Number(expiry || 0);
+         const now = Math.floor(Date.now() / 1000);
+   
+         if (pirateBoostInput) pirateBoostInput.style.display = "flex";
+         if (pirateBoostStatusEl) pirateBoostStatusEl.innerText = hasBoost ? "✅ Active" : "❌ Inactive";
+   
+         if (pirateBoostExpiryEl) {
+           pirateBoostExpiryEl.innerText =
+             expiryNum > now
+               ? `${formatDuration(expiryNum - now)} left`
+               : "Expired";
+         }
+       } catch {
+         if (pirateBoostInput) pirateBoostInput.style.display = "flex";
+         if (pirateBoostStatusEl) pirateBoostStatusEl.innerText = "⚠️ Unknown";
+         if (pirateBoostExpiryEl) pirateBoostExpiryEl.innerText = "—";
+       }
+     } else {
+       if (pirateBoostInput) pirateBoostInput.style.display = "none";
+     }
    
      const targetTokenIdNum = parseInt(mapState.selectedTokenId, 10);
      const lootableIds = await getAttackableResourceIds(attackerTokenId, targetTokenIdNum);
