@@ -12,7 +12,9 @@
    import {
      isTokenActiveOnV5,
      migrateSingleFarmV5ToV6,
-     migrateManyFarmsV5ToV6
+     migrateManyFarmsV5ToV6,
+     getFarmingV5Contract,
+     getV5PendingTotal
    } from "./migration.js";
    
    let isMigrationRunning = false;
@@ -143,33 +145,67 @@
    export async function claimSelected() {
      if (!state.selectedBlock) return;
      const msgDiv = getActionMessageDiv();
+     const tokenId = state.selectedBlock.tokenId;
    
      try {
-       const preview = await state.farmingV6Contract.previewClaim(state.selectedBlock.tokenId);
-       if (!preview.allowed) {
-         msgDiv.innerHTML = `<span class="error">❌ Claim not ready. Code ${preview.code}. Wait ${formatDuration(preview.secondsRemaining)}.</span>`;
+       // V5 claim
+       if (state.selectedBlock.activeOnV5 && !state.selectedBlock.farmingActive) {
+         const v5 = getFarmingV5Contract();
+   
+         const preview = await v5.previewClaim(tokenId);
+         if (!preview.allowed) {
+           msgDiv.innerHTML = `<span class="error">❌ V5 claim not ready. Code ${preview.code}. Wait ${formatDuration(preview.secondsRemaining)}.</span>`;
+           return;
+         }
+   
+         const total = await getV5PendingTotal(tokenId);
+         if (total.isZero()) {
+           msgDiv.innerHTML = `<span class="error">❌ Nothing to claim on V5.</span>`;
+           return;
+         }
+   
+         msgDiv.innerHTML = `<span class="success">⏳ Claiming V5 resources... ${total.toString()} total</span>`;
+         const tx = await v5.claimResources(tokenId, { gasLimit: 700000 });
+         debugLog("V5 claim tx", tx.hash);
+         await tx.wait();
+   
+         msgDiv.innerHTML = `<span class="success">💰 V5 resources claimed!</span>`;
+         await loadResourceBalancesOnchain();
+         await refreshSelectedBlockView();
          return;
        }
    
-       const pending = await state.farmingV6Contract.getAllPending(state.selectedBlock.tokenId);
-       let total = ethers.BigNumber.from(0);
-       for (let i = 0; i < pending.length; i++) {
-         total = total.add(pending[i]);
-       }
+       // V6 claim
+       if (state.selectedBlock.farmingActive) {
+         const preview = await state.farmingV6Contract.previewClaim(tokenId);
+         if (!preview.allowed) {
+           msgDiv.innerHTML = `<span class="error">❌ V6 claim not ready. Code ${preview.code}. Wait ${formatDuration(preview.secondsRemaining)}.</span>`;
+           return;
+         }
    
-       if (total.isZero()) {
-         msgDiv.innerHTML = `<span class="error">❌ Nothing to claim.</span>`;
+         const pending = await state.farmingV6Contract.getAllPending(tokenId);
+         let total = ethers.BigNumber.from(0);
+         for (let i = 0; i < pending.length; i++) {
+           total = total.add(pending[i]);
+         }
+   
+         if (total.isZero()) {
+           msgDiv.innerHTML = `<span class="error">❌ Nothing to claim on V6.</span>`;
+           return;
+         }
+   
+         msgDiv.innerHTML = `<span class="success">⏳ Claiming V6 resources... ${total.toString()} total</span>`;
+         const tx = await state.farmingV6Contract.claimResources(tokenId, { gasLimit: 700000 });
+         debugLog("V6 claim tx", tx.hash);
+         await tx.wait();
+   
+         msgDiv.innerHTML = `<span class="success">💰 V6 resources claimed!</span>`;
+         await loadResourceBalancesOnchain();
+         await refreshSelectedBlockView();
          return;
        }
    
-       msgDiv.innerHTML = `<span class="success">⏳ Claiming resources... ${total.toString()} total</span>`;
-       const tx = await state.farmingV6Contract.claimResources(state.selectedBlock.tokenId, { gasLimit: 700000 });
-       debugLog("claim tx", tx.hash);
-       await tx.wait();
-   
-       msgDiv.innerHTML = `<span class="success">💰 Resources claimed!</span>`;
-       await loadResourceBalancesOnchain();
-       await refreshSelectedBlockView();
+       msgDiv.innerHTML = `<span class="error">❌ No active farm to claim from.</span>`;
      } catch (e) {
        console.error("Claim error:", e);
        msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;

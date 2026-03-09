@@ -19,7 +19,7 @@
      buildFarmV6Map,
      buildProtectionMap
    } from "./subgraph.js";
-   import { isTokenActiveOnV5 } from "./migration.js";
+   import { isTokenActiveOnV5, getFarmingV5Contract } from "./migration.js";
    
    export async function loadUserBlocks({ onRevealSelected, onRefreshBlockMarkings } = {}) {
      if (!state.userAddress || !state.nftContract) return;
@@ -238,16 +238,28 @@
      safeDisabled("revealBtn", revealed);
      safeDisabled("farmingStartBtn", farmingActive || activeOnV5);
      safeDisabled("farmingStopBtn", !farmingActive);
-     safeDisabled("claimBtn", !farmingActive);
+     safeDisabled("claimBtn", !(farmingActive || activeOnV5));
      safeDisabled("buyBoostBtn", !farmingActive);
    
      if (farmingActive) {
        try {
          const preview = await state.farmingV6Contract.previewClaim(tokenId);
          if (preview.allowed) {
-           safeText("claimStatus", "Ready");
+           safeText("claimStatus", "Ready (V6)");
          } else {
-           safeText("claimStatus", `in ${formatDuration(preview.secondsRemaining)}`);
+           safeText("claimStatus", `V6 in ${formatDuration(preview.secondsRemaining)}`);
+         }
+       } catch {
+         safeText("claimStatus", "—");
+       }
+     } else if (activeOnV5) {
+       try {
+         const v5 = getFarmingV5Contract();
+         const preview = await v5.previewClaim(tokenId);
+         if (preview.allowed) {
+           safeText("claimStatus", "Ready (V5)");
+         } else {
+           safeText("claimStatus", `V5 in ${formatDuration(preview.secondsRemaining)}`);
          }
        } catch {
          safeText("claimStatus", "—");
