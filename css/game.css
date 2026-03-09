@@ -3,9 +3,9 @@
   --game-accent-strong: var(--secondary-color, #7967A1);
   --game-gold: var(--tertiary-color, #E8E2E6);
   --game-bg: var(--background-color, #452554);
-  --game-text: var(--text-color, #1f0606);
-  --game-text-soft: var(--text-soft, rgba(7, 3, 3, 0.82));
-  --game-text-muted: var(--text-muted, rgba(20, 6, 6, 0.68));
+  --game-text: var(--text-color, #ffffff);
+  --game-text-soft: var(--text-soft, rgba(255, 255, 255, 0.78));
+  --game-text-muted: var(--text-muted, rgba(255, 255, 255, 0.58));
 
   --green-ok: #27ae60;
   --orange-warn: #e67e22;
@@ -15,8 +15,8 @@
   --panel-soft-2: var(--card-bg-soft, rgba(255, 255, 255, 0.05));
   --panel-inner: var(--inner-bg, rgba(255, 255, 255, 0.05));
   --panel-inner-strong: var(--inner-bg-strong, rgba(255, 255, 255, 0.07));
-  --line-soft: var(--panel-border, rgba(255, 255, 255, 0.10));
-  --panel-shadow: var(--panel-shadow, 0 10px 24px rgba(0, 0, 0, 0.22));
+  --line-soft: var(--panel-border, rgba(255, 255, 255, 0.12));
+  --panel-shadow: var(--panel-shadow, 0 10px 24px rgba(0, 0, 0, 0.16));
 
   --game-blue-glow: color-mix(in srgb, var(--game-accent) 28%, transparent);
   --game-gold-glow: color-mix(in srgb, var(--game-gold) 18%, transparent);
@@ -53,11 +53,11 @@ body {
   background:
     linear-gradient(
       135deg,
-      color-mix(in srgb, var(--game-bg) 86%, black 14%),
-      color-mix(in srgb, var(--game-accent-strong) 28%, var(--game-bg) 72%)
+      color-mix(in srgb, var(--primary-color) 88%, black 12%),
+      color-mix(in srgb, var(--secondary-color) 32%, var(--primary-color) 68%)
     ),
-    rgba(0, 0, 0, 0.12);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
+    rgba(0, 0, 0, 0.10);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.20);
   overflow: hidden;
   position: relative;
 }
@@ -284,8 +284,8 @@ body {
 }
 
 .block-card.selected {
-  border: 2px solid var(--game-accent);
-  background: var(--game-accent-soft);
+  border: 2px solid var(--quinary-color);
+  background: color-mix(in srgb, var(--quinary-color) 16%, transparent);
 }
 
 .block-card.farming {
@@ -534,12 +534,8 @@ textarea::placeholder {
 
 .action-button,
 .btn {
-  background: linear-gradient(
-    135deg,
-    var(--game-accent),
-    color-mix(in srgb, var(--game-accent-strong) 65%, var(--game-accent) 35%)
-  );
-  color: white;
+  background: var(--quinary-color);
+  color: #ffffff;
   padding: 0.8rem 1rem;
 }
 
