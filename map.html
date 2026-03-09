@@ -1,32 +1,50 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="basic">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover"
+  />
   <title>INPINITY – Pyramid Map (V6)</title>
 
   <link rel="icon" type="image/png" href="favicon.webp" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
 
-  <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/color.css">
-  <link rel="stylesheet" href="css/layout.css">
-  <link rel="stylesheet" href="css/responsive.css">
-  
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/color.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+
+  <meta
+    name="description"
+    content="Explore the Inpinity Pyramid Map, inspect blocks, farming, protection and V6 pirate attacks directly on the map."
+  />
+  <meta name="theme-color" content="#0b0e12" />
+
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * { box-sizing: border-box; }
 
     html, body {
       width: 100%;
       height: 100%;
+      margin: 0;
       overflow: hidden;
       position: fixed;
       touch-action: pan-x pan-y;
     }
 
     body {
-      font-family: 'Inter', sans-serif;
-      background: #0b0e12;
+      font-family: "Inter", sans-serif;
+      background:
+        radial-gradient(circle at top center, rgba(74, 144, 226, 0.08), transparent 35%),
+        radial-gradient(circle at bottom right, rgba(212, 175, 55, 0.08), transparent 25%),
+        #0b0e12;
       color: #eef2f6;
       display: flex;
       flex-direction: column;
@@ -37,14 +55,15 @@
       flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
-      padding: 0.6rem 2rem;
-      background: rgba(20, 28, 36, 0.9);
+      padding: 0.7rem 1.2rem;
+      background: rgba(16, 24, 32, 0.88);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
-      border-bottom: 1px solid rgba(212, 175, 55, 0.25);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.22);
       z-index: 20;
-      gap: 1rem;
+      gap: 0.9rem;
       flex-shrink: 0;
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22);
     }
 
     .header-left {
@@ -55,93 +74,111 @@
       flex-wrap: wrap;
     }
 
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      min-width: 0;
+    }
+
+    .logo h1 {
+      margin: 0;
+      font-weight: 700;
+      font-size: 1.55rem;
+      background: linear-gradient(135deg, #f5e7c8, #d4af37);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      white-space: nowrap;
+      letter-spacing: 0.02em;
+    }
+
+    .logo span {
+      font-size: 0.88rem;
+      color: #98a2b3;
+      background: rgba(0, 0, 0, 0.28);
+      padding: 0.26rem 0.75rem;
+      border-radius: 999px;
+      border: 1px solid #2f3e4c;
+      white-space: nowrap;
+    }
+
+    .v6-badge {
+      display: inline-flex;
+      align-items: center;
+      background: linear-gradient(135deg, #4a90e2, #2563eb);
+      color: white;
+      padding: 0.18rem 0.48rem;
+      border-radius: 999px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      margin-left: 0.35rem;
+      vertical-align: middle;
+    }
+
     .nav-links {
       display: flex;
-      gap: 1rem;
+      gap: 0.65rem;
       flex-wrap: wrap;
     }
 
     .nav-links a {
       color: #eef2f6;
       text-decoration: none;
-      padding: 0.4rem 1rem;
-      border-radius: 40px;
+      padding: 0.42rem 0.95rem;
+      border-radius: 999px;
       border: 1px solid #3b8b6b;
-      background: rgba(30, 58, 58, 0.5);
-      transition: 0.2s;
-      font-weight: 500;
-      font-size: 0.95rem;
+      background: rgba(30, 58, 58, 0.45);
+      transition: 0.18s ease;
+      font-weight: 600;
+      font-size: 0.92rem;
       white-space: nowrap;
     }
 
     .nav-links a:hover {
       background: #2e6d5e;
       border-color: #d4af37;
-      transform: translateY(-2px);
-    }
-
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 0.8rem;
-      min-width: 0;
-    }
-
-    .logo h1 {
-      font-weight: 600;
-      font-size: 1.7rem;
-      background: linear-gradient(135deg, #f5e7c8, #d4af37);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      white-space: nowrap;
-    }
-
-    .logo span {
-      font-size: 0.9rem;
-      color: #98a2b3;
-      background: rgba(0, 0, 0, 0.3);
-      padding: 0.2rem 0.8rem;
-      border-radius: 40px;
-      border: 1px solid #2f3e4c;
-      white-space: nowrap;
+      transform: translateY(-1px);
     }
 
     .wallet {
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 0.7rem;
       margin-left: auto;
+      flex-wrap: wrap;
     }
 
     .wallet button {
       background: linear-gradient(145deg, #1e3a3a, #1f4a3a);
       border: 1px solid #3b8b6b;
       color: #f0f4fa;
-      padding: 0.5rem 1.5rem;
-      border-radius: 40px;
-      font-weight: 600;
-      font-size: 0.95rem;
+      padding: 0.56rem 1.2rem;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.92rem;
       cursor: pointer;
-      transition: 0.2s;
-      box-shadow: 0 2px 6px rgba(0, 40, 30, 0.5);
+      transition: 0.2s ease;
+      box-shadow: 0 2px 6px rgba(0, 40, 30, 0.45);
       white-space: nowrap;
     }
 
     .wallet button:hover {
       background: #2e6d5e;
       border-color: #d4af37;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 14px rgba(212, 175, 55, 0.3);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 16px rgba(212, 175, 55, 0.18);
     }
 
     #walletAddress {
       background: #1a232c;
-      padding: 0.4rem 1.2rem;
-      border-radius: 40px;
+      padding: 0.42rem 1rem;
+      border-radius: 999px;
       font-size: 0.9rem;
       border: 1px solid #2f4b5c;
       color: #bcd0e0;
       white-space: nowrap;
+      min-width: 120px;
+      text-align: center;
     }
 
     .main {
@@ -150,19 +187,16 @@
       position: relative;
       overflow: hidden;
       width: 100%;
-      height: 100%;
       min-height: 0;
     }
 
     .canvas-container {
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      inset: 0;
       width: 100%;
       height: 100%;
-      background: #0f1318;
+      background:
+        linear-gradient(180deg, rgba(14, 19, 24, 0.98), rgba(9, 13, 18, 1));
       overflow: hidden;
       touch-action: none;
       cursor: grab;
@@ -180,17 +214,17 @@
       background: rgba(20, 30, 40, 0.95);
       backdrop-filter: blur(6px);
       border: 1px solid #d4af37;
+      border-left: 4px solid #d4af37;
       border-radius: 16px;
-      padding: 0.75rem 1.2rem;
+      padding: 0.75rem 1rem;
       font-size: 0.9rem;
       pointer-events: none;
       color: #ecf3fa;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.55);
       z-index: 100;
-      transition: opacity 0.15s;
+      transition: opacity 0.15s ease;
       opacity: 0;
       max-width: 260px;
-      border-left: 4px solid #d4af37;
       line-height: 1.5;
     }
 
@@ -198,43 +232,55 @@
       position: absolute;
       top: 20px;
       right: 20px;
-      width: 380px;
+      width: 390px;
+      max-width: calc(100vw - 20px);
+      max-height: calc(100vh - 40px);
       background: rgba(20, 28, 38, 0.95);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border-radius: 24px;
-      border: 1px solid rgba(212, 175, 55, 0.3);
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(212, 175, 55, 0.28);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.46);
       z-index: 15;
       transition: width 0.2s ease, right 0.2s ease;
-      resize: horizontal;
       overflow: hidden;
       cursor: move;
       user-select: none;
-      max-height: calc(100vh - 40px);
-      overflow-y: auto;
+    }
+
+    .legend-panel .resize-handle {
+      position: absolute;
+      left: -5px;
+      top: 0;
+      bottom: 0;
+      width: 10px;
+      cursor: ew-resize;
+      background: transparent;
+      z-index: 2;
     }
 
     .legend-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 1rem 1.5rem;
+      padding: 1rem 1.2rem;
       border-bottom: 1px solid #2a3a48;
       cursor: move;
-      background: rgba(0, 0, 0, 0.2);
+      background: rgba(0, 0, 0, 0.18);
       border-radius: 24px 24px 0 0;
+      gap: 0.6rem;
     }
 
     .legend-header h3 {
-      font-size: 1.2rem;
+      margin: 0;
+      font-size: 1.14rem;
       color: #d4af37;
-      font-weight: 600;
+      font-weight: 700;
     }
 
     .legend-controls {
       display: flex;
-      gap: 0.5rem;
+      gap: 0.45rem;
     }
 
     .legend-controls button {
@@ -243,13 +289,14 @@
       color: #d4af37;
       width: 30px;
       height: 30px;
-      border-radius: 30px;
+      border-radius: 999px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: 0.2s;
-      font-size: 1.1rem;
+      transition: 0.2s ease;
+      font-size: 1rem;
+      padding: 0;
     }
 
     .legend-controls button:hover {
@@ -259,35 +306,41 @@
     }
 
     .legend-content {
-      padding: 1.2rem 1.5rem;
+      padding: 1rem 1.2rem 1.2rem;
       transition: max-height 0.3s ease, padding 0.3s ease;
-      max-height: 600px;
+      max-height: calc(100vh - 110px);
       overflow-y: auto;
     }
 
     .legend-content.collapsed {
       max-height: 0;
-      padding: 0 1.5rem;
+      padding: 0 1.2rem;
       overflow: hidden;
     }
 
     .detail-card {
       background: #1b2630;
-      border-radius: 20px;
-      padding: 1.2rem;
+      border-radius: 18px;
+      padding: 1rem;
       border: 1px solid #2a3f4a;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.1rem;
     }
 
     .detail-row {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 0.7rem;
-      font-size: 0.95rem;
-      gap: 1rem;
+      gap: 0.8rem;
+      margin-bottom: 0.65rem;
+      font-size: 0.94rem;
     }
 
-    .detail-label { color: #98a9b9; }
+    .detail-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .detail-label {
+      color: #98a9b9;
+    }
 
     .detail-value {
       font-weight: 600;
@@ -296,10 +349,16 @@
       word-break: break-word;
     }
 
+    .rarity-bronze { color: #cd7f32; font-weight: 700; }
+    .rarity-silver { color: #c0c0c0; font-weight: 700; text-shadow: 0 0 5px rgba(255,255,255,0.35); }
+    .rarity-gold { color: #ffd700; font-weight: 700; text-shadow: 0 0 6px rgba(255,215,0,0.35); }
+    .rarity-platinum { color: #e5e4e2; font-weight: 700; text-shadow: 0 0 7px rgba(160,214,255,0.22); }
+    .rarity-diamond { color: #b9f2ff; font-weight: 700; text-shadow: 0 0 10px rgba(0,255,255,0.28); }
+
     .action-buttons {
       display: flex;
       flex-direction: column;
-      gap: 0.8rem;
+      gap: 0.7rem;
       margin: 1rem 0;
     }
 
@@ -307,33 +366,34 @@
       background: linear-gradient(145deg, #2a3f4a, #1b2a33);
       border: 1px solid #3b6b8b;
       color: #eef2f6;
-      padding: 0.8rem;
-      border-radius: 40px;
-      font-weight: 600;
+      padding: 0.8rem 0.9rem;
+      border-radius: 999px;
+      font-weight: 700;
       cursor: pointer;
-      transition: 0.2s;
+      transition: 0.18s ease;
       text-align: center;
+      width: 100%;
     }
 
     .action-btn:hover:not(:disabled) {
       background: #3b6b8b;
       border-color: #d4af37;
-      transform: translateY(-2px);
+      transform: translateY(-1px);
     }
 
     .action-btn:disabled {
-      opacity: 0.4;
+      opacity: 0.45;
       cursor: not-allowed;
     }
 
     .boost-btn {
-      background: linear-gradient(145deg, #ffd70020, #ff8c0020);
+      background: linear-gradient(145deg, rgba(255, 215, 0, 0.12), rgba(255, 140, 0, 0.12));
       border: 1px solid #ff8c00;
-      color: #ff8c00;
+      color: #ffb347;
     }
 
     .boost-btn:hover:not(:disabled) {
-      background: linear-gradient(145deg, #ffd70040, #ff8c0040);
+      background: linear-gradient(145deg, rgba(255, 215, 0, 0.22), rgba(255, 140, 0, 0.22));
       border-color: #ff8c00;
     }
 
@@ -341,13 +401,13 @@
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      margin: 0.8rem 0;
+      margin: 0.75rem 0;
     }
 
     .input-group label {
       font-size: 0.9rem;
       color: #98a9b9;
-      min-width: 70px;
+      min-width: 78px;
     }
 
     .input-group input,
@@ -356,8 +416,8 @@
       background: #0f1a22;
       border: 1px solid #2a3f4a;
       color: white;
-      padding: 0.6rem 1rem;
-      border-radius: 30px;
+      padding: 0.62rem 0.95rem;
+      border-radius: 999px;
       outline: none;
       font-size: 16px;
       min-width: 0;
@@ -366,14 +426,16 @@
     .input-group input:focus,
     .input-group select:focus {
       border-color: #d4af37;
+      box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
     }
 
     .message {
       margin-top: 0.8rem;
-      padding: 0.6rem;
-      border-radius: 30px;
+      padding: 0.75rem 0.9rem;
+      border-radius: 16px;
       text-align: center;
       font-size: 0.9rem;
+      line-height: 1.45;
     }
 
     .success {
@@ -393,25 +455,25 @@
       flex-direction: column;
       gap: 0.5rem;
       margin-top: 0.5rem;
-      max-height: 150px;
+      max-height: 180px;
       overflow-y: auto;
     }
 
     .attack-item {
       background: #0f1a2a;
       border-radius: 16px;
-      padding: 0.5rem 1rem;
+      padding: 0.55rem 0.8rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border: 1px solid #d4af37;
+      border: 1px solid #2b4154;
       font-size: 0.85rem;
-      gap: 0.6rem;
+      gap: 0.55rem;
     }
 
     .attack-actions {
       display: flex;
-      gap: 0.3rem;
+      gap: 0.35rem;
       align-items: center;
     }
 
@@ -419,10 +481,10 @@
       background: #e74c3c;
       border: none;
       color: white;
-      padding: 0.2rem 0.8rem;
-      border-radius: 20px;
+      padding: 0.24rem 0.75rem;
+      border-radius: 999px;
       cursor: pointer;
-      font-weight: 600;
+      font-weight: 700;
       font-size: 0.8rem;
       white-space: nowrap;
     }
@@ -433,32 +495,71 @@
     }
 
     .cancel-attack-btn {
-      background: #dc354520;
+      background: rgba(220, 53, 69, 0.12);
       border: 1px solid #dc3545;
-      color: #ff6b6b;
+      color: #ff7f90;
       font-size: 0.8rem;
-      padding: 0.2rem 0.5rem;
-      border-radius: 20px;
+      padding: 0.22rem 0.5rem;
+      border-radius: 999px;
       cursor: pointer;
     }
 
     .cancel-attack-btn:hover {
-      background: #dc354540;
+      background: rgba(220, 53, 69, 0.24);
+    }
+
+    .resource-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.7rem;
+      font-size: 1rem;
+      padding: 0.42rem 0.5rem;
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .resource-icon {
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
+      margin-right: 10px;
+      flex-shrink: 0;
+    }
+
+    .resource-name {
+      color: #d4af37;
+      margin-right: 8px;
+      min-width: 78px;
+      font-weight: 700;
+    }
+
+    .resource-amount {
+      font-weight: 700;
+      color: #f0f4fa;
+      margin-left: auto;
+    }
+
+    .attack-section {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-top: 0.8rem;
     }
 
     .legend-item {
       display: flex;
       align-items: center;
-      gap: 0.8rem;
-      margin-bottom: 0.8rem;
-      font-size: 0.95rem;
+      gap: 0.75rem;
+      margin-bottom: 0.72rem;
+      font-size: 0.92rem;
+      color: #d9e2ea;
     }
 
     .color-box {
       width: 24px;
       height: 24px;
       border-radius: 6px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.35);
       position: relative;
       border: 1px solid #888;
       flex-shrink: 0;
@@ -487,101 +588,37 @@
       text-shadow: 0 0 5px black;
     }
 
-    .rarity-bronze { color: #cd7f32; font-weight: bold; }
-    .rarity-silver { color: #c0c0c0; font-weight: bold; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
-    .rarity-gold { color: #ffd700; font-weight: bold; text-shadow: 0 0 8px gold; }
-    .rarity-platinum { color: #e5e4e2; font-weight: bold; text-shadow: 0 0 8px #a0d6ff; }
-    .rarity-diamond { color: #b9f2ff; font-weight: bold; text-shadow: 0 0 12px cyan; }
-
     .footer-note {
-      margin-top: 1.5rem;
+      margin-top: 1.2rem;
       font-size: 0.8rem;
       color: #6f7c8a;
       text-align: center;
       border-top: 1px dashed #2a3f4a;
       padding-top: 1rem;
-    }
-
-    .legend-panel .resize-handle {
-      position: absolute;
-      left: -5px;
-      top: 0;
-      bottom: 0;
-      width: 10px;
-      cursor: ew-resize;
-      background: transparent;
-    }
-
-    .resource-icon {
-      width: 32px;
-      height: 32px;
-      object-fit: contain;
-      margin-right: 12px;
-      vertical-align: middle;
-    }
-
-    .resource-row {
-      display: flex;
-      align-items: center;
-      margin-bottom: 0.8rem;
-      font-size: 1.1rem;
-      padding: 0.3rem;
-      border-radius: 8px;
-      background: rgba(0,0,0,0.2);
-    }
-
-    .resource-name {
-      color: #d4af37;
-      margin-right: 8px;
-      min-width: 80px;
-      font-weight: 600;
-    }
-
-    .resource-amount {
-      font-weight: 700;
-      color: #f0f4fa;
-    }
-
-    .attack-section {
-      display: flex;
-      flex-direction: column;
-      gap: 0.8rem;
-      margin-top: 0.8rem;
-    }
-
-    /* V6 Badge */
-    .v6-badge {
-      background: #4a90e2;
-      color: white;
-      padding: 0.2rem 0.5rem;
-      border-radius: 1rem;
-      font-size: 0.7rem;
-      font-weight: 600;
-      margin-left: 0.5rem;
-      display: inline-block;
+      line-height: 1.5;
     }
 
     @media (max-width: 768px) {
       .header {
-        padding: 0.45rem 0.6rem;
+        padding: 0.45rem 0.55rem;
         flex-wrap: nowrap;
-        gap: 0.5rem;
+        gap: 0.45rem;
       }
 
       .header-left {
         flex: 1;
         min-width: 0;
-        gap: 0.5rem;
+        gap: 0.45rem;
         flex-wrap: nowrap;
       }
 
       .logo {
-        gap: 0.45rem;
+        gap: 0.42rem;
         flex-shrink: 0;
       }
 
       .logo h1 {
-        font-size: 1.05rem;
+        font-size: 1.02rem;
       }
 
       .logo span {
@@ -590,26 +627,25 @@
 
       .nav-links {
         display: flex;
-        gap: 0.35rem;
+        gap: 0.3rem;
         flex-wrap: nowrap;
         overflow: hidden;
       }
 
       .nav-links a {
-        padding: 0.28rem 0.55rem;
-        font-size: 0.78rem;
-        border-radius: 999px;
+        padding: 0.28rem 0.54rem;
+        font-size: 0.76rem;
       }
 
       .wallet {
         margin-left: 0;
-        gap: 0.4rem;
+        gap: 0.35rem;
         flex-shrink: 0;
       }
 
       .wallet button {
-        padding: 0.32rem 0.72rem;
-        font-size: 0.78rem;
+        padding: 0.32rem 0.68rem;
+        font-size: 0.76rem;
       }
 
       #walletAddress {
@@ -617,17 +653,15 @@
       }
 
       .legend-panel {
-        width: 280px;
+        width: 285px;
         right: 10px;
         top: 60px;
-        font-size: 0.85rem;
         max-height: calc(100vh - 70px);
       }
 
-      .canvas-container {
-        position: absolute;
-        width: 100%;
-        height: 100%;
+      .legend-content {
+        padding: 0.85rem;
+        max-height: calc(100vh - 120px);
       }
 
       .resource-icon {
@@ -637,47 +671,42 @@
       }
 
       .resource-row {
-        font-size: 0.95rem;
-      }
-
-      .legend-content {
-        padding: 0.8rem;
-        max-height: 400px;
+        font-size: 0.94rem;
       }
     }
 
     @media (max-width: 480px) {
       .header {
-        padding: 0.4rem 0.45rem;
+        padding: 0.38rem 0.42rem;
       }
 
       .logo h1 {
-        font-size: 0.98rem;
+        font-size: 0.95rem;
       }
 
       .nav-links {
-        gap: 0.25rem;
+        gap: 0.22rem;
       }
 
       .nav-links a {
-        padding: 0.24rem 0.48rem;
-        font-size: 0.74rem;
+        padding: 0.22rem 0.42rem;
+        font-size: 0.72rem;
       }
 
       .wallet button {
-        padding: 0.28rem 0.62rem;
-        font-size: 0.74rem;
+        padding: 0.26rem 0.58rem;
+        font-size: 0.72rem;
       }
 
       .legend-panel {
-        width: 240px;
-        right: 5px;
-        top: 55px;
+        width: 245px;
+        right: 6px;
+        top: 56px;
       }
     }
   </style>
 </head>
-<body data-theme="basic">
+<body>
   <div class="header">
     <div class="header-left">
       <div class="logo">
@@ -693,7 +722,7 @@
 
     <div class="wallet">
       <div id="walletAddress">Not connected</div>
-      <button id="connectBtn">Connect</button>
+      <button id="connectBtn" type="button">Connect</button>
     </div>
   </div>
 
@@ -709,43 +738,45 @@
       <div class="legend-header" id="dragHandle">
         <h3>🔷 Block Control <span class="v6-badge">V6</span></h3>
         <div class="legend-controls">
-          <button id="collapseBtn">−</button>
-          <button id="resetPosBtn">↺</button>
+          <button id="collapseBtn" type="button" aria-label="Collapse panel">−</button>
+          <button id="resetPosBtn" type="button" aria-label="Reset panel position">↺</button>
         </div>
       </div>
 
       <div class="legend-content" id="legendContent">
         <div class="detail-card" id="blockDetail">
-          <p style="color: #98a9b9; text-align: center;">Click a block</p>
+          <p style="color:#98a9b9; text-align:center;">Click a block</p>
         </div>
 
-        <div id="actionPanel" style="display: none;">
+        <div id="actionPanel" style="display:none;">
           <div class="action-buttons" id="ownerActions"></div>
 
-          <!-- Boost Options (hidden by default, shown via JS) -->
-          <div id="boostOptions" style="display: none; margin: 1rem 0; padding: 1rem; background: rgba(255,215,0,0.1); border-radius: 0.8rem;">
-            <h4 style="margin-top: 0; color: #ffd700;">Buy Farming Boost</h4>
+          <div
+            id="boostOptions"
+            style="display:none; margin:1rem 0; padding:1rem; background:rgba(255,215,0,0.08); border-radius:0.8rem;"
+          >
+            <h4 style="margin-top:0; color:#ffd700;">Buy Farming Boost</h4>
             <div class="input-group">
-              <label>Days</label>
-              <input type="number" id="boostDays" min="1" max="30" value="7">
+              <label for="boostDays">Days</label>
+              <input type="number" id="boostDays" min="1" max="30" value="7" />
             </div>
-            <button class="action-btn boost-btn" id="confirmBoostBtn">Confirm Boost</button>
-            <p class="info-note" style="margin: 0.5rem 0 0; font-size: 0.8rem; color: #98a9b9;">2x production for selected duration</p>
+            <button class="action-btn boost-btn" id="confirmBoostBtn" type="button">Confirm Boost</button>
+            <p style="margin:0.5rem 0 0; font-size:0.8rem; color:#98a9b9;">2x production for selected duration</p>
           </div>
 
-          <div class="input-group" id="protectionInput" style="display: none;">
-            <label>Protection</label>
+          <div class="input-group" id="protectionInput" style="display:none;">
+            <label for="protectLevel">Protection</label>
             <input type="number" id="protectLevel" min="0" max="50" value="10" />
-            <button class="action-btn" id="protectBtn">Buy</button>
+            <button class="action-btn" id="protectBtn" type="button" style="width:auto; min-width:84px;">Buy</button>
           </div>
 
-          <div id="attackInput" class="attack-section" style="display: none;">
+          <div id="attackInput" class="attack-section" style="display:none;">
             <div class="input-group">
-              <label>Resource</label>
+              <label for="attackResource">Resource</label>
               <select id="attackResource"></select>
             </div>
 
-            <div class="detail-card" id="attackInfoCard" style="margin-top: 0; padding: 0.9rem;">
+            <div class="detail-card" id="attackInfoCard" style="margin-top:0; padding:0.9rem;">
               <div class="detail-row">
                 <span class="detail-label">Attacker block</span>
                 <span class="detail-value" id="attackAttackerBlock">—</span>
@@ -780,27 +811,29 @@
               </div>
             </div>
 
-            <button class="action-btn" id="attackBtn">Attack (V6)</button>
+            <button class="action-btn" id="attackBtn" type="button">Attack (V6)</button>
           </div>
 
           <div id="actionMessage" class="message"></div>
         </div>
 
-        <div style="margin: 1rem 0; border-top: 1px solid #2a3f4a; padding-top: 0.8rem;">
-          <h4 style="color: #d4af37; margin-bottom: 0.5rem;">⚔️ Attacks (V6) <span class="v6-badge">Cancelable</span></h4>
+        <div style="margin:1rem 0; border-top:1px solid #2a3f4a; padding-top:0.8rem;">
+          <h4 style="color:#d4af37; margin-bottom:0.5rem;">
+            ⚔️ Attacks (V6) <span class="v6-badge">Cancelable</span>
+          </h4>
           <div id="userAttacksList" class="attacks-list">
-            <p style="color: #98a9b9;">Connect wallet</p>
+            <p style="color:#98a9b9;">Connect wallet</p>
           </div>
         </div>
 
-        <div style="margin: 1rem 0; border-top: 1px solid #2a3f4a; padding-top: 0.8rem;">
-          <h4 style="color: #d4af37; margin-bottom: 0.5rem;">📦 Resources</h4>
-          <div id="userResources" style="max-height: 200px; overflow-y: auto;">
-            <p style="color: #98a9b9;">Connect wallet</p>
+        <div style="margin:1rem 0; border-top:1px solid #2a3f4a; padding-top:0.8rem;">
+          <h4 style="color:#d4af37; margin-bottom:0.5rem;">📦 Resources</h4>
+          <div id="userResources" style="max-height:220px; overflow-y:auto;">
+            <p style="color:#98a9b9;">Connect wallet</p>
           </div>
         </div>
 
-        <h4 style="color: #d4af37; margin: 1.5rem 0 0.8rem;">Legend</h4>
+        <h4 style="color:#d4af37; margin:1.4rem 0 0.8rem;">Legend</h4>
         <div class="legend-item"><div class="color-box color-gray"></div> Not minted</div>
         <div class="legend-item"><div class="color-box color-green"></div> Minted, not revealed</div>
         <div class="legend-item"><div class="color-box color-bronze"></div> Bronze</div>
@@ -813,25 +846,18 @@
         <div class="legend-item"><div class="color-box color-gold border-purple"></div> Protected</div>
         <div class="legend-item"><div class="color-box color-gold border-black"></div> Under attack</div>
         <div class="legend-item"><div class="color-box color-gold border-red"></div> Attack ready</div>
-        <div class="legend-item"><div class="color-box color-gold" style="position: relative;"><span class="star">★</span></div> Partner block</div>
+        <div class="legend-item"><div class="color-box color-gold" style="position:relative;"><span class="star">★</span></div> Partner block</div>
 
         <div class="footer-note">
           <p>100 rows · 10,000 blocks</p>
           <p>π · φ · V6</p>
-          <p>Map: V6 (FarmingV6 + PiratesV6)</p>
+          <p>Map: FarmingV6 + PiratesV6</p>
         </div>
       </div>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-  <!-- V6 Modules -->
-  <script type="module" src="./js/config.js"></script>
-  <script type="module" src="./js/abis.js"></script>
-  <script type="module" src="./js/state.js"></script>
-  <script type="module" src="./js/utils.js"></script>
-  <script type="module" src="./js/contracts.js"></script>
-  <script type="module" src="./js/subgraph.js"></script>
   <script type="module" src="./js/map.js"></script>
 </body>
 </html>
