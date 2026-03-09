@@ -7,7 +7,7 @@ export const PIRATES_V5_ADDRESS = "0xe76b03A848dE22DdbbF34994e650d2E887426879";
 
 export const FARMING_V5_ABI = [
   "function getFarmState(uint256 tokenId) view returns ((uint256 startTime,uint256 lastAccrualTime,uint256 lastClaimTime,uint256 boostExpiry,uint256 stopTime,bool isActive))",
-  "function previewClaim(uint256 tokenId) view returns ((uint8 code,bool allowed,uint256 pendingAmount,uint256 stealAmount,uint256 travelTime,uint256 remainingAttacksToday,uint256 protectionLevel,uint256 effectiveStealPercent,uint256 secondsRemaining))" ,
+  "function previewClaim(uint256 tokenId) view returns ((uint8 code,bool allowed,uint256 pendingAmount,uint256 travelTime,uint256 remainingAttacksToday,uint256 protectionLevel,uint256 effectiveStealPercent,uint256 secondsRemaining))",
   "function claimResources(uint256 tokenId) external",
   "function stopFarming(uint256 tokenId) external",
   "function getAllPending(uint256 tokenId) view returns (uint256[10])"
@@ -122,6 +122,22 @@ export function clearLegacyMigrationContracts() {
 export function getFarmingV5Contract() {
   if (!farmingV5Contract) setupLegacyMigrationContracts();
   return farmingV5Contract;
+}
+
+export async function previewV5Claim(tokenId) {
+  const c = getFarmingV5Contract();
+  const result = await c.previewClaim(tokenId);
+
+  return {
+    code: Number(result.code ?? 0),
+    allowed: !!result.allowed,
+    pendingAmount: result.pendingAmount ?? bn0(),
+    travelTime: result.travelTime ?? bn0(),
+    remainingAttacksToday: Number(result.remainingAttacksToday ?? 0),
+    protectionLevel: Number(result.protectionLevel ?? 0),
+    effectiveStealPercent: Number(result.effectiveStealPercent ?? 0),
+    secondsRemaining: Number(result.secondsRemaining ?? 0)
+  };
 }
 
 export async function getV5FarmState(tokenId) {
@@ -268,7 +284,7 @@ export async function migrateSingleFarmV5ToV6(tokenId, options = {}) {
     try {
       debugLog("V5 claim preview - reading", { tokenId: String(tokenId) });
 
-      const preview = await v5.previewClaim(tokenId);
+      const preview = await previewV5Claim(tokenId);
       const totalPending = await getV5PendingTotal(tokenId);
 
       debugLog("V5 claim preview - result", {
