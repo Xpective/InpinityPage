@@ -325,6 +325,9 @@ export async function migrateSingleFarmV5ToV6(tokenId, options = {}) {
   debugLog("Migration complete", result);
   return result;
 }
+export function clearLegacyMigrationContracts() {
+  farmingV5Contract = null;
+}
 
 export async function migrateManyFarmsV5ToV6(tokenIds = [], options = {}) {
   const results = [];

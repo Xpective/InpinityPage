@@ -17,7 +17,9 @@
        safeText("balanceInpi", `${inpiTxt} INPI`);
        safeText("userInpi", inpiTxt);
      } catch (e) {
-       console.warn("INPI balance failed:", e.message);
+       console.warn("Failed to load INPI balance:", e.message);
+       safeText("balanceInpi", "0 INPI");
+       safeText("userInpi", "0");
      }
    
      try {
@@ -26,7 +28,9 @@
        safeText("balancePit", `${pitTxt} PIT`);
        safeText("userPitrone", pitTxt);
      } catch (e) {
-       console.warn("Pitrone balance failed:", e.message);
+       console.warn("Failed to load Pitrone balance:", e.message);
+       safeText("balancePit", "0 PIT");
+       safeText("userPitrone", "0");
      }
    }
    
@@ -43,6 +47,9 @@
        const aPit = await state.pitroneContract.availablePitrone();
        safeText("poolPit", ethers.utils.formatEther(aPit).split(".")[0]);
      } catch (e) {
-       console.warn("Pool info failed:", e.message);
+       console.warn("Failed to load pool info:", e.message);
+       safeText("exchangeRate", "—");
+       safeText("poolInpi", "0");
+       safeText("poolPit", "0");
      }
    }
