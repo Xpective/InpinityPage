@@ -363,10 +363,6 @@
       font-weight: 600;
     }
 
-    .reveal-block-btn:hover {
-      filter: brightness(1.05);
-    }
-
     .block-actions-container {
       width: 100%;
       background: linear-gradient(180deg, rgba(13, 22, 33, 0.9), rgba(9, 16, 24, 0.88));
@@ -478,10 +474,6 @@
       color: #ffb347;
     }
 
-    .boost-btn:hover {
-      background: linear-gradient(135deg, rgba(255, 215, 0, 0.28), rgba(255, 140, 0, 0.28));
-    }
-
     .protection-input-group {
       display: grid;
       grid-template-columns: 1fr 1fr auto auto;
@@ -518,12 +510,6 @@
       box-sizing: border-box;
     }
 
-    input:focus,
-    select:focus {
-      border-color: var(--gold);
-      box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.12);
-    }
-
     .payment-options {
       display: flex;
       flex-wrap: wrap;
@@ -557,16 +543,6 @@
       background: linear-gradient(135deg, #d4af37, #b88916);
       color: #120e08;
       padding: 0.8rem 1rem;
-    }
-
-    .action-button:hover,
-    .btn:hover,
-    .random-btn:hover,
-    .btn-small:hover,
-    .execute-btn:hover,
-    .cancel-attack-btn:hover {
-      transform: translateY(-1px);
-      filter: brightness(1.04);
     }
 
     .btn-secondary {
@@ -952,22 +928,13 @@
               <div id="blockResources" class="resources-grid"></div>
               <div id="selectedBlockMeta" class="info-note" style="display:none; margin-top:0.8rem;"></div>
             </div>
+
             <div style="display:flex; gap:0.6rem; flex-wrap:wrap; margin-bottom:1rem;">
-              <button
-                class="btn btn-small boost-btn"
-                id="migrateFarmBtn"
-                type="button"
-                style="display:none;"
-              >
+              <button class="btn btn-small boost-btn" id="migrateFarmBtn" type="button" style="display:none;">
                 🔄 Migrate selected V5 Farm to V6
               </button>
-            
-              <button
-                class="btn btn-small boost-btn"
-                id="migrateAllV5Btn"
-                type="button"
-                style="display:none;"
-              >
+
+              <button class="btn btn-small boost-btn" id="migrateAllV5Btn" type="button" style="display:none;">
                 🔄 Migrate all V5 Farms to V6
               </button>
             </div>
