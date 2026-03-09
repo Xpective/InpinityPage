@@ -91,30 +91,28 @@ function setWalletUIDisconnected() {
   safeDisabled("disconnectWallet", true);
 
   const blocksGrid = byId("blocksGrid");
+  const userAttacksList = byId("userAttacksList");
+  const userResourcesEl = byId("userResources");
+  const selectedBlockInfo = byId("selectedBlockInfo");
+  const blockActionsContainer = byId("blockActions");  const noBlockSelected = byId("noBlockSelected");
+
   if (blocksGrid) {
     blocksGrid.innerHTML = `<p class="empty-state">Connect wallet to see your blocks.</p>`;
   }
 
-  const userAttacksList = byId("userAttacksList");
   if (userAttacksList) {
     userAttacksList.innerHTML = `<p class="empty-state">Connect wallet to see your attacks.</p>`;
   }
 
-  const userResourcesEl = byId("userResources");
   if (userResourcesEl) {
     userResourcesEl.innerHTML = `<p class="empty-state">Connect wallet to see your resource tokens.</p>`;
   }
-
-  const selectedBlockInfo = byId("selectedBlockInfo");
-  const blockActionsContainer = byId("blockActionsContainer");
 
   if (selectedBlockInfo) selectedBlockInfo.style.display = "none";
   if (blockActionsContainer) blockActionsContainer.style.display = "none";
   if (noBlockSelected) noBlockSelected.style.display = "block";
 
   safeValue("protectTokenId", "");
-  
-  // Status-Texte zurücksetzen
   safeText("revealStatus", "Hidden");
   safeText("farmingStatus", "Inactive");
   safeText("claimStatus", "—");
@@ -183,7 +181,7 @@ async function updatePoolInfo() {
 
     const aPit = await state.pitroneContract.availablePitrone();
     safeText("poolPit", ethers.utils.formatEther(aPit).split(".")[0]);
-  } catch { }
+  } catch { } is
 }
 
 /* ==================== RESOURCES ==================== */
