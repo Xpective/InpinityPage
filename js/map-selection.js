@@ -22,6 +22,7 @@
      getReadOnlyNFTContract
    } from "./map-data.js";
    import { populateAttackerSelect } from "./map-ui.js";
+
    
    const blockDetailDiv = byId("blockDetail");
    const actionPanel = byId("actionPanel");
@@ -29,6 +30,7 @@
    const protectionInput = byId("protectionInput");
    const attackInput = byId("attackInput");
    const actionMessage = byId("actionMessage");
+   const pirateBoostInput = byId("pirateBoostInput");
    
    function getProduction(rarity) {
      const p = {};
@@ -53,6 +55,7 @@
      if (protectionInput) protectionInput.style.display = "none";
      if (attackInput) attackInput.style.display = "none";
      if (actionMessage) actionMessage.innerHTML = "";
+     if (pirateBoostInput) pirateBoostInput.style.display = "none";
    }
    
    export async function refreshSelectedTargetAttackPreview() {
@@ -68,6 +71,33 @@
      const stealPercentEl = byId("attackStealPercent");
      const attackResourceEl = byId("attackResource");
      const attackBtn = byId("attackBtn");
+     const pirateBoostStatusEl = byId("pirateBoostStatus");
+const pirateBoostExpiryEl = byId("pirateBoostExpiry");
+
+if (attackerTokenId && state.piratesV6Contract) {
+  try {
+    const hasBoost = await state.piratesV6Contract.hasPirateBoost(attackerTokenId);
+    const expiry = await state.piratesV6Contract.getPirateBoostExpiry(attackerTokenId);
+    const expiryNum = Number(expiry || 0);
+    const now = Math.floor(Date.now() / 1000);
+
+    if (pirateBoostInput) pirateBoostInput.style.display = "flex";
+    if (pirateBoostStatusEl) pirateBoostStatusEl.innerText = hasBoost ? "✅ Active" : "❌ Inactive";
+
+    if (pirateBoostExpiryEl) {
+      pirateBoostExpiryEl.innerText =
+        expiryNum > now
+          ? `${formatDuration(expiryNum - now)} left`
+          : "Expired";
+    }
+  } catch {
+    if (pirateBoostInput) pirateBoostInput.style.display = "flex";
+    if (pirateBoostStatusEl) pirateBoostStatusEl.innerText = "⚠️ Unknown";
+    if (pirateBoostExpiryEl) pirateBoostExpiryEl.innerText = "—";
+  }
+} else {
+  if (pirateBoostInput) pirateBoostInput.style.display = "none";
+}
    
      const token = tokens[mapState.selectedTokenId];
    
@@ -98,6 +128,7 @@
        if (stealPercentEl) stealPercentEl.innerText = "—";
        populateAttackResourceSelect([]);
        if (attackBtn) attackBtn.disabled = true;
+       if (pirateBoostInput) pirateBoostInput.style.display = "none";
        return;
      }
    

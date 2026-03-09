@@ -27,7 +27,8 @@
     handleAttack,
     handleMigrateToV6,
     executeAttack,
-    cancelAttack
+    cancelAttack,
+    handleBuyPirateBoost
    } from "./map-actions.js";
    
    async function connectWallet(forceRequest = true) {
@@ -78,6 +79,15 @@
        mapState.isConnecting = false;
      }
    }
+   byId("pirateBoostDays")?.addEventListener("change", () => {
+    const days = parseInt(byId("pirateBoostDays")?.value || "1", 10);
+    const costEl = byId("pirateBoostCost");
+    if (costEl) {
+      costEl.innerText = `${days * 100} PITRONE`;
+    }
+  });
+
+   
    
    function bindMapEvents() {
     byId("connectBtn")?.addEventListener("click", () => connectWallet(true));
@@ -91,6 +101,8 @@
     document.addEventListener("click", async (e) => {
       const target = e.target.closest("button");
       if (!target) return;
+
+      if (e.target.id === "buyPirateBoostBtn") await handleBuyPirateBoost();
   
       if (target.id === "revealBtn") return await handleReveal();
       if (target.id === "startFarmBtn") return await handleStartFarm();

@@ -20,7 +20,8 @@
    } from "./map-data.js";
    import { refreshSelectedTargetAttackPreview, updateSidebar } from "./map-selection.js";
    import { migrateSingleFarmV5ToV6 } from "./migration.js";
-   
+   import { PITRONE_ADDRESS } from "./config.js";
+
    const actionMessage = byId("actionMessage");
    
    async function refreshAfterTx() {
@@ -49,6 +50,50 @@
      }
    }
    
+   export async function handleBuyPirateBoost() {
+    if (!state.userAddress) return;
+  
+    const attackerTokenId = await getPreferredAttackerTokenId();
+    if (!attackerTokenId) {
+      if (actionMessage) {
+        actionMessage.innerHTML = `<span class="error">❌ No attacker block selected.</span>`;
+      }
+      return;
+    }
+  
+    const days = parseInt(byId("pirateBoostDays")?.value || "1", 10);
+    if (!Number.isFinite(days) || days < 1 || days > 10) {
+      if (actionMessage) {
+        actionMessage.innerHTML = `<span class="error">❌ Invalid pirate boost duration.</span>`;
+      }
+      return;
+    }
+  
+    try {
+      const cost = ethers.utils.parseEther(String(days * 100));
+      const allowance = await state.pitroneContract.allowance(state.userAddress, state.piratesV6Contract.address);
+  
+      if (allowance.lt(cost)) {
+        if (actionMessage) {
+          actionMessage.innerHTML = `<span class="success">⏳ Approving PITRONE...</span>`;
+        }
+        const approveTx = await state.pitroneContract.approve(state.piratesV6Contract.address, cost);
+        await approveTx.wait();
+      }
+  
+      await sendTx(
+        state.piratesV6Contract.buyPirateBoost(attackerTokenId, days, { gasLimit: 350000 }),
+        `Pirate boost bought for ${days} day(s)!`
+      );
+  
+      await refreshSelectedTargetAttackPreview();
+    } catch (e) {
+      if (actionMessage) {
+        actionMessage.innerHTML = `<span class="error">❌ ${e.reason || e.message}</span>`;
+      }
+    }
+  }
+  
    export async function handleMigrateToV6() {
      if (!mapState.selectedTokenId) return;
    
