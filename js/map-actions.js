@@ -23,6 +23,63 @@
    import { PITRONE_ADDRESS } from "./config.js";
 
    const actionMessage = byId("actionMessage");
+
+   export function updateMapPirateBoostCostLabels() {
+    const daysInput = byId("pirateBoostDays");
+    const info = byId("pirateBoostCostInfo");
+  
+    if (!info) return;
+  
+    let days = parseInt(daysInput?.value, 10);
+    if (!Number.isFinite(days)) days = 7;
+  
+    // PiratesV6: max 10 Tage
+    days = Math.max(1, Math.min(10, days));
+  
+    if (daysInput && String(days) !== daysInput.value) {
+      daysInput.value = String(days);
+    }
+  
+    const pricePerDay = 100;
+    const total = days * pricePerDay;
+  
+    info.style.display = "block";
+    info.innerHTML = `
+      <span class="success">
+        Pirate Boost: ${pricePerDay} PIT / day<br>
+        Total: ${total} PIT for ${days} day${days > 1 ? "s" : ""}
+      </span>
+    `;
+  }
+
+   export function updateMapFarmBoostCostLabels() {
+    const daysInput = byId("boostDays");
+    const info = byId("farmBoostCostInfo");
+  
+    if (!info) return;
+  
+    let days = parseInt(daysInput?.value, 10);
+    if (!Number.isFinite(days)) days = 7;
+  
+    // FarmingV6 laut deinem Setup: max 7 Tage
+    days = Math.max(1, Math.min(7, days));
+  
+    if (daysInput && String(days) !== daysInput.value) {
+      daysInput.value = String(days);
+    }
+  
+    // Falls FarmingV6 aktuell 10 INPI pro Tag nutzt:
+    const pricePerDay = 10;
+    const total = days * pricePerDay;
+  
+    info.style.display = "block";
+    info.innerHTML = `
+      <span class="success">
+        Farm Boost: ${pricePerDay} INPI / day<br>
+        Total: ${total} INPI for ${days} day${days > 1 ? "s" : ""}
+      </span>
+    `;
+  }
    
    async function refreshAfterTx() {
      await loadData();
@@ -226,21 +283,59 @@
      }
    }
    
-   export async function handleBuyBoost() {
-     if (!mapState.selectedTokenId) return;
-   
-     const days = parseInt(byId("boostDays")?.value, 10);
-     if (!Number.isFinite(days) || days < 1 || days > 30) {
-       alert("Please enter valid days (1-30)");
-       return;
-     }
-   
-     await sendTx(
-       state.farmingV6Contract.buyBoost(mapState.selectedTokenId, days, { gasLimit: 300000 }),
-       `Boost activated for ${days} days!`
-     );
+   export async function handleBuyPirateBoost() {
+    const msgDiv = byId("actionMessage");
+    if (!msgDiv) return;
+  
+    const attackerTokenId =
+      mapState.selectedAttackAttackerTokenId ||
+      mapState.selectedTokenId;
+  
+    if (!attackerTokenId) {
+      msgDiv.innerHTML = `<span class="error">❌ No attacker block selected.</span>`;
+      return;
+    }
+  
+    const daysInput = byId("pirateBoostDays");
+    let days = parseInt(daysInput?.value, 10);
+  
+    if (!Number.isFinite(days)) days = 7;
+    days = Math.max(1, Math.min(10, days));
+  
+    if (daysInput) daysInput.value = String(days);
+  
+    const pricePerDay = 100;
+    const total = days * pricePerDay;
+  
+    try {
+      msgDiv.innerHTML = `
+        <span class="success">
+          ⏳ Buying Pirate Boost...<br>
+          Attacker Block: #${attackerTokenId}<br>
+          Days: ${days}<br>
+          Cost: ${total} PIT
+        </span>
+      `;
+  
+      const tx = await state.piratesV6Contract.buyPirateBoost(attackerTokenId, days, {
+        gasLimit: 350000
+      });
+  
+      await tx.wait();
+  
+      msgDiv.innerHTML = `
+        <span class="success">
+          ✅ Pirate Boost activated!<br>
+          Attacker Block: #${attackerTokenId}<br>
+          Days: ${days}<br>
+          Paid: ${total} PIT
+        </span>
+      `;
+    } catch (e) {
+      console.error("handleBuyPirateBoost error:", e);
+      msgDiv.innerHTML = `<span class="error">❌ ${e.reason || e.message}</span>`;
+    }
    }
-   
    export async function handleProtect() {
      if (!mapState.selectedTokenId || !state.userAddress) return;
    

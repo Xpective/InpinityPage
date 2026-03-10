@@ -28,6 +28,8 @@
     handleMigrateToV6,
     executeAttack,
     cancelAttack,
+    updateMapFarmBoostCostLabels,
+    updateMapPirateBoostCostLabels,
     handleBuyPirateBoost
    } from "./map-actions.js";
    
@@ -91,6 +93,9 @@
    
    function bindMapEvents() {
     byId("connectBtn")?.addEventListener("click", () => connectWallet(true));
+    byId("boostDays")?.addEventListener("input", updateMapFarmBoostCostLabels);
+    byId("pirateBoostDays")?.addEventListener("input", updateMapPirateBoostCostLabels);
+    
   
     byId("attackResource")?.addEventListener("change", async () => {
       if (mapState.selectedTokenId) {
@@ -149,6 +154,8 @@
      bindMapRenderEvents();
      bindMapEvents();
      initMapUI();
+     updateMapFarmBoostCostLabels();
+     updateMapPirateBoostCostLabels();
    
      await loadMapData();
      populateAttackerSelect();
