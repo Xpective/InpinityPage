@@ -147,116 +147,134 @@
    }
    
    export async function claimSelected() {
-     if (!state.selectedBlock) return;
-   
-     const msgDiv = getActionMessageDiv();
-     const tokenId = state.selectedBlock.tokenId;
-   
-     try {
-       // =========================
-       // V5 CLAIM
-       // =========================
-       if (state.selectedBlock.activeOnV5 && !state.selectedBlock.farmingActive) {
-         const v5 = getFarmingV5Contract();
-         let preview = null;
-   
-         try {
-           preview = await v5.previewClaim(tokenId);
-         } catch (e) {
-           console.error("V5 previewClaim error:", e);
-           msgDiv.innerHTML = `<span class="error">❌ V5 preview failed: ${friendlyErrorMessage(e)}</span>`;
-           return;
-         }
-   
-         if (!preview || !preview.allowed) {
-           const code = preview?.code ?? "?";
-           const secondsRemaining = Number(preview?.secondsRemaining || 0);
-           msgDiv.innerHTML = `<span class="error">❌ V5 claim not ready. Code ${code}. Wait ${formatDuration(secondsRemaining)}.</span>`;
-           return;
-         }
-   
-         let total = null;
-         try {
-           total = await getV5PendingTotal(tokenId);
-         } catch (e) {
-           console.error("V5 pending total error:", e);
-           msgDiv.innerHTML = `<span class="error">❌ Could not read V5 pending rewards: ${friendlyErrorMessage(e)}</span>`;
-           return;
-         }
-   
-         if (!total || total.isZero()) {
-           msgDiv.innerHTML = `<span class="error">❌ Nothing to claim on V5.</span>`;
-           return;
-         }
-   
-         msgDiv.innerHTML = `<span class="success">⏳ Claiming V5 resources... ${total.toString()} total</span>`;
-         const tx = await v5.claimResources(tokenId, { gasLimit: 700000 });
-         debugLog("V5 claim tx", tx.hash);
-         await tx.wait();
-   
-         msgDiv.innerHTML = `<span class="success">💰 V5 resources claimed!</span>`;
-         await loadResourceBalancesOnchain();
-         await refreshSelectedBlockView();
-         return;
-       }
-   
-       // =========================
-       // V6 CLAIM
-       // =========================
-       if (state.selectedBlock.farmingActive) {
-         let preview = null;
-   
-         try {
-           preview = await state.farmingV6Contract.previewClaim(tokenId);
-         } catch (e) {
-           console.error("V6 previewClaim error:", e);
-           msgDiv.innerHTML = `<span class="error">❌ V6 preview failed: ${friendlyErrorMessage(e)}</span>`;
-           return;
-         }
-   
-         if (!preview || !preview.allowed) {
-           const code = preview?.code ?? "?";
-           const secondsRemaining = Number(preview?.secondsRemaining || 0);
-           msgDiv.innerHTML = `<span class="error">❌ V6 claim not ready. Code ${code}. Wait ${formatDuration(secondsRemaining)}.</span>`;
-           return;
-         }
-   
-         let pending;
-         try {
-           pending = await state.farmingV6Contract.getAllPending(tokenId);
-         } catch (e) {
-           console.error("V6 getAllPending error:", e);
-           msgDiv.innerHTML = `<span class="error">❌ Could not read V6 pending rewards: ${friendlyErrorMessage(e)}</span>`;
-           return;
-         }
-   
-         let total = ethers.BigNumber.from(0);
-         for (let i = 0; i < pending.length; i++) {
-           total = total.add(pending[i]);
-         }
-   
-         if (total.isZero()) {
-           msgDiv.innerHTML = `<span class="error">❌ Nothing to claim on V6.</span>`;
-           return;
-         }
-   
-         msgDiv.innerHTML = `<span class="success">⏳ Claiming V6 resources... ${total.toString()} total</span>`;
-         const tx = await state.farmingV6Contract.claimResources(tokenId, { gasLimit: 700000 });
-         debugLog("V6 claim tx", tx.hash);
-         await tx.wait();
-   
-         msgDiv.innerHTML = `<span class="success">💰 V6 resources claimed!</span>`;
-         await loadResourceBalancesOnchain();
-         await refreshSelectedBlockView();
-         return;
-       }
-   
-       msgDiv.innerHTML = `<span class="error">❌ No active farm to claim from.</span>`;
-     } catch (e) {
-       console.error("Claim error:", e);
-       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
-     }
-   }
+    if (!state.selectedBlock) return;
+  
+    const msgDiv = getActionMessageDiv();
+    const tokenId = state.selectedBlock.tokenId;
+  
+    try {
+      // =========================
+      // V5 CLAIM
+      // =========================
+      if (state.selectedBlock.activeOnV5 && !state.selectedBlock.farmingActive) {
+        const v5 = getFarmingV5Contract();
+        let preview = null;
+  
+        try {
+          preview = await v5.previewClaim(tokenId);
+        } catch (e) {
+          console.error("V5 previewClaim error:", e);
+          msgDiv.innerHTML = `<span class="error">❌ V5 preview failed: ${friendlyErrorMessage(e)}</span>`;
+          return;
+        }
+  
+        if (!preview || !preview.allowed) {
+          const code = preview?.code ?? "?";
+          const secondsRemaining = Number(preview?.secondsRemaining || 0);
+          msgDiv.innerHTML = `<span class="error">❌ V5 claim not ready. Code ${code}. Wait ${formatDuration(secondsRemaining)}.</span>`;
+          return;
+        }
+  
+        let total = null;
+        try {
+          total = await getV5PendingTotal(tokenId);
+        } catch (e) {
+          console.error("V5 pending total error:", e);
+          msgDiv.innerHTML = `<span class="error">❌ Could not read V5 pending rewards: ${friendlyErrorMessage(e)}</span>`;
+          return;
+        }
+  
+        if (!total || total.isZero()) {
+          msgDiv.innerHTML = `<span class="error">❌ Nothing to claim on V5.</span>`;
+          return;
+        }
+  
+        msgDiv.innerHTML = `<span class="success">⏳ Claiming V5 resources... ${total.toString()} total</span>`;
+        const tx = await v5.claimResources(tokenId, { gasLimit: 700000 });
+        debugLog("V5 claim tx", tx.hash);
+        await tx.wait();
+  
+        msgDiv.innerHTML = `<span class="success">💰 V5 resources claimed!</span>`;
+        await loadResourceBalancesOnchain();
+        await refreshSelectedBlockView();
+        return;
+      }
+  
+      // =========================
+      // V6 CLAIM
+      // =========================
+      if (state.selectedBlock.farmingActive) {
+        let preview = null;
+        let pending = null;
+        let total = ethers.BigNumber.from(0);
+  
+        // 1) Erst Pending lesen, damit wir überhaupt wissen, ob was da ist
+        try {
+          pending = await state.farmingV6Contract.getAllPending(tokenId);
+        } catch (e) {
+          console.error("V6 getAllPending error:", e);
+          msgDiv.innerHTML = `<span class="error">❌ Could not read V6 pending rewards: ${friendlyErrorMessage(e)}</span>`;
+          return;
+        }
+  
+        for (let i = 0; i < pending.length; i++) {
+          total = total.add(pending[i]);
+        }
+  
+        if (total.isZero()) {
+          msgDiv.innerHTML = `<span class="error">❌ Nothing to claim on V6.</span>`;
+          return;
+        }
+  
+        // 2) Preview versuchen, aber nicht hart abbrechen wenn es revertet
+        try {
+          preview = await state.farmingV6Contract.previewClaim(tokenId);
+        } catch (e) {
+          console.warn("V6 previewClaim failed, fallback to secondsUntilClaimable()", e);
+        }
+  
+        // 3) Wenn Preview funktioniert hat, normale Logik
+        if (preview) {
+          if (!preview.allowed) {
+            const code = preview?.code ?? "?";
+            const secondsRemaining = Number(preview?.secondsRemaining || 0);
+            msgDiv.innerHTML = `<span class="error">❌ V6 claim not ready. Code ${code}. Wait ${formatDuration(secondsRemaining)}.</span>`;
+            return;
+          }
+        } else {
+          // 4) Fallback: direkt cooldown lesen
+          try {
+            const waitSec = await state.farmingV6Contract.secondsUntilClaimable(tokenId);
+            const waitNum = Number(waitSec || 0);
+  
+            if (waitNum > 0) {
+              msgDiv.innerHTML = `<span class="error">❌ V6 claim not ready. Wait ${formatDuration(waitNum)}.</span>`;
+              return;
+            }
+          } catch (e) {
+            console.error("V6 secondsUntilClaimable fallback error:", e);
+            msgDiv.innerHTML = `<span class="error">❌ V6 preview failed and fallback check also failed: ${friendlyErrorMessage(e)}</span>`;
+            return;
+          }
+        }
+  
+        msgDiv.innerHTML = `<span class="success">⏳ Claiming V6 resources... ${total.toString()} total</span>`;
+        const tx = await state.farmingV6Contract.claimResources(tokenId, { gasLimit: 700000 });
+        debugLog("V6 claim tx", tx.hash);
+        await tx.wait();
+  
+        msgDiv.innerHTML = `<span class="success">💰 V6 resources claimed!</span>`;
+        await loadResourceBalancesOnchain();
+        await refreshSelectedBlockView();
+        return;
+      }
+  
+      msgDiv.innerHTML = `<span class="error">❌ No active farm to claim from.</span>`;
+    } catch (e) {
+      console.error("Claim error:", e);
+      msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+    }
+  }
    export function updateFarmBoostCostLabel() {
     const days = parseInt(byId("boostDays")?.value, 10);
     const costInfo = byId("boostCostInfo");
