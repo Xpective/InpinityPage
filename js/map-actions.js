@@ -8,9 +8,9 @@
    import { mapState } from "./map-state.js";
    import {
      getAllMapTokens,
-     loadData,
-     loadUserResources,
-     loadUserAttacks,
+     loadMapData,
+     loadMapUserResources,
+     loadMapUserAttacks,
      getPreferredAttackerTokenId,
      normalizeAttackTuple,
      dismissAttackById,
@@ -20,137 +20,100 @@
    } from "./map-data.js";
    import { refreshSelectedTargetAttackPreview, updateSidebar } from "./map-selection.js";
    import { migrateSingleFarmV5ToV6 } from "./migration.js";
-   import { PITRONE_ADDRESS } from "./config.js";
-
+   
    const actionMessage = byId("actionMessage");
-
+   
    export function updateMapPirateBoostCostLabels() {
-    const daysInput = byId("pirateBoostDays");
-    const info = byId("pirateBoostCostInfo");
-  
-    if (!info) return;
-  
-    let days = parseInt(daysInput?.value, 10);
-    if (!Number.isFinite(days)) days = 7;
-  
-    // PiratesV6: max 10 Tage
-    days = Math.max(1, Math.min(10, days));
-  
-    if (daysInput && String(days) !== daysInput.value) {
-      daysInput.value = String(days);
-    }
-  
-    const pricePerDay = 100;
-    const total = days * pricePerDay;
-  
-    info.style.display = "block";
-    info.innerHTML = `
-      <span class="success">
-        Pirate Boost: ${pricePerDay} PIT / day<br>
-        Total: ${total} PIT for ${days} day${days > 1 ? "s" : ""}
-      </span>
-    `;
-  }
-
+     const daysInput = byId("pirateBoostDays");
+     const info = byId("pirateBoostCostInfo");
+   
+     if (!info) return;
+   
+     let days = parseInt(daysInput?.value, 10);
+     if (!Number.isFinite(days)) days = 7;
+   
+     days = Math.max(1, Math.min(10, days));
+   
+     if (daysInput && String(days) !== daysInput.value) {
+       daysInput.value = String(days);
+     }
+   
+     const pricePerDay = 100;
+     const total = days * pricePerDay;
+   
+     info.style.display = "block";
+     info.innerHTML = `
+       <span class="success">
+         Pirate Boost: ${pricePerDay} PIT / day<br>
+         Total: ${total} PIT for ${days} day${days > 1 ? "s" : ""}
+       </span>
+     `;
+   }
+   
    export function updateMapFarmBoostCostLabels() {
-    const daysInput = byId("boostDays");
-    const info = byId("farmBoostCostInfo");
-  
-    if (!info) return;
-  
-    let days = parseInt(daysInput?.value, 10);
-    if (!Number.isFinite(days)) days = 7;
-  
-    // FarmingV6 laut deinem Setup: max 7 Tage
-    days = Math.max(1, Math.min(7, days));
-  
-    if (daysInput && String(days) !== daysInput.value) {
-      daysInput.value = String(days);
-    }
-  
-    // Falls FarmingV6 aktuell 10 INPI pro Tag nutzt:
-    const pricePerDay = 10;
-    const total = days * pricePerDay;
-  
-    info.style.display = "block";
-    info.innerHTML = `
-      <span class="success">
-        Farm Boost: ${pricePerDay} INPI / day<br>
-        Total: ${total} INPI for ${days} day${days > 1 ? "s" : ""}
-      </span>
-    `;
-  }
+     const daysInput = byId("boostDays");
+     const info = byId("farmBoostCostInfo");
+   
+     if (!info) return;
+   
+     let days = parseInt(daysInput?.value, 10);
+     if (!Number.isFinite(days)) days = 7;
+   
+     days = Math.max(1, Math.min(7, days));
+   
+     if (daysInput && String(days) !== daysInput.value) {
+       daysInput.value = String(days);
+     }
+   
+     const pricePerDay = 10;
+     const total = days * pricePerDay;
+   
+     info.style.display = "block";
+     info.innerHTML = `
+       <span class="success">
+         Farm Boost: ${pricePerDay} INPI / day<br>
+         Total: ${total} INPI for ${days} day${days > 1 ? "s" : ""}
+       </span>
+     `;
+   }
    
    async function refreshAfterTx() {
-     await loadData();
-     await loadUserResources();
-     await loadUserAttacks();
+     await loadMapData();
+     await loadMapUserResources();
+     await loadMapUserAttacks();
+   
      if (mapState.selectedTokenId) {
        await updateSidebar(mapState.selectedTokenId);
      }
    }
    
    async function sendTx(txPromise, successMsg) {
-     if (actionMessage) actionMessage.innerHTML = `<span class="success">⏳ Sending...</span>`;
+     if (actionMessage) {
+       actionMessage.innerHTML = `<span class="success">⏳ Sending...</span>`;
+     }
    
      try {
        const tx = await txPromise;
-       if (actionMessage) actionMessage.innerHTML = `<span class="success">⏳ Confirming...</span>`;
+   
+       if (actionMessage) {
+         actionMessage.innerHTML = `<span class="success">⏳ Confirming...</span>`;
+       }
+   
        await tx.wait();
    
-       if (actionMessage) actionMessage.innerHTML = `<span class="success">✅ ${successMsg}</span>`;
+       if (actionMessage) {
+         actionMessage.innerHTML = `<span class="success">✅ ${successMsg}</span>`;
+       }
+   
        await refreshAfterTx();
      } catch (err) {
+       console.error("map action tx error:", err);
        if (actionMessage) {
          actionMessage.innerHTML = `<span class="error">❌ ${err.reason || err.message || "Tx failed"}</span>`;
        }
      }
    }
    
-   export async function handleBuyPirateBoost() {
-    if (!state.userAddress) return;
-  
-    const attackerTokenId = await getPreferredAttackerTokenId();
-    if (!attackerTokenId) {
-      if (actionMessage) {
-        actionMessage.innerHTML = `<span class="error">❌ No attacker block selected.</span>`;
-      }
-      return;
-    }
-  
-    const days = parseInt(byId("pirateBoostDays")?.value || "1", 10);
-    if (!Number.isFinite(days) || days < 1 || days > 10) {
-      if (actionMessage) {
-        actionMessage.innerHTML = `<span class="error">❌ Invalid pirate boost duration.</span>`;
-      }
-      return;
-    }
-  
-    try {
-      const cost = ethers.utils.parseEther(String(days * 100));
-      const allowance = await state.pitroneContract.allowance(state.userAddress, state.piratesV6Contract.address);
-  
-      if (allowance.lt(cost)) {
-        if (actionMessage) {
-          actionMessage.innerHTML = `<span class="success">⏳ Approving PITRONE...</span>`;
-        }
-        const approveTx = await state.pitroneContract.approve(state.piratesV6Contract.address, cost);
-        await approveTx.wait();
-      }
-  
-      await sendTx(
-        state.piratesV6Contract.buyPirateBoost(attackerTokenId, days, { gasLimit: 350000 }),
-        `Pirate boost bought for ${days} day(s)!`
-      );
-  
-      await refreshSelectedTargetAttackPreview();
-    } catch (e) {
-      if (actionMessage) {
-        actionMessage.innerHTML = `<span class="error">❌ ${e.reason || e.message}</span>`;
-      }
-    }
-  }
-  
    export async function handleMigrateToV6() {
      if (!mapState.selectedTokenId) return;
    
@@ -178,6 +141,7 @@
    
        await refreshAfterTx();
      } catch (e) {
+       console.error("handleMigrateToV6 error:", e);
        if (actionMessage) {
          actionMessage.innerHTML = `<span class="error">❌ ${e.reason || e.message}</span>`;
        }
@@ -194,12 +158,14 @@
      try {
        const response = await fetch(`${WORKER_URL}/api/get-proof?row=${row}&col=${col}`);
        if (!response.ok) throw new Error("Proofs not found");
+   
        const proofs = await response.json();
    
-       const formatProof = (arr) => arr.map((item) => {
-         const v = item.left ? item.left : item.right;
-         return v.startsWith("0x") ? v : ("0x" + v);
-       });
+       const formatProof = (arr) =>
+         arr.map((item) => {
+           const v = item.left ? item.left : item.right;
+           return v.startsWith("0x") ? v : `0x${v}`;
+         });
    
        await sendTx(
          state.nftContract.revealBlock(
@@ -213,7 +179,10 @@
          "Block revealed!"
        );
      } catch (e) {
-       if (actionMessage) actionMessage.innerHTML = `<span class="error">❌ ${e.message}</span>`;
+       console.error("handleReveal error:", e);
+       if (actionMessage) {
+         actionMessage.innerHTML = `<span class="error">❌ ${e.message}</span>`;
+       }
      }
    }
    
@@ -256,8 +225,10 @@
          const v5 = getFarmingV5Contract();
          const total = await getV5PendingTotal(mapState.selectedTokenId);
    
-         if (total.isZero()) {
-           actionMessage.innerHTML = `<span class="error">❌ Nothing to claim on V5.</span>`;
+         if (!total || total.isZero()) {
+           if (actionMessage) {
+             actionMessage.innerHTML = `<span class="error">❌ Nothing to claim on V5.</span>`;
+           }
            return;
          }
    
@@ -270,7 +241,9 @@
    
        const preview = await state.farmingV6Contract.previewClaim(mapState.selectedTokenId);
        if (!preview.allowed) {
-         actionMessage.innerHTML = `<span class="error">❌ Claim not ready. Code: ${preview.code}</span>`;
+         if (actionMessage) {
+           actionMessage.innerHTML = `<span class="error">❌ Claim not ready. Code: ${preview.code}</span>`;
+         }
          return;
        }
    
@@ -279,63 +252,96 @@
          "Resources claimed!"
        );
      } catch (e) {
-       actionMessage.innerHTML = `<span class="error">❌ ${e.reason || e.message}</span>`;
+       console.error("handleClaim error:", e);
+       if (actionMessage) {
+         actionMessage.innerHTML = `<span class="error">❌ ${e.reason || e.message}</span>`;
+       }
      }
    }
    
-   export async function handleBuyPirateBoost() {
-    const msgDiv = byId("actionMessage");
-    if (!msgDiv) return;
-  
-    const attackerTokenId =
-      mapState.selectedAttackAttackerTokenId ||
-      mapState.selectedTokenId;
-  
-    if (!attackerTokenId) {
-      msgDiv.innerHTML = `<span class="error">❌ No attacker block selected.</span>`;
-      return;
-    }
-  
-    const daysInput = byId("pirateBoostDays");
-    let days = parseInt(daysInput?.value, 10);
-  
-    if (!Number.isFinite(days)) days = 7;
-    days = Math.max(1, Math.min(10, days));
-  
-    if (daysInput) daysInput.value = String(days);
-  
-    const pricePerDay = 100;
-    const total = days * pricePerDay;
-  
-    try {
-      msgDiv.innerHTML = `
-        <span class="success">
-          ⏳ Buying Pirate Boost...<br>
-          Attacker Block: #${attackerTokenId}<br>
-          Days: ${days}<br>
-          Cost: ${total} PIT
-        </span>
-      `;
-  
-      const tx = await state.piratesV6Contract.buyPirateBoost(attackerTokenId, days, {
-        gasLimit: 350000
-      });
-  
-      await tx.wait();
-  
-      msgDiv.innerHTML = `
-        <span class="success">
-          ✅ Pirate Boost activated!<br>
-          Attacker Block: #${attackerTokenId}<br>
-          Days: ${days}<br>
-          Paid: ${total} PIT
-        </span>
-      `;
-    } catch (e) {
-      console.error("handleBuyPirateBoost error:", e);
-      msgDiv.innerHTML = `<span class="error">❌ ${e.reason || e.message}</span>`;
-    }
+   export async function handleBuyBoost() {
+     if (!mapState.selectedTokenId) return;
+   
+     const daysInput = byId("boostDays");
+     let days = parseInt(daysInput?.value, 10);
+   
+     if (!Number.isFinite(days)) days = 7;
+     days = Math.max(1, Math.min(7, days));
+   
+     if (daysInput) {
+       daysInput.value = String(days);
+     }
+   
+     await sendTx(
+       state.farmingV6Contract.buyBoost(mapState.selectedTokenId, days, { gasLimit: 300000 }),
+       `Farm boost bought for ${days} day(s)!`
+     );
    }
+   
+   export async function handleBuyPirateBoost() {
+     if (!state.userAddress) return;
+   
+     const attackerTokenId = await getPreferredAttackerTokenId();
+     if (!attackerTokenId) {
+       if (actionMessage) {
+         actionMessage.innerHTML = `<span class="error">❌ No attacker block selected.</span>`;
+       }
+       return;
+     }
+   
+     const daysInput = byId("pirateBoostDays");
+     let days = parseInt(daysInput?.value, 10);
+   
+     if (!Number.isFinite(days)) days = 7;
+     days = Math.max(1, Math.min(10, days));
+   
+     if (daysInput) {
+       daysInput.value = String(days);
+     }
+   
+     const totalCostHuman = days * 100;
+   
+     try {
+       if (!state.pitroneContract) {
+         throw new Error("PITRONE contract not initialized");
+       }
+   
+       if (!state.piratesV6Contract) {
+         throw new Error("PiratesV6 contract not initialized");
+       }
+   
+       const cost = ethers.utils.parseEther(String(totalCostHuman));
+       const spender = state.piratesV6Contract.address;
+       const allowance = await state.pitroneContract.allowance(state.userAddress, spender);
+   
+       if (allowance.lt(cost)) {
+         if (actionMessage) {
+           actionMessage.innerHTML = `
+             <span class="success">
+               ⏳ Approving PITRONE...<br>
+               Cost: ${totalCostHuman} PIT
+             </span>
+           `;
+         }
+   
+         const approveTx = await state.pitroneContract.approve(spender, cost);
+         await approveTx.wait();
+       }
+   
+       await sendTx(
+         state.piratesV6Contract.buyPirateBoost(attackerTokenId, days, { gasLimit: 350000 }),
+         `Pirate boost bought for block #${attackerTokenId} for ${days} day(s)! Paid: ${totalCostHuman} PIT`
+       );
+   
+       await refreshSelectedTargetAttackPreview();
+     } catch (e) {
+       console.error("handleBuyPirateBoost error:", e);
+       if (actionMessage) {
+         actionMessage.innerHTML = `<span class="error">❌ ${e.reason || e.message}</span>`;
+       }
+     }
+   }
+   
    export async function handleProtect() {
      if (!mapState.selectedTokenId || !state.userAddress) return;
    
@@ -351,17 +357,24 @@
        const allowance = await state.inpiContract.allowance(state.userAddress, MERCENARY_V2_ADDRESS);
    
        if (allowance.lt(amount)) {
-         if (actionMessage) actionMessage.innerHTML = `<span class="success">⏳ Approving...</span>`;
+         if (actionMessage) {
+           actionMessage.innerHTML = `<span class="success">⏳ Approving...</span>`;
+         }
          const approveTx = await state.inpiContract.approve(MERCENARY_V2_ADDRESS, amount);
          await approveTx.wait();
        }
    
        await sendTx(
-         state.mercenaryV2Contract.hireMercenaries(mapState.selectedTokenId, level, { gasLimit: 400000 }),
+         state.mercenaryV2Contract.hireMercenaries(mapState.selectedTokenId, level, {
+           gasLimit: 400000
+         }),
          "Protection bought!"
        );
      } catch (e) {
-       if (actionMessage) actionMessage.innerHTML = `<span class="error">❌ ${e.reason || e.message}</span>`;
+       console.error("handleProtect error:", e);
+       if (actionMessage) {
+         actionMessage.innerHTML = `<span class="error">❌ ${e.reason || e.message}</span>`;
+       }
      }
    }
    
@@ -372,18 +385,24 @@
      const targetToken = tokens[mapState.selectedTokenId];
    
      if (!targetToken?.owner) {
-       actionMessage.innerHTML = `<span class="error">❌ Target block does not exist.</span>`;
+       if (actionMessage) {
+         actionMessage.innerHTML = `<span class="error">❌ Target block does not exist.</span>`;
+       }
        return;
      }
    
      if (targetToken.owner.toLowerCase() === state.userAddress.toLowerCase()) {
-       actionMessage.innerHTML = `<span class="error">❌ You cannot attack your own block.</span>`;
+       if (actionMessage) {
+         actionMessage.innerHTML = `<span class="error">❌ You cannot attack your own block.</span>`;
+       }
        return;
      }
    
      const attackerTokenId = await getPreferredAttackerTokenId();
      if (!attackerTokenId) {
-       actionMessage.innerHTML = `<span class="error">❌ Need your own block to attack from.</span>`;
+       if (actionMessage) {
+         actionMessage.innerHTML = `<span class="error">❌ Need your own block to attack from.</span>`;
+       }
        return;
      }
    
@@ -391,7 +410,9 @@
      const resource = parseInt(byId("attackResource")?.value || "0", 10);
    
      if (!Number.isFinite(resource) || resource < 0 || resource > 9) {
-       actionMessage.innerHTML = `<span class="error">❌ Invalid resource selected.</span>`;
+       if (actionMessage) {
+         actionMessage.innerHTML = `<span class="error">❌ Invalid resource selected.</span>`;
+       }
        return;
      }
    
@@ -399,30 +420,32 @@
        const preview = await state.piratesV6Contract.previewAttack(attackerTokenId, targetTokenIdNum, resource);
    
        if (!preview.allowed) {
-         actionMessage.innerHTML = `<span class="error">❌ Attack not allowed. Code: ${preview.code}</span>`;
+         if (actionMessage) {
+           actionMessage.innerHTML = `<span class="error">❌ Attack not allowed. Code: ${preview.code}</span>`;
+         }
          await refreshSelectedTargetAttackPreview();
          return;
        }
    
-       actionMessage.innerHTML = `
-         <span class="success">
-           ⏳ Starting attack...<br>
-           Travel time: ${formatDuration(Number(preview.travelTime || 0))}<br>
-           Steal amount: ${(preview.stealAmount || 0).toString()}<br>
-           Remaining today: ${Number(preview.remainingAttacksToday || 0)}
-         </span>
-       `;
+       if (actionMessage) {
+         actionMessage.innerHTML = `
+           <span class="success">
+             ⏳ Starting attack...<br>
+             Travel time: ${formatDuration(Number(preview.travelTime || 0))}<br>
+             Steal amount: ${(preview.stealAmount || 0).toString()}<br>
+             Remaining today: ${Number(preview.remainingAttacksToday || 0)}
+           </span>
+         `;
+       }
    
-       const tx = await state.piratesV6Contract.startAttack(
-         attackerTokenId,
-         targetTokenIdNum,
-         resource,
-         { gasLimit: 450000 }
-       );
-   
+       const tx = await state.piratesV6Contract.startAttack(attackerTokenId, targetTokenIdNum, resource, {
+         gasLimit: 450000
+       });
        await tx.wait();
    
-       actionMessage.innerHTML = `<span class="success">✅ Attack launched!</span>`;
+       if (actionMessage) {
+         actionMessage.innerHTML = `<span class="success">✅ Attack launched!</span>`;
+       }
    
        localStorage.setItem(
          getAttackStorageKey(targetTokenIdNum),
@@ -434,11 +457,14 @@
          })
        );
    
-       await loadUserAttacks();
-       await loadData();
+       await loadMapUserAttacks();
+       await loadMapData();
        await refreshSelectedTargetAttackPreview();
      } catch (e) {
-       actionMessage.innerHTML = `<span class="error">❌ ${e.reason || e.message}</span>`;
+       console.error("handleAttack error:", e);
+       if (actionMessage) {
+         actionMessage.innerHTML = `<span class="error">❌ ${e.reason || e.message}</span>`;
+       }
      }
    }
    
@@ -455,14 +481,14 @@
        if (normalized.executed) {
          actionMessage.innerHTML = `<span class="error">❌ Attack already executed.</span>`;
          if (attack.id) dismissAttackById(attack.id);
-         await loadUserAttacks();
+         await loadMapUserAttacks();
          return;
        }
    
        if (normalized.cancelled) {
          actionMessage.innerHTML = `<span class="error">❌ Attack was cancelled.</span>`;
          if (attack.id) dismissAttackById(attack.id);
-         await loadUserAttacks();
+         await loadMapUserAttacks();
          return;
        }
    
@@ -497,6 +523,7 @@
    
        await refreshAfterTx();
      } catch (e) {
+       console.error("executeAttack error:", e);
        actionMessage.innerHTML = `<span class="error">❌ ${e.reason || e.message}</span>`;
      }
    }
@@ -533,6 +560,7 @@
        actionMessage.innerHTML = `<span class="success">✅ Attack cancelled.</span>`;
        await refreshAfterTx();
      } catch (e) {
+       console.error("cancelAttack error:", e);
        actionMessage.innerHTML = `<span class="error">❌ ${e.reason || e.message}</span>`;
      }
    }
