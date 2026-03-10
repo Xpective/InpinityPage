@@ -51,31 +51,33 @@
    }
    
    export function updateMapFarmBoostCostLabels() {
-     const daysInput = byId("boostDays");
-     const info = byId("farmBoostCostInfo");
-   
-     if (!info) return;
-   
-     let days = parseInt(daysInput?.value, 10);
-     if (!Number.isFinite(days)) days = 7;
-   
-     days = Math.max(1, Math.min(7, days));
-   
-     if (daysInput && String(days) !== daysInput.value) {
-       daysInput.value = String(days);
-     }
-   
-     const pricePerDay = 10;
-     const total = days * pricePerDay;
-   
-     info.style.display = "block";
-     info.innerHTML = `
-       <span class="success">
-         Farm Boost: ${pricePerDay} INPI / day<br>
-         Total: ${total} INPI for ${days} day${days > 1 ? "s" : ""}
-       </span>
-     `;
-   }
+    const daysInput = byId("boostDays");
+    const info = byId("farmBoostCostInfo");
+  
+    if (!info) return;
+  
+    let days = parseInt(daysInput?.value, 10);
+    if (!Number.isFinite(days)) days = 7;
+  
+    // Farming Boost max 7 Tage
+    days = Math.max(1, Math.min(7, days));
+  
+    if (daysInput && String(days) !== daysInput.value) {
+      daysInput.value = String(days);
+    }
+  
+    // Korrigierter Preis laut deinem Contract-/Frontend-Setup
+    const pricePerDay = 100;
+    const total = days * pricePerDay;
+  
+    info.style.display = "block";
+    info.innerHTML = `
+      <span class="success">
+        Farm Boost: ${pricePerDay} INPI / day<br>
+        Total: ${total} INPI for ${days} day${days > 1 ? "s" : ""}
+      </span>
+    `;
+  }
    
    async function refreshAfterTx() {
      await loadMapData();

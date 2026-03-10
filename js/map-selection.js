@@ -53,8 +53,8 @@
      if (ownerActionsDiv) ownerActionsDiv.innerHTML = "";
      if (protectionInput) protectionInput.style.display = "none";
      if (attackInput) attackInput.style.display = "none";
-     if (actionMessage) actionMessage.innerHTML = "";
      if (pirateBoostInput) pirateBoostInput.style.display = "none";
+     if (actionMessage) actionMessage.innerHTML = "";
    }
    
    export async function refreshSelectedTargetAttackPreview() {
@@ -72,6 +72,8 @@
      const attackBtn = byId("attackBtn");
      const pirateBoostStatusEl = byId("pirateBoostStatus");
      const pirateBoostExpiryEl = byId("pirateBoostExpiry");
+     const pirateBoostOptions = byId("pirateBoostOptions");
+     const buyPirateBoostBtn = byId("buyPirateBoostBtn");
    
      const token = tokens[mapState.selectedTokenId];
    
@@ -89,7 +91,6 @@
      if (attackInput) attackInput.style.display = "flex";
    
      populateAttackerSelect();
-   
      const attackerTokenId = await getPreferredAttackerTokenId();
    
      if (!attackerTokenId) {
@@ -116,8 +117,13 @@
          const expiryNum = Number(expiry || 0);
          const now = Math.floor(Date.now() / 1000);
    
-         if (pirateBoostInput) pirateBoostInput.style.display = "flex";
-         if (pirateBoostStatusEl) pirateBoostStatusEl.innerText = hasBoost ? "✅ Active" : "❌ Inactive";
+         if (pirateBoostInput) pirateBoostInput.style.display = "block";
+         if (pirateBoostOptions) pirateBoostOptions.style.display = "flex";
+         if (buyPirateBoostBtn) buyPirateBoostBtn.style.display = "block";
+   
+         if (pirateBoostStatusEl) {
+           pirateBoostStatusEl.innerText = hasBoost && expiryNum > now ? "✅ Active" : "❌ Inactive";
+         }
    
          if (pirateBoostExpiryEl) {
            pirateBoostExpiryEl.innerText =
@@ -126,7 +132,9 @@
                : "Expired";
          }
        } catch {
-         if (pirateBoostInput) pirateBoostInput.style.display = "flex";
+         if (pirateBoostInput) pirateBoostInput.style.display = "block";
+         if (pirateBoostOptions) pirateBoostOptions.style.display = "flex";
+         if (buyPirateBoostBtn) buyPirateBoostBtn.style.display = "block";
          if (pirateBoostStatusEl) pirateBoostStatusEl.innerText = "⚠️ Unknown";
          if (pirateBoostExpiryEl) pirateBoostExpiryEl.innerText = "—";
        }
@@ -232,6 +240,13 @@
      let claimTxt = "-";
      let pendingTotalTxt = "-";
      let boostTxt = "-";
+     let protectionTxt = "inactive";
+     let protectionLevelTxt = "0%";
+   
+     if (token?.protectionActive && Number(token.protectionExpiry || 0) > now) {
+       protectionTxt = `active for ${formatDuration(Number(token.protectionExpiry || 0) - now)}`;
+       protectionLevelTxt = `${Number(token.protectionLevel || 0)}%`;
+     }
    
      if (v5Active) {
        farmVersionTxt = "V5 Legacy";
@@ -266,7 +281,7 @@
          } catch {}
    
          if (farmInfo.boostExpiry && farmInfo.boostExpiry > now) {
-           boostTxt = "active";
+           boostTxt = `${formatDuration(Number(farmInfo.boostExpiry) - now)} left`;
          }
        }
      }
@@ -316,7 +331,9 @@
          ${rarityDisplay}
          <div class="detail-row"><span class="detail-label">Farming</span><span class="detail-value">${farmVersionTxt}</span></div>
          <div class="detail-row"><span class="detail-label">Farm age</span><span class="detail-value">${farmAgeTxt}</span></div>
-         <div class="detail-row"><span class="detail-label">Boost</span><span class="detail-value">${boostTxt}</span></div>
+         <div class="detail-row"><span class="detail-label">Farm boost</span><span class="detail-value">${boostTxt}</span></div>
+         <div class="detail-row"><span class="detail-label">Protection</span><span class="detail-value">${protectionTxt}</span></div>
+         <div class="detail-row"><span class="detail-label">Protection level</span><span class="detail-value">${protectionLevelTxt}</span></div>
          <div class="detail-row"><span class="detail-label">Claim-ready</span><span class="detail-value">${claimTxt}</span></div>
          <div class="detail-row"><span class="detail-label">Pending</span><span class="detail-value">${pendingTotalTxt}</span></div>
          ${productionHtml}

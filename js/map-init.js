@@ -9,7 +9,7 @@
    import { setupLegacyMigrationContracts } from "./migration.js";
    import { mapState } from "./map-state.js";
    import {
-     initReadOnly,
+     initMapReadOnly,
      loadMapData,
      loadMapUserResources,
      loadMapUserAttacks
@@ -18,19 +18,19 @@
    import { refreshSelectedTargetAttackPreview } from "./map-selection.js";
    import { initMapUI, populateAttackerSelect } from "./map-ui.js";
    import {
-    handleReveal,
-    handleStartFarm,
-    handleStopFarm,
-    handleClaim,
-    handleBuyBoost,
-    handleProtect,
-    handleAttack,
-    handleMigrateToV6,
-    executeAttack,
-    cancelAttack,
-    updateMapFarmBoostCostLabels,
-    updateMapPirateBoostCostLabels,
-    handleBuyPirateBoost
+     handleReveal,
+     handleStartFarm,
+     handleStopFarm,
+     handleClaim,
+     handleBuyBoost,
+     handleProtect,
+     handleAttack,
+     handleMigrateToV6,
+     executeAttack,
+     cancelAttack,
+     updateMapFarmBoostCostLabels,
+     updateMapPirateBoostCostLabels,
+     handleBuyPirateBoost
    } from "./map-actions.js";
    
    async function connectWallet(forceRequest = true) {
@@ -60,6 +60,8 @@
        ]);
    
        populateAttackerSelect();
+       updateMapFarmBoostCostLabels();
+       updateMapPirateBoostCostLabels();
        drawPyramid();
    
        if (!mapState.attacksPoller) {
@@ -81,79 +83,70 @@
        mapState.isConnecting = false;
      }
    }
-   byId("pirateBoostDays")?.addEventListener("change", () => {
-    const days = parseInt(byId("pirateBoostDays")?.value || "1", 10);
-    const costEl = byId("pirateBoostCost");
-    if (costEl) {
-      costEl.innerText = `${days * 100} PITRONE`;
-    }
-  });
-
-   
    
    function bindMapEvents() {
-    byId("connectBtn")?.addEventListener("click", () => connectWallet(true));
-    byId("boostDays")?.addEventListener("input", updateMapFarmBoostCostLabels);
-    byId("pirateBoostDays")?.addEventListener("input", updateMapPirateBoostCostLabels);
-    
-  
-    byId("attackResource")?.addEventListener("change", async () => {
-      if (mapState.selectedTokenId) {
-        await refreshSelectedTargetAttackPreview();
-      }
-    });
-  
-    document.addEventListener("click", async (e) => {
-      const target = e.target.closest("button");
-      if (!target) return;
-
-      if (e.target.id === "buyPirateBoostBtn") await handleBuyPirateBoost();
-  
-      if (target.id === "revealBtn") return await handleReveal();
-      if (target.id === "startFarmBtn") return await handleStartFarm();
-      if (target.id === "stopFarmBtn") return await handleStopFarm();
-      if (target.id === "claimBtn") return await handleClaim();
-      if (target.id === "buyBoostBtn") return await handleBuyBoost();
-      if (target.id === "protectBtn") return await handleProtect();
-      if (target.id === "attackBtn") return await handleAttack();
-      if (target.id === "migrateFarmBtn") return await handleMigrateToV6();
-  
-      if (target.classList.contains("execute-btn")) {
-        const attack = {
-          id: target.dataset.attackid || null,
-          targetTokenId: parseInt(target.dataset.targetid || "0", 10),
-          attackIndex: parseInt(target.dataset.attackindex || "0", 10),
-          resource: parseInt(target.dataset.resource || "0", 10)
-        };
-  
-        if (!Number.isFinite(attack.targetTokenId) || !Number.isFinite(attack.attackIndex)) {
-          console.warn("Invalid execute attack payload", target.dataset);
-          return;
-        }
-  
-        return await executeAttack(attack);
-      }
-  
-      if (target.classList.contains("cancel-attack-btn")) {
-        const targetTokenId = parseInt(target.dataset.targetid || "0", 10);
-        const attackIndex = parseInt(target.dataset.attackindex || "0", 10);
-  
-        if (!Number.isFinite(targetTokenId) || !Number.isFinite(attackIndex)) {
-          console.warn("Invalid cancel attack payload", target.dataset);
-          return;
-        }
-  
-        return await cancelAttack(targetTokenId, attackIndex);
-      }
-    });
-  }
+     byId("connectBtn")?.addEventListener("click", () => connectWallet(true));
+   
+     byId("boostDays")?.addEventListener("input", updateMapFarmBoostCostLabels);
+     byId("pirateBoostDays")?.addEventListener("input", updateMapPirateBoostCostLabels);
+   
+     byId("attackResource")?.addEventListener("change", async () => {
+       if (mapState.selectedTokenId) {
+         await refreshSelectedTargetAttackPreview();
+       }
+     });
+   
+     document.addEventListener("click", async (e) => {
+       const target = e.target.closest("button");
+       if (!target) return;
+   
+       if (target.id === "revealBtn") return await handleReveal();
+       if (target.id === "startFarmBtn") return await handleStartFarm();
+       if (target.id === "stopFarmBtn") return await handleStopFarm();
+       if (target.id === "claimBtn") return await handleClaim();
+       if (target.id === "buyBoostBtn") return await handleBuyBoost();
+       if (target.id === "protectBtn") return await handleProtect();
+       if (target.id === "attackBtn") return await handleAttack();
+       if (target.id === "migrateFarmBtn") return await handleMigrateToV6();
+       if (target.id === "buyPirateBoostBtn") return await handleBuyPirateBoost();
+   
+       if (target.classList.contains("execute-btn")) {
+         const attack = {
+           id: target.dataset.attackid || null,
+           targetTokenId: parseInt(target.dataset.targetid || "0", 10),
+           attackIndex: parseInt(target.dataset.attackindex || "0", 10),
+           resource: parseInt(target.dataset.resource || "0", 10)
+         };
+   
+         if (!Number.isFinite(attack.targetTokenId) || !Number.isFinite(attack.attackIndex)) {
+           console.warn("Invalid execute attack payload", target.dataset);
+           return;
+         }
+   
+         return await executeAttack(attack);
+       }
+   
+       if (target.classList.contains("cancel-attack-btn")) {
+         const targetTokenId = parseInt(target.dataset.targetid || "0", 10);
+         const attackIndex = parseInt(target.dataset.attackindex || "0", 10);
+   
+         if (!Number.isFinite(targetTokenId) || !Number.isFinite(attackIndex)) {
+           console.warn("Invalid cancel attack payload", target.dataset);
+           return;
+         }
+   
+         return await cancelAttack(targetTokenId, attackIndex);
+       }
+     });
+   }
    
    export async function initMapPage() {
-     await initReadOnly();
+     await initMapReadOnly();
      resizeCanvas();
      bindMapRenderEvents();
      bindMapEvents();
      initMapUI();
+   
      updateMapFarmBoostCostLabels();
      updateMapPirateBoostCostLabels();
    
