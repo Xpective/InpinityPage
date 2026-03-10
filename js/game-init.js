@@ -18,7 +18,9 @@
      loadUserAttacks,
      refreshBlockMarkings,
      attack,
-     stopAttacksTicker
+     stopAttacksTicker,
+     buyPirateBoost,
+     updateBoostCostLabels
    } from "./attacks.js";
    
    import {
@@ -28,7 +30,8 @@
      buyBoost,
      migrateSelectedFarmToV6,
      migrateAllMyV5Farms,
-     protect
+     protect,
+     updateFarmBoostCostLabel
    } from "./farming.js";
    
    import { revealSelected } from "./reveal.js";
@@ -47,6 +50,8 @@
        setWalletUIConnected(state.userAddress);
    
        initAttackResourceSelect();
+       updateFarmBoostCostLabel();
+       updateBoostCostLabels();
    
        await updateBalances();
        await updatePoolInfo();
@@ -94,6 +99,9 @@
      byId("disconnectWallet")?.addEventListener("click", disconnectWallet);
    
      byId("attackBtn")?.addEventListener("click", attack);
+     byId("buyPirateBoostBtn")?.addEventListener("click", buyPirateBoost);
+     byId("pirateBoostDays")?.addEventListener("input", updateBoostCostLabels);
+   
      byId("protectBtn")?.addEventListener("click", protect);
      byId("revealBtn")?.addEventListener("click", revealSelected);
    
@@ -114,6 +122,9 @@
    
      byId("attackRow")?.addEventListener("input", scheduleAttackDropdownRefresh);
      byId("attackCol")?.addEventListener("input", scheduleAttackDropdownRefresh);
+   
+     byId("boostDays")?.addEventListener("input", updateFarmBoostCostLabel);
+     byId("pirateBoostDays")?.addEventListener("input", updateBoostCostLabels);
    
      document.querySelectorAll('input[name="payment"]').forEach((radio) => {
        radio.addEventListener("change", (e) => {
@@ -144,6 +155,8 @@
    export function initGamePage() {
      setWalletUIDisconnected();
      initAttackResourceSelect();
+     updateFarmBoostCostLabel();
+     updateBoostCostLabels();
      bindEvents();
      bindEthereumEvents();
    

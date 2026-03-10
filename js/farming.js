@@ -257,34 +257,66 @@
        msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
      }
    }
-   
+   export function updateFarmBoostCostLabel() {
+    const days = parseInt(byId("boostDays")?.value, 10);
+    const costInfo = byId("boostCostInfo");
+  
+    if (!costInfo) return;
+  
+    const safeDays = Number.isFinite(days) ? Math.max(1, Math.min(7, days)) : 7;
+    costInfo.textContent = `Total: ${safeDays * 100} INPI`;
+  }
+
    export async function buyBoost() {
-     if (!state.selectedBlock) {
-       alert("No block selected.");
-       return;
-     }
-   
-     const days = parseInt(byId("boostDays")?.value, 10);
-     if (isNaN(days) || days < 1 || days > 30) {
-       alert("Please enter valid days (1-30)");
-       return;
-     }
-   
-     const msgDiv = getActionMessageDiv();
-   
-     try {
-       msgDiv.innerHTML = `<span class="success">⏳ Buying boost for ${days} days...</span>`;
-       const tx = await state.farmingV6Contract.buyBoost(state.selectedBlock.tokenId, days, { gasLimit: 300000 });
-       debugLog("buyBoost tx", tx.hash);
-       await tx.wait();
-   
-       msgDiv.innerHTML = `<span class="success">✅ Boost activated for ${days} days!</span>`;
-       await refreshSelectedBlockView();
-     } catch (e) {
-       console.error("Boost error:", e);
-       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
-     }
-   }
+  if (!state.selectedBlock) {
+    alert("No block selected.");
+    return;
+  }
+
+  const days = parseInt(byId("boostDays")?.value, 10);
+  if (isNaN(days) || days < 1 || days > 7) {
+    alert("Please enter valid days (1-7)");
+    return;
+  }
+
+  const msgDiv = getActionMessageDiv();
+  const cost = days * 100;
+
+  try {
+    msgDiv.innerHTML = `
+      <span class="success">
+        ⏳ Buying farm boost...<br>
+        Block: #${state.selectedBlock.tokenId}<br>
+        Days: ${days}<br>
+        Cost: ${cost} INPI<br>
+        Effect: +25% production
+      </span>
+    `;
+
+    const tx = await state.farmingV6Contract.buyBoost(
+      state.selectedBlock.tokenId,
+      days,
+      { gasLimit: 300000 }
+    );
+
+    debugLog("buyBoost tx", tx.hash);
+    await tx.wait();
+
+    msgDiv.innerHTML = `
+      <span class="success">
+        ✅ Farm boost activated.<br>
+        Block: #${state.selectedBlock.tokenId}<br>
+        Days: ${days}<br>
+        Paid: ${cost} INPI
+      </span>
+    `;
+
+    await refreshSelectedBlockView();
+  } catch (e) {
+    console.error("Boost error:", e);
+    msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+  }
+}
    
    export async function migrateSelectedFarmToV6() {
      if (!state.selectedBlock) return;

@@ -26,11 +26,13 @@
        } catch {}
      }
    
-     const balance = await state.nftContract.balanceOf(state.userAddress);
-     if (balance.gt(0)) {
-       const firstToken = await state.nftContract.tokenOfOwnerByIndex(state.userAddress, 0);
-       return firstToken.toNumber();
-     }
+     try {
+       const balance = await state.nftContract.balanceOf(state.userAddress);
+       if (balance.gt(0)) {
+         const firstToken = await state.nftContract.tokenOfOwnerByIndex(state.userAddress, 0);
+         return firstToken.toNumber();
+       }
+     } catch {}
    
      return null;
    }
@@ -46,6 +48,24 @@
        opt.textContent = resourceNames[i];
        select.appendChild(opt);
      }
+   }
+   
+   export function updateBoostCostLabels() {
+     const pirateDaysInput = byId("pirateBoostDays");
+     const pirateCostInfo = byId("pirateBoostCostInfo");
+   
+     if (!pirateCostInfo) return;
+   
+     let days = parseInt(pirateDaysInput?.value, 10);
+     if (!Number.isFinite(days)) days = 7;
+   
+     days = Math.max(1, Math.min(10, days));
+   
+     if (pirateDaysInput && String(days) !== pirateDaysInput.value) {
+       pirateDaysInput.value = String(days);
+     }
+   
+     pirateCostInfo.textContent = `Total: ${days * 100} PIT`;
    }
    
    export function scheduleAttackDropdownRefresh() {
@@ -198,6 +218,62 @@
      }
    }
    
+   export async function buyPirateBoost() {
+     const msgDiv = byId("pirateBoostMessage");
+     const daysInput = byId("pirateBoostDays");
+   
+     if (!msgDiv) return;
+   
+     let days = parseInt(daysInput?.value, 10);
+     if (!Number.isFinite(days) || days < 1 || days > 10) {
+       msgDiv.innerHTML = `<span class="error">❌ Please enter valid days (1-10).</span>`;
+       return;
+     }
+   
+     try {
+       const attackerTokenId = await getValidAttackerTokenId();
+       if (!attackerTokenId) {
+         msgDiv.innerHTML = `<span class="error">❌ No valid attacker block found.</span>`;
+         return;
+       }
+   
+       const totalCost = days * 100;
+   
+       msgDiv.innerHTML = `
+         <span class="success">
+           ⏳ Buying Pirate Boost...<br>
+           Block: #${attackerTokenId}<br>
+           Days: ${days}<br>
+           Cost: ${totalCost} PIT<br>
+           Effect: +25% pirate bonus
+         </span>
+       `;
+   
+       const tx = await state.piratesV6Contract.buyPirateBoost(attackerTokenId, days, {
+         gasLimit: 350000
+       });
+   
+       await tx.wait();
+   
+       msgDiv.innerHTML = `
+         <span class="success">
+           ✅ Pirate Boost activated!<br>
+           Block: #${attackerTokenId}<br>
+           Days: ${days}<br>
+           Paid: ${totalCost} PIT
+         </span>
+       `;
+   
+       await updateBalances();
+       await loadUserAttacks();
+       await refreshAttackDropdown();
+       refreshBlockMarkings();
+     } catch (e) {
+       console.error("buyPirateBoost error:", e);
+       msgDiv.innerHTML = `<span class="error">❌ ${e.reason || e.message}</span>`;
+     }
+   }
+   
    export async function loadUserAttacks() {
      if (!state.userAddress || !state.piratesV6Contract) return;
    
@@ -271,7 +347,7 @@
                ${
                  timeLeft <= 0
                    ? `<button class="execute-btn" data-targetid="${attack.targetTokenId}" data-attackindex="${attack.attackIndex}">⚔️ Execute</button>`
-                   : `<button class="execute-btn" disabled>⏳ Waiting</button>`
+                   : `<button class="execute-btn" data-targetid="${attack.targetTokenId}" data-attackindex="${attack.attackIndex}" disabled>⏳ Waiting</button>`
                }
                <button class="cancel-attack-btn" data-targetid="${attack.targetTokenId}" data-attackindex="${attack.attackIndex}" title="Cancel attack">✖️</button>
              </div>
@@ -386,7 +462,9 @@
          return;
        }
    
-       const tx = await state.piratesV6Contract.executeAttack(targetTokenId, attackIndex, { gasLimit: 350000 });
+       const tx = await state.piratesV6Contract.executeAttack(targetTokenId, attackIndex, {
+         gasLimit: 350000
+       });
        msgDiv.innerHTML = `<span class="success">⏳ Executing...</span>`;
        await tx.wait();
    
@@ -497,6 +575,8 @@
        msgDiv.innerHTML = `
          <span class="success">
            ⏳ Starting attack...<br>
+           From: Block #${attackerTokenId}<br>
+           Target: #${targetTokenId}<br>
            Travel time: ${formatDuration(preview.travelTime)}<br>
            Steal amount: ${preview.stealAmount.toString()}<br>
            Remaining today: ${preview.remainingAttacksToday}
