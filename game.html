@@ -1,63 +1,63 @@
-  <!DOCTYPE html>
-  <html lang="en" data-theme="basic">
-  <head>
-    <script>
-      (function preloadTheme() {
-        const savedTheme = localStorage.getItem("inpinity-theme");
-        const theme =
-          savedTheme && ["light", "dark", "basic"].includes(savedTheme)
-            ? savedTheme
-            : "basic";
-  
-        document.documentElement.setAttribute("data-theme", theme);
-      })();
-    </script>
-  
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>INPINITY – Game Dashboard (V6)</title>
-  
-    <link rel="icon" type="image/png" href="favicon.webp" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto+Mono:wght@400;700&display=swap"
-      rel="stylesheet"
-    />
-  
-    <link rel="stylesheet" href="css/base.css" />
-    <link rel="stylesheet" href="css/layout.css" />
-    <link rel="stylesheet" href="css/animations.css" />
-    <link rel="stylesheet" href="css/dark.css" />
-    <link rel="stylesheet" href="css/light.css" />
-    <link rel="stylesheet" href="css/color.css" />
-    <link rel="stylesheet" href="css/responsive.css" />
-    <link rel="stylesheet" href="css/game.css" />
-  
-    <meta
-      name="description"
-      content="Manage your Pyramid Blocks, farm resources, protect your territory, launch pirate attacks, and trade inside the Inpinity game dashboard."
-    />
-    <meta
-      name="keywords"
-      content="Inpinity, Game, Pyramid, NFT, Base, INPI, Pitrone, Resources, Farming, Pirate Attack, V6"
-    />
-    <meta name="author" content="Inpinity Team" />
-    <meta property="og:title" content="Inpinity – Game Dashboard V6" />
-    <meta
-      property="og:description"
-      content="Manage blocks, farming, attacks, protection, and exchange in the Inpinity ecosystem. Now with V6 contracts."
-    />
-    <meta property="og:image" content="logo_background.jpg" />
-    <meta property="og:url" content="https://inpinity.online/game.html" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@unxpective" />
-    <meta name="twitter:creator" content="@Inpinity1" />
-    <meta name="theme-color" content="#140f1f" />
-    <meta name="robots" content="index,follow" />
-  
-    <script defer src="main.js"></script>
-  </head>
+<!DOCTYPE html>
+<html lang="en" data-theme="basic">
+<head>
+  <script>
+    (function preloadTheme() {
+      const savedTheme = localStorage.getItem("inpinity-theme");
+      const theme =
+        savedTheme && ["light", "dark", "basic"].includes(savedTheme)
+          ? savedTheme
+          : "basic";
+
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>INPINITY – Game Dashboard (V6)</title>
+
+  <link rel="icon" type="image/png" href="favicon.webp" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto+Mono:wght@400;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/dark.css" />
+  <link rel="stylesheet" href="css/light.css" />
+  <link rel="stylesheet" href="css/color.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+  <link rel="stylesheet" href="css/game.css" />
+
+  <meta
+    name="description"
+    content="Manage your Pyramid Blocks, farm resources, protect your territory, launch pirate attacks, and trade inside the Inpinity game dashboard."
+  />
+  <meta
+    name="keywords"
+    content="Inpinity, Game, Pyramid, NFT, Base, INPI, Pitrone, Resources, Farming, Pirate Attack, V6"
+  />
+  <meta name="author" content="Inpinity Team" />
+  <meta property="og:title" content="Inpinity – Game Dashboard V6" />
+  <meta
+    property="og:description"
+    content="Manage blocks, farming, attacks, protection, and exchange in the Inpinity ecosystem. Now with V6 contracts."
+  />
+  <meta property="og:image" content="logo_background.jpg" />
+  <meta property="og:url" content="https://inpinity.online/game.html" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="@unxpective" />
+  <meta name="twitter:creator" content="@Inpinity1" />
+  <meta name="theme-color" content="#140f1f" />
+  <meta name="robots" content="index,follow" />
+
+  <script defer src="main.js"></script>
+</head>
 <body>
   <header class="site-header">
     <nav class="site-nav" aria-label="Main navigation">
@@ -201,14 +201,14 @@
               <div class="action-card">
                 <h4>⚡ Farm Boost</h4>
                 <div class="action-value" id="boostStatus">Inactive</div>
-              
+
                 <div style="margin-top:0.45rem; font-size:0.82rem; color:#98a9b9; line-height:1.45;">
                   Cost: <strong>100 INPI / day</strong><br />
                   Effect: <strong>+25% production</strong><br />
                   Farm window: <strong>7 days</strong><br />
                   Boost contract max: <strong>10 days</strong>
                 </div>
-              
+
                 <div style="display:flex; gap:0.5rem; margin-top:0.65rem; align-items:center;">
                   <select
                     id="boostDays"
@@ -226,17 +226,17 @@
                     <option value="9">9 days</option>
                     <option value="10">10 days</option>
                   </select>
-              
+
                   <button class="btn btn-small boost-btn" id="buyBoostBtn" type="button" style="flex:1;" disabled>
                     Buy
                   </button>
                 </div>
-              
+
                 <div id="boostCostInfo" style="margin-top:0.45rem; font-size:0.82rem; color:#d4af37;">
                   Total: 700 INPI
                 </div>
               </div>
-            
+            </div>
 
             <div style="margin-top:1rem; border-top:1px solid #2a3f4a; padding-top:1.2rem;">
               <h4 style="color:#d4af37; margin-bottom:1rem;">🛡️ Mercenary Protection</h4>
@@ -344,7 +344,7 @@
                     Contract max: <strong>10 days</strong><br />
                     Base steal: <strong>25%</strong> → with boost up to <strong>50%</strong> before protection
                   </p>
-            
+
                   <div class="input-group" style="grid-template-columns:1fr auto;">
                     <select id="pirateBoostDays">
                       <option value="1">1 day</option>
@@ -358,20 +358,21 @@
                       <option value="9">9 days</option>
                       <option value="10">10 days</option>
                     </select>
-            
+
                     <button class="btn btn-small boost-btn" id="buyPirateBoostBtn" type="button">
                       Buy Pirate Boost
                     </button>
                   </div>
-            
+
                   <div id="pirateBoostCostInfo" style="font-size:0.84rem; color:#d4af37; margin-top:0.35rem;">
                     Total: 700 PIT
                   </div>
-            
+
                   <div id="pirateBoostMessage" style="font-size:0.84rem; margin-top:0.5rem;"></div>
                 </div>
               </details>
             </div>
+          </div>
 
           <div class="pirate-right">
             <div class="panel-head inner-panel-head">
