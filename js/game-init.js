@@ -31,7 +31,18 @@
      migrateSelectedFarmToV6,
      migrateAllMyV5Farms,
      protect,
-     updateFarmBoostCostLabel
+     loadMercenaryPanelState,
+     setMercenaryProtection,
+     extendMercenaryProtection,
+     cancelMercenaryProtection,
+     moveMercenaryProtection,
+     emergencyMoveMercenaryProtection,
+     unlockMercenarySecondSlot,
+     unlockMercenaryThirdSlot,
+     cleanSelectedProtection,
+     saveBastionTitle,
+     updateFarmBoostCostLabel,
+     updateMercenaryCostPreview
    } from "./farming.js";
    
    import { revealSelected } from "./reveal.js";
@@ -52,6 +63,7 @@
        initAttackResourceSelect();
        updateFarmBoostCostLabel();
        updateBoostCostLabels();
+       updateMercenaryCostPreview();
    
        await updateBalances();
        await updatePoolInfo();
@@ -61,6 +73,7 @@
          onRefreshBlockMarkings: refreshBlockMarkings
        });
        await loadUserAttacks();
+       await loadMercenaryPanelState();
    
        if (!state.attacksPoller) {
          state.attacksPoller = setInterval(async () => {
@@ -103,6 +116,16 @@
      byId("pirateBoostDays")?.addEventListener("input", updateBoostCostLabels);
    
      byId("protectBtn")?.addEventListener("click", protect);
+     byId("setProtectionBtn")?.addEventListener("click", setMercenaryProtection);
+     byId("extendProtectionBtn")?.addEventListener("click", extendMercenaryProtection);
+     byId("cancelProtectionBtn")?.addEventListener("click", cancelMercenaryProtection);
+     byId("moveProtectionBtn")?.addEventListener("click", moveMercenaryProtection);
+     byId("emergencyMoveProtectionBtn")?.addEventListener("click", emergencyMoveMercenaryProtection);
+     byId("unlockSlot2Btn")?.addEventListener("click", unlockMercenarySecondSlot);
+     byId("unlockSlot3Btn")?.addEventListener("click", unlockMercenaryThirdSlot);
+     byId("cleanupProtectionBtn")?.addEventListener("click", cleanSelectedProtection);
+     byId("saveBastionTitleBtn")?.addEventListener("click", saveBastionTitle);
+   
      byId("revealBtn")?.addEventListener("click", revealSelected);
    
      byId("farmingStartBtn")?.addEventListener("click", startFarmingSelected);
@@ -123,12 +146,20 @@
      byId("attackRow")?.addEventListener("input", scheduleAttackDropdownRefresh);
      byId("attackCol")?.addEventListener("input", scheduleAttackDropdownRefresh);
    
+     byId("boostDays")?.addEventListener("input", updateFarmBoostCostLabel);
      byId("boostDays")?.addEventListener("change", updateFarmBoostCostLabel);
      byId("pirateBoostDays")?.addEventListener("change", updateBoostCostLabels);
-     
+   
+     byId("protectDays")?.addEventListener("input", updateMercenaryCostPreview);
+     byId("protectDays")?.addEventListener("change", updateMercenaryCostPreview);
+     byId("protectSlotIndex")?.addEventListener("change", updateMercenaryCostPreview);
+     byId("mercenaryPaymentMode")?.addEventListener("change", updateMercenaryCostPreview);
+     byId("protectTokenId")?.addEventListener("input", updateMercenaryCostPreview);
+   
      updateFarmBoostCostLabel();
      updateBoostCostLabels();
-      
+     updateMercenaryCostPreview();
+   
      document.querySelectorAll('input[name="payment"]').forEach((radio) => {
        radio.addEventListener("change", (e) => {
          state.selectedPayment = e.target.value;
@@ -160,6 +191,7 @@
      initAttackResourceSelect();
      updateFarmBoostCostLabel();
      updateBoostCostLabels();
+     updateMercenaryCostPreview();
      bindEvents();
      bindEthereumEvents();
    

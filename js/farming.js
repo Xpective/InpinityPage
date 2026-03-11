@@ -1,14 +1,27 @@
 /* =========================================================
-   FARMING / MIGRATION / PROTECTION
+   FARMING / MIGRATION / MERCENARY V3
    ========================================================= */
 
    import { state } from "./state.js";
-   import { MERCENARY_V2_ADDRESS } from "./config.js";
+   import {
+     MERCENARY_INPI_COST,
+     MERCENARY_SLOT2_UNLOCK,
+     MERCENARY_SLOT3_UNLOCK,
+     MERCENARY_SET_COST_RESOURCES,
+     MERCENARY_EXTEND_COST_RESOURCES,
+     FARM_BOOST_PRICE_PER_DAY,
+     FARM_BOOST_MAX_DAYS,
+     FARM_WINDOW_DAYS
+   } from "./config.js";
    import { byId, formatDuration, debugLog } from "./utils.js";
    import { ensureFarmingApproval, ensureInpiApprovalForMercenary } from "./approvals.js";
    import { loadResourceBalancesOnchain } from "./resources.js";
    import { loadUserBlocks, selectBlock } from "./blocks.js";
    import { loadUserAttacks, refreshBlockMarkings } from "./attacks.js";
+   import {
+     loadMercenaryProfileV3,
+     loadMercenarySlotsV3
+   } from "./subgraph.js";
    import {
      isTokenActiveOnV5,
      migrateSingleFarmV5ToV6,
@@ -16,18 +29,16 @@
      getFarmingV5Contract,
      getV5PendingTotal
    } from "./migration.js";
-
-   import {
-    FARM_BOOST_PRICE_PER_DAY,
-    FARM_BOOST_MAX_DAYS,
-    FARM_WINDOW_DAYS
-  } from "./config.js";
    
    let isMigrationRunning = false;
    let isBatchMigrationRunning = false;
    
    function getActionMessageDiv() {
      return byId("actionMessage");
+   }
+   
+   function getProtectMessageDiv() {
+     return byId("protectMessage");
    }
    
    async function refreshSelectedBlockView() {
@@ -57,7 +68,7 @@
    }
    
    function friendlyErrorMessage(e) {
-     const msg = e?.reason || e?.message || "Unknown error";
+     const msg = e?.reason || e?.data?.message || e?.message || "Unknown error";
      const lower = String(msg).toLowerCase();
    
      if (
@@ -98,6 +109,10 @@
    
      return msg;
    }
+   
+   /* =========================================================
+      FARMING V6
+      ========================================================= */
    
    export async function startFarmingSelected() {
      if (!state.selectedBlock) return;
@@ -153,229 +168,222 @@
    }
    
    export async function claimSelected() {
-    if (!state.selectedBlock) return;
-  
-    const msgDiv = getActionMessageDiv();
-    const tokenId = state.selectedBlock.tokenId;
-  
-    try {
-      // =========================
-      // V5 CLAIM
-      // =========================
-      if (state.selectedBlock.activeOnV5 && !state.selectedBlock.farmingActive) {
-        const v5 = getFarmingV5Contract();
-        let preview = null;
-  
-        try {
-          preview = await v5.previewClaim(tokenId);
-        } catch (e) {
-          console.error("V5 previewClaim error:", e);
-          msgDiv.innerHTML = `<span class="error">❌ V5 preview failed: ${friendlyErrorMessage(e)}</span>`;
-          return;
-        }
-  
-        if (!preview || !preview.allowed) {
-          const code = preview?.code ?? "?";
-          const secondsRemaining = Number(preview?.secondsRemaining || 0);
-          msgDiv.innerHTML = `<span class="error">❌ V5 claim not ready. Code ${code}. Wait ${formatDuration(secondsRemaining)}.</span>`;
-          return;
-        }
-  
-        let total = null;
-        try {
-          total = await getV5PendingTotal(tokenId);
-        } catch (e) {
-          console.error("V5 pending total error:", e);
-          msgDiv.innerHTML = `<span class="error">❌ Could not read V5 pending rewards: ${friendlyErrorMessage(e)}</span>`;
-          return;
-        }
-  
-        if (!total || total.isZero()) {
-          msgDiv.innerHTML = `<span class="error">❌ Nothing to claim on V5.</span>`;
-          return;
-        }
-  
-        msgDiv.innerHTML = `<span class="success">⏳ Claiming V5 resources... ${total.toString()} total</span>`;
-        const tx = await v5.claimResources(tokenId, { gasLimit: 700000 });
-        debugLog("V5 claim tx", tx.hash);
-        await tx.wait();
-  
-        msgDiv.innerHTML = `<span class="success">💰 V5 resources claimed!</span>`;
-        await loadResourceBalancesOnchain();
-        await refreshSelectedBlockView();
-        return;
-      }
-  
-      // =========================
-      // V6 CLAIM
-      // =========================
-      if (state.selectedBlock.farmingActive) {
-        let preview = null;
-        let pending = null;
-        let total = ethers.BigNumber.from(0);
-  
-        // 1) Erst Pending lesen, damit wir überhaupt wissen, ob was da ist
-        try {
-          pending = await state.farmingV6Contract.getAllPending(tokenId);
-        } catch (e) {
-          console.error("V6 getAllPending error:", e);
-          msgDiv.innerHTML = `<span class="error">❌ Could not read V6 pending rewards: ${friendlyErrorMessage(e)}</span>`;
-          return;
-        }
-  
-        for (let i = 0; i < pending.length; i++) {
-          total = total.add(pending[i]);
-        }
-  
-        if (total.isZero()) {
-          msgDiv.innerHTML = `<span class="error">❌ Nothing to claim on V6.</span>`;
-          return;
-        }
-  
-        // 2) Preview versuchen, aber nicht hart abbrechen wenn es revertet
-        try {
-          preview = await state.farmingV6Contract.previewClaim(tokenId);
-        } catch (e) {
-          console.warn("V6 previewClaim failed, fallback to secondsUntilClaimable()", e);
-        }
-  
-        // 3) Wenn Preview funktioniert hat, normale Logik
-        if (preview) {
-          if (!preview.allowed) {
-            const code = preview?.code ?? "?";
-            const secondsRemaining = Number(preview?.secondsRemaining || 0);
-            msgDiv.innerHTML = `<span class="error">❌ V6 claim not ready. Code ${code}. Wait ${formatDuration(secondsRemaining)}.</span>`;
-            return;
-          }
-        } else {
-          // 4) Fallback: direkt cooldown lesen
-          try {
-            const waitSec = await state.farmingV6Contract.secondsUntilClaimable(tokenId);
-            const waitNum = Number(waitSec || 0);
-  
-            if (waitNum > 0) {
-              msgDiv.innerHTML = `<span class="error">❌ V6 claim not ready. Wait ${formatDuration(waitNum)}.</span>`;
-              return;
-            }
-          } catch (e) {
-            console.error("V6 secondsUntilClaimable fallback error:", e);
-            msgDiv.innerHTML = `<span class="error">❌ V6 preview failed and fallback check also failed: ${friendlyErrorMessage(e)}</span>`;
-            return;
-          }
-        }
-  
-        msgDiv.innerHTML = `<span class="success">⏳ Claiming V6 resources... ${total.toString()} total</span>`;
-        const tx = await state.farmingV6Contract.claimResources(tokenId, { gasLimit: 700000 });
-        debugLog("V6 claim tx", tx.hash);
-        await tx.wait();
-  
-        msgDiv.innerHTML = `<span class="success">💰 V6 resources claimed!</span>`;
-        await loadResourceBalancesOnchain();
-        await refreshSelectedBlockView();
-        return;
-      }
-  
-      msgDiv.innerHTML = `<span class="error">❌ No active farm to claim from.</span>`;
-    } catch (e) {
-      console.error("Claim error:", e);
-      msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
-    }
-  }
-  export function updateFarmBoostCostLabel() {
-    const daysEl = byId("boostDays");
-    const costInfo = byId("boostCostInfo");
-  
-    if (!costInfo || !daysEl) return;
-  
-    let days = parseInt(daysEl.value, 10);
-    if (!Number.isFinite(days)) days = 7;
-  
-    days = Math.max(1, Math.min(FARM_BOOST_MAX_DAYS, days));
-    daysEl.value = String(days);
-  
-    costInfo.textContent = `Total: ${days * FARM_BOOST_PRICE_PER_DAY} INPI`;
-  }
-  
-  export async function buyBoost() {
-    if (!state.selectedBlock) {
-      alert("No block selected.");
-      return;
-    }
-  
-    const msgDiv = getActionMessageDiv();
-    const tokenId = state.selectedBlock.tokenId;
-  
-    let days = parseInt(byId("boostDays")?.value, 10);
-    if (!Number.isFinite(days)) days = 7;
-    days = Math.max(1, Math.min(FARM_BOOST_MAX_DAYS, days));
-  
-    const totalCostHuman = days * FARM_BOOST_PRICE_PER_DAY;
-    const totalCostWei = ethers.utils.parseEther(String(totalCostHuman));
-  
-    try {
-      const owner = await state.nftContract.ownerOf(tokenId);
-      if (owner.toLowerCase() !== state.userAddress.toLowerCase()) {
-        msgDiv.innerHTML = `<span class="error">❌ Not your block.</span>`;
-        return;
-      }
-  
-      const allowance = await state.inpiContract.allowance(
-        state.userAddress,
-        state.farmingV6Contract.address
-      );
-  
-      if (allowance.lt(totalCostWei)) {
-        msgDiv.innerHTML = `
-          <span class="success">
-            ⏳ Approving INPI...<br>
-            Cost: ${totalCostHuman} INPI
-          </span>
-        `;
-  
-        const approveTx = await state.inpiContract.approve(
-          state.farmingV6Contract.address,
-          totalCostWei
-        );
-        debugLog("farm boost approve tx", approveTx.hash);
-        await approveTx.wait();
-      }
-  
-      msgDiv.innerHTML = `
-        <span class="success">
-          ⏳ Buying farm boost...<br>
-          Block: #${tokenId}<br>
-          Days: ${days}<br>
-          Cost: ${totalCostHuman} INPI<br>
-          Effect: +25% production<br>
-          Farm window: ${FARM_WINDOW_DAYS} days
-        </span>
-      `;
-  
-      const tx = await state.farmingV6Contract.buyBoost(tokenId, days, {
-        gasLimit: 300000
-      });
-  
-      debugLog("buyBoost tx", tx.hash);
-      await tx.wait();
-  
-      msgDiv.innerHTML = `
-        <span class="success">
-          ✅ Farm boost activated.<br>
-          Block: #${tokenId}<br>
-          Days: ${days}<br>
-          Paid: ${totalCostHuman} INPI
-        </span>
-      `;
-  
-      await loadResourceBalancesOnchain();
-      await refreshSelectedBlockView();
-    } catch (e) {
-      console.error("Boost error:", e);
-      msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
-    }
-  }
-
-
+     if (!state.selectedBlock) return;
+   
+     const msgDiv = getActionMessageDiv();
+     const tokenId = state.selectedBlock.tokenId;
+   
+     try {
+       if (state.selectedBlock.activeOnV5 && !state.selectedBlock.farmingActive) {
+         const v5 = getFarmingV5Contract();
+         let preview = null;
+   
+         try {
+           preview = await v5.previewClaim(tokenId);
+         } catch (e) {
+           console.error("V5 previewClaim error:", e);
+           msgDiv.innerHTML = `<span class="error">❌ V5 preview failed: ${friendlyErrorMessage(e)}</span>`;
+           return;
+         }
+   
+         if (!preview || !preview.allowed) {
+           const code = preview?.code ?? "?";
+           const secondsRemaining = Number(preview?.secondsRemaining || 0);
+           msgDiv.innerHTML = `<span class="error">❌ V5 claim not ready. Code ${code}. Wait ${formatDuration(secondsRemaining)}.</span>`;
+           return;
+         }
+   
+         let total = null;
+         try {
+           total = await getV5PendingTotal(tokenId);
+         } catch (e) {
+           console.error("V5 pending total error:", e);
+           msgDiv.innerHTML = `<span class="error">❌ Could not read V5 pending rewards: ${friendlyErrorMessage(e)}</span>`;
+           return;
+         }
+   
+         if (!total || total.isZero()) {
+           msgDiv.innerHTML = `<span class="error">❌ Nothing to claim on V5.</span>`;
+           return;
+         }
+   
+         msgDiv.innerHTML = `<span class="success">⏳ Claiming V5 resources... ${total.toString()} total</span>`;
+         const tx = await v5.claimResources(tokenId, { gasLimit: 700000 });
+         debugLog("V5 claim tx", tx.hash);
+         await tx.wait();
+   
+         msgDiv.innerHTML = `<span class="success">💰 V5 resources claimed!</span>`;
+         await loadResourceBalancesOnchain();
+         await refreshSelectedBlockView();
+         return;
+       }
+   
+       if (state.selectedBlock.farmingActive) {
+         let preview = null;
+         let pending = null;
+         let total = ethers.BigNumber.from(0);
+   
+         try {
+           pending = await state.farmingV6Contract.getAllPending(tokenId);
+         } catch (e) {
+           console.error("V6 getAllPending error:", e);
+           msgDiv.innerHTML = `<span class="error">❌ Could not read V6 pending rewards: ${friendlyErrorMessage(e)}</span>`;
+           return;
+         }
+   
+         for (let i = 0; i < pending.length; i++) {
+           total = total.add(pending[i]);
+         }
+   
+         if (total.isZero()) {
+           msgDiv.innerHTML = `<span class="error">❌ Nothing to claim on V6.</span>`;
+           return;
+         }
+   
+         try {
+           preview = await state.farmingV6Contract.previewClaim(tokenId);
+         } catch (e) {
+           console.warn("V6 previewClaim failed, fallback to secondsUntilClaimable()", e);
+         }
+   
+         if (preview) {
+           if (!preview.allowed) {
+             const code = preview?.code ?? "?";
+             const secondsRemaining = Number(preview?.secondsRemaining || 0);
+             msgDiv.innerHTML = `<span class="error">❌ V6 claim not ready. Code ${code}. Wait ${formatDuration(secondsRemaining)}.</span>`;
+             return;
+           }
+         } else {
+           try {
+             const waitSec = await state.farmingV6Contract.secondsUntilClaimable(tokenId);
+             const waitNum = Number(waitSec || 0);
+   
+             if (waitNum > 0) {
+               msgDiv.innerHTML = `<span class="error">❌ V6 claim not ready. Wait ${formatDuration(waitNum)}.</span>`;
+               return;
+             }
+           } catch (e) {
+             console.error("V6 secondsUntilClaimable fallback error:", e);
+             msgDiv.innerHTML = `<span class="error">❌ V6 preview failed and fallback check also failed: ${friendlyErrorMessage(e)}</span>`;
+             return;
+           }
+         }
+   
+         msgDiv.innerHTML = `<span class="success">⏳ Claiming V6 resources... ${total.toString()} total</span>`;
+         const tx = await state.farmingV6Contract.claimResources(tokenId, { gasLimit: 700000 });
+         debugLog("V6 claim tx", tx.hash);
+         await tx.wait();
+   
+         msgDiv.innerHTML = `<span class="success">💰 V6 resources claimed!</span>`;
+         await loadResourceBalancesOnchain();
+         await refreshSelectedBlockView();
+         return;
+       }
+   
+       msgDiv.innerHTML = `<span class="error">❌ No active farm to claim from.</span>`;
+     } catch (e) {
+       console.error("Claim error:", e);
+       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+     }
+   }
+   
+   export function updateFarmBoostCostLabel() {
+     const daysEl = byId("boostDays");
+     const costInfo = byId("boostCostInfo");
+   
+     if (!costInfo || !daysEl) return;
+   
+     let days = parseInt(daysEl.value, 10);
+     if (!Number.isFinite(days)) days = 7;
+   
+     days = Math.max(1, Math.min(FARM_BOOST_MAX_DAYS, days));
+     daysEl.value = String(days);
+   
+     costInfo.textContent = `Total: ${days * FARM_BOOST_PRICE_PER_DAY} INPI`;
+   }
+   
+   export async function buyBoost() {
+     if (!state.selectedBlock) {
+       alert("No block selected.");
+       return;
+     }
+   
+     const msgDiv = getActionMessageDiv();
+     const tokenId = state.selectedBlock.tokenId;
+   
+     let days = parseInt(byId("boostDays")?.value, 10);
+     if (!Number.isFinite(days)) days = 7;
+     days = Math.max(1, Math.min(FARM_BOOST_MAX_DAYS, days));
+   
+     const totalCostHuman = days * FARM_BOOST_PRICE_PER_DAY;
+     const totalCostWei = ethers.utils.parseEther(String(totalCostHuman));
+   
+     try {
+       const owner = await state.nftContract.ownerOf(tokenId);
+       if (owner.toLowerCase() !== state.userAddress.toLowerCase()) {
+         msgDiv.innerHTML = `<span class="error">❌ Not your block.</span>`;
+         return;
+       }
+   
+       const allowance = await state.inpiContract.allowance(
+         state.userAddress,
+         state.farmingV6Contract.address
+       );
+   
+       if (allowance.lt(totalCostWei)) {
+         msgDiv.innerHTML = `
+           <span class="success">
+             ⏳ Approving INPI...<br>
+             Cost: ${totalCostHuman} INPI
+           </span>
+         `;
+   
+         const approveTx = await state.inpiContract.approve(
+           state.farmingV6Contract.address,
+           totalCostWei
+         );
+         debugLog("farm boost approve tx", approveTx.hash);
+         await approveTx.wait();
+       }
+   
+       msgDiv.innerHTML = `
+         <span class="success">
+           ⏳ Buying farm boost...<br>
+           Block: #${tokenId}<br>
+           Days: ${days}<br>
+           Cost: ${totalCostHuman} INPI<br>
+           Effect: +25% production<br>
+           Farm window: ${FARM_WINDOW_DAYS} days
+         </span>
+       `;
+   
+       const tx = await state.farmingV6Contract.buyBoost(tokenId, days, {
+         gasLimit: 300000
+       });
+   
+       debugLog("buyBoost tx", tx.hash);
+       await tx.wait();
+   
+       msgDiv.innerHTML = `
+         <span class="success">
+           ✅ Farm boost activated.<br>
+           Block: #${tokenId}<br>
+           Days: ${days}<br>
+           Paid: ${totalCostHuman} INPI
+         </span>
+       `;
+   
+       await loadResourceBalancesOnchain();
+       await refreshSelectedBlockView();
+     } catch (e) {
+       console.error("Boost error:", e);
+       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+     }
+   }
+   
+   /* =========================================================
+      MIGRATION
+      ========================================================= */
    
    export async function migrateSelectedFarmToV6() {
      if (!state.selectedBlock) return;
@@ -477,51 +485,415 @@
      }
    }
    
-   export async function protect() {
-     const tokenId = parseInt(byId("protectTokenId")?.value, 10);
-     const level = parseInt(byId("protectLevel")?.value, 10);
-     const msgDiv = byId("protectMessage");
+   /* =========================================================
+      MERCENARY V3 HELPERS
+      ========================================================= */
    
-     if (isNaN(tokenId) || isNaN(level)) {
-       alert("Invalid input");
-       return;
-     }
+   function getMercenaryPaymentMode() {
+     return (byId("mercenaryPaymentMode")?.value || "resources").toLowerCase();
+   }
+   
+   function getSelectedMercenarySlot() {
+     const v = parseInt(byId("protectSlotIndex")?.value || "0", 10);
+     return Number.isFinite(v) ? v : 0;
+   }
+   
+   function getSelectedProtectionDays() {
+     const v = parseInt(byId("protectDays")?.value || "1", 10);
+     return Number.isFinite(v) ? v : 1;
+   }
+   
+   function getSelectedProtectTokenId() {
+     const v = parseInt(byId("protectTokenId")?.value || "0", 10);
+     return Number.isFinite(v) ? v : 0;
+   }
+   
+   function renderCostList(items) {
+     return items.map((x) => `${x.amount} ${x.label}`).join(", ");
+   }
+   
+   export async function loadMercenaryPanelState() {
+     if (!state.userAddress || !state.mercenaryV3Contract) return;
    
      try {
-       msgDiv.innerHTML = `<span class="success">⏳ Hiring mercenaries...</span>`;
+       const [profile, slots] = await Promise.all([
+         loadMercenaryProfileV3(state.userAddress),
+         loadMercenarySlotsV3(state.userAddress)
+       ]);
    
+       state.mercenaryProfile = profile || null;
+       state.mercenarySlots = slots || [];
+   
+       updateMercenaryPanelDisplay();
+     } catch (e) {
+       console.error("loadMercenaryPanelState error:", e);
+     }
+   }
+   
+   export function updateMercenaryPanelDisplay() {
+     const profile = state.mercenaryProfile;
+     const slots = state.mercenarySlots || [];
+     const selected = state.selectedBlock;
+   
+     safeValue("protectTokenId", selected?.tokenId || "");
+   
+     if (profile) {
+       if (byId("mercenaryRank")) byId("mercenaryRank").textContent = profile.rankName || "Watchman";
+       if (byId("mercenaryPoints")) byId("mercenaryPoints").textContent = String(profile.points || "0");
+       if (byId("mercenaryDiscount")) byId("mercenaryDiscount").textContent = `${Number(profile.discountBps || 0) / 100}%`;
+       if (byId("mercenarySlotsUnlocked")) byId("mercenarySlotsUnlocked").textContent = String(profile.slotsUnlocked || 1);
+       if (byId("mercenaryTitle")) byId("mercenaryTitle").textContent = profile.bastionTitle || "—";
+       if (byId("bastionTitleInput") && !byId("bastionTitleInput").value) {
+         byId("bastionTitleInput").value = profile.bastionTitle || "";
+       }
+     } else {
+       if (byId("mercenaryRank")) byId("mercenaryRank").textContent = "Watchman";
+       if (byId("mercenaryPoints")) byId("mercenaryPoints").textContent = "0";
+       if (byId("mercenaryDiscount")) byId("mercenaryDiscount").textContent = "2%";
+       if (byId("mercenarySlotsUnlocked")) byId("mercenarySlotsUnlocked").textContent = "1";
+       if (byId("mercenaryTitle")) byId("mercenaryTitle").textContent = "—";
+     }
+   
+     const slotsBox = byId("mercenarySlotsInfo");
+     if (slotsBox) {
+       if (!slots.length) {
+         slotsBox.innerHTML = `<div class="resource-item">No active protection slots.</div>`;
+       } else {
+         slotsBox.innerHTML = slots
+           .sort((a, b) => Number(a.slotIndex) - Number(b.slotIndex))
+           .map((slot) => {
+             const expiry = Number(slot.expiry || 0);
+             const active = !!slot.active && expiry > Math.floor(Date.now() / 1000);
+             return `
+               <div class="resource-item">
+                 Slot ${Number(slot.slotIndex) + 1}: 
+                 ${active ? `#${slot.tokenId} · ${slot.protectionPercent}% · ${formatDuration(expiry - Math.floor(Date.now() / 1000))}` : "inactive"}
+               </div>
+             `;
+           })
+           .join("");
+       }
+     }
+   
+     updateMercenaryCostPreview();
+   }
+   
+   export async function updateMercenaryCostPreview() {
+     const info = byId("mercenaryCostInfo");
+     if (!info) return;
+   
+     const slotIndex = getSelectedMercenarySlot();
+     const days = getSelectedProtectionDays();
+     const payInINPI = getMercenaryPaymentMode() === "inpi";
+     const isExtension = !!(state.selectedBlock && state.selectedBlock.protectionActive);
+   
+     try {
+       if (state.userAddress && state.mercenaryV3Contract) {
+         const cost = await state.mercenaryV3Contract.getProtectionCost(
+           state.userAddress,
+           payInINPI,
+           isExtension
+         );
+   
+         if (payInINPI) {
+           const inpiHuman = ethers.utils.formatEther(cost.inpiCost || cost[0]);
+           info.textContent = `Cost: ${inpiHuman} INPI`;
+         } else {
+           const oil = Number(cost.oilCost || cost[1] || 0);
+           const lemons = Number(cost.lemonsCost || cost[2] || 0);
+           const iron = Number(cost.ironCost || cost[3] || 0);
+           info.textContent = `Cost: ${oil} Oil, ${lemons} Lemons, ${iron} Iron`;
+         }
+         return;
+       }
+     } catch (e) {
+       console.warn("updateMercenaryCostPreview fallback:", e);
+     }
+   
+     if (payInINPI) {
+       info.textContent = `Cost: ${MERCENARY_INPI_COST} INPI`;
+     } else {
+       info.textContent = isExtension
+         ? `Cost: ${renderCostList(MERCENARY_EXTEND_COST_RESOURCES)}`
+         : `Cost: ${renderCostList(MERCENARY_SET_COST_RESOURCES)}`;
+     }
+   
+     if (byId("protectDaysInfo")) {
+       byId("protectDaysInfo").textContent = `Duration: ${days} day${days > 1 ? "s" : ""}`;
+     }
+   
+     if (slotIndex >= 0 && byId("protectSlotInfo")) {
+       byId("protectSlotInfo").textContent = `Selected Slot: ${slotIndex + 1}`;
+     }
+   }
+   
+   async function refreshMercenaryAfterWrite(tokenId = null) {
+     await loadMercenaryPanelState();
+     await loadUserBlocks({ onRevealSelected: null, onRefreshBlockMarkings: refreshBlockMarkings });
+   
+     if (state.selectedBlock) {
+       await selectBlock(
+         tokenId || state.selectedBlock.tokenId,
+         state.selectedBlock.row,
+         state.selectedBlock.col
+       );
+     }
+   }
+   
+   export async function unlockMercenarySecondSlot() {
+     const msgDiv = getProtectMessageDiv();
+     if (!state.mercenaryV3Contract) return;
+   
+     try {
+       msgDiv.innerHTML = `<span class="success">⏳ Unlocking slot 2...<br>${renderCostList(MERCENARY_SLOT2_UNLOCK)}</span>`;
+   
+       const tx = await state.mercenaryV3Contract.unlockSecondSlot({ gasLimit: 700000 });
+       debugLog("unlockSecondSlot tx", tx.hash);
+       await tx.wait();
+   
+       msgDiv.innerHTML = `<span class="success">✅ Slot 2 unlocked.</span>`;
+       await loadResourceBalancesOnchain();
+       await refreshMercenaryAfterWrite();
+     } catch (e) {
+       console.error("unlockMercenarySecondSlot error:", e);
+       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+     }
+   }
+   
+   export async function unlockMercenaryThirdSlot() {
+     const msgDiv = getProtectMessageDiv();
+     if (!state.mercenaryV3Contract) return;
+   
+     try {
+       msgDiv.innerHTML = `<span class="success">⏳ Unlocking slot 3...<br>${renderCostList(MERCENARY_SLOT3_UNLOCK)}</span>`;
+   
+       const tx = await state.mercenaryV3Contract.unlockThirdSlot({ gasLimit: 800000 });
+       debugLog("unlockThirdSlot tx", tx.hash);
+       await tx.wait();
+   
+       msgDiv.innerHTML = `<span class="success">✅ Slot 3 unlocked.</span>`;
+       await loadResourceBalancesOnchain();
+       await refreshMercenaryAfterWrite();
+     } catch (e) {
+       console.error("unlockMercenaryThirdSlot error:", e);
+       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+     }
+   }
+   
+   export async function setMercenaryProtection() {
+     const msgDiv = getProtectMessageDiv();
+     const tokenId = getSelectedProtectTokenId();
+     const slotIndex = getSelectedMercenarySlot();
+     const durationDays = getSelectedProtectionDays();
+     const payInINPI = getMercenaryPaymentMode() === "inpi";
+   
+     if (!tokenId || !state.mercenaryV3Contract) return;
+   
+     try {
        const owner = await state.nftContract.ownerOf(tokenId);
        if (owner.toLowerCase() !== state.userAddress.toLowerCase()) {
          msgDiv.innerHTML = `<span class="error">❌ Not your block.</span>`;
          return;
        }
    
-       const cost = level * 10;
-       const amount = ethers.utils.parseEther(cost.toString());
-   
-       const ok = await ensureInpiApprovalForMercenary(amount);
-       if (!ok) {
-         msgDiv.innerHTML = `<span class="error">❌ INPI approval failed.</span>`;
-         return;
+       if (payInINPI) {
+         const amount = ethers.utils.parseEther(MERCENARY_INPI_COST);
+         const ok = await ensureInpiApprovalForMercenary(amount);
+         if (!ok) {
+           msgDiv.innerHTML = `<span class="error">❌ INPI approval failed.</span>`;
+           return;
+         }
        }
    
-       const tx = await state.mercenaryV2Contract.hireMercenaries(tokenId, level, { gasLimit: 400000 });
-       debugLog("hireMercenaries tx", {
+       msgDiv.innerHTML = `<span class="success">⏳ Setting protection...</span>`;
+   
+       const tx = await state.mercenaryV3Contract.setProtection(
+         slotIndex,
          tokenId,
-         level,
-         spender: MERCENARY_V2_ADDRESS,
-         hash: tx.hash
-       });
+         durationDays,
+         payInINPI,
+         { gasLimit: 800000 }
+       );
+       debugLog("setProtection tx", tx.hash);
        await tx.wait();
    
-       msgDiv.innerHTML = `<span class="success">✅ Protection active for 3.14 days.</span>`;
-   
-       await loadUserBlocks({ onRevealSelected: null, onRefreshBlockMarkings: refreshBlockMarkings });
-       if (state.selectedBlock && String(state.selectedBlock.tokenId) === String(tokenId)) {
-         await selectBlock(state.selectedBlock.tokenId, state.selectedBlock.row, state.selectedBlock.col);
-       }
+       msgDiv.innerHTML = `<span class="success">✅ Protection set.</span>`;
+       await loadResourceBalancesOnchain();
+       await refreshMercenaryAfterWrite(tokenId);
      } catch (e) {
-       console.error("Protection error:", e);
+       console.error("setMercenaryProtection error:", e);
        msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
      }
+   }
+   
+   export async function extendMercenaryProtection() {
+     const msgDiv = getProtectMessageDiv();
+     const slotIndex = getSelectedMercenarySlot();
+     const additionalDays = getSelectedProtectionDays();
+     const payInINPI = getMercenaryPaymentMode() === "inpi";
+   
+     if (!state.mercenaryV3Contract) return;
+   
+     try {
+       if (payInINPI) {
+         const amount = ethers.utils.parseEther(MERCENARY_INPI_COST);
+         const ok = await ensureInpiApprovalForMercenary(amount);
+         if (!ok) {
+           msgDiv.innerHTML = `<span class="error">❌ INPI approval failed.</span>`;
+           return;
+         }
+       }
+   
+       msgDiv.innerHTML = `<span class="success">⏳ Extending protection...</span>`;
+   
+       const tx = await state.mercenaryV3Contract.extendProtection(
+         slotIndex,
+         additionalDays,
+         payInINPI,
+         { gasLimit: 800000 }
+       );
+       debugLog("extendProtection tx", tx.hash);
+       await tx.wait();
+   
+       msgDiv.innerHTML = `<span class="success">✅ Protection extended.</span>`;
+       await loadResourceBalancesOnchain();
+       await refreshMercenaryAfterWrite();
+     } catch (e) {
+       console.error("extendMercenaryProtection error:", e);
+       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+     }
+   }
+   
+   export async function cancelMercenaryProtection() {
+     const msgDiv = getProtectMessageDiv();
+     const slotIndex = getSelectedMercenarySlot();
+   
+     if (!state.mercenaryV3Contract) return;
+   
+     try {
+       msgDiv.innerHTML = `<span class="success">⏳ Cancelling protection...</span>`;
+   
+       const tx = await state.mercenaryV3Contract.cancelProtection(slotIndex, {
+         gasLimit: 500000
+       });
+       debugLog("cancelProtection tx", tx.hash);
+       await tx.wait();
+   
+       msgDiv.innerHTML = `<span class="success">✅ Protection cancelled.</span>`;
+       await refreshMercenaryAfterWrite();
+     } catch (e) {
+       console.error("cancelMercenaryProtection error:", e);
+       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+     }
+   }
+   
+   export async function moveMercenaryProtection() {
+     const msgDiv = getProtectMessageDiv();
+     const slotIndex = getSelectedMercenarySlot();
+     const newTokenId = getSelectedProtectTokenId();
+   
+     if (!state.mercenaryV3Contract || !newTokenId) return;
+   
+     try {
+       msgDiv.innerHTML = `<span class="success">⏳ Moving protection...</span>`;
+   
+       const tx = await state.mercenaryV3Contract.moveProtection(slotIndex, newTokenId, {
+         gasLimit: 800000
+       });
+       debugLog("moveProtection tx", tx.hash);
+       await tx.wait();
+   
+       msgDiv.innerHTML = `<span class="success">✅ Protection moved.</span>`;
+       await refreshMercenaryAfterWrite(newTokenId);
+     } catch (e) {
+       console.error("moveMercenaryProtection error:", e);
+       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+     }
+   }
+   
+   export async function emergencyMoveMercenaryProtection() {
+     const msgDiv = getProtectMessageDiv();
+     const slotIndex = getSelectedMercenarySlot();
+     const newTokenId = getSelectedProtectTokenId();
+   
+     if (!state.mercenaryV3Contract || !newTokenId) return;
+   
+     try {
+       msgDiv.innerHTML = `<span class="success">⏳ Emergency moving protection...</span>`;
+   
+       const tx = await state.mercenaryV3Contract.emergencyMoveProtection(slotIndex, newTokenId, {
+         gasLimit: 800000
+       });
+       debugLog("emergencyMoveProtection tx", tx.hash);
+       await tx.wait();
+   
+       msgDiv.innerHTML = `<span class="success">✅ Emergency protection move complete.</span>`;
+       await refreshMercenaryAfterWrite(newTokenId);
+     } catch (e) {
+       console.error("emergencyMoveMercenaryProtection error:", e);
+       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+     }
+   }
+   
+   export async function cleanSelectedProtection() {
+     const msgDiv = getProtectMessageDiv();
+     const slotIndex = getSelectedMercenarySlot();
+     const tokenId = getSelectedProtectTokenId();
+   
+     if (!state.mercenaryV3Contract || !tokenId) return;
+   
+     try {
+       msgDiv.innerHTML = `<span class="success">⏳ Cleaning expired protection...</span>`;
+   
+       const tx = await state.mercenaryV3Contract.cleanExpiredToken(tokenId, {
+         gasLimit: 500000
+       });
+       debugLog("cleanExpiredToken tx", tx.hash);
+       await tx.wait();
+   
+       msgDiv.innerHTML = `<span class="success">✅ Cleanup complete.</span>`;
+       await loadResourceBalancesOnchain();
+       await refreshMercenaryAfterWrite(tokenId);
+     } catch (e) {
+       console.error("cleanSelectedProtection error:", e);
+       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+     }
+   }
+   
+   export async function saveBastionTitle() {
+     const msgDiv = getProtectMessageDiv();
+     const title = (byId("bastionTitleInput")?.value || "").trim();
+   
+     if (!state.mercenaryV3Contract) return;
+     if (!title) {
+       msgDiv.innerHTML = `<span class="error">❌ Enter a title first.</span>`;
+       return;
+     }
+   
+     try {
+       msgDiv.innerHTML = `<span class="success">⏳ Saving bastion title...</span>`;
+   
+       const tx = await state.mercenaryV3Contract.setBastionTitle(title, {
+         gasLimit: 400000
+       });
+       debugLog("setBastionTitle tx", tx.hash);
+       await tx.wait();
+   
+       msgDiv.innerHTML = `<span class="success">✅ Bastion title saved.</span>`;
+       await loadMercenaryPanelState();
+     } catch (e) {
+       console.error("saveBastionTitle error:", e);
+       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+     }
+   }
+   
+   /* =========================================================
+      LEGACY BUTTON COMPAT
+      ========================================================= */
+   
+   export async function protect() {
+     if (!state.selectedBlock?.protectionActive) {
+       return setMercenaryProtection();
+     }
+     return extendMercenaryProtection();
    }

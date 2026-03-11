@@ -1,5 +1,5 @@
 /* =========================================================
-   SUBGRAPH QUERIES – V6 ONLY (farmV6S / attackV6S)
+   SUBGRAPH QUERIES – V6 + MERCENARY V3
    ========================================================= */
 
    import { WORKER_URL } from "./config.js";
@@ -75,15 +75,84 @@
      );
    }
    
-   export async function loadProtectionsFromSubgraph() {
+   /* =========================================================
+      MERCENARY V3 SUBGRAPH
+      ========================================================= */
+   
+   export async function loadMercenaryTokenProtectionsV3() {
      return fetchAllWithPagination(
-       "protections",
-       `id level expiresAt active`,
+       "mercenaryTokenProtectionV3S",
+       `
+         id
+         tokenId
+         user
+         slotIndex
+         protectionTier
+         protectionPercent
+         expiry
+         active
+         updatedAt
+         blockNumber
+       `,
        `{ active: true }`
      );
    }
    
-   // Cache Builders
+   export async function loadMercenaryProfileV3(wallet) {
+     const id = wallet.toLowerCase();
+     const q = `{
+       defenderProfileV3(id: "${id}") {
+         id
+         user
+         points
+         rank
+         rankName
+         discountBps
+         totalProtectedDays
+         successfulDefenses
+         sameBlockExtensions
+         cleanupActions
+         emergencyMovesUsed
+         slotsUnlocked
+         freeCleanupCredits
+         bastionTitle
+         updatedAt
+         blockNumber
+       }
+     }`;
+   
+     const data = await fetchSubgraph(q);
+     return data.defenderProfileV3 || null;
+   }
+   
+   export async function loadMercenarySlotsV3(wallet) {
+     const user = wallet.toLowerCase();
+     return fetchAllWithPagination(
+       "mercenarySlotV3S",
+       `
+         id
+         user
+         slotIndex
+         tokenId
+         startTime
+         expiry
+         cooldownUntil
+         emergencyReadyAt
+         protectionTier
+         protectionPercent
+         active
+         lastReason
+         updatedAt
+         blockNumber
+       `,
+       `{ user: "${user}" }`
+     );
+   }
+   
+   /* =========================================================
+      CACHE BUILDERS
+      ========================================================= */
+   
    export function buildFarmV6Map(farms) {
      const map = new Map();
      for (const farm of farms || []) {
@@ -103,15 +172,26 @@
      return map;
    }
    
-   export function buildProtectionMap(protections) {
+   export function buildMercenaryProtectionMap(protections) {
      const map = new Map();
+     const now = Math.floor(Date.now() / 1000);
+   
      for (const p of protections || []) {
-       map.set(String(p.id), {
-         tokenId: String(p.id),
-         level: Number(p.level || 0),
-         expiresAt: Number(p.expiresAt || 0),
-         active: !!p.active
+       const tokenId = String(p.tokenId || p.id);
+       const expiresAt = Number(p.expiry || 0);
+       const level = Number(p.protectionPercent || 0);
+       const active = !!p.active && expiresAt > now;
+   
+       map.set(tokenId, {
+         tokenId,
+         user: String(p.user || "").toLowerCase(),
+         slotIndex: Number(p.slotIndex || 0),
+         level,
+         tier: Number(p.protectionTier || 0),
+         expiresAt,
+         active
        });
      }
+   
      return map;
    }

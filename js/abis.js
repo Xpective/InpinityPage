@@ -1,5 +1,5 @@
 /* =========================================================
-   ABIs – V6 ONLY (Admin-Funktionen entfernt)
+   ABIs – V6 + MERCENARY V3
    ========================================================= */
 
    export const NFT_ABI = [
@@ -38,7 +38,7 @@
     "function secondsUntilClaimable(uint256 tokenId) view returns (uint256)",
     "function hasBoost(uint256 tokenId) view returns (bool)",
     "function isFarmOwner(uint256 tokenId, address user) view returns (bool)",
-    
+  
     // V6 Preview functions
     "function previewClaim(uint256 tokenId) view returns ((uint8 code, bool allowed, uint256 pendingAmount, uint256 secondsRemaining))",
     "function previewSteal(uint256 targetTokenId, uint8 resourceId, uint256 percentBps) view returns ((uint8 code, bool allowed, uint256 pendingAmount, uint256 stealAmount, uint256 travelTime, uint256 remainingAttacksToday, uint256 protectionLevel, uint256 effectiveStealPercent, uint256 secondsRemaining))",
@@ -72,12 +72,49 @@
     "function paused() view returns (bool)"
   ];
   
-  export const MERCENARY_V2_ABI = [
-    "function hireMercenaries(uint256 tokenId, uint256 protectionLevel) external",
-    "function extendProtection(uint256 tokenId) external",
+  export const MERCENARY_V3_ABI = [
+    // Write functions
+    "function unlockSecondSlot() external",
+    "function unlockThirdSlot() external",
+    "function setProtection(uint8 slotIndex, uint256 tokenId, uint8 durationDays, bool payInINPI) external",
+    "function extendProtection(uint8 slotIndex, uint8 additionalDays, bool payInINPI) external",
+    "function cancelProtection(uint8 slotIndex) external",
+    "function moveProtection(uint8 slotIndex, uint256 newTokenId) external",
+    "function emergencyMoveProtection(uint8 slotIndex, uint256 newTokenId) external",
+    "function cleanExpiredSlot(address user, uint8 slotIndex) external",
+    "function cleanExpiredToken(uint256 tokenId) external",
+    "function setBastionTitle(string title) external",
+  
+    // Views
     "function getProtectionLevel(uint256 tokenId) view returns (uint256)",
-    "function protections(uint256 tokenId) view returns (uint256 level, uint256 expiry, uint256 cost)",
-    "function INPI() view returns (address)"
+    "function getProtectionData(uint256 tokenId) view returns (address protector, uint8 slotIndex, bool active, uint256 startTime, uint256 expiry, uint256 cooldownUntil, uint256 emergencyReadyAt, uint256 tier, uint256 protectionPercent)",
+    "function getWalletSlots(address user) view returns (uint8 slots, tuple(uint256 tokenId,uint64 startTime,uint64 expiry,uint64 cooldownUntil,uint64 emergencyReadyAt,uint8 protectionTier,bool active)[3] data)",
+    "function getDefenderProfile(address user) view returns (uint256 points, uint8 rank, uint256 discountBps, uint256 protectedDays, uint256 defenses, uint256 extensionsCount, uint256 cleanups, string title)",
+    "function getRank(address user) view returns (uint8 rank, string name)",
+    "function getProtectionCost(address user, bool payInINPI, bool isExtension) view returns (uint256 inpiCost, uint256 oilCost, uint256 lemonsCost, uint256 ironCost, uint256 rankDiscountBps, uint256 totalDiscountBps)",
+  
+    "function defenderPoints(address) view returns (uint256)",
+    "function bastionTitle(address) view returns (string)",
+    "function unlockedSlots(address) view returns (uint8)",
+    "function freeCleanupCredits(address) view returns (uint256)",
+    "function cleanupActions(address) view returns (uint256)",
+    "function sameBlockExtensions(address) view returns (uint256)",
+    "function successfulDefenses(address) view returns (uint256)",
+    "function totalProtectedDays(address) view returns (uint256)",
+    "function emergencyMovesUsed(address) view returns (uint256)",
+    "function walletSlots(address,uint8) view returns (uint256 tokenId, uint64 startTime, uint64 expiry, uint64 cooldownUntil, uint64 emergencyReadyAt, uint8 protectionTier, bool active)",
+  
+    // Events
+    "event ProtectionSet(address indexed user, uint8 indexed slotIndex, uint256 indexed tokenId, uint8 tier, uint64 startTime, uint64 expiry)",
+    "event ProtectionExtended(address indexed user, uint8 indexed slotIndex, uint256 indexed tokenId, uint64 oldExpiry, uint64 newExpiry, uint256 discountBps)",
+    "event ProtectionCancelled(address indexed user, uint8 indexed slotIndex, uint256 indexed tokenId, uint64 cancelledAt, string reason)",
+    "event ProtectionMoved(address indexed user, uint8 indexed slotIndex, uint256 indexed oldTokenId, uint256 newTokenId, uint64 movedAt, uint64 cooldownUntil)",
+    "event EmergencyProtectionMoved(address indexed user, uint8 indexed slotIndex, uint256 indexed oldTokenId, uint256 newTokenId, uint64 movedAt, uint64 resetAllowedAt)",
+    "event ProtectionExpired(address indexed user, uint8 indexed slotIndex, uint256 indexed tokenId, uint64 expiredAt)",
+    "event ProtectionSlotUnlocked(address indexed user, uint8 newUnlockedSlots)",
+    "event DefenderPointsAwarded(address indexed user, uint256 indexed tokenId, uint256 points, string reason)",
+    "event CleanupRewardPaid(address indexed cleaner, uint256 indexed tokenId, uint256 rewardResourceId, uint256 amount)",
+    "event BastionTitleSet(address indexed user, string title)"
   ];
   
   export const PARTNERSHIP_V2_ABI = [

@@ -1,5 +1,5 @@
 /* =========================================================
-   STATE MANAGEMENT – V6 ONLY
+   STATE MANAGEMENT – V6 + MERCENARY V3
    ========================================================= */
 
    export const state = {
@@ -13,7 +13,7 @@
     nftContract: null,
     farmingV6Contract: null,
     piratesV6Contract: null,
-    mercenaryV2Contract: null,
+    mercenaryV3Contract: null,
     partnershipV2Contract: null,
     inpiContract: null,
     pitroneContract: null,
@@ -23,10 +23,20 @@
     selectedPayment: "eth",
     selectedBlock: null,
   
+    // Mercenary UI State
+    selectedMercenaryPayment: "resources", // "resources" | "inpi"
+    selectedMercenarySlot: 0,
+    selectedProtectionDays: 1,
+  
     // Data
     userBlocks: [],
     userAttacks: [],
     userResources: [],
+  
+    // Mercenary Data
+    mercenarySlots: [],
+    mercenaryProfile: null,
+    mercenaryProtectionByToken: new Map(),
   
     // Caches
     cachedFarmsV6: [],

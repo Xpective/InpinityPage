@@ -1,12 +1,12 @@
 /* =========================================================
-   CONTRACT MANAGEMENT – V6 ONLY
+   CONTRACT MANAGEMENT – V6 + MERCENARY V3
    ========================================================= */
 
    import {
     NFT_ADDRESS,
     FARMING_V6_ADDRESS,
     PIRATES_V6_ADDRESS,
-    MERCENARY_V2_ADDRESS,
+    MERCENARY_V3_ADDRESS,
     PARTNERSHIP_V2_ADDRESS,
     RESOURCE_TOKEN_ADDRESS,
     INPI_ADDRESS,
@@ -17,7 +17,7 @@
     NFT_ABI,
     FARMING_V6_ABI,
     PIRATES_V6_ABI,
-    MERCENARY_V2_ABI,
+    MERCENARY_V3_ABI,
     PARTNERSHIP_V2_ABI,
     RESOURCE_TOKEN_ABI,
     INPI_ABI,
@@ -53,7 +53,6 @@
       }
     }
   
-    // Re-initialize provider after network switch
     state.provider = new ethers.providers.Web3Provider(window.ethereum);
     state.signer = state.provider.getSigner();
     state.userAddress = await state.signer.getAddress();
@@ -67,7 +66,7 @@
     state.nftContract = new ethers.Contract(NFT_ADDRESS, NFT_ABI, state.signer);
     state.farmingV6Contract = new ethers.Contract(FARMING_V6_ADDRESS, FARMING_V6_ABI, state.signer);
     state.piratesV6Contract = new ethers.Contract(PIRATES_V6_ADDRESS, PIRATES_V6_ABI, state.signer);
-    state.mercenaryV2Contract = new ethers.Contract(MERCENARY_V2_ADDRESS, MERCENARY_V2_ABI, state.signer);
+    state.mercenaryV3Contract = new ethers.Contract(MERCENARY_V3_ADDRESS, MERCENARY_V3_ABI, state.signer);
     state.partnershipV2Contract = new ethers.Contract(PARTNERSHIP_V2_ADDRESS, PARTNERSHIP_V2_ABI, state.signer);
     state.inpiContract = new ethers.Contract(INPI_ADDRESS, INPI_ABI, state.signer);
     state.pitroneContract = new ethers.Contract(PITRONE_ADDRESS, PITRONE_ABI, state.signer);
@@ -84,7 +83,7 @@
     state.nftContract = null;
     state.farmingV6Contract = null;
     state.piratesV6Contract = null;
-    state.mercenaryV2Contract = null;
+    state.mercenaryV3Contract = null;
     state.partnershipV2Contract = null;
     state.inpiContract = null;
     state.pitroneContract = null;
@@ -94,6 +93,11 @@
     state.userBlocks = [];
     state.userAttacks = [];
     state.userResources = [];
+  
+    state.mercenarySlots = [];
+    state.mercenaryProfile = null;
+    state.mercenaryProtectionByToken = new Map();
+  
     state.cachedFarmsV6 = [];
     state.cachedProtections = [];
     state.cachedFarmV6Map = new Map();

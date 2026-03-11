@@ -1,5 +1,5 @@
 /* =========================================================
-   BLOCKS
+   BLOCKS – V6 + MERCENARY V3
    ========================================================= */
 
    import { state } from "./state.js";
@@ -15,9 +15,9 @@
    import {
      loadMyTokensFromSubgraph,
      loadMyFarmsV6FromSubgraph,
-     loadProtectionsFromSubgraph,
+     loadMercenaryTokenProtectionsV3,
      buildFarmV6Map,
-     buildProtectionMap
+     buildMercenaryProtectionMap
    } from "./subgraph.js";
    import { isTokenActiveOnV5, getFarmingV5Contract } from "./migration.js";
    
@@ -30,12 +30,12 @@
      try {
        const subgraphTokens = await loadMyTokensFromSubgraph(state.userAddress);
        const subgraphFarmsV6 = await loadMyFarmsV6FromSubgraph(state.userAddress);
-       const subgraphProtections = await loadProtectionsFromSubgraph();
+       const subgraphProtections = await loadMercenaryTokenProtectionsV3();
    
        state.cachedFarmsV6 = subgraphFarmsV6 || [];
        state.cachedProtections = subgraphProtections || [];
        state.cachedFarmV6Map = buildFarmV6Map(state.cachedFarmsV6);
-       state.cachedProtectionMap = buildProtectionMap(state.cachedProtections);
+       state.cachedProtectionMap = buildMercenaryProtectionMap(state.cachedProtections);
        state.userBlocks = (subgraphTokens || []).map((t) => String(t.id));
    
        if (!state.userBlocks.length) {
@@ -103,6 +103,10 @@
            ? `<div class="rarity-badge" style="background:#8a5cff; color:white; margin-top:4px;">V5 Active</div>`
            : "";
    
+         const protectionBadge = protectionActive
+           ? `<div class="rarity-badge" style="background:#6f42c1; color:white; margin-top:4px;">🛡️ ${protection.level}% Protected</div>`
+           : "";
+   
          const farmDurationLine = farmingActive && farm?.startTime > 0
            ? `<div class="farm-duration">⏱️ Farming: ${formatDuration(now - farm.startTime)}</div>`
            : "";
@@ -117,6 +121,7 @@
              <div>R${row} C${col}</div>
              ${badge}
              ${legacyBadge}
+             ${protectionBadge}
              ${farmDurationLine}
              ${revealButton}
            </div>
@@ -187,6 +192,9 @@
    
      const protection = state.cachedProtectionMap.get(String(tokenId));
      const protectionLevel = protection ? protection.level : 0;
+     const protectionTier = protection ? protection.tier : 0;
+     const protectionSlotIndex = protection ? protection.slotIndex : 0;
+     const protectionExpiresAt = protection ? protection.expiresAt : 0;
      const protectionActive = !!(protection && protection.active && protection.expiresAt > now);
    
      const activeOnV5 = await isTokenActiveOnV5(tokenId).catch(() => false);
@@ -199,6 +207,9 @@
        rarity,
        farmingActive,
        protectionLevel,
+       protectionTier,
+       protectionSlotIndex,
+       protectionExpiresAt,
        protectionActive,
        farmStartTime,
        boostExpiry,
@@ -272,7 +283,7 @@
      const protectionExpiryEl = byId("protectionExpiry");
    
      if (protectionActive && protectionExpiryEl) {
-       protectionExpiryEl.textContent = formatDuration(protection.expiresAt - now);
+       protectionExpiryEl.textContent = formatDuration(protectionExpiresAt - now);
        if (protectionStatusEl) protectionStatusEl.style.display = "block";
      } else if (protectionStatusEl) {
        protectionStatusEl.style.display = "none";
@@ -283,14 +294,25 @@
        if (revealed && rarity !== null) {
          const production = getProduction(rarity, Number(row));
          let h = "";
+   
          for (const [res, amount] of Object.entries(production)) {
            h += `<div class="resource-item">${res}: ${amount}/day</div>`;
          }
-         if (protectionActive) h += `<div class="resource-item">Protection: ${protectionLevel}%</div>`;
-         if (boostExpiry > now) h += `<div class="resource-item">Boost: active</div>`;
+   
+         if (protectionActive) {
+           h += `<div class="resource-item">Protection: ${protectionLevel}%</div>`;
+           h += `<div class="resource-item">Protection Tier: ${protectionTier}</div>`;
+           h += `<div class="resource-item">Protection Slot: ${protectionSlotIndex + 1}</div>`;
+         }
+   
+         if (boostExpiry > now) {
+           h += `<div class="resource-item">Boost: active</div>`;
+         }
+   
          if (activeOnV5 && !farmingActive) {
            h += `<div class="resource-item" style="color:#8a5cff;">⚠️ V5 active - migrate to V6</div>`;
          }
+   
          resDiv.innerHTML = h;
        } else {
          resDiv.innerHTML = "<p>Reveal block to see resources.</p>";

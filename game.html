@@ -40,13 +40,13 @@
   />
   <meta
     name="keywords"
-    content="Inpinity, Game, Pyramid, NFT, Base, INPI, Pitrone, Resources, Farming, Pirate Attack, V6"
+    content="Inpinity, Game, Pyramid, NFT, Base, INPI, Pitrone, Resources, Farming, Pirate Attack, V6, Mercenary V3"
   />
   <meta name="author" content="Inpinity Team" />
   <meta property="og:title" content="Inpinity – Game Dashboard V6" />
   <meta
     property="og:description"
-    content="Manage blocks, farming, attacks, protection, and exchange in the Inpinity ecosystem. Now with V6 contracts."
+    content="Manage blocks, farming, attacks, protection, and exchange in the Inpinity ecosystem. Now with V6 contracts and Mercenary V3."
   />
   <meta property="og:image" content="logo_background.jpg" />
   <meta property="og:url" content="https://inpinity.online/game.html" />
@@ -95,7 +95,7 @@
         <p class="hero-lead">
           This dashboard is the central control room for your Pyramid activity. Connect your wallet,
           reveal and manage blocks, start farming, protect territory, launch pirate attacks, and
-          exchange value inside the ecosystem with the active V6 contract flow.
+          exchange value inside the ecosystem with the active V6 contract flow and Mercenary V3 defense system.
         </p>
       </div>
     </section>
@@ -239,17 +239,134 @@
             </div>
 
             <div style="margin-top:1rem; border-top:1px solid #2a3f4a; padding-top:1.2rem;">
-              <h4 style="color:#d4af37; margin-bottom:1rem;">🛡️ Mercenary Protection</h4>
+              <h4 style="color:#d4af37; margin-bottom:1rem;">🛡️ Mercenary Protection V3</h4>
 
-              <div class="protection-input-group">
-                <input type="number" id="protectTokenId" readonly placeholder="Block ID" />
-                <input type="number" id="protectLevel" min="0" max="50" value="10" placeholder="Level %" />
-                <button class="btn btn-small" id="protectBtn" type="button">Hire</button>
-                <button class="btn btn-small btn-warning" id="extendProtectionBtn" type="button">Extend</button>
+              <div class="info-note" style="margin-bottom:1rem;">
+                1 slot is available by default. Slot 2 and Slot 3 can be unlocked permanently with resources.
+                Protection can be set for 1–7 days, extended, cancelled, moved, or emergency-moved.
               </div>
 
-              <div id="protectionStatus" style="margin-top:0.5rem; font-size:0.9rem; color:#98a9b9; display:none;">
-                Active until: <span id="protectionExpiry">—</span>
+              <div class="action-grid" style="margin-bottom:1rem;">
+                <div class="action-card">
+                  <h4>🏅 Rank</h4>
+                  <div class="action-value" id="mercenaryRank">Watchman</div>
+                  <div style="margin-top:0.45rem; font-size:0.82rem; color:#98a9b9;">
+                    Points: <span id="mercenaryPoints">0</span><br />
+                    Discount: <span id="mercenaryDiscount">2%</span>
+                  </div>
+                </div>
+
+                <div class="action-card">
+                  <h4>🔓 Slots</h4>
+                  <div class="action-value"><span id="mercenarySlotsUnlocked">1</span>/3</div>
+                  <div style="margin-top:0.45rem; font-size:0.82rem; color:#98a9b9;">
+                    Default: 1 slot<br />
+                    Unlock more permanently
+                  </div>
+                </div>
+
+                <div class="action-card">
+                  <h4>🪧 Bastion Title</h4>
+                  <div class="action-value" id="mercenaryTitle">—</div>
+                  <div style="margin-top:0.45rem; font-size:0.82rem; color:#98a9b9;">
+                    Available from Inpinity Bastion rank
+                  </div>
+                </div>
+
+                <div class="action-card">
+                  <h4>⏳ Protection</h4>
+                  <div class="action-value" id="protectionStatusText">Inactive</div>
+                  <div id="protectionStatus" style="margin-top:0.45rem; font-size:0.82rem; color:#98a9b9; display:none;">
+                    Remaining: <span id="protectionExpiry">—</span>
+                  </div>
+                </div>
+              </div>
+
+              <div id="mercenarySlotsInfo" class="resources-grid" style="margin-bottom:1rem;">
+                <div class="resource-item">No active protection slots.</div>
+              </div>
+
+              <div class="input-group" style="margin-bottom:0.8rem;">
+                <label>Block ID
+                  <input type="number" id="protectTokenId" readonly placeholder="Selected Block ID" />
+                </label>
+
+                <label>Slot
+                  <select id="protectSlotIndex">
+                    <option value="0">Slot 1</option>
+                    <option value="1">Slot 2</option>
+                    <option value="2">Slot 3</option>
+                  </select>
+                </label>
+
+                <label>Days
+                  <select id="protectDays">
+                    <option value="1">1 day</option>
+                    <option value="2">2 days</option>
+                    <option value="3">3 days</option>
+                    <option value="4">4 days</option>
+                    <option value="5">5 days</option>
+                    <option value="6">6 days</option>
+                    <option value="7" selected>7 days</option>
+                  </select>
+                </label>
+
+                <label>Payment
+                  <select id="mercenaryPaymentMode">
+                    <option value="resources" selected>Resources</option>
+                    <option value="inpi">INPI</option>
+                  </select>
+                </label>
+              </div>
+
+              <div class="info-note" style="margin-bottom:0.8rem;">
+                <div id="protectSlotInfo">Selected Slot: 1</div>
+                <div id="protectDaysInfo">Duration: 7 days</div>
+                <div id="mercenaryCostInfo">Cost: 10 Oil, 5 Lemons, 2 Iron</div>
+              </div>
+
+              <div class="protection-input-group" style="margin-bottom:0.8rem; display:flex; gap:0.55rem; flex-wrap:wrap;">
+                <button class="btn btn-small" id="protectBtn" type="button">Set / Extend</button>
+                <button class="btn btn-small" id="setProtectionBtn" type="button">Set Protection</button>
+                <button class="btn btn-small btn-warning" id="extendProtectionBtn" type="button">Extend</button>
+                <button class="btn btn-small btn-secondary" id="cancelProtectionBtn" type="button">Cancel</button>
+              </div>
+
+              <div class="protection-input-group" style="margin-bottom:0.8rem; display:flex; gap:0.55rem; flex-wrap:wrap;">
+                <button class="btn btn-small" id="moveProtectionBtn" type="button">Move</button>
+                <button class="btn btn-small btn-warning" id="emergencyMoveProtectionBtn" type="button">Emergency Move</button>
+                <button class="btn btn-small" id="cleanupProtectionBtn" type="button">Cleanup Expired</button>
+              </div>
+
+              <div class="protection-input-group" style="margin-bottom:0.8rem; display:flex; gap:0.55rem; flex-wrap:wrap;">
+                <button class="btn btn-small boost-btn" id="unlockSlot2Btn" type="button">Unlock Slot 2</button>
+                <button class="btn btn-small boost-btn" id="unlockSlot3Btn" type="button">Unlock Slot 3</button>
+              </div>
+
+              <details style="margin-top:0.8rem;">
+                <summary style="cursor:pointer; color:#d4af37;">📘 Mercenary V3 costs & rules</summary>
+                <div class="details-body" style="margin-top:0.8rem;">
+                  <p class="info-note">
+                    <strong>Set protection:</strong> 10 Oil + 5 Lemons + 2 Iron or 50 INPI<br />
+                    <strong>Extend protection:</strong> 5 Oil + 2 Lemons + 1 Iron or discounted INPI<br />
+                    <strong>Slot 2 unlock:</strong> 1000 Oil + 500 Lemons + 100 Iron<br />
+                    <strong>Slot 3 unlock:</strong> 500 Oil + 100 Lemons + 100 Iron + 50 Gold + 25 Crystal + 5 Mysterium
+                  </p>
+                  <p class="info-note">
+                    <strong>Protection tiers:</strong><br />
+                    1–2 days = 20%<br />
+                    3–5 days = 30%<br />
+                    6–7 days = 50%
+                  </p>
+                </div>
+              </details>
+
+              <div style="margin-top:1rem; border-top:1px solid #2a3f4a; padding-top:1rem;">
+                <h5 style="margin-bottom:0.6rem; color:#d4af37;">🏛️ Bastion Title</h5>
+                <div class="input-group" style="grid-template-columns:1fr auto;">
+                  <input type="text" id="bastionTitleInput" maxlength="32" placeholder="Enter Bastion / Clan Title" />
+                  <button class="btn btn-small" id="saveBastionTitleBtn" type="button">Save Title</button>
+                </div>
               </div>
             </div>
 
@@ -473,20 +590,22 @@
 
     <section class="panel faq-panel" style="margin-top:1.35rem;">
       <div class="panel-head">
-        <h2 class="section-title">How To / FAQ <span class="v6-badge">V6 Updates</span></h2>
+        <h2 class="section-title">How To / FAQ <span class="v6-badge">V6 + Mercenary V3</span></h2>
         <p class="section-subtitle">
-          A quick guide to the main gameplay loops inside the V6 dashboard.
+          A quick guide to the main gameplay loops inside the dashboard.
         </p>
       </div>
 
       <details class="content-details">
-        <summary>What's new in V6?</summary>
+        <summary>What's new in V6 + Mercenary V3?</summary>
         <div class="details-body">
           <ul>
             <li>Enhanced attack preview with exact steal amount visibility</li>
             <li>Pirate and farming boosts with clearer state handling</li>
             <li>Better claim preview flow</li>
-            <li>Cleaner V6-only frontend structure without legacy V4/V5 mixing</li>
+            <li>Mercenary V3 slot system with permanent slot unlocks</li>
+            <li>1–7 day protection tiers with dynamic defense levels</li>
+            <li>Move, emergency move, cleanup and Bastion title support</li>
           </ul>
         </div>
       </details>
@@ -507,6 +626,41 @@
           <p>
             Revealing unlocks the block's hidden state and exposes its rarity-related attributes.
             That makes the block fully usable in the wider game flow.
+          </p>
+        </div>
+      </details>
+
+      <details class="content-details">
+        <summary>How does Mercenary Protection V3 work?</summary>
+        <div class="details-body">
+          <p>
+            Each wallet starts with <strong>1 protection slot</strong>. You can permanently unlock
+            <strong>Slot 2</strong> and <strong>Slot 3</strong> by burning resources.
+          </p>
+          <p>
+            Protection can be set for <strong>1 to 7 days</strong>:
+          </p>
+          <ul>
+            <li><strong>1–2 days</strong> = 20% protection</li>
+            <li><strong>3–5 days</strong> = 30% protection</li>
+            <li><strong>6–7 days</strong> = 50% protection</li>
+          </ul>
+          <p>
+            You can pay with <strong>resources</strong> or <strong>INPI</strong>, depending on the action.
+            Same-block extensions are cheaper than fresh setups.
+          </p>
+        </div>
+      </details>
+
+      <details class="content-details">
+        <summary>How do slot unlocks work?</summary>
+        <div class="details-body">
+          <p>
+            <strong>Slot 2 unlock:</strong> 1000 Oil, 500 Lemons, 100 Iron<br />
+            <strong>Slot 3 unlock:</strong> 500 Oil, 100 Lemons, 100 Iron, 50 Gold, 25 Crystal, 5 Mysterium
+          </p>
+          <p>
+            These unlocks are <strong>permanent per wallet</strong>.
           </p>
         </div>
       </details>
@@ -536,6 +690,16 @@
       </details>
 
       <details class="content-details">
+        <summary>What is cleanup for?</summary>
+        <div class="details-body">
+          <p>
+            Cleanup allows expired or stale protection entries to be cleared.
+            Depending on your rank, cleanup can reward materials such as Iron, Copper, or Obsidian.
+          </p>
+        </div>
+      </details>
+
+      <details class="content-details">
         <summary>What is the exchange for?</summary>
         <div class="details-body">
           <p>
@@ -560,7 +724,7 @@
       <a href="whitepaper.html">Whitepaper</a>
       <a href="https://discord.gg/95yj6Eg6" target="_blank" rel="noopener">Discord</a>
     </div>
-    <p class="footer-version">Version 0.24.0 (V6 Active)</p>
+    <p class="footer-version">Version 0.25.0 (V6 + Mercenary V3)</p>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>

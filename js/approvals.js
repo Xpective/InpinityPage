@@ -5,7 +5,7 @@
    import { state } from "./state.js";
    import {
      FARMING_V6_ADDRESS,
-     MERCENARY_V2_ADDRESS,
+     MERCENARY_V3_ADDRESS,
      NFT_ADDRESS,
      PITRONE_ADDRESS
    } from "./config.js";
@@ -67,7 +67,7 @@
    }
    
    export async function ensureInpiApprovalForMercenary(amount) {
-     return ensureInpiApproval(MERCENARY_V2_ADDRESS, amount);
+     return ensureInpiApproval(MERCENARY_V3_ADDRESS, amount);
    }
    
    export async function ensureInpiApprovalForPitrone(amount) {
