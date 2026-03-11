@@ -30,6 +30,10 @@
    const attackInput = byId("attackInput");
    const actionMessage = byId("actionMessage");
    const pirateBoostInput = byId("pirateBoostInput");
+   const boostCenter = byId("boostCenter");
+   const boostOptions = byId("boostOptions");
+   const buyBoostBtn = byId("buyBoostBtn");
+   const farmBoostStatusEl = byId("farmBoostStatus");
    
    function getProduction(rarity) {
      const p = {};
@@ -50,12 +54,15 @@
    }
    
    export function clearActionArea() {
-     if (ownerActionsDiv) ownerActionsDiv.innerHTML = "";
-     if (protectionInput) protectionInput.style.display = "none";
-     if (attackInput) attackInput.style.display = "none";
-     if (pirateBoostInput) pirateBoostInput.style.display = "none";
-     if (actionMessage) actionMessage.innerHTML = "";
-   }
+    if (ownerActionsDiv) ownerActionsDiv.innerHTML = "";
+    if (protectionInput) protectionInput.style.display = "none";
+    if (attackInput) attackInput.style.display = "none";
+    if (pirateBoostInput) pirateBoostInput.style.display = "none";
+    if (boostOptions) boostOptions.style.display = "none";
+    if (buyBoostBtn) buyBoostBtn.style.display = "none";
+    if (boostCenter) boostCenter.style.display = "none";
+    if (actionMessage) actionMessage.innerHTML = "";
+  }
    
    export async function refreshSelectedTargetAttackPreview() {
      const tokens = getAllMapTokens();
@@ -215,161 +222,207 @@
    }
    
    export async function updateSidebar(tokenId) {
-     const tokens = getAllMapTokens();
-     const nftReadOnlyContract = getReadOnlyNFTContract();
-   
-     mapState.selectedTokenId = String(tokenId);
-     const token = tokens[mapState.selectedTokenId];
-     const owner = token ? token.owner : null;
-     mapState.selectedTokenOwner = owner;
-   
-     if (
-       state.userAddress &&
-       owner &&
-       owner.toLowerCase() === state.userAddress.toLowerCase()
-     ) {
-       mapState.selectedAttackAttackerTokenId = String(tokenId);
-     }
-   
-     const now = Math.floor(Date.now() / 1000);
-     let v5Active = !!token?.farmV5Active;
-     let v6Active = false;
-   
-     let farmVersionTxt = "-";
-     let farmAgeTxt = "-";
-     let claimTxt = "-";
-     let pendingTotalTxt = "-";
-     let boostTxt = "-";
-     let protectionTxt = "inactive";
-     let protectionLevelTxt = "0%";
-   
-     if (token?.protectionActive && Number(token.protectionExpiry || 0) > now) {
-       protectionTxt = `active for ${formatDuration(Number(token.protectionExpiry || 0) - now)}`;
-       protectionLevelTxt = `${Number(token.protectionLevel || 0)}%`;
-     }
-   
-     if (v5Active) {
-       farmVersionTxt = "V5 Legacy";
-       if (token.farmV5StartTime > 0) {
-         farmAgeTxt = formatDuration(now - token.farmV5StartTime);
-       }
-       claimTxt = "Claim or migrate";
-       pendingTotalTxt = "legacy";
-     }
-   
-     if (state.farmingV6Contract && token?.owner) {
-       const farmInfo = await safeGetFarm(mapState.selectedTokenId);
-       v6Active = farmInfo.ok && farmInfo.isActive;
-   
-       if (v6Active) {
-         farmVersionTxt = "V6 Active";
-   
-         if (farmInfo.startTime > 0) {
-           farmAgeTxt = formatDuration(now - farmInfo.startTime);
-         }
-   
-         try {
-           const preview = await state.farmingV6Contract.previewClaim(mapState.selectedTokenId);
-           pendingTotalTxt = preview.pendingAmount ? preview.pendingAmount.toString() : "0";
-           claimTxt = preview.allowed
-             ? "READY"
-             : (
-                 Number(preview.secondsRemaining || 0) > 0
-                   ? `in ${formatDuration(Number(preview.secondsRemaining))}`
-                   : "Not ready"
-               );
-         } catch {}
-   
-         if (farmInfo.boostExpiry && farmInfo.boostExpiry > now) {
-           boostTxt = `${formatDuration(Number(farmInfo.boostExpiry) - now)} left`;
-         }
-       }
-     }
-   
-     if (!v5Active && !v6Active) {
-       farmVersionTxt = "Inactive";
-     }
-   
-     let productionHtml = "";
-     let rarityDisplay = "";
-   
-     if (token?.owner && token.revealed && nftReadOnlyContract) {
-       try {
-         const tokenIdNum = parseInt(mapState.selectedTokenId, 10);
-         const rarity = token.rarity !== null
-           ? token.rarity
-           : await nftReadOnlyContract.calculateRarity(tokenIdNum);
-   
-         const r = Number(rarity);
-   
-         rarityDisplay = `
-           <div class="detail-row">
-             <span class="detail-label">Rarity</span>
-             <span class="detail-value ${MAP_CONST.rarityClass[r]}">${rarityNames[r]}</span>
-           </div>
-         `;
-   
-         const production = getProduction(r);
-         productionHtml = `<div class="detail-row"><span class="detail-label">Production</span></div>`;
-   
-         for (const [res, amount] of Object.entries(production)) {
-           productionHtml += `
-             <div class="detail-row">
-               <span class="detail-label">${res}</span>
-               <span class="detail-value">${amount}/d</span>
-             </div>
-           `;
-         }
-       } catch {}
-     }
-   
-     if (token?.owner) {
-       blockDetailDiv.innerHTML = `
-         <div class="detail-row"><span class="detail-label">Block</span><span class="detail-value">${mapState.selectedTokenId}</span></div>
-         <div class="detail-row"><span class="detail-label">Owner</span><span class="detail-value">${shortenAddress(owner)}</span></div>
-         <div class="detail-row"><span class="detail-label">Revealed</span><span class="detail-value">${token.revealed ? "✅" : "❌"}</span></div>
-         ${rarityDisplay}
-         <div class="detail-row"><span class="detail-label">Farming</span><span class="detail-value">${farmVersionTxt}</span></div>
-         <div class="detail-row"><span class="detail-label">Farm age</span><span class="detail-value">${farmAgeTxt}</span></div>
-         <div class="detail-row"><span class="detail-label">Farm boost</span><span class="detail-value">${boostTxt}</span></div>
-         <div class="detail-row"><span class="detail-label">Protection</span><span class="detail-value">${protectionTxt}</span></div>
-         <div class="detail-row"><span class="detail-label">Protection level</span><span class="detail-value">${protectionLevelTxt}</span></div>
-         <div class="detail-row"><span class="detail-label">Claim-ready</span><span class="detail-value">${claimTxt}</span></div>
-         <div class="detail-row"><span class="detail-label">Pending</span><span class="detail-value">${pendingTotalTxt}</span></div>
-         ${productionHtml}
-       `;
-     } else {
-       blockDetailDiv.innerHTML = `<p style="color:#98a9b9;">Block #${mapState.selectedTokenId} not minted</p>`;
-     }
-   
-     if (actionPanel) actionPanel.style.display = token?.owner ? "block" : "none";
-     clearActionArea();
-     populateAttackerSelect();
-   
-     if (state.userAddress && owner && owner.toLowerCase() !== state.userAddress.toLowerCase()) {
-       await refreshSelectedTargetAttackPreview();
-       return;
-     }
-   
-     if (state.userAddress && owner && owner.toLowerCase() === state.userAddress.toLowerCase()) {
-       let btns = "";
-   
-       if (!token.revealed) {
-         btns += `<button class="action-btn" id="revealBtn">🔓 Reveal</button>`;
-       }
-   
-       if (v5Active && !v6Active) {
-         btns += `<button class="action-btn" id="claimBtn">💰 Claim V5</button>`;
-         btns += `<button class="action-btn boost-btn" id="migrateFarmBtn">🔄 Migrate V5 → V6</button>`;
-       } else if (!v6Active) {
-         btns += `<button class="action-btn" id="startFarmBtn">🌾 Start Farming (V6)</button>`;
-       } else {
-         btns += `<button class="action-btn" id="stopFarmBtn">⏹️ Stop</button>`;
-         btns += `<button class="action-btn" id="claimBtn">💰 Claim</button>`;
-         btns += `<button class="action-btn boost-btn" id="buyBoostBtn">⚡ Buy Boost</button>`;
-       }
-   
-       if (protectionInput) protectionInput.style.display = "flex";
-       if (ownerActionsDiv) ownerActionsDiv.innerHTML = btns;
-     }
-   }
+    const tokens = getAllMapTokens();
+    const nftReadOnlyContract = getReadOnlyNFTContract();
+  
+    mapState.selectedTokenId = String(tokenId);
+    const token = tokens[mapState.selectedTokenId];
+    const owner = token ? token.owner : null;
+    mapState.selectedTokenOwner = owner;
+  
+    if (
+      state.userAddress &&
+      owner &&
+      owner.toLowerCase() === state.userAddress.toLowerCase()
+    ) {
+      mapState.selectedAttackAttackerTokenId = String(tokenId);
+    }
+  
+    const now = Math.floor(Date.now() / 1000);
+    let v5Active = !!token?.farmV5Active;
+    let v6Active = false;
+  
+    let farmVersionTxt = "-";
+    let farmAgeTxt = "-";
+    let claimTxt = "-";
+    let pendingTotalTxt = "-";
+    let boostTxt = "inactive";
+    let protectionTxt = "inactive";
+    let protectionLevelTxt = "0%";
+  
+    if (token?.protectionActive && Number(token.protectionExpiry || 0) > now) {
+      protectionTxt = `active for ${formatDuration(Number(token.protectionExpiry || 0) - now)}`;
+      protectionLevelTxt = `${Number(token.protectionLevel || 0)}%`;
+    }
+  
+    if (v5Active) {
+      farmVersionTxt = "V5 Legacy";
+  
+      if (token.farmV5StartTime > 0) {
+        farmAgeTxt = formatDuration(now - token.farmV5StartTime);
+      }
+  
+      claimTxt = "Claim or migrate";
+      pendingTotalTxt = "legacy";
+    }
+  
+    if (state.farmingV6Contract && token?.owner) {
+      const farmInfo = await safeGetFarm(mapState.selectedTokenId);
+      v6Active = farmInfo.ok && farmInfo.isActive;
+  
+      if (v6Active) {
+        farmVersionTxt = "V6 Active";
+  
+        if (farmInfo.startTime > 0) {
+          farmAgeTxt = formatDuration(now - farmInfo.startTime);
+        }
+  
+        try {
+          const preview = await state.farmingV6Contract.previewClaim(mapState.selectedTokenId);
+          pendingTotalTxt = preview.pendingAmount ? preview.pendingAmount.toString() : "0";
+          claimTxt = preview.allowed
+            ? "READY"
+            : (
+                Number(preview.secondsRemaining || 0) > 0
+                  ? `in ${formatDuration(Number(preview.secondsRemaining))}`
+                  : "Not ready"
+              );
+        } catch {
+          // ignore preview issues here, sidebar should still render
+        }
+  
+        if (farmInfo.boostExpiry && Number(farmInfo.boostExpiry) > now) {
+          boostTxt = `${formatDuration(Number(farmInfo.boostExpiry) - now)} left`;
+        }
+      }
+    }
+  
+    if (!v5Active && !v6Active) {
+      farmVersionTxt = "Inactive";
+    }
+  
+    let productionHtml = "";
+    let rarityDisplay = "";
+  
+    if (token?.owner && token.revealed && nftReadOnlyContract) {
+      try {
+        const tokenIdNum = parseInt(mapState.selectedTokenId, 10);
+        const rarity = token.rarity !== null
+          ? token.rarity
+          : await nftReadOnlyContract.calculateRarity(tokenIdNum);
+  
+        const r = Number(rarity);
+  
+        rarityDisplay = `
+          <div class="detail-row">
+            <span class="detail-label">Rarity</span>
+            <span class="detail-value ${MAP_CONST.rarityClass[r]}">${rarityNames[r]}</span>
+          </div>
+        `;
+  
+        const production = getProduction(r);
+        productionHtml = `<div class="detail-row"><span class="detail-label">Production</span></div>`;
+  
+        for (const [res, amount] of Object.entries(production)) {
+          productionHtml += `
+            <div class="detail-row">
+              <span class="detail-label">${res}</span>
+              <span class="detail-value">${amount}/d</span>
+            </div>
+          `;
+        }
+      } catch {
+        // ignore rarity issues here
+      }
+    }
+  
+    if (token?.owner) {
+      blockDetailDiv.innerHTML = `
+        <div class="detail-row"><span class="detail-label">Block</span><span class="detail-value">${mapState.selectedTokenId}</span></div>
+        <div class="detail-row"><span class="detail-label">Owner</span><span class="detail-value">${shortenAddress(owner)}</span></div>
+        <div class="detail-row"><span class="detail-label">Revealed</span><span class="detail-value">${token.revealed ? "✅" : "❌"}</span></div>
+        ${rarityDisplay}
+        <div class="detail-row"><span class="detail-label">Farming</span><span class="detail-value">${farmVersionTxt}</span></div>
+        <div class="detail-row"><span class="detail-label">Farm age</span><span class="detail-value">${farmAgeTxt}</span></div>
+        <div class="detail-row"><span class="detail-label">Farm boost</span><span class="detail-value">${boostTxt}</span></div>
+        <div class="detail-row"><span class="detail-label">Protection</span><span class="detail-value">${protectionTxt}</span></div>
+        <div class="detail-row"><span class="detail-label">Protection level</span><span class="detail-value">${protectionLevelTxt}</span></div>
+        <div class="detail-row"><span class="detail-label">Claim-ready</span><span class="detail-value">${claimTxt}</span></div>
+        <div class="detail-row"><span class="detail-label">Pending</span><span class="detail-value">${pendingTotalTxt}</span></div>
+        ${productionHtml}
+      `;
+    } else {
+      blockDetailDiv.innerHTML = `<p style="color:#98a9b9;">Block #${mapState.selectedTokenId} not minted</p>`;
+    }
+  
+    if (actionPanel) {
+      actionPanel.style.display = token?.owner ? "block" : "none";
+    }
+  
+    clearActionArea();
+    populateAttackerSelect();
+  
+    if (boostCenter) {
+      boostCenter.style.display = token?.owner ? "block" : "none";
+    }
+  
+    if (farmBoostStatusEl) {
+      farmBoostStatusEl.innerText = v6Active
+        ? (boostTxt !== "inactive" ? `✅ ${boostTxt}` : "❌ Inactive")
+        : "—";
+    }
+  
+    if (state.userAddress && owner && owner.toLowerCase() !== state.userAddress.toLowerCase()) {
+      if (boostCenter) boostCenter.style.display = "block";
+      await refreshSelectedTargetAttackPreview();
+      return;
+    }
+  
+    if (state.userAddress && owner && owner.toLowerCase() === state.userAddress.toLowerCase()) {
+      let btns = "";
+  
+      if (!token.revealed) {
+        btns += `<button class="action-btn" id="revealBtn">🔓 Reveal</button>`;
+      }
+  
+      if (v5Active && !v6Active) {
+        btns += `<button class="action-btn" id="claimBtn">💰 Claim V5</button>`;
+        btns += `<button class="action-btn boost-btn" id="migrateFarmBtn">🔄 Migrate V5 → V6</button>`;
+      } else if (!v6Active) {
+        btns += `<button class="action-btn" id="startFarmBtn">🌾 Start Farming (V6)</button>`;
+      } else {
+        btns += `<button class="action-btn" id="stopFarmBtn">⏹️ Stop</button>`;
+        btns += `<button class="action-btn" id="claimBtn">💰 Claim</button>`;
+      }
+  
+      if (protectionInput) {
+        protectionInput.style.display = "flex";
+      }
+  
+      if (ownerActionsDiv) {
+        ownerActionsDiv.innerHTML = btns;
+      }
+  
+      if (boostCenter) {
+        boostCenter.style.display = "block";
+      }
+  
+      if (boostOptions) {
+        boostOptions.style.display = v6Active ? "flex" : "none";
+      }
+  
+      if (buyBoostBtn) {
+        buyBoostBtn.style.display = v6Active ? "block" : "none";
+      }
+  
+      if (pirateBoostInput) {
+        pirateBoostInput.style.display = "none";
+      }
+  
+      return;
+    }
+  
+    if (boostOptions) boostOptions.style.display = "none";
+    if (buyBoostBtn) buyBoostBtn.style.display = "none";
+    if (pirateBoostInput) pirateBoostInput.style.display = "none";
+  }

@@ -87,8 +87,8 @@
    function bindMapEvents() {
      byId("connectBtn")?.addEventListener("click", () => connectWallet(true));
    
-     byId("boostDays")?.addEventListener("input", updateMapFarmBoostCostLabels);
-     byId("pirateBoostDays")?.addEventListener("input", updateMapPirateBoostCostLabels);
+     byId("boostDays")?.addEventListener("change", updateMapFarmBoostCostLabels);
+     byId("pirateBoostDays")?.addEventListener("change", updateMapPirateBoostCostLabels);
    
      byId("attackResource")?.addEventListener("change", async () => {
        if (mapState.selectedTokenId) {

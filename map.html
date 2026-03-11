@@ -754,53 +754,114 @@
 
         <div id="actionPanel" style="display:none;">
           <div class="action-buttons" id="ownerActions"></div>
-
+        
           <div class="input-group" id="protectionInput" style="display:none;">
             <label for="protectLevel">Protection</label>
             <input type="number" id="protectLevel" min="0" max="50" value="10" />
             <button class="action-btn" id="protectBtn" type="button" style="width:auto; min-width:84px;">Buy</button>
           </div>
-
-          <div class="input-group" id="boostOptions" style="display:none;">
-            <label for="boostDays">Boost Days</label>
-            <input type="number" id="boostDays" min="1" max="7" value="7" />
-          </div>
-          <div id="farmBoostCostInfo" class="message" style="display:none;"></div>
-
-          <div id="pirateBoostInput" style="display:none; margin-top:10px;">
-            <div class="detail-card" style="margin-top:0; padding:0.9rem;">
-              <div class="detail-row">
-                <span class="detail-label">Pirate boost</span>
-                <span class="detail-value" id="pirateBoostStatus">—</span>
+        
+          <!-- BOOST CENTER -->
+          <details id="boostCenter" style="display:none; margin-top:0.9rem;">
+            <summary style="cursor:pointer; color:#ffb347; font-weight:700;">
+              ⚡ Boost Center
+            </summary>
+        
+            <div style="margin-top:0.85rem; display:flex; flex-direction:column; gap:0.9rem;">
+        
+              <!-- FARM BOOST -->
+              <div class="detail-card" id="farmBoostCard" style="margin-bottom:0;">
+                <div class="detail-row">
+                  <span class="detail-label">Farm boost</span>
+                  <span class="detail-value" id="farmBoostStatus">—</span>
+                </div>
+        
+                <div style="margin-top:0.45rem; font-size:0.84rem; color:#98a9b9; line-height:1.45;">
+                  Cost: <strong>100 INPI / day</strong><br />
+                  Effect: <strong>+25% production</strong><br />
+                  Farm window: <strong>7 days</strong><br />
+                  Contract max: <strong>10 days</strong>
+                </div>
+        
+                <div class="input-group" id="boostOptions" style="margin-top:0.75rem; display:none;">
+                  <label for="boostDays">Farm Days</label>
+                  <select id="boostDays">
+                    <option value="1">1 day</option>
+                    <option value="2">2 days</option>
+                    <option value="3">3 days</option>
+                    <option value="4">4 days</option>
+                    <option value="5">5 days</option>
+                    <option value="6">6 days</option>
+                    <option value="7" selected>7 days</option>
+                    <option value="8">8 days</option>
+                    <option value="9">9 days</option>
+                    <option value="10">10 days</option>
+                  </select>
+                </div>
+        
+                <div id="farmBoostCostInfo" class="message" style="display:none; margin-top:0.5rem;"></div>
+        
+                <button class="action-btn boost-btn" id="buyBoostBtn" type="button" style="display:none; margin-top:0.6rem;">
+                  ⚡ Buy Farm Boost
+                </button>
               </div>
-              <div class="detail-row">
-                <span class="detail-label">Boost expiry</span>
-                <span class="detail-value" id="pirateBoostExpiry">—</span>
+        
+              <!-- PIRATE BOOST -->
+              <div id="pirateBoostInput" style="display:none;">
+                <div class="detail-card" style="margin-bottom:0;">
+                  <div class="detail-row">
+                    <span class="detail-label">Pirate boost</span>
+                    <span class="detail-value" id="pirateBoostStatus">—</span>
+                  </div>
+        
+                  <div class="detail-row">
+                    <span class="detail-label">Boost expiry</span>
+                    <span class="detail-value" id="pirateBoostExpiry">—</span>
+                  </div>
+        
+                  <div style="margin-top:0.45rem; font-size:0.84rem; color:#98a9b9; line-height:1.45;">
+                    Cost: <strong>100 PITRONE / day</strong><br />
+                    Effect: <strong>+25 percentage points steal bonus</strong><br />
+                    Contract max: <strong>10 days</strong>
+                  </div>
+        
+                  <div class="input-group" id="pirateBoostOptions" style="margin-top:0.75rem; display:none;">
+                    <label for="pirateBoostDays">Pirate Days</label>
+                    <select id="pirateBoostDays">
+                      <option value="1">1 day</option>
+                      <option value="2">2 days</option>
+                      <option value="3">3 days</option>
+                      <option value="4">4 days</option>
+                      <option value="5">5 days</option>
+                      <option value="6">6 days</option>
+                      <option value="7" selected>7 days</option>
+                      <option value="8">8 days</option>
+                      <option value="9">9 days</option>
+                      <option value="10">10 days</option>
+                    </select>
+                  </div>
+        
+                  <div id="pirateBoostCostInfo" class="message" style="display:none; margin-top:0.5rem;"></div>
+        
+                  <button class="action-btn boost-btn" id="buyPirateBoostBtn" type="button" style="display:none; margin-top:0.6rem;">
+                    🏴‍☠️ Buy Pirate Boost
+                  </button>
+                </div>
               </div>
             </div>
-
-            <div class="input-group" id="pirateBoostOptions" style="display:none;">
-              <label for="pirateBoostDays">Pirate Days</label>
-              <input type="number" id="pirateBoostDays" min="1" max="10" value="7" />
-            </div>
-            <div id="pirateBoostCostInfo" class="message" style="display:none;"></div>
-
-            <button class="action-btn boost-btn" id="buyPirateBoostBtn" type="button" style="display:none;">
-              🏴‍☠️ Buy Pirate Boost
-            </button>
-          </div>
-
+          </details>
+        
           <div id="attackInput" class="attack-section" style="display:none;">
             <div class="input-group">
               <label for="attackAttackerSelect">Attacker</label>
               <select id="attackAttackerSelect"></select>
             </div>
-
+        
             <div class="input-group">
               <label for="attackResource">Resource</label>
               <select id="attackResource"></select>
             </div>
-
+        
             <div class="detail-card" id="attackInfoCard" style="margin-top:0; padding:0.9rem;">
               <div class="detail-row">
                 <span class="detail-label">Attacker block</span>
@@ -835,10 +896,10 @@
                 <span class="detail-value" id="attackStealPercent">—</span>
               </div>
             </div>
-
+        
             <button class="action-btn" id="attackBtn" type="button">Attack (V6)</button>
           </div>
-
+        
           <div id="actionMessage" class="message"></div>
         </div>
 

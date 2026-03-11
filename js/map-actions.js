@@ -3,7 +3,14 @@
    ========================================================= */
 
    import { state } from "./state.js";
-   import { WORKER_URL, MERCENARY_V2_ADDRESS } from "./config.js";
+   import { 
+    WORKER_URL, 
+    MERCENARY_V2_ADDRESS,
+    FARM_BOOST_PRICE_PER_DAY,
+    FARM_BOOST_MAX_DAYS,
+    PIRATE_BOOST_PRICE_PER_DAY,
+    PIRATE_BOOST_MAX_DAYS
+   } from "./config.js";
    import { byId, formatDuration } from "./utils.js";
    import { mapState } from "./map-state.js";
    import {
@@ -24,56 +31,46 @@
    const actionMessage = byId("actionMessage");
    
    export function updateMapPirateBoostCostLabels() {
-     const daysInput = byId("pirateBoostDays");
-     const info = byId("pirateBoostCostInfo");
-   
-     if (!info) return;
-   
-     let days = parseInt(daysInput?.value, 10);
-     if (!Number.isFinite(days)) days = 7;
-   
-     days = Math.max(1, Math.min(10, days));
-   
-     if (daysInput && String(days) !== daysInput.value) {
-       daysInput.value = String(days);
-     }
-   
-     const pricePerDay = 100;
-     const total = days * pricePerDay;
-   
-     info.style.display = "block";
-     info.innerHTML = `
-       <span class="success">
-         Pirate Boost: ${pricePerDay} PIT / day<br>
-         Total: ${total} PIT for ${days} day${days > 1 ? "s" : ""}
-       </span>
-     `;
-   }
-   
-   export function updateMapFarmBoostCostLabels() {
-    const daysInput = byId("boostDays");
-    const info = byId("farmBoostCostInfo");
+    const daysSelect = byId("pirateBoostDays");
+    const info = byId("pirateBoostCostInfo");
   
-    if (!info) return;
+    if (!info || !daysSelect) return;
   
-    let days = parseInt(daysInput?.value, 10);
+    let days = parseInt(daysSelect.value, 10);
     if (!Number.isFinite(days)) days = 7;
   
-    // Farming Boost max 7 Tage
-    days = Math.max(1, Math.min(7, days));
+    days = Math.max(1, Math.min(PIRATE_BOOST_MAX_DAYS, days));
+    daysSelect.value = String(days);
   
-    if (daysInput && String(days) !== daysInput.value) {
-      daysInput.value = String(days);
-    }
-  
-    // Korrigierter Preis laut deinem Contract-/Frontend-Setup
-    const pricePerDay = 100;
-    const total = days * pricePerDay;
+    const total = days * PIRATE_BOOST_PRICE_PER_DAY;
   
     info.style.display = "block";
     info.innerHTML = `
       <span class="success">
-        Farm Boost: ${pricePerDay} INPI / day<br>
+        Pirate Boost: ${PIRATE_BOOST_PRICE_PER_DAY} PITRONE / day<br>
+        Total: ${total} PITRONE for ${days} day${days > 1 ? "s" : ""}
+      </span>
+    `;
+  }
+   
+  export function updateMapFarmBoostCostLabels() {
+    const daysSelect = byId("boostDays");
+    const info = byId("farmBoostCostInfo");
+  
+    if (!info || !daysSelect) return;
+  
+    let days = parseInt(daysSelect.value, 10);
+    if (!Number.isFinite(days)) days = 7;
+  
+    days = Math.max(1, Math.min(FARM_BOOST_MAX_DAYS, days));
+    daysSelect.value = String(days);
+  
+    const total = days * FARM_BOOST_PRICE_PER_DAY;
+  
+    info.style.display = "block";
+    info.innerHTML = `
+      <span class="success">
+        Farm Boost: ${FARM_BOOST_PRICE_PER_DAY} INPI / day<br>
         Total: ${total} INPI for ${days} day${days > 1 ? "s" : ""}
       </span>
     `;
@@ -262,24 +259,44 @@
    }
    
    export async function handleBuyBoost() {
-     if (!mapState.selectedTokenId) return;
-   
-     const daysInput = byId("boostDays");
-     let days = parseInt(daysInput?.value, 10);
-   
-     if (!Number.isFinite(days)) days = 7;
-     days = Math.max(1, Math.min(7, days));
-   
-     if (daysInput) {
-       daysInput.value = String(days);
-     }
-   
-     await sendTx(
-       state.farmingV6Contract.buyBoost(mapState.selectedTokenId, days, { gasLimit: 300000 }),
-       `Farm boost bought for ${days} day(s)!`
-     );
-   }
-   
+    if (!mapState.selectedTokenId || !state.userAddress) return;
+  
+    const days = parseInt(byId("boostDays")?.value || "7", 10);
+    if (!Number.isFinite(days) || days < 1 || days > FARM_BOOST_MAX_DAYS) {
+      if (actionMessage) {
+        actionMessage.innerHTML = `<span class="error">❌ Invalid farm boost duration.</span>`;
+      }
+      return;
+    }
+  
+    try {
+      const costHuman = days * FARM_BOOST_PRICE_PER_DAY;
+      const costWei = ethers.utils.parseEther(String(costHuman));
+  
+      const allowance = await state.inpiContract.allowance(
+        state.userAddress,
+        state.farmingV6Contract.address
+      );
+  
+      if (allowance.lt(costWei)) {
+        if (actionMessage) {
+          actionMessage.innerHTML = `<span class="success">⏳ Approving INPI...</span>`;
+        }
+        const approveTx = await state.inpiContract.approve(state.farmingV6Contract.address, costWei);
+        await approveTx.wait();
+      }
+  
+      await sendTx(
+        state.farmingV6Contract.buyBoost(mapState.selectedTokenId, days, { gasLimit: 350000 }),
+        `Farm boost bought for ${days} day(s)! Paid: ${costHuman} INPI`
+      );
+    } catch (e) {
+      if (actionMessage) {
+        actionMessage.innerHTML = `<span class="error">❌ ${e.reason || e.message}</span>`;
+      }
+    }
+  }
+  
    export async function handleBuyPirateBoost() {
      if (!state.userAddress) return;
    
