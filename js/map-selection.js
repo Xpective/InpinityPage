@@ -35,6 +35,7 @@
    const buyBoostBtn = byId("buyBoostBtn");
    const farmBoostStatusEl = byId("farmBoostStatus");
    
+   
    function getProduction(rarity) {
      const p = {};
    
