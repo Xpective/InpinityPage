@@ -13,7 +13,7 @@
      FARM_BOOST_MAX_DAYS,
      FARM_WINDOW_DAYS
    } from "./config.js";
-   import { byId, formatDuration, debugLog } from "./utils.js";
+   import { byId, formatDuration, debugLog, safeValue, safeText } from "./utils.js";
    import { ensureFarmingApproval, ensureInpiApprovalForMercenary } from "./approvals.js";
    import { loadResourceBalancesOnchain } from "./resources.js";
    import { loadUserBlocks, selectBlock } from "./blocks.js";
