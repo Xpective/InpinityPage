@@ -3,7 +3,12 @@
    ========================================================= */
 
    import { state } from "./state.js";
-   import { resourceNames, MAX_ROW } from "./config.js";
+   import {
+     resourceNames,
+     MAX_ROW,
+     PIRATE_BOOST_PRICE_PER_DAY,
+     PIRATE_BOOST_MAX_DAYS
+   } from "./config.js";
    import {
      byId,
      formatTime,
@@ -14,10 +19,7 @@
    import { loadResourceBalancesOnchain } from "./resources.js";
    import { updateBalances } from "./balances.js";
 
-   import {
-    PIRATE_BOOST_PRICE_PER_DAY,
-    PIRATE_BOOST_MAX_DAYS
-  } from "./config.js";
+
    
    export async function getValidAttackerTokenId() {
      if (!state.userAddress || !state.nftContract) return null;
