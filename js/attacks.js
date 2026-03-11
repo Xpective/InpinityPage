@@ -13,6 +13,11 @@
    import { loadMyAttacksV6FromSubgraph } from "./subgraph.js";
    import { loadResourceBalancesOnchain } from "./resources.js";
    import { updateBalances } from "./balances.js";
+
+   import {
+    PIRATE_BOOST_PRICE_PER_DAY,
+    PIRATE_BOOST_MAX_DAYS
+  } from "./config.js";
    
    export async function getValidAttackerTokenId() {
      if (!state.userAddress || !state.nftContract) return null;
@@ -51,22 +56,96 @@
    }
    
    export function updateBoostCostLabels() {
-     const pirateDaysInput = byId("pirateBoostDays");
-     const pirateCostInfo = byId("pirateBoostCostInfo");
-   
-     if (!pirateCostInfo) return;
-   
-     let days = parseInt(pirateDaysInput?.value, 10);
-     if (!Number.isFinite(days)) days = 7;
-   
-     days = Math.max(1, Math.min(10, days));
-   
-     if (pirateDaysInput && String(days) !== pirateDaysInput.value) {
-       pirateDaysInput.value = String(days);
-     }
-   
-     pirateCostInfo.textContent = `Total: ${days * 100} PIT`;
-   }
+    const pirateDaysInput = byId("pirateBoostDays");
+    const pirateCostInfo = byId("pirateBoostCostInfo");
+  
+    if (!pirateCostInfo || !pirateDaysInput) return;
+  
+    let days = parseInt(pirateDaysInput.value, 10);
+    if (!Number.isFinite(days)) days = 7;
+  
+    days = Math.max(1, Math.min(PIRATE_BOOST_MAX_DAYS, days));
+    pirateDaysInput.value = String(days);
+  
+    pirateCostInfo.textContent = `Total: ${days * PIRATE_BOOST_PRICE_PER_DAY} PIT`;
+  }
+  
+  export async function buyPirateBoost() {
+    const msgDiv = byId("pirateBoostMessage");
+    const daysInput = byId("pirateBoostDays");
+  
+    if (!msgDiv) return;
+  
+    let days = parseInt(daysInput?.value, 10);
+    if (!Number.isFinite(days)) days = 7;
+    days = Math.max(1, Math.min(PIRATE_BOOST_MAX_DAYS, days));
+  
+    try {
+      const attackerTokenId = await getValidAttackerTokenId();
+      if (!attackerTokenId) {
+        msgDiv.innerHTML = `<span class="error">❌ No valid attacker block found.</span>`;
+        return;
+      }
+  
+      const totalCostHuman = days * PIRATE_BOOST_PRICE_PER_DAY;
+      const totalCostWei = ethers.utils.parseEther(String(totalCostHuman));
+  
+      const allowance = await state.pitroneContract.allowance(
+        state.userAddress,
+        state.piratesV6Contract.address
+      );
+  
+      if (allowance.lt(totalCostWei)) {
+        msgDiv.innerHTML = `
+          <span class="success">
+            ⏳ Approving PITRONE...<br>
+            Block: #${attackerTokenId}<br>
+            Cost: ${totalCostHuman} PIT
+          </span>
+        `;
+  
+        const approveTx = await state.pitroneContract.approve(
+          state.piratesV6Contract.address,
+          totalCostWei
+        );
+        await approveTx.wait();
+      }
+  
+      msgDiv.innerHTML = `
+        <span class="success">
+          ⏳ Buying Pirate Boost...<br>
+          Block: #${attackerTokenId}<br>
+          Days: ${days}<br>
+          Cost: ${totalCostHuman} PIT<br>
+          Effect: +25 percentage points steal bonus
+        </span>
+      `;
+  
+      const tx = await state.piratesV6Contract.buyPirateBoost(attackerTokenId, days, {
+        gasLimit: 350000
+      });
+  
+      await tx.wait();
+  
+      msgDiv.innerHTML = `
+        <span class="success">
+          ✅ Pirate Boost activated!<br>
+          Block: #${attackerTokenId}<br>
+          Days: ${days}<br>
+          Paid: ${totalCostHuman} PIT
+        </span>
+      `;
+  
+      await updateBalances();
+      await loadResourceBalancesOnchain();
+      await loadUserAttacks();
+      await refreshAttackDropdown();
+      refreshBlockMarkings();
+    } catch (e) {
+      console.error("buyPirateBoost error:", e);
+      msgDiv.innerHTML = `<span class="error">❌ ${e.reason || e.message}</span>`;
+    }
+  }
    
    export function scheduleAttackDropdownRefresh() {
      clearTimeout(state.attackDropdownTimer);
@@ -218,61 +297,6 @@
      }
    }
    
-   export async function buyPirateBoost() {
-     const msgDiv = byId("pirateBoostMessage");
-     const daysInput = byId("pirateBoostDays");
-   
-     if (!msgDiv) return;
-   
-     let days = parseInt(daysInput?.value, 10);
-     if (!Number.isFinite(days) || days < 1 || days > 10) {
-       msgDiv.innerHTML = `<span class="error">❌ Please enter valid days (1-10).</span>`;
-       return;
-     }
-   
-     try {
-       const attackerTokenId = await getValidAttackerTokenId();
-       if (!attackerTokenId) {
-         msgDiv.innerHTML = `<span class="error">❌ No valid attacker block found.</span>`;
-         return;
-       }
-   
-       const totalCost = days * 100;
-   
-       msgDiv.innerHTML = `
-         <span class="success">
-           ⏳ Buying Pirate Boost...<br>
-           Block: #${attackerTokenId}<br>
-           Days: ${days}<br>
-           Cost: ${totalCost} PIT<br>
-           Effect: +25% pirate bonus
-         </span>
-       `;
-   
-       const tx = await state.piratesV6Contract.buyPirateBoost(attackerTokenId, days, {
-         gasLimit: 350000
-       });
-   
-       await tx.wait();
-   
-       msgDiv.innerHTML = `
-         <span class="success">
-           ✅ Pirate Boost activated!<br>
-           Block: #${attackerTokenId}<br>
-           Days: ${days}<br>
-           Paid: ${totalCost} PIT
-         </span>
-       `;
-   
-       await updateBalances();
-       await loadUserAttacks();
-       await refreshAttackDropdown();
-       refreshBlockMarkings();
-     } catch (e) {
-       console.error("buyPirateBoost error:", e);
-       msgDiv.innerHTML = `<span class="error">❌ ${e.reason || e.message}</span>`;
-     }
-   }
    
    export async function loadUserAttacks() {
      if (!state.userAddress || !state.piratesV6Contract) return;

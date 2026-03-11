@@ -201,35 +201,41 @@
               <div class="action-card">
                 <h4>⚡ Farm Boost</h4>
                 <div class="action-value" id="boostStatus">Inactive</div>
-
-              <div style="margin-top:0.45rem; font-size:0.82rem; color:#98a9b9; line-height:1.45;">
-                Cost: <strong>100 INPI / day</strong><br />
-                Effect: <strong>+25% production</strong><br />
-                
-                Farm window: <strong>7 days</strong>
+              
+                <div style="margin-top:0.45rem; font-size:0.82rem; color:#98a9b9; line-height:1.45;">
+                  Cost: <strong>100 INPI / day</strong><br />
+                  Effect: <strong>+25% production</strong><br />
+                  Farm window: <strong>7 days</strong><br />
+                  Boost contract max: <strong>10 days</strong>
+                </div>
+              
+                <div style="display:flex; gap:0.5rem; margin-top:0.65rem; align-items:center;">
+                  <select
+                    id="boostDays"
+                    aria-label="Farm boost days"
+                    style="width:120px; background:#0f1a22; border:1px solid #2a3f4a; color:white; padding:0.45rem; border-radius:0.7rem;"
+                  >
+                    <option value="1">1 day</option>
+                    <option value="2">2 days</option>
+                    <option value="3">3 days</option>
+                    <option value="4">4 days</option>
+                    <option value="5">5 days</option>
+                    <option value="6">6 days</option>
+                    <option value="7" selected>7 days</option>
+                    <option value="8">8 days</option>
+                    <option value="9">9 days</option>
+                    <option value="10">10 days</option>
+                  </select>
+              
+                  <button class="btn btn-small boost-btn" id="buyBoostBtn" type="button" style="flex:1;" disabled>
+                    Buy
+                  </button>
+                </div>
+              
+                <div id="boostCostInfo" style="margin-top:0.45rem; font-size:0.82rem; color:#d4af37;">
+                  Total: 700 INPI
+                </div>
               </div>
-
-              <div style="display:flex; gap:0.5rem; margin-top:0.65rem;">
-                <input
-                  type="number"
-                  id="boostDays"
-                  min="1"
-                  max="7"
-                  value="7"
-                  aria-label="Boost days"
-                  style="width:78px; background:#0f1a22; border:1px solid #2a3f4a; color:white; padding:0.45rem; border-radius:0.7rem;"
-                />
-                <button class="btn btn-small boost-btn" id="buyBoostBtn" type="button" style="flex:1;" disabled>
-                  Buy
-                </button>
-              </div>
-
-              <div id="boostCostInfo" style="margin-top:0.45rem; font-size:0.82rem; color:#d4af37;">
-                Total: 700 INPI
-              </div>
-
-              <button id="confirmBoostBtn" type="button" style="display:none;">Confirm</button>
-            </div>
             
 
             <div style="margin-top:1rem; border-top:1px solid #2a3f4a; padding-top:1.2rem;">
@@ -338,21 +344,34 @@
                     Contract max: <strong>10 days</strong><br />
                     Base steal: <strong>25%</strong> → with boost up to <strong>50%</strong> before protection
                   </p>
-                
+            
                   <div class="input-group" style="grid-template-columns:1fr auto;">
-                    <input type="number" id="pirateBoostDays" min="1" max="10" value="7" placeholder="Days" />
-                    <button class="btn btn-small boost-btn" id="buyPirateBoostBtn" type="button">Buy Pirate Boost</button>
+                    <select id="pirateBoostDays">
+                      <option value="1">1 day</option>
+                      <option value="2">2 days</option>
+                      <option value="3">3 days</option>
+                      <option value="4">4 days</option>
+                      <option value="5">5 days</option>
+                      <option value="6">6 days</option>
+                      <option value="7" selected>7 days</option>
+                      <option value="8">8 days</option>
+                      <option value="9">9 days</option>
+                      <option value="10">10 days</option>
+                    </select>
+            
+                    <button class="btn btn-small boost-btn" id="buyPirateBoostBtn" type="button">
+                      Buy Pirate Boost
+                    </button>
                   </div>
-                
+            
                   <div id="pirateBoostCostInfo" style="font-size:0.84rem; color:#d4af37; margin-top:0.35rem;">
-                    Total: 1000 PIT
+                    Total: 700 PIT
                   </div>
-                
+            
                   <div id="pirateBoostMessage" style="font-size:0.84rem; margin-top:0.5rem;"></div>
                 </div>
               </details>
             </div>
-          </div>
 
           <div class="pirate-right">
             <div class="panel-head inner-panel-head">

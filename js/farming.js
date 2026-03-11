@@ -16,6 +16,12 @@
      getFarmingV5Contract,
      getV5PendingTotal
    } from "./migration.js";
+
+   import {
+    FARM_BOOST_PRICE_PER_DAY,
+    FARM_BOOST_MAX_DAYS,
+    FARM_WINDOW_DAYS
+  } from "./config.js";
    
    let isMigrationRunning = false;
    let isBatchMigrationRunning = false;
@@ -275,66 +281,101 @@
       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
     }
   }
-   export function updateFarmBoostCostLabel() {
-    const days = parseInt(byId("boostDays")?.value, 10);
+  export function updateFarmBoostCostLabel() {
+    const daysEl = byId("boostDays");
     const costInfo = byId("boostCostInfo");
   
-    if (!costInfo) return;
+    if (!costInfo || !daysEl) return;
   
-    const safeDays = Number.isFinite(days) ? Math.max(1, Math.min(7, days)) : 7;
-    costInfo.textContent = `Total: ${safeDays * 100} INPI`;
+    let days = parseInt(daysEl.value, 10);
+    if (!Number.isFinite(days)) days = 7;
+  
+    days = Math.max(1, Math.min(FARM_BOOST_MAX_DAYS, days));
+    daysEl.value = String(days);
+  
+    costInfo.textContent = `Total: ${days * FARM_BOOST_PRICE_PER_DAY} INPI`;
+  }
+  
+  export async function buyBoost() {
+    if (!state.selectedBlock) {
+      alert("No block selected.");
+      return;
+    }
+  
+    const msgDiv = getActionMessageDiv();
+    const tokenId = state.selectedBlock.tokenId;
+  
+    let days = parseInt(byId("boostDays")?.value, 10);
+    if (!Number.isFinite(days)) days = 7;
+    days = Math.max(1, Math.min(FARM_BOOST_MAX_DAYS, days));
+  
+    const totalCostHuman = days * FARM_BOOST_PRICE_PER_DAY;
+    const totalCostWei = ethers.utils.parseEther(String(totalCostHuman));
+  
+    try {
+      const owner = await state.nftContract.ownerOf(tokenId);
+      if (owner.toLowerCase() !== state.userAddress.toLowerCase()) {
+        msgDiv.innerHTML = `<span class="error">❌ Not your block.</span>`;
+        return;
+      }
+  
+      const allowance = await state.inpiContract.allowance(
+        state.userAddress,
+        state.farmingV6Contract.address
+      );
+  
+      if (allowance.lt(totalCostWei)) {
+        msgDiv.innerHTML = `
+          <span class="success">
+            ⏳ Approving INPI...<br>
+            Cost: ${totalCostHuman} INPI
+          </span>
+        `;
+  
+        const approveTx = await state.inpiContract.approve(
+          state.farmingV6Contract.address,
+          totalCostWei
+        );
+        debugLog("farm boost approve tx", approveTx.hash);
+        await approveTx.wait();
+      }
+  
+      msgDiv.innerHTML = `
+        <span class="success">
+          ⏳ Buying farm boost...<br>
+          Block: #${tokenId}<br>
+          Days: ${days}<br>
+          Cost: ${totalCostHuman} INPI<br>
+          Effect: +25% production<br>
+          Farm window: ${FARM_WINDOW_DAYS} days
+        </span>
+      `;
+  
+      const tx = await state.farmingV6Contract.buyBoost(tokenId, days, {
+        gasLimit: 300000
+      });
+  
+      debugLog("buyBoost tx", tx.hash);
+      await tx.wait();
+  
+      msgDiv.innerHTML = `
+        <span class="success">
+          ✅ Farm boost activated.<br>
+          Block: #${tokenId}<br>
+          Days: ${days}<br>
+          Paid: ${totalCostHuman} INPI
+        </span>
+      `;
+  
+      await loadResourceBalancesOnchain();
+      await refreshSelectedBlockView();
+    } catch (e) {
+      console.error("Boost error:", e);
+      msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+    }
   }
 
-   export async function buyBoost() {
-  if (!state.selectedBlock) {
-    alert("No block selected.");
-    return;
-  }
 
-  const days = parseInt(byId("boostDays")?.value, 10);
-  if (isNaN(days) || days < 1 || days > 7) {
-    alert("Please enter valid days (1-7)");
-    return;
-  }
-
-  const msgDiv = getActionMessageDiv();
-  const cost = days * 100;
-
-  try {
-    msgDiv.innerHTML = `
-      <span class="success">
-        ⏳ Buying farm boost...<br>
-        Block: #${state.selectedBlock.tokenId}<br>
-        Days: ${days}<br>
-        Cost: ${cost} INPI<br>
-        Effect: +25% production
-      </span>
-    `;
-
-    const tx = await state.farmingV6Contract.buyBoost(
-      state.selectedBlock.tokenId,
-      days,
-      { gasLimit: 300000 }
-    );
-
-    debugLog("buyBoost tx", tx.hash);
-    await tx.wait();
-
-    msgDiv.innerHTML = `
-      <span class="success">
-        ✅ Farm boost activated.<br>
-        Block: #${state.selectedBlock.tokenId}<br>
-        Days: ${days}<br>
-        Paid: ${cost} INPI
-      </span>
-    `;
-
-    await refreshSelectedBlockView();
-  } catch (e) {
-    console.error("Boost error:", e);
-    msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
-  }
-}
    
    export async function migrateSelectedFarmToV6() {
      if (!state.selectedBlock) return;

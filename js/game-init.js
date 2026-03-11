@@ -123,9 +123,12 @@
      byId("attackRow")?.addEventListener("input", scheduleAttackDropdownRefresh);
      byId("attackCol")?.addEventListener("input", scheduleAttackDropdownRefresh);
    
-     byId("boostDays")?.addEventListener("input", updateFarmBoostCostLabel);
-     byId("pirateBoostDays")?.addEventListener("input", updateBoostCostLabels);
-   
+     byId("boostDays")?.addEventListener("change", updateFarmBoostCostLabel);
+     byId("pirateBoostDays")?.addEventListener("change", updateBoostCostLabels);
+     
+     updateFarmBoostCostLabel();
+     updateBoostCostLabels();
+      
      document.querySelectorAll('input[name="payment"]').forEach((radio) => {
        radio.addEventListener("change", (e) => {
          state.selectedPayment = e.target.value;

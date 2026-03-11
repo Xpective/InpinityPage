@@ -36,3 +36,10 @@ export const resourceNames = [
 ];
 
 export const rarityNames = ["Bronze", "Silver", "Gold", "Platinum", "Diamond"];
+
+export const FARM_BOOST_PRICE_PER_DAY = 100;
+export const FARM_BOOST_MAX_DAYS = 10;
+export const FARM_WINDOW_DAYS = 7;
+
+export const PIRATE_BOOST_PRICE_PER_DAY = 100;
+export const PIRATE_BOOST_MAX_DAYS = 10;
