@@ -27,6 +27,48 @@
      return { canvas, ctx, container, tooltip };
    }
    
+   function isOwnBlock(token) {
+     return !!(
+       state.userAddress &&
+       token?.owner &&
+       token.owner.toLowerCase() === state.userAddress.toLowerCase()
+     );
+   }
+   
+   function getTooltipHtml(tokenId) {
+     const tokens = getAllMapTokens();
+     const userAttacks = getUserAttacks();
+     const token = tokens[tokenId];
+   
+     let html = `<span>Block #${tokenId}</span><br>`;
+   
+     if (token?.owner) {
+       html += `Owner: ${shortenAddress(token.owner)}<br>`;
+       html += `Status: ${token.revealed ? "Revealed" : "Minted"}`;
+   
+       if (token.farmV6Active || token.farmActive) html += " · Farming V6";
+       else if (token.farmV5Active) html += " · Farming V5";
+   
+       if (token.protectionActive) html += ` · Protected ${token.protectionLevel || 0}%`;
+       if (token.partnerActive) html += " ⭐";
+       if (token.rarity !== null && token.rarity !== undefined) {
+         html += ` · ${rarityNames[token.rarity]}`;
+       }
+   
+       const attack = userAttacks.find((a) => String(a.targetTokenId) === String(tokenId));
+       if (attack) {
+         const now = Math.floor(Date.now() / 1000);
+         html += attack.endTime <= now
+           ? " · 🔴 Attack ready!"
+           : ` · ⚔️ Attacking (${formatTime(attack.endTime - now)} left)`;
+       }
+     } else {
+       html += "Not minted";
+     }
+   
+     return html;
+   }
+   
    export function drawPyramid() {
      if (!canvas || !ctx) return;
    
@@ -61,15 +103,12 @@
              fillColor = token.revealed ? "#c9a959" : "#2e7d5e";
            }
    
-           if (
-             state.userAddress &&
-             token.owner &&
-             token.owner.toLowerCase() === state.userAddress.toLowerCase()
-           ) {
+           if (isOwnBlock(token)) {
              fillColor = "#9b59b6";
            }
    
            const attack = userAttacks.find((a) => String(a.targetTokenId) === tokenId);
+   
            if (attack) {
              if (attack.endTime <= now) {
                strokeColor = "#e74c3c";
@@ -81,7 +120,7 @@
            } else if (token.protectionActive) {
              strokeColor = "#9b59b6";
              lineWidth = 3;
-           } else if (token.farmActive) {
+           } else if (token.farmV6Active || token.farmActive) {
              strokeColor = "#3498db";
              lineWidth = 3;
            } else if (token.farmV5Active) {
@@ -196,8 +235,11 @@
    }
    
    async function handleClick(e) {
+     if (mapState.touchMoved || mapState.isDragging) return;
+   
      const tokenId = findTokenIdAtClientPoint(e.clientX, e.clientY);
      if (!tokenId) return;
+   
      await updateSidebar(tokenId);
      drawPyramid();
    }
@@ -205,8 +247,6 @@
    function handleMouseMove(e) {
      if (!canvas || !tooltip || mapState.isDragging) return;
    
-     const tokens = getAllMapTokens();
-     const userAttacks = getUserAttacks();
      const tokenId = findTokenIdAtClientPoint(e.clientX, e.clientY);
    
      if (!tokenId) {
@@ -214,32 +254,7 @@
        return;
      }
    
-     const token = tokens[tokenId];
-     let html = `<span>Block #${tokenId}</span><br>`;
-   
-     if (token?.owner) {
-       html += `Owner: ${shortenAddress(token.owner)}<br>`;
-       html += `Status: ${token.revealed ? "Revealed" : "Minted"}`;
-   
-       if (token.farmActive) html += " · Farming V6";
-       else if (token.farmV5Active) html += " · Farming V5";
-   
-       if (token.protectionActive) html += " · Protected";
-       if (token.partnerActive) html += " ⭐";
-       if (token.rarity !== null) html += ` · ${rarityNames[token.rarity]}`;
-   
-       const attack = userAttacks.find((a) => String(a.targetTokenId) === tokenId);
-       if (attack) {
-         const now = Math.floor(Date.now() / 1000);
-         html += attack.endTime <= now
-           ? " · 🔴 Attack ready!"
-           : ` · ⚔️ Attacking (${formatTime(attack.endTime - now)} left)`;
-       }
-     } else {
-       html += "Not minted";
-     }
-   
-     tooltip.innerHTML = html;
+     tooltip.innerHTML = getTooltipHtml(tokenId);
      tooltip.style.opacity = 1;
      tooltip.style.left = `${e.clientX + 20}px`;
      tooltip.style.top = `${e.clientY - 50}px`;
@@ -278,7 +293,7 @@
          mapState.touchStartY = e.touches[0].clientY;
          drawPyramid();
        }
-     } else if (e.touches.length === 2) {
+     } else if (e.touches.length === 2 && canvas) {
        const dist = Math.hypot(
          e.touches[0].clientX - e.touches[1].clientX,
          e.touches[0].clientY - e.touches[1].clientY
@@ -309,6 +324,7 @@
        if (!mapState.touchMoved && !mapState.isDragging) {
          handleClick({ clientX: mapState.touchStartX, clientY: mapState.touchStartY });
        }
+   
        mapState.isDragging = false;
        mapState.pinchStartDist = 0;
        mapState.touchMoved = false;
@@ -317,7 +333,9 @@
    
    function handleMouseDown(e) {
      if (!canvas) return;
+   
      mapState.isDragging = true;
+     mapState.touchMoved = false;
      mapState.lastMouseX = e.clientX;
      mapState.lastMouseY = e.clientY;
      canvas.style.cursor = "grabbing";
@@ -327,6 +345,10 @@
      if (mapState.isDragging) {
        const dx = e.clientX - mapState.lastMouseX;
        const dy = e.clientY - mapState.lastMouseY;
+   
+       if (Math.abs(dx) > 0 || Math.abs(dy) > 0) {
+         mapState.touchMoved = true;
+       }
    
        mapState.offsetX += dx;
        mapState.offsetY += dy;

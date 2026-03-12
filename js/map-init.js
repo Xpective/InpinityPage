@@ -7,7 +7,7 @@
    import { byId, safeText, shortenAddress, debugLog } from "./utils.js";
    import { connectWalletCore, clearContracts } from "./contracts.js";
    import { setupLegacyMigrationContracts } from "./migration.js";
-   import { mapState } from "./map-state.js";
+   import { mapState, stopMapPollers, resetMapRuntimeState } from "./map-state.js";
    import {
      initMapReadOnly,
      loadMapData,
@@ -32,7 +32,6 @@
      updateMapPirateBoostCostLabels,
      updateMapMercenaryCostPreview,
      handleBuyPirateBoost,
-     handleSetProtection,
      handleExtendProtection,
      handleCancelProtection,
      handleMoveProtection,
@@ -73,6 +72,7 @@
        updateMapFarmBoostCostLabels();
        updateMapPirateBoostCostLabels();
        await updateMapMercenaryCostPreview();
+       await refreshSelectedTargetAttackPreview();
        drawPyramid();
    
        if (!mapState.attacksPoller) {
@@ -97,8 +97,42 @@
      }
    }
    
+   function disconnectMapWallet() {
+     localStorage.removeItem(STORAGE_WALLET_FLAG);
+   
+     stopMapPollers();
+     clearContracts();
+     resetMapRuntimeState();
+   
+     safeText("walletAddress", "Not connected");
+     safeText("connectBtn", "Connect");
+   
+     const blockDetail = byId("blockDetail");
+     if (blockDetail) {
+       blockDetail.innerHTML = `<p style="color:#98a9b9; text-align:center;">Click a block</p>`;
+     }
+   
+     const actionPanel = byId("actionPanel");
+     if (actionPanel) actionPanel.style.display = "none";
+   
+     const userResources = byId("userResources");
+     if (userResources) userResources.innerHTML = `<p style="color:#98a9b9;">Connect wallet</p>`;
+   
+     const userAttacksList = byId("userAttacksList");
+     if (userAttacksList) userAttacksList.innerHTML = `<p style="color:#98a9b9;">Connect wallet</p>`;
+   
+     drawPyramid();
+     debugLog("Map wallet disconnected");
+   }
+   
    function bindMapEvents() {
-     byId("connectBtn")?.addEventListener("click", () => connectWallet(true));
+     byId("connectBtn")?.addEventListener("click", () => {
+       if (state.userAddress) {
+         disconnectMapWallet();
+       } else {
+         connectWallet(true);
+       }
+     });
    
      byId("boostDays")?.addEventListener("input", updateMapFarmBoostCostLabels);
      byId("boostDays")?.addEventListener("change", updateMapFarmBoostCostLabels);
@@ -128,13 +162,10 @@
      });
    
      document.addEventListener("click", async (e) => {
-       // Execute attack button
        const executeBtn = e.target.closest(".execute-btn");
        if (executeBtn) {
          e.preventDefault();
          e.stopPropagation();
-   
-         console.log("execute-btn clicked", executeBtn.dataset);
    
          const attack = {
            id: executeBtn.dataset.attackid || null,
@@ -143,46 +174,28 @@
            resource: Number(executeBtn.dataset.resource || 0)
          };
    
-         if (!Number.isFinite(attack.targetTokenId) || attack.targetTokenId <= 0) {
-           console.warn("Invalid execute attack targetTokenId", executeBtn.dataset);
-           return;
-         }
-   
-         if (!Number.isFinite(attack.attackIndex) || attack.attackIndex < 0) {
-           console.warn("Invalid execute attack index", executeBtn.dataset);
-           return;
-         }
+         if (!Number.isFinite(attack.targetTokenId) || attack.targetTokenId <= 0) return;
+         if (!Number.isFinite(attack.attackIndex) || attack.attackIndex < 0) return;
    
          await executeAttack(attack);
          return;
        }
    
-       // Cancel attack button
        const cancelBtn = e.target.closest(".cancel-attack-btn");
        if (cancelBtn) {
          e.preventDefault();
          e.stopPropagation();
    
-         console.log("cancel-attack-btn clicked", cancelBtn.dataset);
-   
          const targetTokenId = Number(cancelBtn.dataset.targetid || 0);
          const attackIndex = Number(cancelBtn.dataset.attackindex || 0);
    
-         if (!Number.isFinite(targetTokenId) || targetTokenId <= 0) {
-           console.warn("Invalid cancel attack targetTokenId", cancelBtn.dataset);
-           return;
-         }
-   
-         if (!Number.isFinite(attackIndex) || attackIndex < 0) {
-           console.warn("Invalid cancel attack index", cancelBtn.dataset);
-           return;
-         }
+         if (!Number.isFinite(targetTokenId) || targetTokenId <= 0) return;
+         if (!Number.isFinite(attackIndex) || attackIndex < 0) return;
    
          await cancelAttack(targetTokenId, attackIndex);
          return;
        }
    
-       // Regular buttons with IDs
        const button = e.target.closest("button");
        if (!button) return;
    
@@ -192,7 +205,6 @@
        if (button.id === "claimBtn") return await handleClaim();
        if (button.id === "buyBoostBtn") return await handleBuyBoost();
        if (button.id === "protectBtn") return await handleProtect();
-       if (button.id === "setProtectionBtn") return await handleSetProtection();
        if (button.id === "extendProtectionBtn") return await handleExtendProtection();
        if (button.id === "cancelProtectionBtn") return await handleCancelProtection();
        if (button.id === "moveProtectionBtn") return await handleMoveProtection();

@@ -30,7 +30,7 @@
    import { refreshSelectedTargetAttackPreview, updateSidebar } from "./map-selection.js";
    import { migrateSingleFarmV5ToV6 } from "./migration.js";
    
-   // ==================== HELPER ====================
+   /* ==================== HELPER ==================== */
    
    function getActionMessageDiv() {
      return byId("actionMessage");
@@ -106,7 +106,48 @@
      return Number.isFinite(v) ? v : 0;
    }
    
-   // ==================== UI UPDATES ====================
+   function getSelectedToken() {
+     if (!mapState.selectedTokenId) return null;
+     return getAllMapTokens()[String(mapState.selectedTokenId)] || null;
+   }
+   
+   function isSelectedOwnedByUser() {
+     const token = getSelectedToken();
+     if (!token?.owner || !state.userAddress) return false;
+     return token.owner.toLowerCase() === state.userAddress.toLowerCase();
+   }
+   
+   function hasActiveProtectionOnSelectedToken() {
+     const token = getSelectedToken();
+     const now = Math.floor(Date.now() / 1000);
+   
+     return !!(
+       token &&
+       token.protectionActive &&
+       Number(token.protectionExpiry || 0) > now
+     );
+   }
+   
+   async function requireOwnedSelectedToken(msgDiv = null) {
+     if (!mapState.selectedTokenId) {
+       if (msgDiv) msgDiv.innerHTML = `<span class="error">❌ No block selected.</span>`;
+       return false;
+     }
+   
+     if (!state.userAddress) {
+       if (msgDiv) msgDiv.innerHTML = `<span class="error">❌ Wallet not connected.</span>`;
+       return false;
+     }
+   
+     if (!isSelectedOwnedByUser()) {
+       if (msgDiv) msgDiv.innerHTML = `<span class="error">❌ This action is only available for your own block.</span>`;
+       return false;
+     }
+   
+     return true;
+   }
+   
+   /* ==================== UI UPDATES ==================== */
    
    export async function updateMapPirateBoostCostLabels() {
      const daysSelect = byId("pirateBoostDays");
@@ -173,22 +214,10 @@
      const days = getMercenaryDurationDays();
      const slotIndex = getMercenarySlotIndex();
      const payInINPI = getMercenaryPaymentMode() === "inpi";
-   
-     let isExtension = false;
-     if (mapState.selectedTokenId) {
-       const token = getAllMapTokens()[String(mapState.selectedTokenId)];
-       const now = Math.floor(Date.now() / 1000);
-       isExtension = !!(
-         token &&
-         token.protectionActive &&
-         Number(token.protectionExpiry || 0) > now
-       );
-     }
+     const isExtension = hasActiveProtectionOnSelectedToken();
    
      if (!state.userAddress || !state.mercenaryV4Contract) {
-       info.textContent = payInINPI
-         ? "Cost: connect wallet"
-         : "Cost: connect wallet";
+       info.textContent = "Cost: connect wallet";
        return;
      }
    
@@ -231,7 +260,7 @@
      await updateMapMercenaryCostPreview();
    }
    
-   // ==================== TRANSACTION HELPER ====================
+   /* ==================== TRANSACTION HELPER ==================== */
    
    async function sendTx(txPromise, successMsg) {
      setActionMessage(`<span class="success">⏳ Sending...</span>`);
@@ -240,11 +269,9 @@
        const tx = await txPromise;
    
        setActionMessage(`<span class="success">⏳ Confirming...</span>`);
-   
        await tx.wait();
    
        setActionMessage(`<span class="success">✅ ${successMsg}</span>`);
-   
        await refreshAfterTx();
      } catch (err) {
        console.error("map action tx error:", err);
@@ -252,12 +279,14 @@
      }
    }
    
-   // ==================== FARM ACTIONS ====================
+   /* ==================== FARM ACTIONS ==================== */
    
    export async function handleMigrateToV6() {
      if (!mapState.selectedTokenId) return;
    
      const actionMessage = getActionMessageDiv();
+   
+     if (!(await requireOwnedSelectedToken(actionMessage))) return;
    
      try {
        if (actionMessage) {
@@ -294,6 +323,8 @@
      if (!mapState.selectedTokenId || !mapState.selectedTokenOwner) return;
    
      const actionMessage = getActionMessageDiv();
+     if (!(await requireOwnedSelectedToken(actionMessage))) return;
+   
      const tokenIdNum = parseInt(mapState.selectedTokenId, 10);
      const row = Math.floor(tokenIdNum / 2048);
      const col = tokenIdNum % 2048;
@@ -332,9 +363,11 @@
    export async function handleStartFarm() {
      if (!mapState.selectedTokenId) return;
    
+     const actionMessage = getActionMessageDiv();
+     if (!(await requireOwnedSelectedToken(actionMessage))) return;
+   
      const tokens = getAllMapTokens();
      const token = tokens[String(mapState.selectedTokenId)];
-     const actionMessage = getActionMessageDiv();
    
      if (token?.farmV5Active) {
        if (actionMessage) {
@@ -352,6 +385,9 @@
    export async function handleStopFarm() {
      if (!mapState.selectedTokenId) return;
    
+     const actionMessage = getActionMessageDiv();
+     if (!(await requireOwnedSelectedToken(actionMessage))) return;
+   
      await sendTx(
        state.farmingV6Contract.stopFarming(mapState.selectedTokenId, { gasLimit: 500000 }),
        "Farming stopped."
@@ -361,9 +397,11 @@
    export async function handleClaim() {
      if (!mapState.selectedTokenId) return;
    
+     const actionMessage = getActionMessageDiv();
+     if (!(await requireOwnedSelectedToken(actionMessage))) return;
+   
      const tokens = getAllMapTokens();
      const token = tokens[String(mapState.selectedTokenId)];
-     const actionMessage = getActionMessageDiv();
    
      try {
        if (token?.farmV5Active && !token?.farmActive) {
@@ -408,6 +446,8 @@
      if (!mapState.selectedTokenId || !state.userAddress) return;
    
      const actionMessage = getActionMessageDiv();
+     if (!(await requireOwnedSelectedToken(actionMessage))) return;
+   
      const days = parseInt(byId("boostDays")?.value || "7", 10);
    
      if (!Number.isFinite(days) || days < 1 || days > FARM_BOOST_MAX_DAYS) {
@@ -508,10 +548,12 @@
      }
    }
    
-   // ==================== MERCENARY V4 ====================
+   /* ==================== MERCENARY V4 ==================== */
    
    export async function handleSetProtection() {
      const msgDiv = getProtectMessageDiv();
+     if (!(await requireOwnedSelectedToken(msgDiv))) return;
+   
      const tokenId = getSelectedProtectTokenId();
      const slotIndex = getMercenarySlotIndex();
      const durationDays = getMercenaryDurationDays();
@@ -520,12 +562,6 @@
      if (!tokenId || !state.mercenaryV4Contract || !state.userAddress) return;
    
      try {
-       const owner = await state.nftContract.ownerOf(tokenId);
-       if (owner.toLowerCase() !== state.userAddress.toLowerCase()) {
-         msgDiv.innerHTML = `<span class="error">❌ Not your block.</span>`;
-         return;
-       }
-   
        if (payInINPI) {
          const cost = await state.mercenaryV4Contract.getProtectionCost(
            state.userAddress,
@@ -564,6 +600,8 @@
    
    export async function handleExtendProtection() {
      const msgDiv = getProtectMessageDiv();
+     if (!(await requireOwnedSelectedToken(msgDiv))) return;
+   
      const slotIndex = getMercenarySlotIndex();
      const additionalDays = getMercenaryDurationDays();
      const payInINPI = getMercenaryPaymentMode() === "inpi";
@@ -571,6 +609,11 @@
      if (!state.mercenaryV4Contract || !state.userAddress) return;
    
      try {
+       if (!hasActiveProtectionOnSelectedToken()) {
+         msgDiv.innerHTML = `<span class="error">❌ No active protection on this block to extend.</span>`;
+         return;
+       }
+   
        if (payInINPI) {
          const cost = await state.mercenaryV4Contract.getProtectionCost(
            state.userAddress,
@@ -608,6 +651,8 @@
    
    export async function handleCancelProtection() {
      const msgDiv = getProtectMessageDiv();
+     if (!(await requireOwnedSelectedToken(msgDiv))) return;
+   
      const slotIndex = getMercenarySlotIndex();
    
      if (!state.mercenaryV4Contract) return;
@@ -630,6 +675,8 @@
    
    export async function handleMoveProtection() {
      const msgDiv = getProtectMessageDiv();
+     if (!(await requireOwnedSelectedToken(msgDiv))) return;
+   
      const slotIndex = getMercenarySlotIndex();
      const newTokenId = getSelectedProtectTokenId();
    
@@ -653,6 +700,8 @@
    
    export async function handleEmergencyMoveProtection() {
      const msgDiv = getProtectMessageDiv();
+     if (!(await requireOwnedSelectedToken(msgDiv))) return;
+   
      const slotIndex = getMercenarySlotIndex();
      const newTokenId = getSelectedProtectTokenId();
    
@@ -755,11 +804,19 @@
    
    export async function handleSaveBastionTitle() {
      const msgDiv = getProtectMessageDiv();
-     const title = (byId("bastionTitleInput")?.value || "").trim();
-   
      if (!state.mercenaryV4Contract) return;
+   
+     const title = (byId("bastionTitleInput")?.value || "").trim();
      if (!title) {
        msgDiv.innerHTML = `<span class="error">❌ Enter a title first.</span>`;
+       return;
+     }
+   
+     const points =
+       Number(mapState.mercenaryProfile?.defenderPoints || mapState.mercenaryProfile?.points || 0);
+   
+     if (points < 1000) {
+       msgDiv.innerHTML = `<span class="error">❌ Bastion Title unlocks at 1000 Defender Points.</span>`;
        return;
      }
    
@@ -780,24 +837,16 @@
    }
    
    export async function handleProtect() {
-     const tokenId = getSelectedProtectTokenId();
-     if (!tokenId) return;
+     const msgDiv = getProtectMessageDiv();
+     if (!(await requireOwnedSelectedToken(msgDiv))) return;
    
-     const token = getAllMapTokens()[String(tokenId)];
-     const now = Math.floor(Date.now() / 1000);
-     const hasActiveProtection = !!(
-       token &&
-       token.protectionActive &&
-       Number(token.protectionExpiry || 0) > now
-     );
-   
-     if (hasActiveProtection) {
+     if (hasActiveProtectionOnSelectedToken()) {
        return handleExtendProtection();
      }
      return handleSetProtection();
    }
    
-   // ==================== PIRATES ====================
+   /* ==================== PIRATES ==================== */
    
    export async function handleAttack() {
      if (!mapState.selectedTokenId || !state.userAddress) return;
@@ -892,8 +941,6 @@
    
    export async function executeAttack(attack) {
      try {
-       console.log("executeAttack clicked", attack);
-   
        if (!state.userAddress) {
          setActionMessage(`<span class="error">❌ Wallet not connected.</span>`);
          return;
@@ -921,8 +968,6 @@
        const liveAttack = await state.piratesV6Contract.getAttack(targetTokenId, attackIndex);
        const normalized = normalizeAttackTuple(liveAttack);
        const now = Math.floor(Date.now() / 1000);
-   
-       console.log("liveAttack", normalized);
    
        if (!normalized.attacker) {
          setActionMessage(`<span class="error">❌ Attack not found on-chain.</span>`);
@@ -959,8 +1004,6 @@
    
        const preview = await state.piratesV6Contract.previewExecuteAttack(targetTokenId, attackIndex);
    
-       console.log("previewExecuteAttack", preview);
-   
        if (!preview.allowed) {
          setActionMessage(
            `<span class="error">❌ Execute not allowed. Code: ${preview.code}</span>`
@@ -996,8 +1039,6 @@
    
    export async function cancelAttack(targetTokenId, attackIndex) {
      try {
-       console.log("cancelAttack clicked", { targetTokenId, attackIndex });
-   
        if (!state.userAddress) {
          setActionMessage(`<span class="error">❌ Wallet not connected.</span>`);
          return;
