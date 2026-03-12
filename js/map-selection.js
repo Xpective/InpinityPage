@@ -1,429 +1,430 @@
 /* =========================================================
-   MAP SELECTION / SIDEBAR
+   MAP SELECTION / SIDEBAR – V6 + MERCENARY V4
    ========================================================= */
 
-   import { state } from "./state.js";
-   import { rarityNames } from "./config.js";
-   import {
-     byId,
-     shortenAddress,
-     formatDuration
-   } from "./utils.js";
-   import {
-     mapState,
-     MAP_CONST
-   } from "./map-state.js";
-   import {
-     getAllMapTokens,
-     safeGetFarm,
-     getPreferredAttackerTokenId,
-     getAttackableResourceIds,
-     populateAttackResourceSelect,
-     getReadOnlyNFTContract
-   } from "./map-data.js";
-   import { populateAttackerSelect } from "./map-ui.js";
-   
-   const blockDetailDiv = byId("blockDetail");
-   const actionPanel = byId("actionPanel");
-   const ownerActionsDiv = byId("ownerActions");
-   const protectionInput = byId("protectionInput");
-   const attackInput = byId("attackInput");
-   const actionMessage = byId("actionMessage");
-   const pirateBoostInput = byId("pirateBoostInput");
-   const boostCenter = byId("boostCenter");
-   const boostOptions = byId("boostOptions");
-   const buyBoostBtn = byId("buyBoostBtn");
-   const farmBoostStatusEl = byId("farmBoostStatus");
-   
-   
-   function getProduction(rarity) {
-     const p = {};
-   
-     if (rarity === 0) {
-       p.OIL = 12; p.LEMONS = 8; p.IRON = 5; p.COPPER = 1;
-     } else if (rarity === 1) {
-       p.OIL = 14; p.LEMONS = 10; p.IRON = 7; p.GOLD = 1; p.COPPER = 2;
-     } else if (rarity === 2) {
-       p.OIL = 16; p.LEMONS = 12; p.IRON = 9; p.GOLD = 2; p.PLATINUM = 1; p.COPPER = 3; p.CRYSTAL = 1;
-     } else if (rarity === 3) {
-       p.OIL = 18; p.LEMONS = 14; p.IRON = 11; p.GOLD = 3; p.PLATINUM = 2; p.COPPER = 4; p.CRYSTAL = 2; p.MYSTERIUM = 1;
-     } else if (rarity === 4) {
-       p.OIL = 20; p.LEMONS = 15; p.IRON = 12; p.GOLD = 5; p.PLATINUM = 3; p.COPPER = 5; p.CRYSTAL = 3; p.OBSIDIAN = 1; p.MYSTERIUM = 1; p.AETHER = 1;
-     }
-   
-     return p;
-   }
-   
-   export function clearActionArea() {
-    if (ownerActionsDiv) ownerActionsDiv.innerHTML = "";
-    if (protectionInput) protectionInput.style.display = "none";
+import { state } from "./state.js";
+import { rarityNames } from "./config.js";
+import {
+  byId,
+  shortenAddress,
+  formatDuration,
+  getProduction
+} from "./utils.js";
+import {
+  mapState,
+  MAP_CONST
+} from "./map-state.js";
+import {
+  getAllMapTokens,
+  safeGetFarm,
+  getPreferredAttackerTokenId,
+  getAttackableResourceIds,
+  populateAttackResourceSelect,
+  getReadOnlyNFTContract
+} from "./map-data.js";
+import { populateAttackerSelect } from "./map-ui.js";
+
+const blockDetailDiv = byId("blockDetail");
+const actionPanel = byId("actionPanel");
+const ownerActionsDiv = byId("ownerActions");
+const protectionInput = byId("protectionInput");
+const attackInput = byId("attackInput");
+const actionMessage = byId("actionMessage");
+const pirateBoostInput = byId("pirateBoostInput");
+const boostCenter = byId("boostCenter");
+const boostOptions = byId("boostOptions");
+const buyBoostBtn = byId("buyBoostBtn");
+const farmBoostStatusEl = byId("farmBoostStatus");
+
+function getProtectionTierLabel(tier) {
+  const t = Number(tier || 0);
+  if (t === 1) return "Tier 1 (20%)";
+  if (t === 2) return "Tier 2 (30%)";
+  if (t === 3) return "Tier 3 (50%)";
+  return "None";
+}
+
+export function clearActionArea() {
+  if (ownerActionsDiv) ownerActionsDiv.innerHTML = "";
+  if (protectionInput) protectionInput.style.display = "none";
+  if (attackInput) attackInput.style.display = "none";
+  if (pirateBoostInput) pirateBoostInput.style.display = "none";
+  if (boostOptions) boostOptions.style.display = "none";
+  if (buyBoostBtn) buyBoostBtn.style.display = "none";
+  if (boostCenter) boostCenter.style.display = "none";
+  if (actionMessage) actionMessage.innerHTML = "";
+}
+
+export async function refreshSelectedTargetAttackPreview() {
+  const tokens = getAllMapTokens();
+
+  const attackerBlockEl = byId("attackAttackerBlock");
+  const targetStatusEl = byId("attackTargetStatus");
+  const travelTimeEl = byId("attackTravelTime");
+  const remainingEl = byId("attackRemainingToday");
+  const pendingLootEl = byId("attackPendingLoot");
+  const stealAmountEl = byId("attackStealAmount");
+  const protectionEl = byId("attackProtection");
+  const stealPercentEl = byId("attackStealPercent");
+  const attackResourceEl = byId("attackResource");
+  const attackBtn = byId("attackBtn");
+  const pirateBoostStatusEl = byId("pirateBoostStatus");
+  const pirateBoostExpiryEl = byId("pirateBoostExpiry");
+  const pirateBoostOptions = byId("pirateBoostOptions");
+  const buyPirateBoostBtn = byId("buyPirateBoostBtn");
+
+  const token = tokens[mapState.selectedTokenId];
+
+  if (
+    !mapState.selectedTokenId ||
+    !state.userAddress ||
+    !token?.owner ||
+    token.owner.toLowerCase() === state.userAddress.toLowerCase()
+  ) {
     if (attackInput) attackInput.style.display = "none";
     if (pirateBoostInput) pirateBoostInput.style.display = "none";
-    if (boostOptions) boostOptions.style.display = "none";
-    if (buyBoostBtn) buyBoostBtn.style.display = "none";
-    if (boostCenter) boostCenter.style.display = "none";
-    if (actionMessage) actionMessage.innerHTML = "";
+    return;
   }
-   
-   export async function refreshSelectedTargetAttackPreview() {
-     const tokens = getAllMapTokens();
-   
-     const attackerBlockEl = byId("attackAttackerBlock");
-     const targetStatusEl = byId("attackTargetStatus");
-     const travelTimeEl = byId("attackTravelTime");
-     const remainingEl = byId("attackRemainingToday");
-     const pendingLootEl = byId("attackPendingLoot");
-     const stealAmountEl = byId("attackStealAmount");
-     const protectionEl = byId("attackProtection");
-     const stealPercentEl = byId("attackStealPercent");
-     const attackResourceEl = byId("attackResource");
-     const attackBtn = byId("attackBtn");
-     const pirateBoostStatusEl = byId("pirateBoostStatus");
-     const pirateBoostExpiryEl = byId("pirateBoostExpiry");
-     const pirateBoostOptions = byId("pirateBoostOptions");
-     const buyPirateBoostBtn = byId("buyPirateBoostBtn");
-   
-     const token = tokens[mapState.selectedTokenId];
-   
-     if (
-       !mapState.selectedTokenId ||
-       !state.userAddress ||
-       !token?.owner ||
-       token.owner.toLowerCase() === state.userAddress.toLowerCase()
-     ) {
-       if (attackInput) attackInput.style.display = "none";
-       if (pirateBoostInput) pirateBoostInput.style.display = "none";
-       return;
-     }
-   
-     if (attackInput) attackInput.style.display = "flex";
-   
-     populateAttackerSelect();
-     const attackerTokenId = await getPreferredAttackerTokenId();
-   
-     if (!attackerTokenId) {
-       if (attackerBlockEl) attackerBlockEl.innerText = "—";
-       if (targetStatusEl) targetStatusEl.innerText = "❌ No attacker block";
-       if (travelTimeEl) travelTimeEl.innerText = "—";
-       if (remainingEl) remainingEl.innerText = "—";
-       if (pendingLootEl) pendingLootEl.innerText = "—";
-       if (stealAmountEl) stealAmountEl.innerText = "—";
-       if (protectionEl) protectionEl.innerText = "—";
-       if (stealPercentEl) stealPercentEl.innerText = "—";
-       populateAttackResourceSelect([]);
-       if (attackBtn) attackBtn.disabled = true;
-       if (pirateBoostInput) pirateBoostInput.style.display = "none";
-       return;
-     }
-   
-     if (attackerBlockEl) attackerBlockEl.innerText = `#${attackerTokenId}`;
-   
-     if (state.piratesV6Contract) {
-       try {
-         const hasBoost = await state.piratesV6Contract.hasPirateBoost(attackerTokenId);
-         const expiry = await state.piratesV6Contract.getPirateBoostExpiry(attackerTokenId);
-         const expiryNum = Number(expiry || 0);
-         const now = Math.floor(Date.now() / 1000);
-   
-         if (pirateBoostInput) pirateBoostInput.style.display = "block";
-         if (pirateBoostOptions) pirateBoostOptions.style.display = "flex";
-         if (buyPirateBoostBtn) buyPirateBoostBtn.style.display = "block";
-   
-         if (pirateBoostStatusEl) {
-           pirateBoostStatusEl.innerText = hasBoost && expiryNum > now ? "✅ Active" : "❌ Inactive";
-         }
-   
-         if (pirateBoostExpiryEl) {
-           pirateBoostExpiryEl.innerText =
-             expiryNum > now
-               ? `${formatDuration(expiryNum - now)} left`
-               : "Expired";
-         }
-       } catch {
-         if (pirateBoostInput) pirateBoostInput.style.display = "block";
-         if (pirateBoostOptions) pirateBoostOptions.style.display = "flex";
-         if (buyPirateBoostBtn) buyPirateBoostBtn.style.display = "block";
-         if (pirateBoostStatusEl) pirateBoostStatusEl.innerText = "⚠️ Unknown";
-         if (pirateBoostExpiryEl) pirateBoostExpiryEl.innerText = "—";
-       }
-     } else {
-       if (pirateBoostInput) pirateBoostInput.style.display = "none";
-     }
-   
-     const targetTokenIdNum = parseInt(mapState.selectedTokenId, 10);
-     const lootableIds = await getAttackableResourceIds(attackerTokenId, targetTokenIdNum);
-   
-     let selectedResourceId = attackResourceEl?.value ?? null;
-     if (
-       selectedResourceId === null ||
-       selectedResourceId === "" ||
-       !lootableIds.includes(Number(selectedResourceId))
-     ) {
-       selectedResourceId = lootableIds.length ? lootableIds[0] : null;
-     }
-   
-     populateAttackResourceSelect(lootableIds, selectedResourceId);
-   
-     if (!lootableIds.length) {
-       if (targetStatusEl) targetStatusEl.innerText = "⚠️ No loot available";
-       if (travelTimeEl) travelTimeEl.innerText = "—";
-       if (remainingEl) remainingEl.innerText = "—";
-       if (pendingLootEl) pendingLootEl.innerText = "0";
-       if (stealAmountEl) stealAmountEl.innerText = "—";
-       if (protectionEl) protectionEl.innerText = "—";
-       if (stealPercentEl) stealPercentEl.innerText = "—";
-       if (attackBtn) attackBtn.disabled = true;
-       return;
-     }
-   
-     const resourceId = parseInt(byId("attackResource")?.value || "0", 10);
-   
-     try {
-       const preview = await state.piratesV6Contract.previewAttack(
-         attackerTokenId,
-         targetTokenIdNum,
-         resourceId
-       );
-   
-       if (targetStatusEl) {
-         if (preview.allowed) {
-           targetStatusEl.innerText = "✅ Attack allowed";
-         } else if (Number(preview.pendingAmount || 0) === 0) {
-           targetStatusEl.innerText = "⚠️ No loot available";
-         } else {
-           targetStatusEl.innerText = `❌ Blocked (Code ${preview.code})`;
-         }
-       }
-   
-       if (travelTimeEl) {
-         travelTimeEl.innerText = formatDuration(Number(preview.travelTime || 0));
-       }
-       if (remainingEl) {
-         remainingEl.innerText = String(Number(preview.remainingAttacksToday || 0));
-       }
-       if (pendingLootEl) {
-         pendingLootEl.innerText = (preview.pendingAmount || 0).toString();
-       }
-       if (stealAmountEl) {
-         stealAmountEl.innerText = (preview.stealAmount || 0).toString();
-       }
-       if (protectionEl) {
-         protectionEl.innerText = `${Number(preview.protectionLevel || 0)}%`;
-       }
-       if (stealPercentEl) {
-         stealPercentEl.innerText = `${Number(preview.effectiveStealPercent || 0)}%`;
-       }
-       if (attackBtn) {
-         attackBtn.disabled = !preview.allowed;
-       }
-     } catch {
-       if (targetStatusEl) targetStatusEl.innerText = "⚠️ Preview failed";
-       if (attackBtn) attackBtn.disabled = true;
-     }
-   }
-   
-   export async function updateSidebar(tokenId) {
-    const tokens = getAllMapTokens();
-    const nftReadOnlyContract = getReadOnlyNFTContract();
-  
-    mapState.selectedTokenId = String(tokenId);
-    const token = tokens[mapState.selectedTokenId];
-    const owner = token ? token.owner : null;
-    mapState.selectedTokenOwner = owner;
-  
-    if (
-      state.userAddress &&
-      owner &&
-      owner.toLowerCase() === state.userAddress.toLowerCase()
-    ) {
-      mapState.selectedAttackAttackerTokenId = String(tokenId);
-    }
-  
-    const now = Math.floor(Date.now() / 1000);
-    let v5Active = !!token?.farmV5Active;
-    let v6Active = false;
-  
-    let farmVersionTxt = "-";
-    let farmAgeTxt = "-";
-    let claimTxt = "-";
-    let pendingTotalTxt = "-";
-    let boostTxt = "inactive";
-    let protectionTxt = "inactive";
-    let protectionLevelTxt = "0%";
-  
-    if (token?.protectionActive && Number(token.protectionExpiry || 0) > now) {
-      protectionTxt = `active for ${formatDuration(Number(token.protectionExpiry || 0) - now)}`;
-      protectionLevelTxt = `${Number(token.protectionLevel || 0)}%`;
-    }
-  
-    if (v5Active) {
-      farmVersionTxt = "V5 Legacy";
-  
-      if (token.farmV5StartTime > 0) {
-        farmAgeTxt = formatDuration(now - token.farmV5StartTime);
+
+  if (attackInput) attackInput.style.display = "flex";
+
+  populateAttackerSelect();
+  const attackerTokenId = await getPreferredAttackerTokenId();
+
+  if (!attackerTokenId) {
+    if (attackerBlockEl) attackerBlockEl.innerText = "—";
+    if (targetStatusEl) targetStatusEl.innerText = "❌ No attacker block";
+    if (travelTimeEl) travelTimeEl.innerText = "—";
+    if (remainingEl) remainingEl.innerText = "—";
+    if (pendingLootEl) pendingLootEl.innerText = "—";
+    if (stealAmountEl) stealAmountEl.innerText = "—";
+    if (protectionEl) protectionEl.innerText = "—";
+    if (stealPercentEl) stealPercentEl.innerText = "—";
+    populateAttackResourceSelect([]);
+    if (attackBtn) attackBtn.disabled = true;
+    if (pirateBoostInput) pirateBoostInput.style.display = "none";
+    return;
+  }
+
+  if (attackerBlockEl) attackerBlockEl.innerText = `#${attackerTokenId}`;
+
+  if (state.piratesV6Contract) {
+    try {
+      const hasBoost = await state.piratesV6Contract.hasPirateBoost(attackerTokenId);
+      const expiry = await state.piratesV6Contract.getPirateBoostExpiry(attackerTokenId);
+      const expiryNum = Number(expiry || 0);
+      const now = Math.floor(Date.now() / 1000);
+
+      if (pirateBoostInput) pirateBoostInput.style.display = "block";
+      if (pirateBoostOptions) pirateBoostOptions.style.display = "flex";
+      if (buyPirateBoostBtn) buyPirateBoostBtn.style.display = "block";
+
+      if (pirateBoostStatusEl) {
+        pirateBoostStatusEl.innerText = hasBoost && expiryNum > now ? "✅ Active" : "❌ Inactive";
       }
-  
-      claimTxt = "Claim or migrate";
-      pendingTotalTxt = "legacy";
-    }
-  
-    if (state.farmingV6Contract && token?.owner) {
-      const farmInfo = await safeGetFarm(mapState.selectedTokenId);
-      v6Active = farmInfo.ok && farmInfo.isActive;
-  
-      if (v6Active) {
-        farmVersionTxt = "V6 Active";
-  
-        if (farmInfo.startTime > 0) {
-          farmAgeTxt = formatDuration(now - farmInfo.startTime);
-        }
-  
-        try {
-          const preview = await state.farmingV6Contract.previewClaim(mapState.selectedTokenId);
-          pendingTotalTxt = preview.pendingAmount ? preview.pendingAmount.toString() : "0";
-          claimTxt = preview.allowed
-            ? "READY"
-            : (
-                Number(preview.secondsRemaining || 0) > 0
-                  ? `in ${formatDuration(Number(preview.secondsRemaining))}`
-                  : "Not ready"
-              );
-        } catch {
-          // ignore preview issues here, sidebar should still render
-        }
-  
-        if (farmInfo.boostExpiry && Number(farmInfo.boostExpiry) > now) {
-          boostTxt = `${formatDuration(Number(farmInfo.boostExpiry) - now)} left`;
-        }
+
+      if (pirateBoostExpiryEl) {
+        pirateBoostExpiryEl.innerText =
+          expiryNum > now
+            ? `${formatDuration(expiryNum - now)} left`
+            : "Expired";
       }
+    } catch {
+      if (pirateBoostInput) pirateBoostInput.style.display = "block";
+      if (pirateBoostOptions) pirateBoostOptions.style.display = "flex";
+      if (buyPirateBoostBtn) buyPirateBoostBtn.style.display = "block";
+      if (pirateBoostStatusEl) pirateBoostStatusEl.innerText = "⚠️ Unknown";
+      if (pirateBoostExpiryEl) pirateBoostExpiryEl.innerText = "—";
     }
-  
-    if (!v5Active && !v6Active) {
-      farmVersionTxt = "Inactive";
-    }
-  
-    let productionHtml = "";
-    let rarityDisplay = "";
-  
-    if (token?.owner && token.revealed && nftReadOnlyContract) {
-      try {
-        const tokenIdNum = parseInt(mapState.selectedTokenId, 10);
-        const rarity = token.rarity !== null
-          ? token.rarity
-          : await nftReadOnlyContract.calculateRarity(tokenIdNum);
-  
-        const r = Number(rarity);
-  
-        rarityDisplay = `
-          <div class="detail-row">
-            <span class="detail-label">Rarity</span>
-            <span class="detail-value ${MAP_CONST.rarityClass[r]}">${rarityNames[r]}</span>
-          </div>
-        `;
-  
-        const production = getProduction(r);
-        productionHtml = `<div class="detail-row"><span class="detail-label">Production</span></div>`;
-  
-        for (const [res, amount] of Object.entries(production)) {
-          productionHtml += `
-            <div class="detail-row">
-              <span class="detail-label">${res}</span>
-              <span class="detail-value">${amount}/d</span>
-            </div>
-          `;
-        }
-      } catch {
-        // ignore rarity issues here
-      }
-    }
-  
-    if (token?.owner) {
-      blockDetailDiv.innerHTML = `
-        <div class="detail-row"><span class="detail-label">Block</span><span class="detail-value">${mapState.selectedTokenId}</span></div>
-        <div class="detail-row"><span class="detail-label">Owner</span><span class="detail-value">${shortenAddress(owner)}</span></div>
-        <div class="detail-row"><span class="detail-label">Revealed</span><span class="detail-value">${token.revealed ? "✅" : "❌"}</span></div>
-        ${rarityDisplay}
-        <div class="detail-row"><span class="detail-label">Farming</span><span class="detail-value">${farmVersionTxt}</span></div>
-        <div class="detail-row"><span class="detail-label">Farm age</span><span class="detail-value">${farmAgeTxt}</span></div>
-        <div class="detail-row"><span class="detail-label">Farm boost</span><span class="detail-value">${boostTxt}</span></div>
-        <div class="detail-row"><span class="detail-label">Protection</span><span class="detail-value">${protectionTxt}</span></div>
-        <div class="detail-row"><span class="detail-label">Protection level</span><span class="detail-value">${protectionLevelTxt}</span></div>
-        <div class="detail-row"><span class="detail-label">Claim-ready</span><span class="detail-value">${claimTxt}</span></div>
-        <div class="detail-row"><span class="detail-label">Pending</span><span class="detail-value">${pendingTotalTxt}</span></div>
-        ${productionHtml}
-      `;
-    } else {
-      blockDetailDiv.innerHTML = `<p style="color:#98a9b9;">Block #${mapState.selectedTokenId} not minted</p>`;
-    }
-  
-    if (actionPanel) {
-      actionPanel.style.display = token?.owner ? "block" : "none";
-    }
-  
-    clearActionArea();
-    populateAttackerSelect();
-  
-    if (boostCenter) {
-      boostCenter.style.display = token?.owner ? "block" : "none";
-    }
-  
-    if (farmBoostStatusEl) {
-      farmBoostStatusEl.innerText = v6Active
-        ? (boostTxt !== "inactive" ? `✅ ${boostTxt}` : "❌ Inactive")
-        : "—";
-    }
-  
-    if (state.userAddress && owner && owner.toLowerCase() !== state.userAddress.toLowerCase()) {
-      if (boostCenter) boostCenter.style.display = "block";
-      await refreshSelectedTargetAttackPreview();
-      return;
-    }
-  
-    if (state.userAddress && owner && owner.toLowerCase() === state.userAddress.toLowerCase()) {
-      let btns = "";
-  
-      if (!token.revealed) {
-        btns += `<button class="action-btn" id="revealBtn">🔓 Reveal</button>`;
-      }
-  
-      if (v5Active && !v6Active) {
-        btns += `<button class="action-btn" id="claimBtn">💰 Claim V5</button>`;
-        btns += `<button class="action-btn boost-btn" id="migrateFarmBtn">🔄 Migrate V5 → V6</button>`;
-      } else if (!v6Active) {
-        btns += `<button class="action-btn" id="startFarmBtn">🌾 Start Farming (V6)</button>`;
-      } else {
-        btns += `<button class="action-btn" id="stopFarmBtn">⏹️ Stop</button>`;
-        btns += `<button class="action-btn" id="claimBtn">💰 Claim</button>`;
-      }
-  
-      if (protectionInput) {
-        protectionInput.style.display = "flex";
-      }
-  
-      if (ownerActionsDiv) {
-        ownerActionsDiv.innerHTML = btns;
-      }
-  
-      if (boostCenter) {
-        boostCenter.style.display = "block";
-      }
-  
-      if (boostOptions) {
-        boostOptions.style.display = v6Active ? "flex" : "none";
-      }
-  
-      if (buyBoostBtn) {
-        buyBoostBtn.style.display = v6Active ? "block" : "none";
-      }
-  
-      if (pirateBoostInput) {
-        pirateBoostInput.style.display = "none";
-      }
-  
-      return;
-    }
-  
-    if (boostOptions) boostOptions.style.display = "none";
-    if (buyBoostBtn) buyBoostBtn.style.display = "none";
+  } else {
     if (pirateBoostInput) pirateBoostInput.style.display = "none";
   }
+
+  const targetTokenIdNum = parseInt(mapState.selectedTokenId, 10);
+  const lootableIds = await getAttackableResourceIds(attackerTokenId, targetTokenIdNum);
+
+  let selectedResourceId = attackResourceEl?.value ?? null;
+  if (
+    selectedResourceId === null ||
+    selectedResourceId === "" ||
+    !lootableIds.includes(Number(selectedResourceId))
+  ) {
+    selectedResourceId = lootableIds.length ? lootableIds[0] : null;
+  }
+
+  populateAttackResourceSelect(lootableIds, selectedResourceId);
+
+  if (!lootableIds.length) {
+    if (targetStatusEl) targetStatusEl.innerText = "⚠️ No loot available";
+    if (travelTimeEl) travelTimeEl.innerText = "—";
+    if (remainingEl) remainingEl.innerText = "—";
+    if (pendingLootEl) pendingLootEl.innerText = "0";
+    if (stealAmountEl) stealAmountEl.innerText = "—";
+    if (protectionEl) protectionEl.innerText = "—";
+    if (stealPercentEl) stealPercentEl.innerText = "—";
+    if (attackBtn) attackBtn.disabled = true;
+    return;
+  }
+
+  const resourceId = parseInt(byId("attackResource")?.value || "0", 10);
+
+  try {
+    const preview = await state.piratesV6Contract.previewAttack(
+      attackerTokenId,
+      targetTokenIdNum,
+      resourceId
+    );
+
+    if (targetStatusEl) {
+      if (preview.allowed) {
+        targetStatusEl.innerText = "✅ Attack allowed";
+      } else if (Number(preview.pendingAmount || 0) === 0) {
+        targetStatusEl.innerText = "⚠️ No loot available";
+      } else {
+        targetStatusEl.innerText = `❌ Blocked (Code ${preview.code})`;
+      }
+    }
+
+    if (travelTimeEl) {
+      travelTimeEl.innerText = formatDuration(Number(preview.travelTime || 0));
+    }
+    if (remainingEl) {
+      remainingEl.innerText = String(Number(preview.remainingAttacksToday || 0));
+    }
+    if (pendingLootEl) {
+      pendingLootEl.innerText = (preview.pendingAmount || 0).toString();
+    }
+    if (stealAmountEl) {
+      stealAmountEl.innerText = (preview.stealAmount || 0).toString();
+    }
+    if (protectionEl) {
+      protectionEl.innerText = `${Number(preview.protectionLevel || 0)}%`;
+    }
+    if (stealPercentEl) {
+      stealPercentEl.innerText = `${Number(preview.effectiveStealPercent || 0)}%`;
+    }
+    if (attackBtn) {
+      attackBtn.disabled = !preview.allowed;
+    }
+  } catch {
+    if (targetStatusEl) targetStatusEl.innerText = "⚠️ Preview failed";
+    if (attackBtn) attackBtn.disabled = true;
+  }
+}
+
+export async function updateSidebar(tokenId) {
+  const tokens = getAllMapTokens();
+  const nftReadOnlyContract = getReadOnlyNFTContract();
+
+  mapState.selectedTokenId = String(tokenId);
+  const token = tokens[mapState.selectedTokenId];
+  const owner = token ? token.owner : null;
+  mapState.selectedTokenOwner = owner;
+
+  if (
+    state.userAddress &&
+    owner &&
+    owner.toLowerCase() === state.userAddress.toLowerCase()
+  ) {
+    mapState.selectedAttackAttackerTokenId = String(tokenId);
+  }
+
+  const now = Math.floor(Date.now() / 1000);
+  let v5Active = !!token?.farmV5Active;
+  let v6Active = false;
+
+  let farmVersionTxt = "-";
+  let farmAgeTxt = "-";
+  let claimTxt = "-";
+  let pendingTotalTxt = "-";
+  let boostTxt = "inactive";
+  let protectionTxt = "inactive";
+  let protectionLevelTxt = "0%";
+  let protectionTierTxt = "None";
+  let protectionSlotTxt = "-";
+  let protectionOwnerTxt = "-";
+
+  if (token?.protectionActive && Number(token.protectionExpiry || 0) > now) {
+    protectionTxt = `active for ${formatDuration(Number(token.protectionExpiry || 0) - now)}`;
+    protectionLevelTxt = `${Number(token.protectionLevel || 0)}%`;
+    protectionTierTxt = getProtectionTierLabel(token.protectionTier);
+    protectionSlotTxt = `${Number(token.protectionSlotIndex || 0) + 1}`;
+    protectionOwnerTxt = token.protectionUser
+      ? shortenAddress(token.protectionUser)
+      : (owner ? shortenAddress(owner) : "-");
+  }
+
+  if (v5Active) {
+    farmVersionTxt = "V5 Legacy";
+
+    if (token.farmV5StartTime > 0) {
+      farmAgeTxt = formatDuration(now - token.farmV5StartTime);
+    }
+
+    claimTxt = "Claim or migrate";
+    pendingTotalTxt = "legacy";
+  }
+
+  if (state.farmingV6Contract && token?.owner) {
+    const farmInfo = await safeGetFarm(mapState.selectedTokenId);
+    v6Active = farmInfo.ok && farmInfo.isActive;
+
+    if (v6Active) {
+      farmVersionTxt = "V6 Active";
+
+      if (farmInfo.startTime > 0) {
+        farmAgeTxt = formatDuration(now - farmInfo.startTime);
+      }
+
+      try {
+        const preview = await state.farmingV6Contract.previewClaim(mapState.selectedTokenId);
+        pendingTotalTxt = preview.pendingAmount ? preview.pendingAmount.toString() : "0";
+        claimTxt = preview.allowed
+          ? "READY"
+          : (
+              Number(preview.secondsRemaining || 0) > 0
+                ? `in ${formatDuration(Number(preview.secondsRemaining))}`
+                : "Not ready"
+            );
+      } catch {
+        // sidebar should still render
+      }
+
+      if (farmInfo.boostExpiry && Number(farmInfo.boostExpiry) > now) {
+        boostTxt = `${formatDuration(Number(farmInfo.boostExpiry) - now)} left`;
+      }
+    }
+  }
+
+  if (!v5Active && !v6Active) {
+    farmVersionTxt = "Inactive";
+  }
+
+  let productionHtml = "";
+  let rarityDisplay = "";
+
+  if (token?.owner && token.revealed && nftReadOnlyContract) {
+    try {
+      const tokenIdNum = parseInt(mapState.selectedTokenId, 10);
+      const rarity = token.rarity !== null
+        ? token.rarity
+        : await nftReadOnlyContract.calculateRarity(tokenIdNum);
+
+      const r = Number(rarity);
+
+      rarityDisplay = `
+        <div class="detail-row">
+          <span class="detail-label">Rarity</span>
+          <span class="detail-value ${MAP_CONST.rarityClass[r]}">${rarityNames[r]}</span>
+        </div>
+      `;
+
+      const production = getProduction(r, 0);
+      productionHtml = `<div class="detail-row"><span class="detail-label">Production</span></div>`;
+
+      for (const [res, amount] of Object.entries(production)) {
+        productionHtml += `
+          <div class="detail-row">
+            <span class="detail-label">${res}</span>
+            <span class="detail-value">${amount}/d</span>
+          </div>
+        `;
+      }
+    } catch {
+      // ignore rarity problems
+    }
+  }
+
+  if (token?.owner) {
+    blockDetailDiv.innerHTML = `
+      <div class="detail-row"><span class="detail-label">Block</span><span class="detail-value">${mapState.selectedTokenId}</span></div>
+      <div class="detail-row"><span class="detail-label">Owner</span><span class="detail-value">${shortenAddress(owner)}</span></div>
+      <div class="detail-row"><span class="detail-label">Revealed</span><span class="detail-value">${token.revealed ? "✅" : "❌"}</span></div>
+      ${rarityDisplay}
+      <div class="detail-row"><span class="detail-label">Farming</span><span class="detail-value">${farmVersionTxt}</span></div>
+      <div class="detail-row"><span class="detail-label">Farm age</span><span class="detail-value">${farmAgeTxt}</span></div>
+      <div class="detail-row"><span class="detail-label">Farm boost</span><span class="detail-value">${boostTxt}</span></div>
+      <div class="detail-row"><span class="detail-label">Protection</span><span class="detail-value">${protectionTxt}</span></div>
+      <div class="detail-row"><span class="detail-label">Protection level</span><span class="detail-value">${protectionLevelTxt}</span></div>
+      <div class="detail-row"><span class="detail-label">Protection tier</span><span class="detail-value">${protectionTierTxt}</span></div>
+      <div class="detail-row"><span class="detail-label">Protection slot</span><span class="detail-value">${protectionSlotTxt}</span></div>
+      <div class="detail-row"><span class="detail-label">Protector</span><span class="detail-value">${protectionOwnerTxt}</span></div>
+      <div class="detail-row"><span class="detail-label">Claim-ready</span><span class="detail-value">${claimTxt}</span></div>
+      <div class="detail-row"><span class="detail-label">Pending</span><span class="detail-value">${pendingTotalTxt}</span></div>
+      ${productionHtml}
+    `;
+  } else {
+    blockDetailDiv.innerHTML = `<p style="color:#98a9b9;">Block #${mapState.selectedTokenId} not minted</p>`;
+  }
+
+  if (actionPanel) {
+    actionPanel.style.display = token?.owner ? "block" : "none";
+  }
+
+  clearActionArea();
+  populateAttackerSelect();
+
+  if (boostCenter) {
+    boostCenter.style.display = token?.owner ? "block" : "none";
+  }
+
+  if (farmBoostStatusEl) {
+    farmBoostStatusEl.innerText = v6Active
+      ? (boostTxt !== "inactive" ? `✅ ${boostTxt}` : "❌ Inactive")
+      : "—";
+  }
+
+  if (state.userAddress && owner && owner.toLowerCase() !== state.userAddress.toLowerCase()) {
+    if (boostCenter) boostCenter.style.display = "block";
+    await refreshSelectedTargetAttackPreview();
+    return;
+  }
+
+  if (state.userAddress && owner && owner.toLowerCase() === state.userAddress.toLowerCase()) {
+    let btns = "";
+
+    if (!token.revealed) {
+      btns += `<button class="action-btn" id="revealBtn">🔓 Reveal</button>`;
+    }
+
+    if (v5Active && !v6Active) {
+      btns += `<button class="action-btn" id="claimBtn">💰 Claim V5</button>`;
+      btns += `<button class="action-btn boost-btn" id="migrateFarmBtn">🔄 Migrate V5 → V6</button>`;
+    } else if (!v6Active) {
+      btns += `<button class="action-btn" id="startFarmBtn">🌾 Start Farming (V6)</button>`;
+    } else {
+      btns += `<button class="action-btn" id="stopFarmBtn">⏹️ Stop</button>`;
+      btns += `<button class="action-btn" id="claimBtn">💰 Claim</button>`;
+    }
+
+    if (protectionInput) {
+      protectionInput.style.display = "flex";
+    }
+
+    if (ownerActionsDiv) {
+      ownerActionsDiv.innerHTML = btns;
+    }
+
+    if (boostCenter) {
+      boostCenter.style.display = "block";
+    }
+
+    if (boostOptions) {
+      boostOptions.style.display = v6Active ? "flex" : "none";
+    }
+
+    if (buyBoostBtn) {
+      buyBoostBtn.style.display = v6Active ? "block" : "none";
+    }
+
+    if (pirateBoostInput) {
+      pirateBoostInput.style.display = "none";
+    }
+
+    return;
+  }
+
+  if (boostOptions) boostOptions.style.display = "none";
+  if (buyBoostBtn) buyBoostBtn.style.display = "none";
+  if (pirateBoostInput) pirateBoostInput.style.display = "none";
+}
