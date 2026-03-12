@@ -5,6 +5,20 @@
   z-index: 1;
 }
 
+.wallet-row {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+  margin: 1rem 0 0.75rem;
+}
+
+.wallet-status {
+  font-size: 0.95rem;
+  opacity: 0.9;
+  word-break: break-word;
+}
+
 .site-header {
   position: relative;
   z-index: 20;
