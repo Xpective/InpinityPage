@@ -68,25 +68,35 @@
        await updateBalances();
        await updatePoolInfo();
        await loadResourceBalancesOnchain();
+   
        await loadUserBlocks({
          onRevealSelected: revealSelected,
          onRefreshBlockMarkings: refreshBlockMarkings
        });
+   
        await loadUserAttacks();
        await loadMercenaryPanelState();
    
        if (!state.attacksPoller) {
          state.attacksPoller = setInterval(async () => {
            if (!state.userAddress) return;
+   
            await loadUserAttacks();
            refreshBlockMarkings();
+   
+           // optional mitziehen, damit Mercenary-UI auch frisch bleibt
+           try {
+             await loadMercenaryPanelState();
+           } catch (e) {
+             console.warn("Mercenary poll refresh failed:", e);
+           }
          }, 45000);
        }
    
        debugLog("Wallet connected", state.userAddress);
      } catch (e) {
        console.error(e);
-       alert("Connection error: " + (e.reason || e.message));
+       alert("Connection error: " + (e.reason || e.message || "Unknown error"));
        clearContracts();
        setWalletUIDisconnected();
      } finally {
@@ -99,7 +109,9 @@
    
      stopAttacksTicker();
    
-     if (state.attacksPoller) clearInterval(state.attacksPoller);
+     if (state.attacksPoller) {
+       clearInterval(state.attacksPoller);
+     }
      state.attacksPoller = null;
    
      clearContracts();
@@ -114,8 +126,12 @@
      byId("attackBtn")?.addEventListener("click", attack);
      byId("buyPirateBoostBtn")?.addEventListener("click", buyPirateBoost);
      byId("pirateBoostDays")?.addEventListener("input", updateBoostCostLabels);
+     byId("pirateBoostDays")?.addEventListener("change", updateBoostCostLabels);
    
+     // Legacy compat button
      byId("protectBtn")?.addEventListener("click", protect);
+   
+     // Mercenary V4 explicit buttons
      byId("setProtectionBtn")?.addEventListener("click", setMercenaryProtection);
      byId("extendProtectionBtn")?.addEventListener("click", extendMercenaryProtection);
      byId("cancelProtectionBtn")?.addEventListener("click", cancelMercenaryProtection);
@@ -148,7 +164,6 @@
    
      byId("boostDays")?.addEventListener("input", updateFarmBoostCostLabel);
      byId("boostDays")?.addEventListener("change", updateFarmBoostCostLabel);
-     byId("pirateBoostDays")?.addEventListener("change", updateBoostCostLabels);
    
      byId("protectDays")?.addEventListener("input", updateMercenaryCostPreview);
      byId("protectDays")?.addEventListener("change", updateMercenaryCostPreview);
@@ -176,7 +191,10 @@
          return;
        }
    
-       if (state.userAddress && accounts[0].toLowerCase() !== state.userAddress.toLowerCase()) {
+       if (
+         state.userAddress &&
+         accounts[0].toLowerCase() !== state.userAddress.toLowerCase()
+       ) {
          disconnectWallet();
          await connectWallet(false);
        }
@@ -192,9 +210,12 @@
      updateFarmBoostCostLabel();
      updateBoostCostLabels();
      updateMercenaryCostPreview();
+   
      bindEvents();
      bindEthereumEvents();
    
      const shouldReconnect = localStorage.getItem(STORAGE_WALLET_FLAG) === "1";
-     if (shouldReconnect) connectWallet(false);
+     if (shouldReconnect) {
+       connectWallet(false);
+     }
    }

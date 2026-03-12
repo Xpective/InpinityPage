@@ -1,5 +1,5 @@
 /* =========================================================
-   ABIs – V6 + MERCENARY V3
+   ABIs – V6 + MERCENARY V4
    ========================================================= */
 
    export const NFT_ABI = [
@@ -55,6 +55,9 @@
     "function cancelOwnPendingAttack(uint256 targetTokenId, uint256 attackIndex) external",
     "function buyPirateBoost(uint256 tokenId, uint256 daysAmount) external",
   
+    // Admin / integration
+    "function setMercenaryContract(address _mercenary) external",
+  
     // Preview functions
     "function previewAttack(uint256 attackerTokenId, uint256 targetTokenId, uint8 resourceId) view returns (uint8 code, bool allowed, uint256 pendingAmount, uint256 stealAmount, uint256 travelTime, uint256 remainingAttacksToday, uint256 protectionLevel, uint256 effectiveStealPercent, uint256 secondsRemaining, uint256 attackerTokenId)",
     "function previewExecuteAttack(uint256 targetTokenId, uint256 attackIndex) view returns (uint8 code, bool allowed, uint256 pendingAmount, uint256 stealAmount, uint256 travelTime, uint256 remainingAttacksToday, uint256 protectionLevel, uint256 effectiveStealPercent, uint256 secondsRemaining, uint256 attackerTokenId)",
@@ -69,10 +72,11 @@
     "function hasPirateBoost(uint256 tokenId) view returns (bool)",
     "function getPirateBoostExpiry(uint256 tokenId) view returns (uint256)",
     "function roundUpToMinimumOne() view returns (bool)",
-    "function paused() view returns (bool)"
+    "function paused() view returns (bool)",
+    "function mercenaryContract() view returns (address)"
   ];
   
-  export const MERCENARY_V3_ABI = [
+  export const MERCENARY_V4_ABI = [
     // Write functions
     "function unlockSecondSlot() external",
     "function unlockThirdSlot() external",
@@ -91,7 +95,7 @@
     "function getWalletSlots(address user) view returns (uint8 slots, tuple(uint256 tokenId,uint64 startTime,uint64 expiry,uint64 cooldownUntil,uint64 emergencyReadyAt,uint8 protectionTier,bool active)[3] data)",
     "function getDefenderProfile(address user) view returns (uint256 points, uint8 rank, uint256 discountBps, uint256 protectedDays, uint256 defenses, uint256 extensionsCount, uint256 cleanups, string title)",
     "function getRank(address user) view returns (uint8 rank, string name)",
-    "function getProtectionCost(address user, bool payInINPI, bool isExtension) view returns (uint256 inpiCost, uint256 oilCost, uint256 lemonsCost, uint256 ironCost, uint256 rankDiscountBps, uint256 totalDiscountBps)",
+    "function getProtectionCost(address user, uint8 durationDays, bool payInINPI, bool isExtension) view returns (uint256 inpiCost, uint256 oilCost, uint256 lemonsCost, uint256 ironCost, uint256 rankDiscountBps, uint256 totalDiscountBps)",
   
     "function defenderPoints(address) view returns (uint256)",
     "function bastionTitle(address) view returns (string)",
@@ -103,6 +107,10 @@
     "function totalProtectedDays(address) view returns (uint256)",
     "function emergencyMovesUsed(address) view returns (uint256)",
     "function walletSlots(address,uint8) view returns (uint256 tokenId, uint64 startTime, uint64 expiry, uint64 cooldownUntil, uint64 emergencyReadyAt, uint8 protectionTier, bool active)",
+    "function tokenProtectionRef(uint256) view returns (address protector, uint8 slotIndex, bool exists)",
+    "function slotsUnlockedCount(address) view returns (uint256)",
+    "function treasury() view returns (address)",
+    "function piratesContract() view returns (address)",
   
     // Events
     "event ProtectionSet(address indexed user, uint8 indexed slotIndex, uint256 indexed tokenId, uint8 tier, uint64 startTime, uint64 expiry)",

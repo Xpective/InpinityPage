@@ -15,7 +15,7 @@
 
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>INPINITY – Game Dashboard (V6)</title>
+  <title>INPINITY – Game Dashboard (V6 + Mercenary V4)</title>
 
   <link rel="icon" type="image/png" href="favicon.webp" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -40,13 +40,13 @@
   />
   <meta
     name="keywords"
-    content="Inpinity, Game, Pyramid, NFT, Base, INPI, Pitrone, Resources, Farming, Pirate Attack, V6, Mercenary V3"
+    content="Inpinity, Game, Pyramid, NFT, Base, INPI, Pitrone, Resources, Farming, Pirate Attack, V6, Mercenary V4"
   />
   <meta name="author" content="Inpinity Team" />
-  <meta property="og:title" content="Inpinity – Game Dashboard V6" />
+  <meta property="og:title" content="Inpinity – Game Dashboard V6 + Mercenary V4" />
   <meta
     property="og:description"
-    content="Manage blocks, farming, attacks, protection, and exchange in the Inpinity ecosystem. Now with V6 contracts and Mercenary V3."
+    content="Manage blocks, farming, attacks, protection, and exchange in the Inpinity ecosystem. Now with V6 contracts and Mercenary V4."
   />
   <meta property="og:image" content="logo_background.jpg" />
   <meta property="og:url" content="https://inpinity.online/game.html" />
@@ -95,7 +95,7 @@
         <p class="hero-lead">
           This dashboard is the central control room for your Pyramid activity. Connect your wallet,
           reveal and manage blocks, start farming, protect territory, launch pirate attacks, and
-          exchange value inside the ecosystem with the active V6 contract flow and Mercenary V3 defense system.
+          exchange value inside the ecosystem with the active V6 flow and Mercenary V4 defense system.
         </p>
       </div>
     </section>
@@ -239,7 +239,7 @@
             </div>
 
             <div style="margin-top:1rem; border-top:1px solid #2a3f4a; padding-top:1.2rem;">
-              <h4 style="color:#d4af37; margin-bottom:1rem;">🛡️ Mercenary Protection V3</h4>
+              <h4 style="color:#d4af37; margin-bottom:1rem;">🛡️ Mercenary Protection V4</h4>
 
               <div class="info-note" style="margin-bottom:1rem;">
                 1 slot is available by default. Slot 2 and Slot 3 can be unlocked permanently with resources.
@@ -252,7 +252,7 @@
                   <div class="action-value" id="mercenaryRank">Watchman</div>
                   <div style="margin-top:0.45rem; font-size:0.82rem; color:#98a9b9;">
                     Points: <span id="mercenaryPoints">0</span><br />
-                    Discount: <span id="mercenaryDiscount">2%</span>
+                    INPI Discount: <span id="mercenaryDiscount">2%</span>
                   </div>
                 </div>
 
@@ -322,7 +322,7 @@
               <div class="info-note" style="margin-bottom:0.8rem;">
                 <div id="protectSlotInfo">Selected Slot: 1</div>
                 <div id="protectDaysInfo">Duration: 7 days</div>
-                <div id="mercenaryCostInfo">Cost: 10 Oil, 5 Lemons, 2 Iron</div>
+                <div id="mercenaryCostInfo">Cost preview will appear here.</div>
               </div>
 
               <div class="protection-input-group" style="margin-bottom:0.8rem; display:flex; gap:0.55rem; flex-wrap:wrap;">
@@ -344,19 +344,33 @@
               </div>
 
               <details style="margin-top:0.8rem;">
-                <summary style="cursor:pointer; color:#d4af37;">📘 Mercenary V3 costs & rules</summary>
+                <summary style="cursor:pointer; color:#d4af37;">📘 Mercenary V4 costs & rules</summary>
                 <div class="details-body" style="margin-top:0.8rem;">
-                  <p class="info-note">
-                    <strong>Set protection:</strong> 10 Oil + 5 Lemons + 2 Iron or 50 INPI<br />
-                    <strong>Extend protection:</strong> 5 Oil + 2 Lemons + 1 Iron or discounted INPI<br />
-                    <strong>Slot 2 unlock:</strong> 1000 Oil + 500 Lemons + 100 Iron<br />
-                    <strong>Slot 3 unlock:</strong> 500 Oil + 100 Lemons + 100 Iron + 50 Gold + 25 Crystal + 5 Mysterium
-                  </p>
                   <p class="info-note">
                     <strong>Protection tiers:</strong><br />
                     1–2 days = 20%<br />
                     3–5 days = 30%<br />
                     6–7 days = 50%
+                  </p>
+                  <p class="info-note">
+                    <strong>Set protection costs:</strong><br />
+                    1 day = 3 Oil / 2 Lemons / 1 Iron or 8 INPI<br />
+                    2 days = 4 Oil / 3 Lemons / 1 Iron or 14 INPI<br />
+                    3 days = 6 Oil / 4 Lemons / 2 Iron or 22 INPI<br />
+                    4 days = 8 Oil / 4 Lemons / 2 Iron or 29 INPI<br />
+                    5 days = 10 Oil / 5 Lemons / 3 Iron or 35 INPI<br />
+                    6 days = 11 Oil / 5 Lemons / 3 Iron or 42 INPI<br />
+                    7 days = 12 Oil / 6 Lemons / 3 Iron or 50 INPI
+                  </p>
+                  <p class="info-note">
+                    <strong>Slot 2 unlock:</strong> 1000 Oil + 500 Lemons + 100 Iron<br />
+                    <strong>Slot 3 unlock:</strong> 500 Oil + 100 Lemons + 100 Iron + 50 Gold + 25 Crystal + 5 Mysterium
+                  </p>
+                  <p class="info-note">
+                    <strong>Immediate points on set:</strong><br />
+                    1–2 days = +2 points<br />
+                    3–5 days = +5 points<br />
+                    6–7 days = +10 points
                   </p>
                 </div>
               </details>
@@ -590,21 +604,22 @@
 
     <section class="panel faq-panel" style="margin-top:1.35rem;">
       <div class="panel-head">
-        <h2 class="section-title">How To / FAQ <span class="v6-badge">V6 + Mercenary V3</span></h2>
+        <h2 class="section-title">How To / FAQ <span class="v6-badge">V6 + Mercenary V4</span></h2>
         <p class="section-subtitle">
           A quick guide to the main gameplay loops inside the dashboard.
         </p>
       </div>
 
       <details class="content-details">
-        <summary>What's new in V6 + Mercenary V3?</summary>
+        <summary>What's new in V6 + Mercenary V4?</summary>
         <div class="details-body">
           <ul>
             <li>Enhanced attack preview with exact steal amount visibility</li>
             <li>Pirate and farming boosts with clearer state handling</li>
             <li>Better claim preview flow</li>
-            <li>Mercenary V3 slot system with permanent slot unlocks</li>
-            <li>1–7 day protection tiers with dynamic defense levels</li>
+            <li>Mercenary V4 slot system with permanent slot unlocks</li>
+            <li>Duration-based protection pricing from 1 to 7 days</li>
+            <li>Immediate points on protection start plus completion rewards</li>
             <li>Move, emergency move, cleanup and Bastion title support</li>
           </ul>
         </div>
@@ -631,7 +646,7 @@
       </details>
 
       <details class="content-details">
-        <summary>How does Mercenary Protection V3 work?</summary>
+        <summary>How does Mercenary Protection V4 work?</summary>
         <div class="details-body">
           <p>
             Each wallet starts with <strong>1 protection slot</strong>. You can permanently unlock
@@ -646,8 +661,7 @@
             <li><strong>6–7 days</strong> = 50% protection</li>
           </ul>
           <p>
-            You can pay with <strong>resources</strong> or <strong>INPI</strong>, depending on the action.
-            Same-block extensions are cheaper than fresh setups.
+            Resource costs stay fixed by duration. INPI payments receive the rank-based discount.
           </p>
         </div>
       </details>
@@ -724,7 +738,7 @@
       <a href="whitepaper.html">Whitepaper</a>
       <a href="https://discord.gg/95yj6Eg6" target="_blank" rel="noopener">Discord</a>
     </div>
-    <p class="footer-version">Version 0.25.0 (V6 + Mercenary V3)</p>
+    <p class="footer-version">Version 0.26.0 (V6 + Mercenary V4)</p>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>

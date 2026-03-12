@@ -1,12 +1,12 @@
 /* =========================================================
-   CONTRACT MANAGEMENT – V6 + MERCENARY V3
+   CONTRACT MANAGEMENT – V6 + MERCENARY V4
    ========================================================= */
 
    import {
     NFT_ADDRESS,
     FARMING_V6_ADDRESS,
     PIRATES_V6_ADDRESS,
-    MERCENARY_V3_ADDRESS,
+    MERCENARY_V4_ADDRESS,
     PARTNERSHIP_V2_ADDRESS,
     RESOURCE_TOKEN_ADDRESS,
     INPI_ADDRESS,
@@ -17,7 +17,7 @@
     NFT_ABI,
     FARMING_V6_ABI,
     PIRATES_V6_ABI,
-    MERCENARY_V3_ABI,
+    MERCENARY_V4_ABI,
     PARTNERSHIP_V2_ABI,
     RESOURCE_TOKEN_ABI,
     INPI_ABI,
@@ -66,13 +66,22 @@
     state.nftContract = new ethers.Contract(NFT_ADDRESS, NFT_ABI, state.signer);
     state.farmingV6Contract = new ethers.Contract(FARMING_V6_ADDRESS, FARMING_V6_ABI, state.signer);
     state.piratesV6Contract = new ethers.Contract(PIRATES_V6_ADDRESS, PIRATES_V6_ABI, state.signer);
-    state.mercenaryV3Contract = new ethers.Contract(MERCENARY_V3_ADDRESS, MERCENARY_V3_ABI, state.signer);
+    state.mercenaryV4Contract = new ethers.Contract(MERCENARY_V4_ADDRESS, MERCENARY_V4_ABI, state.signer);
     state.partnershipV2Contract = new ethers.Contract(PARTNERSHIP_V2_ADDRESS, PARTNERSHIP_V2_ABI, state.signer);
     state.inpiContract = new ethers.Contract(INPI_ADDRESS, INPI_ABI, state.signer);
     state.pitroneContract = new ethers.Contract(PITRONE_ADDRESS, PITRONE_ABI, state.signer);
     state.resourceTokenContract = new ethers.Contract(RESOURCE_TOKEN_ADDRESS, RESOURCE_TOKEN_ABI, state.signer);
   
-    debugLog("Contracts initialized");
+    debugLog("Contracts initialized", {
+      nft: NFT_ADDRESS,
+      farmingV6: FARMING_V6_ADDRESS,
+      piratesV6: PIRATES_V6_ADDRESS,
+      mercenaryV4: MERCENARY_V4_ADDRESS,
+      partnershipV2: PARTNERSHIP_V2_ADDRESS,
+      inpi: INPI_ADDRESS,
+      pitrone: PITRONE_ADDRESS,
+      resourceToken: RESOURCE_TOKEN_ADDRESS
+    });
   }
   
   export function clearContracts() {
@@ -83,31 +92,40 @@
     state.nftContract = null;
     state.farmingV6Contract = null;
     state.piratesV6Contract = null;
-    state.mercenaryV3Contract = null;
+    state.mercenaryV4Contract = null;
     state.partnershipV2Contract = null;
     state.inpiContract = null;
     state.pitroneContract = null;
     state.resourceTokenContract = null;
   
     state.selectedBlock = null;
+  
     state.userBlocks = [];
     state.userAttacks = [];
     state.userResources = [];
   
-    state.mercenarySlots = [];
-    state.mercenaryProfile = null;
-    state.mercenaryProtectionByToken = new Map();
-  
     state.cachedFarmsV6 = [];
-    state.cachedProtections = [];
+    state.cachedProtectionsV4 = [];
+    state.cachedMercenarySlotsV4 = [];
+    state.cachedDefenderProfilesV4 = [];
+  
     state.cachedFarmV6Map = new Map();
-    state.cachedProtectionMap = new Map();
+    state.cachedProtectionMapV4 = new Map();
+    state.cachedMercenarySlotMapV4 = new Map();
+    state.cachedDefenderProfileMapV4 = new Map();
+  
+    state.mercenaryPanelLoaded = false;
+    state.selectedMercenarySlotIndex = 0;
+    state.selectedMercenaryDurationDays = 7;
+    state.selectedMercenaryPayInINPI = false;
   
     debugLog("Contracts cleared");
   }
   
   export async function connectWalletCore(forceRequest = true) {
-    if (!window.ethereum) throw new Error("Please install MetaMask");
+    if (!window.ethereum) {
+      throw new Error("Please install MetaMask");
+    }
   
     state.provider = new ethers.providers.Web3Provider(window.ethereum);
   

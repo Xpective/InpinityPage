@@ -1,5 +1,5 @@
 /* =========================================================
-   STATE MANAGEMENT – V6 + MERCENARY V3
+   STATE MANAGEMENT – V6 / MERCENARY V4
    ========================================================= */
 
    export const state = {
@@ -13,7 +13,7 @@
     nftContract: null,
     farmingV6Contract: null,
     piratesV6Contract: null,
-    mercenaryV3Contract: null,
+    mercenaryV4Contract: null,
     partnershipV2Contract: null,
     inpiContract: null,
     pitroneContract: null,
@@ -23,30 +23,31 @@
     selectedPayment: "eth",
     selectedBlock: null,
   
-    // Mercenary UI State
-    selectedMercenaryPayment: "resources", // "resources" | "inpi"
-    selectedMercenarySlot: 0,
-    selectedProtectionDays: 1,
-  
     // Data
     userBlocks: [],
     userAttacks: [],
     userResources: [],
   
-    // Mercenary Data
-    mercenarySlots: [],
-    mercenaryProfile: null,
-    mercenaryProtectionByToken: new Map(),
-  
-    // Caches
+    // Subgraph / caches
     cachedFarmsV6: [],
-    cachedProtections: [],
+    cachedProtectionsV4: [],
+    cachedMercenarySlotsV4: [],
+    cachedDefenderProfilesV4: [],
+  
     cachedFarmV6Map: new Map(),
-    cachedProtectionMap: new Map(),
+    cachedProtectionMapV4: new Map(),
+    cachedMercenarySlotMapV4: new Map(),
+    cachedDefenderProfileMapV4: new Map(),
   
     // Timers
     attacksTicker: null,
     attacksPoller: null,
     attackDropdownTimer: null,
-    attackDropdownRequestId: 0
+    attackDropdownRequestId: 0,
+  
+    // Mercenary panel state
+    mercenaryPanelLoaded: false,
+    selectedMercenarySlotIndex: 0,
+    selectedMercenaryDurationDays: 7,
+    selectedMercenaryPayInINPI: false
   };
