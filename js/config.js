@@ -90,7 +90,23 @@ export const MERCENARY_RANK_LABELS = [
   "Inpinity Bastion"
 ];
 
-// Slot unlock costs
+// Slot unlock costs — object form
+export const MERCENARY_SLOT2_UNLOCK_COST = {
+  oil: 1000,
+  lemons: 500,
+  iron: 100
+};
+
+export const MERCENARY_SLOT3_UNLOCK_COST = {
+  oil: 500,
+  lemons: 100,
+  iron: 100,
+  gold: 50,
+  crystal: 25,
+  mysterium: 5
+};
+
+// Slot unlock costs — array aliases for older UI/helpers
 export const MERCENARY_SLOT2_UNLOCK = [
   { key: "oil", label: "Oil", amount: 1000 },
   { key: "lemons", label: "Lemons", amount: 500 },
@@ -108,11 +124,11 @@ export const MERCENARY_SLOT3_UNLOCK = [
 
 // V4 duration-based costs (fallback/UI preview)
 export const MERCENARY_V4_COSTS = {
-  1: { inpi: "8", oil: 3, lemons: 2, iron: 1, upfrontPoints: 2, protectionPercent: 20, tier: 1 },
-  2: { inpi: "14", oil: 4, lemons: 3, iron: 1, upfrontPoints: 2, protectionPercent: 20, tier: 1 },
-  3: { inpi: "22", oil: 6, lemons: 4, iron: 2, upfrontPoints: 5, protectionPercent: 30, tier: 2 },
-  4: { inpi: "29", oil: 8, lemons: 4, iron: 2, upfrontPoints: 5, protectionPercent: 30, tier: 2 },
-  5: { inpi: "35", oil: 10, lemons: 5, iron: 3, upfrontPoints: 5, protectionPercent: 30, tier: 2 },
+  1: { inpi: "8",  oil: 3,  lemons: 2, iron: 1, upfrontPoints: 2,  protectionPercent: 20, tier: 1 },
+  2: { inpi: "14", oil: 4,  lemons: 3, iron: 1, upfrontPoints: 2,  protectionPercent: 20, tier: 1 },
+  3: { inpi: "22", oil: 6,  lemons: 4, iron: 2, upfrontPoints: 5,  protectionPercent: 30, tier: 2 },
+  4: { inpi: "29", oil: 8,  lemons: 4, iron: 2, upfrontPoints: 5,  protectionPercent: 30, tier: 2 },
+  5: { inpi: "35", oil: 10, lemons: 5, iron: 3, upfrontPoints: 5,  protectionPercent: 30, tier: 2 },
   6: { inpi: "42", oil: 11, lemons: 5, iron: 3, upfrontPoints: 10, protectionPercent: 50, tier: 3 },
   7: { inpi: "50", oil: 12, lemons: 6, iron: 3, upfrontPoints: 10, protectionPercent: 50, tier: 3 }
 };
@@ -120,3 +136,18 @@ export const MERCENARY_V4_COSTS = {
 export function getMercenaryV4Cost(days) {
   return MERCENARY_V4_COSTS[Number(days)] || MERCENARY_V4_COSTS[1];
 }
+
+// Legacy-compatible helpers for still-unmigrated UI code
+export const MERCENARY_INPI_COST = "50";
+
+export const MERCENARY_SET_COST_RESOURCES = [
+  { key: "oil", label: "Oil", amount: 10 },
+  { key: "lemons", label: "Lemons", amount: 5 },
+  { key: "iron", label: "Iron", amount: 2 }
+];
+
+export const MERCENARY_EXTEND_COST_RESOURCES = [
+  { key: "oil", label: "Oil", amount: 5 },
+  { key: "lemons", label: "Lemons", amount: 2 },
+  { key: "iron", label: "Iron", amount: 1 }
+];
