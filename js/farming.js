@@ -1,26 +1,27 @@
 /* =========================================================
-   FARMING / MIGRATION / MERCENARY V3
+   FARMING / MIGRATION / MERCENARY V4
    ========================================================= */
 
    import { state } from "./state.js";
    import {
-    MERCENARY_SLOT2_UNLOCK_COST,
-    MERCENARY_SLOT3_UNLOCK_COST,
-    MERCENARY_DURATION_LABELS,
-    MERCENARY_TIER_LABELS,
-    MERCENARY_RANK_LABELS,
-    FARM_BOOST_PRICE_PER_DAY,
-    FARM_BOOST_MAX_DAYS,
-    FARM_WINDOW_DAYS
-  } from "./config.js";
-   import { byId, formatDuration, debugLog, safeValue, safeText } from "./utils.js";
+     MERCENARY_SLOT2_UNLOCK_COST,
+     MERCENARY_SLOT3_UNLOCK_COST,
+     MERCENARY_DURATION_LABELS,
+     MERCENARY_TIER_LABELS,
+     MERCENARY_RANK_LABELS,
+     FARM_BOOST_PRICE_PER_DAY,
+     FARM_BOOST_MAX_DAYS,
+     FARM_WINDOW_DAYS,
+     getMercenaryV4Cost
+   } from "./config.js";
+   import { byId, formatDuration, debugLog, safeValue } from "./utils.js";
    import { ensureFarmingApproval, ensureInpiApprovalForMercenary } from "./approvals.js";
    import { loadResourceBalancesOnchain } from "./resources.js";
    import { loadUserBlocks, selectBlock } from "./blocks.js";
    import { loadUserAttacks, refreshBlockMarkings } from "./attacks.js";
    import {
-     loadMercenaryProfileV3,
-     loadMercenarySlotsV3
+     loadMercenaryProfileV4,
+     loadMercenarySlotsV4
    } from "./subgraph.js";
    import {
      isTokenActiveOnV5,
@@ -486,7 +487,7 @@
    }
    
    /* =========================================================
-      MERCENARY V3 HELPERS
+      MERCENARY V4 HELPERS
       ========================================================= */
    
    function getMercenaryPaymentMode() {
@@ -508,39 +509,39 @@
      return Number.isFinite(v) ? v : 0;
    }
    
-function renderCostList(items) {
-  if (!items) return "";
-
-  if (Array.isArray(items)) {
-    return items.map((x) => `${x.amount} ${x.label}`).join(", ");
-  }
-
-  const labelMap = {
-    oil: "Oil",
-    lemons: "Lemons",
-    iron: "Iron",
-    gold: "Gold",
-    platinum: "Platinum",
-    copper: "Copper",
-    crystal: "Crystal",
-    obsidian: "Obsidian",
-    mysterium: "Mysterium",
-    aether: "Aether"
-  };
-
-  return Object.entries(items)
-    .filter(([_, amount]) => Number(amount || 0) > 0)
-    .map(([key, amount]) => `${amount} ${labelMap[key] || key}`)
-    .join(", ");
-}
+   function renderCostList(items) {
+     if (!items) return "";
+   
+     if (Array.isArray(items)) {
+       return items.map((x) => `${x.amount} ${x.label}`).join(", ");
+     }
+   
+     const labelMap = {
+       oil: "Oil",
+       lemons: "Lemons",
+       iron: "Iron",
+       gold: "Gold",
+       platinum: "Platinum",
+       copper: "Copper",
+       crystal: "Crystal",
+       obsidian: "Obsidian",
+       mysterium: "Mysterium",
+       aether: "Aether"
+     };
+   
+     return Object.entries(items)
+       .filter(([_, amount]) => Number(amount || 0) > 0)
+       .map(([key, amount]) => `${amount} ${labelMap[key] || key}`)
+       .join(", ");
+   }
    
    export async function loadMercenaryPanelState() {
-     if (!state.userAddress || !state.mercenaryV3Contract) return;
+     if (!state.userAddress || !state.mercenaryV4Contract) return;
    
      try {
        const [profile, slots] = await Promise.all([
-         loadMercenaryProfileV3(state.userAddress),
-         loadMercenarySlotsV3(state.userAddress)
+         loadMercenaryProfileV4(state.userAddress),
+         loadMercenarySlotsV4(state.userAddress)
        ]);
    
        state.mercenaryProfile = profile || null;
@@ -610,9 +611,10 @@ function renderCostList(items) {
      const isExtension = !!(state.selectedBlock && state.selectedBlock.protectionActive);
    
      try {
-       if (state.userAddress && state.mercenaryV3Contract) {
-         const cost = await state.mercenaryV3Contract.getProtectionCost(
+       if (state.userAddress && state.mercenaryV4Contract) {
+         const cost = await state.mercenaryV4Contract.getProtectionCost(
            state.userAddress,
+           days,
            payInINPI,
            isExtension
          );
@@ -626,22 +628,30 @@ function renderCostList(items) {
            const iron = Number(cost.ironCost || cost[3] || 0);
            info.textContent = `Cost: ${oil} Oil, ${lemons} Lemons, ${iron} Iron`;
          }
-         return;
+       } else {
+         const base = getMercenaryV4Cost(days);
+         if (payInINPI) {
+           info.textContent = `Cost: ${base.inpi} INPI`;
+         } else {
+           info.textContent = `Cost: ${base.oil} Oil, ${base.lemons} Lemons, ${base.iron} Iron`;
+         }
        }
      } catch (e) {
        console.warn("updateMercenaryCostPreview fallback:", e);
-     }
+       const base = getMercenaryV4Cost(days);
    
-     if (payInINPI) {
-       info.textContent = `Cost: ${MERCENARY_INPI_COST} INPI`;
-     } else {
-       info.textContent = isExtension
-         ? `Cost: ${renderCostList(MERCENARY_EXTEND_COST_RESOURCES)}`
-         : `Cost: ${renderCostList(MERCENARY_SET_COST_RESOURCES)}`;
+       if (payInINPI) {
+         info.textContent = `Cost: ${base.inpi} INPI`;
+       } else {
+         info.textContent = `Cost: ${base.oil} Oil, ${base.lemons} Lemons, ${base.iron} Iron`;
+       }
      }
    
      if (byId("protectDaysInfo")) {
-       byId("protectDaysInfo").textContent = `Duration: ${days} day${days > 1 ? "s" : ""}`;
+       const tierInfo = getMercenaryV4Cost(days);
+       const durationLabel = MERCENARY_DURATION_LABELS[days] || `${days} days`;
+       const tierLabel = MERCENARY_TIER_LABELS[tierInfo.tier] || "None";
+       byId("protectDaysInfo").textContent = `Duration: ${durationLabel} · Tier: ${tierLabel}`;
      }
    
      if (slotIndex >= 0 && byId("protectSlotInfo")) {
@@ -664,12 +674,12 @@ function renderCostList(items) {
    
    export async function unlockMercenarySecondSlot() {
      const msgDiv = getProtectMessageDiv();
-     if (!state.mercenaryV3Contract) return;
+     if (!state.mercenaryV4Contract) return;
    
      try {
-       msgDiv.innerHTML = `<span class="success">⏳ Unlocking slot 2...<br>${renderCostList(MERCENARY_SLOT2_UNLOCK)}</span>`;
+       msgDiv.innerHTML = `<span class="success">⏳ Unlocking slot 2...<br>${renderCostList(MERCENARY_SLOT2_UNLOCK_COST)}</span>`;
    
-       const tx = await state.mercenaryV3Contract.unlockSecondSlot({ gasLimit: 700000 });
+       const tx = await state.mercenaryV4Contract.unlockSecondSlot({ gasLimit: 700000 });
        debugLog("unlockSecondSlot tx", tx.hash);
        await tx.wait();
    
@@ -684,12 +694,12 @@ function renderCostList(items) {
    
    export async function unlockMercenaryThirdSlot() {
      const msgDiv = getProtectMessageDiv();
-     if (!state.mercenaryV3Contract) return;
+     if (!state.mercenaryV4Contract) return;
    
      try {
-       msgDiv.innerHTML = `<span class="success">⏳ Unlocking slot 3...<br>${renderCostList(MERCENARY_SLOT3_UNLOCK)}</span>`;
+       msgDiv.innerHTML = `<span class="success">⏳ Unlocking slot 3...<br>${renderCostList(MERCENARY_SLOT3_UNLOCK_COST)}</span>`;
    
-       const tx = await state.mercenaryV3Contract.unlockThirdSlot({ gasLimit: 800000 });
+       const tx = await state.mercenaryV4Contract.unlockThirdSlot({ gasLimit: 800000 });
        debugLog("unlockThirdSlot tx", tx.hash);
        await tx.wait();
    
@@ -709,7 +719,7 @@ function renderCostList(items) {
      const durationDays = getSelectedProtectionDays();
      const payInINPI = getMercenaryPaymentMode() === "inpi";
    
-     if (!tokenId || !state.mercenaryV3Contract) return;
+     if (!tokenId || !state.mercenaryV4Contract) return;
    
      try {
        const owner = await state.nftContract.ownerOf(tokenId);
@@ -719,7 +729,13 @@ function renderCostList(items) {
        }
    
        if (payInINPI) {
-         const amount = ethers.utils.parseEther(MERCENARY_INPI_COST);
+         const previewCost = await state.mercenaryV4Contract.getProtectionCost(
+           state.userAddress,
+           durationDays,
+           true,
+           false
+         );
+         const amount = previewCost.inpiCost || previewCost[0];
          const ok = await ensureInpiApprovalForMercenary(amount);
          if (!ok) {
            msgDiv.innerHTML = `<span class="error">❌ INPI approval failed.</span>`;
@@ -729,7 +745,7 @@ function renderCostList(items) {
    
        msgDiv.innerHTML = `<span class="success">⏳ Setting protection...</span>`;
    
-       const tx = await state.mercenaryV3Contract.setProtection(
+       const tx = await state.mercenaryV4Contract.setProtection(
          slotIndex,
          tokenId,
          durationDays,
@@ -754,11 +770,17 @@ function renderCostList(items) {
      const additionalDays = getSelectedProtectionDays();
      const payInINPI = getMercenaryPaymentMode() === "inpi";
    
-     if (!state.mercenaryV3Contract) return;
+     if (!state.mercenaryV4Contract) return;
    
      try {
        if (payInINPI) {
-         const amount = ethers.utils.parseEther(MERCENARY_INPI_COST);
+         const previewCost = await state.mercenaryV4Contract.getProtectionCost(
+           state.userAddress,
+           additionalDays,
+           true,
+           true
+         );
+         const amount = previewCost.inpiCost || previewCost[0];
          const ok = await ensureInpiApprovalForMercenary(amount);
          if (!ok) {
            msgDiv.innerHTML = `<span class="error">❌ INPI approval failed.</span>`;
@@ -768,7 +790,7 @@ function renderCostList(items) {
    
        msgDiv.innerHTML = `<span class="success">⏳ Extending protection...</span>`;
    
-       const tx = await state.mercenaryV3Contract.extendProtection(
+       const tx = await state.mercenaryV4Contract.extendProtection(
          slotIndex,
          additionalDays,
          payInINPI,
@@ -790,12 +812,12 @@ function renderCostList(items) {
      const msgDiv = getProtectMessageDiv();
      const slotIndex = getSelectedMercenarySlot();
    
-     if (!state.mercenaryV3Contract) return;
+     if (!state.mercenaryV4Contract) return;
    
      try {
        msgDiv.innerHTML = `<span class="success">⏳ Cancelling protection...</span>`;
    
-       const tx = await state.mercenaryV3Contract.cancelProtection(slotIndex, {
+       const tx = await state.mercenaryV4Contract.cancelProtection(slotIndex, {
          gasLimit: 500000
        });
        debugLog("cancelProtection tx", tx.hash);
@@ -814,12 +836,12 @@ function renderCostList(items) {
      const slotIndex = getSelectedMercenarySlot();
      const newTokenId = getSelectedProtectTokenId();
    
-     if (!state.mercenaryV3Contract || !newTokenId) return;
+     if (!state.mercenaryV4Contract || !newTokenId) return;
    
      try {
        msgDiv.innerHTML = `<span class="success">⏳ Moving protection...</span>`;
    
-       const tx = await state.mercenaryV3Contract.moveProtection(slotIndex, newTokenId, {
+       const tx = await state.mercenaryV4Contract.moveProtection(slotIndex, newTokenId, {
          gasLimit: 800000
        });
        debugLog("moveProtection tx", tx.hash);
@@ -838,12 +860,12 @@ function renderCostList(items) {
      const slotIndex = getSelectedMercenarySlot();
      const newTokenId = getSelectedProtectTokenId();
    
-     if (!state.mercenaryV3Contract || !newTokenId) return;
+     if (!state.mercenaryV4Contract || !newTokenId) return;
    
      try {
        msgDiv.innerHTML = `<span class="success">⏳ Emergency moving protection...</span>`;
    
-       const tx = await state.mercenaryV3Contract.emergencyMoveProtection(slotIndex, newTokenId, {
+       const tx = await state.mercenaryV4Contract.emergencyMoveProtection(slotIndex, newTokenId, {
          gasLimit: 800000
        });
        debugLog("emergencyMoveProtection tx", tx.hash);
@@ -859,15 +881,14 @@ function renderCostList(items) {
    
    export async function cleanSelectedProtection() {
      const msgDiv = getProtectMessageDiv();
-     const slotIndex = getSelectedMercenarySlot();
      const tokenId = getSelectedProtectTokenId();
    
-     if (!state.mercenaryV3Contract || !tokenId) return;
+     if (!state.mercenaryV4Contract || !tokenId) return;
    
      try {
        msgDiv.innerHTML = `<span class="success">⏳ Cleaning expired protection...</span>`;
    
-       const tx = await state.mercenaryV3Contract.cleanExpiredToken(tokenId, {
+       const tx = await state.mercenaryV4Contract.cleanExpiredToken(tokenId, {
          gasLimit: 500000
        });
        debugLog("cleanExpiredToken tx", tx.hash);
@@ -886,7 +907,7 @@ function renderCostList(items) {
      const msgDiv = getProtectMessageDiv();
      const title = (byId("bastionTitleInput")?.value || "").trim();
    
-     if (!state.mercenaryV3Contract) return;
+     if (!state.mercenaryV4Contract) return;
      if (!title) {
        msgDiv.innerHTML = `<span class="error">❌ Enter a title first.</span>`;
        return;
@@ -895,7 +916,7 @@ function renderCostList(items) {
      try {
        msgDiv.innerHTML = `<span class="success">⏳ Saving bastion title...</span>`;
    
-       const tx = await state.mercenaryV3Contract.setBastionTitle(title, {
+       const tx = await state.mercenaryV4Contract.setBastionTitle(title, {
          gasLimit: 400000
        });
        debugLog("setBastionTitle tx", tx.hash);
@@ -919,4 +940,3 @@ function renderCostList(items) {
      }
      return extendMercenaryProtection();
    }
-
