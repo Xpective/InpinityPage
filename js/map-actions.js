@@ -224,6 +224,8 @@ async function refreshAfterTx() {
 
 async function sendTx(txPromise, successMsg) {
   const actionMessage = getActionMessageDiv();
+  if (el) el.innerHTML = html;
+  }
 
   if (actionMessage) {
     actionMessage.innerHTML = `<span class="success">⏳ Sending...</span>`;
@@ -249,7 +251,7 @@ async function sendTx(txPromise, successMsg) {
       actionMessage.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(err)}</span>`;
     }
   }
-}
+
 
 export async function handleMigrateToV6() {
   if (!mapState.selectedTokenId) return;
