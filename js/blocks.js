@@ -1,5 +1,5 @@
 /* =========================================================
-   BLOCKS – V6 + MERCENARY V3
+   BLOCKS – V6 + MERCENARY V4
    ========================================================= */
 
    import { state } from "./state.js";
@@ -15,9 +15,9 @@
    import {
      loadMyTokensFromSubgraph,
      loadMyFarmsV6FromSubgraph,
-     loadMercenaryTokenProtectionsV3,
+     loadMercenaryTokenProtectionsV4,
      buildFarmV6Map,
-     buildMercenaryProtectionMap
+     buildProtectionMapV4
    } from "./subgraph.js";
    import { isTokenActiveOnV5, getFarmingV5Contract } from "./migration.js";
    
@@ -28,15 +28,16 @@
      if (!grid) return;
    
      try {
-       const subgraphTokens = await loadMyTokensFromSubgraph(state.userAddress);
-       const subgraphFarmsV6 = await loadMyFarmsV6FromSubgraph(state.userAddress);
-       const subgraphProtections = await loadMercenaryTokenProtectionsV3();
-   
-       state.cachedFarmsV6 = subgraphFarmsV6 || [];
-       state.cachedProtections = subgraphProtections || [];
-       state.cachedFarmV6Map = buildFarmV6Map(state.cachedFarmsV6);
-       state.cachedProtectionMap = buildMercenaryProtectionMap(state.cachedProtections);
-       state.userBlocks = (subgraphTokens || []).map((t) => String(t.id));
+      const subgraphTokens = await loadMyTokensFromSubgraph(state.userAddress);
+      const subgraphFarmsV6 = await loadMyFarmsV6FromSubgraph(state.userAddress);
+      const subgraphProtections = await loadMercenaryTokenProtectionsV4();
+      
+      state.cachedFarmsV6 = subgraphFarmsV6 || [];
+      state.cachedProtections = subgraphProtections || [];
+      state.cachedFarmV6Map = buildFarmV6Map(state.cachedFarmsV6);
+      state.cachedProtectionMap = buildProtectionMapV4(state.cachedProtections);
+      state.userBlocks = (subgraphTokens || []).map((t) => String(t.id));
+      
    
        if (!state.userBlocks.length) {
          grid.innerHTML = `<p class="empty-state">You don’t own any blocks yet.</p>`;
