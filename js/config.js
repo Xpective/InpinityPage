@@ -2,7 +2,8 @@
    CONFIGURATION – V6 / MERCENARY V4
    ========================================================= */
 
-// Contract Addresses
+/* ==================== CONTRACT ADDRESSES ==================== */
+
 export const NFT_ADDRESS = "0x277a0D5864293C78d7387C54B48c35D5E9578Ab1";
 
 export const FARMING_V5_ADDRESS = "0xe0246dC9c553E9cD741013C21BD217912a9DA0B2";
@@ -17,21 +18,25 @@ export const RESOURCE_TOKEN_ADDRESS = "0x71E76a6065197acdd1a4d6B736712F80D1Fd3D8
 export const INPI_ADDRESS = "0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D";
 export const PITRONE_ADDRESS = "0x7240Ec5B3Ba944888E186c74D0f8B4F5F71c9AE8";
 
-// API & Game Constants
+/* ==================== API / GAME CONSTANTS ==================== */
+
 export const WORKER_URL = "https://inpinity-worker-final.s-plat.workers.dev";
 export const MAX_ROW = 99;
 
-// Minting Prices
+/* ==================== MINT PRICES ==================== */
+
 export const PRICE_ETH = "0.003";
 export const PRICE_INPI = "30";
 export const PRICE_ETH_MIXED = "0.0015";
 export const PRICE_INPI_MIXED = "15";
 
-// Timing
+/* ==================== TIMING ==================== */
+
 export const CLAIM_COOLDOWN_SEC = 24 * 60 * 60;
 export const STORAGE_WALLET_FLAG = "inpinity_wallet_autoreconnect";
 
-// Display Constants
+/* ==================== DISPLAY CONSTANTS ==================== */
+
 export const resourceNames = [
   "Oil",
   "Lemons",
@@ -47,12 +52,14 @@ export const resourceNames = [
 
 export const rarityNames = ["Bronze", "Silver", "Gold", "Platinum", "Diamond"];
 
-// Farming boost
+/* ==================== FARMING BOOST ==================== */
+
 export const FARM_BOOST_PRICE_PER_DAY = 100;
 export const FARM_BOOST_MAX_DAYS = 10;
 export const FARM_WINDOW_DAYS = 7;
 
-// Pirate boost
+/* ==================== PIRATE BOOST ==================== */
+
 export const PIRATE_BOOST_PRICE_PER_DAY = 100;
 export const PIRATE_BOOST_MAX_DAYS = 10;
 
@@ -90,7 +97,6 @@ export const MERCENARY_RANK_LABELS = [
   "Inpinity Bastion"
 ];
 
-// Slot unlock costs — object form
 export const MERCENARY_SLOT2_UNLOCK_COST = {
   oil: 1000,
   lemons: 500,
@@ -106,7 +112,6 @@ export const MERCENARY_SLOT3_UNLOCK_COST = {
   mysterium: 5
 };
 
-// Slot unlock costs — array aliases for older UI/helpers
 export const MERCENARY_SLOT2_UNLOCK = [
   { key: "oil", label: "Oil", amount: 1000 },
   { key: "lemons", label: "Lemons", amount: 500 },
@@ -122,7 +127,6 @@ export const MERCENARY_SLOT3_UNLOCK = [
   { key: "mysterium", label: "Mysterium", amount: 5 }
 ];
 
-// V4 duration-based costs (fallback/UI preview)
 export const MERCENARY_V4_COSTS = {
   1: { inpi: "8",  oil: 3,  lemons: 2, iron: 1, upfrontPoints: 2,  protectionPercent: 20, tier: 1 },
   2: { inpi: "14", oil: 4,  lemons: 3, iron: 1, upfrontPoints: 2,  protectionPercent: 20, tier: 1 },
@@ -137,7 +141,6 @@ export function getMercenaryV4Cost(days) {
   return MERCENARY_V4_COSTS[Number(days)] || MERCENARY_V4_COSTS[1];
 }
 
-// Legacy-compatible helpers for still-unmigrated UI code
 export const MERCENARY_INPI_COST = "50";
 
 export const MERCENARY_SET_COST_RESOURCES = [

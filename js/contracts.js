@@ -24,7 +24,12 @@
     PITRONE_ABI
   } from "./abis.js";
   
-  import { state } from "./state.js";
+  import {
+    state,
+    resetSelectedBlockUiState,
+    resetUiBusyFlags
+  } from "./state.js";
+  
   import { debugLog } from "./utils.js";
   
   export async function ensureBaseNetwork() {
@@ -99,6 +104,8 @@
     state.resourceTokenContract = null;
   
     state.selectedBlock = null;
+    state.selectedBlockId = null;
+    state.selectedBlockData = null;
   
     state.userBlocks = [];
     state.userAttacks = [];
@@ -118,6 +125,12 @@
     state.selectedMercenarySlotIndex = 0;
     state.selectedMercenaryDurationDays = 7;
     state.selectedMercenaryPayInINPI = false;
+  
+    state.mercenaryProfile = null;
+    state.mercenarySlots = [];
+  
+    resetSelectedBlockUiState();
+    resetUiBusyFlags();
   
     debugLog("Contracts cleared");
   }

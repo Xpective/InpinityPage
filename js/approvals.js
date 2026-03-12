@@ -7,9 +7,14 @@
      FARMING_V6_ADDRESS,
      MERCENARY_V4_ADDRESS,
      NFT_ADDRESS,
-     PITRONE_ADDRESS
+     PITRONE_ADDRESS,
+     PIRATES_V6_ADDRESS
    } from "./config.js";
    import { debugLog } from "./utils.js";
+   
+   function friendlyApprovalError(e) {
+     return e?.reason || e?.data?.message || e?.message || "Unknown approval error";
+   }
    
    export async function ensureFarmingApproval() {
      if (!state.resourceTokenContract || !state.userAddress) return false;
@@ -38,9 +43,11 @@
          operator: FARMING_V6_ADDRESS,
          txHash: tx.hash
        });
+   
        return true;
      } catch (e) {
        console.error("ensureFarmingApproval error:", e);
+       debugLog("Farming approval failed", friendlyApprovalError(e));
        return false;
      }
    }
@@ -50,6 +57,7 @@
    
      try {
        const allowance = await state.inpiContract.allowance(state.userAddress, spender);
+   
        if (allowance.gte(amount)) {
          debugLog("INPI approval already sufficient", {
            spender,
@@ -67,9 +75,11 @@
          amount: amount.toString(),
          txHash: tx.hash
        });
+   
        return true;
      } catch (e) {
        console.error("ensureInpiApproval error:", e);
+       debugLog("INPI approval failed", friendlyApprovalError(e));
        return false;
      }
    }
@@ -91,6 +101,7 @@
    
      try {
        const allowance = await state.pitroneContract.allowance(state.userAddress, spender);
+   
        if (allowance.gte(amount)) {
          debugLog("Pitrone approval already sufficient", {
            spender,
@@ -108,9 +119,15 @@
          amount: amount.toString(),
          txHash: tx.hash
        });
+   
        return true;
      } catch (e) {
        console.error("ensurePitroneApproval error:", e);
+       debugLog("Pitrone approval failed", friendlyApprovalError(e));
        return false;
      }
+   }
+   
+   export async function ensurePitroneApprovalForPirates(amount) {
+     return ensurePitroneApproval(PIRATES_V6_ADDRESS, amount);
    }

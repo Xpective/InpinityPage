@@ -11,6 +11,7 @@
    import { updateBalances, updatePoolInfo } from "./balances.js";
    import { loadResourceBalancesOnchain } from "./resources.js";
    import { loadUserBlocks } from "./blocks.js";
+   import { ensureFarmingApproval } from "./approvals.js";
    
    import {
      initAttackResourceSelect,
@@ -32,7 +33,6 @@
      migrateAllMyV5Farms,
      protect,
      loadMercenaryPanelState,
-     setMercenaryProtection,
      extendMercenaryProtection,
      cancelMercenaryProtection,
      moveMercenaryProtection,
@@ -48,6 +48,10 @@
    import { revealSelected } from "./reveal.js";
    import { findRandomFreeBlock, mintBlock } from "./mint.js";
    import { exchangeINPI, exchangePit } from "./exchange.js";
+   
+   /* =========================================================
+      WALLET CONNECT / DISCONNECT
+      ========================================================= */
    
    async function connectWallet(forceRequest = true) {
      if (state.isConnecting) return;
@@ -77,14 +81,19 @@
        await loadUserAttacks();
        await loadMercenaryPanelState();
    
+       scheduleAttackDropdownRefresh();
+   
        if (!state.attacksPoller) {
          state.attacksPoller = setInterval(async () => {
            if (!state.userAddress) return;
    
-           await loadUserAttacks();
-           refreshBlockMarkings();
+           try {
+             await loadUserAttacks();
+             refreshBlockMarkings();
+           } catch (e) {
+             console.warn("Attack refresh failed:", e);
+           }
    
-           // optional mitziehen, damit Mercenary-UI auch frisch bleibt
            try {
              await loadMercenaryPanelState();
            } catch (e) {
@@ -92,6 +101,9 @@
            }
          }, 45000);
        }
+   
+       const approveMsg = byId("approveMessage");
+       if (approveMsg) approveMsg.innerHTML = "";
    
        debugLog("Wallet connected", state.userAddress);
      } catch (e) {
@@ -116,23 +128,90 @@
    
      clearContracts();
      setWalletUIDisconnected();
+   
+     const approveMsg = byId("approveMessage");
+     if (approveMsg) approveMsg.innerHTML = "";
+   
      debugLog("Wallet disconnected");
    }
+   
+   /* =========================================================
+      APPROVAL ACTIONS
+      ========================================================= */
+   
+   async function approveResourcesForFarming() {
+     const msgDiv = byId("approveMessage");
+   
+     if (!state.userAddress || !state.resourceTokenContract) {
+       if (msgDiv) {
+         msgDiv.innerHTML = `<span class="error">❌ Connect wallet first.</span>`;
+       }
+       return;
+     }
+   
+     const btn = byId("approveResourcesBtn");
+     const originalText = btn?.dataset?.originalText || btn?.textContent || "Approve Farming for Resources";
+   
+     try {
+       if (btn) {
+         if (!btn.dataset.originalText) btn.dataset.originalText = originalText;
+         btn.disabled = true;
+         btn.style.opacity = "0.6";
+         btn.style.pointerEvents = "none";
+         btn.textContent = "Approving...";
+       }
+   
+       if (msgDiv) {
+         msgDiv.innerHTML = `<span class="success">⏳ Approving FarmingV6 for ResourceToken...</span>`;
+       }
+   
+       const ok = await ensureFarmingApproval();
+   
+       if (!ok) {
+         if (msgDiv) {
+           msgDiv.innerHTML = `<span class="error">❌ Resource approval failed.</span>`;
+         }
+         return;
+       }
+   
+       if (msgDiv) {
+         msgDiv.innerHTML = `<span class="success">✅ Resource approval successful.</span>`;
+       }
+     } catch (e) {
+       console.error("approveResourcesForFarming error:", e);
+       if (msgDiv) {
+         msgDiv.innerHTML = `<span class="error">❌ ${e.reason || e.message || "Approval failed."}</span>`;
+       }
+     } finally {
+       if (btn) {
+         btn.disabled = false;
+         btn.style.opacity = "1";
+         btn.style.pointerEvents = "auto";
+         btn.textContent = btn.dataset.originalText || "Approve Farming for Resources";
+       }
+     }
+   }
+   
+   /* =========================================================
+      EVENT BINDING
+      ========================================================= */
    
    function bindEvents() {
      byId("connectWallet")?.addEventListener("click", () => connectWallet(true));
      byId("disconnectWallet")?.addEventListener("click", disconnectWallet);
    
+     /* ==================== PIRATE ==================== */
      byId("attackBtn")?.addEventListener("click", attack);
      byId("buyPirateBoostBtn")?.addEventListener("click", buyPirateBoost);
      byId("pirateBoostDays")?.addEventListener("input", updateBoostCostLabels);
      byId("pirateBoostDays")?.addEventListener("change", updateBoostCostLabels);
    
-     // Legacy compat button
-     byId("protectBtn")?.addEventListener("click", protect);
+     byId("attackRow")?.addEventListener("input", scheduleAttackDropdownRefresh);
+     byId("attackCol")?.addEventListener("input", scheduleAttackDropdownRefresh);
+     byId("attackResourceSelect")?.addEventListener("change", scheduleAttackDropdownRefresh);
    
-     // Mercenary V4 explicit buttons
-     byId("setProtectionBtn")?.addEventListener("click", setMercenaryProtection);
+     /* ==================== MERCENARY ==================== */
+     byId("protectBtn")?.addEventListener("click", protect);
      byId("extendProtectionBtn")?.addEventListener("click", extendMercenaryProtection);
      byId("cancelProtectionBtn")?.addEventListener("click", cancelMercenaryProtection);
      byId("moveProtectionBtn")?.addEventListener("click", moveMercenaryProtection);
@@ -142,6 +221,13 @@
      byId("cleanupProtectionBtn")?.addEventListener("click", cleanSelectedProtection);
      byId("saveBastionTitleBtn")?.addEventListener("click", saveBastionTitle);
    
+     byId("protectDays")?.addEventListener("input", updateMercenaryCostPreview);
+     byId("protectDays")?.addEventListener("change", updateMercenaryCostPreview);
+     byId("protectSlotIndex")?.addEventListener("change", updateMercenaryCostPreview);
+     byId("mercenaryPaymentMode")?.addEventListener("change", updateMercenaryCostPreview);
+     byId("protectTokenId")?.addEventListener("input", updateMercenaryCostPreview);
+   
+     /* ==================== REVEAL / FARMING ==================== */
      byId("revealBtn")?.addEventListener("click", revealSelected);
    
      byId("farmingStartBtn")?.addEventListener("click", startFarmingSelected);
@@ -150,37 +236,39 @@
      byId("buyBoostBtn")?.addEventListener("click", buyBoost);
      byId("confirmBoostBtn")?.addEventListener("click", buyBoost);
    
-     byId("migrateFarmBtn")?.addEventListener("click", migrateSelectedFarmToV6);
-     byId("migrateAllV5Btn")?.addEventListener("click", migrateAllMyV5Farms);
-   
-     byId("exchangeInpiBtn")?.addEventListener("click", exchangeINPI);
-     byId("exchangePitBtn")?.addEventListener("click", exchangePit);
-   
-     byId("randomBlockBtn")?.addEventListener("click", findRandomFreeBlock);
-     byId("mintBtn")?.addEventListener("click", mintBlock);
-   
-     byId("attackRow")?.addEventListener("input", scheduleAttackDropdownRefresh);
-     byId("attackCol")?.addEventListener("input", scheduleAttackDropdownRefresh);
-   
      byId("boostDays")?.addEventListener("input", updateFarmBoostCostLabel);
      byId("boostDays")?.addEventListener("change", updateFarmBoostCostLabel);
    
-     byId("protectDays")?.addEventListener("input", updateMercenaryCostPreview);
-     byId("protectDays")?.addEventListener("change", updateMercenaryCostPreview);
-     byId("protectSlotIndex")?.addEventListener("change", updateMercenaryCostPreview);
-     byId("mercenaryPaymentMode")?.addEventListener("change", updateMercenaryCostPreview);
-     byId("protectTokenId")?.addEventListener("input", updateMercenaryCostPreview);
+     byId("migrateFarmBtn")?.addEventListener("click", migrateSelectedFarmToV6);
+     byId("migrateAllV5Btn")?.addEventListener("click", migrateAllMyV5Farms);
    
-     updateFarmBoostCostLabel();
-     updateBoostCostLabels();
-     updateMercenaryCostPreview();
+     /* ==================== EXCHANGE ==================== */
+     byId("exchangeInpiBtn")?.addEventListener("click", exchangeINPI);
+     byId("exchangePitBtn")?.addEventListener("click", exchangePit);
    
+     /* ==================== MINT ==================== */
+     byId("randomBlockBtn")?.addEventListener("click", findRandomFreeBlock);
+     byId("mintBtn")?.addEventListener("click", mintBlock);
+   
+     /* ==================== APPROVALS ==================== */
+     byId("approveResourcesBtn")?.addEventListener("click", approveResourcesForFarming);
+   
+     /* ==================== PAYMENT MODE ==================== */
      document.querySelectorAll('input[name="payment"]').forEach((radio) => {
        radio.addEventListener("change", (e) => {
          state.selectedPayment = e.target.value;
        });
      });
+   
+     /* ==================== INITIAL LABEL REFRESH ==================== */
+     updateFarmBoostCostLabel();
+     updateBoostCostLabels();
+     updateMercenaryCostPreview();
    }
+   
+   /* =========================================================
+      ETHEREUM EVENT BINDING
+      ========================================================= */
    
    function bindEthereumEvents() {
      if (!window.ethereum || window.ethereum.__inpinityBound) return;
@@ -204,8 +292,13 @@
      window.ethereum.__inpinityBound = true;
    }
    
+   /* =========================================================
+      PAGE INIT
+      ========================================================= */
+   
    export function initGamePage() {
      setWalletUIDisconnected();
+   
      initAttackResourceSelect();
      updateFarmBoostCostLabel();
      updateBoostCostLabels();

@@ -8,8 +8,13 @@
    export async function updateBalances() {
      if (!state.userAddress || !state.provider) return;
    
-     const ethBal = await state.provider.getBalance(state.userAddress);
-     safeText("balanceEth", `${parseFloat(ethers.utils.formatEther(ethBal)).toFixed(4)} ETH`);
+     try {
+       const ethBal = await state.provider.getBalance(state.userAddress);
+       safeText("balanceEth", `${parseFloat(ethers.utils.formatEther(ethBal)).toFixed(4)} ETH`);
+     } catch (e) {
+       console.warn("Failed to load ETH balance:", e.message);
+       safeText("balanceEth", "0 ETH");
+     }
    
      try {
        const inpiBal = await state.inpiContract.balanceOf(state.userAddress);

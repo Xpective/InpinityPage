@@ -21,13 +21,11 @@
   ];
   
   export const FARMING_V6_ABI = [
-    // Core functions
     "function startFarming(uint256 tokenId) external",
     "function stopFarming(uint256 tokenId) external",
     "function claimResources(uint256 tokenId) external",
     "function buyBoost(uint256 tokenId, uint256 daysAmount) external",
   
-    // View functions
     "function getFarmState(uint256 tokenId) view returns ((uint256 startTime, uint256 lastAccrualTime, uint256 lastClaimTime, uint256 boostExpiry, uint256 stopTime, bool isActive))",
     "function getFarmStatusCodeV6(uint256 tokenId) view returns (uint8)",
     "function getAllPending(uint256 tokenId) view returns (uint256[10])",
@@ -39,7 +37,6 @@
     "function hasBoost(uint256 tokenId) view returns (bool)",
     "function isFarmOwner(uint256 tokenId, address user) view returns (bool)",
   
-    // V6 Preview functions
     "function previewClaim(uint256 tokenId) view returns ((uint8 code, bool allowed, uint256 pendingAmount, uint256 secondsRemaining))",
     "function previewSteal(uint256 targetTokenId, uint8 resourceId, uint256 percentBps) view returns ((uint8 code, bool allowed, uint256 pendingAmount, uint256 stealAmount, uint256 travelTime, uint256 remainingAttacksToday, uint256 protectionLevel, uint256 effectiveStealPercent, uint256 secondsRemaining))",
     "function previewStealV6(uint256 targetTokenId, uint8 resourceId, uint256 percentBps, bool roundUpToMinimumOne) view returns ((uint8 code, bool allowed, uint256 pendingAmount, uint256 stealAmount, uint256 travelTime, uint256 remainingAttacksToday, uint256 protectionLevel, uint256 effectiveStealPercent, uint256 secondsRemaining, uint256 attackerTokenId))",
@@ -49,20 +46,16 @@
   ];
   
   export const PIRATES_V6_ABI = [
-    // Core functions
     "function startAttack(uint256 attackerTokenId, uint256 targetTokenId, uint8 resourceId) external",
     "function executeAttack(uint256 targetTokenId, uint256 attackIndex) external",
     "function cancelOwnPendingAttack(uint256 targetTokenId, uint256 attackIndex) external",
     "function buyPirateBoost(uint256 tokenId, uint256 daysAmount) external",
   
-    // Admin / integration
     "function setMercenaryContract(address _mercenary) external",
   
-    // Preview functions
     "function previewAttack(uint256 attackerTokenId, uint256 targetTokenId, uint8 resourceId) view returns (uint8 code, bool allowed, uint256 pendingAmount, uint256 stealAmount, uint256 travelTime, uint256 remainingAttacksToday, uint256 protectionLevel, uint256 effectiveStealPercent, uint256 secondsRemaining, uint256 attackerTokenId)",
     "function previewExecuteAttack(uint256 targetTokenId, uint256 attackIndex) view returns (uint8 code, bool allowed, uint256 pendingAmount, uint256 stealAmount, uint256 travelTime, uint256 remainingAttacksToday, uint256 protectionLevel, uint256 effectiveStealPercent, uint256 secondsRemaining, uint256 attackerTokenId)",
   
-    // View functions
     "function canAttackTarget(address attacker, uint256 targetTokenId) view returns (bool)",
     "function getRemainingAttacksToday(address attacker) view returns (uint8)",
     "function getAttackTime(uint256 attackerTokenId, uint256 targetTokenId) view returns (uint256)",
@@ -77,7 +70,6 @@
   ];
   
   export const MERCENARY_V4_ABI = [
-    // Write functions
     "function unlockSecondSlot() external",
     "function unlockThirdSlot() external",
     "function setProtection(uint8 slotIndex, uint256 tokenId, uint8 durationDays, bool payInINPI) external",
@@ -89,10 +81,9 @@
     "function cleanExpiredToken(uint256 tokenId) external",
     "function setBastionTitle(string title) external",
   
-    // Views
     "function getProtectionLevel(uint256 tokenId) view returns (uint256)",
     "function getProtectionData(uint256 tokenId) view returns (address protector, uint8 slotIndex, bool active, uint256 startTime, uint256 expiry, uint256 cooldownUntil, uint256 emergencyReadyAt, uint256 tier, uint256 protectionPercent)",
-    "function getWalletSlots(address user) view returns (uint8 slots, tuple(uint256 tokenId,uint64 startTime,uint64 expiry,uint64 cooldownUntil,uint64 emergencyReadyAt,uint8 protectionTier,bool active)[3] data)",
+    "function getWalletSlots(address user) view returns (uint8 unlockedSlots, tuple(uint256 tokenId,uint64 startTime,uint64 expiry,uint64 cooldownUntil,uint64 emergencyReadyAt,uint8 protectionTier,bool active)[3] data)",
     "function getDefenderProfile(address user) view returns (uint256 points, uint8 rank, uint256 discountBps, uint256 protectedDays, uint256 defenses, uint256 extensionsCount, uint256 cleanups, string title)",
     "function getRank(address user) view returns (uint8 rank, string name)",
     "function getProtectionCost(address user, uint8 durationDays, bool payInINPI, bool isExtension) view returns (uint256 inpiCost, uint256 oilCost, uint256 lemonsCost, uint256 ironCost, uint256 rankDiscountBps, uint256 totalDiscountBps)",
@@ -112,7 +103,6 @@
     "function treasury() view returns (address)",
     "function piratesContract() view returns (address)",
   
-    // Events
     "event ProtectionSet(address indexed user, uint8 indexed slotIndex, uint256 indexed tokenId, uint8 tier, uint64 startTime, uint64 expiry)",
     "event ProtectionExtended(address indexed user, uint8 indexed slotIndex, uint256 indexed tokenId, uint64 oldExpiry, uint64 newExpiry, uint256 discountBps)",
     "event ProtectionCancelled(address indexed user, uint8 indexed slotIndex, uint256 indexed tokenId, uint64 cancelledAt, string reason)",

@@ -18,8 +18,98 @@
    import { loadMyAttacksV6FromSubgraph } from "./subgraph.js";
    import { loadResourceBalancesOnchain } from "./resources.js";
    import { updateBalances } from "./balances.js";
-
-
+   
+   /* =========================================================
+      HELPERS
+      ========================================================= */
+   
+   function setButtonVisualState(buttonId, enabled, enabledText = null, disabledText = null) {
+     const btn = byId(buttonId);
+     if (!btn) return;
+   
+     btn.disabled = !enabled;
+     btn.style.opacity = enabled ? "1" : "0.45";
+     btn.style.pointerEvents = enabled ? "auto" : "none";
+   
+     if (!btn.dataset.originalText) {
+       btn.dataset.originalText = btn.textContent;
+     }
+   
+     if (enabled && enabledText) {
+       btn.textContent = enabledText;
+     } else if (!enabled && disabledText) {
+       btn.textContent = disabledText;
+     } else if (enabled && btn.dataset.originalText) {
+       btn.textContent = btn.dataset.originalText;
+     }
+   }
+   
+   function setButtonBusy(buttonId, busy, busyText = "Processing...") {
+     const btn = byId(buttonId);
+     if (!btn) return;
+   
+     if (!btn.dataset.originalText) {
+       btn.dataset.originalText = btn.textContent;
+     }
+   
+     if (busy) {
+       btn.disabled = true;
+       btn.style.opacity = "0.6";
+       btn.style.pointerEvents = "none";
+       btn.textContent = busyText;
+     } else {
+       btn.disabled = false;
+       btn.style.opacity = "1";
+       btn.style.pointerEvents = "auto";
+       btn.textContent = btn.dataset.originalText;
+     }
+   }
+   
+   function friendlyErrorMessage(e) {
+     const msg = e?.reason || e?.data?.message || e?.message || "Unknown error";
+     const lower = String(msg).toLowerCase();
+   
+     if (
+       e?.code === 4001 ||
+       lower.includes("user rejected") ||
+       lower.includes("denied transaction signature") ||
+       lower.includes("action_rejected")
+     ) {
+       return "Transaction cancelled in wallet.";
+     }
+   
+     if (lower.includes("already known")) {
+       return "This transaction is already known by the network. Please wait.";
+     }
+   
+     if (lower.includes("nonce")) {
+       return "Transaction nonce issue. Please check pending transactions in your wallet.";
+     }
+   
+     return msg;
+   }
+   
+   function getAttackMessageDiv() {
+     return byId("attackMessage");
+   }
+   
+   function getPirateBoostMessageDiv() {
+     return byId("pirateBoostMessage");
+   }
+   
+   function setAttackerSelectorText(text) {
+     const box = byId("attackerSelector");
+     if (!box) return;
+   
+     box.innerHTML = `
+       <h4 style="margin:0 0 0.5rem; font-size:0.95rem;">Attack source</h4>
+       <p class="info-note" style="font-size:0.8rem; margin:0;">${text}</p>
+     `;
+   }
+   
+   /* =========================================================
+      ATTACK SOURCE
+      ========================================================= */
    
    export async function getValidAttackerTokenId() {
      if (!state.userAddress || !state.nftContract) return null;
@@ -44,6 +134,32 @@
      return null;
    }
    
+   async function updateAttackerSelectorUi() {
+     const attackerTokenId = await getValidAttackerTokenId();
+   
+     if (!state.userAddress) {
+       setAttackerSelectorText("Connect wallet to select an attacker block.");
+       return null;
+     }
+   
+     if (state.selectedBlock?.tokenId && attackerTokenId && Number(state.selectedBlock.tokenId) === attackerTokenId) {
+       setAttackerSelectorText(`Selected block #${attackerTokenId} is used as attacker.`);
+       return attackerTokenId;
+     }
+   
+     if (attackerTokenId) {
+       setAttackerSelectorText(`Fallback attacker block: #${attackerTokenId}. Select a block above to change it.`);
+       return attackerTokenId;
+     }
+   
+     setAttackerSelectorText("No valid owned attacker block found.");
+     return null;
+   }
+   
+   /* =========================================================
+      RESOURCE SELECT / BOOST LABELS
+      ========================================================= */
+   
    export function initAttackResourceSelect() {
      const select = byId("attackResourceSelect");
      if (!select) return;
@@ -58,96 +174,105 @@
    }
    
    export function updateBoostCostLabels() {
-    const pirateDaysInput = byId("pirateBoostDays");
-    const pirateCostInfo = byId("pirateBoostCostInfo");
-  
-    if (!pirateCostInfo || !pirateDaysInput) return;
-  
-    let days = parseInt(pirateDaysInput.value, 10);
-    if (!Number.isFinite(days)) days = 7;
-  
-    days = Math.max(1, Math.min(PIRATE_BOOST_MAX_DAYS, days));
-    pirateDaysInput.value = String(days);
-  
-    pirateCostInfo.textContent = `Total: ${days * PIRATE_BOOST_PRICE_PER_DAY} PIT`;
-  }
-  
-  export async function buyPirateBoost() {
-    const msgDiv = byId("pirateBoostMessage");
-    const daysInput = byId("pirateBoostDays");
-  
-    if (!msgDiv) return;
-  
-    let days = parseInt(daysInput?.value, 10);
-    if (!Number.isFinite(days)) days = 7;
-    days = Math.max(1, Math.min(PIRATE_BOOST_MAX_DAYS, days));
-  
-    try {
-      const attackerTokenId = await getValidAttackerTokenId();
-      if (!attackerTokenId) {
-        msgDiv.innerHTML = `<span class="error">❌ No valid attacker block found.</span>`;
-        return;
-      }
-  
-      const totalCostHuman = days * PIRATE_BOOST_PRICE_PER_DAY;
-      const totalCostWei = ethers.utils.parseEther(String(totalCostHuman));
-  
-      const allowance = await state.pitroneContract.allowance(
-        state.userAddress,
-        state.piratesV6Contract.address
-      );
-  
-      if (allowance.lt(totalCostWei)) {
-        msgDiv.innerHTML = `
-          <span class="success">
-            ⏳ Approving PITRONE...<br>
-            Block: #${attackerTokenId}<br>
-            Cost: ${totalCostHuman} PIT
-          </span>
-        `;
-  
-        const approveTx = await state.pitroneContract.approve(
-          state.piratesV6Contract.address,
-          totalCostWei
-        );
-        await approveTx.wait();
-      }
-  
-      msgDiv.innerHTML = `
-        <span class="success">
-          ⏳ Buying Pirate Boost...<br>
-          Block: #${attackerTokenId}<br>
-          Days: ${days}<br>
-          Cost: ${totalCostHuman} PIT<br>
-          Effect: +25 percentage points steal bonus
-        </span>
-      `;
-  
-      const tx = await state.piratesV6Contract.buyPirateBoost(attackerTokenId, days, {
-        gasLimit: 350000
-      });
-  
-      await tx.wait();
-  
-      msgDiv.innerHTML = `
-        <span class="success">
-          ✅ Pirate Boost activated!<br>
-          Block: #${attackerTokenId}<br>
-          Days: ${days}<br>
-          Paid: ${totalCostHuman} PIT
-        </span>
-      `;
-  
-      await updateBalances();
-      await loadResourceBalancesOnchain();
-      await loadUserAttacks();
-      await refreshAttackDropdown();
-      refreshBlockMarkings();
-    } catch (e) {
-      console.error("buyPirateBoost error:", e);
-      msgDiv.innerHTML = `<span class="error">❌ ${e.reason || e.message}</span>`;
-    }
-  }
+     const pirateDaysInput = byId("pirateBoostDays");
+     const pirateCostInfo = byId("pirateBoostCostInfo");
+   
+     if (!pirateCostInfo || !pirateDaysInput) return;
+   
+     let days = parseInt(pirateDaysInput.value, 10);
+     if (!Number.isFinite(days)) days = 7;
+   
+     days = Math.max(1, Math.min(PIRATE_BOOST_MAX_DAYS, days));
+     pirateDaysInput.value = String(days);
+   
+     pirateCostInfo.textContent = `Total: ${days * PIRATE_BOOST_PRICE_PER_DAY} PIT`;
+   }
+   
+   export async function buyPirateBoost() {
+     const msgDiv = getPirateBoostMessageDiv();
+     const daysInput = byId("pirateBoostDays");
+   
+     if (!msgDiv) return;
+   
+     let days = parseInt(daysInput?.value, 10);
+     if (!Number.isFinite(days)) days = 7;
+     days = Math.max(1, Math.min(PIRATE_BOOST_MAX_DAYS, days));
+   
+     try {
+       const attackerTokenId = await getValidAttackerTokenId();
+       if (!attackerTokenId) {
+         msgDiv.innerHTML = `<span class="error">❌ No valid attacker block found.</span>`;
+         setButtonVisualState("buyPirateBoostBtn", false, null, "Buy Pirate Boost");
+         return;
+       }
+   
+       setButtonBusy("buyPirateBoostBtn", true, "Buying...");
+   
+       const totalCostHuman = days * PIRATE_BOOST_PRICE_PER_DAY;
+       const totalCostWei = ethers.utils.parseEther(String(totalCostHuman));
+   
+       const allowance = await state.pitroneContract.allowance(
+         state.userAddress,
+         state.piratesV6Contract.address
+       );
+   
+       if (allowance.lt(totalCostWei)) {
+         msgDiv.innerHTML = `
+           <span class="success">
+             ⏳ Approving PITRONE...<br>
+             Block: #${attackerTokenId}<br>
+             Cost: ${totalCostHuman} PIT
+           </span>
+         `;
+   
+         const approveTx = await state.pitroneContract.approve(
+           state.piratesV6Contract.address,
+           totalCostWei
+         );
+         await approveTx.wait();
+       }
+   
+       msgDiv.innerHTML = `
+         <span class="success">
+           ⏳ Buying Pirate Boost...<br>
+           Block: #${attackerTokenId}<br>
+           Days: ${days}<br>
+           Cost: ${totalCostHuman} PIT<br>
+           Effect: +25 percentage points steal bonus
+         </span>
+       `;
+   
+       const tx = await state.piratesV6Contract.buyPirateBoost(attackerTokenId, days, {
+         gasLimit: 350000
+       });
+   
+       await tx.wait();
+   
+       msgDiv.innerHTML = `
+         <span class="success">
+           ✅ Pirate Boost activated!<br>
+           Block: #${attackerTokenId}<br>
+           Days: ${days}<br>
+           Paid: ${totalCostHuman} PIT
+         </span>
+       `;
+   
+       await updateBalances();
+       await loadResourceBalancesOnchain();
+       await loadUserAttacks();
+       await refreshAttackDropdown();
+       refreshBlockMarkings();
+     } catch (e) {
+       console.error("buyPirateBoost error:", e);
+       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+     } finally {
+       setButtonBusy("buyPirateBoostBtn", false);
+     }
+   }
+   
+   /* =========================================================
+      ATTACK PREVIEW / DROPDOWN
+      ========================================================= */
    
    export function scheduleAttackDropdownRefresh() {
      clearTimeout(state.attackDropdownTimer);
@@ -162,11 +287,13 @@
      const row = parseInt(byId("attackRow")?.value, 10);
      const col = parseInt(byId("attackCol")?.value, 10);
      const select = byId("attackResourceSelect");
-     const msg = byId("attackMessage");
+     const msg = getAttackMessageDiv();
      const info = byId("attackRulesInfo");
      const previewDetails = byId("attackPreviewDetails");
    
      if (!select) return;
+   
+     const attackerTokenId = await updateAttackerSelectorUi();
    
      if (
        !Number.isFinite(row) ||
@@ -177,9 +304,14 @@
        col > 2 * row
      ) {
        select.innerHTML = "";
+       initAttackResourceSelect();
+   
        if (msg) msg.innerHTML = "";
        if (info) info.innerHTML = `<strong>Attack Check</strong><br>Enter valid coordinates.`;
        if (previewDetails) previewDetails.style.display = "none";
+   
+       setButtonVisualState("attackBtn", false, null, "⚔️ Start Attack (V6)");
+       setButtonVisualState("buyPirateBoostBtn", !!attackerTokenId, null, "Buy Pirate Boost");
        return;
      }
    
@@ -187,6 +319,8 @@
    
      if (!state.userAddress || !state.nftContract || !state.piratesV6Contract) {
        initAttackResourceSelect();
+       setButtonVisualState("attackBtn", false, null, "⚔️ Start Attack (V6)");
+       setButtonVisualState("buyPirateBoostBtn", false, null, "Buy Pirate Boost");
        return;
      }
    
@@ -201,16 +335,21 @@
          if (requestId !== state.attackDropdownRequestId) return;
          if (msg) msg.innerHTML = `<span class="error">❌ Target block does not exist.</span>`;
          if (info) info.innerHTML = `<strong>Attack Check</strong><br>Block not minted.`;
+         setButtonVisualState("attackBtn", false, null, "⚔️ Start Attack (V6)");
+         setButtonVisualState("buyPirateBoostBtn", !!attackerTokenId, null, "Buy Pirate Boost");
          return;
        }
    
-       const attackerTokenId = await getValidAttackerTokenId();
        if (!attackerTokenId) {
          if (requestId !== state.attackDropdownRequestId) return;
          if (msg) msg.innerHTML = `<span class="error">❌ You need a block to attack from.</span>`;
-         if (info) info.innerHTML = `<strong>Attack Check</strong><br>No attacker block.`;
+         if (info) info.innerHTML = `<strong>Attack Check</strong><br>No attacker block available.`;
+         setButtonVisualState("attackBtn", false, null, "⚔️ Start Attack (V6)");
+         setButtonVisualState("buyPirateBoostBtn", false, null, "Buy Pirate Boost");
          return;
        }
+   
+       const isOwnTarget = targetOwner.toLowerCase() === state.userAddress.toLowerCase();
    
        const previewPromises = [];
        for (let resourceId = 0; resourceId < 10; resourceId++) {
@@ -239,34 +378,39 @@
        }
    
        if (allowedResources.length === 0) {
-         resourceNames.forEach((name, id) => {
+         for (let id = 0; id < resourceNames.length; id++) {
            const opt = document.createElement("option");
            opt.value = id;
-           opt.textContent = `${name} ⚠️`;
+           opt.textContent = `${resourceNames[id]} ⚠️`;
            select.appendChild(opt);
-         });
+         }
        }
    
        const previewToShow =
          allowedResources.length > 0 ? previews[allowedResources[0]] : previews[0];
    
+       let canAttack = false;
+   
        if (info && previewToShow) {
          let html = `<strong>Attack Check</strong><br>`;
    
-         if (targetOwner.toLowerCase() === state.userAddress.toLowerCase()) {
+         if (isOwnTarget) {
            html += `<span class="error">⚠️ Cannot attack own block</span>`;
+           canAttack = false;
            if (previewDetails) previewDetails.style.display = "none";
          } else {
+           canAttack = !!previewToShow.allowed;
+   
            html += previewToShow.allowed
              ? `<span class="success">✅ Attack allowed</span><br>`
              : `<span class="error">❌ Attack not allowed (Code ${previewToShow.code})</span><br>`;
    
-           html += `Travel time: ${formatDuration(previewToShow.travelTime)}<br>`;
-           html += `Steal amount: ${previewToShow.stealAmount.toString()}<br>`;
-           html += `Remaining attacks: ${previewToShow.remainingAttacksToday}<br>`;
-           html += `Protection: ${previewToShow.protectionLevel}%<br>`;
-           html += `Steal %: ${previewToShow.effectiveStealPercent}%<br>`;
-           html += `Pending: ${previewToShow.pendingAmount.toString()}`;
+           html += `Travel time: ${formatDuration(Number(previewToShow.travelTime || 0))}<br>`;
+           html += `Steal amount: ${(previewToShow.stealAmount || 0).toString()}<br>`;
+           html += `Remaining attacks: ${Number(previewToShow.remainingAttacksToday || 0)}<br>`;
+           html += `Protection: ${Number(previewToShow.protectionLevel || 0)}%<br>`;
+           html += `Steal %: ${Number(previewToShow.effectiveStealPercent || 0)}%<br>`;
+           html += `Pending: ${(previewToShow.pendingAmount || 0).toString()}`;
          }
    
          info.innerHTML = html;
@@ -274,31 +418,44 @@
          if (
            previewDetails &&
            previewToShow.allowed &&
-           targetOwner.toLowerCase() !== state.userAddress.toLowerCase()
+           !isOwnTarget
          ) {
            previewDetails.style.display = "block";
            previewDetails.innerHTML = `
              <strong>Attack Preview</strong><br>
              From Block #${attackerTokenId} → Target #${targetTokenId}<br>
              Resource: ${resourceNames[parseInt(select.value || "0", 10)]}<br>
-             Steal Amount: ${previewToShow.stealAmount.toString()}<br>
-             Travel: ${formatDuration(previewToShow.travelTime)}
+             Steal Amount: ${(previewToShow.stealAmount || 0).toString()}<br>
+             Travel: ${formatDuration(Number(previewToShow.travelTime || 0))}
            `;
          } else if (previewDetails) {
            previewDetails.style.display = "none";
          }
        }
    
-       if (msg) msg.innerHTML = `<span class="success">✅ Target analyzed</span>`;
+       setButtonVisualState("attackBtn", canAttack, "⚔️ Start Attack (V6)", "⚔️ Start Attack (V6)");
+       setButtonVisualState("buyPirateBoostBtn", !!attackerTokenId, "Buy Pirate Boost", "Buy Pirate Boost");
+   
+       if (msg) {
+         msg.innerHTML = canAttack
+           ? `<span class="success">✅ Target analyzed</span>`
+           : `<span class="error">❌ Attack not ready or not allowed</span>`;
+       }
      } catch (e) {
        console.warn("refreshAttackDropdown error:", e);
        if (requestId !== state.attackDropdownRequestId) return;
+   
        if (msg) msg.innerHTML = `<span class="error">❌ Error analyzing target</span>`;
-       if (info) info.innerHTML = `<strong>Attack Check</strong><br>Error: ${e.message}`;
+       if (info) info.innerHTML = `<strong>Attack Check</strong><br>Error: ${friendlyErrorMessage(e)}`;
        if (previewDetails) previewDetails.style.display = "none";
+   
+       setButtonVisualState("attackBtn", false, null, "⚔️ Start Attack (V6)");
      }
    }
    
+   /* =========================================================
+      USER ATTACKS LIST
+      ========================================================= */
    
    export async function loadUserAttacks() {
      if (!state.userAddress || !state.piratesV6Contract) return;
@@ -454,8 +611,12 @@
      }
    }
    
+   /* =========================================================
+      EXECUTE / CANCEL
+      ========================================================= */
+   
    export async function executeAttack(targetTokenId, attackIndex) {
-     const msgDiv = byId("attackMessage");
+     const msgDiv = getAttackMessageDiv();
      if (!msgDiv) return;
    
      try {
@@ -499,14 +660,15 @@
        await loadResourceBalancesOnchain();
        await updateBalances();
        refreshBlockMarkings();
+       await refreshAttackDropdown();
      } catch (e) {
        console.error("executeAttack error:", e);
-       msgDiv.innerHTML = `<span class="error">❌ ${e.reason || e.message}</span>`;
+       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
      }
    }
    
    export async function cancelAttack(targetTokenId, attackIndex) {
-     const msgDiv = byId("attackMessage");
+     const msgDiv = getAttackMessageDiv();
      if (!msgDiv) return;
    
      try {
@@ -540,16 +702,21 @@
        msgDiv.innerHTML = `<span class="success">✅ Attack cancelled.</span>`;
        await loadUserAttacks();
        refreshBlockMarkings();
+       await refreshAttackDropdown();
      } catch (e) {
        console.error("cancelAttack error:", e);
-       msgDiv.innerHTML = `<span class="error">❌ ${e.reason || e.message}</span>`;
+       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
      }
    }
+   
+   /* =========================================================
+      START ATTACK
+      ========================================================= */
    
    export async function attack() {
      const attackRowEl = byId("attackRow");
      const attackColEl = byId("attackCol");
-     const msgDiv = byId("attackMessage");
+     const msgDiv = getAttackMessageDiv();
    
      if (!attackRowEl || !attackColEl) {
        if (msgDiv) msgDiv.innerHTML = `<span class="error">❌ Attack inputs not found.</span>`;
@@ -560,7 +727,7 @@
      const targetCol = parseInt(attackColEl.value, 10);
    
      if (!Number.isFinite(targetRow) || !Number.isFinite(targetCol)) {
-       alert("Enter target coordinates");
+       if (msgDiv) msgDiv.innerHTML = `<span class="error">❌ Enter valid target coordinates.</span>`;
        return;
      }
    
@@ -590,6 +757,7 @@
      }
    
      try {
+       setButtonBusy("attackBtn", true, "Starting...");
        msgDiv.innerHTML = `<span class="success">⏳ Preview attack...</span>`;
    
        const preview = await state.piratesV6Contract.previewAttack(attackerTokenId, targetTokenId, resource);
@@ -603,9 +771,9 @@
            ⏳ Starting attack...<br>
            From: Block #${attackerTokenId}<br>
            Target: #${targetTokenId}<br>
-           Travel time: ${formatDuration(preview.travelTime)}<br>
-           Steal amount: ${preview.stealAmount.toString()}<br>
-           Remaining today: ${preview.remainingAttacksToday}
+           Travel time: ${formatDuration(Number(preview.travelTime || 0))}<br>
+           Steal amount: ${(preview.stealAmount || 0).toString()}<br>
+           Remaining today: ${Number(preview.remainingAttacksToday || 0)}
          </span>
        `;
    
@@ -617,8 +785,11 @@
        msgDiv.innerHTML = `<span class="success">✅ Attack started! Check back later.</span>`;
        await loadUserAttacks();
        refreshBlockMarkings();
+       await refreshAttackDropdown();
      } catch (e) {
        console.error("startAttack error:", e);
-       msgDiv.innerHTML = `<span class="error">❌ ${e.reason || e.message}</span>`;
+       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+     } finally {
+       setButtonBusy("attackBtn", false);
      }
    }

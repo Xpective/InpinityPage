@@ -176,6 +176,9 @@
               <div class="action-card">
                 <h4>🔓 Reveal</h4>
                 <div class="action-value" id="revealStatus">Hidden</div>
+                <div id="revealHint" style="margin-top:0.45rem; font-size:0.82rem; color:#98a9b9;">
+                  Hidden blocks can be revealed once.
+                </div>
                 <button class="btn btn-small" id="revealBtn" type="button" style="width:100%; margin-top:0.5rem;" disabled>
                   Reveal
                 </button>
@@ -184,6 +187,9 @@
               <div class="action-card">
                 <h4>🌾 Farming</h4>
                 <div class="action-value" id="farmingStatus">Inactive</div>
+                <div id="farmingHint" style="margin-top:0.45rem; font-size:0.82rem; color:#98a9b9;">
+                  Start farming on your selected block.
+                </div>
                 <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
                   <button class="btn btn-small" id="farmingStartBtn" type="button" style="flex:1;" disabled>Start</button>
                   <button class="btn btn-small btn-secondary" id="farmingStopBtn" type="button" style="flex:1;" disabled>Stop</button>
@@ -193,6 +199,9 @@
               <div class="action-card">
                 <h4>💰 Claim</h4>
                 <div class="action-value" id="claimStatus">—</div>
+                <div id="claimHint" style="margin-top:0.45rem; font-size:0.82rem; color:#98a9b9;">
+                  Claim becomes available when the cooldown is finished.
+                </div>
                 <button class="btn btn-small" id="claimBtn" type="button" style="width:100%; margin-top:0.5rem;" disabled>
                   Claim
                 </button>
@@ -268,8 +277,8 @@
                 <div class="action-card">
                   <h4>🪧 Bastion Title</h4>
                   <div class="action-value" id="mercenaryTitle">—</div>
-                  <div style="margin-top:0.45rem; font-size:0.82rem; color:#98a9b9;">
-                    Available from Inpinity Bastion rank
+                  <div id="bastionTitleUnlockState" style="margin-top:0.45rem; font-size:0.82rem; color:#98a9b9;">
+                    Locked until 1000 Defender Points
                   </div>
                 </div>
 
@@ -294,8 +303,8 @@
                 <label>Slot
                   <select id="protectSlotIndex">
                     <option value="0">Slot 1</option>
-                    <option value="1">Slot 2</option>
-                    <option value="2">Slot 3</option>
+                    <option value="1" disabled>Slot 2 (locked)</option>
+                    <option value="2" disabled>Slot 3 (locked)</option>
                   </select>
                 </label>
 
@@ -323,11 +332,11 @@
                 <div id="protectSlotInfo">Selected Slot: 1</div>
                 <div id="protectDaysInfo">Duration: 7 days</div>
                 <div id="mercenaryCostInfo">Cost preview will appear here.</div>
+                <div id="mercenarySlotLockHint" style="margin-top:0.35rem;">Slot 2 and Slot 3 remain locked until unlocked permanently.</div>
               </div>
 
               <div class="protection-input-group" style="margin-bottom:0.8rem; display:flex; gap:0.55rem; flex-wrap:wrap;">
                 <button class="btn btn-small" id="protectBtn" type="button">Set / Extend</button>
-                <button class="btn btn-small" id="setProtectionBtn" type="button">Set Protection</button>
                 <button class="btn btn-small btn-warning" id="extendProtectionBtn" type="button">Extend</button>
                 <button class="btn btn-small btn-secondary" id="cancelProtectionBtn" type="button">Cancel</button>
               </div>
@@ -376,10 +385,116 @@
               </details>
 
               <div style="margin-top:1rem; border-top:1px solid #2a3f4a; padding-top:1rem;">
-                <h5 style="margin-bottom:0.6rem; color:#d4af37;">🏛️ Bastion Title</h5>
+                <h5 style="margin-bottom:0.4rem; color:#d4af37;">🏛️ Bastion Title</h5>
+                <div class="info-note" id="bastionTitleHint" style="margin-bottom:0.8rem;">
+                  Locked until you reach 1000 Defender Points.
+                </div>
                 <div class="input-group" style="grid-template-columns:1fr auto;">
-                  <input type="text" id="bastionTitleInput" maxlength="32" placeholder="Enter Bastion / Clan Title" />
-                  <button class="btn btn-small" id="saveBastionTitleBtn" type="button">Save Title</button>
+                  <input
+                    type="text"
+                    id="bastionTitleInput"
+                    maxlength="32"
+                    placeholder="Enter Bastion / Clan Title"
+                    disabled
+                  />
+                  <button class="btn btn-small" id="saveBastionTitleBtn" type="button" disabled>
+                    Save Title
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top:1rem; border-top:1px solid #2a3f4a; padding-top:1.2rem;">
+              <h4 style="color:#d4af37; margin-bottom:1rem;">⚔️ Pirate Attack V6</h4>
+
+              <div class="info-note" style="margin-bottom:1rem;">
+                Pirate attacks use the currently selected block as attacker. If no valid owned block is selected,
+                the first valid owned block may be used as fallback by the game logic.
+              </div>
+
+              <div class="pirate-layout">
+                <div class="pirate-left">
+                  <div class="input-group">
+                    <label>Target Row <input type="number" id="attackRow" min="0" max="99" placeholder="e.g. 5" /></label>
+                    <label>Target Col <input type="number" id="attackCol" min="0" max="198" placeholder="e.g. 3" /></label>
+                  </div>
+
+                  <div class="attacker-selector" id="attackerSelector">
+                    <h4 style="margin:0 0 0.5rem; font-size:0.95rem;">Attack source</h4>
+                    <p class="info-note" style="font-size:0.8rem; margin:0;">
+                      The selected block above is used as attacker.
+                    </p>
+                  </div>
+
+                  <div class="attack-resource-group">
+                    <label class="select-label" for="attackResourceSelect">Choose resource to steal:</label>
+                    <select id="attackResourceSelect"></select>
+                  </div>
+
+                  <div id="attackPreviewDetails" class="attack-preview-detail" style="display:none;"></div>
+
+                  <div class="info-note" id="attackRulesInfo">
+                    <strong>Attack check</strong><br />
+                    Enter coordinates to analyze the target and see whether an attack path makes sense.
+                  </div>
+
+                  <div style="margin-top:1rem;">
+                    <button class="btn" id="attackBtn" type="button" disabled>⚔️ Start Attack (V6)</button>
+                  </div>
+
+                  <div id="attackMessage" style="margin-top:1rem;"></div>
+
+                  <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid var(--line-soft);">
+                    <details>
+                      <summary style="cursor:pointer; color:#ffb347;">⚡ Pirate Boost Options</summary>
+                      <div style="margin-top:0.8rem;">
+                        <p class="info-note">
+                          Cost: <strong>100 PIT / day</strong><br />
+                          Effect: <strong>+25 percentage points steal bonus</strong><br />
+                          Contract max: <strong>10 days</strong><br />
+                          Base steal: <strong>25%</strong> → with boost up to <strong>50%</strong> before protection
+                        </p>
+
+                        <div class="input-group" style="grid-template-columns:1fr auto;">
+                          <select id="pirateBoostDays">
+                            <option value="1">1 day</option>
+                            <option value="2">2 days</option>
+                            <option value="3">3 days</option>
+                            <option value="4">4 days</option>
+                            <option value="5">5 days</option>
+                            <option value="6">6 days</option>
+                            <option value="7" selected>7 days</option>
+                            <option value="8">8 days</option>
+                            <option value="9">9 days</option>
+                            <option value="10">10 days</option>
+                          </select>
+
+                          <button class="btn btn-small boost-btn" id="buyPirateBoostBtn" type="button" disabled>
+                            Buy Pirate Boost
+                          </button>
+                        </div>
+
+                        <div id="pirateBoostCostInfo" style="font-size:0.84rem; color:#d4af37; margin-top:0.35rem;">
+                          Total: 700 PIT
+                        </div>
+
+                        <div id="pirateBoostMessage" style="font-size:0.84rem; margin-top:0.5rem;"></div>
+                      </div>
+                    </details>
+                  </div>
+                </div>
+
+                <div class="pirate-right">
+                  <div class="panel-head inner-panel-head">
+                    <h3 class="subsection-title">Your Attacks</h3>
+                    <p class="section-subtitle">
+                      Review active attacks and execute them when they become ready.
+                    </p>
+                  </div>
+
+                  <div id="userAttacksList" class="attacks-list">
+                    <p class="empty-state">Connect wallet to see your attacks.</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -423,101 +538,6 @@
 
         <button class="action-button" id="mintBtn" type="button">Mint Block</button>
         <div id="mintMessage" style="margin-top:1rem;"></div>
-      </section>
-
-      <section class="panel panel-wide pirate-panel">
-        <div class="panel-head">
-          <h2 class="section-title">Pirate Attack <span class="v6-badge">V6</span></h2>
-          <p class="section-subtitle">
-            Choose a target block and resource lane to prepare an attack. Your active attacks are shown directly below.
-          </p>
-        </div>
-
-        <div class="pirate-layout">
-          <div class="pirate-left">
-            <div class="input-group">
-              <label>Target Row <input type="number" id="attackRow" min="0" max="99" placeholder="e.g. 5" /></label>
-              <label>Target Col <input type="number" id="attackCol" min="0" max="198" placeholder="e.g. 3" /></label>
-            </div>
-
-            <div class="attacker-selector" id="attackerSelector">
-              <h4 style="margin:0 0 0.5rem; font-size:0.95rem;">Attack source</h4>
-              <p class="info-note" style="font-size:0.8rem; margin:0;">
-                The selected block above is used as attacker. If none is selected, your first owned block is used.
-              </p>
-            </div>
-
-            <div class="attack-resource-group">
-              <label class="select-label" for="attackResourceSelect">Choose resource to steal:</label>
-              <select id="attackResourceSelect"></select>
-            </div>
-
-            <div id="attackPreviewDetails" class="attack-preview-detail" style="display:none;"></div>
-
-            <div class="info-note" id="attackRulesInfo">
-              <strong>Attack check</strong><br />
-              Enter coordinates to analyze the target and see whether an attack path makes sense.
-            </div>
-
-            <div style="margin-top:1rem;">
-              <button class="btn" id="attackBtn" type="button">⚔️ Start Attack (V6)</button>
-            </div>
-
-            <div id="attackMessage" style="margin-top:1rem;"></div>
-
-            <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid var(--line-soft);">
-              <details>
-                <summary style="cursor:pointer; color:#ffb347;">⚡ Pirate Boost Options</summary>
-                <div style="margin-top:0.8rem;">
-                  <p class="info-note">
-                    Cost: <strong>100 PIT / day</strong><br />
-                    Effect: <strong>+25 percentage points steal bonus</strong><br />
-                    Contract max: <strong>10 days</strong><br />
-                    Base steal: <strong>25%</strong> → with boost up to <strong>50%</strong> before protection
-                  </p>
-
-                  <div class="input-group" style="grid-template-columns:1fr auto;">
-                    <select id="pirateBoostDays">
-                      <option value="1">1 day</option>
-                      <option value="2">2 days</option>
-                      <option value="3">3 days</option>
-                      <option value="4">4 days</option>
-                      <option value="5">5 days</option>
-                      <option value="6">6 days</option>
-                      <option value="7" selected>7 days</option>
-                      <option value="8">8 days</option>
-                      <option value="9">9 days</option>
-                      <option value="10">10 days</option>
-                    </select>
-
-                    <button class="btn btn-small boost-btn" id="buyPirateBoostBtn" type="button">
-                      Buy Pirate Boost
-                    </button>
-                  </div>
-
-                  <div id="pirateBoostCostInfo" style="font-size:0.84rem; color:#d4af37; margin-top:0.35rem;">
-                    Total: 700 PIT
-                  </div>
-
-                  <div id="pirateBoostMessage" style="font-size:0.84rem; margin-top:0.5rem;"></div>
-                </div>
-              </details>
-            </div>
-          </div>
-
-          <div class="pirate-right">
-            <div class="panel-head inner-panel-head">
-              <h3 class="subsection-title">Your Attacks</h3>
-              <p class="section-subtitle">
-                Review active attacks and execute them when they become ready.
-              </p>
-            </div>
-
-            <div id="userAttacksList" class="attacks-list">
-              <p class="empty-state">Connect wallet to see your attacks.</p>
-            </div>
-          </div>
-        </div>
       </section>
 
       <section class="panel economy-panel panel-wide">

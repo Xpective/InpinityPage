@@ -1,10 +1,11 @@
 /* =========================================================
-   UTILITY FUNCTIONS – V6 + MERCENARY V3
+   UTILITY FUNCTIONS – V6 + MERCENARY V4
    ========================================================= */
 
    import { state } from "./state.js";
 
-   // DOM Helpers
+   /* ==================== DOM HELPERS ==================== */
+   
    export function byId(id) {
      return document.getElementById(id);
    }
@@ -29,30 +30,46 @@
      if (el) el.disabled = !!disabled;
    }
    
-   // Formatting
+   export function safeButtonState(id, enabled, enabledOpacity = "1", disabledOpacity = "0.45") {
+     const el = byId(id);
+     if (!el) return;
+   
+     el.disabled = !enabled;
+     el.style.opacity = enabled ? enabledOpacity : disabledOpacity;
+     el.style.pointerEvents = enabled ? "auto" : "none";
+   }
+   
+   /* ==================== FORMATTING ==================== */
+   
    export function shortenAddress(addr) {
      return addr ? addr.slice(0, 6) + "..." + addr.slice(-4) : "";
    }
    
    export function formatTime(seconds) {
      seconds = Math.max(0, Number(seconds || 0));
-     if (seconds < 60) return seconds + "s";
-     if (seconds < 3600) return Math.floor(seconds / 60) + "m";
-     return Math.floor(seconds / 3600) + "h";
+   
+     if (seconds < 60) return `${seconds}s`;
+     if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
+   
+     return `${Math.floor(seconds / 3600)}h`;
    }
    
    export function formatDuration(seconds) {
      seconds = Math.max(0, Math.floor(Number(seconds || 0)));
+   
      const d = Math.floor(seconds / 86400);
      const h = Math.floor((seconds % 86400) / 3600);
      const m = Math.floor((seconds % 3600) / 60);
+     const s = Math.floor(seconds % 60);
    
      if (d > 0) return `${d}d ${h}h`;
      if (h > 0) return `${h}h ${m}m`;
-     return `${m}m`;
+     if (m > 0) return `${m}m`;
+     return `${s}s`;
    }
    
-   // BigNumber Helpers
+   /* ==================== BIGNUMBER HELPERS ==================== */
+   
    export function bn(value) {
      return ethers.BigNumber.isBigNumber(value)
        ? value
@@ -75,21 +92,24 @@
      }
    }
    
-   // Attack Tuple Normalization
+   /* ==================== ATTACK TUPLE NORMALIZATION ==================== */
+   
    export function normalizeAttackTuple(a) {
      return {
        attacker: a.attacker ?? a[0],
+       attackerAddress: a.attackerAddress ?? a.attacker ?? a[0],
        attackerTokenId: Number(a.attackerTokenId ?? a[1] ?? 0),
        targetTokenId: Number(a.targetTokenId ?? a[2] ?? 0),
        startTime: Number(a.startTime ?? a[3] ?? 0),
        endTime: Number(a.endTime ?? a[4] ?? 0),
        resource: Number(a.resource ?? a[5] ?? 0),
        executed: Boolean(a.executed ?? a[6]),
-       cancelled: Boolean(a.cancelled ?? a[7]),
+       cancelled: Boolean(a.cancelled ?? a[7])
      };
    }
    
-   // Production Calculator
+   /* ==================== PRODUCTION CALCULATOR ==================== */
+   
    export function getProduction(rarity, row) {
      const p = {};
    
@@ -123,13 +143,14 @@
        p.PLATINUM = 3;
        p.CRYSTAL = 2;
        p.MYSTERIUM = 1;
-       if (row === 0) p.AETHER = 1;
+       if (Number(row) === 0) p.AETHER = 1;
      }
    
      return p;
    }
    
-   // Debug
+   /* ==================== DEBUG ==================== */
+   
    export function debugLog(message, data = null) {
      const logDiv = byId("debugLog");
      let line = `[${new Date().toLocaleTimeString()}] ${message}`;
