@@ -40,6 +40,7 @@
 
   <script defer src="main.js"></script>
   <script defer src="https://forminit.com/sdk/v1/forminit.js"></script>
+  <script type="module" src="js/index-swap.js"></script>
 </head>
 
 <body>
@@ -137,6 +138,63 @@
             Open Presale
           </a>
         </div>
+      </div>
+
+      <div class="mini-buy-box">
+        <span class="live-badge">Instant Buy (Small Amounts)</span>
+
+        <p>
+          A small instant-buy option is available for <strong>Base ETH → INPI</strong>.
+          Because liquidity is still limited, this option is restricted to smaller amounts.
+        </p>
+
+        <p class="mini-buy-note">
+          <strong>Presale is currently the better rate.</strong><br />
+          Use this instant buy only for small starter amounts.<br />
+          For larger buys, please use the presale, since a small pool can cause stronger price movement.
+        </p>
+
+        <div class="mini-buy-quick">
+          <button type="button" class="buy-quick-btn" data-amount="0.0005">0.0005 ETH</button>
+          <button type="button" class="buy-quick-btn" data-amount="0.001">0.001 ETH</button>
+          <button type="button" class="buy-quick-btn" data-amount="0.002">0.002 ETH</button>
+        </div>
+
+        <div class="mini-buy-form">
+          <label for="miniBuyAmount">Amount in Base ETH</label>
+          <input
+            id="miniBuyAmount"
+            type="number"
+            min="0.0005"
+            max="0.002"
+            step="0.0001"
+            value="0.001"
+            placeholder="0.001"
+          />
+
+          <div class="mini-buy-actions">
+            <button type="button" id="quoteBuyBtn" class="quote-button">Get Quote</button>
+            <button type="button" id="miniBuyBtn" class="swap-button">Buy INPI</button>
+          </div>
+        </div>
+
+        <div class="mini-buy-meta">
+          <p class="swap-mini">
+            Range: <strong>0.0005 ETH to 0.002 ETH</strong><br />
+            Pool: <strong>Base ETH / INPI · Uniswap v4 · 1% fee</strong>
+          </p>
+          <p class="swap-mini">
+            INPI contract: <strong>0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</strong>
+          </p>
+        </div>
+
+        <div class="quote-panel">
+          <div><strong>Estimated INPI:</strong> <span id="quoteOut">-</span></div>
+          <div><strong>Minimum received:</strong> <span id="quoteMinOut">-</span></div>
+          <div><strong>Estimated gas units:</strong> <span id="quoteGas">-</span></div>
+        </div>
+
+        <p id="miniBuyStatus" class="mini-buy-status"></p>
       </div>
 
       <div class="token-grid">
