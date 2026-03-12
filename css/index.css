@@ -185,6 +185,138 @@
   opacity: 0.95;
 }
 
+/* ===== Instant Buy Box ===== */
+
+.mini-buy-box {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.14);
+}
+
+.mini-buy-box p {
+  margin: 0.55rem 0;
+  line-height: 1.6;
+}
+
+.mini-buy-note {
+  padding: 0.95rem 1rem;
+  border-radius: 14px;
+  background: rgba(255, 215, 100, 0.08);
+  border: 1px solid rgba(255, 215, 100, 0.18);
+}
+
+.mini-buy-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin: 1rem 0;
+}
+
+.buy-quick-btn {
+  padding: 0.65rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-color);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  transition: transform 0.18s ease, background 0.18s ease, opacity 0.18s ease;
+}
+
+.buy-quick-btn:hover {
+  transform: translateY(-1px);
+  background: var(--secondary-color);
+  opacity: 0.97;
+}
+
+.mini-buy-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  margin-top: 0.9rem;
+}
+
+.mini-buy-form label {
+  font-weight: 700;
+}
+
+.mini-buy-form input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.9rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.18);
+  color: var(--text-color);
+  font: inherit;
+}
+
+.mini-buy-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.quote-button,
+.swap-button {
+  display: inline-block;
+  padding: 0.9rem 1.2rem;
+  border: none;
+  border-radius: 999px;
+  font-weight: 700;
+  cursor: pointer;
+  color: #fff;
+  transition: transform 0.18s ease, opacity 0.18s ease, box-shadow 0.18s ease;
+}
+
+.quote-button {
+  background: linear-gradient(135deg, #4f5d75, #3a86ff);
+}
+
+.swap-button {
+  background: linear-gradient(135deg, #6f5cff, #28c7fa);
+  box-shadow: 0 10px 24px rgba(40, 199, 250, 0.22);
+}
+
+.quote-button:hover,
+.swap-button:hover {
+  transform: translateY(-1px);
+  opacity: 0.96;
+}
+
+.mini-buy-meta {
+  margin-top: 0.85rem;
+}
+
+.swap-mini {
+  margin-top: 0.5rem;
+  font-size: 0.92rem;
+  opacity: 0.86;
+  word-break: break-word;
+}
+
+.quote-panel {
+  margin-top: 1rem;
+  padding: 0.95rem 1rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: grid;
+  gap: 0.45rem;
+}
+
+.mini-buy-status {
+  margin-top: 0.85rem;
+  min-height: 1.25rem;
+  font-weight: 600;
+  opacity: 0.92;
+  word-break: break-word;
+}
+
 .token-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -383,6 +515,15 @@
 
   .chart-item {
     min-width: 110px;
+  }
+
+  .mini-buy-actions {
+    flex-direction: column;
+  }
+
+  .quote-button,
+  .swap-button {
+    width: 100%;
   }
 
   .details-body {
