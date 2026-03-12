@@ -3,3 +3,22 @@
     "@solana/web3.js": "^1.78.3"
   }
 }
+{
+  "name": "inpinity-home-swap",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@uniswap/sdk-core": "^6.0.0",
+    "@uniswap/universal-router-sdk": "^4.18.0",
+    "@uniswap/v4-sdk": "^1.21.0",
+    "ethers": "^5.7.2"
+  },
+  "devDependencies": {
+    "vite": "^5.4.0"
+  }
+}
