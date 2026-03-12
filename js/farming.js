@@ -4,15 +4,15 @@
 
    import { state } from "./state.js";
    import {
-     MERCENARY_INPI_COST,
-     MERCENARY_SLOT2_UNLOCK,
-     MERCENARY_SLOT3_UNLOCK,
-     MERCENARY_SET_COST_RESOURCES,
-     MERCENARY_EXTEND_COST_RESOURCES,
-     FARM_BOOST_PRICE_PER_DAY,
-     FARM_BOOST_MAX_DAYS,
-     FARM_WINDOW_DAYS
-   } from "./config.js";
+    MERCENARY_SLOT2_UNLOCK_COST,
+    MERCENARY_SLOT3_UNLOCK_COST,
+    MERCENARY_DURATION_LABELS,
+    MERCENARY_TIER_LABELS,
+    MERCENARY_RANK_LABELS,
+    FARM_BOOST_PRICE_PER_DAY,
+    FARM_BOOST_MAX_DAYS,
+    FARM_WINDOW_DAYS
+  } from "./config.js";
    import { byId, formatDuration, debugLog, safeValue, safeText } from "./utils.js";
    import { ensureFarmingApproval, ensureInpiApprovalForMercenary } from "./approvals.js";
    import { loadResourceBalancesOnchain } from "./resources.js";
@@ -508,9 +508,31 @@
      return Number.isFinite(v) ? v : 0;
    }
    
-   function renderCostList(items) {
-     return items.map((x) => `${x.amount} ${x.label}`).join(", ");
-   }
+function renderCostList(items) {
+  if (!items) return "";
+
+  if (Array.isArray(items)) {
+    return items.map((x) => `${x.amount} ${x.label}`).join(", ");
+  }
+
+  const labelMap = {
+    oil: "Oil",
+    lemons: "Lemons",
+    iron: "Iron",
+    gold: "Gold",
+    platinum: "Platinum",
+    copper: "Copper",
+    crystal: "Crystal",
+    obsidian: "Obsidian",
+    mysterium: "Mysterium",
+    aether: "Aether"
+  };
+
+  return Object.entries(items)
+    .filter(([_, amount]) => Number(amount || 0) > 0)
+    .map(([key, amount]) => `${amount} ${labelMap[key] || key}`)
+    .join(", ");
+}
    
    export async function loadMercenaryPanelState() {
      if (!state.userAddress || !state.mercenaryV3Contract) return;
@@ -897,3 +919,4 @@
      }
      return extendMercenaryProtection();
    }
+
