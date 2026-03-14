@@ -3,7 +3,7 @@ import path from "path";
 
 export default defineConfig({
   root: ".",
-  base: "./",
+  base: "/",
   appType: "mpa",
   server: {
     host: true,
