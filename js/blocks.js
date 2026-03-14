@@ -526,6 +526,10 @@
           let farmDurationLine = "";
 
           if (farmingActive) {
+            const farmingElapsed = Number(farm?.startTime) > 0
+              ? formatDuration(now - Number(farm.startTime))
+              : "—";
+          
             let claimSeconds = 0;
             let claimReady = false;
           
@@ -539,27 +543,34 @@
               claimReady = !!preview?.allowed;
             } catch {}
           
-            if (claimReady || claimSeconds <= 0) {
-              farmDurationLine = `<div class="farm-duration">⏱️ Claim: Ready</div>`;
-            } else {
-              farmDurationLine = `<div class="farm-duration">⏱️ Claim in: ${formatDuration(claimSeconds)}</div>`;
-            }
+            const claimLine = (claimReady || claimSeconds <= 0)
+              ? `⏱️ Claim: Ready`
+              : `⏱️ Claim in: ${formatDuration(claimSeconds)}`;
+          
+            farmDurationLine = `
+              <div class="farm-duration">🌾 Farming: ${farmingElapsed}</div>
+              <div class="farm-duration">${claimLine}</div>
+            `;
           } else if (activeOnV5) {
+            let claimReady = false;
+            let claimSeconds = 0;
+          
             try {
               const v5 = getFarmingV5Contract();
               const preview = await v5.previewClaim(tokenId);
           
-              const claimReady = !!preview?.allowed;
-              const claimSeconds = Math.max(0, Number(preview?.secondsRemaining || 0));
+              claimReady = !!preview?.allowed;
+              claimSeconds = Math.max(0, Number(preview?.secondsRemaining || 0));
+            } catch {}
           
-              if (claimReady || claimSeconds <= 0) {
-                farmDurationLine = `<div class="farm-duration">⏱️ Claim: Ready</div>`;
-              } else {
-                farmDurationLine = `<div class="farm-duration">⏱️ Claim in: ${formatDuration(claimSeconds)}</div>`;
-              }
-            } catch {
-              farmDurationLine = `<div class="farm-duration">⏱️ Claim: —</div>`;
-            }
+            const claimLine = (claimReady || claimSeconds <= 0)
+              ? `⏱️ Claim: Ready`
+              : `⏱️ Claim in: ${formatDuration(claimSeconds)}`;
+          
+            farmDurationLine = `
+              <div class="farm-duration">🌾 Farming: Active on V5</div>
+              <div class="farm-duration">${claimLine}</div>
+            `;
           }
   
         const revealButton = !revealed
