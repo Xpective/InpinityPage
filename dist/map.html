@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="basic">
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover"
+  />
+  <title>INPINITY – Pyramid Map (V6 + Mercenary V4)</title>
+
+  <link rel="icon" type="image/png" href="./assets/favicon-D6BGG7Y0.webp" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+
+
+  <meta
+    name="description"
+    content="Explore the Inpinity Pyramid Map, inspect blocks, farming, Mercenary V4 protection and V6 pirate attacks directly on the map."
+  />
+  <meta name="theme-color" content="#0b0e12" />
+  <script type="module" crossorigin src="./assets/map-k2vxQNM6.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="./assets/subgraph-Ci8j4eNe.js">
+  <link rel="stylesheet" crossorigin href="./assets/map-DfSdLlNQ.css">
+  <link rel="stylesheet" crossorigin href="./assets/responsive-sg2mVcZF.css">
+</head>
+<body>
+  <div class="header">
+    <div class="header-left">
+      <div class="logo">
+        <h1>INPINITY</h1>
+        <span>Interactive Map <span class="v6-badge">V6</span></span>
+      </div>
+
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="game.html">Game</a>
+      </div>
+    </div>
+
+    <div class="wallet">
+      <div id="walletAddress">Not connected</div>
+      <button id="connectBtn" type="button">Connect</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="canvas-container" id="canvasContainer">
+      <canvas id="pyramidCanvas"></canvas>
+      <div class="tooltip" id="tooltip"></div>
+    </div>
+
+    <div class="legend-panel" id="legendPanel">
+      <div class="resize-handle" id="resizeHandle"></div>
+
+      <div class="legend-header" id="dragHandle">
+        <h3>🔷 Block Control <span class="v6-badge">V6</span></h3>
+        <div class="legend-controls">
+          <button id="collapseBtn" type="button" aria-label="Collapse panel" title="Collapse">−</button>
+          <button id="resetPosBtn" type="button" aria-label="Reset panel position" title="Reset position">↺</button>
+        </div>
+      </div>
+
+      <div class="legend-content" id="legendContent">
+        <div class="detail-card" id="blockDetail">
+          <p style="color:#98a9b9; text-align:center;">Click a block</p>
+        </div>
+
+        <div id="actionPanel" style="display:none;">
+          <div class="action-buttons" id="ownerActions"></div>
+          <div id="publicActions" style="display:none; margin-top:0.8rem;"></div>
+
+          <div id="protectionInput" style="display:none;">
+            <details id="mercenaryPanel" style="margin:0.9rem 0;">
+              <summary style="cursor:pointer; color:#d4af37; font-weight:700;">
+                🛡️ Mercenary V4
+              </summary>
+
+              <div style="margin-top:0.85rem; display:flex; flex-direction:column; gap:0.9rem;">
+                <div class="detail-card" style="margin-bottom:0;">
+                  <div class="detail-row">
+                    <span class="detail-label">Rank</span>
+                    <span class="detail-value" id="mercenaryRank">Watchman</span>
+                  </div>
+
+                  <div class="detail-row">
+                    <span class="detail-label">Points</span>
+                    <span class="detail-value" id="mercenaryPoints">0</span>
+                  </div>
+
+                  <div class="detail-row">
+                    <span class="detail-label">Discount</span>
+                    <span class="detail-value" id="mercenaryDiscount">0%</span>
+                  </div>
+
+                  <div class="detail-row">
+                    <span class="detail-label">Slots unlocked</span>
+                    <span class="detail-value"><span id="mercenarySlotsUnlocked">1</span>/3</span>
+                  </div>
+
+                  <div class="detail-row">
+                    <span class="detail-label">Current title</span>
+                    <span class="detail-value" id="mercenaryTitle">—</span>
+                  </div>
+                </div>
+
+                <div class="detail-card" id="mercenarySlotsInfo" style="margin-bottom:0;">
+                  <div class="detail-row">
+                    <span class="detail-label">Slots</span>
+                    <span class="detail-value">No active protection slots.</span>
+                  </div>
+                </div>
+
+                <div class="detail-card" style="margin-bottom:0;">
+                  <div class="detail-row">
+                    <span class="detail-label">Selected block</span>
+                    <span class="detail-value" id="protectTokenIdWrap">
+                      <input
+                        type="number"
+                        id="protectTokenId"
+                        readonly
+                        placeholder="Selected Block ID"
+                        style="width:120px; background:#0f1a22; border:1px solid #2a3f4a; color:white; padding:0.45rem 0.8rem; border-radius:999px;"
+                      />
+                    </span>
+                  </div>
+
+                  <div class="detail-row">
+                    <span class="detail-label">Slot</span>
+                    <span class="detail-value">
+                      <select id="protectSlotIndex" style="width:120px;">
+                        <option value="0">Slot 1</option>
+                        <option value="1" disabled>Slot 2 (locked)</option>
+                        <option value="2" disabled>Slot 3 (locked)</option>
+                      </select>
+                    </span>
+                  </div>
+
+                  <div class="detail-row">
+                    <span class="detail-label">Days</span>
+                    <span class="detail-value">
+                      <select id="protectDays" style="width:120px;">
+                        <option value="1">1 day</option>
+                        <option value="2">2 days</option>
+                        <option value="3">3 days</option>
+                        <option value="4">4 days</option>
+                        <option value="5">5 days</option>
+                        <option value="6">6 days</option>
+                        <option value="7" selected>7 days</option>
+                      </select>
+                    </span>
+                  </div>
+
+                  <div class="detail-row">
+                    <span class="detail-label">Payment</span>
+                    <span class="detail-value">
+                      <select id="mercenaryPaymentMode" style="width:120px;">
+                        <option value="resources" selected>Resources</option>
+                        <option value="inpi">INPI</option>
+                      </select>
+                    </span>
+                  </div>
+
+                  <div class="detail-row">
+                    <span class="detail-label">Slot info</span>
+                    <span class="detail-value" id="protectSlotInfo">Selected Slot: 1</span>
+                  </div>
+
+                  <div class="detail-row">
+                    <span class="detail-label">Duration</span>
+                    <span class="detail-value" id="protectDaysInfo">Duration: 7 days</span>
+                  </div>
+
+                  <div class="detail-row">
+                    <span class="detail-label">Cost</span>
+                    <span class="detail-value" id="mercenaryCostInfo">Cost: —</span>
+                  </div>
+
+                  <div class="detail-row">
+                    <span class="detail-label">Status</span>
+                    <span class="detail-value" id="protectionStatusText">Inactive</span>
+                  </div>
+
+                  <div class="detail-row" id="protectionStatus" style="display:none;">
+                    <span class="detail-label">Expiry</span>
+                    <span class="detail-value" id="protectionExpiry">—</span>
+                  </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.55rem;">
+                  <button class="action-btn" id="protectBtn" type="button">Set / Extend</button>
+                  <button class="action-btn boost-btn" id="extendProtectionBtn" type="button">Extend</button>
+                  <button class="action-btn danger-btn" id="cancelProtectionBtn" type="button">Cancel</button>
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.55rem;">
+                  <button class="action-btn" id="moveProtectionBtn" type="button">Move</button>
+                  <button class="action-btn boost-btn" id="emergencyMoveProtectionBtn" type="button">Emergency</button>
+                  <button class="action-btn" id="cleanupProtectionBtn" type="button">Cleanup</button>
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.55rem;">
+                  <button class="action-btn boost-btn" id="unlockSlot2Btn" type="button">Unlock Slot 2</button>
+                  <button class="action-btn boost-btn" id="unlockSlot3Btn" type="button">Unlock Slot 3</button>
+                </div>
+
+                <div class="detail-card" style="margin-bottom:0;">
+                  <div class="detail-row">
+                    <span class="detail-label">Bastion Title</span>
+                    <span class="detail-value" id="bastionTitleUnlockState">Locked until 1000 Defender Points</span>
+                  </div>
+
+                  <div class="message" id="bastionTitleHint" style="margin-top:0.5rem;">
+                    Locked until you reach 1000 Defender Points.
+                  </div>
+
+                  <div class="input-group" style="margin-top:0.65rem;">
+                    <label for="bastionTitleInput">Title</label>
+                    <input
+                      type="text"
+                      id="bastionTitleInput"
+                      maxlength="32"
+                      placeholder="Enter Bastion / Clan Title"
+                      disabled
+                    />
+                  </div>
+
+                  <button class="action-btn" id="saveBastionTitleBtn" type="button" disabled>
+                    Save Title
+                  </button>
+                </div>
+
+                <div id="protectMessage" class="message"></div>
+              </div>
+            </details>
+          </div>
+
+          <details id="boostCenter" style="display:none; margin-top:0.9rem;">
+            <summary style="cursor:pointer; color:#ffb347; font-weight:700;">
+              ⚡ Boost Center
+            </summary>
+
+            <div style="margin-top:0.85rem; display:flex; flex-direction:column; gap:0.9rem;">
+              <div class="detail-card" id="farmBoostCard" style="margin-bottom:0;">
+                <div class="detail-row">
+                  <span class="detail-label">Farm boost</span>
+                  <span class="detail-value" id="farmBoostStatus">—</span>
+                </div>
+
+                <div style="margin-top:0.45rem; font-size:0.84rem; color:#98a9b9; line-height:1.45;">
+                  Cost: <strong>100 INPI / day</strong><br />
+                  Effect: <strong>+25% production</strong><br />
+                  Farm window: <strong>7 days</strong><br />
+                  Contract max: <strong>10 days</strong>
+                </div>
+
+                <div class="input-group" id="boostOptions" style="margin-top:0.75rem; display:none;">
+                  <label for="boostDays">Farm Days</label>
+                  <select id="boostDays">
+                    <option value="1">1 day</option>
+                    <option value="2">2 days</option>
+                    <option value="3">3 days</option>
+                    <option value="4">4 days</option>
+                    <option value="5">5 days</option>
+                    <option value="6">6 days</option>
+                    <option value="7" selected>7 days</option>
+                    <option value="8">8 days</option>
+                    <option value="9">9 days</option>
+                    <option value="10">10 days</option>
+                  </select>
+                </div>
+
+                <div id="farmBoostCostInfo" class="message" style="display:none; margin-top:0.5rem;"></div>
+
+                <button class="action-btn boost-btn" id="buyBoostBtn" type="button" style="display:none; margin-top:0.6rem;">
+                  ⚡ Buy Farm Boost
+                </button>
+              </div>
+
+              <div id="pirateBoostInput" style="display:none;">
+                <div class="detail-card" style="margin-bottom:0;">
+                  <div class="detail-row">
+                    <span class="detail-label">Pirate boost</span>
+                    <span class="detail-value" id="pirateBoostStatus">—</span>
+                  </div>
+
+                  <div class="detail-row">
+                    <span class="detail-label">Boost expiry</span>
+                    <span class="detail-value" id="pirateBoostExpiry">—</span>
+                  </div>
+
+                  <div style="margin-top:0.45rem; font-size:0.84rem; color:#98a9b9; line-height:1.45;">
+                    Cost: <strong>100 PITRONE / day</strong><br />
+                    Effect: <strong>+25 percentage points steal bonus</strong><br />
+                    Contract max: <strong>10 days</strong>
+                  </div>
+
+                  <div class="input-group" id="pirateBoostOptions" style="margin-top:0.75rem; display:none;">
+                    <label for="pirateBoostDays">Pirate Days</label>
+                    <select id="pirateBoostDays">
+                      <option value="1">1 day</option>
+                      <option value="2">2 days</option>
+                      <option value="3">3 days</option>
+                      <option value="4">4 days</option>
+                      <option value="5">5 days</option>
+                      <option value="6">6 days</option>
+                      <option value="7" selected>7 days</option>
+                      <option value="8">8 days</option>
+                      <option value="9">9 days</option>
+                      <option value="10">10 days</option>
+                    </select>
+                  </div>
+
+                  <div id="pirateBoostCostInfo" class="message" style="display:none; margin-top:0.5rem;"></div>
+
+                  <button class="action-btn boost-btn" id="buyPirateBoostBtn" type="button" style="display:none; margin-top:0.6rem;">
+                    🏴‍☠️ Buy Pirate Boost
+                  </button>
+                </div>
+              </div>
+            </div>
+          </details>
+
+          <div id="attackInput" class="attack-section" style="display:none;">
+            <div class="input-group">
+              <label for="attackAttackerSelect">Attacker</label>
+              <select id="attackAttackerSelect"></select>
+            </div>
+
+            <div class="input-group">
+              <label for="attackResource">Resource</label>
+              <select id="attackResource"></select>
+            </div>
+
+            <div class="detail-card" id="attackInfoCard" style="margin-top:0; padding:0.9rem;">
+              <div class="detail-row">
+                <span class="detail-label">Attacker block</span>
+                <span class="detail-value" id="attackAttackerBlock">—</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Target status</span>
+                <span class="detail-value" id="attackTargetStatus">—</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Travel time</span>
+                <span class="detail-value" id="attackTravelTime">—</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Remaining today</span>
+                <span class="detail-value" id="attackRemainingToday">—</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Pending loot</span>
+                <span class="detail-value" id="attackPendingLoot">—</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Steal amount</span>
+                <span class="detail-value" id="attackStealAmount">—</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Protection</span>
+                <span class="detail-value" id="attackProtection">—</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Steal %</span>
+                <span class="detail-value" id="attackStealPercent">—</span>
+              </div>
+            </div>
+
+            <button class="action-btn" id="attackBtn" type="button">Attack (V6)</button>
+          </div>
+
+          <div id="actionMessage" class="message"></div>
+        </div>
+
+        <div style="margin:1rem 0; border-top:1px solid #2a3f4a; padding-top:0.8rem;">
+          <h4 style="color:#d4af37; margin-bottom:0.5rem;">⚔️ Attacks (V6)</h4>
+          <div id="userAttacksList" class="attacks-list">
+            <p style="color:#98a9b9;">Connect wallet</p>
+          </div>
+        </div>
+
+        <div style="margin:1rem 0; border-top:1px solid #2a3f4a; padding-top:0.8rem;">
+          <h4 style="color:#d4af37; margin-bottom:0.5rem;">📦 Resources</h4>
+          <div id="userResources" style="max-height:220px; overflow-y:auto;">
+            <p style="color:#98a9b9;">Connect wallet</p>
+          </div>
+        </div>
+
+        <h4 style="color:#d4af37; margin:1.4rem 0 0.8rem;">Legend</h4>
+        <div class="legend-item"><div class="color-box color-gray"></div> Not minted</div>
+        <div class="legend-item"><div class="color-box color-green"></div> Minted, not revealed</div>
+        <div class="legend-item"><div class="color-box color-bronze"></div> Bronze</div>
+        <div class="legend-item"><div class="color-box color-silver"></div> Silver</div>
+        <div class="legend-item"><div class="color-box color-gold"></div> Gold</div>
+        <div class="legend-item"><div class="color-box color-platinum"></div> Platinum</div>
+        <div class="legend-item"><div class="color-box color-diamond"></div> Diamond</div>
+        <div class="legend-item"><div class="color-box color-cyan"></div> Your block</div>
+        <div class="legend-item"><div class="color-box color-gold border-blue"></div> Farming active</div>
+        <div class="legend-item"><div class="color-box color-gold border-purple"></div> Protected</div>
+        <div class="legend-item"><div class="color-box color-gold border-black"></div> Under attack</div>
+        <div class="legend-item"><div class="color-box color-gold border-red"></div> Attack ready</div>
+        <div class="legend-item"><div class="color-box color-gold" style="position:relative;"><span class="star">★</span></div> Partner block</div>
+
+        <div class="footer-note">
+          <p>100 rows · 10,000 blocks</p>
+          <p>π · φ · V6</p>
+          <p>Map: FarmingV6 + PiratesV6 + MercenaryV4</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+</body>
+</html>

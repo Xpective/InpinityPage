@@ -1,0 +1,25 @@
+{
+  "name": "INPINITY Resource — Copper",
+  "description": "Copper exists in the INPINITY FarmingV1 resource enum but is not produced by the current farming logic. Reserved for future expansions such as special events, partner blocks, or new recipes for Infinite City.",
+  "image": "https://inpinity.online/img/5.PNG",
+  "external_url": "https://inpinity.online",
+  "attributes": [
+    { "trait_type": "Resource", "value": "Copper" },
+    { "trait_type": "Code", "value": "COPPER" },
+    { "trait_type": "Resource Rarity", "value": "Base" },
+    { "trait_type": "System", "value": "FarmingV2" },
+    { "trait_type": "Status", "value": "Reserved (Not Produced)" }
+  ],
+  "farmingV2": {
+    "produced": false,
+    "production_per_day_by_block_rarity": {
+      "0_Bronze": 0,
+      "1_Silver": 0,
+      "2_Gold": 0,
+      "3_Platinum": 0,
+      "4_Diamond": 0
+    },
+    "note": "Reserved for future expansions (events / partner blocks)."
+  },
+  "use_cases": ["Trade", "Infinite City Build", "Future Expansion"]
+}

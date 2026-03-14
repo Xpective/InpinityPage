@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="basic">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>INPINITY – Mint</title>
+
+  <link rel="icon" type="image/png" href="./assets/favicon-D6BGG7Y0.webp" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+
+
+  <meta name="description" content="Mint Pyramid Blocks on Base, reveal Pi and Phi digits, and prepare your block for farming and gameplay in the Inpinity ecosystem." />
+  <meta name="keywords" content="Inpinity, Mint, Pyramid Block, NFT, Base, INPI, Reveal, Pi, Phi" />
+  <meta name="author" content="Inpinity Team" />
+  <meta property="og:title" content="Inpinity – Mint" />
+  <meta property="og:description" content="Mint a Pyramid Block, reveal rarity, and prepare it for the wider Inpinity game ecosystem." />
+  <meta property="og:image" content="logo_background.jpg" />
+  <meta property="og:url" content="https://inpinity.online/mint.html" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="theme-color" content="#140f1f" />
+  <meta name="robots" content="index,follow" />
+
+  <script defer src="main.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/mint-BxeUXvU7.css">
+  <link rel="stylesheet" crossorigin href="./assets/responsive-sg2mVcZF.css">
+  <link rel="stylesheet" crossorigin href="./assets/light-D_11Ehwr.css">
+</head>
+
+<body>
+  <header class="site-header">
+    <nav class="site-nav" aria-label="Main navigation">
+      <ul class="nav-list">
+        <li><a aria-label="Home" href="index.html">Home</a></li>
+        <li><a aria-label="Features" href="features.html">Features</a></li>
+        <li><a aria-label="Game" href="game.html">Game</a></li>
+        <li><a aria-label="Mint" href="mint.html" aria-current="page">Mint</a></li>
+        <li><a aria-label="Pyramid Map" href="map.html">Pyramid Map</a></li>
+        <li><a aria-label="Collaboration" href="collaboration.html">Collaboration</a></li>
+        <li><a aria-label="About" href="about.html">About</a></li>
+        <li><a aria-label="Whitepaper" href="whitepaper.html">Whitepaper</a></li>
+        <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
+        <li><a aria-label="Guestbook" href="guestbook.html">Guestbook</a></li>
+        <li><a aria-label="Advertising" href="advertising.html">Advertising</a></li>
+        <li><a aria-label="Staking" href="staking.html">Staking</a></li>
+      </ul>
+
+      <div class="themeDots" aria-label="Theme switcher">
+        <button type="button" class="dot light" title="Light Theme" aria-label="Light Theme"></button>
+        <button type="button" class="dot dark" title="Dark Theme" aria-label="Dark Theme"></button>
+        <button type="button" class="dot basic" title="Basic Theme" aria-label="Basic Theme"></button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="page-wrap mint-page">
+    <section class="mint-hero">
+      <p class="eyebrow">Inpinity Mint</p>
+      <h1>Mint a Pyramid Block</h1>
+      <h2>Choose coordinates, mint on Base, then reveal Pi & Phi digits to unlock rarity and gameplay.</h2>
+      <p class="hero-lead">
+        Every block has a fixed place in the Pi-Phi Pyramid. After minting, you can reveal it to unlock its hidden state and prepare it for farming and later game actions.
+      </p>
+
+      <div class="links-section">
+        <a class="link-chip" href="https://basescan.org/address/0x277a0D5864293C78d7387C54B48c35D5E9578Ab1" target="_blank" rel="noopener">
+          📄 NFT Contract
+        </a>
+      </div>
+    </section>
+
+    <section class="mint-grid">
+      <div class="card-box">
+        <h2>Mint</h2>
+        <p class="muted">
+          Each <strong>Block</strong> is an on-chain NFT with fixed coordinates inside the Pi-Phi Pyramid.
+          After minting you can <strong>reveal</strong> hidden digits and unlock its gameplay value.
+        </p>
+
+        <div class="wallet-bar">
+          <div class="wallet-left">
+            <div class="wallet-status" id="walletStatus">🔴 Wallet not connected</div>
+            <div class="wallet-address" id="walletAddress">—</div>
+          </div>
+          <div class="wallet-balance" id="walletBalance">—</div>
+          <button class="btn" id="connectWallet">Connect Wallet</button>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat">
+            <div class="label">Available</div>
+            <div class="value" id="available">10,000</div>
+          </div>
+          <div class="stat">
+            <div class="label">Your Blocks</div>
+            <div class="value" id="userBlocks">0</div>
+          </div>
+          <div class="stat">
+            <div class="label">Price (ETH)</div>
+            <div class="value" id="priceEth">0.003</div>
+          </div>
+        </div>
+
+        <div class="seg-title">💎 Payment method</div>
+        <div class="payment-box">
+          <label class="pay-row" for="payEth">
+            <input type="radio" name="payment" id="payEth" checked />
+            <div class="t">Only ETH</div>
+            <div class="v">0.003 ETH</div>
+          </label>
+
+          <label class="pay-row" for="payInpi">
+            <input type="radio" name="payment" id="payInpi" />
+            <div class="t">Only INPI</div>
+            <div class="v">30 INPI</div>
+          </label>
+
+          <label class="pay-row" for="payMixed">
+            <input type="radio" name="payment" id="payMixed" />
+            <div class="t">Mixed</div>
+            <div class="v">0.0015 ETH + 15 INPI</div>
+          </label>
+        </div>
+
+        <div class="seg-title">📍 Coordinates</div>
+        <div class="coord-row">
+          <label>Row <input type="number" id="row" min="0" max="99" value="0"></label>
+          <label>Col <input type="number" id="col" min="0" max="198" value="0"></label>
+          <button id="randomBlockBtn" class="random-btn" type="button">🎲 Random free</button>
+        </div>
+
+        <div class="info-note">
+          <strong>Mint note:</strong><br>
+          Mint first, reveal second. Revealed blocks expose hidden Pi and Phi digits and are needed for the wider ecosystem flow.
+        </div>
+
+        <button class="btn mint-main" id="mintBtn" disabled type="button">🚀 Mint your Block</button>
+        <div id="mintMessage"></div>
+      </div>
+
+      <div class="card-box">
+        <h2>Reveal</h2>
+        <p class="muted">
+          After minting, reveal your block to unlock its hidden <strong>Pi</strong> and <strong>Phi</strong> digits.
+          Revealed blocks are needed for farming and advanced gameplay.
+        </p>
+
+        <div id="unrevealedList" class="reveal-list reveal-list-spacing">
+          <p class="muted text-center">Connect wallet to see your unrevealed blocks.</p>
+        </div>
+
+        <div id="revealMessage"></div>
+        <div id="debugLog" class="debug-log">[Debug] Console output will appear here.</div>
+
+        <div class="info-note">
+          <strong>Phase 1:</strong> 10,000 blocks<br>
+          <strong>INPI Token:</strong>
+          <a href="https://basescan.org/address/0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D" target="_blank" rel="noopener">
+            0x232F...d0D
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>© 2026 INPINITY. All rights reserved. Built on Base.</p>
+    <div class="footer-links">
+      <a href="whitepaper.html">Whitepaper</a>
+      <a href="faq.html">FAQ</a>
+      <a href="mint.html">Mint</a>
+      <a href="map.html">Pyramid Map</a>
+      <a href="game.html">Game</a>
+      <a href="contact.html">Contact</a>
+    </div>
+    <p class="footer-version">Version 0.23.0</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+
+  <script>
+    const NFT_ADDRESS = "0x277a0D5864293C78d7387C54B48c35D5E9578Ab1";
+    const INPI_ADDRESS = "0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D";
+    const WORKER_URL = "https://inpinity-worker-final.s-plat.workers.dev";
+    const MAX_ROW = 99;
+
+    const NFT_ABI = [
+      "function mintWithETH(uint256 row, uint256 col) payable",
+      "function mintWithINPI(uint256 row, uint256 col) external",
+      "function mintMixed(uint256 row, uint256 col) payable",
+      "function ownerOf(uint256 tokenId) view returns (address)",
+      "function balanceOf(address owner) view returns (uint256)",
+      "function tokenOfOwnerByIndex(address owner, uint256 index) view returns (uint256)",
+      "function getBlockPosition(uint256 tokenId) view returns (uint256 row, uint256 col)",
+      "function blockData(uint256) view returns (uint8 piDigit, uint8 phiDigit, uint256 row, uint256 col, bool revealed, uint256 farmingEndTime)",
+      "function revealBlock(uint256 tokenId, bytes32[] piProof, bytes32[] phiProof, uint8 piDigit, uint8 phiDigit) external"
+    ];
+
+    const INPI_ABI = [
+      "function approve(address spender, uint256 amount) returns (bool)",
+      "function balanceOf(address account) view returns (uint256)",
+      "function allowance(address owner, address spender) view returns (uint256)"
+    ];
+
+    let provider, signer, nftContract, inpiContract, userAddress;
+    let selectedPayment = "eth";
+
+    function applyTheme(theme) {
+      document.documentElement.setAttribute("data-theme", theme);
+      localStorage.setItem("theme", theme);
+
+      document.querySelectorAll(".themeDots .dot").forEach(dot => dot.classList.remove("active"));
+      document.querySelector(`.themeDots .dot.${theme}`)?.classList.add("active");
+    }
+
+    function initTheme() {
+      const savedTheme = localStorage.getItem("theme") || document.documentElement.getAttribute("data-theme") || "basic";
+      applyTheme(savedTheme);
+
+      document.querySelector(".themeDots .dot.light")?.addEventListener("click", () => applyTheme("light"));
+      document.querySelector(".themeDots .dot.dark")?.addEventListener("click", () => applyTheme("dark"));
+      document.querySelector(".themeDots .dot.basic")?.addEventListener("click", () => applyTheme("basic"));
+    }
+
+    function selectPayment(type){
+      selectedPayment = type;
+      document.getElementById("payEth").checked = (type === "eth");
+      document.getElementById("payInpi").checked = (type === "inpi");
+      document.getElementById("payMixed").checked = (type === "mixed");
+    }
+
+    function debugLog(message, data=null){
+      const logDiv = document.getElementById("debugLog");
+      let line = `[${new Date().toLocaleTimeString()}] ${message}`;
+      if (data){
+        try { line += " " + JSON.stringify(data).substring(0,200); }
+        catch { line += " " + String(data); }
+      }
+      logDiv.innerHTML = line + "\\n" + logDiv.innerHTML;
+      console.log(message, data);
+    }
+
+    function showMintMsg(type, text){
+      const el = document.getElementById("mintMessage");
+      if(!el) return;
+      el.innerHTML = `<div class="msg ${type}">${text}</div>`;
+    }
+
+    function showRevealMsg(type, text){
+      const el = document.getElementById("revealMessage");
+      if(!el) return;
+      el.innerHTML = `<div class="msg ${type}">${text}</div>`;
+    }
+
+    async function connectWallet(){
+      if(!window.ethereum) return alert("Please install MetaMask!");
+      try{
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        signer = provider.getSigner();
+        userAddress = await signer.getAddress();
+
+        const network = await provider.getNetwork();
+        if(network.chainId !== 8453){
+          try{
+            await window.ethereum.request({
+              method:"wallet_switchEthereumChain",
+              params:[{ chainId:"0x2105" }]
+            });
+          }catch(e){
+            if(e.code === 4902){
+              await window.ethereum.request({
+                method:"wallet_addEthereumChain",
+                params:[{
+                  chainId:"0x2105",
+                  chainName:"Base Mainnet",
+                  nativeCurrency:{ name:"ETH", symbol:"ETH", decimals:18 },
+                  rpcUrls:["https://mainnet.base.org"],
+                  blockExplorerUrls:["https://basescan.org"]
+                }]
+              });
+            } else {
+              throw e;
+            }
+          }
+        }
+
+        nftContract = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
+        inpiContract = new ethers.Contract(INPI_ADDRESS, INPI_ABI, signer);
+
+        document.getElementById("walletStatus").innerText = "🟢 Wallet connected";
+        document.getElementById("walletAddress").innerText = userAddress.slice(0,6) + "..." + userAddress.slice(-4);
+        document.getElementById("mintBtn").disabled = false;
+
+        await updateBalances();
+        await loadUnrevealedBlocks();
+        debugLog("Wallet connected", userAddress);
+      }catch(e){
+        console.error(e);
+        alert("Connection error: " + e.message);
+      }
+    }
+
+    async function updateBalances(){
+      if(!userAddress) return;
+      const ethBalance = await provider.getBalance(userAddress);
+      document.getElementById("walletBalance").innerText = parseFloat(ethers.utils.formatEther(ethBalance)).toFixed(4) + " ETH";
+
+      try{
+        const bal = await nftContract.balanceOf(userAddress);
+        document.getElementById("userBlocks").innerText = bal.toString();
+      }catch{}
+    }
+
+    async function loadUnrevealedBlocks(){
+      const listDiv = document.getElementById("unrevealedList");
+      if(!userAddress || !nftContract){
+        listDiv.innerHTML = `<p class="muted text-center">Connect wallet to see your unrevealed blocks.</p>`;
+        return;
+      }
+
+      const balance = await nftContract.balanceOf(userAddress);
+      if(balance.toNumber() === 0){
+        listDiv.innerHTML = `<p class="muted text-center">You don’t own any blocks yet.</p>`;
+        return;
+      }
+
+      let rows = [];
+      for(let i = 0; i < balance; i++){
+        const tokenId = await nftContract.tokenOfOwnerByIndex(userAddress, i);
+        const data = await nftContract.blockData(tokenId);
+        if(!data.revealed){
+          const pos = await nftContract.getBlockPosition(tokenId);
+          rows.push({
+            tokenId: tokenId.toString(),
+            row: pos.row.toString(),
+            col: pos.col.toString()
+          });
+        }
+      }
+
+      if(rows.length === 0){
+        listDiv.innerHTML = `<p class="muted text-center">All your blocks are already revealed.</p>`;
+        return;
+      }
+
+      let html = `<div class="seg-title">🔓 Not yet revealed</div>`;
+      for(const r of rows){
+        html += `
+          <div class="item">
+            <div>Block #${r.tokenId} (R${r.row} C${r.col})</div>
+            <button class="reveal-btn" onclick="revealBlock(${r.tokenId})" type="button">🔓 Reveal</button>
+          </div>
+        `;
+      }
+      listDiv.innerHTML = html;
+    }
+
+    window.revealBlock = async function(tokenId){
+      showRevealMsg("success", "⏳ Loading block coordinates...");
+      debugLog("Reveal started", { tokenId });
+
+      try{
+        const pos = await nftContract.getBlockPosition(tokenId);
+        const row = pos.row.toNumber();
+        const col = pos.col.toNumber();
+
+        showRevealMsg("success", "⏳ Fetching proofs from worker...");
+        const response = await fetch(`${WORKER_URL}/api/get-proof?row=${row}&col=${col}`);
+        if(!response.ok) throw new Error(`Worker error ${response.status}`);
+        const proofs = await response.json();
+
+        const formatProof = (arr) => arr.map(item => {
+          const hash = item.left ? item.left : item.right;
+          return hash.startsWith("0x") ? hash : "0x" + hash;
+        });
+
+        const piProof = formatProof(proofs.pi.proof);
+        const phiProof = formatProof(proofs.phi.proof);
+
+        showRevealMsg("success", "⏳ Sending reveal transaction...");
+        const tx = await nftContract.revealBlock(
+          tokenId,
+          piProof,
+          phiProof,
+          proofs.pi.digit,
+          proofs.phi.digit,
+          { gasLimit: 1000000 }
+        );
+
+        debugLog("Reveal tx", tx.hash);
+        await tx.wait();
+
+        showRevealMsg("success", "✅ Block successfully revealed! 🎉");
+        await loadUnrevealedBlocks();
+      }catch(e){
+        console.error(e);
+        showRevealMsg("error", "❌ " + e.message);
+        debugLog("Reveal error", e.message);
+      }
+    };
+
+    async function findRandomFreeBlock(){
+      if(!nftContract) return alert("Please connect wallet first.");
+      showMintMsg("success", "⏳ Searching a free block...");
+
+      const MAX_ATTEMPTS = 80;
+      for(let attempt = 0; attempt < MAX_ATTEMPTS; attempt++){
+        const row = Math.floor(Math.random() * (MAX_ROW + 1));
+        const col = Math.floor(Math.random() * (2 * row + 1));
+        const tokenId = row * 2048 + col;
+
+        try{
+          await nftContract.ownerOf(tokenId);
+        }catch{
+          document.getElementById("row").value = row;
+          document.getElementById("col").value = col;
+          showMintMsg("success", `✅ Free block found: Row ${row}, Col ${col}.`);
+          return;
+        }
+      }
+
+      showMintMsg("error", "❌ Could not find a free block quickly. Try again or pick manually.");
+    }
+
+    async function mint(){
+      const row = parseInt(document.getElementById("row").value, 10);
+      const col = parseInt(document.getElementById("col").value, 10);
+
+      if(Number.isNaN(row) || Number.isNaN(col) || row < 0 || row > MAX_ROW || col < 0 || col > (2 * row)){
+        return showMintMsg("error", "❌ Invalid coordinates.");
+      }
+
+      try{
+        const tokenId = row * 2048 + col;
+        showMintMsg("success", "⏳ Checking block availability...");
+
+        try{
+          await nftContract.ownerOf(tokenId);
+          return showMintMsg("error", "❌ This block is already minted.");
+        }catch{}
+
+        let tx;
+
+        if(selectedPayment === "eth"){
+          showMintMsg("success", "⏳ Minting with ETH...");
+          tx = await nftContract.mintWithETH(row, col, {
+            value: ethers.utils.parseEther("0.003")
+          });
+
+        } else if(selectedPayment === "inpi"){
+          const amount = ethers.utils.parseEther("30");
+          const bal = await inpiContract.balanceOf(userAddress);
+          if(bal.lt(amount)) return showMintMsg("error", "❌ Insufficient INPI balance.");
+
+          const allowance = await inpiContract.allowance(userAddress, NFT_ADDRESS);
+          if(allowance.lt(amount)){
+            showMintMsg("success", "⏳ Approving INPI...");
+            await (await inpiContract.approve(NFT_ADDRESS, amount)).wait();
+          }
+
+          showMintMsg("success", "⏳ Minting with INPI...");
+          tx = await nftContract.mintWithINPI(row, col);
+
+        } else {
+          const ethAmount = ethers.utils.parseEther("0.0015");
+          const inpiAmount = ethers.utils.parseEther("15");
+          const bal = await inpiContract.balanceOf(userAddress);
+          if(bal.lt(inpiAmount)) return showMintMsg("error", "❌ Insufficient INPI for mixed payment.");
+
+          const allowance = await inpiContract.allowance(userAddress, NFT_ADDRESS);
+          if(allowance.lt(inpiAmount)){
+            showMintMsg("success", "⏳ Approving INPI...");
+            await (await inpiContract.approve(NFT_ADDRESS, inpiAmount)).wait();
+          }
+
+          showMintMsg("success", "⏳ Minting (Mixed)...");
+          tx = await nftContract.mintMixed(row, col, { value: ethAmount });
+        }
+
+        showMintMsg("success", "⏳ Transaction sent...");
+        debugLog("Mint tx", tx.hash);
+        await tx.wait();
+
+        showMintMsg("success", "✅ Block minted! 🎉");
+        await updateBalances();
+        await loadUnrevealedBlocks();
+
+      }catch(e){
+        console.error(e);
+        showMintMsg("error", "❌ " + (e?.message || "Unknown error"));
+        debugLog("Mint error", e?.message);
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      initTheme();
+
+      document.getElementById("connectWallet")?.addEventListener("click", connectWallet);
+      document.getElementById("randomBlockBtn")?.addEventListener("click", findRandomFreeBlock);
+      document.getElementById("mintBtn")?.addEventListener("click", mint);
+
+      document.getElementById("payEth")?.addEventListener("change", ()=>selectPayment("eth"));
+      document.getElementById("payInpi")?.addEventListener("change", ()=>selectPayment("inpi"));
+      document.getElementById("payMixed")?.addEventListener("change", ()=>selectPayment("mixed"));
+
+      if(window.ethereum && window.ethereum.selectedAddress){
+        connectWallet();
+      }
+    });
+  </script>
+</body>
+</html>

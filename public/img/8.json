@@ -1,0 +1,27 @@
+{
+  "name": "INPINITY Resource — Mysterium",
+  "description": "Mysterium is an extremely rare resource in INPINITY Online. Only Diamond blocks can produce it. Used for unique Infinite City wonders and top-tier crafting.",
+  "image": "https://inpinity.online/img/8.PNG",
+  "external_url": "https://inpinity.online",
+  "attributes": [
+    { "trait_type": "Resource", "value": "Mysterium" },
+    { "trait_type": "Code", "value": "MYSTERIUM" },
+    { "trait_type": "Resource Rarity", "value": "Extremely Rare" },
+    { "trait_type": "System", "value": "FarmingV2" }
+  ],
+  "farmingV2": {
+    "produced": true,
+    "production_per_day_by_block_rarity": {
+      "0_Bronze": 0,
+      "1_Silver": 0,
+      "2_Gold": 0,
+      "3_Platinum": 0,
+      "4_Diamond": 1
+    },
+    "claim": "Claimed via claimResources. Until claimed, resources are stored on the block."
+  },
+  "risk": {
+    "pirates": "Stored resources can be stolen by pirate attacks (up to 9% per day) until claimed."
+  },
+  "use_cases": ["Trade", "Infinite City Build", "Wonders", "Legendary Crafting"]
+}

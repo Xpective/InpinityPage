@@ -253,9 +253,7 @@
   
     select.innerHTML = `
       <option value="">Choose your attacker block…</option>
-      ${owned
-        .map((tokenId) => `<option value="${tokenId}">Block #${tokenId}</option>`)
-        .join("")}
+      ${owned.map((tokenId) => `<option value="${tokenId}">Block #${tokenId}</option>`).join("")}
     `;
   
     select.value = preferred;
@@ -523,7 +521,10 @@
       }
   
       const selectedResourceId = Number(select.value || (allowedResources[0] ?? 0));
-      const previewToShow = previews[selectedResourceId] || previews[allowedResources[0]] || previews[0];
+      const previewToShow =
+        previews[selectedResourceId] ||
+        previews[allowedResources[0]] ||
+        previews[0];
   
       let canAttack = false;
   
