@@ -236,7 +236,10 @@
     claimCooldownSeconds
   }) {
     safeText("revealStatus", revealed ? "Revealed" : "Hidden");
-    safeText("farmingStatus", farmingActive ? "Active (V6)" : (activeOnV5 ? "Active (V5)" : "Inactive"));
+    safeText(
+      "farmingStatus",
+      farmingActive ? "Active (V6)" : (activeOnV5 ? "Active (V5)" : "Inactive")
+    );
     safeText("claimStatus", claimText || "—");
     safeText("boostStatus", boostActive ? "Active" : "Inactive");
   
@@ -273,6 +276,7 @@
           ? formatTimestampFromSeconds(claimCooldownSeconds)
           : "Waiting"
     );
+  }
   
   async function getCurrentUnlockedSlots() {
     try {
@@ -640,24 +644,24 @@
     let claimReady = false;
     let claimText = "—";
     let claimCooldownSeconds = 0;
-    
+  
     if (farmingActive) {
       try {
         let waitSec = 0;
         let preview = null;
-    
+  
         try {
           const waitRaw = await state.farmingV6Contract.secondsUntilClaimable(tokenId);
           waitSec = Number(waitRaw || 0);
         } catch {}
-    
+  
         try {
           preview = await state.farmingV6Contract.previewClaim(tokenId);
         } catch {}
-    
+  
         claimCooldownSeconds = Math.max(0, waitSec);
         claimReady = claimCooldownSeconds <= 0 && !!preview?.allowed;
-    
+  
         if (claimReady) {
           claimText = "Ready (V6)";
         } else if (claimCooldownSeconds > 0) {
@@ -674,10 +678,10 @@
       try {
         const v5 = getFarmingV5Contract();
         const preview = await v5.previewClaim(tokenId);
-    
+  
         claimReady = !!preview?.allowed;
         claimCooldownSeconds = Math.max(0, Number(preview?.secondsRemaining || 0));
-    
+  
         if (claimReady) {
           claimText = "Ready (V5)";
         } else if (claimCooldownSeconds > 0) {
