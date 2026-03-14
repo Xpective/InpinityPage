@@ -523,9 +523,44 @@
           ? `<div class="rarity-badge" style="background:#6f42c1; color:white; margin-top:4px;">🛡️ ${protection.level}% Protected</div>`
           : "";
   
-        const farmDurationLine = farmingActive && Number(farm?.startTime) > 0
-          ? `<div class="farm-duration">⏱️ Farming: ${formatDuration(now - Number(farm.startTime))}</div>`
-          : "";
+          let farmDurationLine = "";
+
+          if (farmingActive) {
+            let claimSeconds = 0;
+            let claimReady = false;
+          
+            try {
+              const waitRaw = await state.farmingV6Contract.secondsUntilClaimable(tokenId);
+              claimSeconds = Math.max(0, Number(waitRaw || 0));
+            } catch {}
+          
+            try {
+              const preview = await state.farmingV6Contract.previewClaim(tokenId);
+              claimReady = !!preview?.allowed;
+            } catch {}
+          
+            if (claimReady || claimSeconds <= 0) {
+              farmDurationLine = `<div class="farm-duration">⏱️ Claim: Ready</div>`;
+            } else {
+              farmDurationLine = `<div class="farm-duration">⏱️ Claim in: ${formatDuration(claimSeconds)}</div>`;
+            }
+          } else if (activeOnV5) {
+            try {
+              const v5 = getFarmingV5Contract();
+              const preview = await v5.previewClaim(tokenId);
+          
+              const claimReady = !!preview?.allowed;
+              const claimSeconds = Math.max(0, Number(preview?.secondsRemaining || 0));
+          
+              if (claimReady || claimSeconds <= 0) {
+                farmDurationLine = `<div class="farm-duration">⏱️ Claim: Ready</div>`;
+              } else {
+                farmDurationLine = `<div class="farm-duration">⏱️ Claim in: ${formatDuration(claimSeconds)}</div>`;
+              }
+            } catch {
+              farmDurationLine = `<div class="farm-duration">⏱️ Claim: —</div>`;
+            }
+          }
   
         const revealButton = !revealed
           ? `<button class="reveal-block-btn" data-tokenid="${tokenId}" data-row="${row}" data-col="${col}">🔓 Reveal</button>`
