@@ -78,7 +78,7 @@ export function getResourceName(resourceId) {
 }
 
 export function getResourceIconPath(resourceId) {
-  return `/img/${Number(resourceId)}.png`;
+  return `/img/${Number(resourceId)}.PNG`;
 }
 
 /* ==================== FARMING BOOST ==================== */

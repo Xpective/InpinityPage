@@ -265,8 +265,14 @@
           : "Claim becomes available when the cooldown is finished."
     );
   
-    safeText("claimAtText", formatTimestampFromSeconds(claimCooldownSeconds || 0));
-  }
+    safeText(
+      "claimAtText",
+      claimReady
+        ? "Now"
+        : claimCooldownSeconds > 0
+          ? formatTimestampFromSeconds(claimCooldownSeconds)
+          : "Waiting"
+    );
   
   async function getCurrentUnlockedSlots() {
     try {
@@ -634,25 +640,55 @@
     let claimReady = false;
     let claimText = "—";
     let claimCooldownSeconds = 0;
-  
+    
     if (farmingActive) {
       try {
-        const preview = await state.farmingV6Contract.previewClaim(tokenId);
-        claimReady = !!preview?.allowed;
-        claimCooldownSeconds = Number(preview?.secondsRemaining || 0);
-        claimText = claimReady ? "Ready (V6)" : `V6 in ${formatDuration(claimCooldownSeconds)}`;
+        let waitSec = 0;
+        let preview = null;
+    
+        try {
+          const waitRaw = await state.farmingV6Contract.secondsUntilClaimable(tokenId);
+          waitSec = Number(waitRaw || 0);
+        } catch {}
+    
+        try {
+          preview = await state.farmingV6Contract.previewClaim(tokenId);
+        } catch {}
+    
+        claimCooldownSeconds = Math.max(0, waitSec);
+        claimReady = claimCooldownSeconds <= 0 && !!preview?.allowed;
+    
+        if (claimReady) {
+          claimText = "Ready (V6)";
+        } else if (claimCooldownSeconds > 0) {
+          claimText = `V6 in ${formatDuration(claimCooldownSeconds)}`;
+        } else {
+          claimText = "Waiting for next claim window";
+        }
       } catch {
         claimText = "—";
+        claimReady = false;
+        claimCooldownSeconds = 0;
       }
     } else if (activeOnV5) {
       try {
         const v5 = getFarmingV5Contract();
         const preview = await v5.previewClaim(tokenId);
+    
         claimReady = !!preview?.allowed;
-        claimCooldownSeconds = Number(preview?.secondsRemaining || 0);
-        claimText = claimReady ? "Ready (V5)" : `V5 in ${formatDuration(claimCooldownSeconds)}`;
+        claimCooldownSeconds = Math.max(0, Number(preview?.secondsRemaining || 0));
+    
+        if (claimReady) {
+          claimText = "Ready (V5)";
+        } else if (claimCooldownSeconds > 0) {
+          claimText = `V5 in ${formatDuration(claimCooldownSeconds)}`;
+        } else {
+          claimText = "Waiting for next claim window";
+        }
       } catch {
         claimText = "—";
+        claimReady = false;
+        claimCooldownSeconds = 0;
       }
     }
   
