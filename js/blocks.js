@@ -34,6 +34,12 @@
   import { isTokenActiveOnV5, getFarmingV5Contract } from "./migration.js";
   
   /* =========================================================
+     LIVE CLAIM TIMER
+     ========================================================= */
+  
+  let selectedBlockClaimTicker = null;
+  
+  /* =========================================================
      HELPERS
      ========================================================= */
   
@@ -70,6 +76,50 @@
     } catch {
       return dt.toISOString();
     }
+  }
+  
+  function stopSelectedBlockClaimTicker() {
+    if (selectedBlockClaimTicker) {
+      clearInterval(selectedBlockClaimTicker);
+      selectedBlockClaimTicker = null;
+    }
+  }
+  
+  function startSelectedBlockClaimTicker({
+    tokenId,
+    sourceLabel,
+    initialSeconds
+  }) {
+    stopSelectedBlockClaimTicker();
+  
+    let remaining = Math.max(0, Number(initialSeconds || 0));
+  
+    const render = () => {
+      const currentSelectedId = String(state.selectedBlock?.tokenId || "");
+      if (currentSelectedId !== String(tokenId)) {
+        stopSelectedBlockClaimTicker();
+        return;
+      }
+  
+      const ready = remaining <= 0;
+  
+      safeText("claimStatus", ready ? `Ready (${sourceLabel})` : `${sourceLabel} in ${formatDuration(remaining)}`);
+      safeText("claimHint", ready ? "Claim is ready." : `Claim not ready yet: ${sourceLabel} in ${formatDuration(remaining)}`);
+      safeText("claimAtText", ready ? "Now" : formatTimestampFromSeconds(remaining));
+      safeText("timelineClaim", ready ? "Claim: Ready" : `Claim: in ${formatDuration(remaining)}`);
+  
+      setButtonVisualState("claimBtn", ready);
+  
+      if (remaining <= 0) {
+        stopSelectedBlockClaimTicker();
+        return;
+      }
+  
+      remaining -= 1;
+    };
+  
+    render();
+    selectedBlockClaimTicker = setInterval(render, 1000);
   }
   
   function updateRevealCardVisibility(revealed) {
@@ -541,6 +591,7 @@
   export async function selectBlock(tokenId, row, col) {
     const now = Math.floor(Date.now() / 1000);
     resetSelectedBlockUiState();
+    stopSelectedBlockClaimTicker();
   
     let revealed = false;
     let rarity = null;
@@ -722,6 +773,22 @@
       protectionLevel,
       protectionExpiresAt
     });
+  
+    if ((farmingActive || activeOnV5) && !claimReady && claimCooldownSeconds > 0) {
+      startSelectedBlockClaimTicker({
+        tokenId,
+        sourceLabel: farmingActive ? "V6" : "V5",
+        initialSeconds: claimCooldownSeconds
+      });
+    } else if ((farmingActive || activeOnV5) && claimReady) {
+      startSelectedBlockClaimTicker({
+        tokenId,
+        sourceLabel: farmingActive ? "V6" : "V5",
+        initialSeconds: 0
+      });
+    } else {
+      stopSelectedBlockClaimTicker();
+    }
   
     updateRevealCardVisibility(revealed);
   
