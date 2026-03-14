@@ -27,12 +27,28 @@
   import {
     state,
     resetSelectedBlockUiState,
-    resetUiBusyFlags
+    resetUiBusyFlags,
+    setSelectedBlockState,
+    setSelectedAttackAttackerTokenId,
+    setMercenaryProfile,
+    setMercenarySlots
   } from "./state.js";
   
   import { debugLog } from "./utils.js";
   
+  /* =========================================================
+     NETWORK
+     ========================================================= */
+  
   export async function ensureBaseNetwork() {
+    if (!window.ethereum) {
+      throw new Error("MetaMask / Ethereum provider not found");
+    }
+  
+    if (!state.provider) {
+      throw new Error("No provider available");
+    }
+  
     const network = await state.provider.getNetwork();
     if (Number(network.chainId) === 8453) return;
   
@@ -42,13 +58,17 @@
         params: [{ chainId: "0x2105" }]
       });
     } catch (e) {
-      if (e.code === 4902) {
+      if (e?.code === 4902) {
         await window.ethereum.request({
           method: "wallet_addEthereumChain",
           params: [{
             chainId: "0x2105",
             chainName: "Base Mainnet",
-            nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 },
+            nativeCurrency: {
+              name: "ETH",
+              symbol: "ETH",
+              decimals: 18
+            },
             rpcUrls: ["https://mainnet.base.org"],
             blockExplorerUrls: ["https://basescan.org"]
           }]
@@ -60,22 +80,68 @@
   
     state.provider = new ethers.providers.Web3Provider(window.ethereum);
     state.signer = state.provider.getSigner();
-    state.userAddress = await state.signer.getAddress();
   }
   
+  /* =========================================================
+     CONTRACT SETUP
+     ========================================================= */
+  
   export function setupContracts() {
+    if (typeof ethers === "undefined") {
+      throw new Error("ethers is not loaded");
+    }
+  
     if (!state.signer) {
       throw new Error("No signer available");
     }
   
-    state.nftContract = new ethers.Contract(NFT_ADDRESS, NFT_ABI, state.signer);
-    state.farmingV6Contract = new ethers.Contract(FARMING_V6_ADDRESS, FARMING_V6_ABI, state.signer);
-    state.piratesV6Contract = new ethers.Contract(PIRATES_V6_ADDRESS, PIRATES_V6_ABI, state.signer);
-    state.mercenaryV4Contract = new ethers.Contract(MERCENARY_V4_ADDRESS, MERCENARY_V4_ABI, state.signer);
-    state.partnershipV2Contract = new ethers.Contract(PARTNERSHIP_V2_ADDRESS, PARTNERSHIP_V2_ABI, state.signer);
-    state.inpiContract = new ethers.Contract(INPI_ADDRESS, INPI_ABI, state.signer);
-    state.pitroneContract = new ethers.Contract(PITRONE_ADDRESS, PITRONE_ABI, state.signer);
-    state.resourceTokenContract = new ethers.Contract(RESOURCE_TOKEN_ADDRESS, RESOURCE_TOKEN_ABI, state.signer);
+    state.nftContract = new ethers.Contract(
+      NFT_ADDRESS,
+      NFT_ABI,
+      state.signer
+    );
+  
+    state.farmingV6Contract = new ethers.Contract(
+      FARMING_V6_ADDRESS,
+      FARMING_V6_ABI,
+      state.signer
+    );
+  
+    state.piratesV6Contract = new ethers.Contract(
+      PIRATES_V6_ADDRESS,
+      PIRATES_V6_ABI,
+      state.signer
+    );
+  
+    state.mercenaryV4Contract = new ethers.Contract(
+      MERCENARY_V4_ADDRESS,
+      MERCENARY_V4_ABI,
+      state.signer
+    );
+  
+    state.partnershipV2Contract = new ethers.Contract(
+      PARTNERSHIP_V2_ADDRESS,
+      PARTNERSHIP_V2_ABI,
+      state.signer
+    );
+  
+    state.inpiContract = new ethers.Contract(
+      INPI_ADDRESS,
+      INPI_ABI,
+      state.signer
+    );
+  
+    state.pitroneContract = new ethers.Contract(
+      PITRONE_ADDRESS,
+      PITRONE_ABI,
+      state.signer
+    );
+  
+    state.resourceTokenContract = new ethers.Contract(
+      RESOURCE_TOKEN_ADDRESS,
+      RESOURCE_TOKEN_ABI,
+      state.signer
+    );
   
     debugLog("Contracts initialized", {
       nft: NFT_ADDRESS,
@@ -89,10 +155,24 @@
     });
   }
   
+  /* =========================================================
+     CLEANUP
+     ========================================================= */
+  
   export function clearContracts() {
+    if (state.attacksTicker) clearInterval(state.attacksTicker);
+    if (state.attacksPoller) clearInterval(state.attacksPoller);
+    if (state.attackDropdownTimer) clearTimeout(state.attackDropdownTimer);
+  
+    state.attacksTicker = null;
+    state.attacksPoller = null;
+    state.attackDropdownTimer = null;
+    state.attackDropdownRequestId = 0;
+  
     state.provider = null;
     state.signer = null;
     state.userAddress = null;
+    state.isConnecting = false;
   
     state.nftContract = null;
     state.farmingV6Contract = null;
@@ -103,9 +183,8 @@
     state.pitroneContract = null;
     state.resourceTokenContract = null;
   
-    state.selectedBlock = null;
-    state.selectedBlockId = null;
-    state.selectedBlockData = null;
+    setSelectedBlockState(null);
+    setSelectedAttackAttackerTokenId(null);
   
     state.userBlocks = [];
     state.userAttacks = [];
@@ -126,8 +205,8 @@
     state.selectedMercenaryDurationDays = 7;
     state.selectedMercenaryPayInINPI = false;
   
-    state.mercenaryProfile = null;
-    state.mercenarySlots = [];
+    setMercenaryProfile(null);
+    setMercenarySlots([]);
   
     resetSelectedBlockUiState();
     resetUiBusyFlags();
@@ -135,9 +214,17 @@
     debugLog("Contracts cleared");
   }
   
+  /* =========================================================
+     WALLET CONNECT
+     ========================================================= */
+  
   export async function connectWalletCore(forceRequest = true) {
     if (!window.ethereum) {
       throw new Error("Please install MetaMask");
+    }
+  
+    if (typeof ethers === "undefined") {
+      throw new Error("ethers is not loaded");
     }
   
     state.provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -151,10 +238,16 @@
     }
   
     state.signer = state.provider.getSigner();
-    state.userAddress = accounts[0] || await state.signer.getAddress();
   
     await ensureBaseNetwork();
+  
+    state.userAddress = accounts?.[0] || await state.signer.getAddress();
     setupContracts();
+  
+    debugLog("Wallet connected", {
+      userAddress: state.userAddress,
+      requested: !!forceRequest
+    });
   
     return true;
   }

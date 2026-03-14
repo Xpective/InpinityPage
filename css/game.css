@@ -11,7 +11,6 @@
   --orange-warn: #e67e22;
   --red-danger: #dc3545;
 
-  /* darker panel system for basic theme */
   --panel-soft: color-mix(in srgb, var(--primary-color) 82%, transparent);
   --panel-soft-2: color-mix(in srgb, var(--primary-color) 88%, transparent);
   --panel-inner: color-mix(in srgb, var(--primary-color) 72%, black 28%);
@@ -39,6 +38,14 @@ body {
   background-image:
     radial-gradient(circle at top center, var(--game-blue-glow), transparent 35%),
     radial-gradient(circle at bottom right, var(--game-gold-glow), transparent 25%);
+}
+
+body.simple-view .commander-only {
+  display: none !important;
+}
+
+body.commander-view .simple-only {
+  display: none !important;
 }
 
 .game-main {
@@ -119,6 +126,7 @@ body {
 }
 
 .wallet-bar,
+.game-view-bar,
 .panel,
 .block-actions-container,
 .selected-block-info,
@@ -141,15 +149,18 @@ body {
   box-shadow: var(--panel-shadow);
 }
 
-.wallet-bar {
+.wallet-bar,
+.game-view-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
   padding: 1rem 1.2rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.2rem;
 }
 
+.game-view-left,
+.game-view-actions,
 .wallet-left,
 .wallet-right {
   display: flex;
@@ -572,6 +583,49 @@ textarea::placeholder {
   border: 1px solid var(--game-accent-border);
 }
 
+.game-accordion,
+.panel-accordion {
+  margin: 1rem 0 0;
+  border: 1px solid var(--line-soft);
+  border-radius: 1.1rem;
+  overflow: hidden;
+  background: var(--panel-inner);
+}
+
+.game-accordion:first-of-type,
+.panel-accordion:first-of-type {
+  margin-top: 0;
+}
+
+.game-accordion-summary {
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1rem 1rem;
+  cursor: pointer;
+  background: color-mix(in srgb, var(--panel-inner-strong) 88%, black 12%);
+  border-bottom: 1px solid transparent;
+}
+
+.game-accordion-summary::-webkit-details-marker {
+  display: none;
+}
+
+.game-accordion[open] .game-accordion-summary,
+.panel-accordion[open] .game-accordion-summary {
+  border-bottom-color: var(--line-soft);
+}
+
+.game-accordion-summary:hover {
+  background: color-mix(in srgb, var(--panel-inner-strong) 94%, white 6%);
+}
+
+.game-accordion-body {
+  padding: 1rem;
+}
+
 .pirate-layout {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -783,6 +837,86 @@ textarea::placeholder {
   border: 0;
 }
 
+.resource-item-with-icon {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.resource-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.resource-right {
+  margin-left: auto;
+}
+
+.resource-icon-wrap {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 32px;
+}
+
+.resource-icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  display: block;
+}
+
+.resource-icon-fallback {
+  font-size: 1rem;
+}
+
+.resource-icon-fallback-hidden {
+  display: none;
+}
+
+.resource-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.resource-id-label {
+  font-size: 0.76rem;
+  opacity: 0.7;
+}
+
+.mercenary-main-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(280px, 0.95fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.mercenary-info-side .action-card {
+  position: sticky;
+  top: 1rem;
+}
+
+#selectedBlockTimeline,
+#selectedAttackAlert,
+#incomingAttackInfo {
+  margin-top: 0.8rem;
+}
+
+#claimCountdownLine {
+  color: var(--game-gold);
+}
+
+#moveProtectionTargetTokenId,
+#attackAttackerTokenId {
+  background: var(--panel-inner);
+}
+
 @keyframes pulse {
   0% { opacity: 1; }
   50% { opacity: 0.7; }
@@ -791,12 +925,17 @@ textarea::placeholder {
 
 @media (max-width: 1100px) {
   .dashboard-grid,
-  .pirate-layout {
+  .pirate-layout,
+  .mercenary-main-grid {
     grid-template-columns: 1fr;
   }
 
   .panel-wide {
     grid-column: span 1;
+  }
+
+  .mercenary-info-side .action-card {
+    position: static;
   }
 }
 
@@ -806,7 +945,8 @@ textarea::placeholder {
     width: min(100% - 1rem, 1440px);
   }
 
-  .wallet-bar {
+  .wallet-bar,
+  .game-view-bar {
     padding: 1rem;
   }
 
@@ -825,5 +965,10 @@ textarea::placeholder {
 
   .balance-item {
     flex: 1 1 120px;
+  }
+
+  .game-accordion-summary {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

@@ -2,1153 +2,1355 @@
    FARMING / MIGRATION / MERCENARY V4
    ========================================================= */
 
-   import { state, applyDefenderProfileToUi } from "./state.js";
    import {
-     MERCENARY_SLOT2_UNLOCK_COST,
-     MERCENARY_SLOT3_UNLOCK_COST,
-     MERCENARY_DURATION_LABELS,
-     MERCENARY_TIER_LABELS,
-     FARM_BOOST_PRICE_PER_DAY,
-     FARM_BOOST_MAX_DAYS,
-     FARM_WINDOW_DAYS,
-     getMercenaryV4Cost
-   } from "./config.js";
-   import { byId, formatDuration, debugLog, safeValue } from "./utils.js";
-   import { ensureFarmingApproval, ensureInpiApprovalForMercenary } from "./approvals.js";
-   import { loadResourceBalancesOnchain } from "./resources.js";
-   import { loadUserBlocks, selectBlock } from "./blocks.js";
-   import { loadUserAttacks, refreshBlockMarkings } from "./attacks.js";
-   import {
-     loadMercenaryProfileV4,
-     loadMercenarySlotsV4
-   } from "./subgraph.js";
-   import {
-     isTokenActiveOnV5,
-     migrateSingleFarmV5ToV6,
-     migrateManyFarmsV5ToV6,
-     getFarmingV5Contract,
-     getV5PendingTotal
-   } from "./migration.js";
-   
-   let isMigrationRunning = false;
-   let isBatchMigrationRunning = false;
-   
-   /* =========================================================
-      BASIC HELPERS
-      ========================================================= */
-   
-   function getActionMessageDiv() {
-     return byId("actionMessage");
-   }
-   
-   function getProtectMessageDiv() {
-     return byId("protectMessage");
-   }
-   
-   async function refreshSelectedBlockView() {
-     if (!state.selectedBlock) return;
-     await loadUserBlocks({ onRevealSelected: null, onRefreshBlockMarkings: refreshBlockMarkings });
-     await selectBlock(state.selectedBlock.tokenId, state.selectedBlock.row, state.selectedBlock.col);
-   }
-   
-   function setButtonBusy(buttonId, busy, busyText = "Processing...") {
-     const btn = byId(buttonId);
-     if (!btn) return null;
-   
-     if (busy) {
-       if (!btn.dataset.originalText) {
-         btn.dataset.originalText = btn.textContent;
-       }
-       btn.disabled = true;
-       btn.style.opacity = "0.6";
-       btn.style.pointerEvents = "none";
-       btn.textContent = busyText;
-     } else {
-       btn.disabled = false;
-       btn.style.opacity = "1";
-       btn.style.pointerEvents = "auto";
-       if (btn.dataset.originalText) {
-         btn.textContent = btn.dataset.originalText;
-       }
-     }
-   
-     return btn;
-   }
-   
-   function setButtonVisualState(buttonId, enabled) {
-     const btn = byId(buttonId);
-     if (!btn) return;
-     btn.disabled = !enabled;
-     btn.style.opacity = enabled ? "1" : "0.45";
-     btn.style.pointerEvents = enabled ? "auto" : "none";
-   }
-   
-   function friendlyErrorMessage(e) {
-     const msg = e?.reason || e?.data?.message || e?.message || "Unknown error";
-     const lower = String(msg).toLowerCase();
-   
-     if (
-       e?.code === 4001 ||
-       lower.includes("user rejected") ||
-       lower.includes("denied transaction signature") ||
-       lower.includes("action_rejected")
-     ) {
-       return "Transaction cancelled in wallet.";
-     }
-   
-     if (e?.code === "TRANSACTION_REPLACED") {
-       if (e?.cancelled) return "Transaction was cancelled/replaced in wallet after sending.";
-       return "Transaction was replaced in wallet.";
-     }
-   
-     if (lower.includes("nonce too high")) {
-       return "Nonce too high. Please check pending transactions in MetaMask and try again.";
-     }
-   
-     if (lower.includes("nonce has already been used")) {
-       return "Nonce already used. Please wait for pending transactions or reset activity in MetaMask.";
-     }
-   
-     if (lower.includes("replacement transaction underpriced")) {
-       return "Replacement transaction underpriced. Please wait a moment and try again.";
-     }
-   
-     if (lower.includes("already known")) {
-       return "This transaction is already known by the network. Please wait.";
-     }
-   
-     if (lower.includes("call revert exception")) {
-       return "Contract call failed. Please check whether the selected block is really active on this farm version.";
-     }
-   
-     return msg;
-   }
-   
-   /* =========================================================
-      MERCENARY UI HELPERS
-      ========================================================= */
-   
-   function getMercenaryPaymentMode() {
-     return (byId("mercenaryPaymentMode")?.value || "resources").toLowerCase();
-   }
-   
-   function getSelectedMercenarySlot() {
-     const v = parseInt(byId("protectSlotIndex")?.value || "0", 10);
-     return Number.isFinite(v) ? v : 0;
-   }
-   
-   function getSelectedProtectionDays() {
-     const v = parseInt(byId("protectDays")?.value || "1", 10);
-     return Number.isFinite(v) ? v : 1;
-   }
-   
-   function getSelectedProtectTokenId() {
-     const v = parseInt(byId("protectTokenId")?.value || "0", 10);
-     return Number.isFinite(v) ? v : 0;
-   }
-   
-   function renderCostList(items) {
-     if (!items) return "";
-   
-     if (Array.isArray(items)) {
-       return items.map((x) => `${x.amount} ${x.label}`).join(", ");
-     }
-   
-     const labelMap = {
-       oil: "Oil",
-       lemons: "Lemons",
-       iron: "Iron",
-       gold: "Gold",
-       platinum: "Platinum",
-       copper: "Copper",
-       crystal: "Crystal",
-       obsidian: "Obsidian",
-       mysterium: "Mysterium",
-       aether: "Aether"
-     };
-   
-     return Object.entries(items)
-       .filter(([_, amount]) => Number(amount || 0) > 0)
-       .map(([key, amount]) => `${amount} ${labelMap[key] || key}`)
-       .join(", ");
-   }
-   
-   function updateMercenarySlotDropdown(unlockedSlots = 1) {
-     const select = byId("protectSlotIndex");
-     if (!select) return;
-   
-     const slots = Number(unlockedSlots || 1);
-   
-     const opt0 = Array.from(select.options).find((o) => String(o.value) === "0");
-     const opt1 = Array.from(select.options).find((o) => String(o.value) === "1");
-     const opt2 = Array.from(select.options).find((o) => String(o.value) === "2");
-   
-     if (opt0) {
-       opt0.disabled = false;
-       opt0.textContent = "Slot 1";
-     }
-   
-     if (opt1) {
-       opt1.disabled = slots < 2;
-       opt1.textContent = slots >= 2 ? "Slot 2" : "Slot 2 (locked)";
-     }
-   
-     if (opt2) {
-       opt2.disabled = slots < 3;
-       opt2.textContent = slots >= 3 ? "Slot 3" : "Slot 3 (locked)";
-     }
-   
-     if (Number(select.value) === 1 && slots < 2) select.value = "0";
-     if (Number(select.value) === 2 && slots < 3) select.value = "0";
-   
-     const slotInfo = byId("protectSlotInfo");
-     if (slotInfo) {
-       slotInfo.textContent = `Selected Slot: ${Number(select.value) + 1}`;
-     }
-   
-     const lockHint = byId("mercenarySlotLockHint");
-     if (lockHint) {
-       if (slots >= 3) {
-         lockHint.textContent = "All 3 protection slots are unlocked.";
-       } else if (slots === 2) {
-         lockHint.textContent = "Slot 3 remains locked until unlocked permanently.";
-       } else {
-         lockHint.textContent = "Slot 2 and Slot 3 remain locked until unlocked permanently.";
-       }
-     }
-   
-     setButtonVisualState("unlockSlot2Btn", slots < 2);
-     setButtonVisualState("unlockSlot3Btn", slots < 3);
-   }
-   
-   function updateBastionTitleLock(points = 0) {
-     const canSetTitle = Number(points || 0) >= 1000;
-   
-     const input = byId("bastionTitleInput");
-     const button = byId("saveBastionTitleBtn");
-     const hint = byId("bastionTitleHint");
-     const unlockState = byId("bastionTitleUnlockState");
-   
-     if (input) {
-       input.disabled = !canSetTitle;
-       input.style.opacity = canSetTitle ? "1" : "0.55";
-     }
-   
-     if (button) {
-       button.disabled = !canSetTitle;
-       button.style.opacity = canSetTitle ? "1" : "0.45";
-       button.style.pointerEvents = canSetTitle ? "auto" : "none";
-     }
-   
-     if (hint) {
-       hint.textContent = canSetTitle
-         ? "Unlocked. You can now save a Bastion / Clan Title."
-         : `Locked until you reach 1000 Defender Points. Current: ${Number(points || 0)}.`;
-     }
-   
-     if (unlockState) {
-       unlockState.textContent = canSetTitle
-         ? "Unlocked at 1000+ Defender Points"
-         : "Locked until 1000 Defender Points";
-     }
-   
-     applyDefenderProfileToUi({ defenderPoints: Number(points || 0) });
-   }
-   
-   function getProfilePoints(profile) {
-     return Number(
-       profile?.defenderPoints ??
-       profile?.points ??
-       profile?.totalPoints ??
-       0
-     );
-   }
-   
-   function getProfileSlotsUnlocked(profile) {
-     return Number(
-       profile?.slotsUnlocked ??
-       profile?.unlockedSlots ??
-       1
-     );
-   }
-   
-   function getProfileDiscountPercent(profile) {
-     const bps = Number(profile?.discountBps ?? profile?.discount_basis_points ?? 0);
-     return (bps / 100).toFixed(bps % 100 === 0 ? 0 : 2);
-   }
-   
-   function getProfileRankName(profile) {
-     return (
-       profile?.rankName ||
-       profile?.rank_label ||
-       "Watchman"
-     );
-   }
-   
-   /* =========================================================
-      FARMING V6
-      ========================================================= */
-   
-   export async function startFarmingSelected() {
-     if (!state.selectedBlock) return;
-     const msgDiv = getActionMessageDiv();
-   
-     try {
-       if (state.selectedBlock.activeOnV5) {
-         msgDiv.innerHTML = `<span class="error">❌ Block is still active on V5. Use Migrate button first.</span>`;
-         return;
-       }
-   
-       const owner = await state.nftContract.ownerOf(state.selectedBlock.tokenId);
-       if (owner.toLowerCase() !== state.userAddress.toLowerCase()) {
-         msgDiv.innerHTML = `<span class="error">❌ Not your block.</span>`;
-         return;
-       }
-   
-       const approved = await ensureFarmingApproval();
-       if (!approved) {
-         msgDiv.innerHTML = `<span class="error">❌ Failed to approve farming.</span>`;
-         return;
-       }
-   
-       setButtonBusy("farmingStartBtn", true, "Starting...");
-       msgDiv.innerHTML = `<span class="success">⏳ Starting V6 farming...</span>`;
-   
-       const tx = await state.farmingV6Contract.startFarming(state.selectedBlock.tokenId, { gasLimit: 500000 });
-       debugLog("startFarming tx", tx.hash);
-       await tx.wait();
-   
-       msgDiv.innerHTML = `<span class="success">✅ V6 farming started.</span>`;
-       await refreshSelectedBlockView();
-     } catch (e) {
-       console.error("Farming error:", e);
-       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
-     } finally {
-       setButtonBusy("farmingStartBtn", false);
-     }
-   }
-   
-   export async function stopFarmingSelected() {
-     if (!state.selectedBlock) return;
-     const msgDiv = getActionMessageDiv();
-   
-     try {
-       setButtonBusy("farmingStopBtn", true, "Stopping...");
-       msgDiv.innerHTML = `<span class="success">⏳ Stopping V6 farming...</span>`;
-   
-       const tx = await state.farmingV6Contract.stopFarming(state.selectedBlock.tokenId, { gasLimit: 500000 });
-       debugLog("stopFarming tx", tx.hash);
-       await tx.wait();
-   
-       msgDiv.innerHTML = `<span class="success">⏹️ Farming stopped.</span>`;
-       await refreshSelectedBlockView();
-     } catch (e) {
-       console.error("Stop farming error:", e);
-       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
-     } finally {
-       setButtonBusy("farmingStopBtn", false);
-     }
-   }
-   
-   export async function claimSelected() {
-     if (!state.selectedBlock) return;
-   
-     const msgDiv = getActionMessageDiv();
-     const tokenId = state.selectedBlock.tokenId;
-   
-     try {
-       setButtonBusy("claimBtn", true, "Claiming...");
-   
-       if (state.selectedBlock.activeOnV5 && !state.selectedBlock.farmingActive) {
-         const v5 = getFarmingV5Contract();
-         let preview = null;
-   
-         try {
-           preview = await v5.previewClaim(tokenId);
-         } catch (e) {
-           console.error("V5 previewClaim error:", e);
-           msgDiv.innerHTML = `<span class="error">❌ V5 preview failed: ${friendlyErrorMessage(e)}</span>`;
-           return;
-         }
-   
-         if (!preview || !preview.allowed) {
-           const code = preview?.code ?? "?";
-           const secondsRemaining = Number(preview?.secondsRemaining || 0);
-           msgDiv.innerHTML = `<span class="error">❌ V5 claim not ready. Code ${code}. Wait ${formatDuration(secondsRemaining)}.</span>`;
-           return;
-         }
-   
-         let total = null;
-         try {
-           total = await getV5PendingTotal(tokenId);
-         } catch (e) {
-           console.error("V5 pending total error:", e);
-           msgDiv.innerHTML = `<span class="error">❌ Could not read V5 pending rewards: ${friendlyErrorMessage(e)}</span>`;
-           return;
-         }
-   
-         if (!total || total.isZero()) {
-           msgDiv.innerHTML = `<span class="error">❌ Nothing to claim on V5.</span>`;
-           return;
-         }
-   
-         msgDiv.innerHTML = `<span class="success">⏳ Claiming V5 resources... ${total.toString()} total</span>`;
-         const tx = await v5.claimResources(tokenId, { gasLimit: 700000 });
-         debugLog("V5 claim tx", tx.hash);
-         await tx.wait();
-   
-         msgDiv.innerHTML = `<span class="success">💰 V5 resources claimed!</span>`;
-         await loadResourceBalancesOnchain();
-         await refreshSelectedBlockView();
-         return;
-       }
-   
-       if (state.selectedBlock.farmingActive) {
-         let preview = null;
-         let pending = null;
-         let total = ethers.BigNumber.from(0);
-   
-         try {
-           pending = await state.farmingV6Contract.getAllPending(tokenId);
-         } catch (e) {
-           console.error("V6 getAllPending error:", e);
-           msgDiv.innerHTML = `<span class="error">❌ Could not read V6 pending rewards: ${friendlyErrorMessage(e)}</span>`;
-           return;
-         }
-   
-         for (let i = 0; i < pending.length; i++) {
-           total = total.add(pending[i]);
-         }
-   
-         if (total.isZero()) {
-           msgDiv.innerHTML = `<span class="error">❌ Nothing to claim on V6.</span>`;
-           return;
-         }
-   
-         try {
-           preview = await state.farmingV6Contract.previewClaim(tokenId);
-         } catch (e) {
-           console.warn("V6 previewClaim failed, fallback to secondsUntilClaimable()", e);
-         }
-   
-         if (preview) {
-           if (!preview.allowed) {
-             const code = preview?.code ?? "?";
-             const secondsRemaining = Number(preview?.secondsRemaining || 0);
-             msgDiv.innerHTML = `<span class="error">❌ V6 claim not ready. Code ${code}. Wait ${formatDuration(secondsRemaining)}.</span>`;
-             return;
-           }
-         } else {
-           try {
-             const waitSec = await state.farmingV6Contract.secondsUntilClaimable(tokenId);
-             const waitNum = Number(waitSec || 0);
-   
-             if (waitNum > 0) {
-               msgDiv.innerHTML = `<span class="error">❌ V6 claim not ready. Wait ${formatDuration(waitNum)}.</span>`;
-               return;
-             }
-           } catch (e) {
-             console.error("V6 secondsUntilClaimable fallback error:", e);
-             msgDiv.innerHTML = `<span class="error">❌ V6 preview failed and fallback check also failed: ${friendlyErrorMessage(e)}</span>`;
-             return;
-           }
-         }
-   
-         msgDiv.innerHTML = `<span class="success">⏳ Claiming V6 resources... ${total.toString()} total</span>`;
-         const tx = await state.farmingV6Contract.claimResources(tokenId, { gasLimit: 700000 });
-         debugLog("V6 claim tx", tx.hash);
-         await tx.wait();
-   
-         msgDiv.innerHTML = `<span class="success">💰 V6 resources claimed!</span>`;
-         await loadResourceBalancesOnchain();
-         await refreshSelectedBlockView();
-         return;
-       }
-   
-       msgDiv.innerHTML = `<span class="error">❌ No active farm to claim from.</span>`;
-     } catch (e) {
-       console.error("Claim error:", e);
-       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
-     } finally {
-       setButtonBusy("claimBtn", false);
-     }
-   }
-   
-   export function updateFarmBoostCostLabel() {
-     const daysEl = byId("boostDays");
-     const costInfo = byId("boostCostInfo");
-   
-     if (!costInfo || !daysEl) return;
-   
-     let days = parseInt(daysEl.value, 10);
-     if (!Number.isFinite(days)) days = 7;
-   
-     days = Math.max(1, Math.min(FARM_BOOST_MAX_DAYS, days));
-     daysEl.value = String(days);
-   
-     costInfo.textContent = `Total: ${days * FARM_BOOST_PRICE_PER_DAY} INPI`;
-   }
-   
-   export async function buyBoost() {
-     if (!state.selectedBlock) {
-       alert("No block selected.");
-       return;
-     }
-   
-     const msgDiv = getActionMessageDiv();
-     const tokenId = state.selectedBlock.tokenId;
-   
-     let days = parseInt(byId("boostDays")?.value, 10);
-     if (!Number.isFinite(days)) days = 7;
-     days = Math.max(1, Math.min(FARM_BOOST_MAX_DAYS, days));
-   
-     const totalCostHuman = days * FARM_BOOST_PRICE_PER_DAY;
-     const totalCostWei = ethers.utils.parseEther(String(totalCostHuman));
-   
-     try {
-       const owner = await state.nftContract.ownerOf(tokenId);
-       if (owner.toLowerCase() !== state.userAddress.toLowerCase()) {
-         msgDiv.innerHTML = `<span class="error">❌ Not your block.</span>`;
-         return;
-       }
-   
-       setButtonBusy("buyBoostBtn", true, "Buying...");
-   
-       const allowance = await state.inpiContract.allowance(
-         state.userAddress,
-         state.farmingV6Contract.address
-       );
-   
-       if (allowance.lt(totalCostWei)) {
-         msgDiv.innerHTML = `
-           <span class="success">
-             ⏳ Approving INPI...<br>
-             Cost: ${totalCostHuman} INPI
-           </span>
-         `;
-   
-         const approveTx = await state.inpiContract.approve(
-           state.farmingV6Contract.address,
-           totalCostWei
-         );
-         debugLog("farm boost approve tx", approveTx.hash);
-         await approveTx.wait();
-       }
-   
-       msgDiv.innerHTML = `
-         <span class="success">
-           ⏳ Buying farm boost...<br>
-           Block: #${tokenId}<br>
-           Days: ${days}<br>
-           Cost: ${totalCostHuman} INPI<br>
-           Effect: +25% production<br>
-           Farm window: ${FARM_WINDOW_DAYS} days
-         </span>
-       `;
-   
-       const tx = await state.farmingV6Contract.buyBoost(tokenId, days, {
-         gasLimit: 300000
-       });
-   
-       debugLog("buyBoost tx", tx.hash);
-       await tx.wait();
-   
-       msgDiv.innerHTML = `
-         <span class="success">
-           ✅ Farm boost activated.<br>
-           Block: #${tokenId}<br>
-           Days: ${days}<br>
-           Paid: ${totalCostHuman} INPI
-         </span>
-       `;
-   
-       await loadResourceBalancesOnchain();
-       await refreshSelectedBlockView();
-     } catch (e) {
-       console.error("Boost error:", e);
-       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
-     } finally {
-       setButtonBusy("buyBoostBtn", false);
-     }
-   }
-   
-   /* =========================================================
-      MIGRATION
-      ========================================================= */
-   
-   export async function migrateSelectedFarmToV6() {
-     if (!state.selectedBlock) return;
-     if (isMigrationRunning) return;
-   
-     const msgDiv = getActionMessageDiv();
-     isMigrationRunning = true;
-     setButtonBusy("migrateFarmBtn", true, "⏳ Migrating...");
-   
-     try {
-       msgDiv.innerHTML = `<span class="success">⏳ Migrating V5 → V6...</span>`;
-   
-       const result = await migrateSingleFarmV5ToV6(state.selectedBlock.tokenId, {
-         claimIfPossible: true,
-         stopOnV5: true,
-         startOnV6: true
-       });
-   
-       let extra = "";
-       if (result.needsRevealOnV6) {
-         extra = `<br>Reveal needed on V6 before farming can start.`;
-       }
-   
-       msgDiv.innerHTML = `
-         <span class="success">
-           ✅ Migration complete.<br>
-           Claimed on V5: ${result.claimedOnV5 ? "yes" : "no"}<br>
-           Stopped on V5: ${result.stoppedOnV5 ? "yes" : "no"}<br>
-           Started on V6: ${result.startedOnV6 ? "yes" : "no"}${extra}
-         </span>
-       `;
-   
-       await loadResourceBalancesOnchain();
-       await loadUserAttacks();
-       await refreshSelectedBlockView();
-     } catch (e) {
-       console.error("Migration error:", e);
-       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
-     } finally {
-       isMigrationRunning = false;
-       setButtonBusy("migrateFarmBtn", false);
-     }
-   }
-   
-   export async function migrateAllMyV5Farms() {
-     if (isBatchMigrationRunning) return;
-   
-     const msgDiv = getActionMessageDiv();
-     isBatchMigrationRunning = true;
-     setButtonBusy("migrateAllV5Btn", true, "⏳ Migrating...");
-   
-     try {
-       msgDiv.innerHTML = `<span class="success">⏳ Scanning V5 farms...</span>`;
-   
-       const checks = await Promise.all(
-         state.userBlocks.map(async (tokenId) => ({
-           tokenId,
-           active: await isTokenActiveOnV5(tokenId).catch(() => false)
-         }))
-       );
-   
-       const toMigrate = checks.filter((x) => x.active).map((x) => x.tokenId);
-   
-       if (!toMigrate.length) {
-         msgDiv.innerHTML = `<span class="success">✅ No active V5 farms found.</span>`;
-         return;
-       }
-   
-       msgDiv.innerHTML = `<span class="success">⏳ Migrating ${toMigrate.length} V5 farms...</span>`;
-   
-       const results = await migrateManyFarmsV5ToV6(toMigrate, {
-         claimIfPossible: true,
-         stopOnV5: true,
-         startOnV6: true
-       });
-   
-       const successCount = results.filter((r) => r.ok && (r.startedOnV6 || r.needsRevealOnV6)).length;
-       const failCount = results.length - successCount;
-       const revealCount = results.filter((r) => r.ok && r.needsRevealOnV6).length;
-   
-       msgDiv.innerHTML = `
-         <span class="success">
-           ✅ Migration finished.<br>
-           Success: ${successCount}<br>
-           Failed: ${failCount}<br>
-           Need reveal before V6 start: ${revealCount}
-         </span>
-       `;
-   
-       await loadResourceBalancesOnchain();
-       await loadUserBlocks({ onRevealSelected: null, onRefreshBlockMarkings: refreshBlockMarkings });
-       await loadUserAttacks();
-     } catch (e) {
-       console.error("Migration error:", e);
-       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
-     } finally {
-       isBatchMigrationRunning = false;
-       setButtonBusy("migrateAllV5Btn", false);
-     }
-   }
-   
-   /* =========================================================
-      MERCENARY PANEL
-      ========================================================= */
-   
-   export async function loadMercenaryPanelState() {
-     if (!state.userAddress || !state.mercenaryV4Contract) return;
-   
-     try {
-       const [profile, slots] = await Promise.all([
-         loadMercenaryProfileV4(state.userAddress),
-         loadMercenarySlotsV4(state.userAddress)
-       ]);
-   
-       state.mercenaryProfile = profile || null;
-       state.mercenarySlots = slots || [];
-   
-       updateMercenaryPanelDisplay();
-     } catch (e) {
-       console.error("loadMercenaryPanelState error:", e);
-   
-       try {
-         const onchainProfile = await state.mercenaryV4Contract.getDefenderProfile(state.userAddress);
-         state.mercenaryProfile = {
-           defenderPoints: Number(onchainProfile?.defenderPoints ?? onchainProfile?.[0] ?? 0),
-           points: Number(onchainProfile?.defenderPoints ?? onchainProfile?.[0] ?? 0),
-           rankName: null,
-           discountBps: Number(onchainProfile?.discountBps ?? onchainProfile?.[3] ?? 0),
-           slotsUnlocked: Number(onchainProfile?.slotsUnlocked ?? onchainProfile?.[4] ?? 1),
-           bastionTitle: String(onchainProfile?.bastionTitle ?? onchainProfile?.[7] ?? "")
-         };
-   
-         try {
-           const walletSlots = await state.mercenaryV4Contract.getWalletSlots(state.userAddress);
-           const unlocked = Number(walletSlots?.unlockedSlots ?? walletSlots?.[0] ?? 1);
-           state.mercenaryProfile.slotsUnlocked = unlocked;
-         } catch {}
-   
-         state.mercenarySlots = [];
-         updateMercenaryPanelDisplay();
-       } catch (inner) {
-         console.error("loadMercenaryPanelState on-chain fallback error:", inner);
-       }
-     }
-   }
-   
-   export function updateMercenaryPanelDisplay() {
-     const profile = state.mercenaryProfile;
-     const slots = state.mercenarySlots || [];
-     const selected = state.selectedBlock;
-   
-     safeValue("protectTokenId", selected?.tokenId || "");
-   
-     const points = getProfilePoints(profile);
-     const slotsUnlocked = getProfileSlotsUnlocked(profile);
-     const rankName = getProfileRankName(profile);
-     const discount = getProfileDiscountPercent(profile);
-     const bastionTitle = profile?.bastionTitle || "—";
-   
-     if (byId("mercenaryRank")) byId("mercenaryRank").textContent = rankName;
-     if (byId("mercenaryPoints")) byId("mercenaryPoints").textContent = String(points);
-     if (byId("mercenaryDiscount")) byId("mercenaryDiscount").textContent = `${discount}%`;
-     if (byId("mercenarySlotsUnlocked")) byId("mercenarySlotsUnlocked").textContent = String(slotsUnlocked);
-     if (byId("mercenaryTitle")) byId("mercenaryTitle").textContent = bastionTitle;
-   
-     if (byId("bastionTitleInput") && !byId("bastionTitleInput").value) {
-       byId("bastionTitleInput").value = profile?.bastionTitle || "";
-     }
-   
-     updateMercenarySlotDropdown(slotsUnlocked);
-     updateBastionTitleLock(points);
-   
-     const slotsBox = byId("mercenarySlotsInfo");
-     if (slotsBox) {
-       if (!slots.length) {
-         slotsBox.innerHTML = `<div class="resource-item">No active protection slots.</div>`;
-       } else {
-         const now = Math.floor(Date.now() / 1000);
-   
-         slotsBox.innerHTML = slots
-           .sort((a, b) => Number(a.slotIndex) - Number(b.slotIndex))
-           .map((slot) => {
-             const expiry = Number(slot.expiry || slot.expiresAt || 0);
-             const active = !!slot.active && expiry > now;
-             const tokenId = Number(slot.tokenId || 0);
-             const percent = Number(slot.protectionPercent || slot.level || 0);
-             const slotIndex = Number(slot.slotIndex || 0);
-   
-             return `
-               <div class="resource-item">
-                 Slot ${slotIndex + 1}:
-                 ${active ? `#${tokenId} · ${percent}% · ${formatDuration(expiry - now)}` : "inactive"}
-               </div>
-             `;
-           })
-           .join("");
-       }
-     }
-   
-     updateMercenaryCostPreview();
-   }
-   
-   export async function updateMercenaryCostPreview() {
-     const info = byId("mercenaryCostInfo");
-     if (!info) return;
-   
-     const slotIndex = getSelectedMercenarySlot();
-     const days = getSelectedProtectionDays();
-     const payInINPI = getMercenaryPaymentMode() === "inpi";
-     const isExtension = !!(state.selectedBlock && state.selectedBlock.protectionActive);
-   
-     try {
-       if (state.userAddress && state.mercenaryV4Contract) {
-         const cost = await state.mercenaryV4Contract.getProtectionCost(
-           state.userAddress,
-           days,
-           payInINPI,
-           isExtension
-         );
-   
-         if (payInINPI) {
-           const inpiHuman = ethers.utils.formatEther(cost.inpiCost || cost[0]);
-           info.textContent = `Cost: ${inpiHuman} INPI`;
-         } else {
-           const oil = Number(cost.oilCost || cost[1] || 0);
-           const lemons = Number(cost.lemonsCost || cost[2] || 0);
-           const iron = Number(cost.ironCost || cost[3] || 0);
-           info.textContent = `Cost: ${oil} Oil, ${lemons} Lemons, ${iron} Iron`;
-         }
-       } else {
-         const base = getMercenaryV4Cost(days);
-         if (payInINPI) {
-           info.textContent = `Cost: ${base.inpi} INPI`;
-         } else {
-           info.textContent = `Cost: ${base.oil} Oil, ${base.lemons} Lemons, ${base.iron} Iron`;
-         }
-       }
-     } catch (e) {
-       console.warn("updateMercenaryCostPreview fallback:", e);
-       const base = getMercenaryV4Cost(days);
-   
-       if (payInINPI) {
-         info.textContent = `Cost: ${base.inpi} INPI`;
-       } else {
-         info.textContent = `Cost: ${base.oil} Oil, ${base.lemons} Lemons, ${base.iron} Iron`;
-       }
-     }
-   
-     const tierInfo = getMercenaryV4Cost(days);
-     const durationLabel = MERCENARY_DURATION_LABELS[days] || `${days} days`;
-     const tierLabel = MERCENARY_TIER_LABELS[tierInfo.tier] || "None";
-   
-     if (byId("protectDaysInfo")) {
-       byId("protectDaysInfo").textContent = `Duration: ${durationLabel} · Tier: ${tierLabel}`;
-     }
-   
-     if (slotIndex >= 0 && byId("protectSlotInfo")) {
-       byId("protectSlotInfo").textContent = `Selected Slot: ${slotIndex + 1}`;
-     }
-   }
-   
-   async function refreshMercenaryAfterWrite(tokenId = null) {
-     await loadMercenaryPanelState();
-     await loadUserBlocks({ onRevealSelected: null, onRefreshBlockMarkings: refreshBlockMarkings });
-   
-     if (state.selectedBlock) {
-       await selectBlock(
-         tokenId || state.selectedBlock.tokenId,
-         state.selectedBlock.row,
-         state.selectedBlock.col
-       );
-     }
-   }
-   
-   export async function unlockMercenarySecondSlot() {
-     const msgDiv = getProtectMessageDiv();
-     if (!state.mercenaryV4Contract) return;
-   
-     try {
-       setButtonBusy("unlockSlot2Btn", true, "Unlocking...");
-       msgDiv.innerHTML = `<span class="success">⏳ Unlocking slot 2...<br>${renderCostList(MERCENARY_SLOT2_UNLOCK_COST)}</span>`;
-   
-       const tx = await state.mercenaryV4Contract.unlockSecondSlot({ gasLimit: 700000 });
-       debugLog("unlockSecondSlot tx", tx.hash);
-       await tx.wait();
-   
-       msgDiv.innerHTML = `<span class="success">✅ Slot 2 unlocked.</span>`;
-       await loadResourceBalancesOnchain();
-       await refreshMercenaryAfterWrite();
-     } catch (e) {
-       console.error("unlockMercenarySecondSlot error:", e);
-       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
-     } finally {
-       setButtonBusy("unlockSlot2Btn", false);
-     }
-   }
-   
-   export async function unlockMercenaryThirdSlot() {
-     const msgDiv = getProtectMessageDiv();
-     if (!state.mercenaryV4Contract) return;
-   
-     try {
-       setButtonBusy("unlockSlot3Btn", true, "Unlocking...");
-       msgDiv.innerHTML = `<span class="success">⏳ Unlocking slot 3...<br>${renderCostList(MERCENARY_SLOT3_UNLOCK_COST)}</span>`;
-   
-       const tx = await state.mercenaryV4Contract.unlockThirdSlot({ gasLimit: 800000 });
-       debugLog("unlockThirdSlot tx", tx.hash);
-       await tx.wait();
-   
-       msgDiv.innerHTML = `<span class="success">✅ Slot 3 unlocked.</span>`;
-       await loadResourceBalancesOnchain();
-       await refreshMercenaryAfterWrite();
-     } catch (e) {
-       console.error("unlockMercenaryThirdSlot error:", e);
-       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
-     } finally {
-       setButtonBusy("unlockSlot3Btn", false);
-     }
-   }
-   
-   export async function setMercenaryProtection() {
-     const msgDiv = getProtectMessageDiv();
-     const tokenId = getSelectedProtectTokenId();
-     const slotIndex = getSelectedMercenarySlot();
-     const durationDays = getSelectedProtectionDays();
-     const payInINPI = getMercenaryPaymentMode() === "inpi";
-   
-     if (!tokenId || !state.mercenaryV4Contract) return;
-   
-     try {
-       const owner = await state.nftContract.ownerOf(tokenId);
-       if (owner.toLowerCase() !== state.userAddress.toLowerCase()) {
-         msgDiv.innerHTML = `<span class="error">❌ Not your block.</span>`;
-         return;
-       }
-   
-       if (payInINPI) {
-         const previewCost = await state.mercenaryV4Contract.getProtectionCost(
-           state.userAddress,
-           durationDays,
-           true,
-           false
-         );
-         const amount = previewCost.inpiCost || previewCost[0];
-         const ok = await ensureInpiApprovalForMercenary(amount);
-         if (!ok) {
-           msgDiv.innerHTML = `<span class="error">❌ INPI approval failed.</span>`;
-           return;
-         }
-       }
-   
-       setButtonBusy("protectBtn", true, "Setting...");
-       msgDiv.innerHTML = `<span class="success">⏳ Setting protection...</span>`;
-   
-       const tx = await state.mercenaryV4Contract.setProtection(
-         slotIndex,
-         tokenId,
-         durationDays,
-         payInINPI,
-         { gasLimit: 800000 }
-       );
-       debugLog("setProtection tx", tx.hash);
-       await tx.wait();
-   
-       msgDiv.innerHTML = `<span class="success">✅ Protection set.</span>`;
-       await loadResourceBalancesOnchain();
-       await refreshMercenaryAfterWrite(tokenId);
-     } catch (e) {
-       console.error("setMercenaryProtection error:", e);
-       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
-     } finally {
-       setButtonBusy("protectBtn", false);
-     }
-   }
-   
-   export async function extendMercenaryProtection() {
-     const msgDiv = getProtectMessageDiv();
-     const slotIndex = getSelectedMercenarySlot();
-     const additionalDays = getSelectedProtectionDays();
-     const payInINPI = getMercenaryPaymentMode() === "inpi";
-   
-     if (!state.mercenaryV4Contract) return;
-   
-     try {
-       if (payInINPI) {
-         const previewCost = await state.mercenaryV4Contract.getProtectionCost(
-           state.userAddress,
-           additionalDays,
-           true,
-           true
-         );
-         const amount = previewCost.inpiCost || previewCost[0];
-         const ok = await ensureInpiApprovalForMercenary(amount);
-         if (!ok) {
-           msgDiv.innerHTML = `<span class="error">❌ INPI approval failed.</span>`;
-           return;
-         }
-       }
-   
-       setButtonBusy("extendProtectionBtn", true, "Extending...");
-       msgDiv.innerHTML = `<span class="success">⏳ Extending protection...</span>`;
-   
-       const tx = await state.mercenaryV4Contract.extendProtection(
-         slotIndex,
-         additionalDays,
-         payInINPI,
-         { gasLimit: 800000 }
-       );
-       debugLog("extendProtection tx", tx.hash);
-       await tx.wait();
-   
-       msgDiv.innerHTML = `<span class="success">✅ Protection extended.</span>`;
-       await loadResourceBalancesOnchain();
-       await refreshMercenaryAfterWrite();
-     } catch (e) {
-       console.error("extendMercenaryProtection error:", e);
-       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
-     } finally {
-       setButtonBusy("extendProtectionBtn", false);
-     }
-   }
-   
-   export async function cancelMercenaryProtection() {
-     const msgDiv = getProtectMessageDiv();
-     const slotIndex = getSelectedMercenarySlot();
-   
-     if (!state.mercenaryV4Contract) return;
-   
-     try {
-       setButtonBusy("cancelProtectionBtn", true, "Cancelling...");
-       msgDiv.innerHTML = `<span class="success">⏳ Cancelling protection...</span>`;
-   
-       const tx = await state.mercenaryV4Contract.cancelProtection(slotIndex, {
-         gasLimit: 500000
-       });
-       debugLog("cancelProtection tx", tx.hash);
-       await tx.wait();
-   
-       msgDiv.innerHTML = `<span class="success">✅ Protection cancelled.</span>`;
-       await refreshMercenaryAfterWrite();
-     } catch (e) {
-       console.error("cancelMercenaryProtection error:", e);
-       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
-     } finally {
-       setButtonBusy("cancelProtectionBtn", false);
-     }
-   }
-   
-   export async function moveMercenaryProtection() {
-     const msgDiv = getProtectMessageDiv();
-     const slotIndex = getSelectedMercenarySlot();
-     const newTokenId = getSelectedProtectTokenId();
-   
-     if (!state.mercenaryV4Contract || !newTokenId) return;
-   
-     try {
-       setButtonBusy("moveProtectionBtn", true, "Moving...");
-       msgDiv.innerHTML = `<span class="success">⏳ Moving protection...</span>`;
-   
-       const tx = await state.mercenaryV4Contract.moveProtection(slotIndex, newTokenId, {
-         gasLimit: 800000
-       });
-       debugLog("moveProtection tx", tx.hash);
-       await tx.wait();
-   
-       msgDiv.innerHTML = `<span class="success">✅ Protection moved.</span>`;
-       await refreshMercenaryAfterWrite(newTokenId);
-     } catch (e) {
-       console.error("moveMercenaryProtection error:", e);
-       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
-     } finally {
-       setButtonBusy("moveProtectionBtn", false);
-     }
-   }
-   
-   export async function emergencyMoveMercenaryProtection() {
-     const msgDiv = getProtectMessageDiv();
-     const slotIndex = getSelectedMercenarySlot();
-     const newTokenId = getSelectedProtectTokenId();
-   
-     if (!state.mercenaryV4Contract || !newTokenId) return;
-   
-     try {
-       setButtonBusy("emergencyMoveProtectionBtn", true, "Emergency...");
-       msgDiv.innerHTML = `<span class="success">⏳ Emergency moving protection...</span>`;
-   
-       const tx = await state.mercenaryV4Contract.emergencyMoveProtection(slotIndex, newTokenId, {
-         gasLimit: 800000
-       });
-       debugLog("emergencyMoveProtection tx", tx.hash);
-       await tx.wait();
-   
-       msgDiv.innerHTML = `<span class="success">✅ Emergency protection move complete.</span>`;
-       await refreshMercenaryAfterWrite(newTokenId);
-     } catch (e) {
-       console.error("emergencyMoveMercenaryProtection error:", e);
-       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
-     } finally {
-       setButtonBusy("emergencyMoveProtectionBtn", false);
-     }
-   }
-   
-   export async function cleanSelectedProtection() {
-     const msgDiv = getProtectMessageDiv();
-     const tokenId = getSelectedProtectTokenId();
-   
-     if (!state.mercenaryV4Contract || !tokenId) return;
-   
-     try {
-       setButtonBusy("cleanupProtectionBtn", true, "Cleaning...");
-       msgDiv.innerHTML = `<span class="success">⏳ Cleaning expired protection...</span>`;
-   
-       const tx = await state.mercenaryV4Contract.cleanExpiredToken(tokenId, {
-         gasLimit: 500000
-       });
-       debugLog("cleanExpiredToken tx", tx.hash);
-       await tx.wait();
-   
-       msgDiv.innerHTML = `<span class="success">✅ Cleanup complete.</span>`;
-       await loadResourceBalancesOnchain();
-       await refreshMercenaryAfterWrite(tokenId);
-     } catch (e) {
-       console.error("cleanSelectedProtection error:", e);
-       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
-     } finally {
-       setButtonBusy("cleanupProtectionBtn", false);
-     }
-   }
-   
-   export async function saveBastionTitle() {
-     const msgDiv = getProtectMessageDiv();
-     const title = (byId("bastionTitleInput")?.value || "").trim();
-     const points = Number(state.uiBlockStatus?.defenderPoints || getProfilePoints(state.mercenaryProfile));
-   
-     if (!state.mercenaryV4Contract) return;
-   
-     if (points < 1000) {
-       msgDiv.innerHTML = `<span class="error">❌ Bastion Title unlocks at 1000 Defender Points. Current: ${points}.</span>`;
-       updateBastionTitleLock(points);
-       return;
-     }
-   
-     if (!title) {
-       msgDiv.innerHTML = `<span class="error">❌ Enter a title first.</span>`;
-       return;
-     }
-   
-     try {
-       setButtonBusy("saveBastionTitleBtn", true, "Saving...");
-       msgDiv.innerHTML = `<span class="success">⏳ Saving bastion title...</span>`;
-   
-       const tx = await state.mercenaryV4Contract.setBastionTitle(title, {
-         gasLimit: 400000
-       });
-       debugLog("setBastionTitle tx", tx.hash);
-       await tx.wait();
-   
-       msgDiv.innerHTML = `<span class="success">✅ Bastion title saved.</span>`;
-       await loadMercenaryPanelState();
-     } catch (e) {
-       console.error("saveBastionTitle error:", e);
-       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
-     } finally {
-       setButtonBusy("saveBastionTitleBtn", false);
-     }
-   }
-   
-   /* =========================================================
-      LEGACY BUTTON COMPAT
-      ========================================================= */
-   
-   export async function protect() {
-     if (!state.selectedBlock?.protectionActive) {
-       return setMercenaryProtection();
-     }
-     return extendMercenaryProtection();
-   }
+    state,
+    applyDefenderProfileToUi,
+    setMercenaryProfile,
+    setMercenarySlots
+  } from "./state.js";
+  
+  import {
+    MERCENARY_SLOT2_UNLOCK_COST,
+    MERCENARY_SLOT3_UNLOCK_COST,
+    MERCENARY_DURATION_LABELS,
+    MERCENARY_TIER_LABELS,
+    FARM_BOOST_PRICE_PER_DAY,
+    FARM_BOOST_MAX_DAYS,
+    FARM_WINDOW_DAYS,
+    getMercenaryV4Cost,
+    getMercenaryRankLabel,
+    getMercenaryDiscountPercent,
+    getMercenaryNextRankThreshold
+  } from "./config.js";
+  
+  import { byId, formatDuration, debugLog, safeValue, safeText } from "./utils.js";
+  import { ensureFarmingApproval, ensureInpiApprovalForMercenary } from "./approvals.js";
+  import { loadResourceBalancesOnchain } from "./resources.js";
+  import { loadUserBlocks, selectBlock } from "./blocks.js";
+  import { loadUserAttacks, refreshBlockMarkings } from "./attacks.js";
+  
+  import {
+    loadMercenaryProfileV4,
+    loadMercenarySlotsV4
+  } from "./subgraph.js";
+  
+  import {
+    isTokenActiveOnV5,
+    migrateSingleFarmV5ToV6,
+    migrateManyFarmsV5ToV6,
+    getFarmingV5Contract,
+    getV5PendingTotal
+  } from "./migration.js";
+  
+  let isMigrationRunning = false;
+  let isBatchMigrationRunning = false;
+  
+  /* =========================================================
+     BASIC HELPERS
+     ========================================================= */
+  
+  function getActionMessageDiv() {
+    return byId("actionMessage");
+  }
+  
+  function getProtectMessageDiv() {
+    return byId("protectMessage");
+  }
+  
+  async function resolveTokenPosition(tokenId) {
+    if (!state.nftContract || tokenId === null || tokenId === undefined || tokenId === "") {
+      return { row: 0, col: 0 };
+    }
+  
+    try {
+      const pos = await state.nftContract.getBlockPosition(tokenId);
+      return {
+        row: Number(pos?.row || 0),
+        col: Number(pos?.col || 0)
+      };
+    } catch {
+      return { row: 0, col: 0 };
+    }
+  }
+  
+  async function refreshSelectedBlockView() {
+    if (!state.selectedBlock) return;
+  
+    await loadUserBlocks({
+      onRevealSelected: null,
+      onRefreshBlockMarkings: refreshBlockMarkings
+    });
+  
+    await selectBlock(
+      state.selectedBlock.tokenId,
+      state.selectedBlock.row,
+      state.selectedBlock.col
+    );
+  }
+  
+  function setButtonBusy(buttonId, busy, busyText = "Processing...") {
+    const btn = byId(buttonId);
+    if (!btn) return null;
+  
+    if (busy) {
+      if (!btn.dataset.originalText) {
+        btn.dataset.originalText = btn.textContent;
+      }
+      btn.disabled = true;
+      btn.style.opacity = "0.6";
+      btn.style.pointerEvents = "none";
+      btn.textContent = busyText;
+    } else {
+      btn.disabled = false;
+      btn.style.opacity = "1";
+      btn.style.pointerEvents = "auto";
+      if (btn.dataset.originalText) {
+        btn.textContent = btn.dataset.originalText;
+      }
+    }
+  
+    return btn;
+  }
+  
+  function setButtonVisualState(buttonId, enabled) {
+    const btn = byId(buttonId);
+    if (!btn) return;
+    btn.disabled = !enabled;
+    btn.style.opacity = enabled ? "1" : "0.45";
+    btn.style.pointerEvents = enabled ? "auto" : "none";
+  }
+  
+  function friendlyErrorMessage(e) {
+    const msg = e?.reason || e?.data?.message || e?.message || "Unknown error";
+    const lower = String(msg).toLowerCase();
+  
+    if (
+      e?.code === 4001 ||
+      lower.includes("user rejected") ||
+      lower.includes("denied transaction signature") ||
+      lower.includes("action_rejected")
+    ) {
+      return "Transaction cancelled in wallet.";
+    }
+  
+    if (e?.code === "TRANSACTION_REPLACED") {
+      if (e?.cancelled) return "Transaction was cancelled/replaced in wallet after sending.";
+      return "Transaction was replaced in wallet.";
+    }
+  
+    if (lower.includes("nonce too high")) {
+      return "Nonce too high. Please check pending transactions in MetaMask and try again.";
+    }
+  
+    if (lower.includes("nonce has already been used")) {
+      return "Nonce already used. Please wait for pending transactions or reset activity in MetaMask.";
+    }
+  
+    if (lower.includes("replacement transaction underpriced")) {
+      return "Replacement transaction underpriced. Please wait a moment and try again.";
+    }
+  
+    if (lower.includes("already known")) {
+      return "This transaction is already known by the network. Please wait.";
+    }
+  
+    if (lower.includes("call revert exception")) {
+      return "Contract call failed. Please check whether the selected block is really active on this farm version.";
+    }
+  
+    return msg;
+  }
+  
+  /* =========================================================
+     MERCENARY UI HELPERS
+     ========================================================= */
+  
+  function getMercenaryPaymentMode() {
+    return (byId("mercenaryPaymentMode")?.value || "resources").toLowerCase();
+  }
+  
+  function getSelectedMercenarySlot() {
+    const v = parseInt(byId("protectSlotIndex")?.value || "0", 10);
+    return Number.isFinite(v) ? v : 0;
+  }
+  
+  function getSelectedProtectionDays() {
+    const v = parseInt(byId("protectDays")?.value || "1", 10);
+    return Number.isFinite(v) ? v : 1;
+  }
+  
+  function getSelectedProtectTokenId() {
+    const v = parseInt(byId("protectTokenId")?.value || "0", 10);
+    return Number.isFinite(v) ? v : 0;
+  }
+  
+  function getMoveProtectionTargetTokenId() {
+    const v = parseInt(byId("moveProtectionTargetTokenId")?.value || "0", 10);
+    return Number.isFinite(v) ? v : 0;
+  }
+  
+  function renderCostList(items) {
+    if (!items) return "";
+  
+    if (Array.isArray(items)) {
+      return items.map((x) => `${x.amount} ${x.label}`).join(", ");
+    }
+  
+    const labelMap = {
+      oil: "Oil",
+      lemons: "Lemons",
+      iron: "Iron",
+      gold: "Gold",
+      platinum: "Platinum",
+      copper: "Copper",
+      crystal: "Crystal",
+      obsidian: "Obsidian",
+      mysterium: "Mysterium",
+      aether: "Aether"
+    };
+  
+    return Object.entries(items)
+      .filter(([_, amount]) => Number(amount || 0) > 0)
+      .map(([key, amount]) => `${amount} ${labelMap[key] || key}`)
+      .join(", ");
+  }
+  
+  function getProfilePoints(profile) {
+    return Number(
+      profile?.defenderPoints ??
+      profile?.points ??
+      profile?.totalPoints ??
+      0
+    );
+  }
+  
+  function getProfileSlotsUnlocked(profile) {
+    return Number(
+      profile?.slotsUnlocked ??
+      profile?.unlockedSlots ??
+      1
+    );
+  }
+  
+  function getProfileDiscountPercent(profile) {
+    if (profile?.discountPercent !== undefined && profile?.discountPercent !== null) {
+      return Number(profile.discountPercent);
+    }
+  
+    const bps = Number(profile?.discountBps ?? profile?.discount_basis_points ?? 0);
+    if (bps > 0) return Number((bps / 100).toFixed(bps % 100 === 0 ? 0 : 2));
+  
+    return getMercenaryDiscountPercent(getProfilePoints(profile));
+  }
+  
+  function getProfileRankName(profile) {
+    return (
+      profile?.rankName ||
+      profile?.rank_label ||
+      getMercenaryRankLabel(getProfilePoints(profile))
+    );
+  }
+  
+  function getProfileNextRank(profile) {
+    return getMercenaryNextRankThreshold(getProfilePoints(profile));
+  }
+  
+  function getSelectedSlotData() {
+    const slotIndex = getSelectedMercenarySlot();
+    const slots = Array.isArray(state.mercenarySlots) ? state.mercenarySlots : [];
+    return slots.find((slot) => Number(slot.slotIndex || 0) === slotIndex) || null;
+  }
+  
+  function isSelectedSlotActive() {
+    const slot = getSelectedSlotData();
+    const now = Math.floor(Date.now() / 1000);
+    const expiry = Number(slot?.expiry || slot?.expiresAt || 0);
+    return !!slot && !!slot.active && expiry > now;
+  }
+  
+  function isSelectedSlotExpired() {
+    const slot = getSelectedSlotData();
+    const now = Math.floor(Date.now() / 1000);
+    const expiry = Number(slot?.expiry || slot?.expiresAt || 0);
+    return !!slot && expiry > 0 && expiry <= now;
+  }
+  
+  function getCleanupTargetTokenId() {
+    const slot = getSelectedSlotData();
+  
+    if (slot && isSelectedSlotExpired()) {
+      const expiredSlotTokenId = parseInt(slot.tokenId || "0", 10);
+      if (Number.isFinite(expiredSlotTokenId) && expiredSlotTokenId > 0) {
+        return expiredSlotTokenId;
+      }
+    }
+  
+    return getSelectedProtectTokenId();
+  }
+  
+  function updateMercenarySlotDropdown(unlockedSlots = 1) {
+    const select = byId("protectSlotIndex");
+    if (!select) return;
+  
+    const slots = Number(unlockedSlots || 1);
+  
+    const opt0 = Array.from(select.options).find((o) => String(o.value) === "0");
+    const opt1 = Array.from(select.options).find((o) => String(o.value) === "1");
+    const opt2 = Array.from(select.options).find((o) => String(o.value) === "2");
+  
+    if (opt0) {
+      opt0.disabled = false;
+      opt0.textContent = "Slot 1";
+    }
+  
+    if (opt1) {
+      opt1.disabled = slots < 2;
+      opt1.textContent = slots >= 2 ? "Slot 2" : "Slot 2 (locked)";
+    }
+  
+    if (opt2) {
+      opt2.disabled = slots < 3;
+      opt2.textContent = slots >= 3 ? "Slot 3" : "Slot 3 (locked)";
+    }
+  
+    if (Number(select.value) === 1 && slots < 2) select.value = "0";
+    if (Number(select.value) === 2 && slots < 3) select.value = "0";
+  
+    const slotInfo = byId("protectSlotInfo");
+    if (slotInfo) {
+      slotInfo.textContent = `Selected Slot: ${Number(select.value) + 1}`;
+    }
+  
+    const lockHint = byId("mercenarySlotLockHint");
+    if (lockHint) {
+      if (slots >= 3) {
+        lockHint.textContent = "All 3 protection slots are unlocked.";
+      } else if (slots === 2) {
+        lockHint.textContent = "Slot 3 remains locked until unlocked permanently.";
+      } else {
+        lockHint.textContent = "Slot 2 and Slot 3 remain locked until unlocked permanently.";
+      }
+    }
+  
+    setButtonVisualState("unlockSlot2Btn", slots < 2);
+    setButtonVisualState("unlockSlot3Btn", slots < 3);
+  }
+  
+  function updateBastionTitleLock(points = 0) {
+    const canSetTitle = Number(points || 0) >= 1000;
+  
+    const input = byId("bastionTitleInput");
+    const button = byId("saveBastionTitleBtn");
+    const hint = byId("bastionTitleHint");
+    const unlockState = byId("bastionTitleUnlockState");
+  
+    if (input) {
+      input.disabled = !canSetTitle;
+      input.style.opacity = canSetTitle ? "1" : "0.55";
+    }
+  
+    if (button) {
+      button.disabled = !canSetTitle;
+      button.style.opacity = canSetTitle ? "1" : "0.45";
+      button.style.pointerEvents = canSetTitle ? "auto" : "none";
+    }
+  
+    if (hint) {
+      hint.textContent = canSetTitle
+        ? "Unlocked. You can now save a Bastion / Clan Title."
+        : `Locked until you reach 1000 Defender Points. Current: ${Number(points || 0)}.`;
+    }
+  
+    if (unlockState) {
+      unlockState.textContent = canSetTitle
+        ? "Unlocked at 1000+ Defender Points"
+        : "Locked until 1000 Defender Points";
+    }
+  
+    applyDefenderProfileToUi({ defenderPoints: Number(points || 0) });
+  }
+  
+  function updateMercenaryActionStates() {
+    const selectedSlotActive = isSelectedSlotActive();
+    const selectedSlotExpired = isSelectedSlotExpired();
+    const slotsUnlocked = getProfileSlotsUnlocked(state.mercenaryProfile);
+    const selectedProtectTokenId = getSelectedProtectTokenId();
+    const moveTargetTokenId = getMoveProtectionTargetTokenId();
+  
+    const hasSelectedProtectToken = !!selectedProtectTokenId;
+    const hasMoveTarget =
+      !!moveTargetTokenId &&
+      moveTargetTokenId !== selectedProtectTokenId;
+  
+    setButtonVisualState("protectBtn", hasSelectedProtectToken && !selectedSlotActive);
+    setButtonVisualState("extendProtectionBtn", selectedSlotActive && !selectedSlotExpired);
+    setButtonVisualState("cancelProtectionBtn", selectedSlotActive && !selectedSlotExpired);
+    setButtonVisualState("cleanupProtectionBtn", selectedSlotExpired);
+  
+    setButtonVisualState("moveProtectionBtn", selectedSlotActive && !selectedSlotExpired && hasMoveTarget);
+    setButtonVisualState("emergencyMoveProtectionBtn", selectedSlotActive && !selectedSlotExpired && hasMoveTarget);
+  
+    setButtonVisualState("unlockSlot2Btn", slotsUnlocked < 2);
+    setButtonVisualState("unlockSlot3Btn", slotsUnlocked < 3);
+  
+    const protectBtn = byId("protectBtn");
+    if (protectBtn && !protectBtn.dataset.originalText) {
+      protectBtn.dataset.originalText = "Set Protection";
+    }
+  
+    if (protectBtn) {
+      protectBtn.textContent = selectedSlotActive ? "Slot Active" : "Set Protection";
+    }
+  }
+  
+  function updateMercenarySideInfo(profile) {
+    const points = getProfilePoints(profile);
+    const rankName = getProfileRankName(profile);
+    const discount = getProfileDiscountPercent(profile);
+    const nextRankAt = getProfileNextRank(profile);
+  
+    safeText("mercenaryPoints", String(points));
+    safeText("mercenaryPointsSide", String(points));
+  
+    safeText("mercenaryRank", rankName);
+    safeText("mercenaryRankSide", rankName);
+  
+    safeText("mercenaryDiscount", `${discount}%`);
+    safeText("mercenaryDiscountSide", `${discount}%`);
+  
+    safeText("mercenaryNextRank", String(nextRankAt));
+    safeText("mercenaryNextRankSide", String(nextRankAt));
+  }
+  
+  /* =========================================================
+     FARMING V6
+     ========================================================= */
+  
+  export async function startFarmingSelected() {
+    if (!state.selectedBlock) return;
+    const msgDiv = getActionMessageDiv();
+  
+    try {
+      if (state.selectedBlock.activeOnV5) {
+        msgDiv.innerHTML = `<span class="error">❌ Block is still active on V5. Use Migrate button first.</span>`;
+        return;
+      }
+  
+      const owner = await state.nftContract.ownerOf(state.selectedBlock.tokenId);
+      if (owner.toLowerCase() !== state.userAddress.toLowerCase()) {
+        msgDiv.innerHTML = `<span class="error">❌ Not your block.</span>`;
+        return;
+      }
+  
+      const approved = await ensureFarmingApproval();
+      if (!approved) {
+        msgDiv.innerHTML = `<span class="error">❌ Failed to approve farming.</span>`;
+        return;
+      }
+  
+      setButtonBusy("farmingStartBtn", true, "Starting...");
+      msgDiv.innerHTML = `<span class="success">⏳ Starting V6 farming...</span>`;
+  
+      const tx = await state.farmingV6Contract.startFarming(state.selectedBlock.tokenId, { gasLimit: 500000 });
+      debugLog("startFarming tx", tx.hash);
+      await tx.wait();
+  
+      msgDiv.innerHTML = `<span class="success">✅ V6 farming started.</span>`;
+      await refreshSelectedBlockView();
+    } catch (e) {
+      console.error("Farming error:", e);
+      msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+    } finally {
+      setButtonBusy("farmingStartBtn", false);
+    }
+  }
+  
+  export async function stopFarmingSelected() {
+    if (!state.selectedBlock) return;
+    const msgDiv = getActionMessageDiv();
+  
+    try {
+      setButtonBusy("farmingStopBtn", true, "Stopping...");
+      msgDiv.innerHTML = `<span class="success">⏳ Stopping V6 farming...</span>`;
+  
+      const tx = await state.farmingV6Contract.stopFarming(state.selectedBlock.tokenId, { gasLimit: 500000 });
+      debugLog("stopFarming tx", tx.hash);
+      await tx.wait();
+  
+      msgDiv.innerHTML = `<span class="success">⏹️ Farming stopped.</span>`;
+      await refreshSelectedBlockView();
+    } catch (e) {
+      console.error("Stop farming error:", e);
+      msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+    } finally {
+      setButtonBusy("farmingStopBtn", false);
+    }
+  }
+  
+  export async function claimSelected() {
+    if (!state.selectedBlock) return;
+  
+    const msgDiv = getActionMessageDiv();
+    const tokenId = state.selectedBlock.tokenId;
+  
+    try {
+      setButtonBusy("claimBtn", true, "Claiming...");
+  
+      if (state.selectedBlock.activeOnV5 && !state.selectedBlock.farmingActive) {
+        const v5 = getFarmingV5Contract();
+        let preview = null;
+  
+        try {
+          preview = await v5.previewClaim(tokenId);
+        } catch (e) {
+          console.error("V5 previewClaim error:", e);
+          msgDiv.innerHTML = `<span class="error">❌ V5 preview failed: ${friendlyErrorMessage(e)}</span>`;
+          return;
+        }
+  
+        if (!preview || !preview.allowed) {
+          const code = preview?.code ?? "?";
+          const secondsRemaining = Number(preview?.secondsRemaining || 0);
+          msgDiv.innerHTML = `<span class="error">❌ V5 claim not ready. Code ${code}. Wait ${formatDuration(secondsRemaining)}.</span>`;
+          return;
+        }
+  
+        let total = null;
+        try {
+          total = await getV5PendingTotal(tokenId);
+        } catch (e) {
+          console.error("V5 pending total error:", e);
+          msgDiv.innerHTML = `<span class="error">❌ Could not read V5 pending rewards: ${friendlyErrorMessage(e)}</span>`;
+          return;
+        }
+  
+        if (!total || total.isZero()) {
+          msgDiv.innerHTML = `<span class="error">❌ Nothing to claim on V5.</span>`;
+          return;
+        }
+  
+        msgDiv.innerHTML = `<span class="success">⏳ Claiming V5 resources... ${total.toString()} total</span>`;
+        const tx = await v5.claimResources(tokenId, { gasLimit: 700000 });
+        debugLog("V5 claim tx", tx.hash);
+        await tx.wait();
+  
+        msgDiv.innerHTML = `<span class="success">💰 V5 resources claimed!</span>`;
+        await loadResourceBalancesOnchain();
+        await refreshSelectedBlockView();
+        return;
+      }
+  
+      if (state.selectedBlock.farmingActive) {
+        let preview = null;
+        let pending = null;
+        let total = ethers.BigNumber.from(0);
+  
+        try {
+          pending = await state.farmingV6Contract.getAllPending(tokenId);
+        } catch (e) {
+          console.error("V6 getAllPending error:", e);
+          msgDiv.innerHTML = `<span class="error">❌ Could not read V6 pending rewards: ${friendlyErrorMessage(e)}</span>`;
+          return;
+        }
+  
+        for (let i = 0; i < pending.length; i++) {
+          total = total.add(pending[i]);
+        }
+  
+        if (total.isZero()) {
+          msgDiv.innerHTML = `<span class="error">❌ Nothing to claim on V6.</span>`;
+          return;
+        }
+  
+        try {
+          preview = await state.farmingV6Contract.previewClaim(tokenId);
+        } catch (e) {
+          console.warn("V6 previewClaim failed, fallback to secondsUntilClaimable()", e);
+        }
+  
+        if (preview) {
+          if (!preview.allowed) {
+            const code = preview?.code ?? "?";
+            const secondsRemaining = Number(preview?.secondsRemaining || 0);
+            msgDiv.innerHTML = `<span class="error">❌ V6 claim not ready. Code ${code}. Wait ${formatDuration(secondsRemaining)}.</span>`;
+            return;
+          }
+        } else {
+          try {
+            const waitSec = await state.farmingV6Contract.secondsUntilClaimable(tokenId);
+            const waitNum = Number(waitSec || 0);
+  
+            if (waitNum > 0) {
+              msgDiv.innerHTML = `<span class="error">❌ V6 claim not ready. Wait ${formatDuration(waitNum)}.</span>`;
+              return;
+            }
+          } catch (e) {
+            console.error("V6 secondsUntilClaimable fallback error:", e);
+            msgDiv.innerHTML = `<span class="error">❌ V6 preview failed and fallback check also failed: ${friendlyErrorMessage(e)}</span>`;
+            return;
+          }
+        }
+  
+        msgDiv.innerHTML = `<span class="success">⏳ Claiming V6 resources... ${total.toString()} total</span>`;
+        const tx = await state.farmingV6Contract.claimResources(tokenId, { gasLimit: 700000 });
+        debugLog("V6 claim tx", tx.hash);
+        await tx.wait();
+  
+        msgDiv.innerHTML = `<span class="success">💰 V6 resources claimed!</span>`;
+        await loadResourceBalancesOnchain();
+        await refreshSelectedBlockView();
+        return;
+      }
+  
+      msgDiv.innerHTML = `<span class="error">❌ No active farm to claim from.</span>`;
+    } catch (e) {
+      console.error("Claim error:", e);
+      msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+    } finally {
+      setButtonBusy("claimBtn", false);
+    }
+  }
+  
+  export function updateFarmBoostCostLabel() {
+    const daysEl = byId("boostDays");
+    const costInfo = byId("boostCostInfo");
+  
+    if (!costInfo || !daysEl) return;
+  
+    let days = parseInt(daysEl.value, 10);
+    if (!Number.isFinite(days)) days = 7;
+  
+    days = Math.max(1, Math.min(FARM_BOOST_MAX_DAYS, days));
+    daysEl.value = String(days);
+  
+    costInfo.textContent = `Total: ${days * FARM_BOOST_PRICE_PER_DAY} INPI`;
+  }
+  
+  export async function buyBoost() {
+    if (!state.selectedBlock) {
+      alert("No block selected.");
+      return;
+    }
+  
+    const msgDiv = getActionMessageDiv();
+    const tokenId = state.selectedBlock.tokenId;
+  
+    let days = parseInt(byId("boostDays")?.value, 10);
+    if (!Number.isFinite(days)) days = 7;
+    days = Math.max(1, Math.min(FARM_BOOST_MAX_DAYS, days));
+  
+    const totalCostHuman = days * FARM_BOOST_PRICE_PER_DAY;
+    const totalCostWei = ethers.utils.parseEther(String(totalCostHuman));
+  
+    try {
+      const owner = await state.nftContract.ownerOf(tokenId);
+      if (owner.toLowerCase() !== state.userAddress.toLowerCase()) {
+        msgDiv.innerHTML = `<span class="error">❌ Not your block.</span>`;
+        return;
+      }
+  
+      setButtonBusy("buyBoostBtn", true, "Buying...");
+  
+      const allowance = await state.inpiContract.allowance(
+        state.userAddress,
+        state.farmingV6Contract.address
+      );
+  
+      if (allowance.lt(totalCostWei)) {
+        msgDiv.innerHTML = `
+          <span class="success">
+            ⏳ Approving INPI...<br>
+            Cost: ${totalCostHuman} INPI
+          </span>
+        `;
+  
+        const approveTx = await state.inpiContract.approve(
+          state.farmingV6Contract.address,
+          totalCostWei
+        );
+        debugLog("farm boost approve tx", approveTx.hash);
+        await approveTx.wait();
+      }
+  
+      msgDiv.innerHTML = `
+        <span class="success">
+          ⏳ Buying farm boost...<br>
+          Block: #${tokenId}<br>
+          Days: ${days}<br>
+          Cost: ${totalCostHuman} INPI<br>
+          Effect: +25% production<br>
+          Farm window: ${FARM_WINDOW_DAYS} days
+        </span>
+      `;
+  
+      const tx = await state.farmingV6Contract.buyBoost(tokenId, days, {
+        gasLimit: 300000
+      });
+  
+      debugLog("buyBoost tx", tx.hash);
+      await tx.wait();
+  
+      msgDiv.innerHTML = `
+        <span class="success">
+          ✅ Farm boost activated.<br>
+          Block: #${tokenId}<br>
+          Days: ${days}<br>
+          Paid: ${totalCostHuman} INPI
+        </span>
+      `;
+  
+      await loadResourceBalancesOnchain();
+      await refreshSelectedBlockView();
+    } catch (e) {
+      console.error("Boost error:", e);
+      msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+    } finally {
+      setButtonBusy("buyBoostBtn", false);
+    }
+  }
+  
+  /* =========================================================
+     MIGRATION
+     ========================================================= */
+  
+  export async function migrateSelectedFarmToV6() {
+    if (!state.selectedBlock) return;
+    if (isMigrationRunning) return;
+  
+    const msgDiv = getActionMessageDiv();
+    isMigrationRunning = true;
+    setButtonBusy("migrateFarmBtn", true, "⏳ Migrating...");
+  
+    try {
+      msgDiv.innerHTML = `<span class="success">⏳ Migrating V5 → V6...</span>`;
+  
+      const result = await migrateSingleFarmV5ToV6(state.selectedBlock.tokenId, {
+        claimIfPossible: true,
+        stopOnV5: true,
+        startOnV6: true
+      });
+  
+      let extra = "";
+      if (result.needsRevealOnV6) {
+        extra = `<br>Reveal needed on V6 before farming can start.`;
+      }
+  
+      msgDiv.innerHTML = `
+        <span class="success">
+          ✅ Migration complete.<br>
+          Claimed on V5: ${result.claimedOnV5 ? "yes" : "no"}<br>
+          Stopped on V5: ${result.stoppedOnV5 ? "yes" : "no"}<br>
+          Started on V6: ${result.startedOnV6 ? "yes" : "no"}${extra}
+        </span>
+      `;
+  
+      await loadResourceBalancesOnchain();
+      await loadUserAttacks();
+      await refreshSelectedBlockView();
+    } catch (e) {
+      console.error("Migration error:", e);
+      msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+    } finally {
+      isMigrationRunning = false;
+      setButtonBusy("migrateFarmBtn", false);
+    }
+  }
+  
+  export async function migrateAllMyV5Farms() {
+    if (isBatchMigrationRunning) return;
+  
+    const msgDiv = getActionMessageDiv();
+    isBatchMigrationRunning = true;
+    setButtonBusy("migrateAllV5Btn", true, "⏳ Migrating...");
+  
+    try {
+      msgDiv.innerHTML = `<span class="success">⏳ Scanning V5 farms...</span>`;
+  
+      const checks = await Promise.all(
+        state.userBlocks.map(async (tokenId) => ({
+          tokenId,
+          active: await isTokenActiveOnV5(tokenId).catch(() => false)
+        }))
+      );
+  
+      const toMigrate = checks.filter((x) => x.active).map((x) => x.tokenId);
+  
+      if (!toMigrate.length) {
+        msgDiv.innerHTML = `<span class="success">✅ No active V5 farms found.</span>`;
+        return;
+      }
+  
+      msgDiv.innerHTML = `<span class="success">⏳ Migrating ${toMigrate.length} V5 farms...</span>`;
+  
+      const results = await migrateManyFarmsV5ToV6(toMigrate, {
+        claimIfPossible: true,
+        stopOnV5: true,
+        startOnV6: true
+      });
+  
+      const successCount = results.filter((r) => r.ok && (r.startedOnV6 || r.needsRevealOnV6)).length;
+      const failCount = results.length - successCount;
+      const revealCount = results.filter((r) => r.ok && r.needsRevealOnV6).length;
+  
+      msgDiv.innerHTML = `
+        <span class="success">
+          ✅ Migration finished.<br>
+          Success: ${successCount}<br>
+          Failed: ${failCount}<br>
+          Need reveal before V6 start: ${revealCount}
+        </span>
+      `;
+  
+      await loadResourceBalancesOnchain();
+      await loadUserBlocks({ onRevealSelected: null, onRefreshBlockMarkings: refreshBlockMarkings });
+      await loadUserAttacks();
+    } catch (e) {
+      console.error("Migration error:", e);
+      msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+    } finally {
+      isBatchMigrationRunning = false;
+      setButtonBusy("migrateAllV5Btn", false);
+    }
+  }
+  
+  /* =========================================================
+     MERCENARY PANEL
+     ========================================================= */
+  
+  export async function loadMercenaryPanelState() {
+    if (!state.userAddress || !state.mercenaryV4Contract) return;
+  
+    try {
+      const [profile, slots] = await Promise.all([
+        loadMercenaryProfileV4(state.userAddress),
+        loadMercenarySlotsV4(state.userAddress)
+      ]);
+  
+      setMercenaryProfile(profile || null);
+      setMercenarySlots(slots || []);
+      state.mercenaryPanelLoaded = true;
+  
+      updateMercenaryPanelDisplay();
+    } catch (e) {
+      console.error("loadMercenaryPanelState error:", e);
+  
+      try {
+        const onchainProfile = await state.mercenaryV4Contract.getDefenderProfile(state.userAddress);
+        const fallbackProfile = {
+          defenderPoints: Number(onchainProfile?.defenderPoints ?? onchainProfile?.[0] ?? 0),
+          points: Number(onchainProfile?.defenderPoints ?? onchainProfile?.[0] ?? 0),
+          rankName: null,
+          discountBps: Number(onchainProfile?.discountBps ?? onchainProfile?.[2] ?? 0),
+          discountPercent: null,
+          slotsUnlocked: 1,
+          bastionTitle: String(onchainProfile?.bastionTitle ?? onchainProfile?.[7] ?? "")
+        };
+  
+        try {
+          const walletSlots = await state.mercenaryV4Contract.getWalletSlots(state.userAddress);
+          const unlocked = Number(walletSlots?.unlockedSlots ?? walletSlots?.[0] ?? 1);
+          fallbackProfile.slotsUnlocked = unlocked;
+        } catch {}
+  
+        setMercenaryProfile(fallbackProfile);
+        setMercenarySlots([]);
+        state.mercenaryPanelLoaded = true;
+        updateMercenaryPanelDisplay();
+      } catch (inner) {
+        console.error("loadMercenaryPanelState on-chain fallback error:", inner);
+      }
+    }
+  }
+  
+  export function updateMercenaryPanelDisplay() {
+    const profile = state.mercenaryProfile;
+    const slots = state.mercenarySlots || [];
+    const selected = state.selectedBlock;
+  
+    safeValue("protectTokenId", selected?.tokenId || "");
+  
+    const points = getProfilePoints(profile);
+    const slotsUnlocked = getProfileSlotsUnlocked(profile);
+    const bastionTitle = profile?.bastionTitle || "—";
+  
+    safeText("mercenaryTitle", bastionTitle);
+    safeText("mercenarySlotsUnlocked", String(slotsUnlocked));
+  
+    updateMercenarySideInfo(profile);
+  
+    if (byId("bastionTitleInput") && !byId("bastionTitleInput").value) {
+      byId("bastionTitleInput").value = profile?.bastionTitle || "";
+    }
+  
+    updateMercenarySlotDropdown(slotsUnlocked);
+    updateBastionTitleLock(points);
+  
+    const slotsBox = byId("mercenarySlotsInfo");
+    if (slotsBox) {
+      if (!slots.length) {
+        slotsBox.innerHTML = `<div class="resource-item">No active protection slots.</div>`;
+      } else {
+        const now = Math.floor(Date.now() / 1000);
+  
+        slotsBox.innerHTML = slots
+          .sort((a, b) => Number(a.slotIndex) - Number(b.slotIndex))
+          .map((slot) => {
+            const expiry = Number(slot.expiry || slot.expiresAt || 0);
+            const active = !!slot.active && expiry > now;
+            const expired = expiry > 0 && expiry <= now;
+            const tokenId = Number(slot.tokenId || 0);
+            const percent = Number(slot.protectionPercent || slot.level || 0);
+            const slotIndex = Number(slot.slotIndex || 0);
+  
+            return `
+              <div class="resource-item">
+                Slot ${slotIndex + 1}:
+                ${
+                  active
+                    ? `#${tokenId} · ${percent}% · ${formatDuration(expiry - now)}`
+                    : expired
+                      ? `#${tokenId} · expired`
+                      : "inactive"
+                }
+              </div>
+            `;
+          })
+          .join("");
+      }
+    }
+  
+    updateMercenaryCostPreview();
+    updateMercenaryActionStates();
+  }
+  
+  export async function updateMercenaryCostPreview() {
+    const info = byId("mercenaryCostInfo");
+    if (!info) return;
+  
+    const slotIndex = getSelectedMercenarySlot();
+    const days = getSelectedProtectionDays();
+    const payInINPI = getMercenaryPaymentMode() === "inpi";
+    const selectedSlotActive = isSelectedSlotActive();
+    const isExtension = selectedSlotActive;
+  
+    try {
+      if (state.userAddress && state.mercenaryV4Contract) {
+        const cost = await state.mercenaryV4Contract.getProtectionCost(
+          state.userAddress,
+          days,
+          payInINPI,
+          isExtension
+        );
+  
+        if (payInINPI) {
+          const inpiHuman = ethers.utils.formatEther(cost.inpiCost || cost[0]);
+          info.textContent = `Cost: ${inpiHuman} INPI`;
+        } else {
+          const oil = Number(cost.oilCost || cost[1] || 0);
+          const lemons = Number(cost.lemonsCost || cost[2] || 0);
+          const iron = Number(cost.ironCost || cost[3] || 0);
+          info.textContent = `Cost: ${oil} Oil, ${lemons} Lemons, ${iron} Iron`;
+        }
+      } else {
+        const base = getMercenaryV4Cost(days);
+        if (payInINPI) {
+          info.textContent = `Cost: ${base.inpi} INPI`;
+        } else {
+          info.textContent = `Cost: ${base.oil} Oil, ${base.lemons} Lemons, ${base.iron} Iron`;
+        }
+      }
+    } catch (e) {
+      console.warn("updateMercenaryCostPreview fallback:", e);
+      const base = getMercenaryV4Cost(days);
+  
+      if (payInINPI) {
+        info.textContent = `Cost: ${base.inpi} INPI`;
+      } else {
+        info.textContent = `Cost: ${base.oil} Oil, ${base.lemons} Lemons, ${base.iron} Iron`;
+      }
+    }
+  
+    const tierInfo = getMercenaryV4Cost(days);
+    const durationLabel = MERCENARY_DURATION_LABELS[days] || `${days} days`;
+    const tierLabel = MERCENARY_TIER_LABELS[tierInfo.tier] || "None";
+  
+    if (byId("protectDaysInfo")) {
+      byId("protectDaysInfo").textContent = `Duration: ${durationLabel} · Tier: ${tierLabel}`;
+    }
+  
+    if (slotIndex >= 0 && byId("protectSlotInfo")) {
+      byId("protectSlotInfo").textContent = `Selected Slot: ${slotIndex + 1}`;
+    }
+  
+    updateMercenaryActionStates();
+  }
+  
+  async function refreshMercenaryAfterWrite(tokenId = null) {
+    await loadMercenaryPanelState();
+    await loadUserBlocks({ onRevealSelected: null, onRefreshBlockMarkings: refreshBlockMarkings });
+  
+    const targetTokenId = tokenId || state.selectedBlock?.tokenId;
+    if (!targetTokenId) return;
+  
+    const pos = await resolveTokenPosition(targetTokenId);
+    await selectBlock(targetTokenId, pos.row, pos.col);
+  }
+  
+  export async function unlockMercenarySecondSlot() {
+    const msgDiv = getProtectMessageDiv();
+    if (!state.mercenaryV4Contract) return;
+  
+    try {
+      setButtonBusy("unlockSlot2Btn", true, "Unlocking...");
+      msgDiv.innerHTML = `<span class="success">⏳ Unlocking slot 2...<br>${renderCostList(MERCENARY_SLOT2_UNLOCK_COST)}</span>`;
+  
+      const tx = await state.mercenaryV4Contract.unlockSecondSlot({ gasLimit: 700000 });
+      debugLog("unlockSecondSlot tx", tx.hash);
+      await tx.wait();
+  
+      msgDiv.innerHTML = `<span class="success">✅ Slot 2 unlocked.</span>`;
+      await loadResourceBalancesOnchain();
+      await refreshMercenaryAfterWrite();
+    } catch (e) {
+      console.error("unlockMercenarySecondSlot error:", e);
+      msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+    } finally {
+      setButtonBusy("unlockSlot2Btn", false);
+    }
+  }
+  
+  export async function unlockMercenaryThirdSlot() {
+    const msgDiv = getProtectMessageDiv();
+    if (!state.mercenaryV4Contract) return;
+  
+    try {
+      setButtonBusy("unlockSlot3Btn", true, "Unlocking...");
+      msgDiv.innerHTML = `<span class="success">⏳ Unlocking slot 3...<br>${renderCostList(MERCENARY_SLOT3_UNLOCK_COST)}</span>`;
+  
+      const tx = await state.mercenaryV4Contract.unlockThirdSlot({ gasLimit: 800000 });
+      debugLog("unlockThirdSlot tx", tx.hash);
+      await tx.wait();
+  
+      msgDiv.innerHTML = `<span class="success">✅ Slot 3 unlocked.</span>`;
+      await loadResourceBalancesOnchain();
+      await refreshMercenaryAfterWrite();
+    } catch (e) {
+      console.error("unlockMercenaryThirdSlot error:", e);
+      msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+    } finally {
+      setButtonBusy("unlockSlot3Btn", false);
+    }
+  }
+  
+  export async function setMercenaryProtection() {
+    const msgDiv = getProtectMessageDiv();
+    const tokenId = getSelectedProtectTokenId();
+    const slotIndex = getSelectedMercenarySlot();
+    const durationDays = getSelectedProtectionDays();
+    const payInINPI = getMercenaryPaymentMode() === "inpi";
+    const unlockedSlots = getProfileSlotsUnlocked(state.mercenaryProfile);
+  
+    if (!tokenId || !state.mercenaryV4Contract) return;
+  
+    try {
+      if (slotIndex >= unlockedSlots) {
+        msgDiv.innerHTML = `<span class="error">❌ Selected slot is still locked.</span>`;
+        return;
+      }
+  
+      const owner = await state.nftContract.ownerOf(tokenId);
+      if (owner.toLowerCase() !== state.userAddress.toLowerCase()) {
+        msgDiv.innerHTML = `<span class="error">❌ Not your block.</span>`;
+        return;
+      }
+  
+      if (payInINPI) {
+        const previewCost = await state.mercenaryV4Contract.getProtectionCost(
+          state.userAddress,
+          durationDays,
+          true,
+          false
+        );
+        const amount = previewCost.inpiCost || previewCost[0];
+        const ok = await ensureInpiApprovalForMercenary(amount);
+        if (!ok) {
+          msgDiv.innerHTML = `<span class="error">❌ INPI approval failed.</span>`;
+          return;
+        }
+      }
+  
+      setButtonBusy("protectBtn", true, "Setting...");
+      msgDiv.innerHTML = `<span class="success">⏳ Setting protection...</span>`;
+  
+      const tx = await state.mercenaryV4Contract.setProtection(
+        slotIndex,
+        tokenId,
+        durationDays,
+        payInINPI,
+        { gasLimit: 800000 }
+      );
+      debugLog("setProtection tx", tx.hash);
+      await tx.wait();
+  
+      msgDiv.innerHTML = `<span class="success">✅ Protection set.</span>`;
+      await loadResourceBalancesOnchain();
+      await refreshMercenaryAfterWrite(tokenId);
+    } catch (e) {
+      console.error("setMercenaryProtection error:", e);
+      msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+    } finally {
+      setButtonBusy("protectBtn", false);
+    }
+  }
+  
+  export async function extendMercenaryProtection() {
+    const msgDiv = getProtectMessageDiv();
+    const slotIndex = getSelectedMercenarySlot();
+    const additionalDays = getSelectedProtectionDays();
+    const payInINPI = getMercenaryPaymentMode() === "inpi";
+  
+    if (!state.mercenaryV4Contract) return;
+  
+    try {
+      if (!isSelectedSlotActive()) {
+        msgDiv.innerHTML = `<span class="error">❌ Extend is only available for an active protection slot.</span>`;
+        return;
+      }
+  
+      if (payInINPI) {
+        const previewCost = await state.mercenaryV4Contract.getProtectionCost(
+          state.userAddress,
+          additionalDays,
+          true,
+          true
+        );
+        const amount = previewCost.inpiCost || previewCost[0];
+        const ok = await ensureInpiApprovalForMercenary(amount);
+        if (!ok) {
+          msgDiv.innerHTML = `<span class="error">❌ INPI approval failed.</span>`;
+          return;
+        }
+      }
+  
+      setButtonBusy("extendProtectionBtn", true, "Extending...");
+      msgDiv.innerHTML = `<span class="success">⏳ Extending protection...</span>`;
+  
+      const tx = await state.mercenaryV4Contract.extendProtection(
+        slotIndex,
+        additionalDays,
+        payInINPI,
+        { gasLimit: 800000 }
+      );
+      debugLog("extendProtection tx", tx.hash);
+      await tx.wait();
+  
+      msgDiv.innerHTML = `<span class="success">✅ Protection extended.</span>`;
+      await loadResourceBalancesOnchain();
+      await refreshMercenaryAfterWrite();
+    } catch (e) {
+      console.error("extendMercenaryProtection error:", e);
+      msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+    } finally {
+      setButtonBusy("extendProtectionBtn", false);
+    }
+  }
+  
+  export async function cancelMercenaryProtection() {
+    const msgDiv = getProtectMessageDiv();
+    const slotIndex = getSelectedMercenarySlot();
+  
+    if (!state.mercenaryV4Contract) return;
+  
+    try {
+      if (!isSelectedSlotActive()) {
+        msgDiv.innerHTML = `<span class="error">❌ Cancel is only available for an active protection slot.</span>`;
+        return;
+      }
+  
+      setButtonBusy("cancelProtectionBtn", true, "Cancelling...");
+      msgDiv.innerHTML = `<span class="success">⏳ Cancelling protection...</span>`;
+  
+      const tx = await state.mercenaryV4Contract.cancelProtection(slotIndex, {
+        gasLimit: 500000
+      });
+      debugLog("cancelProtection tx", tx.hash);
+      await tx.wait();
+  
+      msgDiv.innerHTML = `<span class="success">✅ Protection cancelled.</span>`;
+      await refreshMercenaryAfterWrite();
+    } catch (e) {
+      console.error("cancelMercenaryProtection error:", e);
+      msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+    } finally {
+      setButtonBusy("cancelProtectionBtn", false);
+    }
+  }
+  
+  export async function moveMercenaryProtection() {
+    const msgDiv = getProtectMessageDiv();
+    const slotIndex = getSelectedMercenarySlot();
+    const newTokenId = getMoveProtectionTargetTokenId();
+    const currentTokenId = getSelectedProtectTokenId();
+  
+    if (!state.mercenaryV4Contract || !newTokenId) return;
+  
+    try {
+      if (!isSelectedSlotActive()) {
+        msgDiv.innerHTML = `<span class="error">❌ Move is only available for an active protection slot.</span>`;
+        return;
+      }
+  
+      if (newTokenId === currentTokenId) {
+        msgDiv.innerHTML = `<span class="error">❌ Choose a different target block.</span>`;
+        return;
+      }
+  
+      const owner = await state.nftContract.ownerOf(newTokenId);
+      if (owner.toLowerCase() !== state.userAddress.toLowerCase()) {
+        msgDiv.innerHTML = `<span class="error">❌ Target block is not owned by your wallet.</span>`;
+        return;
+      }
+  
+      setButtonBusy("moveProtectionBtn", true, "Moving...");
+      msgDiv.innerHTML = `<span class="success">⏳ Moving protection...</span>`;
+  
+      const tx = await state.mercenaryV4Contract.moveProtection(slotIndex, newTokenId, {
+        gasLimit: 800000
+      });
+      debugLog("moveProtection tx", tx.hash);
+      await tx.wait();
+  
+      msgDiv.innerHTML = `<span class="success">✅ Protection moved.</span>`;
+      await refreshMercenaryAfterWrite(newTokenId);
+    } catch (e) {
+      console.error("moveMercenaryProtection error:", e);
+      msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+    } finally {
+      setButtonBusy("moveProtectionBtn", false);
+    }
+  }
+  
+  export async function emergencyMoveMercenaryProtection() {
+    const msgDiv = getProtectMessageDiv();
+    const slotIndex = getSelectedMercenarySlot();
+    const newTokenId = getMoveProtectionTargetTokenId();
+    const currentTokenId = getSelectedProtectTokenId();
+  
+    if (!state.mercenaryV4Contract || !newTokenId) return;
+  
+    try {
+      if (!isSelectedSlotActive()) {
+        msgDiv.innerHTML = `<span class="error">❌ Emergency Move is only available for an active protection slot.</span>`;
+        return;
+      }
+  
+      if (newTokenId === currentTokenId) {
+        msgDiv.innerHTML = `<span class="error">❌ Choose a different target block.</span>`;
+        return;
+      }
+  
+      const owner = await state.nftContract.ownerOf(newTokenId);
+      if (owner.toLowerCase() !== state.userAddress.toLowerCase()) {
+        msgDiv.innerHTML = `<span class="error">❌ Target block is not owned by your wallet.</span>`;
+        return;
+      }
+  
+      setButtonBusy("emergencyMoveProtectionBtn", true, "Emergency...");
+      msgDiv.innerHTML = `<span class="success">⏳ Emergency moving protection...</span>`;
+  
+      const tx = await state.mercenaryV4Contract.emergencyMoveProtection(slotIndex, newTokenId, {
+        gasLimit: 800000
+      });
+      debugLog("emergencyMoveProtection tx", tx.hash);
+      await tx.wait();
+  
+      msgDiv.innerHTML = `<span class="success">✅ Emergency protection move complete.</span>`;
+      await refreshMercenaryAfterWrite(newTokenId);
+    } catch (e) {
+      console.error("emergencyMoveMercenaryProtection error:", e);
+      msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+    } finally {
+      setButtonBusy("emergencyMoveProtectionBtn", false);
+    }
+  }
+  
+  export async function cleanSelectedProtection() {
+    const msgDiv = getProtectMessageDiv();
+    const tokenId = getCleanupTargetTokenId();
+  
+    if (!state.mercenaryV4Contract || !tokenId) return;
+  
+    try {
+      if (!isSelectedSlotExpired() && !state.selectedBlock?.protectionExpired) {
+        msgDiv.innerHTML = `<span class="error">❌ Cleanup is only available after protection expires.</span>`;
+        return;
+      }
+  
+      setButtonBusy("cleanupProtectionBtn", true, "Cleaning...");
+      msgDiv.innerHTML = `<span class="success">⏳ Cleaning expired protection...</span>`;
+  
+      const tx = await state.mercenaryV4Contract.cleanExpiredToken(tokenId, {
+        gasLimit: 500000
+      });
+      debugLog("cleanExpiredToken tx", tx.hash);
+      await tx.wait();
+  
+      msgDiv.innerHTML = `<span class="success">✅ Cleanup complete.</span>`;
+      await loadResourceBalancesOnchain();
+      await refreshMercenaryAfterWrite(tokenId);
+    } catch (e) {
+      console.error("cleanSelectedProtection error:", e);
+      msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+    } finally {
+      setButtonBusy("cleanupProtectionBtn", false);
+    }
+  }
+  
+  export async function saveBastionTitle() {
+    const msgDiv = getProtectMessageDiv();
+    const title = (byId("bastionTitleInput")?.value || "").trim();
+    const points = Number(state.uiBlockStatus?.defenderPoints || getProfilePoints(state.mercenaryProfile));
+  
+    if (!state.mercenaryV4Contract) return;
+  
+    if (points < 1000) {
+      msgDiv.innerHTML = `<span class="error">❌ Bastion Title unlocks at 1000 Defender Points. Current: ${points}.</span>`;
+      updateBastionTitleLock(points);
+      return;
+    }
+  
+    if (!title) {
+      msgDiv.innerHTML = `<span class="error">❌ Enter a title first.</span>`;
+      return;
+    }
+  
+    try {
+      setButtonBusy("saveBastionTitleBtn", true, "Saving...");
+      msgDiv.innerHTML = `<span class="success">⏳ Saving bastion title...</span>`;
+  
+      const tx = await state.mercenaryV4Contract.setBastionTitle(title, {
+        gasLimit: 400000
+      });
+      debugLog("setBastionTitle tx", tx.hash);
+      await tx.wait();
+  
+      msgDiv.innerHTML = `<span class="success">✅ Bastion title saved.</span>`;
+      await loadMercenaryPanelState();
+    } catch (e) {
+      console.error("saveBastionTitle error:", e);
+      msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+    } finally {
+      setButtonBusy("saveBastionTitleBtn", false);
+    }
+  }
+  
+  /* =========================================================
+     LEGACY BUTTON COMPAT
+     ========================================================= */
+  
+  export async function protect() {
+    if (isSelectedSlotActive()) {
+      return extendMercenaryProtection();
+    }
+    return setMercenaryProtection();
+  }

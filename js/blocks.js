@@ -8,12 +8,17 @@
     resetSelectedBlockUiState
   } from "./state.js";
   
-  import { rarityNames } from "./config.js";
+  import {
+    rarityNames,
+    getMercenaryRankLabel,
+    getMercenaryDiscountPercent,
+    getMercenaryNextRankThreshold
+  } from "./config.js";
+  
   import {
     byId,
     safeText,
     safeValue,
-    safeDisabled,
     formatDuration,
     getProduction
   } from "./utils.js";
@@ -35,6 +40,7 @@
   function setButtonVisualState(buttonId, enabled) {
     const el = byId(buttonId);
     if (!el) return;
+  
     el.disabled = !enabled;
     el.style.opacity = enabled ? "1" : "0.45";
     el.style.pointerEvents = enabled ? "auto" : "none";
@@ -44,11 +50,32 @@
     const select = byId(selectId);
     if (!select) return;
   
-    const option = Array.from(select.options).find((o) => String(o.value) === String(optionValue));
+    const option = Array.from(select.options).find(
+      (o) => String(o.value) === String(optionValue)
+    );
     if (!option) return;
   
     option.disabled = !enabled;
     option.textContent = enabled ? enabledLabel : disabledLabel;
+  }
+  
+  function formatTimestampFromSeconds(secondsFromNow) {
+    const sec = Number(secondsFromNow || 0);
+    if (sec <= 0) return "Now";
+  
+    const dt = new Date(Date.now() + sec * 1000);
+  
+    try {
+      return dt.toLocaleString();
+    } catch {
+      return dt.toISOString();
+    }
+  }
+  
+  function updateRevealCardVisibility(revealed) {
+    const revealCard = byId("revealCard");
+    if (!revealCard) return;
+    revealCard.style.display = revealed ? "none" : "";
   }
   
   function updateMercenarySlotDropdown(unlockedSlots = 1) {
@@ -75,6 +102,26 @@
       } else {
         lockHint.textContent = "Slot 2 and Slot 3 remain locked until unlocked permanently.";
       }
+    }
+  }
+  
+  function updateMoveProtectionTargetDropdown(selectedTokenId) {
+    const select = byId("moveProtectionTargetTokenId");
+    if (!select) return;
+  
+    const blocks = Array.isArray(state.userBlocks) ? state.userBlocks : [];
+    const current = String(selectedTokenId || "");
+    const previous = String(select.value || "");
+  
+    const targetBlocks = blocks.map(String).filter((id) => id !== current);
+  
+    select.innerHTML = [
+      `<option value="">Choose target block…</option>`,
+      ...targetBlocks.map((id) => `<option value="${id}">Block #${id}</option>`)
+    ].join("");
+  
+    if (previous && targetBlocks.includes(previous)) {
+      select.value = previous;
     }
   }
   
@@ -113,13 +160,80 @@
     state.uiBlockStatus.canSetBastionTitle = canSetTitle;
   }
   
+  function updateDefenderSidePanel(points = 0) {
+    const p = Number(points || 0);
+    const rankLabel = getMercenaryRankLabel(p);
+    const discountPercent = getMercenaryDiscountPercent(p);
+    const nextRankAt = getMercenaryNextRankThreshold(p);
+  
+    state.uiBlockStatus.defenderPoints = p;
+    state.uiBlockStatus.defenderRank = rankLabel;
+    state.uiBlockStatus.defenderDiscountPercent = discountPercent;
+    state.uiBlockStatus.nextRankAt = nextRankAt;
+  
+    safeText("mercenaryPoints", String(p));
+    safeText("mercenaryPointsSide", String(p));
+  
+    safeText("mercenaryRank", rankLabel);
+    safeText("mercenaryRankSide", rankLabel);
+  
+    safeText("mercenaryDiscount", `${discountPercent}%`);
+    safeText("mercenaryDiscountSide", `${discountPercent}%`);
+  
+    safeText("mercenaryNextRank", String(nextRankAt));
+    safeText("mercenaryNextRankSide", String(nextRankAt));
+  }
+  
+  function updateTimeline({
+    revealed,
+    farmingActive,
+    activeOnV5,
+    claimReady,
+    claimCooldownSeconds,
+    protectionActive,
+    protectionLevel,
+    protectionExpiresAt
+  }) {
+    safeText("timelineReveal", `Reveal: ${revealed ? "Done" : "Hidden"}`);
+  
+    if (farmingActive) {
+      safeText("timelineFarm", "Farm: Active (V6)");
+    } else if (activeOnV5) {
+      safeText("timelineFarm", "Farm: Active (V5)");
+    } else {
+      safeText("timelineFarm", "Farm: Inactive");
+    }
+  
+    if (claimReady) {
+      safeText("timelineClaim", "Claim: Ready");
+    } else if (claimCooldownSeconds > 0) {
+      safeText("timelineClaim", `Claim: in ${formatDuration(claimCooldownSeconds)}`);
+    } else {
+      safeText("timelineClaim", "Claim: —");
+    }
+  
+    if (protectionActive) {
+      safeText(
+        "timelineProtection",
+        `Protection: ${protectionLevel}% until ${formatDuration(
+          Math.max(0, protectionExpiresAt - Math.floor(Date.now() / 1000))
+        )}`
+      );
+    } else {
+      safeText("timelineProtection", "Protection: Inactive");
+    }
+  
+    safeText("timelineAttack", "Attack: —");
+  }
+  
   function updateActionHints({
     revealed,
     farmingActive,
     activeOnV5,
     claimReady,
     claimText,
-    boostActive
+    boostActive,
+    claimCooldownSeconds
   }) {
     safeText("revealStatus", revealed ? "Revealed" : "Hidden");
     safeText("farmingStatus", farmingActive ? "Active (V6)" : (activeOnV5 ? "Active (V5)" : "Inactive"));
@@ -150,10 +264,16 @@
           ? `Claim not ready yet: ${claimText}`
           : "Claim becomes available when the cooldown is finished."
     );
+  
+    safeText("claimAtText", formatTimestampFromSeconds(claimCooldownSeconds || 0));
   }
   
   async function getCurrentUnlockedSlots() {
     try {
+      if (state.mercenaryProfile?.slotsUnlocked !== undefined) {
+        return Math.max(1, Number(state.mercenaryProfile.slotsUnlocked || 1));
+      }
+  
       if (!state.userAddress || !state.mercenaryV4Contract) return 1;
   
       if (typeof state.mercenaryV4Contract.unlockedSlots === "function") {
@@ -163,9 +283,8 @@
   
       if (typeof state.mercenaryV4Contract.getWalletSlots === "function") {
         const slots = await state.mercenaryV4Contract.getWalletSlots(state.userAddress);
-        if (Array.isArray(slots)) {
-          return Math.max(1, slots.length);
-        }
+        const unlocked = Number(slots?.unlockedSlots ?? slots?.[0] ?? 1);
+        return Math.max(1, unlocked);
       }
     } catch {}
   
@@ -174,20 +293,84 @@
   
   async function getDefenderPoints() {
     try {
+      if (state.mercenaryProfile?.defenderPoints !== undefined) {
+        return Number(state.mercenaryProfile.defenderPoints || 0);
+      }
+  
       if (!state.userAddress || !state.mercenaryV4Contract) return 0;
   
       if (typeof state.mercenaryV4Contract.getDefenderProfile === "function") {
         const profile = await state.mercenaryV4Contract.getDefenderProfile(state.userAddress);
-        return Number(profile?.defenderPoints || 0);
-      }
-  
-      if (typeof state.mercenaryV4Contract.defenderProfiles === "function") {
-        const profile = await state.mercenaryV4Contract.defenderProfiles(state.userAddress);
-        return Number(profile?.defenderPoints || 0);
+        return Number(profile?.defenderPoints ?? profile?.points ?? profile?.[0] ?? 0);
       }
     } catch {}
   
     return Number(state.uiBlockStatus?.defenderPoints || 0);
+  }
+  
+  function updateProtectionActionStates({
+    protectionActive,
+    protectionExpired,
+    unlockedSlots,
+    selectedTokenId
+  }) {
+    const moveTargetValue = String(byId("moveProtectionTargetTokenId")?.value || "");
+    const hasMoveTarget = !!moveTargetValue && moveTargetValue !== String(selectedTokenId || "");
+  
+    setButtonVisualState("protectBtn", !protectionActive);
+    setButtonVisualState("extendProtectionBtn", protectionActive && !protectionExpired);
+    setButtonVisualState("cancelProtectionBtn", protectionActive && !protectionExpired);
+    setButtonVisualState("cleanupProtectionBtn", protectionExpired);
+    setButtonVisualState("moveProtectionBtn", protectionActive && !protectionExpired && hasMoveTarget);
+    setButtonVisualState("emergencyMoveProtectionBtn", protectionActive && !protectionExpired && hasMoveTarget);
+  
+    setButtonVisualState("unlockSlot2Btn", unlockedSlots < 2);
+    setButtonVisualState("unlockSlot3Btn", unlockedSlots < 3);
+  }
+  
+  function buildResourceHtml({
+    revealed,
+    rarity,
+    row,
+    protectionActive,
+    protectionLevel,
+    protectionTier,
+    protectionSlotIndex,
+    protectionExpired,
+    boostActive,
+    activeOnV5,
+    farmingActive
+  }) {
+    if (!revealed || rarity === null) {
+      return "<p>Reveal block to see resources.</p>";
+    }
+  
+    const production = getProduction(rarity, Number(row));
+    let h = "";
+  
+    for (const [res, amount] of Object.entries(production)) {
+      h += `<div class="resource-item">${res}: ${amount}/day</div>`;
+    }
+  
+    if (protectionActive) {
+      h += `<div class="resource-item">Protection: ${protectionLevel}%</div>`;
+      h += `<div class="resource-item">Protection Tier: ${protectionTier}</div>`;
+      h += `<div class="resource-item">Protection Slot: ${protectionSlotIndex + 1}</div>`;
+    }
+  
+    if (protectionExpired) {
+      h += `<div class="resource-item">Protection: expired</div>`;
+    }
+  
+    if (boostActive) {
+      h += `<div class="resource-item">Boost: active</div>`;
+    }
+  
+    if (activeOnV5 && !farmingActive) {
+      h += `<div class="resource-item" style="color:#8a5cff;">⚠️ V5 active - migrate to V6</div>`;
+    }
+  
+    return h;
   }
   
   /* =========================================================
@@ -375,6 +558,12 @@
     const protectionSlotIndex = protection ? Number(protection.slotIndex || 0) : 0;
     const protectionExpiresAt = protection ? Number(protection.expiresAt || 0) : 0;
     const protectionActive = !!(protection && protection.active && protectionExpiresAt > now);
+    const protectionExpired = !!(
+      protection &&
+      !protectionActive &&
+      protectionExpiresAt > 0 &&
+      protectionExpiresAt <= now
+    );
   
     const activeOnV5 = await isTokenActiveOnV5(tokenId).catch(() => false);
   
@@ -390,6 +579,7 @@
       protectionSlotIndex,
       protectionExpiresAt,
       protectionActive,
+      protectionExpired,
       farmStartTime,
       boostExpiry,
       activeOnV5
@@ -405,6 +595,7 @@
     state.uiBlockStatus.farmActive = farmingActive;
     state.uiBlockStatus.farmLegacyActive = activeOnV5;
     state.uiBlockStatus.protectionActive = protectionActive;
+    state.uiBlockStatus.protectionExpired = protectionExpired;
     state.uiBlockStatus.protectionSlotCount = unlockedSlots;
     state.uiBlockStatus.selectedProtectionSlot = protectionSlotIndex;
     state.uiBlockStatus.canUseSlot2 = unlockedSlots >= 2;
@@ -477,29 +668,46 @@
       activeOnV5,
       claimReady,
       claimText,
-      boostActive
+      boostActive,
+      claimCooldownSeconds
     });
+  
+    updateTimeline({
+      revealed,
+      farmingActive,
+      activeOnV5,
+      claimReady,
+      claimCooldownSeconds,
+      protectionActive,
+      protectionLevel,
+      protectionExpiresAt
+    });
+  
+    updateRevealCardVisibility(revealed);
   
     setButtonVisualState("revealBtn", !revealed);
     setButtonVisualState("farmingStartBtn", !farmingActive && !activeOnV5);
     setButtonVisualState("farmingStopBtn", !!farmingActive);
     setButtonVisualState("claimBtn", !!(claimReady && (farmingActive || activeOnV5)));
     setButtonVisualState("buyBoostBtn", !!farmingActive);
-    setButtonVisualState("attackBtn", true);
-    setButtonVisualState("buyPirateBoostBtn", true);
   
     const protectionStatusEl = byId("protectionStatus");
     const protectionExpiryEl = byId("protectionExpiry");
     const protectionStatusText = byId("protectionStatusText");
   
     if (protectionStatusText) {
-      protectionStatusText.textContent = protectionActive
-        ? `${protectionLevel}% Active`
-        : "Inactive";
+      if (protectionActive) {
+        protectionStatusText.textContent = `${protectionLevel}% Active`;
+      } else if (protectionExpired) {
+        protectionStatusText.textContent = "Expired";
+      } else {
+        protectionStatusText.textContent = "Inactive";
+      }
     }
   
-    if (protectionActive && protectionExpiryEl) {
-      protectionExpiryEl.textContent = formatDuration(protectionExpiresAt - now);
+    if ((protectionActive || protectionExpired) && protectionExpiryEl) {
+      const delta = protectionExpiresAt - now;
+      protectionExpiryEl.textContent = delta > 0 ? formatDuration(delta) : "Expired";
       if (protectionStatusEl) protectionStatusEl.style.display = "block";
     } else if (protectionStatusEl) {
       protectionStatusEl.style.display = "none";
@@ -507,35 +715,30 @@
   
     updateMercenarySlotDropdown(unlockedSlots);
     updateBastionTitleLock(defenderPoints);
+    updateDefenderSidePanel(defenderPoints);
+    updateMoveProtectionTargetDropdown(tokenId);
+    updateProtectionActionStates({
+      protectionActive,
+      protectionExpired,
+      unlockedSlots,
+      selectedTokenId: tokenId
+    });
   
     const resDiv = byId("blockResources");
     if (resDiv) {
-      if (revealed && rarity !== null) {
-        const production = getProduction(rarity, Number(row));
-        let h = "";
-  
-        for (const [res, amount] of Object.entries(production)) {
-          h += `<div class="resource-item">${res}: ${amount}/day</div>`;
-        }
-  
-        if (protectionActive) {
-          h += `<div class="resource-item">Protection: ${protectionLevel}%</div>`;
-          h += `<div class="resource-item">Protection Tier: ${protectionTier}</div>`;
-          h += `<div class="resource-item">Protection Slot: ${protectionSlotIndex + 1}</div>`;
-        }
-  
-        if (boostActive) {
-          h += `<div class="resource-item">Boost: active</div>`;
-        }
-  
-        if (activeOnV5 && !farmingActive) {
-          h += `<div class="resource-item" style="color:#8a5cff;">⚠️ V5 active - migrate to V6</div>`;
-        }
-  
-        resDiv.innerHTML = h;
-      } else {
-        resDiv.innerHTML = "<p>Reveal block to see resources.</p>";
-      }
+      resDiv.innerHTML = buildResourceHtml({
+        revealed,
+        rarity,
+        row,
+        protectionActive,
+        protectionLevel,
+        protectionTier,
+        protectionSlotIndex,
+        protectionExpired,
+        boostActive,
+        activeOnV5,
+        farmingActive
+      });
     }
   
     document.querySelectorAll(".block-card").forEach((c) => c.classList.remove("selected"));

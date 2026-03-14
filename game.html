@@ -132,8 +132,22 @@
       </div>
     </section>
 
+    <section class="game-view-bar card-shell" id="gameViewBar">
+      <div class="game-view-left">
+        <strong>Dashboard View</strong>
+        <span class="section-subtitle" style="margin-left:0.65rem;">
+          Simple is compact. Commander shows deeper stats and timelines.
+        </span>
+      </div>
+      <div class="game-view-actions">
+        <button class="btn btn-small" id="simpleViewBtn" type="button" aria-pressed="true">Simple View</button>
+        <button class="btn btn-small btn-secondary" id="commanderViewBtn" type="button" aria-pressed="false">Commander View</button>
+        <span class="v6-badge" id="gameViewMode">SIMPLE</span>
+      </div>
+    </section>
+
     <section class="dashboard-grid">
-      <section class="panel panel-wide left-column">
+      <section class="panel panel-wide">
         <div class="blocks-section">
           <div class="blocks-grid-container">
             <div class="panel-head">
@@ -150,14 +164,34 @@
           </div>
 
           <div class="block-actions-container" id="blockActionsContainer" style="display:none;">
-            <h3>
-              <span>⚙️ Block Actions</span>
-              <span class="v6-badge">Selected Block</span>
-            </h3>
+            <div class="panel-head" style="margin-bottom:1rem;">
+              <h3 class="section-title" style="margin-bottom:0.35rem;">
+                <span>⚙️ Block Actions</span>
+                <span class="v6-badge">Selected Block</span>
+              </h3>
+              <p class="section-subtitle">
+                Smart actions, protection, attack flow and exchange tools for the currently selected block.
+              </p>
+            </div>
 
             <div id="selectedBlockInfo" class="selected-block-info" style="display:none;">
               <p id="selectedBlockText">None selected</p>
               <div id="selectedActionToken" class="sr-only">Block #—</div>
+
+              <div id="selectedBlockTimeline" class="info-note" style="margin-top:0.8rem; display:block;">
+                <strong>Timeline:</strong>
+                <span id="timelineReveal">Reveal: —</span> ·
+                <span id="timelineFarm">Farm: —</span> ·
+                <span id="timelineClaim">Claim: —</span> ·
+                <span id="timelineProtection">Protection: —</span> ·
+                <span id="timelineAttack">Attack: —</span>
+              </div>
+
+              <div id="selectedAttackAlert" class="info-note" style="display:none; margin-top:0.8rem;">
+                <strong>Attack alert:</strong>
+                <span id="selectedAttackAlertText">No active attack data.</span>
+              </div>
+
               <div id="blockResources" class="resources-grid"></div>
               <div id="selectedBlockMeta" class="info-note" style="display:none; margin-top:0.8rem;"></div>
             </div>
@@ -172,280 +206,383 @@
               </button>
             </div>
 
-            <div class="action-grid">
-              <div class="action-card">
-                <h4>🔓 Reveal</h4>
-                <div class="action-value" id="revealStatus">Hidden</div>
-                <div id="revealHint" style="margin-top:0.45rem; font-size:0.82rem; color:#98a9b9;">
-                  Hidden blocks can be revealed once.
+            <details class="game-accordion" id="coreActionsAccordion" open>
+              <summary class="game-accordion-summary">
+                <div>
+                  <strong>🧭 Core Block Actions</strong>
+                  <span class="section-subtitle" style="display:block;">
+                    Reveal, farming and claim flow for the selected block.
+                  </span>
                 </div>
-                <button class="btn btn-small" id="revealBtn" type="button" style="width:100%; margin-top:0.5rem;" disabled>
-                  Reveal
-                </button>
-              </div>
+                <span class="v6-badge">CORE</span>
+              </summary>
 
-              <div class="action-card">
-                <h4>🌾 Farming</h4>
-                <div class="action-value" id="farmingStatus">Inactive</div>
-                <div id="farmingHint" style="margin-top:0.45rem; font-size:0.82rem; color:#98a9b9;">
-                  Start farming on your selected block.
-                </div>
-                <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
-                  <button class="btn btn-small" id="farmingStartBtn" type="button" style="flex:1;" disabled>Start</button>
-                  <button class="btn btn-small btn-secondary" id="farmingStopBtn" type="button" style="flex:1;" disabled>Stop</button>
-                </div>
-              </div>
-
-              <div class="action-card">
-                <h4>💰 Claim</h4>
-                <div class="action-value" id="claimStatus">—</div>
-                <div id="claimHint" style="margin-top:0.45rem; font-size:0.82rem; color:#98a9b9;">
-                  Claim becomes available when the cooldown is finished.
-                </div>
-                <button class="btn btn-small" id="claimBtn" type="button" style="width:100%; margin-top:0.5rem;" disabled>
-                  Claim
-                </button>
-              </div>
-
-              <div class="action-card">
-                <h4>⚡ Farm Boost</h4>
-                <div class="action-value" id="boostStatus">Inactive</div>
-
-                <div style="margin-top:0.45rem; font-size:0.82rem; color:#98a9b9; line-height:1.45;">
-                  Cost: <strong>100 INPI / day</strong><br />
-                  Effect: <strong>+25% production</strong><br />
-                  Farm window: <strong>7 days</strong><br />
-                  Boost contract max: <strong>10 days</strong>
-                </div>
-
-                <div style="display:flex; gap:0.5rem; margin-top:0.65rem; align-items:center;">
-                  <select
-                    id="boostDays"
-                    aria-label="Farm boost days"
-                    style="width:120px; background:#0f1a22; border:1px solid #2a3f4a; color:white; padding:0.45rem; border-radius:0.7rem;"
-                  >
-                    <option value="1">1 day</option>
-                    <option value="2">2 days</option>
-                    <option value="3">3 days</option>
-                    <option value="4">4 days</option>
-                    <option value="5">5 days</option>
-                    <option value="6">6 days</option>
-                    <option value="7" selected>7 days</option>
-                    <option value="8">8 days</option>
-                    <option value="9">9 days</option>
-                    <option value="10">10 days</option>
-                  </select>
-
-                  <button class="btn btn-small boost-btn" id="buyBoostBtn" type="button" style="flex:1;" disabled>
-                    Buy
-                  </button>
-                </div>
-
-                <div id="boostCostInfo" style="margin-top:0.45rem; font-size:0.82rem; color:#d4af37;">
-                  Total: 700 INPI
-                </div>
-              </div>
-            </div>
-
-            <div style="margin-top:1rem; border-top:1px solid #2a3f4a; padding-top:1.2rem;">
-              <h4 style="color:#d4af37; margin-bottom:1rem;">🛡️ Mercenary Protection V4</h4>
-
-              <div class="info-note" style="margin-bottom:1rem;">
-                1 slot is available by default. Slot 2 and Slot 3 can be unlocked permanently with resources.
-                Protection can be set for 1–7 days, extended, cancelled, moved, or emergency-moved.
-              </div>
-
-              <div class="action-grid" style="margin-bottom:1rem;">
-                <div class="action-card">
-                  <h4>🏅 Rank</h4>
-                  <div class="action-value" id="mercenaryRank">Watchman</div>
-                  <div style="margin-top:0.45rem; font-size:0.82rem; color:#98a9b9;">
-                    Points: <span id="mercenaryPoints">0</span><br />
-                    INPI Discount: <span id="mercenaryDiscount">2%</span>
+              <div class="game-accordion-body">
+                <div class="action-grid">
+                  <div class="action-card" id="revealCard">
+                    <h4>🔓 Reveal</h4>
+                    <div class="action-value" id="revealStatus">Hidden</div>
+                    <div id="revealHint" style="margin-top:0.45rem; font-size:0.82rem; color:#98a9b9;">
+                      Hidden blocks can be revealed once.
+                    </div>
+                    <button class="btn btn-small" id="revealBtn" type="button" style="width:100%; margin-top:0.5rem;" disabled>
+                      Reveal
+                    </button>
                   </div>
-                </div>
 
-                <div class="action-card">
-                  <h4>🔓 Slots</h4>
-                  <div class="action-value"><span id="mercenarySlotsUnlocked">1</span>/3</div>
-                  <div style="margin-top:0.45rem; font-size:0.82rem; color:#98a9b9;">
-                    Default: 1 slot<br />
-                    Unlock more permanently
+                  <div class="action-card">
+                    <h4>🌾 Farming</h4>
+                    <div class="action-value" id="farmingStatus">Inactive</div>
+                    <div id="farmingHint" style="margin-top:0.45rem; font-size:0.82rem; color:#98a9b9;">
+                      Start farming on your selected block.
+                    </div>
+                    <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
+                      <button class="btn btn-small" id="farmingStartBtn" type="button" style="flex:1;" disabled>Start</button>
+                      <button class="btn btn-small btn-secondary" id="farmingStopBtn" type="button" style="flex:1;" disabled>Stop</button>
+                    </div>
                   </div>
-                </div>
 
-                <div class="action-card">
-                  <h4>🪧 Bastion Title</h4>
-                  <div class="action-value" id="mercenaryTitle">—</div>
-                  <div id="bastionTitleUnlockState" style="margin-top:0.45rem; font-size:0.82rem; color:#98a9b9;">
-                    Locked until 1000 Defender Points
-                  </div>
-                </div>
-
-                <div class="action-card">
-                  <h4>⏳ Protection</h4>
-                  <div class="action-value" id="protectionStatusText">Inactive</div>
-                  <div id="protectionStatus" style="margin-top:0.45rem; font-size:0.82rem; color:#98a9b9; display:none;">
-                    Remaining: <span id="protectionExpiry">—</span>
+                  <div class="action-card">
+                    <h4>💰 Claim</h4>
+                    <div class="action-value" id="claimStatus">—</div>
+                    <div id="claimHint" style="margin-top:0.45rem; font-size:0.82rem; color:#98a9b9;">
+                      Claim becomes available when the cooldown is finished.
+                    </div>
+                    <div id="claimCountdownLine" style="margin-top:0.45rem; font-size:0.82rem; color:#d4af37;">
+                      Next claim at: <span id="claimAtText">—</span>
+                    </div>
+                    <button class="btn btn-small" id="claimBtn" type="button" style="width:100%; margin-top:0.5rem;" disabled>
+                      Claim
+                    </button>
                   </div>
                 </div>
               </div>
+            </details>
 
-              <div id="mercenarySlotsInfo" class="resources-grid" style="margin-bottom:1rem;">
-                <div class="resource-item">No active protection slots.</div>
-              </div>
-
-              <div class="input-group" style="margin-bottom:0.8rem;">
-                <label>Block ID
-                  <input type="number" id="protectTokenId" readonly placeholder="Selected Block ID" />
-                </label>
-
-                <label>Slot
-                  <select id="protectSlotIndex">
-                    <option value="0">Slot 1</option>
-                    <option value="1" disabled>Slot 2 (locked)</option>
-                    <option value="2" disabled>Slot 3 (locked)</option>
-                  </select>
-                </label>
-
-                <label>Days
-                  <select id="protectDays">
-                    <option value="1">1 day</option>
-                    <option value="2">2 days</option>
-                    <option value="3">3 days</option>
-                    <option value="4">4 days</option>
-                    <option value="5">5 days</option>
-                    <option value="6">6 days</option>
-                    <option value="7" selected>7 days</option>
-                  </select>
-                </label>
-
-                <label>Payment
-                  <select id="mercenaryPaymentMode">
-                    <option value="resources" selected>Resources</option>
-                    <option value="inpi">INPI</option>
-                  </select>
-                </label>
-              </div>
-
-              <div class="info-note" style="margin-bottom:0.8rem;">
-                <div id="protectSlotInfo">Selected Slot: 1</div>
-                <div id="protectDaysInfo">Duration: 7 days</div>
-                <div id="mercenaryCostInfo">Cost preview will appear here.</div>
-                <div id="mercenarySlotLockHint" style="margin-top:0.35rem;">Slot 2 and Slot 3 remain locked until unlocked permanently.</div>
-              </div>
-
-              <div class="protection-input-group" style="margin-bottom:0.8rem; display:flex; gap:0.55rem; flex-wrap:wrap;">
-                <button class="btn btn-small" id="protectBtn" type="button">Set / Extend</button>
-                <button class="btn btn-small btn-warning" id="extendProtectionBtn" type="button">Extend</button>
-                <button class="btn btn-small btn-secondary" id="cancelProtectionBtn" type="button">Cancel</button>
-              </div>
-
-              <div class="protection-input-group" style="margin-bottom:0.8rem; display:flex; gap:0.55rem; flex-wrap:wrap;">
-                <button class="btn btn-small" id="moveProtectionBtn" type="button">Move</button>
-                <button class="btn btn-small btn-warning" id="emergencyMoveProtectionBtn" type="button">Emergency Move</button>
-                <button class="btn btn-small" id="cleanupProtectionBtn" type="button">Cleanup Expired</button>
-              </div>
-
-              <div class="protection-input-group" style="margin-bottom:0.8rem; display:flex; gap:0.55rem; flex-wrap:wrap;">
-                <button class="btn btn-small boost-btn" id="unlockSlot2Btn" type="button">Unlock Slot 2</button>
-                <button class="btn btn-small boost-btn" id="unlockSlot3Btn" type="button">Unlock Slot 3</button>
-              </div>
-
-              <details style="margin-top:0.8rem;">
-                <summary style="cursor:pointer; color:#d4af37;">📘 Mercenary V4 costs & rules</summary>
-                <div class="details-body" style="margin-top:0.8rem;">
-                  <p class="info-note">
-                    <strong>Protection tiers:</strong><br />
-                    1–2 days = 20%<br />
-                    3–5 days = 30%<br />
-                    6–7 days = 50%
-                  </p>
-                  <p class="info-note">
-                    <strong>Set protection costs:</strong><br />
-                    1 day = 3 Oil / 2 Lemons / 1 Iron or 8 INPI<br />
-                    2 days = 4 Oil / 3 Lemons / 1 Iron or 14 INPI<br />
-                    3 days = 6 Oil / 4 Lemons / 2 Iron or 22 INPI<br />
-                    4 days = 8 Oil / 4 Lemons / 2 Iron or 29 INPI<br />
-                    5 days = 10 Oil / 5 Lemons / 3 Iron or 35 INPI<br />
-                    6 days = 11 Oil / 5 Lemons / 3 Iron or 42 INPI<br />
-                    7 days = 12 Oil / 6 Lemons / 3 Iron or 50 INPI
-                  </p>
-                  <p class="info-note">
-                    <strong>Slot 2 unlock:</strong> 1000 Oil + 500 Lemons + 100 Iron<br />
-                    <strong>Slot 3 unlock:</strong> 500 Oil + 100 Lemons + 100 Iron + 50 Gold + 25 Crystal + 5 Mysterium
-                  </p>
-                  <p class="info-note">
-                    <strong>Immediate points on set:</strong><br />
-                    1–2 days = +2 points<br />
-                    3–5 days = +5 points<br />
-                    6–7 days = +10 points
-                  </p>
+            <details class="game-accordion" id="farmBoostAccordion">
+              <summary class="game-accordion-summary">
+                <div>
+                  <strong>⚡ Farm Boost</strong>
+                  <span class="section-subtitle" style="display:block;">
+                    Buy temporary farming acceleration for the selected block.
+                  </span>
                 </div>
-              </details>
+                <span class="v6-badge" id="farmBoostSummaryState">INACTIVE</span>
+              </summary>
 
-              <div style="margin-top:1rem; border-top:1px solid #2a3f4a; padding-top:1rem;">
-                <h5 style="margin-bottom:0.4rem; color:#d4af37;">🏛️ Bastion Title</h5>
-                <div class="info-note" id="bastionTitleHint" style="margin-bottom:0.8rem;">
-                  Locked until you reach 1000 Defender Points.
-                </div>
-                <div class="input-group" style="grid-template-columns:1fr auto;">
-                  <input
-                    type="text"
-                    id="bastionTitleInput"
-                    maxlength="32"
-                    placeholder="Enter Bastion / Clan Title"
-                    disabled
-                  />
-                  <button class="btn btn-small" id="saveBastionTitleBtn" type="button" disabled>
-                    Save Title
-                  </button>
+              <div class="game-accordion-body">
+                <div class="action-grid" style="grid-template-columns:1fr;">
+                  <div class="action-card">
+                    <h4>⚡ Farm Boost</h4>
+                    <div class="action-value" id="boostStatus">Inactive</div>
+
+                    <div style="margin-top:0.45rem; font-size:0.82rem; color:#98a9b9; line-height:1.45;">
+                      Cost: <strong>100 INPI / day</strong><br />
+                      Effect: <strong>+25% production</strong><br />
+                      Farm window: <strong>7 days</strong><br />
+                      Boost contract max: <strong>10 days</strong>
+                    </div>
+
+                    <div style="display:flex; gap:0.5rem; margin-top:0.65rem; align-items:center; flex-wrap:wrap;">
+                      <select
+                        id="boostDays"
+                        aria-label="Farm boost days"
+                        style="width:140px; background:#0f1a22; border:1px solid #2a3f4a; color:white; padding:0.45rem; border-radius:0.7rem;"
+                      >
+                        <option value="1">1 day</option>
+                        <option value="2">2 days</option>
+                        <option value="3">3 days</option>
+                        <option value="4">4 days</option>
+                        <option value="5">5 days</option>
+                        <option value="6">6 days</option>
+                        <option value="7" selected>7 days</option>
+                        <option value="8">8 days</option>
+                        <option value="9">9 days</option>
+                        <option value="10">10 days</option>
+                      </select>
+
+                      <button class="btn btn-small boost-btn" id="buyBoostBtn" type="button" style="flex:1;" disabled>
+                        Buy
+                      </button>
+                    </div>
+
+                    <div id="boostCostInfo" style="margin-top:0.45rem; font-size:0.82rem; color:#d4af37;">
+                      Total: 700 INPI
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
+            </details>
 
-            <div style="margin-top:1rem; border-top:1px solid #2a3f4a; padding-top:1.2rem;">
-              <h4 style="color:#d4af37; margin-bottom:1rem;">⚔️ Pirate Attack V6</h4>
+            <details class="game-accordion" id="mercenaryAccordion" open>
+              <summary class="game-accordion-summary">
+                <div>
+                  <strong>🛡️ Mercenary Protection V4</strong>
+                  <span class="section-subtitle" style="display:block;">
+                    State-driven protection, slots, cleanup, movement and rank progression.
+                  </span>
+                </div>
+                <span class="v6-badge" id="mercenarySummaryState">PROTECTION</span>
+              </summary>
 
-              <div class="info-note" style="margin-bottom:1rem;">
-                Pirate attacks use the currently selected block as attacker. If no valid owned block is selected,
-                the first valid owned block may be used as fallback by the game logic.
-              </div>
+              <div class="game-accordion-body">
+                <div class="info-note" style="margin-bottom:1rem;">
+                  1 slot is available by default. Slot 2 and Slot 3 can be unlocked permanently with resources.
+                  Protection can be set for 1–7 days, extended, cancelled, moved, emergency-moved, or cleaned up after expiry.
+                </div>
 
-              <div class="pirate-layout">
-                <div class="pirate-left">
-                  <div class="input-group">
-                    <label>Target Row <input type="number" id="attackRow" min="0" max="99" placeholder="e.g. 5" /></label>
-                    <label>Target Col <input type="number" id="attackCol" min="0" max="198" placeholder="e.g. 3" /></label>
+                <div class="action-grid" style="margin-bottom:1rem;">
+                  <div class="action-card">
+                    <h4>🏅 Rank</h4>
+                    <div class="action-value" id="mercenaryRank">Watchman</div>
+                    <div style="margin-top:0.45rem; font-size:0.82rem; color:#98a9b9;">
+                      Points: <span id="mercenaryPoints">0</span><br />
+                      INPI Discount: <span id="mercenaryDiscount">2%</span><br />
+                      Next Rank At: <span id="mercenaryNextRank">100</span>
+                    </div>
                   </div>
 
-                  <div class="attacker-selector" id="attackerSelector">
-                    <h4 style="margin:0 0 0.5rem; font-size:0.95rem;">Attack source</h4>
-                    <p class="info-note" style="font-size:0.8rem; margin:0;">
-                      The selected block above is used as attacker.
+                  <div class="action-card">
+                    <h4>🔓 Slots</h4>
+                    <div class="action-value"><span id="mercenarySlotsUnlocked">1</span>/3</div>
+                    <div style="margin-top:0.45rem; font-size:0.82rem; color:#98a9b9;">
+                      Default: 1 slot<br />
+                      Unlock more permanently
+                    </div>
+                  </div>
+
+                  <div class="action-card">
+                    <h4>🪧 Bastion Title</h4>
+                    <div class="action-value" id="mercenaryTitle">—</div>
+                    <div id="bastionTitleUnlockState" style="margin-top:0.45rem; font-size:0.82rem; color:#98a9b9;">
+                      Locked until 1000 Defender Points
+                    </div>
+                  </div>
+
+                  <div class="action-card">
+                    <h4>⏳ Protection</h4>
+                    <div class="action-value" id="protectionStatusText">Inactive</div>
+                    <div id="protectionStatus" style="margin-top:0.45rem; font-size:0.82rem; color:#98a9b9; display:none;">
+                      Remaining: <span id="protectionExpiry">—</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="mercenarySlotsInfo" class="resources-grid" style="margin-bottom:1rem;">
+                  <div class="resource-item">No active protection slots.</div>
+                </div>
+
+                <div class="mercenary-main-grid" style="display:grid; grid-template-columns:minmax(0,1.65fr) minmax(280px,0.95fr); gap:1rem; align-items:start;">
+                  <div class="mercenary-actions-side">
+                    <div class="input-group" style="margin-bottom:0.8rem;">
+                      <label>Block ID
+                        <input type="number" id="protectTokenId" readonly placeholder="Selected Block ID" />
+                      </label>
+
+                      <label>Slot
+                        <select id="protectSlotIndex">
+                          <option value="0">Slot 1</option>
+                          <option value="1" disabled>Slot 2 (locked)</option>
+                          <option value="2" disabled>Slot 3 (locked)</option>
+                        </select>
+                      </label>
+
+                      <label>Days
+                        <select id="protectDays">
+                          <option value="1">1 day</option>
+                          <option value="2">2 days</option>
+                          <option value="3">3 days</option>
+                          <option value="4">4 days</option>
+                          <option value="5">5 days</option>
+                          <option value="6">6 days</option>
+                          <option value="7" selected>7 days</option>
+                        </select>
+                      </label>
+
+                      <label>Payment
+                        <select id="mercenaryPaymentMode">
+                          <option value="resources" selected>Resources</option>
+                          <option value="inpi">INPI</option>
+                        </select>
+                      </label>
+                    </div>
+
+                    <div class="info-note" style="margin-bottom:0.8rem;">
+                      <div id="protectSlotInfo">Selected Slot: 1</div>
+                      <div id="protectDaysInfo">Duration: 7 days</div>
+                      <div id="mercenaryCostInfo">Cost preview will appear here.</div>
+                      <div id="mercenarySlotLockHint" style="margin-top:0.35rem;">
+                        Slot 2 and Slot 3 remain locked until unlocked permanently.
+                      </div>
+                    </div>
+
+                    <div class="protection-input-group" style="margin-bottom:0.8rem; display:flex; gap:0.55rem; flex-wrap:wrap;">
+                      <button class="btn btn-small" id="protectBtn" type="button">Set Protection</button>
+                      <button class="btn btn-small btn-warning" id="extendProtectionBtn" type="button" disabled>Extend</button>
+                      <button class="btn btn-small btn-secondary" id="cancelProtectionBtn" type="button" disabled>Cancel</button>
+                    </div>
+
+                    <div class="protection-input-group" style="margin-bottom:0.8rem; display:grid; grid-template-columns:minmax(180px,1fr) auto auto auto; gap:0.55rem; align-items:center;">
+                      <select id="moveProtectionTargetTokenId" aria-label="Move protection target block">
+                        <option value="">Choose target block…</option>
+                      </select>
+                      <button class="btn btn-small" id="moveProtectionBtn" type="button" disabled>Move</button>
+                      <button class="btn btn-small btn-warning" id="emergencyMoveProtectionBtn" type="button" disabled>Emergency Move</button>
+                      <button class="btn btn-small" id="cleanupProtectionBtn" type="button" disabled>Cleanup Expired</button>
+                    </div>
+
+                    <div class="protection-input-group" style="margin-bottom:0.8rem; display:flex; gap:0.55rem; flex-wrap:wrap;">
+                      <button class="btn btn-small boost-btn" id="unlockSlot2Btn" type="button">Unlock Slot 2</button>
+                      <button class="btn btn-small boost-btn" id="unlockSlot3Btn" type="button">Unlock Slot 3</button>
+                    </div>
+
+                    <div style="margin-top:1rem; border-top:1px solid #2a3f4a; padding-top:1rem;">
+                      <h5 style="margin-bottom:0.4rem; color:#d4af37;">🏛️ Bastion Title</h5>
+                      <div class="info-note" id="bastionTitleHint" style="margin-bottom:0.8rem;">
+                        Locked until you reach 1000 Defender Points.
+                      </div>
+                      <div class="input-group" style="grid-template-columns:1fr auto;">
+                        <input
+                          type="text"
+                          id="bastionTitleInput"
+                          maxlength="32"
+                          placeholder="Enter Bastion / Clan Title"
+                          disabled
+                        />
+                        <button class="btn btn-small" id="saveBastionTitleBtn" type="button" disabled>
+                          Save Title
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <aside class="mercenary-info-side">
+                    <div class="action-card" style="height:100%;">
+                      <h4>📈 Defender Points</h4>
+
+                      <div style="margin-top:0.35rem; font-size:0.9rem; line-height:1.6; color:#dbe7f3;">
+                        <div><strong>Points:</strong> <span id="mercenaryPointsSide">0</span></div>
+                        <div><strong>Rank:</strong> <span id="mercenaryRankSide">Watchman</span></div>
+                        <div><strong>Discount:</strong> <span id="mercenaryDiscountSide">2%</span></div>
+                        <div><strong>Next rank at:</strong> <span id="mercenaryNextRankSide">100</span></div>
+                      </div>
+
+                      <div class="info-note" style="margin-top:0.85rem;">
+                        <strong>How to earn Defender Points</strong><br />
+                        • Start protection: 1–2 days = +2, 3–5 days = +5, 6–7 days = +10<br />
+                        • Finished protection grants completion points<br />
+                        • Longer successful protection grants more bonus points<br />
+                        • Cleanup helps keep expired protection slots clean
+                      </div>
+
+                      <div class="info-note" style="margin-top:0.75rem;">
+                        <strong>Rank path</strong><br />
+                        Watchman: 0–99<br />
+                        Defender: 100–249<br />
+                        Guardian: 250–599<br />
+                        Citadel Keeper: 600–1000<br />
+                        Inpinity Bastion: 1001+
+                      </div>
+
+                      <div class="info-note" style="margin-top:0.75rem;">
+                        <strong>Why rank matters</strong><br />
+                        Higher rank reduces INPI protection cost, improves status, and unlocks stronger defender identity.
+                      </div>
+                    </div>
+                  </aside>
+                </div>
+
+                <details style="margin-top:1rem;">
+                  <summary style="cursor:pointer; color:#d4af37;">📘 Mercenary V4 costs & rules</summary>
+                  <div class="details-body" style="margin-top:0.8rem;">
+                    <p class="info-note">
+                      <strong>Protection tiers:</strong><br />
+                      1–2 days = 20%<br />
+                      3–5 days = 30%<br />
+                      6–7 days = 50%
+                    </p>
+                    <p class="info-note">
+                      <strong>Set protection costs:</strong><br />
+                      1 day = 3 Oil / 2 Lemons / 1 Iron or 8 INPI<br />
+                      2 days = 4 Oil / 3 Lemons / 1 Iron or 14 INPI<br />
+                      3 days = 6 Oil / 4 Lemons / 2 Iron or 22 INPI<br />
+                      4 days = 8 Oil / 4 Lemons / 2 Iron or 29 INPI<br />
+                      5 days = 10 Oil / 5 Lemons / 3 Iron or 35 INPI<br />
+                      6 days = 11 Oil / 5 Lemons / 3 Iron or 42 INPI<br />
+                      7 days = 12 Oil / 6 Lemons / 3 Iron or 50 INPI
+                    </p>
+                    <p class="info-note">
+                      <strong>Slot 2 unlock:</strong> 1000 Oil + 500 Lemons + 100 Iron<br />
+                      <strong>Slot 3 unlock:</strong> 500 Oil + 100 Lemons + 100 Iron + 50 Gold + 25 Crystal + 5 Mysterium
+                    </p>
+                    <p class="info-note">
+                      <strong>Immediate points on set:</strong><br />
+                      1–2 days = +2 points<br />
+                      3–5 days = +5 points<br />
+                      6–7 days = +10 points
                     </p>
                   </div>
+                </details>
+              </div>
+            </details>
 
-                  <div class="attack-resource-group">
-                    <label class="select-label" for="attackResourceSelect">Choose resource to steal:</label>
-                    <select id="attackResourceSelect"></select>
-                  </div>
+            <details class="game-accordion" id="pirateAccordion">
+              <summary class="game-accordion-summary">
+                <div>
+                  <strong>⚔️ Pirate Attack V6</strong>
+                  <span class="section-subtitle" style="display:block;">
+                    Choose attacker, target, resource and execute attacks from one compact panel.
+                  </span>
+                </div>
+                <span class="v6-badge" id="pirateSummaryState">ATTACK</span>
+              </summary>
 
-                  <div id="attackPreviewDetails" class="attack-preview-detail" style="display:none;"></div>
+              <div class="game-accordion-body">
+                <div class="info-note" style="margin-bottom:1rem;">
+                  Choose the attacking block explicitly. This makes attacks clearer, easier to track,
+                  and better for reaction and revenge flow later.
+                </div>
 
-                  <div class="info-note" id="attackRulesInfo">
-                    <strong>Attack check</strong><br />
-                    Enter coordinates to analyze the target and see whether an attack path makes sense.
-                  </div>
+                <div class="pirate-layout">
+                  <div class="pirate-left">
+                    <div class="input-group">
+                      <label>Target Row <input type="number" id="attackRow" min="0" max="99" placeholder="e.g. 5" /></label>
+                      <label>Target Col <input type="number" id="attackCol" min="0" max="198" placeholder="e.g. 3" /></label>
+                    </div>
 
-                  <div style="margin-top:1rem;">
-                    <button class="btn" id="attackBtn" type="button" disabled>⚔️ Start Attack (V6)</button>
-                  </div>
+                    <div class="attacker-selector" id="attackerSelector">
+                      <h4 style="margin:0 0 0.5rem; font-size:0.95rem;">Attack source</h4>
+                      <div class="input-group" style="grid-template-columns:1fr;">
+                        <label>Attacker Block
+                          <select id="attackAttackerTokenId">
+                            <option value="">Choose your attacker block…</option>
+                          </select>
+                        </label>
+                      </div>
+                      <p class="info-note" style="font-size:0.8rem; margin:0.35rem 0 0;">
+                        Pick the exact block that should launch the attack.
+                      </p>
+                    </div>
 
-                  <div id="attackMessage" style="margin-top:1rem;"></div>
+                    <div class="attack-resource-group">
+                      <label class="select-label" for="attackResourceSelect">Choose resource to steal:</label>
+                      <select id="attackResourceSelect"></select>
+                    </div>
 
-                  <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid var(--line-soft);">
-                    <details>
+                    <div id="attackPreviewDetails" class="attack-preview-detail" style="display:none;"></div>
+
+                    <div id="attackRulesInfo" class="info-note">
+                      <strong>Attack check</strong><br />
+                      Enter coordinates to analyze the target and see whether an attack path makes sense.
+                    </div>
+
+                    <div style="margin-top:1rem;">
+                      <button class="btn" id="attackBtn" type="button" disabled>⚔️ Start Attack (V6)</button>
+                    </div>
+
+                    <div id="attackMessage" style="margin-top:1rem;"></div>
+
+                    <details style="margin-top:1rem; padding-top:1rem; border-top:1px solid var(--line-soft);" id="pirateBoostAccordion">
                       <summary style="cursor:pointer; color:#ffb347;">⚡ Pirate Boost Options</summary>
                       <div style="margin-top:0.8rem;">
                         <p class="info-note">
@@ -482,22 +619,27 @@
                       </div>
                     </details>
                   </div>
-                </div>
 
-                <div class="pirate-right">
-                  <div class="panel-head inner-panel-head">
-                    <h3 class="subsection-title">Your Attacks</h3>
-                    <p class="section-subtitle">
-                      Review active attacks and execute them when they become ready.
-                    </p>
-                  </div>
+                  <div class="pirate-right">
+                    <div class="panel-head inner-panel-head">
+                      <h3 class="subsection-title">Your Attacks</h3>
+                      <p class="section-subtitle">
+                        Review active attacks, see source and target, and execute them when ready.
+                      </p>
+                    </div>
 
-                  <div id="userAttacksList" class="attacks-list">
-                    <p class="empty-state">Connect wallet to see your attacks.</p>
+                    <div id="incomingAttackInfo" class="info-note" style="margin-bottom:0.8rem; display:none;">
+                      <strong>Attack updates:</strong>
+                      <span id="incomingAttackText">No attack update data.</span>
+                    </div>
+
+                    <div id="userAttacksList" class="attacks-list">
+                      <p class="empty-state">Connect wallet to see your attacks.</p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </details>
 
             <div id="actionMessage" class="message" style="margin-top:1rem;"></div>
             <div id="protectMessage" class="message" style="margin-top:0.5rem;"></div>
@@ -510,115 +652,134 @@
       </section>
 
       <section class="panel">
-        <div class="panel-head">
-          <h2 class="section-title">Mint a New Block</h2>
-          <p class="section-subtitle">
-            Choose coordinates, select a payment method, and mint a new Pyramid Block.
-          </p>
-        </div>
+        <details class="panel-accordion" id="mintAccordion" open>
+          <summary class="game-accordion-summary">
+            <div>
+              <strong>⛏️ Mint a New Block</strong>
+              <span class="section-subtitle" style="display:block;">
+                Choose coordinates, select payment and mint a new Pyramid Block.
+              </span>
+            </div>
+            <span class="v6-badge">MINT</span>
+          </summary>
 
-        <div class="info-note">
-          <strong>Mint note:</strong><br />
-          Blocks paid with <strong>INPI</strong> are treated as burn-based payments.
-          Blocks paid with <strong>ETH</strong> are also treated as burn-based in practice,
-          because that ETH is not accessible again.
-        </div>
+          <div class="game-accordion-body">
+            <div class="info-note">
+              <strong>Mint note:</strong><br />
+              Blocks paid with <strong>INPI</strong> are treated as burn-based payments.
+              Blocks paid with <strong>ETH</strong> are also treated as burn-based in practice,
+              because that ETH is not accessible again.
+            </div>
 
-        <div class="input-group">
-          <label>Row <input type="number" id="row" min="0" max="99" value="0" /></label>
-          <label>Col <input type="number" id="col" min="0" max="198" value="0" /></label>
-          <button class="random-btn" id="randomBlockBtn" type="button">🎲 Random free</button>
-        </div>
+            <div class="input-group" style="margin-top:1rem;">
+              <label>Row <input type="number" id="row" min="0" max="99" value="0" /></label>
+              <label>Col <input type="number" id="col" min="0" max="198" value="0" /></label>
+              <button class="random-btn" id="randomBlockBtn" type="button">🎲 Random free</button>
+            </div>
 
-        <div class="payment-options">
-          <label><input type="radio" name="payment" value="eth" checked /> 0.003 ETH</label>
-          <label><input type="radio" name="payment" value="inpi" /> 30 INPI</label>
-          <label><input type="radio" name="payment" value="mixed" /> 0.0015 ETH + 15 INPI</label>
-        </div>
+            <div class="payment-options">
+              <label><input type="radio" name="payment" value="eth" checked /> 0.003 ETH</label>
+              <label><input type="radio" name="payment" value="inpi" /> 30 INPI</label>
+              <label><input type="radio" name="payment" value="mixed" /> 0.0015 ETH + 15 INPI</label>
+            </div>
 
-        <button class="action-button" id="mintBtn" type="button">Mint Block</button>
-        <div id="mintMessage" style="margin-top:1rem;"></div>
+            <button class="action-button" id="mintBtn" type="button">Mint Block</button>
+            <div id="mintMessage" style="margin-top:1rem;"></div>
+          </div>
+        </details>
       </section>
 
       <section class="panel economy-panel panel-wide">
-        <div class="panel-head">
-          <h2 class="section-title">Pitrone Exchange & Resources</h2>
-          <p class="section-subtitle">
-            Track balances, swap between INPI and PIT, and review your broader resource position.
-          </p>
-        </div>
-
-        <div class="economy-top">
-          <div class="economy-stat-card">
-            <div class="economy-icon">🪙</div>
+        <details class="panel-accordion" id="economyAccordion" open>
+          <summary class="game-accordion-summary">
             <div>
-              <span class="resource-name">INPI</span><br />
-              <span class="resource-amount" id="userInpi">0</span>
+              <strong>🍋 Pitrone Exchange & Resources</strong>
+              <span class="section-subtitle" style="display:block;">
+                Track balances, swap INPI/PIT and review your current resource position.
+              </span>
+            </div>
+            <span class="v6-badge">ECONOMY</span>
+          </summary>
+
+          <div class="game-accordion-body">
+            <div class="economy-top">
+              <div class="economy-stat-card">
+                <div class="economy-icon">🪙</div>
+                <div>
+                  <span class="resource-name">INPI</span><br />
+                  <span class="resource-amount" id="userInpi">0</span>
+                </div>
+              </div>
+
+              <div class="economy-stat-card">
+                <div class="economy-icon">🍋</div>
+                <div>
+                  <span class="resource-name">Pitrone</span><br />
+                  <span class="resource-amount" id="userPitrone">0</span>
+                </div>
+              </div>
+
+              <div class="economy-stat-card">
+                <div class="economy-icon">🌾</div>
+                <div>
+                  <span class="resource-name">Active Farms</span><br />
+                  <span class="resource-amount" id="activeFarms">0</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="exchange-info">
+              <span>Rate: 1 INPI = <span id="exchangeRate">100</span> PIT</span>
+              <span>Pool: <span id="poolInpi">0</span> INPI | <span id="poolPit">0</span> PIT</span>
+            </div>
+
+            <div class="swap-grid">
+              <div class="swap-card">
+                <h3>INPI → PIT</h3>
+                <div class="input-group">
+                  <label>INPI amount <input type="number" id="inpiAmount" min="0" step="0.0001" value="10" /></label>
+                </div>
+                <button class="btn btn-small" id="exchangeInpiBtn" type="button">Swap to PIT</button>
+              </div>
+
+              <div class="swap-card">
+                <h3>PIT → INPI</h3>
+                <div class="input-group">
+                  <label>PIT amount <input type="number" id="pitAmount" min="0" step="0.0001" value="1000" /></label>
+                </div>
+                <button class="btn btn-small" id="exchangePitBtn" type="button">Swap to INPI</button>
+              </div>
+            </div>
+
+            <div id="exchangeMessage"></div>
+
+            <div style="margin:1rem 0 0.5rem;">
+              <details>
+                <summary style="cursor:pointer; color:var(--gold);">🔧 Advanced: Resource Approvals</summary>
+                <div style="margin-top:0.8rem; padding:0.8rem; background:rgba(0,0,0,0.2); border-radius:0.8rem;">
+                  <p class="info-note">Approve contracts to manage your resource tokens.</p>
+                  <button class="btn btn-small" id="approveResourcesBtn" type="button">Approve Farming for Resources</button>
+                  <div id="approveMessage" style="font-size:0.84rem; margin-top:0.5rem;"></div>
+                </div>
+              </details>
+            </div>
+
+            <div class="info-note" style="margin-bottom:0.85rem;">
+              <strong>Resource icons:</strong> Your ERC-1155 resource balances are shown with 32×32 icons from
+              <code>img/0-9.png</code> when available.
+            </div>
+
+            <div class="user-resources" id="userResources">
+              <p class="empty-state">Connect wallet to see your resource tokens.</p>
+            </div>
+
+            <div class="info-note" style="margin-top:1rem;">
+              <strong>Special resources:</strong><br />
+              Copper and Obsidian are not produced by regular blocks. They are intended for special integration paths
+              and later ecosystem expansion.
             </div>
           </div>
-
-          <div class="economy-stat-card">
-            <div class="economy-icon">🍋</div>
-            <div>
-              <span class="resource-name">Pitrone</span><br />
-              <span class="resource-amount" id="userPitrone">0</span>
-            </div>
-          </div>
-
-          <div class="economy-stat-card">
-            <div class="economy-icon">🌾</div>
-            <div>
-              <span class="resource-name">Active Farms</span><br />
-              <span class="resource-amount" id="activeFarms">0</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="exchange-info">
-          <span>Rate: 1 INPI = <span id="exchangeRate">100</span> PIT</span>
-          <span>Pool: <span id="poolInpi">0</span> INPI | <span id="poolPit">0</span> PIT</span>
-        </div>
-
-        <div class="swap-grid">
-          <div class="swap-card">
-            <h3>INPI → PIT</h3>
-            <div class="input-group">
-              <label>INPI amount <input type="number" id="inpiAmount" min="0" step="0.0001" value="10" /></label>
-            </div>
-            <button class="btn btn-small" id="exchangeInpiBtn" type="button">Swap to PIT</button>
-          </div>
-
-          <div class="swap-card">
-            <h3>PIT → INPI</h3>
-            <div class="input-group">
-              <label>PIT amount <input type="number" id="pitAmount" min="0" step="0.0001" value="1000" /></label>
-            </div>
-            <button class="btn btn-small" id="exchangePitBtn" type="button">Swap to INPI</button>
-          </div>
-        </div>
-
-        <div id="exchangeMessage"></div>
-
-        <div style="margin:1rem 0 0.5rem;">
-          <details>
-            <summary style="cursor:pointer; color:var(--gold);">🔧 Advanced: Resource Approvals</summary>
-            <div style="margin-top:0.8rem; padding:0.8rem; background:rgba(0,0,0,0.2); border-radius:0.8rem;">
-              <p class="info-note">Approve contracts to manage your resource tokens.</p>
-              <button class="btn btn-small" id="approveResourcesBtn" type="button">Approve Farming for Resources</button>
-              <div id="approveMessage" style="font-size:0.84rem; margin-top:0.5rem;"></div>
-            </div>
-          </details>
-        </div>
-
-        <div class="user-resources" id="userResources">
-          <p class="empty-state">Connect wallet to see your resource tokens.</p>
-        </div>
-
-        <div class="info-note" style="margin-top:1rem;">
-          <strong>Special resources:</strong><br />
-          Copper and Obsidian are not produced by regular blocks. They are intended for special integration paths
-          and later ecosystem expansion.
-        </div>
+        </details>
       </section>
     </section>
 
@@ -687,6 +848,25 @@
       </details>
 
       <details class="content-details">
+        <summary>How do Defender Points work?</summary>
+        <div class="details-body">
+          <p>
+            Defender Points grow through active protection usage. Short protection gives fewer points,
+            longer protection gives more, and successful finished protection adds extra rewards.
+          </p>
+          <ul>
+            <li>1–2 days protection start = +2 points</li>
+            <li>3–5 days protection start = +5 points</li>
+            <li>6–7 days protection start = +10 points</li>
+            <li>Completed protection adds more points depending on duration</li>
+          </ul>
+          <p>
+            Higher ranks improve your INPI discount and strengthen your defender profile.
+          </p>
+        </div>
+      </details>
+
+      <details class="content-details">
         <summary>How do slot unlocks work?</summary>
         <div class="details-body">
           <p>
@@ -703,8 +883,8 @@
         <summary>How do attacks work?</summary>
         <div class="details-body">
           <p>
-            Enter target coordinates, preview the route and stealability, then start the attack.
-            Once the timer finishes, you can execute the attack from your active attacks list.
+            Enter target coordinates, choose the attacker block, preview the route and stealability,
+            then start the attack. Once the timer finishes, you can execute the attack from your active attacks list.
           </p>
         </div>
       </details>
@@ -758,7 +938,7 @@
       <a href="whitepaper.html">Whitepaper</a>
       <a href="https://discord.gg/95yj6Eg6" target="_blank" rel="noopener">Discord</a>
     </div>
-    <p class="footer-version">Version 0.26.0 (V6 + Mercenary V4)</p>
+    <p class="footer-version">Version 0.27.0 (V6 + Mercenary V4)</p>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
