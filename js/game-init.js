@@ -58,6 +58,19 @@ import { findRandomFreeBlock, mintBlock } from "./mint.js";
 import { exchangeINPI, exchangePit } from "./exchange.js";
 
 /* =========================================================
+   HELPERS
+   ========================================================= */
+
+async function refreshAttackSelectorAfterBlockLoad() {
+  try {
+    await updateAttackerSelectorUi();
+    scheduleAttackDropdownRefresh();
+  } catch (e) {
+    console.warn("refreshAttackSelectorAfterBlockLoad failed:", e);
+  }
+}
+
+/* =========================================================
    WALLET CONNECT / DISCONNECT
    ========================================================= */
 
@@ -85,16 +98,28 @@ async function connectWallet(forceRequest = true) {
     await loadResourceBalancesOnchain();
 
     await loadUserBlocks({
-      onRevealSelected: revealSelected,
+      onRevealSelected: async () => {
+        await revealSelected();
+        await refreshAttackSelectorAfterBlockLoad();
+      },
       onRefreshBlockMarkings: refreshBlockMarkings
     });
 
     await loadMercenaryPanelState();
-    await updateAttackerSelectorUi();
-    await loadUserAttacks();
 
+    /* Wichtig:
+       Erst nach loadUserBlocks den Attacker-Selector befüllen,
+       weil state.userBlocks dort gesetzt wird. */
+    await refreshAttackSelectorAfterBlockLoad();
+
+    await loadUserAttacks();
     refreshBlockMarkings();
-    scheduleAttackDropdownRefresh();
+
+    /* Noch ein kleiner zweiter Refresh, falls DOM/Subgraph/State
+       minimal zeitversetzt ankommt */
+    setTimeout(() => {
+      refreshAttackSelectorAfterBlockLoad();
+    }, 250);
 
     if (!state.attacksPoller) {
       state.attacksPoller = setInterval(async () => {
@@ -114,7 +139,7 @@ async function connectWallet(forceRequest = true) {
         }
 
         try {
-          await updateAttackerSelectorUi();
+          await refreshAttackSelectorAfterBlockLoad();
         } catch (e) {
           console.warn("Attacker selector refresh failed:", e);
         }
