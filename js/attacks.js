@@ -19,7 +19,6 @@
   import {
     byId,
     formatTime,
-    formatDuration,
     normalizeAttackTuple
   } from "./utils.js";
   
@@ -198,18 +197,26 @@
     if (box) box.style.display = visible ? "block" : "none";
   }
   
-  function getMapAttackUrl() {
+  function getMapAttackUrl(extraParams = {}) {
     const params = new URLSearchParams();
   
-    const attackerId = String(state.selectedAttackAttackerTokenId || "");
-    const row = String(byId("attackRow")?.value || "");
-    const col = String(byId("attackCol")?.value || "");
-    const resource = String(byId("attackResourceSelect")?.value || "");
+    const attackerId = String(extraParams.attacker ?? state.selectedAttackAttackerTokenId ?? "");
+    const row = String(extraParams.row ?? byId("attackRow")?.value ?? "");
+    const col = String(extraParams.col ?? byId("attackCol")?.value ?? "");
+    const resource = String(extraParams.resource ?? byId("attackResourceSelect")?.value ?? "");
   
     if (attackerId) params.set("attacker", attackerId);
     if (row) params.set("row", row);
     if (col) params.set("col", col);
     if (resource) params.set("resource", resource);
+  
+    if (extraParams.targetTokenId !== undefined && extraParams.targetTokenId !== null) {
+      params.set("targetTokenId", String(extraParams.targetTokenId));
+    }
+  
+    if (extraParams.attackIndex !== undefined && extraParams.attackIndex !== null) {
+      params.set("attackIndex", String(extraParams.attackIndex));
+    }
   
     const qs = params.toString();
     return qs ? `map.html?${qs}#attack` : "map.html#attack";
@@ -252,6 +259,34 @@
       attackBtn.style.opacity = "1";
       attackBtn.style.pointerEvents = "auto";
     }
+  }
+  
+  function clearAttackUiDisconnected() {
+    const select = getAttackerSelect();
+    const resourceSelect = getAttackResourceSelect();
+    const msg = getAttackMessageDiv();
+    const info = byId("attackRulesInfo");
+    const previewDetails = byId("attackPreviewDetails");
+  
+    if (select) {
+      select.innerHTML = `<option value="">Connect wallet first…</option>`;
+    }
+  
+    if (resourceSelect) {
+      resourceSelect.innerHTML = "";
+    }
+  
+    if (msg) msg.innerHTML = "";
+    if (info) info.innerHTML = `<strong>Attack Flow</strong><br>Connect wallet first.`;
+    if (previewDetails) previewDetails.style.display = "none";
+  
+    setSelectedAttackAttackerTokenId(null);
+    persistSelectedAttackerTokenId(null);
+    setIncomingAttackInfo("", false);
+    setSelectedAttackAlert("", false);
+  
+    setButtonVisualState("attackBtn", false, "🗺️ Open Attack View in Map", "🗺️ Open Attack View in Map");
+    setButtonVisualState("buyPirateBoostBtn", false, "Buy Pirate Boost", "Buy Pirate Boost");
   }
   
   /* =========================================================
@@ -299,10 +334,7 @@
     if (!select) return null;
   
     if (!state.userAddress) {
-      select.innerHTML = `<option value="">Connect wallet first…</option>`;
-      setSelectedAttackAttackerTokenId(null);
-      setIncomingAttackInfo("", false);
-      setSelectedAttackAlert("", false);
+      clearAttackUiDisconnected();
       return null;
     }
   
@@ -314,6 +346,7 @@
       persistSelectedAttackerTokenId(null);
       setSelectedAttackAlert("No owned attacker block found for this wallet.", true);
       renderMapRedirectInfo();
+      setButtonVisualState("buyPirateBoostBtn", false, "Buy Pirate Boost", "Buy Pirate Boost");
       return null;
     }
   
@@ -341,6 +374,7 @@
   
     setSelectedAttackAlert(`Selected attacker block: #${preferred}`, true);
     renderMapRedirectInfo();
+    setButtonVisualState("buyPirateBoostBtn", true, "Buy Pirate Boost", "Buy Pirate Boost");
   
     return parseInt(preferred, 10);
   }
@@ -408,7 +442,7 @@
       const attackerTokenId = await getValidAttackerTokenId({ allowFallback: false });
       if (!attackerTokenId) {
         msgDiv.innerHTML = `<span class="error">❌ Select a valid attacker block first.</span>`;
-        setButtonVisualState("buyPirateBoostBtn", false, null, "Buy Pirate Boost");
+        setButtonVisualState("buyPirateBoostBtn", false, "Buy Pirate Boost", "Buy Pirate Boost");
         return;
       }
   
@@ -490,7 +524,12 @@
     const select = getAttackResourceSelect();
     if (!select) return;
   
-    await updateAttackerSelectorUi();
+    if (!state.userAddress) {
+      clearAttackUiDisconnected();
+      return;
+    }
+  
+    const attackerTokenId = await updateAttackerSelectorUi();
   
     const msg = getAttackMessageDiv();
     const info = byId("attackRulesInfo");
@@ -521,7 +560,7 @@
     }
   
     setButtonVisualState("attackBtn", true, "🗺️ Open Attack View in Map", "🗺️ Open Attack View in Map");
-    setButtonVisualState("buyPirateBoostBtn", !!state.selectedAttackAttackerTokenId, "Buy Pirate Boost", "Buy Pirate Boost");
+    setButtonVisualState("buyPirateBoostBtn", !!attackerTokenId, "Buy Pirate Boost", "Buy Pirate Boost");
   }
   
   /* =========================================================
@@ -529,7 +568,11 @@
      ========================================================= */
   
   export async function loadUserAttacks() {
-    if (!state.userAddress || !state.piratesV6Contract) return;
+    if (!state.userAddress || !state.piratesV6Contract) {
+      state.userAttacks = [];
+      displayUserAttacks();
+      return;
+    }
   
     try {
       const subgraphAttacks = await loadMyAttacksV6FromSubgraph(state.userAddress);
@@ -647,30 +690,10 @@
   }
   
   function openAttackInMap(targetTokenId = null, attackIndex = null) {
-    const params = new URLSearchParams();
-  
-    if (state.selectedAttackAttackerTokenId) {
-      params.set("attacker", String(state.selectedAttackAttackerTokenId));
-    }
-  
-    if (targetTokenId !== null && targetTokenId !== undefined) {
-      params.set("targetTokenId", String(targetTokenId));
-    }
-  
-    if (attackIndex !== null && attackIndex !== undefined) {
-      params.set("attackIndex", String(attackIndex));
-    }
-  
-    const row = String(byId("attackRow")?.value || "");
-    const col = String(byId("attackCol")?.value || "");
-    const resource = String(byId("attackResourceSelect")?.value || "");
-  
-    if (row) params.set("row", row);
-    if (col) params.set("col", col);
-    if (resource) params.set("resource", resource);
-  
-    const qs = params.toString();
-    window.location.href = qs ? `map.html?${qs}#attack` : "map.html#attack";
+    window.location.href = getMapAttackUrl({
+      targetTokenId,
+      attackIndex
+    });
   }
   
   export function startAttacksTicker() {
