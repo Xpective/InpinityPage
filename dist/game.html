@@ -520,54 +520,29 @@
                 <div>
                   <strong>⚔️ Pirate Attack V6</strong>
                   <span class="section-subtitle" style="display:block;">
-                    Attack execution has been moved to the Pyramid Map for better stability and visual targeting.
+                    Attack execution happens in the Pyramid Map.
                   </span>
                 </div>
                 <span class="v6-badge" id="pirateSummaryState">MAP</span>
               </summary>
-
+            
               <div class="game-accordion-body">
-                <div class="info-note" style="margin-bottom:1rem;">
-                  The attack flow inside the Game dashboard has been reduced to avoid freezes and heavy browser load.
-                  Please use the <strong>Pyramid Map</strong> for starting and executing attacks.
-                </div>
-
                 <div class="action-card" style="margin-bottom:1rem;">
                   <h4>🗺️ Attack via Map</h4>
+            
                   <div style="margin-top:0.5rem; font-size:0.92rem; line-height:1.65; color:#dbe7f3;">
                     • Open the map for visual target selection<br />
                     • Launch attacks there with the cleaner attack flow<br />
                     • Execute ready attacks from the attack list or directly in map view
                   </div>
-
-                  <div class="attacker-selector" id="attackerSelector" style="margin-top:1rem;">
-                    <h4 style="margin:0 0 0.5rem; font-size:0.95rem;">Pirate Boost Source Block</h4>
-                    <div class="input-group" style="grid-template-columns:1fr;">
-                      <label>Attacker Block
-                        <select id="attackAttackerTokenId">
-                          <option value="">Choose your attacker block…</option>
-                        </select>
-                      </label>
-                    </div>
-                    <p class="info-note" style="font-size:0.8rem; margin:0.35rem 0 0;">
-                      Select the block that should receive the Pirate Boost. Full attack targeting happens in the map.
-                    </p>
-                  </div>
-
-                  <div id="attackRulesInfo" class="info-note" style="margin-top:1rem;">
-                    <strong>Attack Flow</strong><br />
-                    Open the Pyramid Map for target selection and execution.
-                  </div>
-
-                  <div id="attackPreviewDetails" class="attack-preview-detail" style="display:none;"></div>
-
+            
                   <div style="margin-top:1rem; display:flex; gap:0.7rem; flex-wrap:wrap;">
-                    <button class="btn" id="attackBtn" type="button">🗺️ Open Pyramid Map Attack View</button>
+                    <a href="/map#attack" class="btn" id="openMapAttackBtn">🗺️ Open Pyramid Map</a>
                   </div>
-
+            
                   <div id="attackMessage" style="margin-top:1rem;"></div>
                 </div>
-
+            
                 <details style="margin-top:1rem; padding-top:1rem; border-top:1px solid var(--line-soft);" id="pirateBoostAccordion">
                   <summary style="cursor:pointer; color:#ffb347;">⚡ Pirate Boost Options</summary>
                   <div style="margin-top:0.8rem;">
@@ -577,8 +552,22 @@
                       Contract max: <strong>10 days</strong><br />
                       Base steal: <strong>25%</strong> → with boost up to <strong>50%</strong> before protection
                     </p>
-
-                    <div class="input-group" style="grid-template-columns:1fr auto;">
+            
+                    <div class="attacker-selector" id="attackerSelector" style="margin-top:1rem;">
+                      <h4 style="margin:0 0 0.5rem; font-size:0.95rem;">Pirate Boost Source Block</h4>
+                      <div class="input-group" style="grid-template-columns:1fr;">
+                        <label>Attacker Block
+                          <select id="attackAttackerTokenId">
+                            <option value="">Choose your attacker block…</option>
+                          </select>
+                        </label>
+                      </div>
+                      <p class="info-note" style="font-size:0.8rem; margin:0.35rem 0 0;">
+                        Select the block that should receive the Pirate Boost.
+                      </p>
+                    </div>
+            
+                    <div class="input-group" style="grid-template-columns:1fr auto; margin-top:0.8rem;">
                       <select id="pirateBoostDays">
                         <option value="1">1 day</option>
                         <option value="2">2 days</option>
@@ -591,20 +580,20 @@
                         <option value="9">9 days</option>
                         <option value="10">10 days</option>
                       </select>
-
+            
                       <button class="btn btn-small boost-btn" id="buyPirateBoostBtn" type="button" disabled>
                         Buy Pirate Boost
                       </button>
                     </div>
-
+            
                     <div id="pirateBoostCostInfo" style="font-size:0.84rem; color:#d4af37; margin-top:0.35rem;">
                       Total: 700 PIT
                     </div>
-
+            
                     <div id="pirateBoostMessage" style="font-size:0.84rem; margin-top:0.5rem;"></div>
                   </div>
                 </details>
-
+            
                 <div class="pirate-right" style="margin-top:1.2rem;">
                   <div class="panel-head inner-panel-head">
                     <h3 class="subsection-title">Your Attacks</h3>
@@ -612,12 +601,12 @@
                       Review active attacks and open ready executions in the map view.
                     </p>
                   </div>
-
+            
                   <div id="incomingAttackInfo" class="info-note" style="margin-bottom:0.8rem; display:none;">
                     <strong>Attack updates:</strong>
                     <span id="incomingAttackText">No attack update data.</span>
                   </div>
-
+            
                   <div id="userAttacksList" class="attacks-list">
                     <p class="empty-state">Connect wallet to see your attacks.</p>
                   </div>
