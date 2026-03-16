@@ -1,8 +1,9 @@
 /* =========================================================
    BLOCKS – V6 + MERCENARY V4
-   LIGHT GRID VERSION
-   - Grid stays cheap and stable
-   - Heavy per-block reads only happen on select
+   RESTORED GRID VERSION
+   - Rarity back in grid
+   - Claim info back in grid
+   - No useless "Revealed block / Revealed" duplication
    ========================================================= */
 
    import {
@@ -12,6 +13,7 @@
   } from "./state.js";
   
   import {
+    rarityNames,
     getMercenaryRankLabel,
     getMercenaryDiscountPercent,
     getMercenaryNextRankThreshold
@@ -443,7 +445,6 @@
   
   /* =========================================================
      LOAD USER BLOCKS
-     LIGHT GRID: no heavy onchain per-card calls
      ========================================================= */
   
   export async function loadUserBlocks({ onRevealSelected, onRefreshBlockMarkings } = {}) {
@@ -476,29 +477,65 @@
         return;
       }
   
+      const v5States = await Promise.all(
+        state.userBlocks.map((tokenId) => isTokenActiveOnV5(tokenId).catch(() => false))
+      );
+  
+      const v5Map = new Map();
+      state.userBlocks.forEach((tokenId, idx) => {
+        v5Map.set(String(tokenId), !!v5States[idx]);
+      });
+  
       let html = "";
       let activeFarmsCount = 0;
+      let activeV5Count = 0;
       const now = Math.floor(Date.now() / 1000);
   
       for (const token of subgraphTokens) {
         const tokenId = String(token.id);
         const revealed = !!token.revealed;
   
+        let row = 0;
+        let col = 0;
+        let rarity = null;
+        let rarityName = "";
+  
+        try {
+          const pos = await state.nftContract.getBlockPosition(tokenId);
+          row = Number(pos?.row ?? 0);
+          col = Number(pos?.col ?? 0);
+        } catch {}
+  
+        if (revealed) {
+          try {
+            rarity = Number(await state.nftContract.calculateRarity(tokenId));
+            rarityName = rarityNames[rarity] || "";
+          } catch {}
+        }
+  
         const farm = state.cachedFarmV6Map.get(tokenId);
         const farmingActive = !!(farm && farm.active);
         if (farmingActive) activeFarmsCount++;
+  
+        const activeOnV5 = v5Map.get(tokenId);
+        if (activeOnV5) activeV5Count++;
   
         const protection = state.cachedProtectionMapV4.get(tokenId);
         const protectionActive = !!(protection && protection.active && Number(protection.expiresAt) > now);
   
         let classNames = revealed ? "revealed" : "hidden";
         if (farmingActive) classNames += " farming";
+        if (activeOnV5 && !farmingActive) classNames += " legacy-farming";
         if (protectionActive) classNames += " protected";
         if (state.selectedBlock && String(state.selectedBlock.tokenId) === tokenId) classNames += " selected";
   
         const badge = revealed
-          ? `<div class="rarity-badge">Revealed</div>`
+          ? `<div class="rarity-badge ${String(rarityName || "").toLowerCase()}">${rarityName || "Revealed"}</div>`
           : `<div class="rarity-badge hidden-badge">🔒 Hidden</div>`;
+  
+        const legacyBadge = activeOnV5 && !farmingActive
+          ? `<div class="rarity-badge" style="background:#8a5cff; color:white; margin-top:4px;">V5 Active</div>`
+          : "";
   
         const protectionBadge = protectionActive
           ? `<div class="rarity-badge" style="background:#6f42c1; color:white; margin-top:4px;">🛡️ ${protection.level}% Protected</div>`
@@ -511,6 +548,28 @@
             : "—";
   
           farmDurationLine = `<div class="farm-duration">🌾 Farming: ${farmingElapsed}</div>`;
+        } else if (activeOnV5) {
+          farmDurationLine = `<div class="farm-duration">🌾 Farming: Active on V5</div>`;
+        }
+  
+        let claimLine = "";
+        if (farmingActive) {
+          try {
+            const waitRaw = await state.farmingV6Contract.secondsUntilClaimable(tokenId);
+            const waitSec = Math.max(0, Number(waitRaw || 0));
+            claimLine = waitSec <= 0
+              ? `<div class="farm-duration" style="color:#5CFF95;">💰 Claim Ready</div>`
+              : `<div class="farm-duration">💰 Claim: ${formatDuration(waitSec)}</div>`;
+          } catch {}
+        } else if (activeOnV5) {
+          try {
+            const v5 = getFarmingV5Contract();
+            const preview = await v5.previewClaim(tokenId);
+            const waitSec = Math.max(0, Number(preview?.secondsRemaining || 0));
+            claimLine = !!preview?.allowed
+              ? `<div class="farm-duration" style="color:#5CFF95;">💰 Claim Ready</div>`
+              : `<div class="farm-duration">💰 Claim: ${formatDuration(waitSec)}</div>`;
+          } catch {}
         }
   
         const revealButton = !revealed
@@ -520,10 +579,12 @@
         html += `
           <div class="block-card ${classNames}" data-tokenid="${tokenId}">
             <div class="block-id">#${tokenId}</div>
-            <div>${revealed ? "Revealed block" : "Hidden block"}</div>
+            <div>${revealed ? `R${row} C${col}` : "Hidden block"}</div>
             ${badge}
+            ${legacyBadge}
             ${protectionBadge}
             ${farmDurationLine}
+            ${claimLine}
             ${revealButton}
           </div>
         `;
@@ -534,7 +595,10 @@
   
       const migrateAllBtn = byId("migrateAllV5Btn");
       if (migrateAllBtn) {
-        migrateAllBtn.style.display = "none";
+        migrateAllBtn.style.display = activeV5Count > 0 ? "inline-block" : "none";
+        if (activeV5Count > 0) {
+          migrateAllBtn.textContent = `🔄 Migrate ${activeV5Count} V5 Farm${activeV5Count > 1 ? "s" : ""} to V6`;
+        }
       }
   
       document.querySelectorAll(".block-card").forEach((card) => {
@@ -566,7 +630,6 @@
   
   /* =========================================================
      SELECT BLOCK
-     Heavy reads only here
      ========================================================= */
   
   export async function selectBlock(tokenId, row = null, col = null) {

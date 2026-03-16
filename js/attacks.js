@@ -108,10 +108,6 @@
     return byId("attackAttackerTokenId");
   }
   
-  function getAttackResourceSelect() {
-    return byId("attackResourceSelect");
-  }
-  
   function persistSelectedAttackerTokenId(tokenId) {
     try {
       if (tokenId === null || tokenId === undefined || tokenId === "") {
@@ -201,14 +197,8 @@
     const params = new URLSearchParams();
   
     const attackerId = String(extraParams.attacker ?? state.selectedAttackAttackerTokenId ?? "");
-    const row = String(extraParams.row ?? "");
-    const col = String(extraParams.col ?? "");
-    const resource = String(extraParams.resource ?? "");
   
     if (attackerId) params.set("attacker", attackerId);
-    if (row) params.set("row", row);
-    if (col) params.set("col", col);
-    if (resource) params.set("resource", resource);
   
     if (extraParams.targetTokenId !== undefined && extraParams.targetTokenId !== null) {
       params.set("targetTokenId", String(extraParams.targetTokenId));
@@ -223,38 +213,19 @@
   }
   
   function renderMapRedirectInfo() {
-    const info = byId("attackRulesInfo");
-    const previewDetails = byId("attackPreviewDetails");
     const msg = getAttackMessageDiv();
     const attackBtn = byId("attackBtn");
-  
-    if (info) {
-      info.innerHTML = `
-        <strong>Attack Flow</strong><br>
-        The heavy attack selection and execution now runs on the <strong>Map</strong> page for better performance.<br>
-        Use the Pyramid Map for target selection and execution.
-      `;
-    }
-  
-    if (previewDetails) {
-      previewDetails.style.display = "block";
-      previewDetails.innerHTML = `
-        <strong>Recommended:</strong><br>
-        Open the Pyramid Map and execute attacks there with the visual block view.
-      `;
-    }
   
     if (msg) {
       msg.innerHTML = `
         <span class="success">
-          ℹ️ Use the Map page for attack execution.<br>
           <a href="${getMapAttackUrl()}" style="color:#d4af37; text-decoration:underline;">Open Map Attack View</a>
         </span>
       `;
     }
   
     if (attackBtn) {
-      attackBtn.textContent = "🗺️ Open Attack View in Map";
+      attackBtn.textContent = "🗺️ Open Pyramid Map";
       attackBtn.disabled = false;
       attackBtn.style.opacity = "1";
       attackBtn.style.pointerEvents = "auto";
@@ -263,29 +234,20 @@
   
   function clearAttackUiDisconnected() {
     const select = getAttackerSelect();
-    const resourceSelect = getAttackResourceSelect();
     const msg = getAttackMessageDiv();
-    const info = byId("attackRulesInfo");
-    const previewDetails = byId("attackPreviewDetails");
   
     if (select) {
       select.innerHTML = `<option value="">Connect wallet first…</option>`;
     }
   
-    if (resourceSelect) {
-      resourceSelect.innerHTML = "";
-    }
-  
     if (msg) msg.innerHTML = "";
-    if (info) info.innerHTML = `<strong>Attack Flow</strong><br>Connect wallet first.`;
-    if (previewDetails) previewDetails.style.display = "none";
   
     setSelectedAttackAttackerTokenId(null);
     persistSelectedAttackerTokenId(null);
     setIncomingAttackInfo("", false);
     setSelectedAttackAlert("", false);
   
-    setButtonVisualState("attackBtn", false, "🗺️ Open Attack View in Map", "🗺️ Open Attack View in Map");
+    setButtonVisualState("attackBtn", true, "🗺️ Open Pyramid Map", "🗺️ Open Pyramid Map");
     setButtonVisualState("buyPirateBoostBtn", false, "Buy Pirate Boost", "Buy Pirate Boost");
   }
   
@@ -393,24 +355,17 @@
       setSelectedAttackAlert("No attacker block selected.", true);
     }
   
-    await refreshAttackDropdown();
+    renderMapRedirectInfo();
+    setButtonVisualState("buyPirateBoostBtn", !!value, "Buy Pirate Boost", "Buy Pirate Boost");
   }
   
   /* =========================================================
      RESOURCE SELECT / BOOST LABELS
+     kept as no-op for compatibility with existing imports
      ========================================================= */
   
   export function initAttackResourceSelect() {
-    const select = getAttackResourceSelect();
-    if (!select) return;
-  
-    select.innerHTML = "";
-    for (let i = 0; i < resourceNames.length; i++) {
-      const opt = document.createElement("option");
-      opt.value = i;
-      opt.textContent = resourceNames[i];
-      select.appendChild(opt);
-    }
+    /* no-op in light mode */
   }
   
   export function updateBoostCostLabels() {
@@ -521,9 +476,6 @@
   }
   
   export async function refreshAttackDropdown() {
-    const select = getAttackResourceSelect();
-    if (!select) return;
-  
     if (!state.userAddress) {
       clearAttackUiDisconnected();
       return;
@@ -531,35 +483,8 @@
   
     const attackerTokenId = await updateAttackerSelectorUi();
   
-    const msg = getAttackMessageDiv();
-    const info = byId("attackRulesInfo");
-    const previewDetails = byId("attackPreviewDetails");
-  
-    if (info) {
-      info.innerHTML = `
-        <strong>Attack Flow</strong><br>
-        Attack execution has been moved to the <strong>Map</strong> page to keep the Game dashboard stable.
-      `;
-    }
-  
-    if (previewDetails) {
-      previewDetails.style.display = "block";
-      previewDetails.innerHTML = `
-        <strong>Next step</strong><br>
-        Select your attacker block here, then continue in the map for target selection and execution.
-      `;
-    }
-  
-    if (msg) {
-      msg.innerHTML = `
-        <span class="success">
-          ℹ️ For full attack flow use the map.<br>
-          <a href="${getMapAttackUrl()}" style="color:#d4af37; text-decoration:underline;">Open Map Attack View</a>
-        </span>
-      `;
-    }
-  
-    setButtonVisualState("attackBtn", true, "🗺️ Open Attack View in Map", "🗺️ Open Attack View in Map");
+    renderMapRedirectInfo();
+    setButtonVisualState("attackBtn", true, "🗺️ Open Pyramid Map", "🗺️ Open Pyramid Map");
     setButtonVisualState("buyPirateBoostBtn", !!attackerTokenId, "Buy Pirate Boost", "Buy Pirate Boost");
   }
   
@@ -711,8 +636,6 @@
         const timeLeft = endTime - now;
         el.textContent = timeLeft <= 0 ? "Ready to execute" : "⏳ " + formatTime(timeLeft) + " remaining";
       });
-  
-      refreshBlockMarkings();
     }, 1000);
   }
   
@@ -793,5 +716,5 @@
      ========================================================= */
   
   export async function attack() {
-    openAttackInMap();
+    window.location.href = "map.html#attack";
   }
