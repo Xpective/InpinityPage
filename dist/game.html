@@ -17,7 +17,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>INPINITY – Game Dashboard (V6 + Mercenary V4)</title>
 
-  <link rel="icon" type="image/png" href="favicon.webp" />
+  <link rel="icon" type="image/png" href="/assets/favicon-D6BGG7Y0.webp" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -25,14 +25,6 @@
     rel="stylesheet"
   />
 
-  <link rel="stylesheet" href="css/base.css" />
-  <link rel="stylesheet" href="css/layout.css" />
-  <link rel="stylesheet" href="css/animations.css" />
-  <link rel="stylesheet" href="css/dark.css" />
-  <link rel="stylesheet" href="css/light.css" />
-  <link rel="stylesheet" href="css/color.css" />
-  <link rel="stylesheet" href="css/responsive.css" />
-  <link rel="stylesheet" href="css/game.css" />
 
   <meta
     name="description"
@@ -57,6 +49,12 @@
   <meta name="robots" content="index,follow" />
 
   <script defer src="main.js"></script>
+  <script type="module" crossorigin src="/assets/game-aWkk4Qlj.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/subgraph-INO-PRQz.js">
+  <link rel="stylesheet" crossorigin href="/assets/game-viWzuyQ2.css">
+  <link rel="stylesheet" crossorigin href="/assets/responsive-sg2mVcZF.css">
+  <link rel="stylesheet" crossorigin href="/assets/light-D_11Ehwr.css">
 </head>
 <body>
   <header class="site-header">
@@ -520,70 +518,31 @@
                 <div>
                   <strong>⚔️ Pirate Attack V6</strong>
                   <span class="section-subtitle" style="display:block;">
-                    Attack execution has been moved to the Pyramid Map for better stability.
+                    Attack execution has been moved to the Pyramid Map for better stability and visual targeting.
                   </span>
                 </div>
                 <span class="v6-badge" id="pirateSummaryState">MAP</span>
               </summary>
-
+            
               <div class="game-accordion-body">
                 <div class="info-note" style="margin-bottom:1rem;">
-                  <strong>Attack execution moved to Map.</strong><br />
-                  To keep the Game dashboard stable and avoid freezes, pirate attacks are now handled on the
-                  <strong>Pyramid Map</strong>.
+                  The attack flow inside the Game dashboard has been reduced to avoid freezes and heavy browser load.
+                  Please use the <strong>Pyramid Map</strong> for starting and executing attacks.
                 </div>
-
+            
                 <div class="action-card" style="margin-bottom:1rem;">
-                  <h4>🗺️ Use the Map for Attacks</h4>
-                  <div style="margin-top:0.5rem; font-size:0.95rem; line-height:1.6; color:#dbe7f3;">
-                    Open the map to:
-                    <br />• choose attacker block
-                    <br />• select target visually
-                    <br />• review active attacks
-                    <br />• execute attacks when ready
+                  <h4>🗺️ Attack via Map</h4>
+                  <div style="margin-top:0.5rem; font-size:0.92rem; line-height:1.65; color:#dbe7f3;">
+                    • Open the map for visual target selection<br />
+                    • Launch attacks there with the cleaner attack flow<br />
+                    • Execute ready attacks from the attack list or directly in map view
                   </div>
-
-                  <div style="margin-top:1rem; display:flex; gap:0.65rem; flex-wrap:wrap;">
-                    <a
-                      href="map.html#attack"
-                      class="btn"
-                      style="text-decoration:none; display:inline-flex; align-items:center; justify-content:center;"
-                    >
-                      🗺️ Open Pyramid Map
-                    </a>
+            
+                  <div style="margin-top:1rem; display:flex; gap:0.7rem; flex-wrap:wrap;">
+                    <a href="map.html#attack" class="btn" id="openMapAttackBtn">🗺️ Open Pyramid Map Attack View</a>
                   </div>
                 </div>
-
-                <div id="incomingAttackInfo" class="info-note" style="margin-bottom:0.8rem; display:none;">
-                  <strong>Attack updates:</strong>
-                  <span id="incomingAttackText">No attack update data.</span>
-                </div>
-
-                <div class="panel-head inner-panel-head">
-                  <h3 class="subsection-title">Your Attacks</h3>
-                  <p class="section-subtitle">
-                    Review active attacks here. Execute or continue them through the map view.
-                  </p>
-                </div>
-
-                <div id="userAttacksList" class="attacks-list">
-                  <p class="empty-state">Connect wallet to see your attacks.</p>
-                </div>
-
-                <div id="attackMessage" style="margin-top:1rem;"></div>
-
-                <div id="attackPreviewDetails" style="display:none;"></div>
-                <div id="attackRulesInfo" style="display:none;"></div>
-
-                <select id="attackAttackerTokenId" style="display:none;">
-                  <option value="">Choose your attacker block…</option>
-                </select>
-
-                <select id="attackResourceSelect" style="display:none;"></select>
-                <input type="hidden" id="attackRow" />
-                <input type="hidden" id="attackCol" />
-                <button id="attackBtn" type="button" style="display:none;"></button>
-
+            
                 <details style="margin-top:1rem; padding-top:1rem; border-top:1px solid var(--line-soft);" id="pirateBoostAccordion">
                   <summary style="cursor:pointer; color:#ffb347;">⚡ Pirate Boost Options</summary>
                   <div style="margin-top:0.8rem;">
@@ -593,7 +552,7 @@
                       Contract max: <strong>10 days</strong><br />
                       Base steal: <strong>25%</strong> → with boost up to <strong>50%</strong> before protection
                     </p>
-
+            
                     <div class="input-group" style="grid-template-columns:1fr auto;">
                       <select id="pirateBoostDays">
                         <option value="1">1 day</option>
@@ -607,19 +566,37 @@
                         <option value="9">9 days</option>
                         <option value="10">10 days</option>
                       </select>
-
+            
                       <button class="btn btn-small boost-btn" id="buyPirateBoostBtn" type="button" disabled>
                         Buy Pirate Boost
                       </button>
                     </div>
-
+            
                     <div id="pirateBoostCostInfo" style="font-size:0.84rem; color:#d4af37; margin-top:0.35rem;">
                       Total: 700 PIT
                     </div>
-
+            
                     <div id="pirateBoostMessage" style="font-size:0.84rem; margin-top:0.5rem;"></div>
                   </div>
                 </details>
+            
+                <div class="pirate-right" style="margin-top:1.2rem;">
+                  <div class="panel-head inner-panel-head">
+                    <h3 class="subsection-title">Your Attacks</h3>
+                    <p class="section-subtitle">
+                      Review active attacks and open ready executions in the map view.
+                    </p>
+                  </div>
+            
+                  <div id="incomingAttackInfo" class="info-note" style="margin-bottom:0.8rem; display:none;">
+                    <strong>Attack updates:</strong>
+                    <span id="incomingAttackText">No attack update data.</span>
+                  </div>
+            
+                  <div id="userAttacksList" class="attacks-list">
+                    <p class="empty-state">Connect wallet to see your attacks.</p>
+                  </div>
+                </div>
               </div>
             </details>
 
@@ -849,7 +826,8 @@
         <summary>How do attacks work?</summary>
         <div class="details-body">
           <p>
-            Pirate attack execution has been moved to the <strong>Pyramid Map</strong> for better stability and a clearer visual flow.
+            Enter target coordinates, choose the attacker block, preview the route and stealability,
+            then start the attack. Once the timer finishes, you can execute the attack from your active attacks list.
           </p>
         </div>
       </details>
@@ -907,6 +885,5 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-  <script type="module" src="./js/game.js"></script>
 </body>
-</html> 
+</html>
