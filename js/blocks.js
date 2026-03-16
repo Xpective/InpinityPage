@@ -4,6 +4,7 @@
    - Rarity back in grid
    - Claim info back in grid
    - No useless "Revealed block / Revealed" duplication
+   - Better handling for purchased blocks with already-active farms
    ========================================================= */
 
    import {
@@ -252,7 +253,8 @@
     claimCooldownSeconds,
     protectionActive,
     protectionLevel,
-    protectionExpiresAt
+    protectionExpiresAt,
+    claimedFarmResetPossible
   }) {
     safeText("timelineReveal", `Reveal: ${revealed ? "Done" : "Hidden"}`);
   
@@ -260,6 +262,8 @@
       safeText("timelineFarm", "Farm: Active (V6)");
     } else if (activeOnV5) {
       safeText("timelineFarm", "Farm: Active (V5)");
+    } else if (claimedFarmResetPossible) {
+      safeText("timelineFarm", "Farm: Previously active / reset possible");
     } else {
       safeText("timelineFarm", "Farm: Inactive");
     }
@@ -293,12 +297,19 @@
     claimReady,
     claimText,
     boostActive,
-    claimCooldownSeconds
+    claimCooldownSeconds,
+    claimedFarmResetPossible
   }) {
     safeText("revealStatus", revealed ? "Revealed" : "Hidden");
     safeText(
       "farmingStatus",
-      farmingActive ? "Active (V6)" : (activeOnV5 ? "Active (V5)" : "Inactive")
+      farmingActive
+        ? "Active (V6)"
+        : activeOnV5
+          ? "Active (V5)"
+          : claimedFarmResetPossible
+            ? "Needs reset"
+            : "Inactive"
     );
     safeText("claimStatus", claimText || "—");
     safeText("boostStatus", boostActive ? "Active" : "Inactive");
@@ -316,7 +327,9 @@
         ? "This block is currently farming on V6."
         : activeOnV5
           ? "This block is still active on V5 and can be migrated."
-          : "Start farming on your selected block."
+          : claimedFarmResetPossible
+            ? "This block may still have an old active farm state from a previous owner. Try Stop Farming once, then Start Farming again."
+            : "Start farming on your selected block."
     );
   
     safeText(
@@ -409,7 +422,8 @@
     protectionExpired,
     boostActive,
     activeOnV5,
-    farmingActive
+    farmingActive,
+    claimedFarmResetPossible
   }) {
     if (!revealed || rarity === null) {
       return "<p>Reveal block to see resources.</p>";
@@ -438,6 +452,10 @@
   
     if (activeOnV5 && !farmingActive) {
       h += `<div class="resource-item" style="color:#8a5cff;">⚠️ V5 active - migrate to V6</div>`;
+    }
+  
+    if (claimedFarmResetPossible && !farmingActive && !activeOnV5) {
+      h += `<div class="resource-item" style="color:#ffb347;">⚠️ Purchased block may need farm reset</div>`;
     }
   
     return h;
@@ -680,6 +698,8 @@
   
     const activeOnV5 = await isTokenActiveOnV5(tokenId).catch(() => false);
   
+    const claimedFarmResetPossible = revealed && !farmingActive && !activeOnV5;
+  
     const selectedBlock = {
       tokenId: String(tokenId),
       row: resolvedRow,
@@ -695,7 +715,8 @@
       protectionExpired,
       farmStartTime,
       boostExpiry,
-      activeOnV5
+      activeOnV5,
+      claimedFarmResetPossible
     };
   
     setSelectedBlockState(selectedBlock);
@@ -715,11 +736,13 @@
     state.uiBlockStatus.canUseSlot3 = unlockedSlots >= 3;
     state.uiBlockStatus.canBuyFarmBoost = farmingActive;
     state.uiBlockStatus.canAttackFromSelectedBlock = true;
+    state.uiBlockStatus.claimedFarmResetPossible = claimedFarmResetPossible;
   
     const blockActionsContainer = byId("blockActionsContainer");
     const noBlockSelected = byId("noBlockSelected");
     const selectedBlockInfo = byId("selectedBlockInfo");
     const migrateBtn = byId("migrateFarmBtn");
+    const resetFarmBtn = byId("resetPurchasedFarmBtn");
   
     if (blockActionsContainer) blockActionsContainer.style.display = "block";
     if (selectedBlockInfo) selectedBlockInfo.style.display = "block";
@@ -733,6 +756,17 @@
         migrateBtn.style.pointerEvents = "auto";
       } else {
         migrateBtn.style.display = "none";
+      }
+    }
+  
+    if (resetFarmBtn) {
+      if (claimedFarmResetPossible && !activeOnV5) {
+        resetFarmBtn.style.display = "inline-block";
+        resetFarmBtn.disabled = false;
+        resetFarmBtn.style.opacity = "1";
+        resetFarmBtn.style.pointerEvents = "auto";
+      } else {
+        resetFarmBtn.style.display = "none";
       }
     }
   
@@ -802,7 +836,7 @@
     state.uiBlockStatus.claimReady = claimReady;
     state.uiBlockStatus.claimCooldownSeconds = claimCooldownSeconds;
     state.uiBlockStatus.canStartFarm = !farmingActive && !activeOnV5;
-    state.uiBlockStatus.canStopFarm = !!farmingActive;
+    state.uiBlockStatus.canStopFarm = !!(farmingActive || claimedFarmResetPossible);
     state.uiBlockStatus.canClaim = !!(claimReady && (farmingActive || activeOnV5));
   
     updateActionHints({
@@ -812,7 +846,8 @@
       claimReady,
       claimText,
       boostActive,
-      claimCooldownSeconds
+      claimCooldownSeconds,
+      claimedFarmResetPossible
     });
   
     updateTimeline({
@@ -823,7 +858,8 @@
       claimCooldownSeconds,
       protectionActive,
       protectionLevel,
-      protectionExpiresAt
+      protectionExpiresAt,
+      claimedFarmResetPossible
     });
   
     if ((farmingActive || activeOnV5) && !claimReady && claimCooldownSeconds > 0) {
@@ -846,9 +882,10 @@
   
     setButtonVisualState("revealBtn", !revealed);
     setButtonVisualState("farmingStartBtn", !farmingActive && !activeOnV5);
-    setButtonVisualState("farmingStopBtn", !!farmingActive);
+    setButtonVisualState("farmingStopBtn", !!(farmingActive || claimedFarmResetPossible));
     setButtonVisualState("claimBtn", !!(claimReady && (farmingActive || activeOnV5)));
     setButtonVisualState("buyBoostBtn", !!farmingActive);
+    setButtonVisualState("resetPurchasedFarmBtn", !!(claimedFarmResetPossible && !activeOnV5));
   
     const protectionStatusEl = byId("protectionStatus");
     const protectionExpiryEl = byId("protectionExpiry");
@@ -896,7 +933,8 @@
         protectionExpired,
         boostActive,
         activeOnV5,
-        farmingActive
+        farmingActive,
+        claimedFarmResetPossible
       });
     }
   

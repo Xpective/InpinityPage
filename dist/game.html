@@ -17,7 +17,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>INPINITY – Game Dashboard (V6 + Mercenary V4)</title>
 
-  <link rel="icon" type="image/png" href="/assets/favicon-D6BGG7Y0.webp" />
+  <link rel="icon" type="image/png" href="favicon.webp" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -25,6 +25,14 @@
     rel="stylesheet"
   />
 
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/dark.css" />
+  <link rel="stylesheet" href="css/light.css" />
+  <link rel="stylesheet" href="css/color.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+  <link rel="stylesheet" href="css/game.css" />
 
   <meta
     name="description"
@@ -49,12 +57,6 @@
   <meta name="robots" content="index,follow" />
 
   <script defer src="main.js"></script>
-  <script type="module" crossorigin src="/assets/game-CEGOoT3l.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
-  <link rel="modulepreload" crossorigin href="/assets/subgraph-INO-PRQz.js">
-  <link rel="stylesheet" crossorigin href="/assets/game-viWzuyQ2.css">
-  <link rel="stylesheet" crossorigin href="/assets/responsive-sg2mVcZF.css">
-  <link rel="stylesheet" crossorigin href="/assets/light-D_11Ehwr.css">
 </head>
 <body>
   <header class="site-header">
@@ -220,10 +222,25 @@
                     <div id="farmingHint" style="margin-top:0.45rem; font-size:0.82rem; color:#98a9b9;">
                       Start farming on your selected block.
                     </div>
+                  
                     <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
-                      <button class="btn btn-small" id="farmingStartBtn" type="button" style="flex:1;" disabled>Start</button>
-                      <button class="btn btn-small btn-secondary" id="farmingStopBtn" type="button" style="flex:1;" disabled>Stop</button>
+                      <button class="btn btn-small" id="farmingStartBtn" type="button" style="flex:1;" disabled>
+                        Start
+                      </button>
+                      <button class="btn btn-small btn-secondary" id="farmingStopBtn" type="button" style="flex:1;" disabled>
+                        Stop
+                      </button>
                     </div>
+                  
+                    <button
+                      class="btn btn-small boost-btn"
+                      id="resetPurchasedFarmBtn"
+                      type="button"
+                      style="width:100%; margin-top:0.5rem; display:none;"
+                      disabled
+                    >
+                      ♻️ Reset Purchased Farm
+                    </button>
                   </div>
 
                   <div class="action-card">
@@ -906,5 +923,6 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <script type="module" src="./js/game.js"></script>
 </body>
 </html>

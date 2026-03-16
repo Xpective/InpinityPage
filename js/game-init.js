@@ -38,6 +38,7 @@
   import {
     startFarmingSelected,
     stopFarmingSelected,
+    resetPurchasedFarmSelected,
     claimSelected,
     buyBoost,
     migrateSelectedFarmToV6,
@@ -293,6 +294,7 @@
     byId("revealBtn")?.addEventListener("click", revealSelected);
     byId("farmingStartBtn")?.addEventListener("click", startFarmingSelected);
     byId("farmingStopBtn")?.addEventListener("click", stopFarmingSelected);
+    byId("resetPurchasedFarmBtn")?.addEventListener("click", resetPurchasedFarmSelected);
     byId("claimBtn")?.addEventListener("click", claimSelected);
     byId("buyBoostBtn")?.addEventListener("click", buyBoost);
   

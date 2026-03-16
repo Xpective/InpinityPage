@@ -76,15 +76,22 @@
   async function refreshSelectedBlockView() {
     if (!state.selectedBlock) return;
   
+    const selectedTokenId = state.selectedBlock.tokenId;
+  
     await loadUserBlocks({
       onRevealSelected: null,
       onRefreshBlockMarkings: refreshBlockMarkings
     });
   
+    const refreshedSelected =
+      Array.isArray(state.blocksData)
+        ? state.blocksData.find((b) => String(b.tokenId) === String(selectedTokenId))
+        : null;
+  
     await selectBlock(
-      state.selectedBlock.tokenId,
-      state.selectedBlock.row,
-      state.selectedBlock.col
+      selectedTokenId,
+      refreshedSelected?.row ?? state.selectedBlock.row,
+      refreshedSelected?.col ?? state.selectedBlock.col
     );
   }
   
@@ -120,8 +127,30 @@
     btn.style.pointerEvents = enabled ? "auto" : "none";
   }
   
+  function getRawErrorMessage(e) {
+    return String(
+      e?.reason ||
+      e?.data?.message ||
+      e?.error?.message ||
+      e?.message ||
+      "Unknown error"
+    );
+  }
+  
+  function isAlreadyActiveFarmError(e) {
+    const lower = getRawErrorMessage(e).toLowerCase();
+  
+    return (
+      lower.includes("already active") ||
+      lower.includes("farm already active") ||
+      lower.includes("farming already active") ||
+      lower.includes("active farm") ||
+      lower.includes("already farming")
+    );
+  }
+  
   function friendlyErrorMessage(e) {
-    const msg = e?.reason || e?.data?.message || e?.message || "Unknown error";
+    const msg = getRawErrorMessage(e);
     const lower = String(msg).toLowerCase();
   
     if (
@@ -431,12 +460,14 @@
     const msgDiv = getActionMessageDiv();
   
     try {
+      const tokenId = state.selectedBlock.tokenId;
+  
       if (state.selectedBlock.activeOnV5) {
         msgDiv.innerHTML = `<span class="error">❌ Block is still active on V5. Use Migrate button first.</span>`;
         return;
       }
   
-      const owner = await state.nftContract.ownerOf(state.selectedBlock.tokenId);
+      const owner = await state.nftContract.ownerOf(tokenId);
       if (owner.toLowerCase() !== state.userAddress.toLowerCase()) {
         msgDiv.innerHTML = `<span class="error">❌ Not your block.</span>`;
         return;
@@ -451,7 +482,7 @@
       setButtonBusy("farmingStartBtn", true, "Starting...");
       msgDiv.innerHTML = `<span class="success">⏳ Starting V6 farming...</span>`;
   
-      const tx = await state.farmingV6Contract.startFarming(state.selectedBlock.tokenId, { gasLimit: 500000 });
+      const tx = await state.farmingV6Contract.startFarming(tokenId, { gasLimit: 500000 });
       debugLog("startFarming tx", tx.hash);
       await tx.wait();
   
@@ -459,7 +490,18 @@
       await refreshSelectedBlockView();
     } catch (e) {
       console.error("Farming error:", e);
-      msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+  
+      if (isAlreadyActiveFarmError(e)) {
+        msgDiv.innerHTML = `
+          <span class="error">
+            ❌ This block already has an active farm.<br>
+            If you bought it from another wallet while farming was active, press <b>Stop Farming</b> once and then start it again.
+          </span>
+        `;
+        setButtonVisualState("farmingStopBtn", true);
+      } else {
+        msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+      }
     } finally {
       setButtonBusy("farmingStartBtn", false);
     }
@@ -470,20 +512,95 @@
     const msgDiv = getActionMessageDiv();
   
     try {
+      const tokenId = state.selectedBlock.tokenId;
+  
+      const owner = await state.nftContract.ownerOf(tokenId);
+      if (owner.toLowerCase() !== state.userAddress.toLowerCase()) {
+        msgDiv.innerHTML = `<span class="error">❌ Not your block.</span>`;
+        return;
+      }
+  
       setButtonBusy("farmingStopBtn", true, "Stopping...");
       msgDiv.innerHTML = `<span class="success">⏳ Stopping V6 farming...</span>`;
   
-      const tx = await state.farmingV6Contract.stopFarming(state.selectedBlock.tokenId, { gasLimit: 500000 });
+      const tx = await state.farmingV6Contract.stopFarming(tokenId, { gasLimit: 500000 });
       debugLog("stopFarming tx", tx.hash);
       await tx.wait();
   
-      msgDiv.innerHTML = `<span class="success">⏹️ Farming stopped.</span>`;
+      msgDiv.innerHTML = `
+        <span class="success">
+          ⏹️ Farming stopped.<br>
+          You can now start farming again with the current wallet owner.
+        </span>
+      `;
+  
       await refreshSelectedBlockView();
     } catch (e) {
       console.error("Stop farming error:", e);
       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
     } finally {
       setButtonBusy("farmingStopBtn", false);
+    }
+  }
+  
+  export async function resetPurchasedFarmSelected() {
+    if (!state.selectedBlock) return;
+  
+    const msgDiv = getActionMessageDiv();
+    const tokenId = state.selectedBlock.tokenId;
+  
+    try {
+      const owner = await state.nftContract.ownerOf(tokenId);
+      if (owner.toLowerCase() !== state.userAddress.toLowerCase()) {
+        msgDiv.innerHTML = `<span class="error">❌ Not your block.</span>`;
+        return;
+      }
+  
+      setButtonBusy("farmingStopBtn", true, "Resetting...");
+      setButtonBusy("farmingStartBtn", true, "Resetting...");
+  
+      msgDiv.innerHTML = `
+        <span class="success">
+          ⏳ Resetting purchased farm...<br>
+          Step 1/2: stopping old active state
+        </span>
+      `;
+  
+      const stopTx = await state.farmingV6Contract.stopFarming(tokenId, { gasLimit: 500000 });
+      debugLog("reset stopFarming tx", stopTx.hash);
+      await stopTx.wait();
+  
+      const approved = await ensureFarmingApproval();
+      if (!approved) {
+        msgDiv.innerHTML = `<span class="error">❌ Failed to approve farming after reset.</span>`;
+        return;
+      }
+  
+      msgDiv.innerHTML = `
+        <span class="success">
+          ⏳ Resetting purchased farm...<br>
+          Step 2/2: starting with current owner
+        </span>
+      `;
+  
+      const startTx = await state.farmingV6Contract.startFarming(tokenId, { gasLimit: 500000 });
+      debugLog("reset startFarming tx", startTx.hash);
+      await startTx.wait();
+  
+      msgDiv.innerHTML = `
+        <span class="success">
+          ✅ Purchased farm reset complete.<br>
+          Farming is now active under your current wallet.
+        </span>
+      `;
+  
+      await refreshSelectedBlockView();
+    } catch (e) {
+      console.error("resetPurchasedFarmSelected error:", e);
+      msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+    } finally {
+      setButtonBusy("farmingStopBtn", false);
+      setButtonBusy("farmingStartBtn", false);
     }
   }
   
