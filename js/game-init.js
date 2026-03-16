@@ -3,7 +3,7 @@
    LIGHT VERSION:
    - Attack flow on game page reduced
    - Heavy attack execution moved to map.html
-   - Old attack hooks kept as comments for later reuse
+   - Optional attacker select only if present in HTML
    ========================================================= */
 
    import {
@@ -24,16 +24,15 @@
   import { ensureFarmingApproval } from "./approvals.js";
   
   import {
-    /* initAttackResourceSelect, */
-    /* scheduleAttackDropdownRefresh, */
+    initAttackResourceSelect,
     loadUserAttacks,
     refreshBlockMarkings,
     attack,
     stopAttacksTicker,
     buyPirateBoost,
     updateBoostCostLabels,
-    /* updateAttackerSelectorUi, */
-    /* handleAttackerSelectionChange */
+    updateAttackerSelectorUi,
+    handleAttackerSelectionChange
   } from "./attacks.js";
   
   import {
@@ -62,20 +61,39 @@
   import { exchangeINPI, exchangePit } from "./exchange.js";
   
   /* =========================================================
-     OPTIONAL FUTURE ATTACK HELPERS
-     Keep for later if full game-page attack flow returns
+     HELPERS
      ========================================================= */
   
-  /*
-  async function refreshAttackSelectorAfterBlockLoad() {
+  async function initLightAttackUi() {
     try {
-      await updateAttackerSelectorUi();
-      scheduleAttackDropdownRefresh();
+      if (byId("attackResourceSelect")) {
+        initAttackResourceSelect();
+      }
+  
+      if (byId("attackAttackerTokenId")) {
+        await updateAttackerSelectorUi();
+      }
     } catch (e) {
-      console.warn("refreshAttackSelectorAfterBlockLoad failed:", e);
+      console.warn("initLightAttackUi failed:", e);
     }
   }
-  */
+  
+  function clearUiMessages() {
+    const ids = [
+      "approveMessage",
+      "attackMessage",
+      "protectMessage",
+      "actionMessage",
+      "pirateBoostMessage",
+      "exchangeMessage",
+      "mintMessage"
+    ];
+  
+    ids.forEach((id) => {
+      const el = byId(id);
+      if (el) el.innerHTML = "";
+    });
+  }
   
   /* =========================================================
      WALLET CONNECT / DISCONNECT
@@ -95,10 +113,6 @@
   
       setWalletUIConnected(state.userAddress);
   
-      /* Attack UI light mode:
-         no heavy attacker selector / preview refresh here anymore */
-      /* initAttackResourceSelect(); */
-  
       updateFarmBoostCostLabel();
       updateBoostCostLabels();
       updateMercenaryCostPreview();
@@ -110,26 +124,14 @@
       await loadUserBlocks({
         onRevealSelected: async () => {
           await revealSelected();
-  
-          /* Full attack rebind disabled for now */
-          /* await refreshAttackSelectorAfterBlockLoad(); */
         },
         onRefreshBlockMarkings: refreshBlockMarkings
       });
   
       await loadMercenaryPanelState();
-  
-      /* Full attack selector refresh disabled for now */
-      /* await refreshAttackSelectorAfterBlockLoad(); */
-  
+      await initLightAttackUi();
       await loadUserAttacks();
       refreshBlockMarkings();
-  
-      /*
-      setTimeout(() => {
-        refreshAttackSelectorAfterBlockLoad();
-      }, 250);
-      */
   
       if (!state.attacksPoller) {
         state.attacksPoller = setInterval(async () => {
@@ -147,21 +149,10 @@
           } catch (e) {
             console.warn("Mercenary poll refresh failed:", e);
           }
-  
-          /* Disabled in light mode */
-          /*
-          try {
-            await refreshAttackSelectorAfterBlockLoad();
-          } catch (e) {
-            console.warn("Attacker selector refresh failed:", e);
-          }
-          */
         }, 45000);
       }
   
-      const approveMsg = byId("approveMessage");
-      if (approveMsg) approveMsg.innerHTML = "";
-  
+      clearUiMessages();
       debugLog("Wallet connected", state.userAddress);
     } catch (e) {
       console.error("connectWallet error:", e);
@@ -187,22 +178,16 @@
   
     clearContracts();
     setWalletUIDisconnected();
-  
-    const approveMsg = byId("approveMessage");
-    if (approveMsg) approveMsg.innerHTML = "";
-  
-    const attackMsg = byId("attackMessage");
-    if (attackMsg) attackMsg.innerHTML = "";
-  
-    const protectMsg = byId("protectMessage");
-    if (protectMsg) protectMsg.innerHTML = "";
-  
-    const actionMsg = byId("actionMessage");
-    if (actionMsg) actionMsg.innerHTML = "";
+    clearUiMessages();
   
     const attackerSelect = byId("attackAttackerTokenId");
     if (attackerSelect) {
       attackerSelect.innerHTML = `<option value="">Connect wallet first…</option>`;
+    }
+  
+    const userAttacksList = byId("userAttacksList");
+    if (userAttacksList) {
+      userAttacksList.innerHTML = `<p class="empty-state">Connect wallet to see your attacks.</p>`;
     }
   
     debugLog("Wallet disconnected");
@@ -284,14 +269,7 @@
     byId("buyPirateBoostBtn")?.addEventListener("click", buyPirateBoost);
     byId("pirateBoostDays")?.addEventListener("input", updateBoostCostLabels);
     byId("pirateBoostDays")?.addEventListener("change", updateBoostCostLabels);
-  
-    /* Full game-page attack field bindings disabled for light mode */
-    /*
-    byId("attackRow")?.addEventListener("input", scheduleAttackDropdownRefresh);
-    byId("attackCol")?.addEventListener("input", scheduleAttackDropdownRefresh);
-    byId("attackResourceSelect")?.addEventListener("change", scheduleAttackDropdownRefresh);
     byId("attackAttackerTokenId")?.addEventListener("change", handleAttackerSelectionChange);
-    */
   
     /* ==================== MERCENARY ==================== */
     byId("protectBtn")?.addEventListener("click", protect);
@@ -313,7 +291,6 @@
   
     /* ==================== REVEAL / FARMING ==================== */
     byId("revealBtn")?.addEventListener("click", revealSelected);
-  
     byId("farmingStartBtn")?.addEventListener("click", startFarmingSelected);
     byId("farmingStopBtn")?.addEventListener("click", stopFarmingSelected);
     byId("claimBtn")?.addEventListener("click", claimSelected);
@@ -343,7 +320,6 @@
       });
     });
   
-    /* ==================== INITIAL LABEL REFRESH ==================== */
     updateFarmBoostCostLabel();
     updateBoostCostLabels();
     updateMercenaryCostPreview();
@@ -382,8 +358,9 @@
   export function initGamePage() {
     setWalletUIDisconnected();
   
-    /* Full attack init disabled for light mode */
-    /* initAttackResourceSelect(); */
+    if (byId("attackResourceSelect")) {
+      initAttackResourceSelect();
+    }
   
     updateFarmBoostCostLabel();
     updateBoostCostLabels();

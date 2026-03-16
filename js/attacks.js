@@ -1,7 +1,7 @@
 /* =========================================================
    ATTACKS – V6 LIGHT MODE / MAP REDIRECT FLOW
-   Game page keeps attack overview + attacker selection,
-   but heavy attack execution flow is delegated to map.html
+   Game page keeps attack overview + pirate boost,
+   but heavy attack execution is delegated to map.html
    ========================================================= */
 
    import {
@@ -201,9 +201,9 @@
     const params = new URLSearchParams();
   
     const attackerId = String(extraParams.attacker ?? state.selectedAttackAttackerTokenId ?? "");
-    const row = String(extraParams.row ?? byId("attackRow")?.value ?? "");
-    const col = String(extraParams.col ?? byId("attackCol")?.value ?? "");
-    const resource = String(extraParams.resource ?? byId("attackResourceSelect")?.value ?? "");
+    const row = String(extraParams.row ?? "");
+    const col = String(extraParams.col ?? "");
+    const resource = String(extraParams.resource ?? "");
   
     if (attackerId) params.set("attacker", attackerId);
     if (row) params.set("row", row);
@@ -232,7 +232,7 @@
       info.innerHTML = `
         <strong>Attack Flow</strong><br>
         The heavy attack selection and execution now runs on the <strong>Map</strong> page for better performance.<br>
-        Choose your attacker block here, then continue in the map for target selection and execution.
+        Use the Pyramid Map for target selection and execution.
       `;
     }
   
@@ -571,6 +571,7 @@
     if (!state.userAddress || !state.piratesV6Contract) {
       state.userAttacks = [];
       displayUserAttacks();
+      stopAttacksTicker();
       return;
     }
   
@@ -630,6 +631,8 @@
       setIncomingAttackInfo("", false);
     } catch (e) {
       console.error("Failed to load attacks:", e);
+      state.userAttacks = [];
+      displayUserAttacks();
     }
   }
   

@@ -1,5 +1,8 @@
 /* =========================================================
    BLOCKS – V6 + MERCENARY V4
+   LIGHT GRID VERSION
+   - Grid stays cheap and stable
+   - Heavy per-block reads only happen on select
    ========================================================= */
 
    import {
@@ -9,7 +12,6 @@
   } from "./state.js";
   
   import {
-    rarityNames,
     getMercenaryRankLabel,
     getMercenaryDiscountPercent,
     getMercenaryNextRankThreshold
@@ -441,6 +443,7 @@
   
   /* =========================================================
      LOAD USER BLOCKS
+     LIGHT GRID: no heavy onchain per-card calls
      ========================================================= */
   
   export async function loadUserBlocks({ onRevealSelected, onRefreshBlockMarkings } = {}) {
@@ -450,6 +453,7 @@
     if (!grid) return;
   
     if (!state.userAddress || !state.nftContract) {
+      state.userBlocks = [];
       grid.innerHTML = `<p class="empty-state">Connect wallet to see your blocks.</p>`;
       safeText("activeFarms", "0");
       return;
@@ -472,95 +476,52 @@
         return;
       }
   
-      const v5States = await Promise.all(
-        state.userBlocks.map((tokenId) => isTokenActiveOnV5(tokenId).catch(() => false))
-      );
-  
-      const v5Map = new Map();
-      state.userBlocks.forEach((tokenId, idx) => {
-        v5Map.set(String(tokenId), !!v5States[idx]);
-      });
-  
       let html = "";
       let activeFarmsCount = 0;
-      let activeV5Count = 0;
       const now = Math.floor(Date.now() / 1000);
   
       for (const token of subgraphTokens) {
         const tokenId = String(token.id);
-        let row = 0;
-        let col = 0;
         const revealed = !!token.revealed;
-        let rarityName = "";
-  
-        try {
-          const pos = await state.nftContract.getBlockPosition(tokenId);
-          row = Number(pos.row);
-          col = Number(pos.col);
-        } catch {}
-  
-        let rarity = null;
-        if (revealed) {
-          try {
-            rarity = Number(await state.nftContract.calculateRarity(tokenId));
-            rarityName = rarityNames[rarity] || "";
-          } catch {}
-        }
   
         const farm = state.cachedFarmV6Map.get(tokenId);
         const farmingActive = !!(farm && farm.active);
         if (farmingActive) activeFarmsCount++;
-  
-        const activeOnV5 = v5Map.get(tokenId);
-        if (activeOnV5) activeV5Count++;
   
         const protection = state.cachedProtectionMapV4.get(tokenId);
         const protectionActive = !!(protection && protection.active && Number(protection.expiresAt) > now);
   
         let classNames = revealed ? "revealed" : "hidden";
         if (farmingActive) classNames += " farming";
-        if (activeOnV5 && !farmingActive) classNames += " legacy-farming";
         if (protectionActive) classNames += " protected";
         if (state.selectedBlock && String(state.selectedBlock.tokenId) === tokenId) classNames += " selected";
   
         const badge = revealed
-          ? `<div class="rarity-badge ${String(rarityName || "").toLowerCase()}">${rarityName}</div>`
+          ? `<div class="rarity-badge">Revealed</div>`
           : `<div class="rarity-badge hidden-badge">🔒 Hidden</div>`;
-  
-        const legacyBadge = activeOnV5 && !farmingActive
-          ? `<div class="rarity-badge" style="background:#8a5cff; color:white; margin-top:4px;">V5 Active</div>`
-          : "";
   
         const protectionBadge = protectionActive
           ? `<div class="rarity-badge" style="background:#6f42c1; color:white; margin-top:4px;">🛡️ ${protection.level}% Protected</div>`
           : "";
   
         let farmDurationLine = "";
-  
         if (farmingActive) {
           const farmingElapsed = Number(farm?.startTime) > 0
             ? formatDuration(now - Number(farm.startTime))
             : "—";
   
-          farmDurationLine = `
-            <div class="farm-duration">🌾 Farming: ${farmingElapsed}</div>
-          `;
-        } else if (activeOnV5) {
-          farmDurationLine = `
-            <div class="farm-duration">🌾 Farming: Active on V5</div>
-          `;
+          farmDurationLine = `<div class="farm-duration">🌾 Farming: ${farmingElapsed}</div>`;
         }
   
         const revealButton = !revealed
-          ? `<button class="reveal-block-btn" data-tokenid="${tokenId}" data-row="${row}" data-col="${col}">🔓 Reveal</button>`
+          ? `<button class="reveal-block-btn" data-tokenid="${tokenId}">🔓 Reveal</button>`
           : "";
   
         html += `
-          <div class="block-card ${classNames}" data-tokenid="${tokenId}" data-row="${row}" data-col="${col}">
+          <div class="block-card ${classNames}" data-tokenid="${tokenId}">
             <div class="block-id">#${tokenId}</div>
-            <div>R${row} C${col}</div>
+            <div>${revealed ? "Revealed block" : "Hidden block"}</div>
             ${badge}
-            ${legacyBadge}
             ${protectionBadge}
             ${farmDurationLine}
             ${revealButton}
@@ -573,16 +534,13 @@
   
       const migrateAllBtn = byId("migrateAllV5Btn");
       if (migrateAllBtn) {
-        migrateAllBtn.style.display = activeV5Count > 0 ? "inline-block" : "none";
-        if (activeV5Count > 0) {
-          migrateAllBtn.textContent = `🔄 Migrate ${activeV5Count} V5 Farm${activeV5Count > 1 ? "s" : ""} to V6`;
-        }
+        migrateAllBtn.style.display = "none";
       }
   
       document.querySelectorAll(".block-card").forEach((card) => {
         card.addEventListener("click", async (e) => {
           if (e.target.classList.contains("reveal-block-btn")) return;
-          await selectBlock(card.dataset.tokenid, card.dataset.row, card.dataset.col);
+          await selectBlock(card.dataset.tokenid);
         });
       });
   
@@ -590,9 +548,7 @@
         btn.addEventListener("click", async (e) => {
           e.stopPropagation();
           const tokenId = btn.dataset.tokenid;
-          const row = btn.dataset.row;
-          const col = btn.dataset.col;
-          await selectBlock(tokenId, row, col);
+          await selectBlock(tokenId);
           if (typeof onRevealSelected === "function") {
             await onRevealSelected();
           }
@@ -610,19 +566,28 @@
   
   /* =========================================================
      SELECT BLOCK
+     Heavy reads only here
      ========================================================= */
   
-  export async function selectBlock(tokenId, row, col) {
+  export async function selectBlock(tokenId, row = null, col = null) {
     const now = Math.floor(Date.now() / 1000);
     resetSelectedBlockUiState();
     stopSelectedBlockClaimTicker();
   
     let revealed = false;
     let rarity = null;
+    let resolvedRow = Number(row ?? 0);
+    let resolvedCol = Number(col ?? 0);
   
     try {
       const tokenData = await state.nftContract.blockData(tokenId);
       revealed = !!tokenData.revealed;
+    } catch {}
+  
+    try {
+      const pos = await state.nftContract.getBlockPosition(tokenId);
+      resolvedRow = Number(pos?.row ?? 0);
+      resolvedCol = Number(pos?.col ?? 0);
     } catch {}
   
     if (revealed) {
@@ -654,8 +619,8 @@
   
     const selectedBlock = {
       tokenId: String(tokenId),
-      row: Number(row),
-      col: Number(col),
+      row: resolvedRow,
+      col: resolvedCol,
       revealed,
       rarity,
       farmingActive,
@@ -712,7 +677,7 @@
       ? ` · ⏱️ ${formatDuration(now - farmStartTime)}`
       : "";
   
-    safeText("selectedBlockText", `Block #${tokenId} (R${row}, C${col})${farmDur}`);
+    safeText("selectedBlockText", `Block #${tokenId} (R${resolvedRow}, C${resolvedCol})${farmDur}`);
     safeText("selectedActionToken", `Block #${tokenId}`);
     safeValue("protectTokenId", tokenId);
   
@@ -860,7 +825,7 @@
       resDiv.innerHTML = buildResourceHtml({
         revealed,
         rarity,
-        row,
+        row: resolvedRow,
         protectionActive,
         protectionLevel,
         protectionTier,
