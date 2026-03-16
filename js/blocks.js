@@ -37,7 +37,10 @@ import {
   buildProtectionMapV4
 } from "./subgraph.js";
 
-import { isTokenActiveOnV5, getFarmingV5Contract } from "./migration.js";
+import {
+  isTokenActiveOnV5,
+  getFarmingV5Contract
+} from "./migration.js";
 
 /* =========================================================
    LIVE CLAIM TIMER
@@ -45,15 +48,16 @@ import { isTokenActiveOnV5, getFarmingV5Contract } from "./migration.js";
 
 let selectedBlockClaimTicker = null;
 
-/* Wichtig:
-   schützt vor async race conditions beim schnellen Klicken
-   auf verschiedene Blöcke. Nur der neueste selectBlock-Aufruf
-   darf am Ende die UI setzen. */
+/* schützt vor async race conditions beim schnellen Klicken */
 let latestSelectRequestId = 0;
 
 /* =========================================================
    HELPERS
    ========================================================= */
+
+function isStaleSelectRequest(requestId) {
+  return requestId !== latestSelectRequestId;
+}
 
 function setButtonVisualState(buttonId, enabled) {
   const el = byId(buttonId);
@@ -398,6 +402,26 @@ async function getDefenderPoints() {
   return Number(state.uiBlockStatus?.defenderPoints || 0);
 }
 
+async function detectClaimedFarmResetPossible(tokenId, { farmingActive, activeOnV5 }) {
+  if (farmingActive || activeOnV5) return false;
+
+  try {
+    if (!state.farmingV6Contract) return false;
+
+    if (typeof state.farmingV6Contract.canFarm === "function") {
+      const canFarm = await state.farmingV6Contract.canFarm(tokenId);
+      return !canFarm;
+    }
+
+    if (typeof state.farmingV6Contract.canStartFarm === "function") {
+      const canStart = await state.farmingV6Contract.canStartFarm(tokenId);
+      return !canStart;
+    }
+  } catch {}
+
+  return false;
+}
+
 function updateProtectionActionStates({
   protectionActive,
   protectionExpired,
@@ -433,4 +457,526 @@ function buildResourceHtml({
   claimedFarmResetPossible
 }) {
   if (!revealed || rarity === null) {
-    return "<p>Reveal block to
+    return "<p>Reveal block to see resources.</p>";
+  }
+
+  const production = getProduction(rarity, Number(row));
+  let h = "";
+
+  for (const [res, amount] of Object.entries(production)) {
+    h += `<div class="resource-item">${res}: ${amount}/day</div>`;
+  }
+
+  if (protectionActive) {
+    h += `<div class="resource-item">Protection: ${protectionLevel}%</div>`;
+    h += `<div class="resource-item">Protection Tier: ${protectionTier}</div>`;
+    h += `<div class="resource-item">Protection Slot: ${protectionSlotIndex + 1}</div>`;
+  }
+
+  if (protectionExpired) {
+    h += `<div class="resource-item">Protection: expired</div>`;
+  }
+
+  if (boostActive) {
+    h += `<div class="resource-item">Boost: active</div>`;
+  }
+
+  if (activeOnV5 && !farmingActive) {
+    h += `<div class="resource-item" style="color:#8a5cff;">⚠️ V5 active - migrate to V6</div>`;
+  }
+
+  if (claimedFarmResetPossible && !farmingActive && !activeOnV5) {
+    h += `<div class="resource-item" style="color:#ffb347;">⚠️ Old farm state detected - reset may be required</div>`;
+  }
+
+  return h;
+}
+
+/* =========================================================
+   LOAD USER BLOCKS
+   ========================================================= */
+
+export async function loadUserBlocks({ onRevealSelected, onRefreshBlockMarkings } = {}) {
+  stopSelectedBlockClaimTicker();
+
+  const grid = byId("blocksGrid");
+  if (!grid) return;
+
+  if (!state.userAddress || !state.nftContract) {
+    state.userBlocks = [];
+    grid.innerHTML = `<p class="empty-state">Connect wallet to see your blocks.</p>`;
+    safeText("activeFarms", "0");
+    return;
+  }
+
+  try {
+    const subgraphTokens = await loadMyTokensFromSubgraph(state.userAddress);
+    const subgraphFarmsV6 = await loadMyFarmsV6FromSubgraph(state.userAddress);
+    const subgraphProtections = await loadMercenaryTokenProtectionsV4();
+
+    state.cachedFarmsV6 = subgraphFarmsV6 || [];
+    state.cachedProtectionsV4 = subgraphProtections || [];
+    state.cachedFarmV6Map = buildFarmV6Map(state.cachedFarmsV6);
+    state.cachedProtectionMapV4 = buildProtectionMapV4(state.cachedProtectionsV4);
+    state.userBlocks = (subgraphTokens || []).map((t) => String(t.id));
+
+    if (!state.userBlocks.length) {
+      grid.innerHTML = `<p class="empty-state">You don’t own any blocks yet.</p>`;
+      safeText("activeFarms", "0");
+      return;
+    }
+
+    const v5States = await Promise.all(
+      state.userBlocks.map((tokenId) => isTokenActiveOnV5(tokenId).catch(() => false))
+    );
+
+    const v5Map = new Map();
+    state.userBlocks.forEach((tokenId, idx) => {
+      v5Map.set(String(tokenId), !!v5States[idx]);
+    });
+
+    let html = "";
+    let activeFarmsCount = 0;
+    let activeV5Count = 0;
+    const now = Math.floor(Date.now() / 1000);
+
+    for (const token of subgraphTokens) {
+      const tokenId = String(token.id);
+      const revealed = !!token.revealed;
+
+      let row = 0;
+      let col = 0;
+      let rarity = null;
+      let rarityName = "";
+
+      try {
+        const pos = await state.nftContract.getBlockPosition(tokenId);
+        row = Number(pos?.row ?? 0);
+        col = Number(pos?.col ?? 0);
+      } catch {}
+
+      if (revealed) {
+        try {
+          rarity = Number(await state.nftContract.calculateRarity(tokenId));
+          rarityName = rarityNames[rarity] || "";
+        } catch {}
+      }
+
+      const farm = state.cachedFarmV6Map.get(tokenId);
+      const farmingActive = !!(farm && farm.active);
+      if (farmingActive) activeFarmsCount++;
+
+      const activeOnV5 = v5Map.get(tokenId);
+      if (activeOnV5) activeV5Count++;
+
+      const protection = state.cachedProtectionMapV4.get(tokenId);
+      const protectionActive = !!(
+        protection &&
+        protection.active &&
+        Number(protection.expiresAt) > now
+      );
+
+      let classNames = revealed ? "revealed" : "hidden";
+      if (farmingActive) classNames += " farming";
+      if (activeOnV5 && !farmingActive) classNames += " legacy-farming";
+      if (protectionActive) classNames += " protected";
+      if (state.selectedBlock && String(state.selectedBlock.tokenId) === tokenId) classNames += " selected";
+
+      const badge = revealed
+        ? `<div class="rarity-badge ${String(rarityName || "").toLowerCase()}">${rarityName || "Revealed"}</div>`
+        : `<div class="rarity-badge hidden-badge">🔒 Hidden</div>`;
+
+      const legacyBadge = activeOnV5 && !farmingActive
+        ? `<div class="rarity-badge" style="background:#8a5cff; color:white; margin-top:4px;">V5 Active</div>`
+        : "";
+
+      const protectionBadge = protectionActive
+        ? `<div class="rarity-badge" style="background:#6f42c1; color:white; margin-top:4px;">🛡️ ${protection.level}% Protected</div>`
+        : "";
+
+      let farmDurationLine = "";
+      if (farmingActive) {
+        const farmingElapsed = Number(farm?.startTime) > 0
+          ? formatDuration(now - Number(farm.startTime))
+          : "—";
+
+        farmDurationLine = `<div class="farm-duration">🌾 Farming: ${farmingElapsed}</div>`;
+      } else if (activeOnV5) {
+        farmDurationLine = `<div class="farm-duration">🌾 Farming: Active on V5</div>`;
+      }
+
+      let claimLine = "";
+      if (farmingActive) {
+        try {
+          const waitRaw = await state.farmingV6Contract.secondsUntilClaimable(tokenId);
+          const waitSec = Math.max(0, Number(waitRaw || 0));
+          claimLine = waitSec <= 0
+            ? `<div class="farm-duration" style="color:#5CFF95;">💰 Claim Ready</div>`
+            : `<div class="farm-duration">💰 Claim: ${formatDuration(waitSec)}</div>`;
+        } catch {}
+      } else if (activeOnV5) {
+        try {
+          const v5 = getFarmingV5Contract();
+          const preview = await v5.previewClaim(tokenId);
+          const waitSec = Math.max(0, Number(preview?.secondsRemaining || 0));
+          claimLine = !!preview?.allowed
+            ? `<div class="farm-duration" style="color:#5CFF95;">💰 Claim Ready</div>`
+            : `<div class="farm-duration">💰 Claim: ${formatDuration(waitSec)}</div>`;
+        } catch {}
+      }
+
+      const revealButton = !revealed
+        ? `<button class="reveal-block-btn" data-tokenid="${tokenId}">🔓 Reveal</button>`
+        : "";
+
+      html += `
+        <div class="block-card ${classNames}" data-tokenid="${tokenId}">
+          <div class="block-id">#${tokenId}</div>
+          <div>${revealed ? `R${row} C${col}` : "Hidden block"}</div>
+          ${badge}
+          ${legacyBadge}
+          ${protectionBadge}
+          ${farmDurationLine}
+          ${claimLine}
+          ${revealButton}
+        </div>
+      `;
+    }
+
+    grid.innerHTML = html;
+    safeText("activeFarms", String(activeFarmsCount));
+
+    const migrateAllBtn = byId("migrateAllV5Btn");
+    if (migrateAllBtn) {
+      migrateAllBtn.style.display = activeV5Count > 0 ? "inline-block" : "none";
+      if (activeV5Count > 0) {
+        migrateAllBtn.textContent = `🔄 Migrate ${activeV5Count} V5 Farm${activeV5Count > 1 ? "s" : ""} to V6`;
+      }
+    }
+
+    document.querySelectorAll(".block-card").forEach((card) => {
+      card.addEventListener("click", async (e) => {
+        if (e.target.classList.contains("reveal-block-btn")) return;
+        await selectBlock(card.dataset.tokenid);
+      });
+    });
+
+    document.querySelectorAll(".reveal-block-btn").forEach((btn) => {
+      btn.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        const tokenId = btn.dataset.tokenid;
+        await selectBlock(tokenId);
+        if (typeof onRevealSelected === "function") {
+          await onRevealSelected();
+        }
+      });
+    });
+
+    if (typeof onRefreshBlockMarkings === "function") {
+      onRefreshBlockMarkings();
+    }
+  } catch (e) {
+    console.error("loadUserBlocks error:", e);
+    grid.innerHTML = `<p class="error">Failed to load blocks.</p>`;
+  }
+}
+
+/* =========================================================
+   SELECT BLOCK
+   ========================================================= */
+
+export async function selectBlock(tokenId, row = null, col = null) {
+  const requestId = ++latestSelectRequestId;
+  const now = Math.floor(Date.now() / 1000);
+
+  resetSelectedBlockUiState();
+  stopSelectedBlockClaimTicker();
+
+  let revealed = false;
+  let rarity = null;
+  let resolvedRow = Number(row ?? 0);
+  let resolvedCol = Number(col ?? 0);
+
+  try {
+    const tokenData = await state.nftContract.blockData(tokenId);
+    if (isStaleSelectRequest(requestId)) return;
+    revealed = !!tokenData.revealed;
+  } catch {}
+
+  try {
+    const pos = await state.nftContract.getBlockPosition(tokenId);
+    if (isStaleSelectRequest(requestId)) return;
+    resolvedRow = Number(pos?.row ?? 0);
+    resolvedCol = Number(pos?.col ?? 0);
+  } catch {}
+
+  if (revealed) {
+    try {
+      rarity = Number(await state.nftContract.calculateRarity(tokenId));
+      if (isStaleSelectRequest(requestId)) return;
+    } catch {}
+  }
+
+  const farm = state.cachedFarmV6Map.get(String(tokenId));
+  const farmingActive = !!(farm && farm.active);
+  const farmStartTime = farm ? Number(farm.startTime || 0) : 0;
+  const boostExpiry = farm ? Number(farm.boostExpiry || 0) : 0;
+  const boostActive = boostExpiry > now;
+
+  const protection = state.cachedProtectionMapV4.get(String(tokenId));
+  const protectionLevel = protection ? Number(protection.level || 0) : 0;
+  const protectionTier = protection ? Number(protection.tier || 0) : 0;
+  const protectionSlotIndex = protection ? Number(protection.slotIndex || 0) : 0;
+  const protectionExpiresAt = protection ? Number(protection.expiresAt || 0) : 0;
+  const protectionActive = !!(protection && protection.active && protectionExpiresAt > now);
+  const protectionExpired = !!(
+    protection &&
+    !protectionActive &&
+    protectionExpiresAt > 0 &&
+    protectionExpiresAt <= now
+  );
+
+  const activeOnV5 = await isTokenActiveOnV5(tokenId).catch(() => false);
+  if (isStaleSelectRequest(requestId)) return;
+
+  const claimedFarmResetPossible = await detectClaimedFarmResetPossible(tokenId, {
+    farmingActive,
+    activeOnV5
+  });
+  if (isStaleSelectRequest(requestId)) return;
+
+  const selectedBlock = {
+    tokenId: String(tokenId),
+    row: resolvedRow,
+    col: resolvedCol,
+    revealed,
+    rarity,
+    farmingActive,
+    protectionLevel,
+    protectionTier,
+    protectionSlotIndex,
+    protectionExpiresAt,
+    protectionActive,
+    protectionExpired,
+    farmStartTime,
+    boostExpiry,
+    activeOnV5,
+    claimedFarmResetPossible
+  };
+
+  setSelectedBlockState(selectedBlock);
+
+  const unlockedSlots = await getCurrentUnlockedSlots();
+  if (isStaleSelectRequest(requestId)) return;
+
+  const defenderPoints = await getDefenderPoints();
+  if (isStaleSelectRequest(requestId)) return;
+
+  state.uiBlockStatus.isOwner = true;
+  state.uiBlockStatus.isRevealed = revealed;
+  state.uiBlockStatus.farmActive = farmingActive;
+  state.uiBlockStatus.farmLegacyActive = activeOnV5;
+  state.uiBlockStatus.claimedFarmResetPossible = claimedFarmResetPossible;
+  state.uiBlockStatus.protectionActive = protectionActive;
+  state.uiBlockStatus.protectionExpired = protectionExpired;
+  state.uiBlockStatus.protectionSlotCount = unlockedSlots;
+  state.uiBlockStatus.selectedProtectionSlot = protectionSlotIndex;
+  state.uiBlockStatus.canUseSlot2 = unlockedSlots >= 2;
+  state.uiBlockStatus.canUseSlot3 = unlockedSlots >= 3;
+  state.uiBlockStatus.canBuyFarmBoost = farmingActive;
+  state.uiBlockStatus.canAttackFromSelectedBlock = true;
+
+  const blockActionsContainer = byId("blockActionsContainer");
+  const noBlockSelected = byId("noBlockSelected");
+  const selectedBlockInfo = byId("selectedBlockInfo");
+  const migrateBtn = byId("migrateFarmBtn");
+
+  if (blockActionsContainer) blockActionsContainer.style.display = "block";
+  if (selectedBlockInfo) selectedBlockInfo.style.display = "block";
+  if (noBlockSelected) noBlockSelected.style.display = "none";
+
+  if (migrateBtn) {
+    if (activeOnV5 && !farmingActive) {
+      migrateBtn.style.display = "inline-block";
+      migrateBtn.disabled = false;
+      migrateBtn.style.opacity = "1";
+      migrateBtn.style.pointerEvents = "auto";
+    } else {
+      migrateBtn.style.display = "none";
+    }
+  }
+
+  const farmDur = (farmingActive && farmStartTime > 0)
+    ? ` · ⏱️ ${formatDuration(now - farmStartTime)}`
+    : "";
+
+  safeText("selectedBlockText", `Block #${tokenId} (R${resolvedRow}, C${resolvedCol})${farmDur}`);
+  safeText("selectedActionToken", `Block #${tokenId}`);
+  safeValue("protectTokenId", tokenId);
+
+  let claimReady = false;
+  let claimText = "—";
+  let claimCooldownSeconds = 0;
+
+  if (farmingActive) {
+    try {
+      let waitSec = 0;
+      let preview = null;
+
+      try {
+        const waitRaw = await state.farmingV6Contract.secondsUntilClaimable(tokenId);
+        if (isStaleSelectRequest(requestId)) return;
+        waitSec = Number(waitRaw || 0);
+      } catch {}
+
+      try {
+        preview = await state.farmingV6Contract.previewClaim(tokenId);
+        if (isStaleSelectRequest(requestId)) return;
+      } catch {}
+
+      claimCooldownSeconds = Math.max(0, waitSec);
+      claimReady = claimCooldownSeconds <= 0 && !!preview?.allowed;
+
+      if (claimReady) {
+        claimText = "Ready (V6)";
+      } else if (claimCooldownSeconds > 0) {
+        claimText = `V6 in ${formatDuration(claimCooldownSeconds)}`;
+      } else {
+        claimText = "Waiting for next claim window";
+      }
+    } catch {
+      claimText = "—";
+      claimReady = false;
+      claimCooldownSeconds = 0;
+    }
+  } else if (activeOnV5) {
+    try {
+      const v5 = getFarmingV5Contract();
+      const preview = await v5.previewClaim(tokenId);
+      if (isStaleSelectRequest(requestId)) return;
+
+      claimReady = !!preview?.allowed;
+      claimCooldownSeconds = Math.max(0, Number(preview?.secondsRemaining || 0));
+
+      if (claimReady) {
+        claimText = "Ready (V5)";
+      } else if (claimCooldownSeconds > 0) {
+        claimText = `V5 in ${formatDuration(claimCooldownSeconds)}`;
+      } else {
+        claimText = "Waiting for next claim window";
+      }
+    } catch {
+      claimText = "—";
+      claimReady = false;
+      claimCooldownSeconds = 0;
+    }
+  }
+
+  state.uiBlockStatus.claimReady = claimReady;
+  state.uiBlockStatus.claimCooldownSeconds = claimCooldownSeconds;
+  state.uiBlockStatus.canStartFarm = !farmingActive && !activeOnV5;
+  state.uiBlockStatus.canStopFarm = !!farmingActive || claimedFarmResetPossible;
+  state.uiBlockStatus.canClaim = !!(claimReady && (farmingActive || activeOnV5));
+
+  updateActionHints({
+    revealed,
+    farmingActive,
+    activeOnV5,
+    claimReady,
+    claimText,
+    boostActive,
+    claimCooldownSeconds,
+    claimedFarmResetPossible
+  });
+
+  updateTimeline({
+    revealed,
+    farmingActive,
+    activeOnV5,
+    claimReady,
+    claimCooldownSeconds,
+    protectionActive,
+    protectionLevel,
+    protectionExpiresAt,
+    claimedFarmResetPossible
+  });
+
+  if ((farmingActive || activeOnV5) && !claimReady && claimCooldownSeconds > 0) {
+    startSelectedBlockClaimTicker({
+      tokenId,
+      sourceLabel: farmingActive ? "V6" : "V5",
+      initialSeconds: claimCooldownSeconds
+    });
+  } else if ((farmingActive || activeOnV5) && claimReady) {
+    startSelectedBlockClaimTicker({
+      tokenId,
+      sourceLabel: farmingActive ? "V6" : "V5",
+      initialSeconds: 0
+    });
+  } else {
+    stopSelectedBlockClaimTicker();
+  }
+
+  updateRevealCardVisibility(revealed);
+
+  setButtonVisualState("revealBtn", !revealed);
+  setButtonVisualState("farmingStartBtn", !farmingActive && !activeOnV5 && !claimedFarmResetPossible);
+  setButtonVisualState("farmingStopBtn", !!farmingActive || !!claimedFarmResetPossible);
+  setButtonVisualState("claimBtn", !!(claimReady && (farmingActive || activeOnV5)));
+  setButtonVisualState("buyBoostBtn", !!farmingActive);
+
+  const protectionStatusEl = byId("protectionStatus");
+  const protectionExpiryEl = byId("protectionExpiry");
+  const protectionStatusText = byId("protectionStatusText");
+
+  if (protectionStatusText) {
+    if (protectionActive) {
+      protectionStatusText.textContent = `${protectionLevel}% Active`;
+    } else if (protectionExpired) {
+      protectionStatusText.textContent = "Expired";
+    } else {
+      protectionStatusText.textContent = "Inactive";
+    }
+  }
+
+  if ((protectionActive || protectionExpired) && protectionExpiryEl) {
+    const delta = protectionExpiresAt - now;
+    protectionExpiryEl.textContent = delta > 0 ? formatDuration(delta) : "Expired";
+    if (protectionStatusEl) protectionStatusEl.style.display = "block";
+  } else if (protectionStatusEl) {
+    protectionStatusEl.style.display = "none";
+  }
+
+  updateMercenarySlotDropdown(unlockedSlots);
+  updateBastionTitleLock(defenderPoints);
+  updateDefenderSidePanel(defenderPoints);
+  updateMoveProtectionTargetDropdown(tokenId);
+  updateProtectionActionStates({
+    protectionActive,
+    protectionExpired,
+    unlockedSlots,
+    selectedTokenId: tokenId
+  });
+
+  const resDiv = byId("blockResources");
+  if (resDiv) {
+    resDiv.innerHTML = buildResourceHtml({
+      revealed,
+      rarity,
+      row: resolvedRow,
+      protectionActive,
+      protectionLevel,
+      protectionTier,
+      protectionSlotIndex,
+      protectionExpired,
+      boostActive,
+      activeOnV5,
+      farmingActive,
+      claimedFarmResetPossible
+    });
+  }
+
+  document.querySelectorAll(".block-card").forEach((c) => c.classList.remove("selected"));
+  const sel = document.querySelector(`.block-card[data-tokenid="${tokenId}"]`);
+  if (sel) sel.classList.add("selected");
+}
