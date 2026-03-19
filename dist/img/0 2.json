@@ -1,0 +1,27 @@
+{
+  "name": "INPINITY Resource — Oil",
+  "description": "Oil is a base resource in INPINITY Online. It is farmed by Pyramid Blocks and can be claimed, traded, and used to build and upgrade Infinite City. Stored on blocks and at risk from pirate attacks until claimed.",
+  "image": "https://inpinity.online/img/0.PNG",
+  "external_url": "https://inpinity.online",
+  "attributes": [
+    { "trait_type": "Resource", "value": "Oil" },
+    { "trait_type": "Code", "value": "OIL" },
+    { "trait_type": "Resource Rarity", "value": "Base" },
+    { "trait_type": "System", "value": "FarmingV2" }
+  ],
+  "farmingV2": {
+    "produced": true,
+    "production_per_day_by_block_rarity": {
+      "0_Bronze": 10,
+      "1_Silver": 20,
+      "2_Gold": 30,
+      "3_Platinum": 40,
+      "4_Diamond": 60
+    },
+    "claim": "Claimed via claimResources. Until claimed, resources are stored on the block."
+  },
+  "risk": {
+    "pirates": "Stored resources can be stolen by pirate attacks (up to 9% per day) until claimed."
+  },
+  "use_cases": ["Trade", "Infinite City Build", "Upgrades"]
+}

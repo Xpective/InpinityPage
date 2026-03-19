@@ -1,0 +1,25 @@
+{
+  "name": "INPINITY Resource — Obsidian",
+  "description": "Obsidian exists in the INPINITY FarmingV1 resource enum but is not produced by the current farming logic. Reserved for future expansions such as special events, raids, or partner blocks for Infinite City.",
+  "image": "https://inpinity.online/img/7.PNG",
+  "external_url": "https://inpinity.online",
+  "attributes": [
+    { "trait_type": "Resource", "value": "Obsidian" },
+    { "trait_type": "Code", "value": "OBSIDIAN" },
+    { "trait_type": "Resource Rarity", "value": "Rare" },
+    { "trait_type": "System", "value": "FarmingV2" },
+    { "trait_type": "Status", "value": "Reserved (Not Produced)" }
+  ],
+  "farmingV2": {
+    "produced": false,
+    "production_per_day_by_block_rarity": {
+      "0_Bronze": 0,
+      "1_Silver": 0,
+      "2_Gold": 0,
+      "3_Platinum": 0,
+      "4_Diamond": 0
+    },
+    "note": "Reserved for future expansions (events / raids / partner blocks)."
+  },
+  "use_cases": ["Trade", "Infinite City Build", "Future Expansion"]
+}
