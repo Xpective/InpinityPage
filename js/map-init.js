@@ -62,12 +62,10 @@
        safeText("walletAddress", shortenAddress(state.userAddress));
        safeText("connectBtn", "Connected");
    
-       await Promise.all([
-         loadMapData(),
-         loadMapUserResources(),
-         loadMapUserAttacks()
-       ]);
-   
+       await loadMapData();
+       await loadMapUserResources();
+       await loadMapUserAttacks();
+        
        populateAttackerSelect();
        updateMapFarmBoostCostLabels();
        updateMapPirateBoostCostLabels();
