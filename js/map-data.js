@@ -1,5 +1,11 @@
 /* =========================================================
    MAP DATA / RESOURCES / ATTACKS – V6 + MERCENARY V4
+   HARDENED VERSION
+   - read-only init guarded
+   - short local TTL caches
+   - reduced subgraph burst
+   - throttled V5 activity checks
+   - safer redraw behavior
    ========================================================= */
 
    import { NFT_ADDRESS, resourceNames, rarityNames } from "./config.js";
@@ -14,6 +20,21 @@
    import { mapState, getMapDom } from "./map-state.js";
    import { drawPyramid } from "./map-render.js";
    
+   /* =========================================================
+      LOCAL TTL SETTINGS
+      ========================================================= */
+   
+   const MAP_DATA_TTL_MS = 12_000;
+   const MAP_RESOURCES_TTL_MS = 15_000;
+   const MAP_ATTACKS_TTL_MS = 10_000;
+   const V5_ACTIVITY_TTL_MS = 60_000;
+   const V5_CHECK_MAX_PER_PASS = 12;
+   const V5_CHECK_GAP_MS = 120;
+   
+   /* =========================================================
+      HELPERS
+      ========================================================= */
+   
    function bnGtZero(value) {
      try {
        return ethers.BigNumber.from(value || 0).gt(0);
@@ -22,11 +43,56 @@
      }
    }
    
+   function nowMs() {
+     return Date.now();
+   }
+   
+   function sleep(ms) {
+     return new Promise((resolve) => setTimeout(resolve, ms));
+   }
+   
+   function ensureMapCaches() {
+     if (!mapState.v5ActivityCache) mapState.v5ActivityCache = new Map();
+     if (!mapState.cachedFarmV6Map) mapState.cachedFarmV6Map = new Map();
+     if (!mapState.cachedProtectionMap) mapState.cachedProtectionMap = new Map();
+     if (!mapState.mercenaryProtectionByToken) mapState.mercenaryProtectionByToken = new Map();
+   
+     if (typeof mapState.lastMapDataLoadAt !== "number") mapState.lastMapDataLoadAt = 0;
+     if (typeof mapState.lastUserResourcesLoadAt !== "number") mapState.lastUserResourcesLoadAt = 0;
+     if (typeof mapState.lastUserAttacksLoadAt !== "number") mapState.lastUserAttacksLoadAt = 0;
+   }
+   
+   function safeParseInt(value, fallback = 0) {
+     const n = parseInt(value ?? fallback, 10);
+     return Number.isFinite(n) ? n : fallback;
+   }
+   
+   function shouldSkipByTtl(lastAt, ttlMs, forceFresh = false) {
+     if (forceFresh) return false;
+     return !!lastAt && nowMs() - lastAt < ttlMs;
+   }
+   
+   function getTokenOwnerLower(token) {
+     return String(token?.owner || "").toLowerCase();
+   }
+   
+   function isConnectedOwner(owner) {
+     return !!(
+       state.userAddress &&
+       owner &&
+       owner.toLowerCase() === state.userAddress.toLowerCase()
+     );
+   }
+   
    /* =========================================================
       READ ONLY
       ========================================================= */
    
    export async function initMapReadOnly() {
+     if (mapState.readOnlyProvider && mapState.nftReadOnlyContract) {
+       return;
+     }
+   
      mapState.readOnlyProvider = new ethers.providers.JsonRpcProvider("https://mainnet.base.org");
    
      mapState.nftReadOnlyContract = new ethers.Contract(
@@ -159,186 +225,293 @@
    }
    
    /* =========================================================
+      INTERNAL TOKEN BUILDERS
+      ========================================================= */
+   
+   function createBaseTokenRecord(t) {
+     return {
+       owner: t.owner ? t.owner.id : null,
+       revealed: !!t.revealed,
+   
+       farmActive: false,
+       farmV6Active: false,
+       farmV5Active: false,
+   
+       protectionActive: false,
+       protectionLevel: 0,
+       protectionTier: 0,
+       protectionExpiry: 0,
+       protectionSlotIndex: 0,
+       protectionUser: null,
+   
+       partnerActive: false,
+       rarity: null,
+   
+       farmStartTime: 0,
+       lastClaimTime: 0,
+       boostExpiry: 0,
+   
+       farmV5StartTime: 0,
+       farmV5LastClaimTime: 0
+     };
+   }
+   
+   function applyRevealData(blockRevealedItems) {
+     for (const br of blockRevealedItems || []) {
+       const tokenId = String(br.tokenId);
+       if (mapState.tokens[tokenId]) {
+         mapState.tokens[tokenId].rarity = safeParseInt(br.rarity, null);
+       }
+     }
+   }
+   
+   function applyFarmV5Data(farmV5Items) {
+     for (const f of farmV5Items || []) {
+       const tokenId = String(f.id);
+       if (!mapState.tokens[tokenId]) continue;
+   
+       mapState.tokens[tokenId].farmV5Active = !!f.active;
+       mapState.tokens[tokenId].farmV5StartTime = safeParseInt(f.startTime, 0);
+       mapState.tokens[tokenId].farmV5LastClaimTime = safeParseInt(f.lastClaimTime, 0);
+     }
+   }
+   
+   function applyFarmV6Data(farmV6Items) {
+     mapState.cachedFarmV6Map = new Map();
+   
+     for (const f of farmV6Items || []) {
+       const tokenId = String(f.id);
+       const farmEntry = {
+         tokenId,
+         owner: String(f.owner || "").toLowerCase(),
+         startTime: safeParseInt(f.startTime, 0),
+         lastAccrualTime: safeParseInt(f.lastAccrualTime, 0),
+         lastClaimTime: safeParseInt(f.lastClaimTime, 0),
+         boostExpiry: safeParseInt(f.boostExpiry, 0),
+         stopTime: safeParseInt(f.stopTime, 0),
+         active: !!f.active,
+         updatedAt: safeParseInt(f.updatedAt, 0),
+         blockNumber: safeParseInt(f.blockNumber, 0)
+       };
+   
+       mapState.cachedFarmV6Map.set(tokenId, farmEntry);
+   
+       if (!mapState.tokens[tokenId]) continue;
+   
+       mapState.tokens[tokenId].farmActive = !!f.active;
+       mapState.tokens[tokenId].farmV6Active = !!f.active;
+       mapState.tokens[tokenId].farmStartTime = farmEntry.startTime;
+       mapState.tokens[tokenId].lastClaimTime = farmEntry.lastClaimTime;
+       mapState.tokens[tokenId].boostExpiry = farmEntry.boostExpiry;
+     }
+   }
+   
+   function applyProtectionData(mercenaryProtectionItems) {
+     mapState.cachedProtectionMap = new Map();
+     mapState.mercenaryProtectionByToken = new Map();
+   
+     for (const p of mercenaryProtectionItems || []) {
+       const tokenId = String(p.tokenId || p.id);
+       const protectionEntry = {
+         tokenId,
+         user: String(p.user || "").toLowerCase(),
+         slotIndex: safeParseInt(p.slotIndex, 0),
+         tier: safeParseInt(p.protectionTier, 0),
+         level: safeParseInt(p.protectionPercent, 0),
+         expiresAt: safeParseInt(p.expiry, 0),
+         active: !!p.active
+       };
+   
+       mapState.cachedProtectionMap.set(tokenId, protectionEntry);
+       mapState.mercenaryProtectionByToken.set(tokenId, protectionEntry);
+   
+       if (!mapState.tokens[tokenId]) continue;
+   
+       mapState.tokens[tokenId].protectionActive = !!p.active;
+       mapState.tokens[tokenId].protectionLevel = protectionEntry.level;
+       mapState.tokens[tokenId].protectionTier = protectionEntry.tier;
+       mapState.tokens[tokenId].protectionExpiry = protectionEntry.expiresAt;
+       mapState.tokens[tokenId].protectionSlotIndex = protectionEntry.slotIndex;
+       mapState.tokens[tokenId].protectionUser = protectionEntry.user;
+     }
+   }
+   
+   function applyPartnershipData(partnerItems) {
+     for (const p of partnerItems || []) {
+       const tokenId = String(p.id);
+       if (mapState.tokens[tokenId]) {
+         mapState.tokens[tokenId].partnerActive = !!p.active;
+       }
+     }
+   }
+   
+   /* =========================================================
+      V5 ACTIVITY CACHE / THROTTLED CHECKS
+      ========================================================= */
+   
+   function getCachedV5Activity(tokenId) {
+     ensureMapCaches();
+     const entry = mapState.v5ActivityCache.get(String(tokenId));
+     if (!entry) return null;
+     if (entry.expiresAt <= nowMs()) {
+       mapState.v5ActivityCache.delete(String(tokenId));
+       return null;
+     }
+     return !!entry.active;
+   }
+   
+   function setCachedV5Activity(tokenId, active) {
+     ensureMapCaches();
+     mapState.v5ActivityCache.set(String(tokenId), {
+       active: !!active,
+       expiresAt: nowMs() + V5_ACTIVITY_TTL_MS
+     });
+   }
+   
+   async function refreshOwnV5ActivityHints() {
+     if (!state.userAddress) return;
+   
+     const ownTokenIds = Object.entries(mapState.tokens)
+       .filter(([_, t]) => isConnectedOwner(t.owner))
+       .map(([tokenId]) => String(tokenId));
+   
+     if (!ownTokenIds.length) return;
+   
+     let checked = 0;
+   
+     for (const tokenId of ownTokenIds) {
+       if (checked >= V5_CHECK_MAX_PER_PASS) break;
+   
+       const cached = getCachedV5Activity(tokenId);
+       if (cached !== null) {
+         if (mapState.tokens[tokenId]) {
+           mapState.tokens[tokenId].farmV5Active = !!cached || !!mapState.tokens[tokenId].farmV5Active;
+         }
+         continue;
+       }
+   
+       try {
+         const active = await isTokenActiveOnV5(tokenId);
+         setCachedV5Activity(tokenId, active);
+   
+         if (mapState.tokens[tokenId] && active) {
+           mapState.tokens[tokenId].farmV5Active = true;
+         }
+       } catch {
+         setCachedV5Activity(tokenId, false);
+       }
+   
+       checked += 1;
+       await sleep(V5_CHECK_GAP_MS);
+     }
+   }
+   
+   /* =========================================================
       SUBGRAPH DATA
       ========================================================= */
    
-   export async function loadMapData() {
+   export async function loadMapData(options = {}) {
+     ensureMapCaches();
+   
+     const forceFresh = !!options.forceFresh;
+   
+     if (shouldSkipByTtl(mapState.lastMapDataLoadAt, MAP_DATA_TTL_MS, forceFresh)) {
+       return;
+     }
+   
      try {
-       const [
-         tokenItems,
-         blockRevealedItems,
-         farmV5Items,
-         farmV6Items,
-         mercenaryProtectionItems,
-         partnerItems
-       ] = await Promise.all([
-         fetchAllWithPagination("tokens", "id owner { id } revealed").catch(() => []),
+       /* first lightweight base */
+       const tokenItems = await fetchAllWithPagination(
+         "tokens",
+         "id owner { id } revealed",
+         "",
+         {
+           cacheTtlMs: 15_000,
+           forceFresh
+         }
+       ).catch(() => []);
    
-         fetchAllWithPagination("blockRevealeds", "tokenId rarity").catch(() => []),
+       const blockRevealedItems = await fetchAllWithPagination(
+         "blockRevealeds",
+         "tokenId rarity",
+         "",
+         {
+           cacheTtlMs: 20_000,
+           forceFresh
+         }
+       ).catch(() => []);
    
-         fetchAllWithPagination(
-           "farmV5S",
-           "id owner startTime lastAccrualTime lastClaimTime boostExpiry stopTime active updatedAt blockNumber",
-           `{ active: true }`
-         ).catch(() => []),
+       /* then active system overlays */
+       const farmV6Items = await fetchAllWithPagination(
+         "farmV6S",
+         "id owner startTime lastAccrualTime lastClaimTime boostExpiry stopTime active updatedAt blockNumber",
+         `{ active: true }`,
+         {
+           cacheTtlMs: 10_000,
+           forceFresh
+         }
+       ).catch(() => []);
    
-         fetchAllWithPagination(
-           "farmV6S",
-           "id owner startTime lastAccrualTime lastClaimTime boostExpiry stopTime active updatedAt blockNumber",
-           `{ active: true }`
-         ).catch(() => []),
+       const farmV5Items = await fetchAllWithPagination(
+         "farmV5S",
+         "id owner startTime lastAccrualTime lastClaimTime boostExpiry stopTime active updatedAt blockNumber",
+         `{ active: true }`,
+         {
+           cacheTtlMs: 15_000,
+           forceFresh
+         }
+       ).catch(() => []);
    
-         fetchAllWithPagination(
-           "mercenaryTokenProtectionV4S",
-           `
-             id
-             tokenId
-             user
-             slotIndex
-             protectionTier
-             protectionPercent
-             expiry
-             active
-             updatedAt
-             blockNumber
-           `,
-           `{ active: true }`
-         ).catch(() => []),
+       const mercenaryProtectionItems = await fetchAllWithPagination(
+         "mercenaryTokenProtectionV4S",
+         `
+           id
+           tokenId
+           user
+           slotIndex
+           protectionTier
+           protectionPercent
+           expiry
+           active
+           updatedAt
+           blockNumber
+         `,
+         `{ active: true }`,
+         {
+           cacheTtlMs: 20_000,
+           forceFresh
+         }
+       ).catch(() => []);
    
-         fetchAllWithPagination("partnerships", "id active", `{ active: true }`).catch(() => [])
-       ]);
+       const partnerItems = await fetchAllWithPagination(
+         "partnerships",
+         "id active",
+         `{ active: true }`,
+         {
+           cacheTtlMs: 30_000,
+           forceFresh
+         }
+       ).catch(() => []);
    
        mapState.tokens = {};
        mapState.cachedFarmsV6 = farmV6Items || [];
        mapState.cachedProtections = mercenaryProtectionItems || [];
-       mapState.cachedFarmV6Map = new Map();
-       mapState.cachedProtectionMap = new Map();
-       mapState.mercenaryProtectionByToken = new Map();
    
-       tokenItems.forEach((t) => {
-         mapState.tokens[String(t.id)] = {
-           owner: t.owner ? t.owner.id : null,
-           revealed: !!t.revealed,
-   
-           farmActive: false,
-           farmV6Active: false,
-           farmV5Active: false,
-   
-           protectionActive: false,
-           protectionLevel: 0,
-           protectionTier: 0,
-           protectionExpiry: 0,
-           protectionSlotIndex: 0,
-           protectionUser: null,
-   
-           partnerActive: false,
-           rarity: null,
-   
-           farmStartTime: 0,
-           lastClaimTime: 0,
-           boostExpiry: 0,
-   
-           farmV5StartTime: 0,
-           farmV5LastClaimTime: 0
-         };
-       });
-   
-       blockRevealedItems.forEach((br) => {
-         const tokenId = String(br.tokenId);
-         if (mapState.tokens[tokenId]) {
-           mapState.tokens[tokenId].rarity = parseInt(br.rarity, 10);
-         }
-       });
-   
-       farmV5Items.forEach((f) => {
-         const tokenId = String(f.id);
-         if (mapState.tokens[tokenId]) {
-           mapState.tokens[tokenId].farmV5Active = !!f.active;
-           mapState.tokens[tokenId].farmV5StartTime = parseInt(f.startTime || "0", 10);
-           mapState.tokens[tokenId].farmV5LastClaimTime = parseInt(f.lastClaimTime || "0", 10);
-         }
-       });
-   
-       farmV6Items.forEach((f) => {
-         const tokenId = String(f.id);
-         const farmEntry = {
-           tokenId,
-           owner: String(f.owner || "").toLowerCase(),
-           startTime: parseInt(f.startTime || "0", 10),
-           lastAccrualTime: parseInt(f.lastAccrualTime || "0", 10),
-           lastClaimTime: parseInt(f.lastClaimTime || "0", 10),
-           boostExpiry: parseInt(f.boostExpiry || "0", 10),
-           stopTime: parseInt(f.stopTime || "0", 10),
-           active: !!f.active,
-           updatedAt: parseInt(f.updatedAt || "0", 10),
-           blockNumber: parseInt(f.blockNumber || "0", 10)
-         };
-   
-         mapState.cachedFarmV6Map.set(tokenId, farmEntry);
-   
-         if (mapState.tokens[tokenId]) {
-           mapState.tokens[tokenId].farmActive = !!f.active;
-           mapState.tokens[tokenId].farmV6Active = !!f.active;
-           mapState.tokens[tokenId].farmStartTime = farmEntry.startTime;
-           mapState.tokens[tokenId].lastClaimTime = farmEntry.lastClaimTime;
-           mapState.tokens[tokenId].boostExpiry = farmEntry.boostExpiry;
-         }
-       });
-   
-       mercenaryProtectionItems.forEach((p) => {
-         const tokenId = String(p.tokenId || p.id);
-         const protectionEntry = {
-           tokenId,
-           user: String(p.user || "").toLowerCase(),
-           slotIndex: parseInt(p.slotIndex || "0", 10),
-           tier: parseInt(p.protectionTier || "0", 10),
-           level: parseInt(p.protectionPercent || "0", 10),
-           expiresAt: parseInt(p.expiry || "0", 10),
-           active: !!p.active
-         };
-   
-         mapState.cachedProtectionMap.set(tokenId, protectionEntry);
-         mapState.mercenaryProtectionByToken.set(tokenId, protectionEntry);
-   
-         if (mapState.tokens[tokenId]) {
-           mapState.tokens[tokenId].protectionActive = !!p.active;
-           mapState.tokens[tokenId].protectionLevel = protectionEntry.level;
-           mapState.tokens[tokenId].protectionTier = protectionEntry.tier;
-           mapState.tokens[tokenId].protectionExpiry = protectionEntry.expiresAt;
-           mapState.tokens[tokenId].protectionSlotIndex = protectionEntry.slotIndex;
-           mapState.tokens[tokenId].protectionUser = protectionEntry.user;
-         }
-       });
-   
-       partnerItems.forEach((p) => {
-         const tokenId = String(p.id);
-         if (mapState.tokens[tokenId]) {
-           mapState.tokens[tokenId].partnerActive = !!p.active;
-         }
-       });
-   
-       if (state.userAddress) {
-         const ownTokenIds = Object.entries(mapState.tokens)
-           .filter(([_, t]) => t.owner && t.owner.toLowerCase() === state.userAddress.toLowerCase())
-           .map(([tokenId]) => tokenId);
-   
-         const checks = await Promise.all(
-           ownTokenIds.map(async (tokenId) => {
-             try {
-               return { tokenId, active: await isTokenActiveOnV5(tokenId) };
-             } catch {
-               return { tokenId, active: false };
-             }
-           })
-         );
-   
-         checks.forEach(({ tokenId, active }) => {
-           if (mapState.tokens[tokenId] && active) {
-             mapState.tokens[tokenId].farmV5Active = true;
-           }
-         });
+       for (const t of tokenItems || []) {
+         mapState.tokens[String(t.id)] = createBaseTokenRecord(t);
        }
    
+       applyRevealData(blockRevealedItems || []);
+       applyFarmV5Data(farmV5Items || []);
+       applyFarmV6Data(farmV6Items || []);
+       applyProtectionData(mercenaryProtectionItems || []);
+       applyPartnershipData(partnerItems || []);
+   
+       if (state.userAddress) {
+         await refreshOwnV5ActivityHints();
+       }
+   
+       mapState.lastMapDataLoadAt = nowMs();
        drawPyramid();
      } catch (err) {
        console.error("loadMapData error:", err);
@@ -349,8 +522,16 @@
       RESOURCES
       ========================================================= */
    
-   export async function loadMapUserResources() {
+   export async function loadMapUserResources(options = {}) {
+     ensureMapCaches();
+   
+     const forceFresh = !!options.forceFresh;
+   
      if (!state.userAddress || !state.resourceTokenContract) return;
+     if (shouldSkipByTtl(mapState.lastUserResourcesLoadAt, MAP_RESOURCES_TTL_MS, forceFresh)) {
+       updateMapUserResourcesDisplay();
+       return;
+     }
    
      try {
        const ids = [...Array(10).keys()];
@@ -364,6 +545,7 @@
          }))
          .filter((r) => bnGtZero(r.amount));
    
+       mapState.lastUserResourcesLoadAt = nowMs();
        updateMapUserResourcesDisplay();
      } catch (err) {
        console.error("loadMapUserResources error:", err);
@@ -470,38 +652,52 @@
       ATTACKS
       ========================================================= */
    
-   export async function loadMapUserAttacks() {
+   export async function loadMapUserAttacks(options = {}) {
+     ensureMapCaches();
+   
+     const forceFresh = !!options.forceFresh;
+   
      if (!state.userAddress) return;
+     if (shouldSkipByTtl(mapState.lastUserAttacksLoadAt, MAP_ATTACKS_TTL_MS, forceFresh)) {
+       displayMapUserAttacks();
+       return;
+     }
    
      try {
        const attacks = await fetchAllWithPagination(
          "attackV6S",
          "id attacker attackerTokenId targetTokenId attackIndex startTime endTime resource executed cancelled protectionLevel effectiveStealPercent stolenAmount",
-         `{ attacker: "${state.userAddress.toLowerCase()}" }`
+         `{ attacker: "${state.userAddress.toLowerCase()}" }`,
+         {
+           cacheTtlMs: 10_000,
+           forceFresh
+         }
        );
    
        const dismissed = loadDismissedAttacks();
    
-       mapState.userAttacks = attacks
+       mapState.userAttacks = (attacks || [])
          .map((a) => ({
            id: a.id,
-           targetTokenId: parseInt(a.targetTokenId, 10),
-           attackerTokenId: parseInt(a.attackerTokenId, 10),
-           attackIndex: parseInt(a.attackIndex, 10),
-           startTime: parseInt(a.startTime, 10),
-           endTime: parseInt(a.endTime, 10),
+           targetTokenId: safeParseInt(a.targetTokenId, 0),
+           attackerTokenId: safeParseInt(a.attackerTokenId, 0),
+           attackIndex: safeParseInt(a.attackIndex, 0),
+           startTime: safeParseInt(a.startTime, 0),
+           endTime: safeParseInt(a.endTime, 0),
            executed: !!a.executed,
            cancelled: !!a.cancelled,
-           resource: parseInt(a.resource, 10),
-           protectionLevel: a.protectionLevel ? parseInt(a.protectionLevel, 10) : 0,
-           effectiveStealPercent: a.effectiveStealPercent ? parseInt(a.effectiveStealPercent, 10) : 0,
+           resource: safeParseInt(a.resource, 0),
+           protectionLevel: a.protectionLevel ? safeParseInt(a.protectionLevel, 0) : 0,
+           effectiveStealPercent: a.effectiveStealPercent ? safeParseInt(a.effectiveStealPercent, 0) : 0,
            stolenAmount: a.stolenAmount ? a.stolenAmount.toString() : "0"
          }))
          .filter((a) => !a.executed && !a.cancelled && !dismissed.has(a.id));
    
+       mapState.lastUserAttacksLoadAt = nowMs();
+   
        displayMapUserAttacks();
-       drawPyramid();
        startMapAttacksTicker();
+       drawPyramid();
      } catch (e) {
        console.error("loadMapUserAttacks error:", e);
      }
@@ -591,8 +787,6 @@
          btn.disabled = timeLeft > 0;
          btn.textContent = timeLeft <= 0 ? "⚔️" : "⏳";
        });
-   
-       drawPyramid();
      }, 1000);
    }
    

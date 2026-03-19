@@ -1,5 +1,11 @@
 /* =========================================================
    MAP INIT / WALLET / EVENTS – V6 + MERCENARY V4
+   HARDENED VERSION
+   - no duplicate event binding
+   - no duplicate initial load
+   - guarded polling
+   - sequential loading
+   - stale connect protection
    ========================================================= */
 
    import { STORAGE_WALLET_FLAG } from "./config.js";
@@ -42,69 +48,81 @@
      handleSaveBastionTitle
    } from "./map-actions.js";
    
-   async function connectWallet(forceRequest = true) {
-     if (!window.ethereum) {
-       alert("Please install MetaMask!");
-       return;
-     }
-     if (mapState.isConnecting) return;
-     if (state.userAddress) return;
+   /* =========================================================
+      MODULE FLAGS / GUARDS
+      ========================================================= */
    
-     mapState.isConnecting = true;
+   let mapEventsBound = false;
+   let mapRenderEventsBound = false;
+   let mapPageInitialized = false;
+   let connectSessionId = 0;
    
+   /* =========================================================
+      LOAD GUARDS
+      ========================================================= */
+   
+   async function guardedLoadMapData() {
+     if (mapState.isLoadingData) return false;
+   
+     mapState.isLoadingData = true;
      try {
-       const ok = await connectWalletCore(forceRequest);
-       if (!ok) return;
-   
-       setupLegacyMigrationContracts();
-       localStorage.setItem(STORAGE_WALLET_FLAG, "1");
-   
-       safeText("walletAddress", shortenAddress(state.userAddress));
-       safeText("connectBtn", "Connected");
-   
        await loadMapData();
-       await loadMapUserResources();
-       await loadMapUserAttacks();
-        
-       populateAttackerSelect();
-       updateMapFarmBoostCostLabels();
-       updateMapPirateBoostCostLabels();
-       await updateMapMercenaryCostPreview();
-       await refreshSelectedTargetAttackPreview();
-       drawPyramid();
-   
-       if (!mapState.attacksPoller) {
-         mapState.attacksPoller = setInterval(() => {
-           loadMapUserAttacks();
-         }, 30000);
-       }
-   
-       if (!mapState.dataPoller) {
-         mapState.dataPoller = setInterval(async () => {
-           await loadMapData();
-           populateAttackerSelect();
-         }, 30000);
-       }
-   
-       debugLog("Map wallet connected", state.userAddress);
+       return true;
      } catch (err) {
-       alert("Connection error: " + (err?.reason || err?.message || err));
-       clearContracts();
+       debugLog("guardedLoadMapData failed", err?.message || err);
+       throw err;
      } finally {
-       mapState.isConnecting = false;
+       mapState.isLoadingData = false;
      }
    }
    
-   function disconnectMapWallet() {
-     localStorage.removeItem(STORAGE_WALLET_FLAG);
+   async function guardedLoadMapUserResources() {
+     if (!state.userAddress) return false;
+     if (mapState.isLoadingUserResources) return false;
    
-     stopMapPollers();
-     clearContracts();
-     resetMapRuntimeState();
+     mapState.isLoadingUserResources = true;
+     try {
+       await loadMapUserResources();
+       return true;
+     } catch (err) {
+       debugLog("guardedLoadMapUserResources failed", err?.message || err);
+       throw err;
+     } finally {
+       mapState.isLoadingUserResources = false;
+     }
+   }
    
+   async function guardedLoadMapUserAttacks() {
+     if (!state.userAddress) return false;
+     if (mapState.isLoadingUserAttacks) return false;
+   
+     mapState.isLoadingUserAttacks = true;
+     try {
+       await loadMapUserAttacks();
+       return true;
+     } catch (err) {
+       debugLog("guardedLoadMapUserAttacks failed", err?.message || err);
+       throw err;
+     } finally {
+       mapState.isLoadingUserAttacks = false;
+     }
+   }
+   
+   /* =========================================================
+      UI HELPERS
+      ========================================================= */
+   
+   function setWalletUiConnected() {
+     safeText("walletAddress", shortenAddress(state.userAddress));
+     safeText("connectBtn", "Connected");
+   }
+   
+   function setWalletUiDisconnected() {
      safeText("walletAddress", "Not connected");
      safeText("connectBtn", "Connect");
+   }
    
+   function resetDisconnectedPanels() {
      const blockDetail = byId("blockDetail");
      if (blockDetail) {
        blockDetail.innerHTML = `<p style="color:#98a9b9; text-align:center;">Click a block</p>`;
@@ -114,16 +132,153 @@
      if (actionPanel) actionPanel.style.display = "none";
    
      const userResources = byId("userResources");
-     if (userResources) userResources.innerHTML = `<p style="color:#98a9b9;">Connect wallet</p>`;
+     if (userResources) {
+       userResources.innerHTML = `<p style="color:#98a9b9;">Connect wallet</p>`;
+     }
    
      const userAttacksList = byId("userAttacksList");
-     if (userAttacksList) userAttacksList.innerHTML = `<p style="color:#98a9b9;">Connect wallet</p>`;
+     if (userAttacksList) {
+       userAttacksList.innerHTML = `<p style="color:#98a9b9;">Connect wallet</p>`;
+     }
+   }
+   
+   function resetMapLoadingFlags() {
+     mapState.isLoadingData = false;
+     mapState.isLoadingUserResources = false;
+     mapState.isLoadingUserAttacks = false;
+   }
+   
+   /* =========================================================
+      POLLERS
+      ========================================================= */
+   
+   function startMapPollers() {
+     if (!mapState.attacksPoller) {
+       mapState.attacksPoller = setInterval(async () => {
+         if (!state.userAddress) return;
+         if (document.hidden) return;
+   
+         try {
+           await guardedLoadMapUserAttacks();
+         } catch (err) {
+           debugLog("attacksPoller error", err?.message || err);
+         }
+       }, 30000);
+     }
+   
+     if (!mapState.dataPoller) {
+       mapState.dataPoller = setInterval(async () => {
+         if (document.hidden) return;
+   
+         try {
+           const changed = await guardedLoadMapData();
+           if (changed) {
+             populateAttackerSelect();
+             drawPyramid();
+           }
+         } catch (err) {
+           debugLog("dataPoller error", err?.message || err);
+         }
+       }, 30000);
+     }
+   
+     if (!mapState.resourcesPoller) {
+       mapState.resourcesPoller = setInterval(async () => {
+         if (!state.userAddress) return;
+         if (document.hidden) return;
+   
+         try {
+           await guardedLoadMapUserResources();
+         } catch (err) {
+           debugLog("resourcesPoller error", err?.message || err);
+         }
+       }, 45000);
+     }
+   }
+   
+   /* =========================================================
+      CONNECT / DISCONNECT
+      ========================================================= */
+   
+   async function connectWallet(forceRequest = true) {
+     if (!window.ethereum) {
+       alert("Please install MetaMask!");
+       return;
+     }
+   
+     if (mapState.isConnecting) return;
+     if (state.userAddress && forceRequest) return;
+   
+     const sessionId = ++connectSessionId;
+     mapState.isConnecting = true;
+   
+     try {
+       const ok = await connectWalletCore(forceRequest);
+       if (!ok) return;
+       if (sessionId !== connectSessionId) return;
+   
+       setupLegacyMigrationContracts();
+       localStorage.setItem(STORAGE_WALLET_FLAG, "1");
+   
+       setWalletUiConnected();
+   
+       await guardedLoadMapData();
+       if (sessionId !== connectSessionId) return;
+   
+       await guardedLoadMapUserResources();
+       if (sessionId !== connectSessionId) return;
+   
+       await guardedLoadMapUserAttacks();
+       if (sessionId !== connectSessionId) return;
+   
+       populateAttackerSelect();
+       updateMapFarmBoostCostLabels();
+       updateMapPirateBoostCostLabels();
+       await updateMapMercenaryCostPreview();
+   
+       if (mapState.selectedTokenId) {
+         await refreshSelectedTargetAttackPreview();
+       }
+   
+       drawPyramid();
+       startMapPollers();
+   
+       debugLog("Map wallet connected", state.userAddress);
+     } catch (err) {
+       alert("Connection error: " + (err?.reason || err?.message || err));
+       clearContracts();
+       setWalletUiDisconnected();
+       resetMapLoadingFlags();
+     } finally {
+       mapState.isConnecting = false;
+     }
+   }
+   
+   function disconnectMapWallet() {
+     connectSessionId += 1;
+   
+     localStorage.removeItem(STORAGE_WALLET_FLAG);
+   
+     stopMapPollers();
+     clearContracts();
+     resetMapRuntimeState();
+     resetMapLoadingFlags();
+   
+     setWalletUiDisconnected();
+     resetDisconnectedPanels();
    
      drawPyramid();
      debugLog("Map wallet disconnected");
    }
    
+   /* =========================================================
+      EVENT BINDING
+      ========================================================= */
+   
    function bindMapEvents() {
+     if (mapEventsBound) return;
+     mapEventsBound = true;
+   
      byId("connectBtn")?.addEventListener("click", () => {
        if (state.userAddress) {
          disconnectMapWallet();
@@ -146,16 +301,34 @@
      byId("protectTokenId")?.addEventListener("input", updateMapMercenaryCostPreview);
    
      byId("attackResource")?.addEventListener("change", async () => {
-       if (mapState.selectedTokenId) {
-         await refreshSelectedTargetAttackPreview();
-       }
+       if (!mapState.selectedTokenId) return;
+       await refreshSelectedTargetAttackPreview();
      });
    
      byId("attackAttackerSelect")?.addEventListener("change", async () => {
        const select = byId("attackAttackerSelect");
        mapState.selectedAttackAttackerTokenId = select?.value || null;
-       if (mapState.selectedTokenId) {
-         await refreshSelectedTargetAttackPreview();
+   
+       if (!mapState.selectedTokenId) return;
+       await refreshSelectedTargetAttackPreview();
+     });
+   
+     document.addEventListener("visibilitychange", async () => {
+       if (document.hidden) return;
+   
+       try {
+         const changed = await guardedLoadMapData();
+         if (changed) {
+           populateAttackerSelect();
+           drawPyramid();
+         }
+   
+         if (state.userAddress) {
+           await guardedLoadMapUserResources();
+           await guardedLoadMapUserAttacks();
+         }
+       } catch (err) {
+         debugLog("visibility refresh failed", err?.message || err);
        }
      });
    
@@ -217,23 +390,39 @@
      });
    }
    
+   /* =========================================================
+      PAGE INIT
+      ========================================================= */
+   
    export async function initMapPage() {
-     await initMapReadOnly();
-     resizeCanvas();
-     bindMapRenderEvents();
-     bindMapEvents();
-     initMapUI();
+     if (!mapPageInitialized) {
+       await initMapReadOnly();
    
-     updateMapFarmBoostCostLabels();
-     updateMapPirateBoostCostLabels();
-     await updateMapMercenaryCostPreview();
+       resizeCanvas();
    
-     await loadMapData();
-     populateAttackerSelect();
-     drawPyramid();
+       if (!mapRenderEventsBound) {
+         bindMapRenderEvents();
+         mapRenderEventsBound = true;
+       }
+   
+       bindMapEvents();
+       initMapUI();
+   
+       updateMapFarmBoostCostLabels();
+       updateMapPirateBoostCostLabels();
+       await updateMapMercenaryCostPreview();
+   
+       mapPageInitialized = true;
+     }
    
      const shouldReconnect = localStorage.getItem(STORAGE_WALLET_FLAG) === "1";
+   
      if (shouldReconnect) {
        await connectWallet(false);
+       return;
      }
+   
+     await guardedLoadMapData();
+     populateAttackerSelect();
+     drawPyramid();
    }
