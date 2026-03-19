@@ -1,9 +1,10 @@
 /* =========================================================
    GAME INIT / ORCHESTRATOR
-   LIGHT VERSION:
+   HARDENED VERSION
    - Attack flow on game page reduced
    - Heavy attack execution moved to map.html
    - Optional attacker select only if present in HTML
+   - guarded reconnect / polling / event binding
    ========================================================= */
 
    import {
@@ -62,6 +63,21 @@
   import { exchangeINPI, exchangePit } from "./exchange.js";
   
   /* =========================================================
+     MODULE FLAGS / LOAD GUARDS
+     ========================================================= */
+  
+  let gamePageInitialized = false;
+  let connectSessionId = 0;
+  
+  function ensureGameStateGuards() {
+    if (typeof state.isLoadingBlocks !== "boolean") state.isLoadingBlocks = false;
+    if (typeof state.isLoadingAttacks !== "boolean") state.isLoadingAttacks = false;
+    if (typeof state.isLoadingMercenaryPanel !== "boolean") state.isLoadingMercenaryPanel = false;
+    if (typeof state.isLoadingBalances !== "boolean") state.isLoadingBalances = false;
+    if (typeof state.isLoadingResources !== "boolean") state.isLoadingResources = false;
+  }
+  
+  /* =========================================================
      HELPERS
      ========================================================= */
   
@@ -96,17 +112,172 @@
     });
   }
   
+  function resetGamePanelsDisconnected() {
+    const userAttacksList = byId("userAttacksList");
+    if (userAttacksList) {
+      userAttacksList.innerHTML = `<p class="empty-state">Connect wallet to see your attacks.</p>`;
+    }
+  
+    const attackerSelect = byId("attackAttackerTokenId");
+    if (attackerSelect) {
+      attackerSelect.innerHTML = `<option value="">Connect wallet first…</option>`;
+    }
+  
+    const blocksGrid = byId("blocksGrid");
+    if (blocksGrid) {
+      blocksGrid.innerHTML = `<p class="empty-state">Connect wallet to see your blocks.</p>`;
+    }
+  }
+  
+  async function guardedUpdateBalances() {
+    if (state.isLoadingBalances) return false;
+    state.isLoadingBalances = true;
+    try {
+      await updateBalances();
+      await updatePoolInfo();
+      return true;
+    } finally {
+      state.isLoadingBalances = false;
+    }
+  }
+  
+  async function guardedLoadResourceBalances() {
+    if (state.isLoadingResources) return false;
+    state.isLoadingResources = true;
+    try {
+      await loadResourceBalancesOnchain();
+      return true;
+    } finally {
+      state.isLoadingResources = false;
+    }
+  }
+  
+  async function guardedLoadBlocks() {
+    if (state.isLoadingBlocks) return false;
+    state.isLoadingBlocks = true;
+    try {
+      await loadUserBlocks({
+        onRevealSelected: async () => {
+          await revealSelected();
+        },
+        onRefreshBlockMarkings: refreshBlockMarkings
+      });
+      return true;
+    } finally {
+      state.isLoadingBlocks = false;
+    }
+  }
+  
+  async function guardedLoadAttacks() {
+    if (state.isLoadingAttacks) return false;
+    state.isLoadingAttacks = true;
+    try {
+      await loadUserAttacks();
+      return true;
+    } finally {
+      state.isLoadingAttacks = false;
+    }
+  }
+  
+  async function guardedLoadMercenaryPanel() {
+    if (state.isLoadingMercenaryPanel) return false;
+    state.isLoadingMercenaryPanel = true;
+    try {
+      await loadMercenaryPanelState();
+      return true;
+    } finally {
+      state.isLoadingMercenaryPanel = false;
+    }
+  }
+  
+  function startGamePollers() {
+    if (!state.attacksPoller) {
+      state.attacksPoller = setInterval(async () => {
+        if (!state.userAddress) return;
+        if (document.hidden) return;
+  
+        try {
+          await guardedLoadAttacks();
+          refreshBlockMarkings();
+        } catch (e) {
+          console.warn("Attack refresh failed:", e);
+        }
+  
+        try {
+          await guardedLoadMercenaryPanel();
+        } catch (e) {
+          console.warn("Mercenary poll refresh failed:", e);
+        }
+      }, 45000);
+    }
+  
+    if (!state.gameBlocksPoller) {
+      state.gameBlocksPoller = setInterval(async () => {
+        if (!state.userAddress) return;
+        if (document.hidden) return;
+  
+        try {
+          const changed = await guardedLoadBlocks();
+          if (changed) {
+            refreshBlockMarkings();
+          }
+        } catch (e) {
+          console.warn("Blocks refresh failed:", e);
+        }
+      }, 60000);
+    }
+  
+    if (!state.gameBalancesPoller) {
+      state.gameBalancesPoller = setInterval(async () => {
+        if (!state.userAddress) return;
+        if (document.hidden) return;
+  
+        try {
+          await guardedUpdateBalances();
+          await guardedLoadResourceBalances();
+        } catch (e) {
+          console.warn("Balance/resource refresh failed:", e);
+        }
+      }, 60000);
+    }
+  }
+  
+  function stopGamePollers() {
+    stopAttacksTicker();
+  
+    if (state.attacksPoller) {
+      clearInterval(state.attacksPoller);
+      state.attacksPoller = null;
+    }
+  
+    if (state.gameBlocksPoller) {
+      clearInterval(state.gameBlocksPoller);
+      state.gameBlocksPoller = null;
+    }
+  
+    if (state.gameBalancesPoller) {
+      clearInterval(state.gameBalancesPoller);
+      state.gameBalancesPoller = null;
+    }
+  }
+  
   /* =========================================================
      WALLET CONNECT / DISCONNECT
      ========================================================= */
   
   async function connectWallet(forceRequest = true) {
+    ensureGameStateGuards();
+  
     if (state.isConnecting) return;
+    if (state.userAddress && forceRequest) return;
+  
+    const sessionId = ++connectSessionId;
     state.isConnecting = true;
   
     try {
       const ok = await connectWalletCore(forceRequest);
       if (!ok) return;
+      if (sessionId !== connectSessionId) return;
   
       try {
         localStorage.setItem(STORAGE_WALLET_FLAG, "1");
@@ -118,40 +289,26 @@
       updateBoostCostLabels();
       updateMercenaryCostPreview();
   
-      await updateBalances();
-      await updatePoolInfo();
-      await loadResourceBalancesOnchain();
+      await guardedUpdateBalances();
+      if (sessionId !== connectSessionId) return;
   
-      await loadUserBlocks({
-        onRevealSelected: async () => {
-          await revealSelected();
-        },
-        onRefreshBlockMarkings: refreshBlockMarkings
-      });
+      await guardedLoadResourceBalances();
+      if (sessionId !== connectSessionId) return;
   
-      await loadMercenaryPanelState();
+      await guardedLoadBlocks();
+      if (sessionId !== connectSessionId) return;
+  
+      await guardedLoadMercenaryPanel();
+      if (sessionId !== connectSessionId) return;
+  
       await initLightAttackUi();
-      await loadUserAttacks();
+      if (sessionId !== connectSessionId) return;
+  
+      await guardedLoadAttacks();
+      if (sessionId !== connectSessionId) return;
+  
       refreshBlockMarkings();
-  
-      if (!state.attacksPoller) {
-        state.attacksPoller = setInterval(async () => {
-          if (!state.userAddress) return;
-  
-          try {
-            await loadUserAttacks();
-            refreshBlockMarkings();
-          } catch (e) {
-            console.warn("Attack refresh failed:", e);
-          }
-  
-          try {
-            await loadMercenaryPanelState();
-          } catch (e) {
-            console.warn("Mercenary poll refresh failed:", e);
-          }
-        }, 45000);
-      }
+      startGamePollers();
   
       clearUiMessages();
       debugLog("Wallet connected", state.userAddress);
@@ -166,30 +323,23 @@
   }
   
   function disconnectWallet() {
+    connectSessionId += 1;
+  
     try {
       localStorage.removeItem(STORAGE_WALLET_FLAG);
     } catch {}
   
-    stopAttacksTicker();
-  
-    if (state.attacksPoller) {
-      clearInterval(state.attacksPoller);
-    }
-    state.attacksPoller = null;
-  
+    stopGamePollers();
     clearContracts();
     setWalletUIDisconnected();
     clearUiMessages();
+    resetGamePanelsDisconnected();
   
-    const attackerSelect = byId("attackAttackerTokenId");
-    if (attackerSelect) {
-      attackerSelect.innerHTML = `<option value="">Connect wallet first…</option>`;
-    }
-  
-    const userAttacksList = byId("userAttacksList");
-    if (userAttacksList) {
-      userAttacksList.innerHTML = `<p class="empty-state">Connect wallet to see your attacks.</p>`;
-    }
+    state.isLoadingBlocks = false;
+    state.isLoadingAttacks = false;
+    state.isLoadingMercenaryPanel = false;
+    state.isLoadingBalances = false;
+    state.isLoadingResources = false;
   
     debugLog("Wallet disconnected");
   }
@@ -322,6 +472,22 @@
       });
     });
   
+    document.addEventListener("visibilitychange", async () => {
+      if (document.hidden) return;
+      if (!state.userAddress) return;
+  
+      try {
+        await guardedLoadBlocks();
+        await guardedLoadAttacks();
+        await guardedLoadMercenaryPanel();
+        await guardedUpdateBalances();
+        await guardedLoadResourceBalances();
+        refreshBlockMarkings();
+      } catch (e) {
+        console.warn("visibility refresh failed:", e);
+      }
+    });
+  
     updateFarmBoostCostLabel();
     updateBoostCostLabels();
     updateMercenaryCostPreview();
@@ -358,18 +524,23 @@
      ========================================================= */
   
   export function initGamePage() {
+    ensureGameStateGuards();
     setWalletUIDisconnected();
   
-    if (byId("attackResourceSelect")) {
-      initAttackResourceSelect();
+    if (!gamePageInitialized) {
+      if (byId("attackResourceSelect")) {
+        initAttackResourceSelect();
+      }
+  
+      updateFarmBoostCostLabel();
+      updateBoostCostLabels();
+      updateMercenaryCostPreview();
+  
+      bindEvents();
+      bindEthereumEvents();
+  
+      gamePageInitialized = true;
     }
-  
-    updateFarmBoostCostLabel();
-    updateBoostCostLabels();
-    updateMercenaryCostPreview();
-  
-    bindEvents();
-    bindEthereumEvents();
   
     let shouldReconnect = false;
     try {
