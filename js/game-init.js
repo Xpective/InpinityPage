@@ -549,5 +549,5 @@
   
     if (shouldReconnect) {
       connectWallet(false);
-    }
+    } 
   }
