@@ -32,6 +32,18 @@
    
    /* ==================== HELPER ==================== */
    
+   function readTupleValue(tuple, key, index, fallback = null) {
+     if (!tuple) return fallback;
+   
+     const named = tuple?.[key];
+     if (named !== undefined) return named;
+   
+     const indexed = tuple?.[index];
+     if (indexed !== undefined) return indexed;
+   
+     return fallback;
+   }
+   
    function getActionMessageDiv() {
      return byId("actionMessage");
    }
@@ -40,9 +52,12 @@
      return byId("protectMessage") || byId("actionMessage");
    }
    
-   function setActionMessage(html) {
-     const el = getActionMessageDiv();
+   function setHtml(el, html) {
      if (el) el.innerHTML = html;
+   }
+   
+   function setActionMessage(html) {
+     setHtml(getActionMessageDiv(), html);
    }
    
    function friendlyErrorMessage(e) {
@@ -128,19 +143,46 @@
      );
    }
    
+   async function getLiveProtectionData(tokenId) {
+     if (!state.mercenaryV4Contract || !tokenId) return null;
+   
+     try {
+       const raw = await state.mercenaryV4Contract.getProtectionData(tokenId);
+   
+       return {
+         protector: readTupleValue(raw, "protector", 0, "0x0000000000000000000000000000000000000000"),
+         slotIndex: Number(readTupleValue(raw, "slotIndex", 1, 0)),
+         active: !!readTupleValue(raw, "active", 2, false),
+         startTime: Number(readTupleValue(raw, "startTime", 3, 0)),
+         expiry: Number(readTupleValue(raw, "expiry", 4, 0)),
+         cooldownUntil: Number(readTupleValue(raw, "cooldownUntil", 5, 0)),
+         emergencyReadyAt: Number(readTupleValue(raw, "emergencyReadyAt", 6, 0)),
+         tier: Number(readTupleValue(raw, "tier", 7, 0)),
+         protectionPercent: Number(readTupleValue(raw, "protectionPercent", 8, 0))
+       };
+     } catch (e) {
+       console.warn("getLiveProtectionData failed:", e);
+       return null;
+     }
+   }
+   
+   function isProtectionActiveNow(protectionData, now = Math.floor(Date.now() / 1000)) {
+     return !!protectionData?.active && Number(protectionData?.expiry || 0) > now;
+   }
+   
    async function requireOwnedSelectedToken(msgDiv = null) {
      if (!mapState.selectedTokenId) {
-       if (msgDiv) msgDiv.innerHTML = `<span class="error">❌ No block selected.</span>`;
+       setHtml(msgDiv, `<span class="error">❌ No block selected.</span>`);
        return false;
      }
    
      if (!state.userAddress) {
-       if (msgDiv) msgDiv.innerHTML = `<span class="error">❌ Wallet not connected.</span>`;
+       setHtml(msgDiv, `<span class="error">❌ Wallet not connected.</span>`);
        return false;
      }
    
      if (!isSelectedOwnedByUser()) {
-       if (msgDiv) msgDiv.innerHTML = `<span class="error">❌ This action is only available for your own block.</span>`;
+       setHtml(msgDiv, `<span class="error">❌ This action is only available for your own block.</span>`);
        return false;
      }
    
@@ -211,14 +253,20 @@
    
      if (!info) return;
    
+     const tokenId = getSelectedProtectTokenId();
      const days = getMercenaryDurationDays();
      const slotIndex = getMercenarySlotIndex();
      const payInINPI = getMercenaryPaymentMode() === "inpi";
-     const isExtension = hasActiveProtectionOnSelectedToken();
    
      if (!state.userAddress || !state.mercenaryV4Contract) {
        info.textContent = "Cost: connect wallet";
        return;
+     }
+   
+     let isExtension = hasActiveProtectionOnSelectedToken();
+     const liveProtection = await getLiveProtectionData(tokenId);
+     if (liveProtection) {
+       isExtension = isProtectionActiveNow(liveProtection);
      }
    
      try {
@@ -230,12 +278,12 @@
        );
    
        if (payInINPI) {
-         const inpiHuman = ethers.utils.formatEther(cost.inpiCost || cost[0]);
+         const inpiHuman = ethers.utils.formatEther(readTupleValue(cost, "inpiCost", 0, 0));
          info.textContent = `Cost: ${inpiHuman} INPI`;
        } else {
-         const oil = Number(cost.oilCost || cost[1] || 0);
-         const lemons = Number(cost.lemonsCost || cost[2] || 0);
-         const iron = Number(cost.ironCost || cost[3] || 0);
+         const oil = Number(readTupleValue(cost, "oilCost", 1, 0));
+         const lemons = Number(readTupleValue(cost, "lemonsCost", 2, 0));
+         const iron = Number(readTupleValue(cost, "ironCost", 3, 0));
          info.textContent = `Cost: ${oil} Oil, ${lemons} Lemons, ${iron} Iron`;
        }
    
@@ -289,9 +337,7 @@
      if (!(await requireOwnedSelectedToken(actionMessage))) return;
    
      try {
-       if (actionMessage) {
-         actionMessage.innerHTML = `<span class="success">⏳ Migrating V5 → V6...</span>`;
-       }
+       setHtml(actionMessage, `<span class="success">⏳ Migrating V5 → V6...</span>`);
    
        const result = await migrateSingleFarmV5ToV6(mapState.selectedTokenId, {
          claimIfPossible: true,
@@ -299,23 +345,22 @@
          startOnV6: true
        });
    
-       if (actionMessage) {
-         actionMessage.innerHTML = `
+       setHtml(
+         actionMessage,
+         `
            <span class="success">
              ✅ Migration complete.<br>
              Claimed on V5: ${result.claimedOnV5 ? "yes" : "no"}<br>
              Stopped on V5: ${result.stoppedOnV5 ? "yes" : "no"}<br>
              Started on V6: ${result.startedOnV6 ? "yes" : "no"}
            </span>
-         `;
-       }
+         `
+       );
    
        await refreshAfterTx();
      } catch (e) {
        console.error("handleMigrateToV6 error:", e);
-       if (actionMessage) {
-         actionMessage.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
-       }
+       setHtml(actionMessage, `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`);
      }
    }
    
@@ -324,6 +369,10 @@
    
      const actionMessage = getActionMessageDiv();
      if (!(await requireOwnedSelectedToken(actionMessage))) return;
+     if (!state.nftContract) {
+       setHtml(actionMessage, `<span class="error">❌ NFT contract not initialized.</span>`);
+       return;
+     }
    
      const tokenIdNum = parseInt(mapState.selectedTokenId, 10);
      const row = Math.floor(tokenIdNum / 2048);
@@ -334,6 +383,9 @@
        if (!response.ok) throw new Error("Proofs not found");
    
        const proofs = await response.json();
+       if (!proofs?.pi?.proof || !proofs?.phi?.proof) {
+         throw new Error("Invalid proof payload");
+       }
    
        const formatProof = (arr) =>
          arr.map((item) => {
@@ -354,9 +406,7 @@
        );
      } catch (e) {
        console.error("handleReveal error:", e);
-       if (actionMessage) {
-         actionMessage.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
-       }
+       setHtml(actionMessage, `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`);
      }
    }
    
@@ -365,14 +415,16 @@
    
      const actionMessage = getActionMessageDiv();
      if (!(await requireOwnedSelectedToken(actionMessage))) return;
+     if (!state.farmingV6Contract) {
+       setHtml(actionMessage, `<span class="error">❌ FarmingV6 contract not initialized.</span>`);
+       return;
+     }
    
      const tokens = getAllMapTokens();
      const token = tokens[String(mapState.selectedTokenId)];
    
      if (token?.farmV5Active) {
-       if (actionMessage) {
-         actionMessage.innerHTML = `<span class="error">❌ This block is still active on V5. Migrate it first.</span>`;
-       }
+       setHtml(actionMessage, `<span class="error">❌ This block is still active on V5. Migrate it first.</span>`);
        return;
      }
    
@@ -387,6 +439,10 @@
    
      const actionMessage = getActionMessageDiv();
      if (!(await requireOwnedSelectedToken(actionMessage))) return;
+     if (!state.farmingV6Contract) {
+       setHtml(actionMessage, `<span class="error">❌ FarmingV6 contract not initialized.</span>`);
+       return;
+     }
    
      await sendTx(
        state.farmingV6Contract.stopFarming(mapState.selectedTokenId, { gasLimit: 500000 }),
@@ -408,10 +464,13 @@
          const v5 = getFarmingV5Contract();
          const total = await getV5PendingTotal(mapState.selectedTokenId);
    
+         if (!v5) {
+           setHtml(actionMessage, `<span class="error">❌ FarmingV5 contract not initialized.</span>`);
+           return;
+         }
+   
          if (!total || total.isZero()) {
-           if (actionMessage) {
-             actionMessage.innerHTML = `<span class="error">❌ Nothing to claim on V5.</span>`;
-           }
+           setHtml(actionMessage, `<span class="error">❌ Nothing to claim on V5.</span>`);
            return;
          }
    
@@ -422,11 +481,17 @@
          return;
        }
    
+       if (!state.farmingV6Contract) {
+         setHtml(actionMessage, `<span class="error">❌ FarmingV6 contract not initialized.</span>`);
+         return;
+       }
+   
        const preview = await state.farmingV6Contract.previewClaim(mapState.selectedTokenId);
-       if (!preview.allowed) {
-         if (actionMessage) {
-           actionMessage.innerHTML = `<span class="error">❌ Claim not ready. Code: ${preview.code}</span>`;
-         }
+       const allowed = !!readTupleValue(preview, "allowed", 1, false);
+       const code = Number(readTupleValue(preview, "code", 0, 0));
+   
+       if (!allowed) {
+         setHtml(actionMessage, `<span class="error">❌ Claim not ready. Code: ${code}</span>`);
          return;
        }
    
@@ -436,9 +501,7 @@
        );
      } catch (e) {
        console.error("handleClaim error:", e);
-       if (actionMessage) {
-         actionMessage.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
-       }
+       setHtml(actionMessage, `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`);
      }
    }
    
@@ -451,9 +514,12 @@
      const days = parseInt(byId("boostDays")?.value || "7", 10);
    
      if (!Number.isFinite(days) || days < 1 || days > FARM_BOOST_MAX_DAYS) {
-       if (actionMessage) {
-         actionMessage.innerHTML = `<span class="error">❌ Invalid farm boost duration.</span>`;
-       }
+       setHtml(actionMessage, `<span class="error">❌ Invalid farm boost duration.</span>`);
+       return;
+     }
+   
+     if (!state.inpiContract || !state.farmingV6Contract) {
+       setHtml(actionMessage, `<span class="error">❌ Boost contracts not initialized.</span>`);
        return;
      }
    
@@ -467,9 +533,7 @@
        );
    
        if (allowance.lt(costWei)) {
-         if (actionMessage) {
-           actionMessage.innerHTML = `<span class="success">⏳ Approving INPI...</span>`;
-         }
+         setHtml(actionMessage, `<span class="success">⏳ Approving INPI...</span>`);
          const approveTx = await state.inpiContract.approve(
            state.farmingV6Contract.address,
            costWei
@@ -482,9 +546,8 @@
          `Farm boost bought for ${days} day(s)! Paid: ${costHuman} INPI`
        );
      } catch (e) {
-       if (actionMessage) {
-         actionMessage.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
-       }
+       console.error("handleBuyBoost error:", e);
+       setHtml(actionMessage, `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`);
      }
    }
    
@@ -494,9 +557,7 @@
      const actionMessage = getActionMessageDiv();
      const attackerTokenId = await getPreferredAttackerTokenId();
      if (!attackerTokenId) {
-       if (actionMessage) {
-         actionMessage.innerHTML = `<span class="error">❌ No attacker block selected.</span>`;
-       }
+       setHtml(actionMessage, `<span class="error">❌ No attacker block selected.</span>`);
        return;
      }
    
@@ -521,14 +582,15 @@
        const allowance = await state.pitroneContract.allowance(state.userAddress, spender);
    
        if (allowance.lt(cost)) {
-         if (actionMessage) {
-           actionMessage.innerHTML = `
+         setHtml(
+           actionMessage,
+           `
              <span class="success">
                ⏳ Approving PITRONE...<br>
                Cost: ${totalCostHuman} PIT
              </span>
-           `;
-         }
+           `
+         );
    
          const approveTx = await state.pitroneContract.approve(spender, cost);
          await approveTx.wait();
@@ -542,9 +604,7 @@
        await refreshSelectedTargetAttackPreview();
      } catch (e) {
        console.error("handleBuyPirateBoost error:", e);
-       if (actionMessage) {
-         actionMessage.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
-       }
+       setHtml(actionMessage, `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`);
      }
    }
    
@@ -569,17 +629,17 @@
            true,
            false
          );
-         const inpiCost = cost.inpiCost || cost[0];
+         const inpiCost = readTupleValue(cost, "inpiCost", 0, 0);
    
          const allowance = await state.inpiContract.allowance(state.userAddress, MERCENARY_V4_ADDRESS);
          if (allowance.lt(inpiCost)) {
-           msgDiv.innerHTML = `<span class="success">⏳ Approving INPI...</span>`;
+           setHtml(msgDiv, `<span class="success">⏳ Approving INPI...</span>`);
            const approveTx = await state.inpiContract.approve(MERCENARY_V4_ADDRESS, inpiCost);
            await approveTx.wait();
          }
        }
    
-       msgDiv.innerHTML = `<span class="success">⏳ Setting protection...</span>`;
+       setHtml(msgDiv, `<span class="success">⏳ Setting protection...</span>`);
    
        const tx = await state.mercenaryV4Contract.setProtection(
          slotIndex,
@@ -590,11 +650,11 @@
        );
        await tx.wait();
    
-       msgDiv.innerHTML = `<span class="success">✅ Protection set.</span>`;
+       setHtml(msgDiv, `<span class="success">✅ Protection set.</span>`);
        await refreshAfterTx();
      } catch (e) {
        console.error("handleSetProtection error:", e);
-       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+       setHtml(msgDiv, `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`);
      }
    }
    
@@ -602,6 +662,7 @@
      const msgDiv = getProtectMessageDiv();
      if (!(await requireOwnedSelectedToken(msgDiv))) return;
    
+     const tokenId = getSelectedProtectTokenId();
      const slotIndex = getMercenarySlotIndex();
      const additionalDays = getMercenaryDurationDays();
      const payInINPI = getMercenaryPaymentMode() === "inpi";
@@ -609,8 +670,9 @@
      if (!state.mercenaryV4Contract || !state.userAddress) return;
    
      try {
-       if (!hasActiveProtectionOnSelectedToken()) {
-         msgDiv.innerHTML = `<span class="error">❌ No active protection on this block to extend.</span>`;
+       const liveProtection = await getLiveProtectionData(tokenId);
+       if (!isProtectionActiveNow(liveProtection)) {
+         setHtml(msgDiv, `<span class="error">❌ No active protection on this block to extend.</span>`);
          return;
        }
    
@@ -621,17 +683,17 @@
            true,
            true
          );
-         const inpiCost = cost.inpiCost || cost[0];
+         const inpiCost = readTupleValue(cost, "inpiCost", 0, 0);
    
          const allowance = await state.inpiContract.allowance(state.userAddress, MERCENARY_V4_ADDRESS);
          if (allowance.lt(inpiCost)) {
-           msgDiv.innerHTML = `<span class="success">⏳ Approving INPI...</span>`;
+           setHtml(msgDiv, `<span class="success">⏳ Approving INPI...</span>`);
            const approveTx = await state.inpiContract.approve(MERCENARY_V4_ADDRESS, inpiCost);
            await approveTx.wait();
          }
        }
    
-       msgDiv.innerHTML = `<span class="success">⏳ Extending protection...</span>`;
+       setHtml(msgDiv, `<span class="success">⏳ Extending protection...</span>`);
    
        const tx = await state.mercenaryV4Contract.extendProtection(
          slotIndex,
@@ -641,11 +703,11 @@
        );
        await tx.wait();
    
-       msgDiv.innerHTML = `<span class="success">✅ Protection extended.</span>`;
+       setHtml(msgDiv, `<span class="success">✅ Protection extended.</span>`);
        await refreshAfterTx();
      } catch (e) {
        console.error("handleExtendProtection error:", e);
-       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+       setHtml(msgDiv, `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`);
      }
    }
    
@@ -658,18 +720,18 @@
      if (!state.mercenaryV4Contract) return;
    
      try {
-       msgDiv.innerHTML = `<span class="success">⏳ Cancelling protection...</span>`;
+       setHtml(msgDiv, `<span class="success">⏳ Cancelling protection...</span>`);
    
        const tx = await state.mercenaryV4Contract.cancelProtection(slotIndex, {
          gasLimit: 600000
        });
        await tx.wait();
    
-       msgDiv.innerHTML = `<span class="success">✅ Protection cancelled.</span>`;
+       setHtml(msgDiv, `<span class="success">✅ Protection cancelled.</span>`);
        await refreshAfterTx();
      } catch (e) {
        console.error("handleCancelProtection error:", e);
-       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+       setHtml(msgDiv, `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`);
      }
    }
    
@@ -683,18 +745,18 @@
      if (!state.mercenaryV4Contract || !newTokenId) return;
    
      try {
-       msgDiv.innerHTML = `<span class="success">⏳ Moving protection...</span>`;
+       setHtml(msgDiv, `<span class="success">⏳ Moving protection...</span>`);
    
        const tx = await state.mercenaryV4Contract.moveProtection(slotIndex, newTokenId, {
          gasLimit: 900000
        });
        await tx.wait();
    
-       msgDiv.innerHTML = `<span class="success">✅ Protection moved.</span>`;
+       setHtml(msgDiv, `<span class="success">✅ Protection moved.</span>`);
        await refreshAfterTx();
      } catch (e) {
        console.error("handleMoveProtection error:", e);
-       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+       setHtml(msgDiv, `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`);
      }
    }
    
@@ -708,18 +770,18 @@
      if (!state.mercenaryV4Contract || !newTokenId) return;
    
      try {
-       msgDiv.innerHTML = `<span class="success">⏳ Emergency moving protection...</span>`;
+       setHtml(msgDiv, `<span class="success">⏳ Emergency moving protection...</span>`);
    
        const tx = await state.mercenaryV4Contract.emergencyMoveProtection(slotIndex, newTokenId, {
          gasLimit: 900000
        });
        await tx.wait();
    
-       msgDiv.innerHTML = `<span class="success">✅ Emergency move complete.</span>`;
+       setHtml(msgDiv, `<span class="success">✅ Emergency move complete.</span>`);
        await refreshAfterTx();
      } catch (e) {
        console.error("handleEmergencyMoveProtection error:", e);
-       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+       setHtml(msgDiv, `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`);
      }
    }
    
@@ -727,21 +789,40 @@
      const msgDiv = getProtectMessageDiv();
      const tokenId = getSelectedProtectTokenId();
    
+     if (!state.userAddress) {
+       setHtml(msgDiv, `<span class="error">❌ Wallet not connected.</span>`);
+       return;
+     }
+   
      if (!state.mercenaryV4Contract || !tokenId) return;
    
      try {
-       msgDiv.innerHTML = `<span class="success">⏳ Cleaning expired protection...</span>`;
+       const protection = await getLiveProtectionData(tokenId);
+       const expiry = Number(protection?.expiry || 0);
+       const now = Math.floor(Date.now() / 1000);
+   
+       if (!expiry) {
+         setHtml(msgDiv, `<span class="error">❌ No protection record found for this block.</span>`);
+         return;
+       }
+   
+       if (expiry > now) {
+         setHtml(msgDiv, `<span class="error">❌ Cleanup is only available after protection expires.</span>`);
+         return;
+       }
+   
+       setHtml(msgDiv, `<span class="success">⏳ Cleaning expired protection...</span>`);
    
        const tx = await state.mercenaryV4Contract.cleanExpiredToken(tokenId, {
          gasLimit: 600000
        });
        await tx.wait();
    
-       msgDiv.innerHTML = `<span class="success">✅ Cleanup complete.</span>`;
+       setHtml(msgDiv, `<span class="success">✅ Cleanup complete.</span>`);
        await refreshAfterTx();
      } catch (e) {
        console.error("handleCleanupProtection error:", e);
-       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+       setHtml(msgDiv, `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`);
      }
    }
    
@@ -750,25 +831,28 @@
      if (!state.mercenaryV4Contract) return;
    
      try {
-       msgDiv.innerHTML = `
-         <span class="success">
-           ⏳ Unlocking slot 2...<br>
-           ${renderCostList([
-             { amount: MERCENARY_SLOT2_UNLOCK_COST.oil, label: "Oil" },
-             { amount: MERCENARY_SLOT2_UNLOCK_COST.lemons, label: "Lemons" },
-             { amount: MERCENARY_SLOT2_UNLOCK_COST.iron, label: "Iron" }
-           ])}
-         </span>
-       `;
+       setHtml(
+         msgDiv,
+         `
+           <span class="success">
+             ⏳ Unlocking slot 2...<br>
+             ${renderCostList([
+               { amount: MERCENARY_SLOT2_UNLOCK_COST.oil, label: "Oil" },
+               { amount: MERCENARY_SLOT2_UNLOCK_COST.lemons, label: "Lemons" },
+               { amount: MERCENARY_SLOT2_UNLOCK_COST.iron, label: "Iron" }
+             ])}
+           </span>
+         `
+       );
    
        const tx = await state.mercenaryV4Contract.unlockSecondSlot({ gasLimit: 800000 });
        await tx.wait();
    
-       msgDiv.innerHTML = `<span class="success">✅ Slot 2 unlocked.</span>`;
+       setHtml(msgDiv, `<span class="success">✅ Slot 2 unlocked.</span>`);
        await refreshAfterTx();
      } catch (e) {
        console.error("handleUnlockSlot2 error:", e);
-       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+       setHtml(msgDiv, `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`);
      }
    }
    
@@ -777,28 +861,31 @@
      if (!state.mercenaryV4Contract) return;
    
      try {
-       msgDiv.innerHTML = `
-         <span class="success">
-           ⏳ Unlocking slot 3...<br>
-           ${renderCostList([
-             { amount: MERCENARY_SLOT3_UNLOCK_COST.oil, label: "Oil" },
-             { amount: MERCENARY_SLOT3_UNLOCK_COST.lemons, label: "Lemons" },
-             { amount: MERCENARY_SLOT3_UNLOCK_COST.iron, label: "Iron" },
-             { amount: MERCENARY_SLOT3_UNLOCK_COST.gold, label: "Gold" },
-             { amount: MERCENARY_SLOT3_UNLOCK_COST.crystal, label: "Crystal" },
-             { amount: MERCENARY_SLOT3_UNLOCK_COST.mysterium, label: "Mysterium" }
-           ])}
-         </span>
-       `;
+       setHtml(
+         msgDiv,
+         `
+           <span class="success">
+             ⏳ Unlocking slot 3...<br>
+             ${renderCostList([
+               { amount: MERCENARY_SLOT3_UNLOCK_COST.oil, label: "Oil" },
+               { amount: MERCENARY_SLOT3_UNLOCK_COST.lemons, label: "Lemons" },
+               { amount: MERCENARY_SLOT3_UNLOCK_COST.iron, label: "Iron" },
+               { amount: MERCENARY_SLOT3_UNLOCK_COST.gold, label: "Gold" },
+               { amount: MERCENARY_SLOT3_UNLOCK_COST.crystal, label: "Crystal" },
+               { amount: MERCENARY_SLOT3_UNLOCK_COST.mysterium, label: "Mysterium" }
+             ])}
+           </span>
+         `
+       );
    
        const tx = await state.mercenaryV4Contract.unlockThirdSlot({ gasLimit: 1000000 });
        await tx.wait();
    
-       msgDiv.innerHTML = `<span class="success">✅ Slot 3 unlocked.</span>`;
+       setHtml(msgDiv, `<span class="success">✅ Slot 3 unlocked.</span>`);
        await refreshAfterTx();
      } catch (e) {
        console.error("handleUnlockSlot3 error:", e);
-       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+       setHtml(msgDiv, `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`);
      }
    }
    
@@ -808,7 +895,7 @@
    
      const title = (byId("bastionTitleInput")?.value || "").trim();
      if (!title) {
-       msgDiv.innerHTML = `<span class="error">❌ Enter a title first.</span>`;
+       setHtml(msgDiv, `<span class="error">❌ Enter a title first.</span>`);
        return;
      }
    
@@ -816,23 +903,23 @@
        Number(mapState.mercenaryProfile?.defenderPoints || mapState.mercenaryProfile?.points || 0);
    
      if (points < 1000) {
-       msgDiv.innerHTML = `<span class="error">❌ Bastion Title unlocks at 1000 Defender Points.</span>`;
+       setHtml(msgDiv, `<span class="error">❌ Bastion Title unlocks at 1000 Defender Points.</span>`);
        return;
      }
    
      try {
-       msgDiv.innerHTML = `<span class="success">⏳ Saving bastion title...</span>`;
+       setHtml(msgDiv, `<span class="success">⏳ Saving bastion title...</span>`);
    
        const tx = await state.mercenaryV4Contract.setBastionTitle(title, {
          gasLimit: 500000
        });
        await tx.wait();
    
-       msgDiv.innerHTML = `<span class="success">✅ Bastion title saved.</span>`;
+       setHtml(msgDiv, `<span class="success">✅ Bastion title saved.</span>`);
        await refreshAfterTx();
      } catch (e) {
        console.error("handleSaveBastionTitle error:", e);
-       msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+       setHtml(msgDiv, `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`);
      }
    }
    
@@ -840,7 +927,10 @@
      const msgDiv = getProtectMessageDiv();
      if (!(await requireOwnedSelectedToken(msgDiv))) return;
    
-     if (hasActiveProtectionOnSelectedToken()) {
+     const tokenId = getSelectedProtectTokenId();
+     const liveProtection = await getLiveProtectionData(tokenId);
+   
+     if (isProtectionActiveNow(liveProtection)) {
        return handleExtendProtection();
      }
      return handleSetProtection();
@@ -855,25 +945,24 @@
      const tokens = getAllMapTokens();
      const targetToken = tokens[mapState.selectedTokenId];
    
+     if (!state.piratesV6Contract) {
+       setHtml(actionMessage, `<span class="error">❌ PiratesV6 contract not initialized.</span>`);
+       return;
+     }
+   
      if (!targetToken?.owner) {
-       if (actionMessage) {
-         actionMessage.innerHTML = `<span class="error">❌ Target block does not exist.</span>`;
-       }
+       setHtml(actionMessage, `<span class="error">❌ Target block does not exist.</span>`);
        return;
      }
    
      if (targetToken.owner.toLowerCase() === state.userAddress.toLowerCase()) {
-       if (actionMessage) {
-         actionMessage.innerHTML = `<span class="error">❌ You cannot attack your own block.</span>`;
-       }
+       setHtml(actionMessage, `<span class="error">❌ You cannot attack your own block.</span>`);
        return;
      }
    
      const attackerTokenId = await getPreferredAttackerTokenId();
      if (!attackerTokenId) {
-       if (actionMessage) {
-         actionMessage.innerHTML = `<span class="error">❌ Need your own block to attack from.</span>`;
-       }
+       setHtml(actionMessage, `<span class="error">❌ Need your own block to attack from.</span>`);
        return;
      }
    
@@ -881,42 +970,42 @@
      const resource = parseInt(byId("attackResource")?.value || "0", 10);
    
      if (!Number.isFinite(resource) || resource < 0 || resource > 9) {
-       if (actionMessage) {
-         actionMessage.innerHTML = `<span class="error">❌ Invalid resource selected.</span>`;
-       }
+       setHtml(actionMessage, `<span class="error">❌ Invalid resource selected.</span>`);
        return;
      }
    
      try {
        const preview = await state.piratesV6Contract.previewAttack(attackerTokenId, targetTokenIdNum, resource);
+       const allowed = !!readTupleValue(preview, "allowed", 1, false);
+       const code = Number(readTupleValue(preview, "code", 0, 0));
+       const travelTime = Number(readTupleValue(preview, "travelTime", 4, 0));
+       const stealAmount = readTupleValue(preview, "stealAmount", 3, 0);
+       const remainingToday = Number(readTupleValue(preview, "remainingAttacksToday", 5, 0));
    
-       if (!preview.allowed) {
-         if (actionMessage) {
-           actionMessage.innerHTML = `<span class="error">❌ Attack not allowed. Code: ${preview.code}</span>`;
-         }
+       if (!allowed) {
+         setHtml(actionMessage, `<span class="error">❌ Attack not allowed. Code: ${code}</span>`);
          await refreshSelectedTargetAttackPreview();
          return;
        }
    
-       if (actionMessage) {
-         actionMessage.innerHTML = `
+       setHtml(
+         actionMessage,
+         `
            <span class="success">
              ⏳ Starting attack...<br>
-             Travel time: ${formatDuration(Number(preview.travelTime || 0))}<br>
-             Steal amount: ${(preview.stealAmount || 0).toString()}<br>
-             Remaining today: ${Number(preview.remainingAttacksToday || 0)}
+             Travel time: ${formatDuration(travelTime)}<br>
+             Steal amount: ${stealAmount?.toString ? stealAmount.toString() : String(stealAmount || 0)}<br>
+             Remaining today: ${remainingToday}
            </span>
-         `;
-       }
+         `
+       );
    
        const tx = await state.piratesV6Contract.startAttack(attackerTokenId, targetTokenIdNum, resource, {
          gasLimit: 450000
        });
        await tx.wait();
    
-       if (actionMessage) {
-         actionMessage.innerHTML = `<span class="success">✅ Attack launched!</span>`;
-       }
+       setHtml(actionMessage, `<span class="success">✅ Attack launched!</span>`);
    
        localStorage.setItem(
          getAttackStorageKey(targetTokenIdNum),
@@ -933,9 +1022,7 @@
        await refreshSelectedTargetAttackPreview();
      } catch (e) {
        console.error("handleAttack error:", e);
-       if (actionMessage) {
-         actionMessage.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
-       }
+       setHtml(actionMessage, `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`);
      }
    }
    
@@ -1003,11 +1090,12 @@
        setActionMessage(`<span class="success">⏳ Previewing execute...</span>`);
    
        const preview = await state.piratesV6Contract.previewExecuteAttack(targetTokenId, attackIndex);
+       const allowed = !!readTupleValue(preview, "allowed", 1, false);
+       const code = Number(readTupleValue(preview, "code", 0, 0));
+       const stealAmount = readTupleValue(preview, "stealAmount", 3, 0);
    
-       if (!preview.allowed) {
-         setActionMessage(
-           `<span class="error">❌ Execute not allowed. Code: ${preview.code}</span>`
-         );
+       if (!allowed) {
+         setActionMessage(`<span class="error">❌ Execute not allowed. Code: ${code}</span>`);
          return;
        }
    
@@ -1024,7 +1112,7 @@
        await tx.wait();
    
        setActionMessage(
-         `<span class="success">✅ Attack executed! Stolen: ${preview.stealAmount.toString()}</span>`
+         `<span class="success">✅ Attack executed! Stolen: ${stealAmount?.toString ? stealAmount.toString() : String(stealAmount || 0)}</span>`
        );
    
        localStorage.removeItem(getAttackStorageKey(targetTokenId));
@@ -1100,3 +1188,4 @@
        setActionMessage(`<span class="error">❌ ${friendlyErrorMessage(e)}</span>`);
      }
    }
+   

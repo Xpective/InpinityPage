@@ -66,7 +66,10 @@
     "function getPirateBoostExpiry(uint256 tokenId) view returns (uint256)",
     "function roundUpToMinimumOne() view returns (bool)",
     "function paused() view returns (bool)",
-    "function mercenaryContract() view returns (address)"
+    "function farming() view returns (address)",
+    "function inpinityNFT() view returns (address)",
+    "function pitroneToken() view returns (address)",
+    "function mercenary() view returns (address)"
   ];
   
   export const MERCENARY_V4_ABI = [
@@ -80,10 +83,11 @@
     "function cleanExpiredSlot(address user, uint8 slotIndex) external",
     "function cleanExpiredToken(uint256 tokenId) external",
     "function setBastionTitle(string title) external",
+    "function setPiratesContract(address pirates) external",
   
     "function getProtectionLevel(uint256 tokenId) view returns (uint256)",
     "function getProtectionData(uint256 tokenId) view returns (address protector, uint8 slotIndex, bool active, uint256 startTime, uint256 expiry, uint256 cooldownUntil, uint256 emergencyReadyAt, uint256 tier, uint256 protectionPercent)",
-    "function getWalletSlots(address user) view returns (uint8 unlockedSlots, tuple(uint256 tokenId, uint64 startTime, uint64 expiry, uint64 cooldownUntil, uint64 emergencyReadyAt, uint8 protectionTier, bool active)[3] data)",    
+    "function getWalletSlots(address user) view returns (uint8 unlockedSlots, tuple(uint256 tokenId, uint64 startTime, uint64 expiry, uint64 cooldownUntil, uint64 emergencyReadyAt, uint8 protectionTier, bool active)[3] data)",
     "function getDefenderProfile(address user) view returns (uint256 points, uint8 rank, uint256 discountBps, uint256 protectedDays, uint256 defenses, uint256 extensionsCount, uint256 cleanups, string title)",
     "function getRank(address user) view returns (uint8 rank, string name)",
     "function getProtectionCost(address user, uint8 durationDays, bool payInINPI, bool isExtension) view returns (uint256 inpiCost, uint256 oilCost, uint256 lemonsCost, uint256 ironCost, uint256 rankDiscountBps, uint256 totalDiscountBps)",
@@ -102,6 +106,11 @@
     "function slotsUnlockedCount(address) view returns (uint256)",
     "function treasury() view returns (address)",
     "function piratesContract() view returns (address)",
+    "function inpiToken() view returns (address)",
+    "function inpinityNFT() view returns (address)",
+    "function resourceToken() view returns (address)",
+    "function TITLE_MIN_POINTS() view returns (uint256)",
+    "function MAX_TITLE_LENGTH() view returns (uint256)",
   
     "event ProtectionSet(address indexed user, uint8 indexed slotIndex, uint256 indexed tokenId, uint8 tier, uint64 startTime, uint64 expiry)",
     "event ProtectionExtended(address indexed user, uint8 indexed slotIndex, uint256 indexed tokenId, uint64 oldExpiry, uint64 newExpiry, uint256 discountBps)",
@@ -165,3 +174,4 @@
     "function MYSTERIUM() view returns (uint256)",
     "function AETHER() view returns (uint256)"
   ];
+  

@@ -30,6 +30,10 @@
      HELPERS
      ========================================================= */
   
+  function setHtml(el, html) {
+    if (el) el.innerHTML = html;
+  }
+  
   function setButtonVisualState(buttonId, enabled, enabledText = null, disabledText = null) {
     const btn = byId(buttonId);
     if (!btn) return;
@@ -115,7 +119,9 @@
       } else {
         localStorage.setItem(STORAGE_ATTACKER_TOKEN_KEY, String(tokenId));
       }
-    } catch {}
+    } catch {
+      // ignore storage failures
+    }
   }
   
   function readPersistedAttackerTokenId() {
@@ -136,14 +142,24 @@
     ];
   }
   
+  function toSafeNumber(value, fallback = 0) {
+    const normalized = value?.toString ? value.toString() : value;
+    const n = Number(normalized);
+    return Number.isFinite(n) ? n : fallback;
+  }
+  
+  function toSafeBool(value) {
+    return value === true || value === "true" || value === 1 || value === "1";
+  }
+  
   async function getOwnedTokenIds() {
     if (!state.userAddress) return [];
   
-    const collected = [];
-  
     if (Array.isArray(state.userBlocks) && state.userBlocks.length) {
-      collected.push(...state.userBlocks.map(String));
+      return uniqueTokenIds(state.userBlocks.map(String)).sort((a, b) => Number(a) - Number(b));
     }
+  
+    const collected = [];
   
     if (state.nftContract) {
       try {
@@ -163,11 +179,17 @@
       }
     }
   
-    return uniqueTokenIds(collected);
+    return uniqueTokenIds(collected).sort((a, b) => Number(a) - Number(b));
   }
   
   async function isOwnedToken(tokenId) {
-    if (!tokenId || !state.userAddress || !state.nftContract) return false;
+    if (!tokenId || !state.userAddress) return false;
+  
+    if (Array.isArray(state.userBlocks) && state.userBlocks.length) {
+      return state.userBlocks.map(String).includes(String(tokenId));
+    }
+  
+    if (!state.nftContract) return false;
   
     try {
       const owner = await state.nftContract.ownerOf(tokenId);
@@ -216,13 +238,14 @@
     const msg = getAttackMessageDiv();
     const attackBtn = byId("attackBtn");
   
-    if (msg) {
-      msg.innerHTML = `
+    setHtml(
+      msg,
+      `
         <span class="success">
           <a href="${getMapAttackUrl()}" style="color:#d4af37; text-decoration:underline;">Open Map Attack View</a>
         </span>
-      `;
-    }
+      `
+    );
   
     if (attackBtn) {
       attackBtn.textContent = "🗺️ Open Pyramid Map";
@@ -240,7 +263,7 @@
       select.innerHTML = `<option value="">Connect wallet first…</option>`;
     }
   
-    if (msg) msg.innerHTML = "";
+    setHtml(msg, "");
   
     setSelectedAttackAttackerTokenId(null);
     persistSelectedAttackerTokenId(null);
@@ -389,6 +412,16 @@
   
     if (!msgDiv) return;
   
+    if (!state.userAddress) {
+      setHtml(msgDiv, `<span class="error">❌ Wallet not connected.</span>`);
+      return;
+    }
+  
+    if (!state.pitroneContract || !state.piratesV6Contract) {
+      setHtml(msgDiv, `<span class="error">❌ Pirate boost contracts not initialized.</span>`);
+      return;
+    }
+  
     let days = parseInt(daysInput?.value, 10);
     if (!Number.isFinite(days)) days = 7;
     days = Math.max(1, Math.min(PIRATE_BOOST_MAX_DAYS, days));
@@ -396,7 +429,7 @@
     try {
       const attackerTokenId = await getValidAttackerTokenId({ allowFallback: false });
       if (!attackerTokenId) {
-        msgDiv.innerHTML = `<span class="error">❌ Select a valid attacker block first.</span>`;
+        setHtml(msgDiv, `<span class="error">❌ Select a valid attacker block first.</span>`);
         setButtonVisualState("buyPirateBoostBtn", false, "Buy Pirate Boost", "Buy Pirate Boost");
         return;
       }
@@ -412,13 +445,16 @@
       );
   
       if (allowance.lt(totalCostWei)) {
-        msgDiv.innerHTML = `
-          <span class="success">
-            ⏳ Approving PITRONE...<br>
-            Block: #${attackerTokenId}<br>
-            Cost: ${totalCostHuman} PIT
-          </span>
-        `;
+        setHtml(
+          msgDiv,
+          `
+            <span class="success">
+              ⏳ Approving PITRONE...<br>
+              Block: #${attackerTokenId}<br>
+              Cost: ${totalCostHuman} PIT
+            </span>
+          `
+        );
   
         const approveTx = await state.pitroneContract.approve(
           state.piratesV6Contract.address,
@@ -427,15 +463,18 @@
         await approveTx.wait();
       }
   
-      msgDiv.innerHTML = `
-        <span class="success">
-          ⏳ Buying Pirate Boost...<br>
-          Block: #${attackerTokenId}<br>
-          Days: ${days}<br>
-          Cost: ${totalCostHuman} PIT<br>
-          Effect: +25 percentage points steal bonus
-        </span>
-      `;
+      setHtml(
+        msgDiv,
+        `
+          <span class="success">
+            ⏳ Buying Pirate Boost...<br>
+            Block: #${attackerTokenId}<br>
+            Days: ${days}<br>
+            Cost: ${totalCostHuman} PIT<br>
+            Effect: +25 percentage points steal bonus
+          </span>
+        `
+      );
   
       const tx = await state.piratesV6Contract.buyPirateBoost(attackerTokenId, days, {
         gasLimit: 350000
@@ -443,22 +482,26 @@
   
       await tx.wait();
   
-      msgDiv.innerHTML = `
-        <span class="success">
-          ✅ Pirate Boost activated!<br>
-          Block: #${attackerTokenId}<br>
-          Days: ${days}<br>
-          Paid: ${totalCostHuman} PIT
-        </span>
-      `;
+      setHtml(
+        msgDiv,
+        `
+          <span class="success">
+            ✅ Pirate Boost activated!<br>
+            Block: #${attackerTokenId}<br>
+            Days: ${days}<br>
+            Paid: ${totalCostHuman} PIT
+          </span>
+        `
+      );
   
       await updateBalances();
       await loadResourceBalancesOnchain();
       await loadUserAttacks();
+      await refreshAttackDropdown();
       refreshBlockMarkings();
     } catch (e) {
       console.error("buyPirateBoost error:", e);
-      msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+      setHtml(msgDiv, `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`);
     } finally {
       setButtonBusy("buyPirateBoostBtn", false);
     }
@@ -502,42 +545,96 @@
   
     try {
       const subgraphAttacks = await loadMyAttacksV6FromSubgraph(state.userAddress);
-      const validatedAttacks = [];
+      const now = Math.floor(Date.now() / 1000);
+      const seen = new Set();
   
-      for (const a of subgraphAttacks || []) {
-        try {
-          const targetId = parseInt(a.targetTokenId, 10);
-          const attackIdx = parseInt(a.attackIndex, 10);
-  
-          const onChainAttack = await state.piratesV6Contract.getAttack(targetId, attackIdx);
-          const normalized = normalizeAttackTuple(onChainAttack);
-  
-          if (!normalized.executed && !normalized.cancelled) {
-            validatedAttacks.push({
-              id: a.id,
-              targetTokenId: targetId,
-              attackerTokenId: normalized.attackerTokenId,
-              attackIndex: attackIdx,
-              startTime: normalized.startTime,
-              endTime: normalized.endTime,
-              executed: normalized.executed,
-              cancelled: normalized.cancelled,
-              resource: normalized.resource
-            });
+      const parsedAttacks = (subgraphAttacks || [])
+        .map((a) => ({
+          id: a?.id,
+          targetTokenId: toSafeNumber(a?.targetTokenId, NaN),
+          attackerTokenId: toSafeNumber(
+            a?.attackerTokenId ??
+            a?.attackerBlockId ??
+            a?.attackerToken?.tokenId ??
+            a?.attackerToken?.id ??
+            a?.attacker?.tokenId ??
+            a?.attacker?.id,
+            0
+          ),
+          attackIndex: toSafeNumber(a?.attackIndex, NaN),
+          startTime: toSafeNumber(a?.startTime, 0),
+          endTime: toSafeNumber(a?.endTime, 0),
+          executed: toSafeBool(a?.executed),
+          cancelled: toSafeBool(a?.cancelled),
+          resource: toSafeNumber(a?.resource ?? a?.resourceId, 0)
+        }))
+        .filter((a) => {
+          if (!Number.isFinite(a.targetTokenId) || !Number.isFinite(a.attackIndex)) {
+            return false;
           }
-        } catch (e) {
-          console.warn("Skipping invalid attack:", a.id, e.message);
-        }
-      }
   
-      state.userAttacks = validatedAttacks;
+          if (a.executed || a.cancelled) {
+            return false;
+          }
+  
+          const key = `${a.targetTokenId}:${a.attackIndex}`;
+          if (seen.has(key)) {
+            return false;
+          }
+          seen.add(key);
+          return true;
+        })
+        .sort((a, b) => {
+          const aReady = a.endTime > 0 && a.endTime <= now;
+          const bReady = b.endTime > 0 && b.endTime <= now;
+          if (aReady !== bReady) return aReady ? -1 : 1;
+          return a.endTime - b.endTime;
+        });
+  
+      state.userAttacks = parsedAttacks;
       displayUserAttacks();
       refreshBlockMarkings();
       startAttacksTicker();
   
+      const readyAttacks = parsedAttacks
+        .filter((a) => a.endTime > 0 && a.endTime <= now)
+        .slice(0, 8);
+  
+      for (const attack of readyAttacks) {
+        try {
+          const onChainAttack = await state.piratesV6Contract.getAttack(
+            attack.targetTokenId,
+            attack.attackIndex
+          );
+  
+          const normalized = normalizeAttackTuple(onChainAttack);
+  
+          if (normalized.executed || normalized.cancelled) {
+            state.userAttacks = state.userAttacks.filter(
+              (x) =>
+                !(
+                  Number(x.targetTokenId) === Number(attack.targetTokenId) &&
+                  Number(x.attackIndex) === Number(attack.attackIndex)
+                )
+            );
+          } else if (!attack.attackerTokenId && Number(normalized.attackerTokenId || 0) > 0) {
+            attack.attackerTokenId = Number(normalized.attackerTokenId || 0);
+          }
+        } catch (e) {
+          console.warn(
+            "Ready-attack validation skipped:",
+            attack?.id || `${attack.targetTokenId}:${attack.attackIndex}`,
+            e
+          );
+        }
+      }
+  
+      displayUserAttacks();
+      refreshBlockMarkings();
+  
       if (state.selectedBlock?.tokenId) {
         const selectedTokenId = Number(state.selectedBlock.tokenId);
-        const matchingAttack = validatedAttacks.find(
+        const matchingAttack = state.userAttacks.find(
           (a) => Number(a.targetTokenId) === selectedTokenId
         );
   
@@ -580,11 +677,13 @@
     container.innerHTML = state.userAttacks
       .map((attack) => {
         const timeLeft = attack.endTime - now;
+        const resourceLabel = resourceNames[attack.resource] || `Resource ${attack.resource}`;
+  
         return `
           <div class="attack-item" data-endtime="${attack.endTime}" data-targetid="${attack.targetTokenId}" data-attackindex="${attack.attackIndex}">
             <div>
-              <div><strong>Target #${attack.targetTokenId}</strong> (${resourceNames[attack.resource]})</div>
-              <div>From attacker #${attack.attackerTokenId}</div>
+              <div><strong>Target #${attack.targetTokenId}</strong> (${resourceLabel})</div>
+              <div>From attacker #${attack.attackerTokenId || "—"}</div>
               <div class="attack-status" data-endtime="${attack.endTime}">
                 ${timeLeft <= 0 ? "Ready to execute" : "⏳ " + formatTime(timeLeft) + " remaining"}
               </div>
@@ -600,7 +699,7 @@
       })
       .join("");
   
-    document.querySelectorAll(".execute-btn").forEach((btn) => {
+    container.querySelectorAll(".execute-btn").forEach((btn) => {
       btn.addEventListener("click", async () => {
         const targetTokenId = parseInt(btn.dataset.targetid, 10);
         const attackIndex = parseInt(btn.dataset.attackindex, 10);
@@ -608,7 +707,7 @@
       });
     });
   
-    document.querySelectorAll(".cancel-attack-btn").forEach((btn) => {
+    container.querySelectorAll(".cancel-attack-btn").forEach((btn) => {
       btn.addEventListener("click", async () => {
         const targetTokenId = parseInt(btn.dataset.targetid, 10);
         const attackIndex = parseInt(btn.dataset.attackindex, 10);
@@ -673,41 +772,51 @@
     const msgDiv = getAttackMessageDiv();
     if (!msgDiv) return;
   
+    if (!state.userAddress) {
+      setHtml(msgDiv, `<span class="error">❌ Wallet not connected.</span>`);
+      return;
+    }
+  
+    if (!state.piratesV6Contract) {
+      setHtml(msgDiv, `<span class="error">❌ PiratesV6 contract not initialized.</span>`);
+      return;
+    }
+  
     try {
       const liveAttack = await state.piratesV6Contract.getAttack(targetTokenId, attackIndex);
       const normalized = normalizeAttackTuple(liveAttack);
   
       const attackerAddress = normalized.attacker || normalized.attackerAddress || "";
       if (!attackerAddress || attackerAddress.toLowerCase() !== state.userAddress.toLowerCase()) {
-        msgDiv.innerHTML = `<span class="error">❌ Not your attack to cancel.</span>`;
+        setHtml(msgDiv, `<span class="error">❌ Not your attack to cancel.</span>`);
         return;
       }
   
       if (normalized.executed) {
-        msgDiv.innerHTML = `<span class="error">❌ Cannot cancel executed attack.</span>`;
+        setHtml(msgDiv, `<span class="error">❌ Cannot cancel executed attack.</span>`);
         await loadUserAttacks();
         return;
       }
   
       if (normalized.cancelled) {
-        msgDiv.innerHTML = `<span class="error">❌ Attack already cancelled.</span>`;
+        setHtml(msgDiv, `<span class="error">❌ Attack already cancelled.</span>`);
         await loadUserAttacks();
         return;
       }
   
-      msgDiv.innerHTML = `<span class="success">⏳ Cancelling attack...</span>`;
+      setHtml(msgDiv, `<span class="success">⏳ Cancelling attack...</span>`);
       const tx = await state.piratesV6Contract.cancelOwnPendingAttack(targetTokenId, attackIndex, {
         gasLimit: 300000
       });
       await tx.wait();
   
-      msgDiv.innerHTML = `<span class="success">✅ Attack cancelled.</span>`;
+      setHtml(msgDiv, `<span class="success">✅ Attack cancelled.</span>`);
       await loadUserAttacks();
       refreshBlockMarkings();
       await refreshAttackDropdown();
     } catch (e) {
       console.error("cancelAttack error:", e);
-      msgDiv.innerHTML = `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`;
+      setHtml(msgDiv, `<span class="error">❌ ${friendlyErrorMessage(e)}</span>`);
     }
   }
   
@@ -716,5 +825,6 @@
      ========================================================= */
   
   export async function attack() {
-    window.location.href = "map.html#attack";
+    window.location.href = getMapAttackUrl();
   }
+  
