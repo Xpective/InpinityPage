@@ -62,7 +62,9 @@ function setActionMessage(html) {
 }
 
 function friendlyErrorMessage(e) {
-  const msg = e?.reason || e?.errorName || e?.data?.message || e?.message || "Transaction failed";
+  const errorName = e?.errorName || e?.error?.errorName || e?.data?.errorName || "";
+  const errorArgs = e?.errorArgs || e?.error?.errorArgs || e?.data?.errorArgs || null;
+  const msg = e?.reason || errorName || e?.data?.message || e?.message || "Transaction failed";
   const lower = String(msg).toLowerCase();
 
   if (
@@ -93,6 +95,29 @@ function friendlyErrorMessage(e) {
 
   if (lower.includes("already known")) {
     return "This transaction is already known by the network.";
+  }
+
+  if (String(errorName).toLowerCase() === "movecooldownactive") {
+    const until = Number(errorArgs?.untilTimestamp ?? errorArgs?.[1] ?? 0);
+    if (until > 0) {
+      return `Move cooldown is still active until ${new Date(until * 1000).toLocaleString()}.`;
+    }
+    return "Move cooldown is still active for the selected slot.";
+  }
+
+  if (String(errorName).toLowerCase() === "emergencymovenotready") {
+    const readyAt = Number(errorArgs?.readyAt ?? errorArgs?.[1] ?? 0);
+    if (readyAt > 0) {
+      return `Emergency move becomes available at ${new Date(readyAt * 1000).toLocaleString()}.`;
+    }
+    return "Emergency move is not ready yet for the selected slot.";
+  }
+
+  if (String(errorName).toLowerCase() === "invalidtitlelength") {
+    const length = Number(errorArgs?.length ?? errorArgs?.[0] ?? 0);
+    return length > 0
+      ? `The Bastion Title length (${length}) is outside the allowed range.`
+      : "The Bastion Title length is outside the allowed range.";
   }
 
   const customErrorMap = [
@@ -250,6 +275,32 @@ function isProtectionActiveNow(protectionData, now = Math.floor(Date.now() / 100
   return !!protectionData?.active && Number(protectionData?.expiry || 0) > now;
 }
 
+
+function parseAttackStartedFromReceipt(receipt) {
+  if (!receipt?.logs || !state.piratesV6Contract?.interface) return null;
+
+  for (const log of receipt.logs) {
+    try {
+      const parsed = state.piratesV6Contract.interface.parseLog(log);
+      if (parsed?.name !== "AttackStarted") continue;
+
+      return {
+        attackIndex: Number(parsed.args?.attackIndex ?? 0),
+        attacker: parsed.args?.attacker || null,
+        attackerTokenId: Number(parsed.args?.attackerTokenId ?? 0),
+        targetTokenId: Number(parsed.args?.targetTokenId ?? 0),
+        resource: Number(parsed.args?.resource ?? 0),
+        startTime: Number(parsed.args?.startTime ?? 0),
+        endTime: Number(parsed.args?.endTime ?? 0)
+      };
+    } catch {
+      // ignore unrelated logs
+    }
+  }
+
+  return null;
+}
+
 async function requireOwnedSelectedToken(msgDiv = null) {
   if (!mapState.selectedTokenId) {
     setHtml(msgDiv, `<span class="error">❌ No block selected.</span>`);
@@ -377,7 +428,7 @@ export async function updateMapMercenaryCostPreview() {
 }
 
 async function refreshAfterTx(options = {}) {
-  const forceFresh = !!options.forceFresh;
+  const forceFresh = options.forceFresh !== undefined ? !!options.forceFresh : true;
 
   await loadMapData({ forceFresh });
   await loadMapUserResources({ forceFresh });
@@ -402,7 +453,7 @@ async function sendTx(txPromise, successMsg) {
     await tx.wait();
 
     setActionMessage(`<span class="success">✅ ${successMsg}</span>`);
-    await refreshAfterTx();
+    await refreshAfterTx({ forceFresh: true });
   } catch (err) {
     console.error("map action tx error:", err);
     setActionMessage(`<span class="error">❌ ${friendlyErrorMessage(err)}</span>`);
@@ -1191,18 +1242,29 @@ export async function handleAttack() {
     const tx = await state.piratesV6Contract.startAttack(attackerTokenId, targetTokenIdNum, resource, {
       gasLimit: 450000
     });
-    await tx.wait();
+    const receipt = await tx.wait();
+
+    const emittedAttack = parseAttackStartedFromReceipt(receipt);
+    const nowSec = Math.floor(Date.now() / 1000);
+    const pendingAttack = {
+      id: emittedAttack?.attackIndex >= 0
+        ? `local:${targetTokenIdNum}:${Number(emittedAttack.attackIndex)}`
+        : `local:${targetTokenIdNum}:${nowSec}`,
+      targetTokenId: targetTokenIdNum,
+      attackerTokenId: Number(emittedAttack?.attackerTokenId || attackerTokenId),
+      attackIndex: Number.isFinite(Number(emittedAttack?.attackIndex)) ? Number(emittedAttack.attackIndex) : null,
+      startTime: Number(emittedAttack?.startTime || nowSec),
+      endTime: Number(emittedAttack?.endTime || (nowSec + Math.max(1, travelTime))),
+      resource,
+      localPending: true,
+      receiptHash: receipt?.transactionHash || null
+    };
 
     setHtml(actionMessage, `<span class="success">✅ Attack launched!</span>`);
 
     localStorage.setItem(
       getAttackStorageKey(targetTokenIdNum),
-      JSON.stringify({
-        targetTokenId: targetTokenIdNum,
-        attackerTokenId,
-        resource,
-        startTime: Math.floor(Date.now() / 1000)
-      })
+      JSON.stringify(pendingAttack)
     );
 
     await loadMapUserAttacks({ forceFresh: true });
@@ -1375,6 +1437,8 @@ export async function cancelAttack(targetTokenId, attackIndex) {
     displayMapUserAttacks();
 
     setActionMessage(`<span class="success">✅ Attack cancelled.</span>`);
+
+    localStorage.removeItem(getAttackStorageKey(targetIdNum));
 
     await refreshAfterTx({ forceFresh: true });
   } catch (e) {

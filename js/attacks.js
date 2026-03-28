@@ -174,6 +174,58 @@ function toSafeBool(value) {
   return value === true || value === "true" || value === 1 || value === "1";
 }
 
+
+function getAttackStorageKey(targetTokenId) {
+  return `attack_${targetTokenId}`;
+}
+
+function loadPendingLocalAttackObjects() {
+  if (typeof localStorage === "undefined") return [];
+
+  const attacks = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (!key || !key.startsWith("attack_")) continue;
+
+    try {
+      const raw = JSON.parse(localStorage.getItem(key) || "null");
+      if (!raw || typeof raw !== "object") continue;
+      attacks.push(raw);
+    } catch {
+      // ignore malformed local placeholders
+    }
+  }
+
+  return attacks;
+}
+
+function normalizePendingLocalAttack(raw) {
+  const targetTokenId = toSafeNumber(raw?.targetTokenId, NaN);
+  const attackerTokenId = toSafeNumber(raw?.attackerTokenId, 0);
+  const attackIndex = raw?.attackIndex === null || raw?.attackIndex === undefined || raw?.attackIndex === ""
+    ? null
+    : toSafeNumber(raw?.attackIndex, NaN);
+  const startTime = toSafeNumber(raw?.startTime, 0);
+  const endTime = toSafeNumber(raw?.endTime, 0);
+  const resource = toSafeNumber(raw?.resource, 0);
+
+  if (!Number.isFinite(targetTokenId) || !attackerTokenId || !endTime) return null;
+
+  return {
+    id: raw?.id || `local:${targetTokenId}:${Number.isFinite(attackIndex) ? attackIndex : startTime}`,
+    targetTokenId,
+    attackerTokenId,
+    attackIndex: Number.isFinite(attackIndex) ? attackIndex : null,
+    startTime,
+    endTime,
+    executed: false,
+    cancelled: false,
+    resource,
+    localPending: true,
+    receiptHash: raw?.receiptHash || null
+  };
+}
+
 async function getOwnedTokenIds() {
   if (!state.userAddress) return [];
 
@@ -570,7 +622,7 @@ export async function loadUserAttacks() {
     const now = Math.floor(Date.now() / 1000);
     const seen = new Set();
 
-    const parsedAttacks = (subgraphAttacks || [])
+    const remoteAttacks = (subgraphAttacks || [])
       .map((a) => ({
         id: a?.id,
         targetTokenId: toSafeNumber(a?.targetTokenId, NaN),
@@ -588,7 +640,8 @@ export async function loadUserAttacks() {
         endTime: toSafeNumber(a?.endTime, 0),
         executed: toSafeBool(a?.executed),
         cancelled: toSafeBool(a?.cancelled),
-        resource: toSafeNumber(a?.resource ?? a?.resourceId, 0)
+        resource: toSafeNumber(a?.resource ?? a?.resourceId, 0),
+        localPending: false
       }))
       .filter((a) => {
         if (!Number.isFinite(a.targetTokenId) || !Number.isFinite(a.attackIndex)) {
@@ -605,11 +658,29 @@ export async function loadUserAttacks() {
         }
         seen.add(key);
         return true;
-      })
+      });
+
+    const remoteKeys = new Set(remoteAttacks.map((a) => `${a.targetTokenId}:${a.attackIndex}`));
+    const pendingLocalAttacks = loadPendingLocalAttackObjects()
+      .map(normalizePendingLocalAttack)
+      .filter(Boolean)
+      .filter((a) => {
+        const key = a.attackIndex !== null ? `${a.targetTokenId}:${a.attackIndex}` : `${a.targetTokenId}:local`;
+        if (a.attackIndex !== null && remoteKeys.has(`${a.targetTokenId}:${a.attackIndex}`)) {
+          localStorage.removeItem(getAttackStorageKey(a.targetTokenId));
+          return false;
+        }
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+
+    const parsedAttacks = [...pendingLocalAttacks, ...remoteAttacks]
       .sort((a, b) => {
         const aReady = a.endTime > 0 && a.endTime <= now;
         const bReady = b.endTime > 0 && b.endTime <= now;
         if (aReady !== bReady) return aReady ? -1 : 1;
+        if (!!a.localPending !== !!b.localPending) return a.localPending ? -1 : 1;
         return a.endTime - b.endTime;
       });
 
@@ -619,7 +690,7 @@ export async function loadUserAttacks() {
     startAttacksTicker();
 
     const readyAttacks = parsedAttacks
-      .filter((a) => a.endTime > 0 && a.endTime <= now)
+      .filter((a) => Number.isFinite(Number(a.attackIndex)) && a.endTime > 0 && a.endTime <= now)
       .slice(0, 8);
 
     for (const attack of readyAttacks) {
@@ -833,6 +904,7 @@ export async function cancelAttack(targetTokenId, attackIndex) {
     await tx.wait();
 
     setHtml(msgDiv, `<span class="success">✅ Attack cancelled.</span>`);
+    localStorage.removeItem(getAttackStorageKey(targetTokenId));
     await loadUserAttacks();
     refreshBlockMarkings();
     await refreshAttackDropdown();

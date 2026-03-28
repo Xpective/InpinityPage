@@ -742,9 +742,12 @@
      const ready = timeLeft <= 0;
      const resourceLabel = resourceNames[attack.resource] || `Resource ${attack.resource}`;
 
+     const canAct = Number.isFinite(Number(attack.attackIndex)) && Number(attack.attackIndex) >= 0;
+     const syncingLabel = attack.localPending ? `<span style="font-size:0.75rem; color:#d4af37;">syncing…</span>` : "";
+
      return `
        <div class="attack-item" data-targetid="${attack.targetTokenId}" data-attackindex="${attack.attackIndex}">
-         <span>#${attack.targetTokenId} (${resourceLabel})</span>
+         <span>#${attack.targetTokenId} (${resourceLabel}) ${syncingLabel}</span>
          <span class="attack-status" data-endtime="${attack.endTime}" style="${ready ? "color:#51cf66;" : ""}">
            ${ready ? "Ready" : "⏳ " + formatTime(timeLeft)}
          </span>
@@ -753,16 +756,17 @@
              class="execute-btn"
              data-attackid="${attack.id}"
              data-targetid="${attack.targetTokenId}"
-             data-attackindex="${attack.attackIndex}"
+             data-attackindex="${attack.attackIndex ?? ""}"
              data-resource="${attack.resource}"
-             title="${ready ? "Execute attack" : "Attack not ready yet"}"
-             ${ready ? "" : "disabled"}
-           >${ready ? "⚔️" : "⏳"}</button>
+             title="${canAct ? (ready ? "Execute attack" : "Attack not ready yet") : "Waiting for attack sync"}"
+             ${ready && canAct ? "" : "disabled"}
+           >${ready && canAct ? "⚔️" : "⏳"}</button>
            <button
              class="cancel-attack-btn"
              data-targetid="${attack.targetTokenId}"
-             data-attackindex="${attack.attackIndex}"
-             title="Cancel attack"
+             data-attackindex="${attack.attackIndex ?? ""}"
+             title="${canAct ? "Cancel attack" : "Waiting for attack sync"}"
+             ${canAct ? "" : "disabled"}
            >✖️</button>
          </div>
        </div>
@@ -803,9 +807,11 @@
          const statusEl = attackRow?.querySelector(".attack-status");
          const endTime = parseInt(statusEl?.dataset.endtime || "0", 10);
          const timeLeft = endTime - now;
+         const attackIndex = btn.dataset.attackindex;
+         const canAct = attackIndex !== undefined && attackIndex !== null && attackIndex !== "";
    
-         btn.disabled = timeLeft > 0;
-         btn.textContent = timeLeft <= 0 ? "⚔️" : "⏳";
+         btn.disabled = timeLeft > 0 || !canAct;
+         btn.textContent = timeLeft <= 0 && canAct ? "⚔️" : "⏳";
        });
      }, 1000);
    }

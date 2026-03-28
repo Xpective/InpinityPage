@@ -42,7 +42,11 @@ export const FARMING_V6_ABI = [
   "function previewStealV6(uint256 targetTokenId, uint8 resourceId, uint256 percentBps, bool roundUpToMinimumOne) view returns ((uint8 code, bool allowed, uint256 pendingAmount, uint256 stealAmount, uint256 travelTime, uint256 remainingAttacksToday, uint256 protectionLevel, uint256 effectiveStealPercent, uint256 secondsRemaining, uint256 attackerTokenId))",
   "function getFarmActiveUntil(uint256 tokenId) view returns (uint256)",
   "function isFarmEffectivelyActive(uint256 tokenId) view returns (bool)",
-  "function paused() view returns (bool)"
+  "function paused() view returns (bool)",
+  "function partnershipContract() view returns (address)",
+  "function treasury() view returns (address)",
+  "function inpiPool() view returns (address)",
+  "function pitronePool() view returns (address)"
 ];
 
 export const PIRATES_V6_ABI = [
@@ -69,7 +73,10 @@ export const PIRATES_V6_ABI = [
   "function farming() view returns (address)",
   "function inpinityNFT() view returns (address)",
   "function pitroneToken() view returns (address)",
-  "function mercenary() view returns (address)"
+  "function mercenary() view returns (address)",
+  "function treasury() view returns (address)",
+  "function pitronePool() view returns (address)",
+  "function inpiPool() view returns (address)"
 ];
 
 export const MERCENARY_V4_ABI = [

@@ -68,6 +68,59 @@ function getProtectionFlags(token, now = Math.floor(Date.now() / 1000)) {
   };
 }
 
+const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
+
+async function getLiveProtectionSnapshot(tokenId) {
+  if (!state.mercenaryV4Contract || !tokenId) return null;
+
+  try {
+    const raw = await state.mercenaryV4Contract.getProtectionData(tokenId);
+    const protector = String(readTupleValue(raw, "protector", 0, ZERO_ADDRESS) || ZERO_ADDRESS);
+    const slotIndex = Number(readTupleValue(raw, "slotIndex", 1, 0));
+    const active = !!readTupleValue(raw, "active", 2, false);
+    const startTime = Number(readTupleValue(raw, "startTime", 3, 0));
+    const expiry = Number(readTupleValue(raw, "expiry", 4, 0));
+    const cooldownUntil = Number(readTupleValue(raw, "cooldownUntil", 5, 0));
+    const emergencyReadyAt = Number(readTupleValue(raw, "emergencyReadyAt", 6, 0));
+    const tier = Number(readTupleValue(raw, "tier", 7, 0));
+    const protectionPercent = Number(readTupleValue(raw, "protectionPercent", 8, 0));
+    const exists = (protector && protector !== ZERO_ADDRESS) || expiry > 0 || active;
+
+    return {
+      exists,
+      protector,
+      slotIndex,
+      active,
+      startTime,
+      expiry,
+      cooldownUntil,
+      emergencyReadyAt,
+      tier,
+      protectionPercent
+    };
+  } catch {
+    return null;
+  }
+}
+
+function buildProtectionViewToken(token, liveProtection) {
+  if (!liveProtection) return token;
+
+  return {
+    ...token,
+    protectionUser: liveProtection.exists && liveProtection.protector !== ZERO_ADDRESS
+      ? liveProtection.protector
+      : null,
+    protectionSlotIndex: liveProtection.exists ? liveProtection.slotIndex : 0,
+    protectionActive: !!liveProtection.active,
+    protectionExpiry: Number(liveProtection.expiry || 0),
+    protectionTier: Number(liveProtection.tier || 0),
+    protectionLevel: Number(liveProtection.protectionPercent || 0),
+    protectionCooldownUntil: Number(liveProtection.cooldownUntil || 0),
+    protectionEmergencyReadyAt: Number(liveProtection.emergencyReadyAt || 0)
+  };
+}
+
 function setButtonState(el, enabled) {
   if (!el) return;
   el.disabled = !enabled;
@@ -623,10 +676,12 @@ export async function updateSidebar(tokenId) {
   }
 
   const now = Math.floor(Date.now() / 1000);
+  const liveProtection = token?.owner ? await getLiveProtectionSnapshot(mapState.selectedTokenId) : null;
+  const protectionViewToken = buildProtectionViewToken(token, liveProtection);
   const {
     hasActiveProtection,
     hasExpiredProtection
-  } = getProtectionFlags(token, now);
+  } = getProtectionFlags(protectionViewToken, now);
 
   let v5Active = !!token?.farmV5Active;
   let v6Active = false;
@@ -643,20 +698,20 @@ export async function updateSidebar(tokenId) {
   let protectionOwnerTxt = "-";
 
   if (hasActiveProtection) {
-    protectionTxt = `active for ${formatDuration(Number(token?.protectionExpiry || 0) - now)}`;
-    protectionLevelTxt = `${Number(token?.protectionLevel || 0)}%`;
-    protectionTierTxt = getProtectionTierLabel(token?.protectionTier);
-    protectionSlotTxt = `${Number(token?.protectionSlotIndex || 0) + 1}`;
-    protectionOwnerTxt = token?.protectionUser
-      ? shortenAddress(token.protectionUser)
+    protectionTxt = `active for ${formatDuration(Number(protectionViewToken?.protectionExpiry || 0) - now)}`;
+    protectionLevelTxt = `${Number(protectionViewToken?.protectionLevel || 0)}%`;
+    protectionTierTxt = getProtectionTierLabel(protectionViewToken?.protectionTier);
+    protectionSlotTxt = `${Number(protectionViewToken?.protectionSlotIndex || 0) + 1}`;
+    protectionOwnerTxt = protectionViewToken?.protectionUser
+      ? shortenAddress(protectionViewToken.protectionUser)
       : (owner ? shortenAddress(owner) : "-");
   } else if (hasExpiredProtection) {
     protectionTxt = "expired";
-    protectionLevelTxt = `${Number(token?.protectionLevel || 0)}%`;
-    protectionTierTxt = getProtectionTierLabel(token?.protectionTier);
-    protectionSlotTxt = `${Number(token?.protectionSlotIndex || 0) + 1}`;
-    protectionOwnerTxt = token?.protectionUser
-      ? shortenAddress(token.protectionUser)
+    protectionLevelTxt = `${Number(protectionViewToken?.protectionLevel || 0)}%`;
+    protectionTierTxt = getProtectionTierLabel(protectionViewToken?.protectionTier);
+    protectionSlotTxt = `${Number(protectionViewToken?.protectionSlotIndex || 0) + 1}`;
+    protectionOwnerTxt = protectionViewToken?.protectionUser
+      ? shortenAddress(protectionViewToken.protectionUser)
       : (owner ? shortenAddress(owner) : "-");
   }
 
@@ -778,7 +833,7 @@ export async function updateSidebar(tokenId) {
   clearActionArea();
   populateAttackerSelect();
   updateMercenaryProfileDisplay();
-  setProtectionInfoText(token, now);
+  setProtectionInfoText(protectionViewToken, now);
 
   if (farmBoostStatusEl) {
     farmBoostStatusEl.innerText = v6Active
