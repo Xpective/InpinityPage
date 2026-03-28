@@ -20,6 +20,7 @@ import {
   loadMapData,
   loadMapUserResources,
   loadMapUserAttacks,
+  displayMapUserAttacks,
   getPreferredAttackerTokenId,
   normalizeAttackTuple,
   dismissAttackById,
@@ -118,7 +119,13 @@ function friendlyErrorMessage(e) {
     ["invalidresource", "The selected resource is invalid."],
     ["tokendoesnotexist", "One of the selected blocks does not exist."],
     ["selfattack", "You cannot attack your own block."],
-    ["nothingtoclaim", "There is nothing claimable right now."]
+    ["nothingtoclaim", "There is nothing claimable right now."],
+    ["invalidattackindex", "This attack index is invalid or no longer exists."],
+    ["attackalreadyexecuted", "This attack has already been executed."],
+    ["invaliddaysamount", "The selected boost duration is invalid."],
+    ["invalidaddress", "A required on-chain address is invalid or not configured correctly."],
+    ["notenoughbalance", "Your token balance is too low for this action."],
+    ["enforcedpause", "This contract action is currently paused on-chain."]
   ];
 
   for (const [needle, human] of customErrorMap) {
@@ -369,10 +376,12 @@ export async function updateMapMercenaryCostPreview() {
   }
 }
 
-async function refreshAfterTx() {
-  await loadMapData();
-  await loadMapUserResources();
-  await loadMapUserAttacks();
+async function refreshAfterTx(options = {}) {
+  const forceFresh = !!options.forceFresh;
+
+  await loadMapData({ forceFresh });
+  await loadMapUserResources({ forceFresh });
+  await loadMapUserAttacks({ forceFresh });
 
   if (mapState.selectedTokenId) {
     await updateSidebar(mapState.selectedTokenId);
@@ -1196,8 +1205,8 @@ export async function handleAttack() {
       })
     );
 
-    await loadMapUserAttacks();
-    await loadMapData();
+    await loadMapUserAttacks({ forceFresh: true });
+    await loadMapData({ forceFresh: true });
     await refreshSelectedTargetAttackPreview();
   } catch (e) {
     console.error("handleAttack error:", e);
@@ -1248,14 +1257,14 @@ export async function executeAttack(attack) {
     if (normalized.executed) {
       setActionMessage(`<span class="error">❌ Attack already executed.</span>`);
       if (attack.id) dismissAttackById(attack.id);
-      await loadMapUserAttacks();
+      await loadMapUserAttacks({ forceFresh: true });
       return;
     }
 
     if (normalized.cancelled) {
       setActionMessage(`<span class="error">❌ Attack was already cancelled.</span>`);
       if (attack.id) dismissAttackById(attack.id);
-      await loadMapUserAttacks();
+      await loadMapUserAttacks({ forceFresh: true });
       return;
     }
 
@@ -1290,6 +1299,9 @@ export async function executeAttack(attack) {
 
     await tx.wait();
 
+    mapState.userAttacks = (mapState.userAttacks || []).filter((x) => !(Number(x.targetTokenId) === targetTokenId && Number(x.attackIndex) === attackIndex));
+    displayMapUserAttacks();
+
     setActionMessage(
       `<span class="success">✅ Attack executed! Stolen: ${stealAmount?.toString ? stealAmount.toString() : String(stealAmount || 0)}</span>`
     );
@@ -1297,7 +1309,7 @@ export async function executeAttack(attack) {
     localStorage.removeItem(getAttackStorageKey(targetTokenId));
     if (attack.id) dismissAttackById(attack.id);
 
-    await refreshAfterTx();
+    await refreshAfterTx({ forceFresh: true });
   } catch (e) {
     console.error("executeAttack error:", e);
     setActionMessage(`<span class="error">❌ ${friendlyErrorMessage(e)}</span>`);
@@ -1359,9 +1371,12 @@ export async function cancelAttack(targetTokenId, attackIndex) {
 
     await tx.wait();
 
+    mapState.userAttacks = (mapState.userAttacks || []).filter((x) => !(Number(x.targetTokenId) === targetIdNum && Number(x.attackIndex) === attackIdxNum));
+    displayMapUserAttacks();
+
     setActionMessage(`<span class="success">✅ Attack cancelled.</span>`);
 
-    await refreshAfterTx();
+    await refreshAfterTx({ forceFresh: true });
   } catch (e) {
     console.error("cancelAttack error:", e);
     setActionMessage(`<span class="error">❌ ${friendlyErrorMessage(e)}</span>`);

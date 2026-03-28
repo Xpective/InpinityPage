@@ -653,102 +653,122 @@
       ========================================================= */
    
    export async function loadMapUserAttacks(options = {}) {
-     ensureMapCaches();
-   
-     const forceFresh = !!options.forceFresh;
-   
-     if (!state.userAddress) return;
-     if (shouldSkipByTtl(mapState.lastUserAttacksLoadAt, MAP_ATTACKS_TTL_MS, forceFresh)) {
-       displayMapUserAttacks();
-       return;
-     }
-   
-     try {
-       const attacks = await fetchAllWithPagination(
-         "attackV6S",
-         "id attacker attackerTokenId targetTokenId attackIndex startTime endTime resource executed cancelled protectionLevel effectiveStealPercent stolenAmount",
-         `{ attacker: "${state.userAddress.toLowerCase()}" }`,
-         {
-           cacheTtlMs: 10_000,
-           forceFresh
-         }
-       );
-   
-       const dismissed = loadDismissedAttacks();
-   
-       mapState.userAttacks = (attacks || [])
-         .map((a) => ({
-           id: a.id,
-           targetTokenId: safeParseInt(a.targetTokenId, 0),
-           attackerTokenId: safeParseInt(a.attackerTokenId, 0),
-           attackIndex: safeParseInt(a.attackIndex, 0),
-           startTime: safeParseInt(a.startTime, 0),
-           endTime: safeParseInt(a.endTime, 0),
-           executed: !!a.executed,
-           cancelled: !!a.cancelled,
-           resource: safeParseInt(a.resource, 0),
-           protectionLevel: a.protectionLevel ? safeParseInt(a.protectionLevel, 0) : 0,
-           effectiveStealPercent: a.effectiveStealPercent ? safeParseInt(a.effectiveStealPercent, 0) : 0,
-           stolenAmount: a.stolenAmount ? a.stolenAmount.toString() : "0"
-         }))
-         .filter((a) => !a.executed && !a.cancelled && !dismissed.has(a.id));
-   
-       mapState.lastUserAttacksLoadAt = nowMs();
-   
-       displayMapUserAttacks();
-       startMapAttacksTicker();
-       drawPyramid();
-     } catch (e) {
-       console.error("loadMapUserAttacks error:", e);
-     }
+   ensureMapCaches();
+
+   const forceFresh = !!options.forceFresh;
+
+   if (!state.userAddress) return;
+   if (shouldSkipByTtl(mapState.lastUserAttacksLoadAt, MAP_ATTACKS_TTL_MS, forceFresh)) {
+     displayMapUserAttacks();
+     return;
    }
+
+   try {
+     const attacks = await fetchAllWithPagination(
+       "attackV6S",
+       "id attacker attackerTokenId targetTokenId attackIndex startTime endTime resource executed cancelled protectionLevel effectiveStealPercent stolenAmount",
+       `{ attacker: "${state.userAddress.toLowerCase()}" }`,
+       {
+         cacheTtlMs: 10_000,
+         forceFresh
+       }
+     );
+
+     const dismissed = loadDismissedAttacks();
+     const seen = new Set();
+     const now = Math.floor(Date.now() / 1000);
+
+     mapState.userAttacks = (attacks || [])
+       .map((a) => ({
+         id: a.id,
+         targetTokenId: safeParseInt(a.targetTokenId, 0),
+         attackerTokenId: safeParseInt(a.attackerTokenId, 0),
+         attackIndex: safeParseInt(a.attackIndex, 0),
+         startTime: safeParseInt(a.startTime, 0),
+         endTime: safeParseInt(a.endTime, 0),
+         executed: !!a.executed,
+         cancelled: !!a.cancelled,
+         resource: safeParseInt(a.resource, 0),
+         protectionLevel: a.protectionLevel ? safeParseInt(a.protectionLevel, 0) : 0,
+         effectiveStealPercent: a.effectiveStealPercent ? safeParseInt(a.effectiveStealPercent, 0) : 0,
+         stolenAmount: a.stolenAmount ? a.stolenAmount.toString() : "0"
+       }))
+       .filter((a) => {
+         if (!a.id || !a.targetTokenId) return false;
+         if (a.executed || a.cancelled) return false;
+         if (dismissed.has(a.id)) return false;
+
+         const key = `${a.targetTokenId}:${a.attackIndex}`;
+         if (seen.has(key)) return false;
+         seen.add(key);
+         return true;
+       })
+       .sort((a, b) => {
+         const aReady = a.endTime > 0 && a.endTime <= now;
+         const bReady = b.endTime > 0 && b.endTime <= now;
+         if (aReady !== bReady) return aReady ? -1 : 1;
+         if (a.endTime !== b.endTime) return a.endTime - b.endTime;
+         return a.targetTokenId - b.targetTokenId;
+       });
+
+     mapState.lastUserAttacksLoadAt = nowMs();
+
+     displayMapUserAttacks();
+     startMapAttacksTicker();
+     drawPyramid();
+   } catch (e) {
+     console.error("loadMapUserAttacks error:", e);
+   }
+ }
    
    export function displayMapUserAttacks() {
-     const { userAttacksList } = getMapDom();
-     if (!userAttacksList) return;
-   
-     if (!state.userAddress) {
-       userAttacksList.innerHTML = `<p style="color:#98a9b9;">Connect wallet</p>`;
-       return;
-     }
-   
-     if (!mapState.userAttacks.length) {
-       userAttacksList.innerHTML = `<p style="color:#98a9b9;">No active attacks</p>`;
-       return;
-     }
-   
-     const now = Math.floor(Date.now() / 1000);
-   
-     userAttacksList.innerHTML = mapState.userAttacks.map((attack) => {
-       const timeLeft = attack.endTime - now;
-       const ready = timeLeft <= 0;
-   
-       return `
-         <div class="attack-item">
-           <span>#${attack.targetTokenId} (${resourceNames[attack.resource]})</span>
-           <span class="attack-status" data-endtime="${attack.endTime}" style="${ready ? "color:#51cf66;" : ""}">
-             ${ready ? "Ready" : "⏳ " + formatTime(timeLeft)}
-           </span>
-           <div class="attack-actions">
-             <button
-               class="execute-btn"
-               data-attackid="${attack.id}"
-               data-targetid="${attack.targetTokenId}"
-               data-attackindex="${attack.attackIndex}"
-               data-resource="${attack.resource}"
-               ${ready ? "" : "disabled"}
-             >${ready ? "⚔️" : "⏳"}</button>
-             <button
-               class="cancel-attack-btn"
-               data-targetid="${attack.targetTokenId}"
-               data-attackindex="${attack.attackIndex}"
-               title="Cancel attack"
-             >✖️</button>
-           </div>
-         </div>
-       `;
-     }).join("");
+   const { userAttacksList } = getMapDom();
+   if (!userAttacksList) return;
+
+   if (!state.userAddress) {
+     userAttacksList.innerHTML = `<p style="color:#98a9b9;">Connect wallet</p>`;
+     return;
    }
+
+   if (!mapState.userAttacks.length) {
+     userAttacksList.innerHTML = `<p style="color:#98a9b9;">No active attacks</p>`;
+     return;
+   }
+
+   const now = Math.floor(Date.now() / 1000);
+
+   userAttacksList.innerHTML = mapState.userAttacks.map((attack) => {
+     const timeLeft = attack.endTime - now;
+     const ready = timeLeft <= 0;
+     const resourceLabel = resourceNames[attack.resource] || `Resource ${attack.resource}`;
+
+     return `
+       <div class="attack-item" data-targetid="${attack.targetTokenId}" data-attackindex="${attack.attackIndex}">
+         <span>#${attack.targetTokenId} (${resourceLabel})</span>
+         <span class="attack-status" data-endtime="${attack.endTime}" style="${ready ? "color:#51cf66;" : ""}">
+           ${ready ? "Ready" : "⏳ " + formatTime(timeLeft)}
+         </span>
+         <div class="attack-actions">
+           <button
+             class="execute-btn"
+             data-attackid="${attack.id}"
+             data-targetid="${attack.targetTokenId}"
+             data-attackindex="${attack.attackIndex}"
+             data-resource="${attack.resource}"
+             title="${ready ? "Execute attack" : "Attack not ready yet"}"
+             ${ready ? "" : "disabled"}
+           >${ready ? "⚔️" : "⏳"}</button>
+           <button
+             class="cancel-attack-btn"
+             data-targetid="${attack.targetTokenId}"
+             data-attackindex="${attack.attackIndex}"
+             title="Cancel attack"
+           >✖️</button>
+         </div>
+       </div>
+     `;
+   }).join("");
+ }
    
    export function getUserAttacks() {
      return mapState.userAttacks;

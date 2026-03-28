@@ -37,8 +37,8 @@ export const FARMING_V6_ABI = [
   "function hasBoost(uint256 tokenId) view returns (bool)",
   "function isFarmOwner(uint256 tokenId, address user) view returns (bool)",
 
-  "function previewClaim(uint256 tokenId) view returns ((uint8 code, bool allowed, uint256 pendingAmount, uint256 secondsRemaining))",
-  "function previewSteal(uint256 targetTokenId, uint8 resourceId, uint256 percentBps) view returns ((uint8 code, bool allowed, uint256 pendingAmount, uint256 stealAmount, uint256 travelTime, uint256 remainingAttacksToday, uint256 protectionLevel, uint256 effectiveStealPercent, uint256 secondsRemaining))",
+  "function previewClaim(uint256 tokenId) view returns ((uint8 code, bool allowed, uint256 pendingAmount, uint256 travelTime, uint256 remainingAttacksToday, uint256 protectionLevel, uint256 effectiveStealPercent, uint256 secondsRemaining))",
+  "function previewSteal(uint256 targetTokenId, uint8 resourceId, uint256 percentBps) view returns ((uint8 code, bool allowed, uint256 pendingAmount, uint256 travelTime, uint256 remainingAttacksToday, uint256 protectionLevel, uint256 effectiveStealPercent, uint256 secondsRemaining))",
   "function previewStealV6(uint256 targetTokenId, uint8 resourceId, uint256 percentBps, bool roundUpToMinimumOne) view returns ((uint8 code, bool allowed, uint256 pendingAmount, uint256 stealAmount, uint256 travelTime, uint256 remainingAttacksToday, uint256 protectionLevel, uint256 effectiveStealPercent, uint256 secondsRemaining, uint256 attackerTokenId))",
   "function getFarmActiveUntil(uint256 tokenId) view returns (uint256)",
   "function isFarmEffectivelyActive(uint256 tokenId) view returns (bool)",

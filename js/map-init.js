@@ -18,10 +18,11 @@
      initMapReadOnly,
      loadMapData,
      loadMapUserResources,
-     loadMapUserAttacks
+     loadMapUserAttacks,
+     getAllMapTokens
    } from "./map-data.js";
    import { bindMapRenderEvents, resizeCanvas, drawPyramid } from "./map-render.js";
-   import { refreshSelectedTargetAttackPreview } from "./map-selection.js";
+   import { refreshSelectedTargetAttackPreview, updateSidebar } from "./map-selection.js";
    import { initMapUI, populateAttackerSelect } from "./map-ui.js";
    import {
      handleReveal,
@@ -147,6 +148,98 @@
      mapState.isLoadingUserResources = false;
      mapState.isLoadingUserAttacks = false;
    }
+
+   /* =========================================================
+      ATTACK DEEP LINK HELPERS
+      ========================================================= */
+
+   function readAttackDeepLink() {
+     try {
+       const params = new URLSearchParams(window.location.search || "");
+
+       const attacker = params.get("attacker");
+       const targetTokenId = params.get("targetTokenId");
+       const attackIndex = params.get("attackIndex");
+
+       const parsed = {
+         attacker: attacker && /^\d+$/.test(attacker) ? String(attacker) : null,
+         targetTokenId: targetTokenId && /^\d+$/.test(targetTokenId) ? Number(targetTokenId) : null,
+         attackIndex: attackIndex && /^\d+$/.test(attackIndex) ? Number(attackIndex) : null
+       };
+
+       if (!parsed.attacker && parsed.targetTokenId === null && parsed.attackIndex === null) {
+         return null;
+       }
+
+       return parsed;
+     } catch {
+       return null;
+     }
+   }
+
+   function clearAttackDeepLinkFocus() {
+     document.querySelectorAll(".attack-item.attack-deeplink-focus").forEach((el) => {
+       el.classList.remove("attack-deeplink-focus");
+       el.style.outline = "";
+       el.style.boxShadow = "";
+     });
+   }
+
+   function highlightDeepLinkedAttack(targetTokenId, attackIndex) {
+     if (!Number.isFinite(Number(targetTokenId)) || !Number.isFinite(Number(attackIndex))) return false;
+
+     clearAttackDeepLinkFocus();
+
+     const row = document
+       .querySelector(`.execute-btn[data-targetid="${Number(targetTokenId)}"][data-attackindex="${Number(attackIndex)}"]`)
+       ?.closest(".attack-item");
+
+     if (!row) return false;
+
+     row.classList.add("attack-deeplink-focus");
+     row.style.outline = "1px solid #d4af37";
+     row.style.boxShadow = "0 0 0 1px rgba(212,175,55,0.25)";
+     row.scrollIntoView({ behavior: "smooth", block: "center" });
+     return true;
+   }
+
+   async function applyAttackDeepLinkContext() {
+     const ctx = readAttackDeepLink();
+     if (!ctx) return;
+
+     mapState.pendingAttackDeepLink = ctx;
+
+     if (ctx.attacker) {
+       mapState.selectedAttackAttackerTokenId = String(ctx.attacker);
+     }
+
+     const tokens = getAllMapTokens();
+     if (ctx.targetTokenId !== null && tokens[String(ctx.targetTokenId)]) {
+       await updateSidebar(String(ctx.targetTokenId));
+     }
+
+     requestAnimationFrame(() => {
+       const matched = ctx.targetTokenId !== null && ctx.attackIndex !== null
+         ? highlightDeepLinkedAttack(ctx.targetTokenId, ctx.attackIndex)
+         : false;
+
+       const deepLinkMessage = byId("mapAttackDeepLinkMessage");
+       if (deepLinkMessage) {
+         deepLinkMessage.style.display = "block";
+         deepLinkMessage.innerHTML = ctx.targetTokenId !== null && ctx.attackIndex !== null
+           ? (matched
+               ? `<span class="success">🗺️ Loaded target #${ctx.targetTokenId}, attack index ${ctx.attackIndex}. Use ⚔️ to execute if the attack is ready.</span>`
+               : `<span class="success">🗺️ Loaded target #${ctx.targetTokenId}, attack index ${ctx.attackIndex}. If the row is not visible yet, refresh once or wait a few seconds for subgraph sync.</span>`)
+           : `<span class="success">🗺️ Loaded target #${ctx.targetTokenId}.</span>`;
+       }
+
+       if (window.location.hash === "#attack") {
+         const attackInput = byId("attackInput");
+         const userAttacksList = byId("userAttacksList");
+         (attackInput || userAttacksList)?.scrollIntoView({ behavior: "smooth", block: "center" });
+       }
+     });
+   }
    
    /* =========================================================
       POLLERS
@@ -242,7 +335,8 @@
    
        drawPyramid();
        startMapPollers();
-   
+       await applyAttackDeepLinkContext();
+
        debugLog("Map wallet connected", state.userAddress);
      } catch (err) {
        alert("Connection error: " + (err?.reason || err?.message || err));
@@ -325,8 +419,10 @@
    
          if (state.userAddress) {
            await guardedLoadMapUserResources();
-           await guardedLoadMapUserAttacks();
+           await loadMapUserAttacks({ forceFresh: true });
          }
+
+         await applyAttackDeepLinkContext();
        } catch (err) {
          debugLog("visibility refresh failed", err?.message || err);
        }
@@ -425,4 +521,5 @@
      await guardedLoadMapData();
      populateAttackerSelect();
      drawPyramid();
+     await applyAttackDeepLinkContext();
    }
