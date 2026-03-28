@@ -22,7 +22,7 @@
     content="Explore the Inpinity Pyramid Map, inspect blocks, farming, Mercenary V4 protection and V6 pirate attacks directly on the map."
   />
   <meta name="theme-color" content="#0b0e12" />
-  <script type="module" crossorigin src="/assets/map-D2cx7Ps9.js"></script>
+  <script type="module" crossorigin src="/assets/map-BrXmjR0Q.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/subgraph-Dhvwn9x1.js">
   <link rel="stylesheet" crossorigin href="/assets/map-DfSdLlNQ.css">
@@ -130,6 +130,15 @@
                   </div>
 
                   <div class="detail-row">
+                    <span class="detail-label">Move target</span>
+                    <span class="detail-value">
+                      <select id="moveProtectionTargetTokenId" style="width:160px;">
+                        <option value="">Choose target block…</option>
+                      </select>
+                    </span>
+                  </div>
+
+                  <div class="detail-row">
                     <span class="detail-label">Slot</span>
                     <span class="detail-value">
                       <select id="protectSlotIndex" style="width:120px;">
@@ -191,19 +200,19 @@
                   </div>
                 </div>
 
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.55rem;">
+                <div style="display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:0.55rem;">
                   <button class="action-btn" id="protectBtn" type="button">Set / Extend</button>
                   <button class="action-btn boost-btn" id="extendProtectionBtn" type="button">Extend</button>
                   <button class="action-btn danger-btn" id="cancelProtectionBtn" type="button">Cancel</button>
                 </div>
 
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.55rem;">
-                  <button class="action-btn" id="moveProtectionBtn" type="button">Move</button>
-                  <button class="action-btn boost-btn" id="emergencyMoveProtectionBtn" type="button">Emergency</button>
-                  <button class="action-btn" id="cleanupProtectionBtn" type="button">Cleanup</button>
+                <div style="display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:0.55rem;">
+                  <button class="action-btn" id="moveProtectionBtn" type="button" disabled>Move</button>
+                  <button class="action-btn boost-btn" id="emergencyMoveProtectionBtn" type="button" disabled>Emergency</button>
+                  <button class="action-btn" id="cleanupProtectionBtn" type="button" disabled>Cleanup</button>
                 </div>
 
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.55rem;">
+                <div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:0.55rem;">
                   <button class="action-btn boost-btn" id="unlockSlot2Btn" type="button">Unlock Slot 2</button>
                   <button class="action-btn boost-btn" id="unlockSlot3Btn" type="button">Unlock Slot 3</button>
                 </div>
