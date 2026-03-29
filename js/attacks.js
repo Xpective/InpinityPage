@@ -30,6 +30,8 @@ import { updateBalances } from "./balances.js";
    HELPERS
    ========================================================= */
 
+const LOCAL_PENDING_ATTACK_MAX_AGE_SEC = 6 * 60 * 60;
+
 function setHtml(el, html) {
   if (el) el.innerHTML = html;
 }
@@ -665,6 +667,13 @@ export async function loadUserAttacks() {
       .map(normalizePendingLocalAttack)
       .filter(Boolean)
       .filter((a) => {
+        const ageSec = Math.max(0, now - Number(a.startTime || 0));
+
+        if (a.localPending && ageSec > LOCAL_PENDING_ATTACK_MAX_AGE_SEC) {
+          localStorage.removeItem(getAttackStorageKey(a.targetTokenId));
+          return false;
+        }
+
         const key = a.attackIndex !== null ? `${a.targetTokenId}:${a.attackIndex}` : `${a.targetTokenId}:local`;
         if (a.attackIndex !== null && remoteKeys.has(`${a.targetTokenId}:${a.attackIndex}`)) {
           localStorage.removeItem(getAttackStorageKey(a.targetTokenId));
@@ -690,7 +699,7 @@ export async function loadUserAttacks() {
     startAttacksTicker();
 
     const readyAttacks = parsedAttacks
-      .filter((a) => Number.isFinite(Number(a.attackIndex)) && a.endTime > 0 && a.endTime <= now)
+      .filter((a) => a.attackIndex !== null && a.attackIndex !== undefined && a.attackIndex !== "" && Number.isFinite(Number(a.attackIndex)) && a.endTime > 0 && a.endTime <= now)
       .slice(0, 8);
 
     for (const attack of readyAttacks) {

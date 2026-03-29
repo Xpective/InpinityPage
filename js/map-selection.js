@@ -450,6 +450,7 @@ export function clearActionArea() {
   const attackInput = byId("attackInput");
   const actionMessage = byId("actionMessage");
   const pirateBoostInput = byId("pirateBoostInput");
+  const protectionInput = byId("protectionInput");
   const boostCenter = byId("boostCenter");
   const boostOptions = byId("boostOptions");
   const buyBoostBtn = byId("buyBoostBtn");
@@ -463,6 +464,7 @@ export function clearActionArea() {
 
   setDisplay(attackInput, false);
   setDisplay(pirateBoostInput, false);
+  setDisplay(protectionInput, false);
   setDisplay(boostOptions, false);
   setDisplay(buyBoostBtn, false);
   setDisplay(boostCenter, false);
@@ -656,6 +658,7 @@ export async function updateSidebar(tokenId) {
   const buyBoostBtn = byId("buyBoostBtn");
   const farmBoostStatusEl = byId("farmBoostStatus");
   const pirateBoostInput = byId("pirateBoostInput");
+  const protectionInput = byId("protectionInput");
   const protectTokenId = byId("protectTokenId");
 
   mapState.selectedTokenId = String(tokenId);
@@ -830,7 +833,15 @@ export async function updateSidebar(tokenId) {
     actionPanel.style.display = token?.owner ? "block" : "none";
   }
 
+  if (protectionInput) {
+    protectionInput.style.display = token?.owner ? "block" : "none";
+  }
+
   clearActionArea();
+
+  if (protectionInput && token?.owner) {
+    protectionInput.style.display = "block";
+  }
   populateAttackerSelect();
   updateMercenaryProfileDisplay();
   setProtectionInfoText(protectionViewToken, now);
