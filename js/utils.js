@@ -1,5 +1,5 @@
 /* =========================================================
-   UTILITY FUNCTIONS – V6 + MERCENARY V4
+   UTILITY FUNCTIONS – V6 + MERCENARY V4 (FIXED)
    ========================================================= */
 
    import { state } from "./state.js";
@@ -33,7 +33,6 @@
    export function safeButtonState(id, enabled, enabledOpacity = "1", disabledOpacity = "0.45") {
      const el = byId(id);
      if (!el) return;
-   
      el.disabled = !enabled;
      el.style.opacity = enabled ? enabledOpacity : disabledOpacity;
      el.style.pointerEvents = enabled ? "auto" : "none";
@@ -47,21 +46,17 @@
    
    export function formatTime(seconds) {
      seconds = Math.max(0, Number(seconds || 0));
-   
      if (seconds < 60) return `${seconds}s`;
      if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
-   
      return `${Math.floor(seconds / 3600)}h`;
    }
    
    export function formatDuration(seconds) {
      seconds = Math.max(0, Math.floor(Number(seconds || 0)));
-   
      const d = Math.floor(seconds / 86400);
      const h = Math.floor((seconds % 86400) / 3600);
      const m = Math.floor((seconds % 3600) / 60);
      const s = Math.floor(seconds % 60);
-   
      if (d > 0) return `${d}d ${h}h`;
      if (h > 0) return `${h}h ${m}m`;
      if (m > 0) return `${m}m`;
@@ -112,40 +107,18 @@
    
    export function getProduction(rarity, row) {
      const p = {};
-   
      if (rarity === 0) {
-       p.OIL = 10;
-       p.LEMONS = 5;
-       p.IRON = 3;
+       p.OIL = 10; p.LEMONS = 5; p.IRON = 3;
      } else if (rarity === 1) {
-       p.OIL = 20;
-       p.LEMONS = 10;
-       p.IRON = 6;
-       p.GOLD = 1;
+       p.OIL = 20; p.LEMONS = 10; p.IRON = 6; p.GOLD = 1;
      } else if (rarity === 2) {
-       p.OIL = 30;
-       p.LEMONS = 15;
-       p.IRON = 9;
-       p.GOLD = 2;
-       p.PLATINUM = 1;
+       p.OIL = 30; p.LEMONS = 15; p.IRON = 9; p.GOLD = 2; p.PLATINUM = 1;
      } else if (rarity === 3) {
-       p.OIL = 40;
-       p.LEMONS = 20;
-       p.IRON = 12;
-       p.GOLD = 3;
-       p.PLATINUM = 2;
-       p.CRYSTAL = 1;
+       p.OIL = 40; p.LEMONS = 20; p.IRON = 12; p.GOLD = 3; p.PLATINUM = 2; p.CRYSTAL = 1;
      } else if (rarity === 4) {
-       p.OIL = 60;
-       p.LEMONS = 30;
-       p.IRON = 18;
-       p.GOLD = 5;
-       p.PLATINUM = 3;
-       p.CRYSTAL = 2;
-       p.MYSTERIUM = 1;
+       p.OIL = 60; p.LEMONS = 30; p.IRON = 18; p.GOLD = 5; p.PLATINUM = 3; p.CRYSTAL = 2; p.MYSTERIUM = 1;
        if (Number(row) === 0) p.AETHER = 1;
      }
-   
      return p;
    }
    
@@ -154,7 +127,6 @@
    export function debugLog(message, data = null) {
      const logDiv = byId("debugLog");
      let line = `[${new Date().toLocaleTimeString()}] ${message}`;
-   
      if (data !== null) {
        try {
          line += " " + JSON.stringify(data).slice(0, 500);
@@ -162,11 +134,36 @@
          line += " " + String(data);
        }
      }
-   
      if (logDiv) {
        logDiv.innerHTML = line + "\n" + logDiv.innerHTML;
      }
-   
      console.log(message, data);
    }
    
+   /* ==================== 🧠 NEUE SICHERE HELFER (Fix) ==================== */
+   
+   /**
+    * Konvertiert beliebige Subgraph-Antwort sicher in ein Array.
+    * Verhindert .items-Abhängigkeit und null/undefined.
+    */
+   export function safeArray(data) {
+     if (!data) return [];
+     if (Array.isArray(data)) return data;
+     // Rückwärtskompatibilität für alte .items-Strukturen
+     if (data.items && Array.isArray(data.items)) return data.items;
+     return [];
+   }
+   
+   /**
+    * Normalisiert die gesamte Subgraph-Antwort auf definierte Arrays.
+    * Verwendet die korrekten Feldnamen (farmV6, attackV6, etc.)
+    */
+   export function normalizeSubgraph(data) {
+     return {
+       tokens: safeArray(data?.tokens),
+       farms: safeArray(data?.farmV6),
+       attacks: safeArray(data?.attackV6),
+       mercenaries: safeArray(data?.mercenarySlotV4),
+       protections: safeArray(data?.mercenaryTokenProtectionV4)
+     };
+   }

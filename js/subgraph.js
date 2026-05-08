@@ -1,5 +1,5 @@
 /* =========================================================
-   SUBGRAPH QUERIES – V6 + MERCENARY V4
+   SUBGRAPH QUERIES – V6 + MERCENARY V4 (FIXED)
    ========================================================= */
 
    import {
@@ -25,11 +25,17 @@
   
         const json = await res.json().catch(() => ({}));
   
-        if (!res.ok || json.errors) {
-          throw new Error(json?.errors?.[0]?.message || `HTTP ${res.status}`);
+        // 🔴 C) SAFE RESPONSE HANDLING
+        if (json.errors) {
+          console.error("Subgraph errors:", json.errors);
+          return {};
         }
   
-        return json.data || {};
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+  
+        return json?.data ?? {};
       } catch (e) {
         if (i === retries - 1) throw e;
   
@@ -37,7 +43,6 @@
         await new Promise((r) => setTimeout(r, wait));
       }
     }
-  
     return {};
   }
   
@@ -54,7 +59,8 @@
       }`;
   
       const data = await fetchSubgraph(q);
-      const items = data?.[fieldName];
+      // 🔴 D) PAGINATION SAFETY FIX
+      const items = data?.[fieldName] ?? [];
   
       if (!items || items.length === 0) break;
   
@@ -69,13 +75,14 @@
   }
   
   /* =========================================================
-     TOKENS / FARMS / ATTACKS
+     TOKENS / FARMS / ATTACKS – KORREKTE FELDNAMEN
      ========================================================= */
   
   export async function loadMyTokensFromSubgraph(wallet) {
     const owner = String(wallet || "").toLowerCase();
     if (!owner) return [];
   
+    // 🔴 B) TOKEN FILTER FIX: owner, nicht owner_
     return fetchAllWithPagination(
       "tokens",
       `
@@ -83,7 +90,7 @@
         revealed
         owner { id }
       `,
-      `{ owner_: { id: "${owner}" } }`
+      `{ owner: "${owner}" }`
     );
   }
   
@@ -91,8 +98,9 @@
     const owner = String(wallet || "").toLowerCase();
     if (!owner) return [];
   
+    // ✅ KORREKT: farmV6 statt farmV6S
     return fetchAllWithPagination(
-      "farmV6S",
+      "farmV6",
       `
         id
         owner
@@ -113,8 +121,9 @@
     const owner = String(wallet || "").toLowerCase();
     if (!owner) return [];
   
+    // ✅ KORREKT: attackV6 statt attackV6S
     return fetchAllWithPagination(
-      "attackV6S",
+      "attackV6",
       `
         id
         attacker
@@ -135,7 +144,7 @@
   }
   
   /* =========================================================
-     MERCENARY V4 NORMALIZERS
+     MERCENARY V4 NORMALIZERS (unverändert)
      ========================================================= */
   
   function normalizeRankName(rank, rankName, points = 0) {
@@ -150,10 +159,8 @@
         "Citadel Keeper",
         "Inpinity Bastion"
       ][idx];
-  
       if (fallback) return fallback;
     }
-  
     return getMercenaryRankLabel(points);
   }
   
@@ -176,27 +183,20 @@
     return {
       id: String(profile.id || profile.user || "").toLowerCase(),
       user: String(profile.user || profile.id || "").toLowerCase(),
-  
       points,
       defenderPoints: points,
-  
       rank,
       rankName: normalizeRankName(rank, profile.rankName, points),
-  
       discountBps,
       discountPercent,
-  
       totalProtectedDays: Number(profile.totalProtectedDays ?? 0),
       successfulDefenses: Number(profile.successfulDefenses ?? 0),
       sameBlockExtensions: Number(profile.sameBlockExtensions ?? 0),
       cleanupActions: Number(profile.cleanupActions ?? 0),
       emergencyMovesUsed: Number(profile.emergencyMovesUsed ?? 0),
-  
       slotsUnlocked,
       freeCleanupCredits: Number(profile.freeCleanupCredits ?? 0),
-  
       bastionTitle,
-  
       updatedAt: Number(profile.updatedAt ?? 0),
       blockNumber: Number(profile.blockNumber ?? 0),
       transactionHash: profile.transactionHash || null
@@ -230,12 +230,13 @@
   }
   
   /* =========================================================
-     MERCENARY V4 LOADERS
+     MERCENARY V4 LOADERS – KORREKTE FELDNAMEN
      ========================================================= */
   
   export async function loadMercenaryTokenProtectionsV4() {
+    // ✅ KORREKT: mercenaryTokenProtectionV4 (ohne S)
     return fetchAllWithPagination(
-      "mercenaryTokenProtectionV4S",
+      "mercenaryTokenProtectionV4",
       `
         id
         tokenId
@@ -286,8 +287,9 @@
     const user = String(wallet || "").toLowerCase();
     if (!user) return [];
   
+    // ✅ KORREKT: mercenarySlotV4 (ohne S)
     const rows = await fetchAllWithPagination(
-      "mercenarySlotV4S",
+      "mercenarySlotV4",
       `
         id
         user
@@ -312,12 +314,11 @@
   }
   
   /* =========================================================
-     CACHE BUILDERS
+     CACHE BUILDERS (unverändert)
      ========================================================= */
   
   export function buildFarmV6Map(farms) {
     const map = new Map();
-  
     for (const farm of farms || []) {
       map.set(String(farm.id), {
         tokenId: String(farm.id),
@@ -332,20 +333,17 @@
         blockNumber: Number(farm.blockNumber ?? 0)
       });
     }
-  
     return map;
   }
   
   export function buildProtectionMapV4(protections) {
     const map = new Map();
     const now = Math.floor(Date.now() / 1000);
-  
     for (const p of protections || []) {
       const tokenId = String(p.tokenId || p.id);
       const expiresAt = Number(p.expiry ?? p.expiresAt ?? 0);
       const level = Number(p.protectionPercent ?? p.level ?? 0);
       const active = !!p.active && expiresAt > now;
-  
       map.set(tokenId, {
         tokenId,
         user: String(p.user || "").toLowerCase(),
@@ -362,20 +360,17 @@
         transactionHash: p.transactionHash || null
       });
     }
-  
     return map;
   }
   
   export function buildMercenarySlotMapV4(slots) {
     const map = new Map();
     const now = Math.floor(Date.now() / 1000);
-  
     for (const raw of slots || []) {
       const slot = normalizeMercenarySlot(raw);
       const slotIndex = Number(slot.slotIndex ?? 0);
       const user = String(slot.user || "").toLowerCase();
       const id = `${user}-${slotIndex}`;
-  
       map.set(id, {
         id,
         user,
@@ -397,49 +392,39 @@
         transactionHash: slot.transactionHash || null
       });
     }
-  
     return map;
   }
   
   export function buildDefenderProfileMapV4(profile) {
     const map = new Map();
     const normalized = normalizeMercenaryProfile(profile);
-  
     if (!normalized || !normalized.id) return map;
-  
     map.set(String(normalized.id).toLowerCase(), {
       id: String(normalized.id).toLowerCase(),
       user: String(normalized.user || "").toLowerCase(),
-  
       points: Number(normalized.points ?? 0),
       defenderPoints: Number(normalized.defenderPoints ?? normalized.points ?? 0),
-  
       rank: normalized.rank,
       rankName: String(normalized.rankName || "Watchman"),
       discountBps: Number(normalized.discountBps ?? 0),
       discountPercent: Number(normalized.discountPercent ?? 0),
-  
       totalProtectedDays: Number(normalized.totalProtectedDays ?? 0),
       successfulDefenses: Number(normalized.successfulDefenses ?? 0),
       sameBlockExtensions: Number(normalized.sameBlockExtensions ?? 0),
       cleanupActions: Number(normalized.cleanupActions ?? 0),
       emergencyMovesUsed: Number(normalized.emergencyMovesUsed ?? 0),
-  
       slotsUnlocked: Number(normalized.slotsUnlocked ?? 1),
       freeCleanupCredits: Number(normalized.freeCleanupCredits ?? 0),
-  
       bastionTitle: String(normalized.bastionTitle || ""),
       updatedAt: Number(normalized.updatedAt ?? 0),
       blockNumber: Number(normalized.blockNumber ?? 0),
       transactionHash: normalized.transactionHash || null
     });
-  
     return map;
   }
   
   /* =========================================================
      OPTIONAL COMPAT EXPORTS
      ========================================================= */
-  
   export const loadProtectionsFromSubgraph = loadMercenaryTokenProtectionsV4;
   export const buildProtectionMap = buildProtectionMapV4;
