@@ -1,5 +1,5 @@
 /* =========================================================
-   STATE MANAGEMENT – V6 / MERCENARY V4 (FIXED)
+   STATE MANAGEMENT – V6 / MERCENARY V4
    ========================================================= */
 
    export const state = {
@@ -40,7 +40,7 @@
     selectedMercenaryDurationDays: 7,
     selectedMercenaryPayInINPI: false,
   
-    /* ==================== SUBGRAPH / CACHES (immer Arrays) ==================== */
+    /* ==================== SUBGRAPH / CACHES ==================== */
     cachedFarmsV6: [],
     cachedProtectionsV4: [],
     cachedMercenarySlotsV4: [],
@@ -61,26 +61,31 @@
     uiBlockStatus: {
       isOwner: false,
       isRevealed: false,
+  
       farmActive: false,
       farmLegacyActive: false,
       claimReady: false,
       claimCooldownSeconds: 0,
       hasPendingRewards: false,
+  
       canStartFarm: false,
       canStopFarm: false,
       canClaim: false,
       canBuyFarmBoost: false,
+  
       protectionActive: false,
       protectionExpired: false,
       protectionSlotCount: 1,
       selectedProtectionSlot: 0,
       canUseSlot2: false,
       canUseSlot3: false,
+  
       defenderPoints: 0,
       defenderRank: "Watchman",
       defenderDiscountPercent: 0,
       nextRankAt: 100,
       canSetBastionTitle: false,
+  
       canAttackFromSelectedBlock: false
     },
   
@@ -91,6 +96,7 @@
       farmingStop: false,
       claim: false,
       farmBoost: false,
+  
       setProtection: false,
       extendProtection: false,
       cancelProtection: false,
@@ -100,6 +106,7 @@
       unlockSlot3: false,
       cleanup: false,
       saveTitle: false,
+  
       pirateAttack: false,
       pirateBoost: false
     }
@@ -113,26 +120,31 @@
     return {
       isOwner: false,
       isRevealed: false,
+  
       farmActive: false,
       farmLegacyActive: false,
       claimReady: false,
       claimCooldownSeconds: 0,
       hasPendingRewards: false,
+  
       canStartFarm: false,
       canStopFarm: false,
       canClaim: false,
       canBuyFarmBoost: false,
+  
       protectionActive: false,
       protectionExpired: false,
       protectionSlotCount: 1,
       selectedProtectionSlot: 0,
       canUseSlot2: false,
       canUseSlot3: false,
+  
       defenderPoints: 0,
       defenderRank: "Watchman",
       defenderDiscountPercent: 0,
       nextRankAt: 100,
       canSetBastionTitle: false,
+  
       canAttackFromSelectedBlock: false
     };
   }
@@ -144,6 +156,7 @@
       farmingStop: false,
       claim: false,
       farmBoost: false,
+  
       setProtection: false,
       extendProtection: false,
       cancelProtection: false,
@@ -153,6 +166,7 @@
       unlockSlot3: false,
       cleanup: false,
       saveTitle: false,
+  
       pirateAttack: false,
       pirateBoost: false
     };
@@ -199,15 +213,18 @@
       profile?.totalPoints ??
       0
     );
+  
     const rank =
       profile?.rankName ??
       profile?.rank ??
       deriveDefenderRank(points);
+  
     const discountPercent = Number(
       profile?.discountPercent ??
       profile?.inpiDiscountPercent ??
       deriveDefenderDiscountPercent(points)
     );
+  
     state.uiBlockStatus.defenderPoints = points;
     state.uiBlockStatus.defenderRank = rank;
     state.uiBlockStatus.defenderDiscountPercent = discountPercent;
@@ -225,6 +242,7 @@
   
   export function deriveDefenderRank(points = 0) {
     const p = Number(points || 0);
+  
     if (p >= 1001) return "Inpinity Bastion";
     if (p >= 600) return "Citadel Keeper";
     if (p >= 250) return "Guardian";
@@ -234,6 +252,7 @@
   
   export function deriveDefenderDiscountPercent(points = 0) {
     const p = Number(points || 0);
+  
     if (p >= 1001) return 10;
     if (p >= 600) return 8;
     if (p >= 250) return 6;
@@ -243,24 +262,10 @@
   
   export function getNextRankThreshold(points = 0) {
     const p = Number(points || 0);
+  
     if (p < 100) return 100;
     if (p < 250) return 250;
     if (p < 600) return 600;
     if (p < 1001) return 1001;
     return 1001;
-  }
-  
-  /* ==================== 🧠 NEUE SICHERE STATE-SETTER (Fix) ==================== */
-  
-  /**
-   * Setzt einen State-Array sicher – verhindert null/undefined.
-   * @param {string} key - Property-Name in state
-   * @param {any} value - potentiell null/undefined
-   */
-  export function safeSetStateArray(key, value) {
-    if (key in state) {
-      state[key] = Array.isArray(value) ? value : [];
-    } else {
-      console.warn(`safeSetStateArray: Ungültiger Schlüssel "${key}"`);
-    }
   }
