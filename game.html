@@ -8,7 +8,6 @@
         savedTheme && ["light", "dark", "basic"].includes(savedTheme)
           ? savedTheme
           : "basic";
-
       document.documentElement.setAttribute("data-theme", theme);
     })();
   </script>
@@ -20,10 +19,7 @@
   <link rel="icon" type="image/png" href="favicon.webp" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto+Mono:wght@400;700&display=swap"
-    rel="stylesheet"
-  />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet" />
 
   <link rel="stylesheet" href="css/base.css" />
   <link rel="stylesheet" href="css/layout.css" />
@@ -34,30 +30,134 @@
   <link rel="stylesheet" href="css/responsive.css" />
   <link rel="stylesheet" href="css/game.css" />
 
-  <meta
-    name="description"
-    content="Manage your Pyramid Blocks, farm resources, protect your territory, review attacks, and trade inside the Inpinity game dashboard."
-  />
-  <meta
-    name="keywords"
-    content="Inpinity, Game, Pyramid, NFT, Base, INPI, Pitrone, Resources, Farming, Pirate Attack, V6, Mercenary V4"
-  />
-  <meta name="author" content="Inpinity Team" />
-  <meta property="og:title" content="Inpinity – Game Dashboard V6 + Mercenary V4" />
-  <meta
-    property="og:description"
-    content="Manage blocks, farming, attack overview, protection, and exchange in the Inpinity ecosystem. Now with V6 contracts and Mercenary V4."
-  />
-  <meta property="og:image" content="logo_background.jpg" />
-  <meta property="og:url" content="https://inpinity.online/game.html" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:site" content="@unxpective" />
-  <meta name="twitter:creator" content="@Inpinity1" />
-  <meta name="theme-color" content="#140f1f" />
-  <meta name="robots" content="index,follow" />
+  <style>
+    /* ==== TUTORIAL + STATUS BAR STYLES ==== */
+    .onboarding-modal {
+      position: fixed; inset: 0; z-index: 9999;
+      display: none; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.75); backdrop-filter: blur(4px);
+      padding: 1rem;
+    }
+    .onboarding-card {
+      background: #1a2430; border: 1px solid #2a3f4a; border-radius: 1rem;
+      max-width: 520px; width: 100%; padding: 2rem;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      position: relative;
+    }
+    .onboarding-dismiss {
+      position: absolute; top: 0.8rem; right: 0.8rem;
+      background: transparent; border: 0; color: #98a9b9;
+      font-size: 1.4rem; cursor: pointer;
+    }
+    .onboarding-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    .onboarding-title { font-size: 1.2rem; margin-bottom: 0.8rem; color: #d4af37; }
+    .onboarding-text { line-height: 1.65; color: #dbe7f3; margin-bottom: 1.5rem; min-height: 80px; }
+    .onboarding-progress-track { height: 4px; background: #2a3f4a; border-radius: 2px; margin-bottom: 1rem; overflow: hidden; }
+    .onboarding-progress-fill { height: 100%; background: #d4af37; transition: width 0.3s ease; }
+    .onboarding-footer { display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; }
+    .onboarding-counter { font-size: 0.8rem; color: #98a9b9; }
+    .onboarding-actions { display: flex; gap: 0.5rem; }
 
-  </head>
+    .status-bar {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.8rem;
+      margin: 1rem 0;
+    }
+    .status-card {
+      background: #0f1a22; border: 1px solid #2a3f4a; border-radius: 0.8rem;
+      padding: 0.8rem 1rem;
+    }
+    .status-card-label { font-size: 0.75rem; color: #98a9b9; text-transform: uppercase; letter-spacing: 0.05em; }
+    .status-card-value { font-size: 1.4rem; font-weight: 700; color: #d4af37; margin-top: 0.3rem; }
+    @media (max-width: 640px) { .status-bar { grid-template-columns: repeat(2, 1fr); } }
+
+    .checklist-card {
+      background: #0f1a22; border: 1px solid #2a3f4a; border-radius: 0.8rem;
+      padding: 1rem 1.2rem; margin: 1rem 0;
+    }
+    .checklist-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
+    .checklist-title { font-weight: 700; color: #d4af37; }
+    .checklist-progress { font-size: 0.85rem; color: #98a9b9; }
+    .checklist-list { display: grid; gap: 0.5rem; }
+    .checklist-item { display: flex; gap: 0.6rem; align-items: center; font-size: 0.9rem; }
+    .checklist-icon { font-size: 1.1rem; }
+
+    .quick-actions {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.8rem; margin: 1rem 0;
+    }
+    .quick-action-card {
+      background: #0f1a22; border: 1px solid #2a3f4a; border-radius: 0.8rem;
+      padding: 1rem; text-align: center; text-decoration: none; color: inherit;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .quick-action-card:hover { border-color: #d4af37; transform: translateY(-2px); }
+    .quick-action-icon { font-size: 1.8rem; margin-bottom: 0.4rem; }
+    .quick-action-title { font-weight: 600; color: #d4af37; margin-bottom: 0.2rem; }
+    .quick-action-desc { font-size: 0.8rem; color: #98a9b9; }
+
+    .section-number {
+      display: inline-block; background: #d4af37; color: #0f1a22;
+      width: 24px; height: 24px; line-height: 24px; text-align: center;
+      border-radius: 50%; font-weight: 700; font-size: 0.8rem; margin-right: 0.5rem;
+    }
+
+    .help-icon {
+      display: inline-block; width: 18px; height: 18px; line-height: 18px;
+      text-align: center; background: #2a3f4a; color: #d4af37;
+      border-radius: 50%; font-size: 0.75rem; cursor: help; margin-left: 0.4rem;
+    }
+    .help-icon:hover { background: #d4af37; color: #0f1a22; }
+
+    .attack-steps {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem;
+      margin: 1rem 0;
+    }
+    .attack-step {
+      background: #0f1a22; border: 1px solid #2a3f4a; border-radius: 0.6rem;
+      padding: 0.8rem; text-align: center;
+    }
+    .attack-step-num {
+      display: inline-block; background: #d4af37; color: #0f1a22;
+      width: 28px; height: 28px; line-height: 28px; border-radius: 50%;
+      font-weight: 700; margin-bottom: 0.4rem;
+    }
+    .attack-step-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 0.3rem; }
+    .attack-step-desc { font-size: 0.78rem; color: #98a9b9; }
+    @media (max-width: 640px) { .attack-steps { grid-template-columns: 1fr; } }
+
+    .farming-timeline {
+      display: flex; gap: 0.5rem; margin: 0.8rem 0; font-size: 0.8rem;
+      align-items: center; flex-wrap: wrap;
+    }
+    .farming-timeline-step {
+      background: #0f1a22; border: 1px solid #2a3f4a; border-radius: 0.5rem;
+      padding: 0.4rem 0.7rem;
+    }
+    .farming-timeline-arrow { color: #d4af37; }
+  </style>
+</head>
 <body>
+  <!-- ========== ONBOARDING MODAL ========== -->
+  <div class="onboarding-modal" id="onboardingModal">
+    <div class="onboarding-card">
+      <button class="onboarding-dismiss" data-onboard-dismiss aria-label="Schließen">×</button>
+      <div class="onboarding-progress-track">
+        <div class="onboarding-progress-fill" data-onboard-progress style="width: 20%;"></div>
+      </div>
+      <div class="onboarding-icon" data-onboard-icon>🦊</div>
+      <div class="onboarding-title" data-onboard-title>Willkommen bei Inpinity</div>
+      <div class="onboarding-text" data-onboard-text>Lade...</div>
+      <div class="onboarding-footer">
+        <span class="onboarding-counter" data-onboard-counter>1 / 5</span>
+        <div class="onboarding-actions">
+          <button class="btn btn-secondary" data-onboard-prev>← Zurück</button>
+          <button class="btn" data-onboard-next>Weiter →</button>
+        </div>
+      </div>
+      <button class="btn btn-secondary" data-onboard-skip style="width:100%;margin-top:0.8rem;">Überspringen</button>
+    </div>
+  </div>
+
   <header class="site-header">
     <nav class="site-nav" aria-label="Main navigation">
       <ul class="nav-list">
@@ -74,7 +174,6 @@
         <li><a href="advertising.html">Advertising</a></li>
         <li><a href="staking.html">Staking</a></li>
       </ul>
-
       <div class="themeDots" aria-label="Theme switcher">
         <button type="button" class="dot light" title="Light Theme" aria-label="Light Theme"></button>
         <button type="button" class="dot dark" title="Dark Theme" aria-label="Dark Theme"></button>
@@ -92,10 +191,12 @@
         </p>
         <h1>Manage your blocks, resources, protection, attacks and exchange in one place.</h1>
         <p class="hero-lead">
-          This dashboard is the central control room for your Pyramid activity. Connect your wallet,
-          reveal and manage blocks, start farming, protect territory, review active pirate attacks, and
+          Connect your wallet, reveal and manage blocks, start farming, protect territory, review active pirate attacks, and
           exchange value inside the ecosystem with the active V6 flow and Mercenary V4 defense system.
         </p>
+        <div style="margin-top:1rem;">
+          <button class="btn btn-small btn-secondary" id="reopenOnboarding" type="button">❓ Anleitung erneut zeigen</button>
+        </div>
       </div>
     </section>
 
@@ -107,7 +208,6 @@
         </div>
         <div class="wallet-address" id="walletAddress">—</div>
       </div>
-
       <div class="wallet-right">
         <div class="balances">
           <div class="balance-item">
@@ -123,10 +223,59 @@
             <span class="balance-value balance-pit" id="balancePit">0 PIT</span>
           </div>
         </div>
-
         <div class="wallet-actions">
           <button class="btn" id="connectWallet" type="button">Connect Wallet</button>
           <button class="btn btn-secondary" id="disconnectWallet" type="button">Disconnect</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== LIVE STATUS BAR ========== -->
+    <section class="status-bar" aria-label="Live Status">
+      <div class="status-card">
+        <div class="status-card-label">🌾 Aktive Farms</div>
+        <div class="status-card-value" id="statusFarms">0</div>
+      </div>
+      <div class="status-card">
+        <div class="status-card-label">📦 Ressourcen-Typen</div>
+        <div class="status-card-value" id="statusResources">0</div>
+      </div>
+      <div class="status-card">
+        <div class="status-card-label">🛡️ Protection</div>
+        <div class="status-card-value" id="statusProtection">—</div>
+      </div>
+      <div class="status-card">
+        <div class="status-card-label">⚔️ Attacks</div>
+        <div class="status-card-value" id="statusAttacks">0</div>
+      </div>
+    </section>
+
+    <!-- ========== ERSTE SCHRITTE CHECKLISTE ========== -->
+    <section class="checklist-card" aria-label="Erste Schritte">
+      <div class="checklist-header">
+        <span class="checklist-title">🚀 Erste Schritte</span>
+        <span class="checklist-progress" id="checklistProgress">0/5</span>
+      </div>
+      <div class="checklist-list">
+        <div class="checklist-item" id="checkWallet">
+          <span class="checklist-icon">⬜</span>
+          <span>Wallet verbinden</span>
+        </div>
+        <div class="checklist-item" id="checkBlock">
+          <span class="checklist-icon">⬜</span>
+          <span>Ersten Block minten</span>
+        </div>
+        <div class="checklist-item" id="checkReveal">
+          <span class="checklist-icon">⬜</span>
+          <span>Block aufdecken (Reveal)</span>
+        </div>
+        <div class="checklist-item" id="checkFarm">
+          <span class="checklist-icon">⬜</span>
+          <span>Farming starten</span>
+        </div>
+        <div class="checklist-item" id="checkProtection">
+          <span class="checklist-icon">⬜</span>
+          <span>Erste Protection setzen</span>
         </div>
       </div>
     </section>
@@ -136,9 +285,9 @@
         <div class="blocks-section">
           <div class="blocks-grid-container">
             <div class="panel-head">
-              <h2 class="section-title">Your Pyramid Blocks</h2>
+              <h2 class="section-title"><span class="section-number">1</span>Your Pyramid Blocks</h2>
               <p class="section-subtitle">
-                View your owned blocks, reveal hidden ones, track rarity, and select one for actions below.
+                Klick auf einen Block, um Aktionen freizuschalten.
                 <span class="action-badge badge-v6-farm">V6 Farming</span>
               </p>
             </div>
@@ -151,11 +300,11 @@
           <div class="block-actions-container" id="blockActionsContainer" style="display:none;">
             <div class="panel-head" style="margin-bottom:1rem;">
               <h3 class="section-title" style="margin-bottom:0.35rem;">
-                <span>⚙️ Block Actions</span>
+                <span class="section-number">2</span>Block Actions
                 <span class="v6-badge">Selected Block</span>
               </h3>
               <p class="section-subtitle">
-                Smart actions, protection, attack flow and exchange tools for the currently selected block.
+                Reveal, Farming, Claim, Boost, Protection und Attack-Flow für den ausgewählten Block.
               </p>
             </div>
 
@@ -185,7 +334,6 @@
               <button class="btn btn-small boost-btn" id="migrateFarmBtn" type="button" style="display:none;">
                 🔄 Migrate selected V5 Farm to V6
               </button>
-
               <button class="btn btn-small boost-btn" id="migrateAllV5Btn" type="button" style="display:none;">
                 🔄 Migrate all V5 Farms to V6
               </button>
@@ -194,18 +342,28 @@
             <details class="game-accordion" id="coreActionsAccordion" open>
               <summary class="game-accordion-summary">
                 <div>
-                  <strong>🧭 Core Block Actions</strong>
+                  <strong><span class="section-number">3</span>Reveal · Farming · Claim</strong>
                   <span class="section-subtitle" style="display:block;">
-                    Reveal, farming and claim flow for the selected block.
+                    So funktioniert der Kern-Zyklus deines Blocks.
                   </span>
                 </div>
                 <span class="v6-badge">CORE</span>
               </summary>
 
               <div class="game-accordion-body">
+                <div class="farming-timeline">
+                  <span class="farming-timeline-step">1. Reveal</span>
+                  <span class="farming-timeline-arrow">→</span>
+                  <span class="farming-timeline-step">2. Start Farming (7 Tage)</span>
+                  <span class="farming-timeline-arrow">→</span>
+                  <span class="farming-timeline-step">3. Alle 24h Claim</span>
+                  <span class="farming-timeline-arrow">→</span>
+                  <span class="farming-timeline-step">4. Boost für +25%</span>
+                </div>
+
                 <div class="action-grid">
                   <div class="action-card" id="revealCard">
-                    <h4>🔓 Reveal</h4>
+                    <h4>🔓 Reveal <span class="help-icon" title="Macht Rarity und Produktionsraten sichtbar. Nur einmal pro Block möglich.">?</span></h4>
                     <div class="action-value" id="revealStatus">Hidden</div>
                     <div id="revealHint" style="margin-top:0.45rem; font-size:0.82rem; color:#98a9b9;">
                       Hidden blocks can be revealed once.
@@ -216,34 +374,22 @@
                   </div>
 
                   <div class="action-card">
-                    <h4>🌾 Farming</h4>
+                    <h4>🌾 Farming <span class="help-icon" title="Start: Block produziert 24/7 Ressourcen. Stop: jederzeit möglich, pausiert Produktion. Farm läuft max 7 Tage.">?</span></h4>
                     <div class="action-value" id="farmingStatus">Inactive</div>
                     <div id="farmingHint" style="margin-top:0.45rem; font-size:0.82rem; color:#98a9b9;">
                       Start farming on your selected block.
                     </div>
-                  
                     <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
-                      <button class="btn btn-small" id="farmingStartBtn" type="button" style="flex:1;" disabled>
-                        Start
-                      </button>
-                      <button class="btn btn-small btn-secondary" id="farmingStopBtn" type="button" style="flex:1;" disabled>
-                        Stop
-                      </button>
+                      <button class="btn btn-small" id="farmingStartBtn" type="button" style="flex:1;" disabled>Start</button>
+                      <button class="btn btn-small btn-secondary" id="farmingStopBtn" type="button" style="flex:1;" disabled>Stop</button>
                     </div>
-                  
-                    <button
-                      class="btn btn-small boost-btn"
-                      id="resetPurchasedFarmBtn"
-                      type="button"
-                      style="width:100%; margin-top:0.5rem; display:none;"
-                      disabled
-                    >
+                    <button class="btn btn-small boost-btn" id="resetPurchasedFarmBtn" type="button" style="width:100%; margin-top:0.5rem; display:none;" disabled>
                       ♻️ Reset Purchased Farm
                     </button>
                   </div>
 
                   <div class="action-card">
-                    <h4>💰 Claim</h4>
+                    <h4>💰 Claim <span class="help-icon" title="Sammelt alle produzierten Ressourcen ein. Cooldown: 24h ab letztem Claim/Start.">?</span></h4>
                     <div class="action-value" id="claimStatus">—</div>
                     <div id="claimHint" style="margin-top:0.45rem; font-size:0.82rem; color:#98a9b9;">
                       Claim becomes available when the cooldown is finished.
@@ -262,33 +408,25 @@
             <details class="game-accordion" id="farmBoostAccordion">
               <summary class="game-accordion-summary">
                 <div>
-                  <strong>⚡ Farm Boost</strong>
+                  <strong><span class="section-number">4</span>⚡ Farm Boost</strong>
                   <span class="section-subtitle" style="display:block;">
-                    Buy temporary farming acceleration for the selected block.
+                    +25% Produktion für 1–10 Tage.
                   </span>
                 </div>
                 <span class="v6-badge" id="farmBoostSummaryState">INACTIVE</span>
               </summary>
-
               <div class="game-accordion-body">
                 <div class="action-grid" style="grid-template-columns:1fr;">
                   <div class="action-card">
                     <h4>⚡ Farm Boost</h4>
                     <div class="action-value" id="boostStatus">Inactive</div>
-
                     <div style="margin-top:0.45rem; font-size:0.82rem; color:#98a9b9; line-height:1.45;">
                       Cost: <strong>100 INPI / day</strong><br />
                       Effect: <strong>+25% production</strong><br />
-                      Farm window: <strong>7 days</strong><br />
-                      Boost contract max: <strong>10 days</strong>
+                      Farm window: <strong>7 days</strong> · Contract max: <strong>10 days</strong>
                     </div>
-
                     <div style="display:flex; gap:0.5rem; margin-top:0.65rem; align-items:center; flex-wrap:wrap;">
-                      <select
-                        id="boostDays"
-                        aria-label="Farm boost days"
-                        style="width:140px; background:#0f1a22; border:1px solid #2a3f4a; color:white; padding:0.45rem; border-radius:0.7rem;"
-                      >
+                      <select id="boostDays" aria-label="Farm boost days" style="width:140px; background:#0f1a22; border:1px solid #2a3f4a; color:white; padding:0.45rem; border-radius:0.7rem;">
                         <option value="1">1 day</option>
                         <option value="2">2 days</option>
                         <option value="3">3 days</option>
@@ -300,15 +438,9 @@
                         <option value="9">9 days</option>
                         <option value="10">10 days</option>
                       </select>
-
-                      <button class="btn btn-small boost-btn" id="buyBoostBtn" type="button" style="flex:1;" disabled>
-                        Buy
-                      </button>
+                      <button class="btn btn-small boost-btn" id="buyBoostBtn" type="button" style="flex:1;" disabled>Buy</button>
                     </div>
-
-                    <div id="boostCostInfo" style="margin-top:0.45rem; font-size:0.82rem; color:#d4af37;">
-                      Total: 700 INPI
-                    </div>
+                    <div id="boostCostInfo" style="margin-top:0.45rem; font-size:0.82rem; color:#d4af37;">Total: 700 INPI</div>
                   </div>
                 </div>
               </div>
@@ -317,9 +449,9 @@
             <details class="game-accordion" id="mercenaryAccordion" open>
               <summary class="game-accordion-summary">
                 <div>
-                  <strong>🛡️ Mercenary Protection V4</strong>
+                  <strong><span class="section-number">5</span>🛡️ Mercenary Protection V4</strong>
                   <span class="section-subtitle" style="display:block;">
-                    State-driven protection, slots, cleanup, movement and rank progression.
+                    Schutz-Level, Slots, Rank und Verschiebung.
                   </span>
                 </div>
                 <span class="v6-badge" id="mercenarySummaryState">PROTECTION</span>
@@ -327,8 +459,11 @@
 
               <div class="game-accordion-body">
                 <div class="info-note" style="margin-bottom:1rem;">
-                  1 slot is available by default. Slot 2 and Slot 3 can be unlocked permanently with resources.
-                  Protection can be set for 1–7 days, extended, cancelled, moved, emergency-moved, or cleaned up after expiry.
+                  <strong>So funktioniert's:</strong><br />
+                  • 1 Slot gratis, Slots 2+3 permanent via Ressourcen freischaltbar<br />
+                  • Protection 1–7 Tage kaufbar (20% / 30% / 50% Schutz)<br />
+                  • Extension verlängert aktiv, Emergency Move verschiebt sofort<br />
+                  • Defender Points steigern Rank → INPI-Rabatt
                 </div>
 
                 <div class="action-grid" style="margin-bottom:1rem;">
@@ -346,8 +481,7 @@
                     <h4>🔓 Slots</h4>
                     <div class="action-value"><span id="mercenarySlotsUnlocked">1</span>/3</div>
                     <div style="margin-top:0.45rem; font-size:0.82rem; color:#98a9b9;">
-                      Default: 1 slot<br />
-                      Unlock more permanently
+                      Default: 1 slot<br />Unlock more permanently
                     </div>
                   </div>
 
@@ -378,7 +512,6 @@
                       <label>Block ID
                         <input type="number" id="protectTokenId" readonly placeholder="Selected Block ID" />
                       </label>
-
                       <label>Slot
                         <select id="protectSlotIndex">
                           <option value="0">Slot 1</option>
@@ -386,7 +519,6 @@
                           <option value="2" disabled>Slot 3 (locked)</option>
                         </select>
                       </label>
-
                       <label>Days
                         <select id="protectDays">
                           <option value="1">1 day</option>
@@ -398,7 +530,6 @@
                           <option value="7" selected>7 days</option>
                         </select>
                       </label>
-
                       <label>Payment
                         <select id="mercenaryPaymentMode">
                           <option value="resources" selected>Resources</option>
@@ -417,23 +548,23 @@
                     </div>
 
                     <div class="protection-input-group" style="margin-bottom:0.8rem; display:flex; gap:0.55rem; flex-wrap:wrap;">
-                      <button class="btn btn-small" id="protectBtn" type="button">Set Protection</button>
-                      <button class="btn btn-small btn-warning" id="extendProtectionBtn" type="button" disabled>Extend</button>
-                      <button class="btn btn-small btn-secondary" id="cancelProtectionBtn" type="button" disabled>Cancel</button>
+                      <button class="btn btn-small" id="protectBtn" type="button" title="Setzt neue Protection auf den ausgewählten Block">Set Protection</button>
+                      <button class="btn btn-small btn-warning" id="extendProtectionBtn" type="button" disabled title="Verlängert eine bereits aktive Protection">Extend</button>
+                      <button class="btn btn-small btn-secondary" id="cancelProtectionBtn" type="button" disabled title="Beendet die aktive Protection vorzeitig">Cancel</button>
                     </div>
 
                     <div class="protection-input-group" style="margin-bottom:0.8rem; display:grid; grid-template-columns:minmax(180px,1fr) auto auto auto; gap:0.55rem; align-items:center;">
                       <select id="moveProtectionTargetTokenId" aria-label="Move protection target block">
                         <option value="">Choose target block…</option>
                       </select>
-                      <button class="btn btn-small" id="moveProtectionBtn" type="button" disabled>Move</button>
-                      <button class="btn btn-small btn-warning" id="emergencyMoveProtectionBtn" type="button" disabled>Emergency Move</button>
-                      <button class="btn btn-small" id="cleanupProtectionBtn" type="button" disabled>Cleanup Expired</button>
+                      <button class="btn btn-small" id="moveProtectionBtn" type="button" disabled title="Verschiebt aktive Protection auf anderen Block (mit Cooldown)">Move</button>
+                      <button class="btn btn-small btn-warning" id="emergencyMoveProtectionBtn" type="button" disabled title="Verschiebt sofort, aber mit höheren Kosten">Emergency Move</button>
+                      <button class="btn btn-small" id="cleanupProtectionBtn" type="button" disabled title="Räumt abgelaufene Protection-Slots auf, verdient Ressourcen">Cleanup Expired</button>
                     </div>
 
                     <div class="protection-input-group" style="margin-bottom:0.8rem; display:flex; gap:0.55rem; flex-wrap:wrap;">
-                      <button class="btn btn-small boost-btn" id="unlockSlot2Btn" type="button">Unlock Slot 2</button>
-                      <button class="btn btn-small boost-btn" id="unlockSlot3Btn" type="button">Unlock Slot 3</button>
+                      <button class="btn btn-small boost-btn" id="unlockSlot2Btn" type="button" title="1000 Oil · 500 Lemons · 100 Iron">Unlock Slot 2</button>
+                      <button class="btn btn-small boost-btn" id="unlockSlot3Btn" type="button" title="500 Oil · 100 Lemons · 100 Iron · 50 Gold · 25 Crystal · 5 Mysterium">Unlock Slot 3</button>
                     </div>
 
                     <div style="margin-top:1rem; border-top:1px solid #2a3f4a; padding-top:1rem;">
@@ -442,16 +573,8 @@
                         Locked until you reach 1000 Defender Points.
                       </div>
                       <div class="input-group" style="grid-template-columns:1fr auto;">
-                        <input
-                          type="text"
-                          id="bastionTitleInput"
-                          maxlength="32"
-                          placeholder="Enter Bastion / Clan Title"
-                          disabled
-                        />
-                        <button class="btn btn-small" id="saveBastionTitleBtn" type="button" disabled>
-                          Save Title
-                        </button>
+                        <input type="text" id="bastionTitleInput" maxlength="32" placeholder="Enter Bastion / Clan Title" disabled />
+                        <button class="btn btn-small" id="saveBastionTitleBtn" type="button" disabled>Save Title</button>
                       </div>
                     </div>
 
@@ -460,34 +583,21 @@
                       <div class="details-body" style="margin-top:0.8rem;">
                         <div class="action-card">
                           <h4>📈 Defender Points</h4>
-
                           <div style="margin-top:0.35rem; font-size:0.9rem; line-height:1.6; color:#dbe7f3;">
                             <div><strong>Points:</strong> <span id="mercenaryPointsSide">0</span></div>
                             <div><strong>Rank:</strong> <span id="mercenaryRankSide">Watchman</span></div>
                             <div><strong>Discount:</strong> <span id="mercenaryDiscountSide">2%</span></div>
                             <div><strong>Next rank at:</strong> <span id="mercenaryNextRankSide">100</span></div>
                           </div>
-
                           <div class="info-note" style="margin-top:0.85rem;">
-                            <strong>How to earn Defender Points</strong><br />
-                            • Start protection: 1–2 days = +2, 3–5 days = +5, 6–7 days = +10<br />
-                            • Finished protection grants completion points<br />
-                            • Longer successful protection grants more bonus points<br />
-                            • Cleanup helps keep expired protection slots clean
+                            <strong>So sammelst du Punkte</strong><br />
+                            • Set: 1–2d=+2 · 3–5d=+5 · 6–7d=+10<br />
+                            • Abgeschlossene Protection gibt Bonus<br />
+                            • Cleanup hilft Expired-Slots loszuwerden
                           </div>
-
                           <div class="info-note" style="margin-top:0.75rem;">
-                            <strong>Rank path</strong><br />
-                            Watchman: 0–99<br />
-                            Defender: 100–249<br />
-                            Guardian: 250–599<br />
-                            Citadel Keeper: 600–1000<br />
-                            Inpinity Bastion: 1001+
-                          </div>
-
-                          <div class="info-note" style="margin-top:0.75rem;">
-                            <strong>Why rank matters</strong><br />
-                            Higher rank reduces INPI protection cost, improves status, and unlocks stronger defender identity.
+                            <strong>Rank-Pfad</strong><br />
+                            Watchman 0–99 · Defender 100–249 · Guardian 250–599 · Citadel Keeper 600–1000 · Inpinity Bastion 1001+
                           </div>
                         </div>
                       </div>
@@ -496,33 +606,24 @@
                 </div>
 
                 <details style="margin-top:1rem;">
-                  <summary style="cursor:pointer; color:#d4af37;">📘 Mercenary V4 costs & rules</summary>
+                  <summary style="cursor:pointer; color:#d4af37;">📘 Mercenary V4 Kosten & Regeln</summary>
                   <div class="details-body" style="margin-top:0.8rem;">
                     <p class="info-note">
-                      <strong>Protection tiers:</strong><br />
-                      1–2 days = 20%<br />
-                      3–5 days = 30%<br />
-                      6–7 days = 50%
+                      <strong>Tiers:</strong> 1–2d = 20% · 3–5d = 30% · 6–7d = 50%
                     </p>
                     <p class="info-note">
-                      <strong>Set protection costs:</strong><br />
-                      1 day = 3 Oil / 2 Lemons / 1 Iron or 8 INPI<br />
-                      2 days = 4 Oil / 3 Lemons / 1 Iron or 14 INPI<br />
-                      3 days = 6 Oil / 4 Lemons / 2 Iron or 22 INPI<br />
-                      4 days = 8 Oil / 4 Lemons / 2 Iron or 29 INPI<br />
-                      5 days = 10 Oil / 5 Lemons / 3 Iron or 35 INPI<br />
-                      6 days = 11 Oil / 5 Lemons / 3 Iron or 42 INPI<br />
-                      7 days = 12 Oil / 6 Lemons / 3 Iron or 50 INPI
+                      <strong>Kosten:</strong><br />
+                      1d: 3 Oil · 2 Lemons · 1 Iron oder 8 INPI<br />
+                      2d: 4 Oil · 3 Lemons · 1 Iron oder 14 INPI<br />
+                      3d: 6 Oil · 4 Lemons · 2 Iron oder 22 INPI<br />
+                      4d: 8 Oil · 4 Lemons · 2 Iron oder 29 INPI<br />
+                      5d: 10 Oil · 5 Lemons · 3 Iron oder 35 INPI<br />
+                      6d: 11 Oil · 5 Lemons · 3 Iron oder 42 INPI<br />
+                      7d: 12 Oil · 6 Lemons · 3 Iron oder 50 INPI
                     </p>
                     <p class="info-note">
-                      <strong>Slot 2 unlock:</strong> 1000 Oil + 500 Lemons + 100 Iron<br />
-                      <strong>Slot 3 unlock:</strong> 500 Oil + 100 Lemons + 100 Iron + 50 Gold + 25 Crystal + 5 Mysterium
-                    </p>
-                    <p class="info-note">
-                      <strong>Immediate points on set:</strong><br />
-                      1–2 days = +2 points<br />
-                      3–5 days = +5 points<br />
-                      6–7 days = +10 points
+                      <strong>Slot 2:</strong> 1000 Oil + 500 Lemons + 100 Iron<br />
+                      <strong>Slot 3:</strong> 500 Oil + 100 Lemons + 100 Iron + 50 Gold + 25 Crystal + 5 Mysterium
                     </p>
                   </div>
                 </details>
@@ -532,41 +633,55 @@
             <details class="game-accordion" id="pirateAccordion" open>
               <summary class="game-accordion-summary">
                 <div>
-                  <strong>⚔️ Pirate Attack V6</strong>
+                  <strong><span class="section-number">6</span>⚔️ Pirate Attack V6</strong>
                   <span class="section-subtitle" style="display:block;">
-                    Attack execution happens in the Pyramid Map.
+                    Angriffe werden in der Pyramid Map ausgeführt.
                   </span>
                 </div>
                 <span class="v6-badge" id="pirateSummaryState">MAP</span>
               </summary>
-            
+
               <div class="game-accordion-body">
+                <div class="attack-steps">
+                  <div class="attack-step">
+                    <div class="attack-step-num">1</div>
+                    <div class="attack-step-title">Attacker-Block wählen</div>
+                    <div class="attack-step-desc">Unten im Pirate-Boost-Bereich</div>
+                  </div>
+                  <div class="attack-step">
+                    <div class="attack-step-num">2</div>
+                    <div class="attack-step-title">Pyramid Map öffnen</div>
+                    <div class="attack-step-desc">Klick auf Button unten</div>
+                  </div>
+                  <div class="attack-step">
+                    <div class="attack-step-num">3</div>
+                    <div class="attack-step-title">Ziel blocken → Attack</div>
+                    <div class="attack-step-desc">Im Map-Sidebar → "Attack"-Button</div>
+                  </div>
+                </div>
+
                 <div class="action-card" style="margin-bottom:1rem;">
                   <h4>🗺️ Attack via Map</h4>
-            
                   <div style="margin-top:0.5rem; font-size:0.92rem; line-height:1.65; color:#dbe7f3;">
-                    • Open the map for visual target selection<br />
-                    • Launch attacks there with the cleaner attack flow<br />
-                    • Execute ready attacks from the attack list or directly in map view
+                    • Map für visuelle Zielauswahl nutzen<br />
+                    • Attack dort starten (sauberer Flow)<br />
+                    • Bereite Attacks aus der Liste unten oder in der Map ausführen
                   </div>
-            
                   <div style="margin-top:1rem; display:flex; gap:0.7rem; flex-wrap:wrap;">
                     <a href="map.html#attack" class="btn" id="openMapAttackBtn">🗺️ Open Pyramid Map</a>
                   </div>
-            
                   <div id="attackMessage" style="margin-top:1rem;"></div>
                 </div>
-            
+
                 <details style="margin-top:1rem; padding-top:1rem; border-top:1px solid var(--line-soft);" id="pirateBoostAccordion">
                   <summary style="cursor:pointer; color:#ffb347;">⚡ Pirate Boost Options</summary>
                   <div style="margin-top:0.8rem;">
                     <p class="info-note">
                       Cost: <strong>100 PIT / day</strong><br />
-                      Effect: <strong>+25 percentage points steal bonus</strong><br />
-                      Contract max: <strong>10 days</strong><br />
-                      Base steal: <strong>25%</strong> → with boost up to <strong>50%</strong> before protection
+                      Effect: <strong>+25 Prozentpunkte Steal-Bonus</strong><br />
+                      Base Steal: <strong>25%</strong> → mit Boost bis <strong>50%</strong> vor Protection
                     </p>
-            
+
                     <div class="attacker-selector" id="attackerSelector" style="margin-top:1rem;">
                       <h4 style="margin:0 0 0.5rem; font-size:0.95rem;">Pirate Boost Source Block</h4>
                       <div class="input-group" style="grid-template-columns:1fr;">
@@ -576,11 +691,8 @@
                           </select>
                         </label>
                       </div>
-                      <p class="info-note" style="font-size:0.8rem; margin:0.35rem 0 0;">
-                        Select the block that should receive the Pirate Boost.
-                      </p>
                     </div>
-            
+
                     <div class="input-group" style="grid-template-columns:1fr auto; margin-top:0.8rem;">
                       <select id="pirateBoostDays">
                         <option value="1">1 day</option>
@@ -594,33 +706,23 @@
                         <option value="9">9 days</option>
                         <option value="10">10 days</option>
                       </select>
-            
-                      <button class="btn btn-small boost-btn" id="buyPirateBoostBtn" type="button" disabled>
-                        Buy Pirate Boost
-                      </button>
+                      <button class="btn btn-small boost-btn" id="buyPirateBoostBtn" type="button" disabled>Buy Pirate Boost</button>
                     </div>
-            
-                    <div id="pirateBoostCostInfo" style="font-size:0.84rem; color:#d4af37; margin-top:0.35rem;">
-                      Total: 700 PIT
-                    </div>
-            
+
+                    <div id="pirateBoostCostInfo" style="font-size:0.84rem; color:#d4af37; margin-top:0.35rem;">Total: 700 PIT</div>
                     <div id="pirateBoostMessage" style="font-size:0.84rem; margin-top:0.5rem;"></div>
                   </div>
                 </details>
-            
+
                 <div class="pirate-right" style="margin-top:1.2rem;">
                   <div class="panel-head inner-panel-head">
-                    <h3 class="subsection-title">Your Attacks</h3>
-                    <p class="section-subtitle">
-                      Review active attacks and open ready executions in the map view.
-                    </p>
+                    <h3 class="subsection-title">Deine Attacks</h3>
+                    <p class="section-subtitle">Aktive Attacks und bereite Executions.</p>
                   </div>
-            
                   <div id="incomingAttackInfo" class="info-note" style="margin-bottom:0.8rem; display:none;">
                     <strong>Attack updates:</strong>
                     <span id="incomingAttackText">No attack update data.</span>
                   </div>
-            
                   <div id="userAttacksList" class="attacks-list">
                     <p class="empty-state">Connect wallet to see your attacks.</p>
                   </div>
@@ -632,8 +734,31 @@
             <div id="protectMessage" class="message" style="margin-top:0.5rem;"></div>
           </div>
 
+          <!-- ========== QUICK ACTIONS statt leerem Text ========== -->
           <div id="noBlockSelected" class="empty-state" style="margin-top:1rem; display:block;">
-            Select a block from the pyramid above to see its V6 actions.
+            <p style="font-size:1rem; margin-bottom:1rem;">Wähle einen Block aus dem Grid oben — oder starte hier:</p>
+            <div class="quick-actions">
+              <a href="mint.html" class="quick-action-card">
+                <div class="quick-action-icon">⛏️</div>
+                <div class="quick-action-title">Block minten</div>
+                <div class="quick-action-desc">Ersten Pyramid Block kaufen</div>
+              </a>
+              <a href="map.html" class="quick-action-card">
+                <div class="quick-action-icon">🗺️</div>
+                <div class="quick-action-title">Pyramid Map</div>
+                <div class="quick-action-desc">Alle Blöcke & Attacks</div>
+              </a>
+              <a href="faq.html" class="quick-action-card">
+                <div class="quick-action-icon">❓</div>
+                <div class="quick-action-title">FAQ</div>
+                <div class="quick-action-desc">Häufige Fragen</div>
+              </a>
+              <button class="quick-action-card" id="quickShowTutorial" type="button" style="cursor:pointer; border:1px solid #2a3f4a; background:#0f1a22; text-align:center;">
+                <div class="quick-action-icon">🎓</div>
+                <div class="quick-action-title">Anleitung</div>
+                <div class="quick-action-desc">Tutorial erneut starten</div>
+              </button>
+            </div>
           </div>
         </div>
       </section>
@@ -643,33 +768,24 @@
           <summary class="game-accordion-summary">
             <div>
               <strong>⛏️ Mint a New Block</strong>
-              <span class="section-subtitle" style="display:block;">
-                Choose coordinates, select payment and mint a new Pyramid Block.
-              </span>
+              <span class="section-subtitle" style="display:block;">Koordi­naten wählen, zahlen, minten.</span>
             </div>
             <span class="v6-badge">MINT</span>
           </summary>
-
           <div class="game-accordion-body">
             <div class="info-note">
-              <strong>Mint note:</strong><br />
-              Blocks paid with <strong>INPI</strong> are treated as burn-based payments.
-              Blocks paid with <strong>ETH</strong> are also treated as burn-based in practice,
-              because that ETH is not accessible again.
+              <strong>Mint-Hinweis:</strong> INPI-Mints sind burn-based. ETH-Mints sind ebenfalls burn-based in der Praxis.
             </div>
-
             <div class="input-group" style="margin-top:1rem;">
               <label>Row <input type="number" id="row" min="0" max="99" value="0" /></label>
               <label>Col <input type="number" id="col" min="0" max="198" value="0" /></label>
               <button class="random-btn" id="randomBlockBtn" type="button">🎲 Random free</button>
             </div>
-
             <div class="payment-options">
               <label><input type="radio" name="payment" value="eth" checked /> 0.003 ETH</label>
               <label><input type="radio" name="payment" value="inpi" /> 30 INPI</label>
               <label><input type="radio" name="payment" value="mixed" /> 0.0015 ETH + 15 INPI</label>
             </div>
-
             <button class="action-button" id="mintBtn" type="button">Mint Block</button>
             <div id="mintMessage" style="margin-top:1rem;"></div>
           </div>
@@ -681,9 +797,7 @@
           <summary class="game-accordion-summary">
             <div>
               <strong>🍋 Pitrone Exchange & Resources</strong>
-              <span class="section-subtitle" style="display:block;">
-                Track balances, swap INPI/PIT and review your current resource position.
-              </span>
+              <span class="section-subtitle" style="display:block;">Balances, Swap, Inventar.</span>
             </div>
             <span class="v6-badge">ECONOMY</span>
           </summary>
@@ -692,26 +806,15 @@
             <div class="economy-top">
               <div class="economy-stat-card">
                 <div class="economy-icon">🪙</div>
-                <div>
-                  <span class="resource-name">INPI</span><br />
-                  <span class="resource-amount" id="userInpi">0</span>
-                </div>
+                <div><span class="resource-name">INPI</span><br /><span class="resource-amount" id="userInpi">0</span></div>
               </div>
-
               <div class="economy-stat-card">
                 <div class="economy-icon">🍋</div>
-                <div>
-                  <span class="resource-name">Pitrone</span><br />
-                  <span class="resource-amount" id="userPitrone">0</span>
-                </div>
+                <div><span class="resource-name">Pitrone</span><br /><span class="resource-amount" id="userPitrone">0</span></div>
               </div>
-
               <div class="economy-stat-card">
                 <div class="economy-icon">🌾</div>
-                <div>
-                  <span class="resource-name">Active Farms</span><br />
-                  <span class="resource-amount" id="activeFarms">0</span>
-                </div>
+                <div><span class="resource-name">Active Farms</span><br /><span class="resource-amount" id="activeFarms">0</span></div>
               </div>
             </div>
 
@@ -728,7 +831,6 @@
                 </div>
                 <button class="btn btn-small" id="exchangeInpiBtn" type="button">Swap to PIT</button>
               </div>
-
               <div class="swap-card">
                 <h3>PIT → INPI</h3>
                 <div class="input-group">
@@ -745,9 +847,7 @@
             </div>
 
             <div class="info-note" style="margin-top:1rem;">
-              <strong>Special resources:</strong><br />
-              Copper and Obsidian are not produced by regular blocks. They are intended for special integration paths
-              and later ecosystem expansion.
+              <strong>Spezial-Ressourcen:</strong> Copper und Obsidian werden nicht von normalen Blöcken produziert.
             </div>
           </div>
         </details>
@@ -757,149 +857,91 @@
     <section class="panel faq-panel" style="margin-top:1.35rem;">
       <div class="panel-head">
         <h2 class="section-title">How To / FAQ <span class="v6-badge">V6 + Mercenary V4</span></h2>
-        <p class="section-subtitle">
-          A quick guide to the main gameplay loops inside the dashboard.
-        </p>
+        <p class="section-subtitle">Kurzer Guide, kompakt.</p>
       </div>
 
       <details class="content-details">
-        <summary>What's new in V6 + Mercenary V4?</summary>
+        <summary>Was ist neu in V6 + Mercenary V4?</summary>
         <div class="details-body">
           <ul>
-            <li>Enhanced claim and block state flow</li>
-            <li>Pirate and farming boosts with clearer state handling</li>
-            <li>Better claim preview flow</li>
-            <li>Mercenary V4 slot system with permanent slot unlocks</li>
-            <li>Duration-based protection pricing from 1 to 7 days</li>
-            <li>Immediate points on protection start plus completion rewards</li>
-            <li>Attack execution moved to the Pyramid Map for better stability</li>
+            <li>Besserer Claim & Block-State-Flow</li>
+            <li>Pirate & Farming Boosts mit klarerem State</li>
+            <li>Verbesserte Claim-Preview</li>
+            <li>Mercenary V4 mit permanenten Slot-Unlocks</li>
+            <li>Duration-basierte Protection-Preise (1–7 Tage)</li>
+            <li>Sofort-Punkte beim Start + Completion-Rewards</li>
+            <li>Attack-Execution in Pyramid Map (stabiler)</li>
           </ul>
         </div>
       </details>
 
       <details class="content-details">
-        <summary>How does minting work?</summary>
+        <summary>Wie funktioniert Minting?</summary>
         <div class="details-body">
-          <p>
-            Choose coordinates, select a payment option, and mint a Pyramid Block NFT.
-            After minting, the block can later be revealed and used for farming, defense, and attacks.
-          </p>
+          <p>Koordinaten wählen, Zahlung wählen, minten. Danach Reveal → Farming → Attack.</p>
         </div>
       </details>
 
       <details class="content-details">
-        <summary>What does revealing a block do?</summary>
+        <summary>Was macht Reveal?</summary>
         <div class="details-body">
-          <p>
-            Revealing unlocks the block's hidden state and exposes its rarity-related attributes.
-            That makes the block fully usable in the wider game flow.
-          </p>
+          <p>Macht Rarity und Produktionsraten sichtbar. Einmal pro Block möglich.</p>
         </div>
       </details>
 
       <details class="content-details">
-        <summary>How does Mercenary Protection V4 work?</summary>
+        <summary>Wie funktioniert Mercenary Protection V4?</summary>
         <div class="details-body">
-          <p>
-            Each wallet starts with <strong>1 protection slot</strong>. You can permanently unlock
-            <strong>Slot 2</strong> and <strong>Slot 3</strong> by burning resources.
-          </p>
-          <p>
-            Protection can be set for <strong>1 to 7 days</strong>:
-          </p>
+          <p>1 Slot gratis. Slots 2+3 permanent via Ressourcen. Protection 1–7 Tage: 20% / 30% / 50%. INPI-Zahlungen bekommen Rank-Rabatt.</p>
+        </div>
+      </details>
+
+      <details class="content-details">
+        <summary>Wie funktionieren Defender Points?</summary>
+        <div class="details-body">
           <ul>
-            <li><strong>1–2 days</strong> = 20% protection</li>
-            <li><strong>3–5 days</strong> = 30% protection</li>
-            <li><strong>6–7 days</strong> = 50% protection</li>
-          </ul>
-          <p>
-            Resource costs stay fixed by duration. INPI payments receive the rank-based discount.
-          </p>
-        </div>
-      </details>
-
-      <details class="content-details">
-        <summary>How do Defender Points work?</summary>
-        <div class="details-body">
-          <p>
-            Defender Points grow through active protection usage. Short protection gives fewer points,
-            longer protection gives more, and successful finished protection adds extra rewards.
-          </p>
-          <ul>
-            <li>1–2 days protection start = +2 points</li>
-            <li>3–5 days protection start = +5 points</li>
-            <li>6–7 days protection start = +10 points</li>
-            <li>Completed protection adds more points depending on duration</li>
-          </ul>
-          <p>
-            Higher ranks improve your INPI discount and strengthen your defender profile.
-          </p>
-        </div>
-      </details>
-
-      <details class="content-details">
-        <summary>How do slot unlocks work?</summary>
-        <div class="details-body">
-          <p>
-            <strong>Slot 2 unlock:</strong> 1000 Oil, 500 Lemons, 100 Iron<br />
-            <strong>Slot 3 unlock:</strong> 500 Oil, 100 Lemons, 100 Iron, 50 Gold, 25 Crystal, 5 Mysterium
-          </p>
-          <p>
-            These unlocks are <strong>permanent per wallet</strong>.
-          </p>
-        </div>
-      </details>
-
-      <details class="content-details">
-        <summary>How do attacks work now?</summary>
-        <div class="details-body">
-          <p>
-            The heavy attack flow has been moved to the <strong>Pyramid Map</strong> to keep the Game page stable.
-            Use the map for target selection and attack execution.
-          </p>
-          <p>
-            Inside the Game dashboard, you can still:
-          </p>
-          <ul>
-            <li>review your active attacks,</li>
-            <li>open ready attacks in the map,</li>
-            <li>cancel pending attacks,</li>
-            <li>and buy Pirate Boost for a selected attacker block.</li>
+            <li>Set 1–2d = +2 · 3–5d = +5 · 6–7d = +10</li>
+            <li>Abgeschlossene Protection gibt Bonus</li>
+            <li>Höhere Ranks = besserer INPI-Rabatt</li>
           </ul>
         </div>
       </details>
 
       <details class="content-details">
-        <summary>What are boosts?</summary>
+        <summary>Slot-Unlocks?</summary>
         <div class="details-body">
-          <p>
-            <strong>Farming Boost</strong> costs <strong>100 INPI per day</strong> and increases production by
-            <strong>25%</strong>. The contract allows up to <strong>10 days</strong>, while the farming window itself lasts
-            <strong>7 days</strong>.<br /><br />
-            <strong>Pirate Boost</strong> costs <strong>100 PIT per day</strong> and adds
-            <strong>+25 percentage points</strong> to the steal rate before protection penalties are applied.
-            The contract allows up to <strong>10 days</strong>.
-          </p>
+          <p><strong>Slot 2:</strong> 1000 Oil · 500 Lemons · 100 Iron<br />
+          <strong>Slot 3:</strong> 500 Oil · 100 Lemons · 100 Iron · 50 Gold · 25 Crystal · 5 Mysterium</p>
+          <p>Permanent pro Wallet.</p>
         </div>
       </details>
 
       <details class="content-details">
-        <summary>What is cleanup for?</summary>
+        <summary>Wie funktionieren Attacks?</summary>
         <div class="details-body">
-          <p>
-            Cleanup allows expired or stale protection entries to be cleared.
-            Depending on your rank, cleanup can reward materials such as Iron, Copper, or Obsidian.
-          </p>
+          <p>Heavy-Flow in <strong>Pyramid Map</strong>. Im Game siehst du aktive Attacks, kannst sie dort öffnen/canceln und Pirate Boost kaufen.</p>
         </div>
       </details>
 
       <details class="content-details">
-        <summary>What is the exchange for?</summary>
+        <summary>Boosts?</summary>
         <div class="details-body">
-          <p>
-            The exchange area lets you view the current INPI ↔ PIT relation and swap between both
-            sides depending on pool state and contract availability.
-          </p>
+          <p><strong>Farm Boost:</strong> 100 INPI/Tag · +25% · max 10d (Farm-Fenster 7d)<br />
+          <strong>Pirate Boost:</strong> 100 PIT/Tag · +25 Prozentpunkte Steal · max 10d</p>
+        </div>
+      </details>
+
+      <details class="content-details">
+        <summary>Wofür Cleanup?</summary>
+        <div class="details-body">
+          <p>Räumt abgelaufene Protection-Slots auf. Belohnung je nach Rank (Iron, Copper, Obsidian).</p>
+        </div>
+      </details>
+
+      <details class="content-details">
+        <summary>Wofür der Exchange?</summary>
+        <div class="details-body">
+          <p>INPI ↔ PIT swapen. Rate und Pool-Status werden live angezeigt.</p>
         </div>
       </details>
     </section>
@@ -918,10 +960,27 @@
       <a href="whitepaper.html">Whitepaper</a>
       <a href="https://discord.gg/95yj6Eg6" target="_blank" rel="noopener">Discord</a>
     </div>
-    <p class="footer-version">Version 0.27.0 (V6 + Mercenary V4)</p>
+    <p class="footer-version">Version 0.28.0 (V6 + Mercenary V4 · UX)</p>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <script type="module" src="./js/game.js"></script>
+  <script type="module">
+    // Tutorial-Modul laden + an bestehende Buttons koppeln
+    import { initTutorial } from "./js/tutorial.js";
+
+    document.addEventListener("DOMContentLoaded", () => {
+      initTutorial();
+
+      document.getElementById("reopenOnboarding")?.addEventListener("click", () => {
+        localStorage.removeItem("inpinity_onboarding_done_v1");
+        location.reload();
+      });
+      document.getElementById("quickShowTutorial")?.addEventListener("click", () => {
+        localStorage.removeItem("inpinity_onboarding_done_v1");
+        location.reload();
+      });
+    });
+  </script>
 </body>
 </html>
