@@ -720,10 +720,11 @@
     const renderId = ++latestGridRenderId;
   
     try {
+      // FIX: loadMercenaryTokenProtectionsV4 benoetigt jetzt state.userAddress
       const [subgraphTokens, subgraphFarmsV6, subgraphProtections] = await Promise.all([
         loadMyTokensFromSubgraph(state.userAddress),
         loadMyFarmsV6FromSubgraph(state.userAddress),
-        loadMercenaryTokenProtectionsV4()
+        loadMercenaryTokenProtectionsV4(state.userAddress)
       ]);
   
       if (renderId !== latestGridRenderId) return;

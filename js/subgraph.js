@@ -1,5 +1,5 @@
 /* =========================================================
-   SUBGRAPH QUERIES – V6 + MERCENARY V4
+   SUBGRAPH QUERIES - V6 + MERCENARY V4
    ========================================================= */
 
    import {
@@ -25,8 +25,11 @@
   
         const json = await res.json().catch(() => ({}));
   
+        // FIX A: Fehler sichtbar loggen
         if (!res.ok || json.errors) {
-          throw new Error(json?.errors?.[0]?.message || `HTTP ${res.status}`);
+          const errMsg = json?.errors?.[0]?.message || `HTTP ${res.status}`;
+          console.error("[subgraph] Query failed:", errMsg, json?.errors);
+          throw new Error(errMsg);
         }
   
         return json.data || {};
@@ -64,7 +67,8 @@
       skip += pageSize;
     }
   
-    debugLog(`Fetched ${all.length} ${fieldName} items`);
+    // FIX C: count statt "null" im Log
+    debugLog(`Fetched ${fieldName}`, { count: all.length });
     return all;
   }
   
@@ -233,7 +237,11 @@
      MERCENARY V4 LOADERS
      ========================================================= */
   
-  export async function loadMercenaryTokenProtectionsV4() {
+  // FIX B: wallet-Parameter + User-Filter
+  export async function loadMercenaryTokenProtectionsV4(wallet) {
+    const user = String(wallet || "").toLowerCase();
+    if (!user) return [];
+  
     return fetchAllWithPagination(
       "mercenaryTokenProtectionV4S",
       `
@@ -248,7 +256,8 @@
         updatedAt
         blockNumber
         transactionHash
-      `
+      `,
+      `{ user: "${user}" }`
     );
   }
   

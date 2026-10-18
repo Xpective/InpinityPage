@@ -1,5 +1,5 @@
 /* =========================================================
-   MAP DATA / RESOURCES / ATTACKS – V6 + MERCENARY V4
+   MAP DATA / RESOURCES / ATTACKS - V6 + MERCENARY V4
    HARDENED VERSION
    - read-only init guarded
    - short local TTL caches
@@ -452,15 +452,12 @@
          }
        ).catch(() => []);
    
-       const farmV5Items = await fetchAllWithPagination(
-         "farmV5S",
-         "id owner startTime lastAccrualTime lastClaimTime boostExpiry stopTime active updatedAt blockNumber",
-         `{ active: true }`,
-         {
-           cacheTtlMs: 15_000,
-           forceFresh
-         }
-       ).catch(() => []);
+       /*
+        * FIX: farmV5S existiert nicht mehr im Schema (QmaN99).
+        * V5-Aktivitaet wird rein on-chain via refreshOwnV5ActivityHints() erkannt.
+        * Variable bleibt als leeres Array, damit applyFarmV5Data() unten nicht bricht.
+        */
+       const farmV5Items = [];
    
        const mercenaryProtectionItems = await fetchAllWithPagination(
          "mercenaryTokenProtectionV4S",
