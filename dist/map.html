@@ -1,6 +1,17 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="basic">
 <head>
+  <script>
+    (function preloadTheme() {
+      const savedTheme = localStorage.getItem("inpinity-theme");
+      const theme =
+        savedTheme && ["light", "dark", "basic"].includes(savedTheme)
+          ? savedTheme
+          : "basic";
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+
   <meta charset="UTF-8" />
   <meta
     name="viewport"
@@ -22,6 +33,39 @@
     content="Explore the Inpinity Pyramid Map, inspect blocks, farming, Mercenary V4 protection and V6 pirate attacks directly on the map."
   />
   <meta name="theme-color" content="#0b0e12" />
+
+  <style>
+    /* Theme dots for the map header (small, inline) */
+    .theme-dots-map {
+      display: flex;
+      gap: 6px;
+      margin-right: 10px;
+      align-items: center;
+    }
+    .theme-dots-map .dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.25);
+      cursor: pointer;
+      padding: 0;
+      transition: transform 0.15s;
+    }
+    .theme-dots-map .dot:hover { transform: scale(1.15); }
+    .theme-dots-map .dot.light { background: #ffffff; }
+    .theme-dots-map .dot.dark  { background: #0a0d11; }
+    .theme-dots-map .dot.basic { background: #d4af37; }
+    .theme-dots-map .dot.active {
+      box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.65);
+    }
+
+    /* Make nav-links wrap on narrow screens so all 7 fit */
+    @media (max-width: 900px) {
+      .nav-links {
+        flex-wrap: wrap;
+      }
+    }
+  </style>
   <script type="module" crossorigin src="/assets/map-2xX95SyO.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/subgraph-BAgouvoR.js">
@@ -39,10 +83,21 @@
       <div class="nav-links">
         <a href="index.html">Home</a>
         <a href="game.html">Game</a>
+        <a href="mint.html">Mint</a>
+        <a href="map.html" aria-current="page">Map</a>
+        <a href="staking.html">Staking</a>
+        <a href="whitepaper.html">Whitepaper</a>
+        <a href="faq.html">FAQ</a>
       </div>
     </div>
 
     <div class="wallet">
+      <div class="theme-dots-map" aria-label="Theme switcher">
+        <button type="button" class="dot light" title="Light Theme" aria-label="Light Theme"></button>
+        <button type="button" class="dot dark" title="Dark Theme" aria-label="Dark Theme"></button>
+        <button type="button" class="dot basic" title="Basic Theme" aria-label="Basic Theme"></button>
+      </div>
+
       <div id="walletAddress">Not connected</div>
       <button id="connectBtn" type="button">Connect</button>
     </div>
@@ -426,5 +481,32 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const root = document.documentElement;
+      const dots = document.querySelectorAll(".theme-dots-map .dot");
+
+      function applyTheme(theme) {
+        root.setAttribute("data-theme", theme);
+        try { localStorage.setItem("inpinity-theme", theme); } catch (_) {}
+        dots.forEach(dot => {
+          const active =
+            (theme === "light" && dot.classList.contains("light")) ||
+            (theme === "dark" && dot.classList.contains("dark")) ||
+            (theme === "basic" && dot.classList.contains("basic"));
+          dot.classList.toggle("active", active);
+        });
+      }
+
+      let savedTheme = "basic";
+      try { savedTheme = localStorage.getItem("inpinity-theme") || "basic"; } catch (_) {}
+      applyTheme(savedTheme);
+
+      document.querySelector(".theme-dots-map .dot.light")?.addEventListener("click", () => applyTheme("light"));
+      document.querySelector(".theme-dots-map .dot.dark")?.addEventListener("click", () => applyTheme("dark"));
+      document.querySelector(".theme-dots-map .dot.basic")?.addEventListener("click", () => applyTheme("basic"));
+    });
+  </script>
 </body>
 </html>

@@ -11,7 +11,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
 
 
-
   <meta name="description" content="Mint Pyramid Blocks on Base, reveal Pi and Phi digits, and prepare your block for farming and gameplay in the Inpinity ecosystem." />
   <meta name="keywords" content="Inpinity, Mint, Pyramid Block, NFT, Base, INPI, Reveal, Pi, Phi" />
   <meta name="author" content="Inpinity Team" />
@@ -33,18 +32,13 @@
   <header class="site-header">
     <nav class="site-nav" aria-label="Main navigation">
       <ul class="nav-list">
-        <li><a aria-label="Home" href="index.html">Home</a></li>
-        <li><a aria-label="Features" href="features.html">Features</a></li>
-        <li><a aria-label="Game" href="game.html">Game</a></li>
-        <li><a aria-label="Mint" href="mint.html" aria-current="page">Mint</a></li>
-        <li><a aria-label="Pyramid Map" href="map.html">Pyramid Map</a></li>
-        <li><a aria-label="Collaboration" href="collaboration.html">Collaboration</a></li>
-        <li><a aria-label="About" href="about.html">About</a></li>
-        <li><a aria-label="Whitepaper" href="whitepaper.html">Whitepaper</a></li>
-        <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
-        <li><a aria-label="Guestbook" href="guestbook.html">Guestbook</a></li>
-        <li><a aria-label="Advertising" href="advertising.html">Advertising</a></li>
-        <li><a aria-label="Staking" href="staking.html">Staking</a></li>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="game.html">Game</a></li>
+        <li><a href="mint.html" aria-current="page">Mint</a></li>
+        <li><a href="map.html">Pyramid Map</a></li>
+        <li><a href="staking.html">Staking</a></li>
+        <li><a href="whitepaper.html">Whitepaper</a></li>
+        <li><a href="faq.html">FAQ</a></li>
       </ul>
 
       <div class="themeDots" aria-label="Theme switcher">
@@ -59,7 +53,7 @@
     <section class="mint-hero">
       <p class="eyebrow">Inpinity Mint</p>
       <h1>Mint a Pyramid Block</h1>
-      <h2>Choose coordinates, mint on Base, then reveal Pi & Phi digits to unlock rarity and gameplay.</h2>
+      <h2>Choose coordinates, mint on Base, then reveal Pi &amp; Phi digits to unlock rarity and gameplay.</h2>
       <p class="hero-lead">
         Every block has a fixed place in the Pi-Phi Pyramid. After minting, you can reveal it to unlock its hidden state and prepare it for farming and later game actions.
       </p>
@@ -68,6 +62,7 @@
         <a class="link-chip" href="https://basescan.org/address/0x277a0D5864293C78d7387C54B48c35D5E9578Ab1" target="_blank" rel="noopener">
           📄 NFT Contract
         </a>
+        <a class="link-chip" href="game.html">🎮 Open Game</a>
       </div>
     </section>
 
@@ -168,14 +163,16 @@
   <footer class="site-footer">
     <p>© 2026 INPINITY. All rights reserved. Built on Base.</p>
     <div class="footer-links">
-      <a href="whitepaper.html">Whitepaper</a>
-      <a href="faq.html">FAQ</a>
+      <a href="game.html">Game</a>
       <a href="mint.html">Mint</a>
       <a href="map.html">Pyramid Map</a>
-      <a href="game.html">Game</a>
-      <a href="contact.html">Contact</a>
+      <a href="staking.html">Staking</a>
+      <a href="whitepaper.html">Whitepaper</a>
+      <a href="faq.html">FAQ</a>
+      <a href="privacypolicy.html">Privacy</a>
+      <a href="termsofuse.html">Terms</a>
     </div>
-    <p class="footer-version">Version 0.23.0</p>
+    <p class="footer-version">Version 0.28.0</p>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
@@ -238,7 +235,7 @@
         try { line += " " + JSON.stringify(data).substring(0,200); }
         catch { line += " " + String(data); }
       }
-      logDiv.innerHTML = line + "\\n" + logDiv.innerHTML;
+      logDiv.innerHTML = line + "\n" + logDiv.innerHTML;
       console.log(message, data);
     }
 
@@ -323,7 +320,7 @@
 
       const balance = await nftContract.balanceOf(userAddress);
       if(balance.toNumber() === 0){
-        listDiv.innerHTML = `<p class="muted text-center">You don’t own any blocks yet.</p>`;
+        listDiv.innerHTML = `<p class="muted text-center">You don't own any blocks yet.</p>`;
         return;
       }
 

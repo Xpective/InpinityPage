@@ -1,23 +1,27 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="basic">
 <head>
+  <script>
+    (function preloadTheme() {
+      const savedTheme = localStorage.getItem("inpinity-theme");
+      const theme =
+        savedTheme && ["light", "dark", "basic"].includes(savedTheme)
+          ? savedTheme
+          : "basic";
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Inpinity - FAQ</title>
 
-  <link rel="stylesheet" href="css/adapted_about_us.css" />
-  <link rel="stylesheet" href="css/adapted_advertisements.css" />
-  <link rel="stylesheet" href="css/adapted_combined.css"/>
-  <link rel="stylesheet" href="css/adapted_comunity_guidelines.css" />
-  <link rel="stylesheet" href="css/adapted_course_feedback.css" />
-  <link rel="stylesheet" href="css/adapted_mft_marketplace.css"/>
-  <link rel="stylesheet" href="css/adapted_profile.css"/>
 
   <script defer src="main.js"></script>
   <link rel="icon" type="image/png" href="/assets/favicon-D6BGG7Y0.webp">
 
-  <meta content="Inpinity, FAQ, INPI, Base, NFT, FarmingV3, PiratesV3, Resources, ERC1155, Partnerships, UE5" name="keywords">
+  <meta content="Inpinity, FAQ, INPI, Base, NFT, FarmingV6, PiratesV6, MercenaryV4, Resources, ERC1155, Partnerships, UE5" name="keywords">
   <meta content="Inpinity Team" name="Xpective">
   <meta property="og:title" content="Inpinity - FAQ">
   <meta property="og:description" content="Frequently asked questions about Inpinity, the Pi-Phi Pyramid, NFTs, resources, attacks, staking, and the roadmap.">
@@ -29,11 +33,9 @@
   <meta name="robots" content="index,follow">
 
   <style>
-    /* ✅ keep content away from footer */
     main { padding-bottom: 4rem; }
     footer { margin-top: 3rem; padding-top: 1rem; }
 
-    /* Additional FAQ styling */
     .faq-search {
       margin: 2rem 0;
       display: flex;
@@ -102,17 +104,6 @@
     }
     .warning-note a { color: gold; }
 
-    .presale-note {
-      background: rgba(255,215,0,0.1);
-      border: 1px solid gold;
-      border-radius: 10px;
-      padding: 1rem;
-      margin: 1.2rem auto 2rem;
-      max-width: 900px;
-      text-align: center;
-    }
-    .presale-note a { color: gold; font-weight: 900; }
-
     .token-address {
       font-family: monospace;
       background: #111;
@@ -144,64 +135,33 @@
   </style>
   <link rel="stylesheet" crossorigin href="/assets/responsive-sg2mVcZF.css">
   <link rel="stylesheet" crossorigin href="/assets/light-D_11Ehwr.css">
-  <link rel="stylesheet" crossorigin href="/assets/referral-C3BWTXCa.css">
 </head>
 
 <body>
-  <header>
-    <nav>
-      <ul>
-        <li><a aria-label="Home" href="index.html">Home</a></li>
-        <li><a aria-label="Features" href="features.html">Features</a></li>
-        <li><a aria-label="Game" href="game.html">Game</a></li>
-        <li><a aria-label="Mint" href="mint.html">Mint</a></li>
-        <li><a aria-label="Pyramid Map" href="map.html">Pyramid Map</a></li>
-        <li><a aria-label="Collaboration" href="collaboration.html">Collaboration</a></li>
-        <li><a aria-label="About" href="about.html">About</a></li>
-        <li><a aria-label="Whitepaper" href="whitepaper.html">Whitepaper</a></li>
-        <li><a aria-label="FAQ" href="faq.html">FAQ</a></li>
-        <li><a aria-label="Guestbook" href="guestbook.html">Guestbook</a></li>
-        <li><a aria-label="Advertising" href="advertising.html">Advertising</a></li>
-        <li><a aria-label="Staking" href="staking.html">Staking</a></li>
-
-        <div class="themeDots">
-          <div class="dot light" title="Light Theme"></div>
-          <div class="dot dark" title="Dark Theme"></div>
-          <div class="dot basic" title="Basic Theme"></div>
-        </div>
+  <header class="site-header">
+    <nav class="site-nav" aria-label="Main navigation">
+      <ul class="nav-list">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="game.html">Game</a></li>
+        <li><a href="mint.html">Mint</a></li>
+        <li><a href="map.html">Pyramid Map</a></li>
+        <li><a href="staking.html">Staking</a></li>
+        <li><a href="whitepaper.html">Whitepaper</a></li>
+        <li><a href="faq.html" aria-current="page">FAQ</a></li>
       </ul>
+
+      <div class="themeDots" aria-label="Theme switcher">
+        <button type="button" class="dot light" title="Light Theme" aria-label="Light Theme"></button>
+        <button type="button" class="dot dark" title="Dark Theme" aria-label="Dark Theme"></button>
+        <button type="button" class="dot basic" title="Basic Theme" aria-label="Basic Theme"></button>
+      </div>
     </nav>
-
-    <style>
-      .themeDots .dot {
-        display: inline-block;
-        width: 20px;
-        height: 20px;
-        border-radius: 50%;
-        margin: 5px;
-        cursor: pointer;
-        transition: transform 0.2s;
-      }
-      .themeDots .dot.light { background-color: #FFFFFF; }
-      .themeDots .dot.dark { background-color: #000000; }
-      .themeDots .dot.basic { background-color: var(--quinary-color); }
-      .themeDots .dot:hover { transform: scale(1.2); }
-    </style>
-
-    <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        document.querySelector('.themeDots .dot.light')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'light'));
-        document.querySelector('.themeDots .dot.dark')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'dark'));
-        document.querySelector('.themeDots .dot.basic')?.addEventListener('click', () => document.body.setAttribute('data-theme', 'basic'));
-      });
-    </script>
   </header>
 
   <main class="container">
     <div class="warning-note">
       <p>
-        ⚠️ <strong>Security Notice:</strong> We withdrew from ToshiMart due to phishing concerns.
-        Always use official links from <a href="index.html">Home</a>.
+        ⚠️ <strong>Security Notice:</strong> Only use official links from <a href="index.html">Home</a>.
         The only official INPI token is:
         <span class="token-address">0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</span>
       </p>
@@ -211,13 +171,6 @@
         <a class="pill" href="game.html">🎮 Game</a>
         <a class="pill" href="whitepaper.html">📘 Whitepaper</a>
       </div>
-    </div>
-
-    <div class="presale-note">
-      <p>
-        🔴 <strong>PRESALE LIVE:</strong> 2,000,000 INPI per 1 ETH until <strong>March 25, 2026, 20:20 UTC</strong>.
-        <a href="https://inpinity.online/token/" target="_blank" rel="noopener">👉 Join the Presale</a>
-      </p>
     </div>
 
     <h1>FAQ - Frequently Asked Questions</h1>
@@ -238,7 +191,7 @@
         <div class="faq-answer">
           <p>
             Inpinity is a live on-chain game module on Base: the <strong>Pi-Phi Pyramid</strong>.
-            You mint a <strong>Block NFT</strong> at fixed coordinates (Row/Col), reveal its Pi & Phi digits (rarity),
+            You mint a <strong>Block NFT</strong> at fixed coordinates (Row/Col), reveal its Pi &amp; Phi digits (rarity),
             farm resources (ERC-1155), defend with mercenaries, and attack other blocks with pirates.
           </p>
           <p>
@@ -253,7 +206,7 @@
           <ol>
             <li>Open <a href="mint.html">Mint</a> and mint a block (Row/Col).</li>
             <li>Open <a href="game.html">Game</a> and reveal your block (proofs come from the worker).</li>
-            <li>Start farming (FarmingV3), wait, then claim resources.</li>
+            <li>Start farming (FarmingV6), wait, then claim resources.</li>
             <li>Optionally protect your block and try a pirate attack.</li>
           </ol>
         </div>
@@ -264,7 +217,7 @@
         <div class="faq-answer">
           <p>
             You must use <strong>Base Mainnet</strong> (Chain ID <strong>8453</strong>).
-            If you connect on Mint/Game and you’re on the wrong network, the page should ask you to switch.
+            If you connect on Mint/Game and you're on the wrong network, the page should ask you to switch.
           </p>
         </div>
       </details>
@@ -274,17 +227,17 @@
          CONTRACTS / ADDRESSES
     ========================== -->
     <div class="faq-section">
-      <h2>Contracts & Collections</h2>
+      <h2>Contracts &amp; Collections</h2>
 
       <details class="faq-item">
-        <summary>What are the official game contracts (V3)?</summary>
+        <summary>What are the official game contracts?</summary>
         <div class="faq-answer">
           <ul>
             <li><strong>InpinityNFT (Blocks):</strong> <span class="token-address">0x277a0D5864293C78d7387C54B48c35D5E9578Ab1</span></li>
             <li><strong>ResourceToken (ERC1155):</strong> <span class="token-address">0x71E76a6065197acdd1a4d6B736712F80D1Fd3D8b</span></li>
-            <li><strong>FarmingV3:</strong> <span class="token-address">0xE79445C9ef97B8156BB505D784C0356E54432AD9</span></li>
-            <li><strong>PiratesV3:</strong> <span class="token-address">0xC3544804cea908b8Ac6752B4F47609e1c22DaF5d</span></li>
-            <li><strong>MercenaryV2:</strong> <span class="token-address">0xFEa09ccA75dbc63cc8053739A61777Bd13fC6Bc2</span></li>
+            <li><strong>FarmingV6:</strong> <span class="token-address">0x55Ee68e576E97288802D3b887d79Bf7177EfCb92</span></li>
+            <li><strong>PiratesV6:</strong> <span class="token-address">0xc3A9c40fE8664A0aa9243a8DEe27ADf4E4f9e731</span></li>
+            <li><strong>MercenaryV4:</strong> <span class="token-address">0x484d4ae1C70c938a4819B04d4b08DCBFf9639094</span></li>
             <li><strong>PartnershipV2:</strong> <span class="token-address">0xb18323efE4Cc8c36e10D664E287b4e2c82Fe3ad9</span></li>
           </ul>
         </div>
@@ -294,8 +247,8 @@
         <summary>Where can I see the NFT collections?</summary>
         <div class="faq-answer">
           <ul>
-            <li><strong>Pyramid Blocks:</strong> <a href="https://opensea.io/collection/inpinity-pyramid-447084512" target="_blank" rel="noopener">OpenSea collection</a></li>
-            <li><strong>Resources (ERC1155):</strong> <a href="https://opensea.io/collection/0x71e76a6065197acdd1a4d6b736712f80d1fd3d8b" target="_blank" rel="noopener">OpenSea collection</a></li>
+            <li><strong>Pyramid Blocks:</strong> <a href="https://opensea.io/collection/inpinity-pyramid" target="_blank" rel="noopener">OpenSea collection</a></li>
+            <li><strong>Resources (ERC1155):</strong> <a href="https://opensea.io/collection/inpinity-resources" target="_blank" rel="noopener">OpenSea collection</a></li>
           </ul>
         </div>
       </details>
@@ -304,10 +257,9 @@
         <summary>What is the official INPI token address?</summary>
         <div class="faq-answer">
           <p>
-            <strong>NEW INPI token:</strong> <span class="token-address">0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</span><br>
-            <strong>Old token (deprecated):</strong> <span class="token-address">0x15ac8e2c38f0c644123e61011e7113de56038453</span>
+            <strong>INPI token:</strong> <span class="token-address">0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</span>
           </p>
-          <p>Only use the new contract.</p>
+          <p>Only use this contract.</p>
         </div>
       </details>
     </div>
@@ -316,7 +268,7 @@
          MINT / REVEAL
     ========================== -->
     <div class="faq-section">
-      <h2>Mint & Reveal</h2>
+      <h2>Mint &amp; Reveal</h2>
 
       <details class="faq-item">
         <summary>What is a Pyramid Block?</summary>
@@ -329,10 +281,10 @@
       </details>
 
       <details class="faq-item">
-        <summary>Why do I need to “reveal” a block?</summary>
+        <summary>Why do I need to "reveal" a block?</summary>
         <div class="faq-answer">
           <p>
-            Blocks have hidden <strong>Pi & Phi digits</strong>. Revealing unlocks the digits and the block’s <strong>rarity</strong>.
+            Blocks have hidden <strong>Pi &amp; Phi digits</strong>. Revealing unlocks the digits and the block's <strong>rarity</strong>.
             Rarity affects production and gameplay value.
           </p>
         </div>
@@ -355,7 +307,7 @@
         <summary>How do I find a free (unminted) coordinate?</summary>
         <div class="faq-answer">
           <p>
-            Use the “Random free block” button in Mint. It checks random Row/Col and stops when a block is not minted.
+            Use the "Random free block" button in Mint. It checks random Row/Col and stops when a block is not minted.
             You can also explore the <a href="map.html">Pyramid Map</a> and choose a strategic location.
           </p>
         </div>
@@ -366,7 +318,7 @@
          FARMING / RESOURCES
     ========================== -->
     <div class="faq-section">
-      <h2>Farming & Resources (FarmingV3 + ERC1155)</h2>
+      <h2>Farming &amp; Resources (FarmingV6 + ERC1155)</h2>
 
       <details class="faq-item">
         <summary>Where do my farmed resources live?</summary>
@@ -380,10 +332,10 @@
       </details>
 
       <details class="faq-item">
-        <summary>Why do I see “0 resources” even though I farmed?</summary>
+        <summary>Why do I see "0 resources" even though I farmed?</summary>
         <div class="faq-answer">
           <p>
-            Farming only increases “pending” amounts until you <strong>claim</strong>.
+            Farming only increases "pending" amounts until you <strong>claim</strong>.
             If you claimed already, pending goes to 0 and your ERC1155 balances go up.
           </p>
         </div>
@@ -400,7 +352,7 @@
       </details>
 
       <details class="faq-item">
-        <summary>What is Copper/Obsidian “special resource”?</summary>
+        <summary>What is Copper/Obsidian "special resource"?</summary>
         <div class="faq-answer">
           <p>
             Some resources are designed to come from special mechanics (e.g. partnerships, special blocks, events),
@@ -414,7 +366,7 @@
          PIRATES / ATTACKS
     ========================== -->
     <div class="faq-section">
-      <h2>PiratesV3 Attacks (Start → Wait → Execute)</h2>
+      <h2>PiratesV6 Attacks (Start → Wait → Execute)</h2>
 
       <details class="faq-item">
         <summary>How do attacks work?</summary>
@@ -428,7 +380,7 @@
       </details>
 
       <details class="faq-item">
-        <summary>My execute failed with “Nichts zu stehlen” — why?</summary>
+        <summary>My execute failed with "Nothing to steal" — why?</summary>
         <div class="faq-answer">
           <p>
             That means the target had <strong>nothing available to steal</strong> at execution time.
@@ -446,15 +398,15 @@
       </details>
 
       <details class="faq-item">
-        <summary>Why does the “Execute” button sometimes stay visible?</summary>
+        <summary>Why does the "Execute" button sometimes stay visible?</summary>
         <div class="faq-answer">
           <p>
-            Usually because the subgraph still shows the attack as “not executed” (indexing delay) or because
+            Usually because the subgraph still shows the attack as "not executed" (indexing delay) or because
             the execute transaction reverted (so the state did not change).
           </p>
           <p>
             Fix strategy (UI): after any execute attempt, refresh attacks and hide the item if it was executed
-            OR if the execute reverted with “nothing to steal” (treat as failed/finished attempt in UI).
+            OR if the execute reverted with "nothing to steal" (treat as failed/finished attempt in UI).
           </p>
         </div>
       </details>
@@ -463,11 +415,11 @@
         <summary>Can the UI auto-detect stealable resources before attacking?</summary>
         <div class="faq-answer">
           <p>
-            Yes (and you already planned it): when selecting a target, the UI can estimate what the target can hold/produce
+            Yes — when selecting a target, the UI can estimate what the target can hold/produce
             (rarity/row rules) and filter the dropdown to only show likely stealable resources.
           </p>
           <p>
-            Even then, the target can still claim before execute — so “nothing to steal” can remain a real outcome (and that’s good).
+            Even then, the target can still claim before execute — so "nothing to steal" can remain a real outcome (and that's good).
           </p>
         </div>
       </details>
@@ -482,18 +434,17 @@
       </details>
     </div>
 
-
     <!-- =========================
          PARTNERSHIPS / ROADMAP
     ========================== -->
     <div class="faq-section">
-      <h2>Partnerships, Inpinity City & UE5 Roadmap</h2>
+      <h2>Partnerships, Inpinity City &amp; UE5 Roadmap</h2>
 
       <details class="faq-item">
         <summary>What is a partnership in Inpinity?</summary>
         <div class="faq-answer">
           <p>
-            Partnerships are not only “logos”. A partner project can become real gameplay:
+            Partnerships are not only "logos". A partner project can become real gameplay:
             new ERC1155 resources, special drops, catalyst mechanics, partner blocks, and later city crafting materials.
           </p>
         </div>
@@ -521,30 +472,55 @@
     </div>
 
     <p style="text-align:center; margin-top: 2rem;">
-      Still have questions? Visit <a href="contact.html">Contact</a> or email
-      <a href="mailto:xpective@inpinity.online">xpective@inpinity.online</a>.
+      Still have questions? Email
+      <a href="mailto:xpective@inpinity.online">xpective@inpinity.online</a>
+      or join our <a href="https://discord.gg/95yj6Eg6" target="_blank" rel="noopener">Discord</a>.
     </p>
   </main>
 
-  <footer>
+  <footer class="site-footer">
     <p>
       © 2026 Inpinity. All rights reserved. Working with
       <a href="https://base.org/" target="_blank" rel="noopener" style="color: gold;">Base</a>
       and <a href="https://uniswap.org/" target="_blank" rel="noopener" style="color: gold;">Uniswap</a>.
     </p>
     <div class="footer-links">
-      <a href="privacypolicy.html">Privacy Policy</a>
-      <a href="termsofuse.html">Terms of Use</a>
-      <a href="contact.html">Contact</a>
-      <a href="faq.html">FAQ</a>
-      <a href="guestbook.html">Guestbook</a>
-      <a href="advertising.html">Advertising</a>
-      <a href="staking.html">Staking</a>
-      <a href="whitepaper.html">Whitepaper</a>
+      <a href="game.html">Game</a>
       <a href="mint.html">Mint</a>
       <a href="map.html">Pyramid Map</a>
-      <a href="game.html">Game</a>
+      <a href="staking.html">Staking</a>
+      <a href="whitepaper.html">Whitepaper</a>
+      <a href="faq.html">FAQ</a>
+      <a href="privacypolicy.html">Privacy</a>
+      <a href="termsofuse.html">Terms</a>
     </div>
   </footer>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const root = document.documentElement;
+      const dots = document.querySelectorAll(".themeDots .dot");
+
+      function applyTheme(theme) {
+        root.setAttribute("data-theme", theme);
+        try { localStorage.setItem("inpinity-theme", theme); } catch (_) {}
+        dots.forEach(dot => {
+          const active =
+            (theme === "light" && dot.classList.contains("light")) ||
+            (theme === "dark" && dot.classList.contains("dark")) ||
+            (theme === "basic" && dot.classList.contains("basic"));
+          dot.classList.toggle("active", active);
+        });
+      }
+
+      let savedTheme = "basic";
+      try { savedTheme = localStorage.getItem("inpinity-theme") || "basic"; } catch (_) {}
+      applyTheme(savedTheme);
+
+      document.querySelector(".themeDots .dot.light")?.addEventListener("click", () => applyTheme("light"));
+      document.querySelector(".themeDots .dot.dark")?.addEventListener("click", () => applyTheme("dark"));
+      document.querySelector(".themeDots .dot.basic")?.addEventListener("click", () => applyTheme("basic"));
+    });
+  </script>
 </body>
 </html>
