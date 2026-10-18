@@ -1,8 +1,8 @@
 /* =========================================================
    INPINITY TUTORIAL
-   - Onboarding-Modal (5 Schritte, localStorage gate)
-   - Live-Status-Bar
-   - "Erste Schritte"-Checkliste
+   - Onboarding modal (5 steps, localStorage gate)
+   - Live status bar
+   - "Getting Started" checklist
    ========================================================= */
 
    const ONBOARDING_KEY = "inpinity_onboarding_done_v1";
@@ -10,28 +10,28 @@
    const ONBOARDING_STEPS = [
      {
        icon: "🦊",
-       title: "Schritt 1 — Wallet verbinden",
-       text: "Klicke oben auf <strong>Connect Wallet</strong>. Wir nutzen Base Mainnet. Deine Adresse erscheint oben rechts, sobald verbunden."
+       title: "Step 1 — Connect your wallet",
+       text: "Click <strong>Connect Wallet</strong> at the top. We use Base Mainnet. Your address will appear in the top right once connected."
      },
      {
        icon: "🧱",
-       title: "Schritt 2 — Block minten (falls du noch keinen hast)",
-       text: "Im Bereich <strong>Mint a New Block</strong> wählst du Koordinaten und bezahlst mit ETH oder INPI. Jeder Block ist ein NFT."
+       title: "Step 2 — Mint a block (if you don't own one yet)",
+       text: "In the <strong>Mint a New Block</strong> section, choose coordinates and pay with ETH or INPI. Every block is an NFT."
      },
      {
        icon: "🔓",
-       title: "Schritt 3 — Block aufdecken (Reveal)",
-       text: "Klick auf deinen Block im Grid oben → <strong>Reveal</strong>-Button. Damit werden Rarity und Ressourcenproduktion sichtbar."
+       title: "Step 3 — Reveal your block",
+       text: "Click your block in the grid above → <strong>Reveal</strong> button. This exposes rarity and resource production rate."
      },
      {
        icon: "🌾",
-       title: "Schritt 4 — Farming starten",
-       text: "Nach Reveal: <strong>Start Farming</strong>. Dein Block produziert jetzt 24/7 Ressourcen. Alle 24h kannst du mit <strong>Claim</strong> ernten."
+       title: "Step 4 — Start farming",
+       text: "After reveal: <strong>Start Farming</strong>. Your block now produces resources 24/7. Every 24h you can harvest with <strong>Claim</strong>."
      },
      {
        icon: "🛡️⚔️",
-       title: "Schritt 5 — Verteidigen & Angreifen",
-       text: "Andere Spieler können deine Ressourcen stehlen. Schutz: <strong>Mercenary</strong> (Schutz-Level 20/30/50%). Angriff: <strong>Pyramid Map</strong> öffnen → Ziel blocken → Attack."
+       title: "Step 5 — Defend & attack",
+       text: "Other players can steal your resources. Defense: <strong>Mercenary</strong> (protection 20/30/50%). Attack: open <strong>Pyramid Map</strong> → click target → Attack."
      }
    ];
    
@@ -74,7 +74,7 @@
    
      if (prevBtn) prevBtn.style.visibility = currentStep === 0 ? "hidden" : "visible";
      if (nextBtn) {
-       nextBtn.textContent = currentStep === total - 1 ? "Los geht's 🚀" : "Weiter →";
+       nextBtn.textContent = currentStep === total - 1 ? "Let's go 🚀" : "Next →";
      }
    }
    
@@ -140,7 +140,7 @@
    
      const protectionActive = readText("protectionStatusText");
      if (protectionEl) {
-       protectionEl.textContent = protectionActive && protectionActive !== "Inactive" ? "Aktiv" : "—";
+       protectionEl.textContent = protectionActive && protectionActive !== "Inactive" ? "Active" : "—";
        protectionEl.style.color = protectionActive && protectionActive !== "Inactive" ? "#5CFF95" : "";
      }
    
@@ -152,12 +152,12 @@
          const endTime = parseInt(item.querySelector(".attack-status")?.dataset?.endtime || "0", 10);
          if (endTime > 0 && endTime <= now) readyCount++;
        });
-       attacksEl.textContent = attacks.length ? `${attacks.length} (${readyCount} bereit)` : "0";
+       attacksEl.textContent = attacks.length ? `${attacks.length} (${readyCount} ready)` : "0";
        attacksEl.style.color = readyCount > 0 ? "#FF6B6B" : "";
      }
    }
    
-   /* ==================== "ERSTE SCHRITTE" CHECKLISTE ==================== */
+   /* ==================== "GETTING STARTED" CHECKLIST ==================== */
    
    export function initChecklist() {
      updateChecklist();
