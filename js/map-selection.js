@@ -711,7 +711,9 @@
      let isPhiMirrorMatch = false;
      let mirrorPi = "?";
      let mirrorPhi = "?";
-     let mirrorRevealed = false;
+     
+     // NEU: Status-Tracking für den Mirror
+     let mirrorStatus = "unknown"; // "revealed", "unrevealed", "not_minted"
    
      if (token?.owner && nftReadOnlyContract) {
        try {
@@ -745,14 +747,18 @@
              if (rev) {
                mirrorPi = readTupleValue(mirrorInfo, "piDigit", 0, 0);
                mirrorPhi = readTupleValue(mirrorInfo, "phiDigit", 1, 0);
-               mirrorRevealed = true;
+               mirrorStatus = "revealed";
                
                // Getrennte Prüfung für Pi und Phi
                isPiMirrorMatch = (piDigit === mirrorPi);
                isPhiMirrorMatch = (phiDigit === mirrorPhi);
+             } else {
+               mirrorStatus = "unrevealed";
              }
              
-           } catch(e) { /* Block existiert evtl. noch nicht */ }
+           } catch(e) { 
+             mirrorStatus = "not_minted"; 
+           }
          }
        } catch (e) {
          console.warn("Could not fetch blockData", e);
@@ -889,15 +895,35 @@
              <span class="detail-value" style="color: ${isAxis ? '#2ecc71' : '#98a9b9'}">${isAxis ? '✅ Yes' : '❌ No'}</span>
            </div>
            
-           <!-- GETRENNTE SPIEGEL-CHECKS FÜR PI UND PHI -->
-           ${!isAxis && mirrorRevealed ? `
+           <!-- GETRENNTE SPIEGEL-CHECKS FÜR PI UND PHI (Zeigt jetzt immer den Status an) -->
+           ${!isAxis ? `
            <div class="detail-row math-data-row">
              <span class="detail-label">Mirror π (Pi)</span>
-             <span class="detail-value" style="color: ${isPiMirrorMatch ? '#4a90e2' : '#98a9b9'}">${isPiMirrorMatch ? '✅ Match!' : '❌ Differs'}</span>
+             <span class="detail-value" style="color: ${
+               mirrorStatus === 'revealed' 
+                 ? (isPiMirrorMatch ? '#4a90e2' : '#98a9b9') 
+                 : '#98a9b9'
+             }">
+               ${
+                 mirrorStatus === 'revealed' 
+                   ? (isPiMirrorMatch ? '✅ Match!' : '❌ Differs') 
+                   : (mirrorStatus === 'unrevealed' ? '⏳ Unrevealed' : '— Not Minted')
+               }
+             </span>
            </div>
            <div class="detail-row math-data-row">
              <span class="detail-label">Mirror φ (Phi)</span>
-             <span class="detail-value" style="color: ${isPhiMirrorMatch ? '#d4af37' : '#98a9b9'}">${isPhiMirrorMatch ? '✅ Match!' : '❌ Differs'}</span>
+             <span class="detail-value" style="color: ${
+               mirrorStatus === 'revealed' 
+                 ? (isPhiMirrorMatch ? '#d4af37' : '#98a9b9') 
+                 : '#98a9b9'
+             }">
+               ${
+                 mirrorStatus === 'revealed' 
+                   ? (isPhiMirrorMatch ? '✅ Match!' : '❌ Differs') 
+                   : (mirrorStatus === 'unrevealed' ? '⏳ Unrevealed' : '— Not Minted')
+               }
+             </span>
            </div>
            ` : ''}
    
