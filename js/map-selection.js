@@ -23,7 +23,7 @@
      getReadOnlyNFTContract
    } from "./map-data.js";
    import { populateAttackerSelect } from "./map-ui.js";
-   import { drawPyramid } from "./map-render.js"; // NEU: Import für Canvas-Update
+   import { drawPyramid } from "./map-render.js";
    
    function readTupleValue(tuple, key, index, fallback = null) {
      if (!tuple) return fallback;
@@ -646,6 +646,54 @@
      }
    }
    
+   export async function precalculateMatches() {
+     if (mapState.isCalculatingMatches) return;
+     mapState.isCalculatingMatches = true;
+   
+     if (!mapState.piMatches) mapState.piMatches = new Set();
+     if (!mapState.phiMatches) mapState.phiMatches = new Set();
+   
+     const nftReadOnlyContract = getReadOnlyNFTContract();
+     if (!nftReadOnlyContract) return;
+   
+     for (let row = 0; row < 100; row++) {
+       for (let col = 0; col < row; col++) { // Nur linke Seite berechnen
+         const tokenId = (row * 2048) + col;
+         const mirrorCol = (2 * row) - col;
+         const mirrorTokenId = (row * 2048) + mirrorCol;
+   
+         try {
+           const [info1, info2] = await Promise.all([
+             nftReadOnlyContract.blockData(tokenId),
+             nftReadOnlyContract.blockData(mirrorTokenId)
+           ]);
+   
+           const pi1 = Number(readTupleValue(info1, "piDigit", 0, 0));
+           const phi1 = Number(readTupleValue(info1, "phiDigit", 1, 0));
+           const pi2 = Number(readTupleValue(info2, "piDigit", 0, 0));
+           const phi2 = Number(readTupleValue(info2, "phiDigit", 1, 0));
+   
+           if (pi1 === pi2) {
+             mapState.piMatches.add(String(tokenId));
+             mapState.piMatches.add(String(mirrorTokenId));
+           }
+           if (phi1 === phi2) {
+             mapState.phiMatches.add(String(tokenId));
+             mapState.phiMatches.add(String(mirrorTokenId));
+           }
+         } catch (e) { /* ignore RPC errors */ }
+       }
+       
+       // Karte regelmäßig updaten, damit der User sieht wie es wächst
+       if (row % 5 === 0) drawPyramid();
+       // Kurze Pause, um RPC nicht zu überlasten
+       await new Promise(resolve => setTimeout(resolve, 50));
+     }
+     
+     mapState.isCalculatingMatches = false;
+     drawPyramid();
+   }
+   
    export async function updateSidebar(tokenId) {
      const tokens = getAllMapTokens();
      const nftReadOnlyContract = getReadOnlyNFTContract();
@@ -725,11 +773,9 @@
          isAxis = (row === col);
          piEqualsPhi = (piDigit === phiDigit);
    
-         // DIE KORREKTE TOKEN ID BERECHNUNG FÜR DEIN 2048ER RASTER
          const mirrorCol = (2 * row) - col;
          
          if (!isAxis && mirrorCol >= 0) {
-           // Jede Reihe startet bei row * 2048
            const mirrorTokenId = (row * 2048) + mirrorCol;
            
            try {
@@ -741,25 +787,7 @@
              isPiMirrorMatch = (piDigit === mirrorPi);
              isPhiMirrorMatch = (phiDigit === mirrorPhi);
              
-             // NEU: Speichere Matches im globalen State für die Canvas-Karte
-             if (!mapState.piMatches) mapState.piMatches = new Set();
-             if (!mapState.phiMatches) mapState.phiMatches = new Set();
-   
-             if (isPiMirrorMatch) {
-               mapState.piMatches.add(String(tokenId));
-               mapState.piMatches.add(String(mirrorTokenId));
-             } else {
-               mapState.piMatches.delete(String(tokenId));
-               mapState.piMatches.delete(String(mirrorTokenId));
-             }
-   
-             if (isPhiMirrorMatch) {
-               mapState.phiMatches.add(String(tokenId));
-               mapState.phiMatches.add(String(mirrorTokenId));
-             } else {
-               mapState.phiMatches.delete(String(tokenId));
-               mapState.phiMatches.delete(String(mirrorTokenId));
-             }
+             // Matches werden hier nicht mehr gesetzt, das macht jetzt precalculateMatches()
              
            } catch(e) { /* Block existiert nicht */ }
          }
@@ -979,7 +1007,6 @@
        if (pirateBoostInput) pirateBoostInput.style.display = "block";
    
        await refreshSelectedTargetAttackPreview();
-       // Canvas nach dem Update neu zeichnen, damit die Matches pulsieren
        drawPyramid();
        return;
      }
@@ -1031,7 +1058,6 @@
          pirateBoostInput.style.display = "none";
        }
    
-       // Canvas nach dem Update neu zeichnen, damit die Matches pulsieren
        drawPyramid();
        return;
      }
@@ -1040,6 +1066,5 @@
      if (buyBoostBtn) buyBoostBtn.style.display = "none";
      if (pirateBoostInput) pirateBoostInput.style.display = "none";
      
-     // Canvas nach dem Update neu zeichnen
      drawPyramid();
    }

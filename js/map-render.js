@@ -78,20 +78,6 @@
      const userAttacks = getUserAttacks();
    
      ctx.clearRect(0, 0, canvas.width, canvas.height);
-     
-     // --- SURPRISE: Kosmischer Hintergrund ---
-     const time = Date.now();
-     const rotation = time / 10000; // Sehr langsame Rotation
-     ctx.save();
-     ctx.translate(canvas.width / 2, canvas.height / 2);
-     ctx.rotate(rotation);
-     ctx.font = 'bold 40vw "Inter", sans-serif';
-     ctx.fillStyle = 'rgba(212, 175, 55, 0.02)'; // Extrem transparentes Gold
-     ctx.textAlign = 'center';
-     ctx.textBaseline = 'middle';
-     ctx.fillText('π', -canvas.width / 4, 0);
-     ctx.fillText('φ', canvas.width / 4, 0);
-     ctx.restore();
    
      ctx.save();
      ctx.translate(mapState.offsetX, mapState.offsetY);
@@ -100,10 +86,9 @@
      const now = Math.floor(Date.now() / 1000);
      
      // Pulsierende Animation berechnen (0.0 bis 1.0)
-     const pulse = (Math.sin(time / 300) + 1) / 2;
+     const pulse = (Math.sin(Date.now() / 300) + 1) / 2;
      const piAlpha = 0.1 + pulse * 0.4; // Blau transparent
      const phiAlpha = 0.1 + pulse * 0.4; // Rot transparent
-     const axisAlpha = 0.2 + pulse * 0.3; // Goldene Achse
    
      for (let row = 0; row < 100; row++) {
        const blocksInRow = 2 * row + 1;
@@ -155,16 +140,6 @@
          // Basis-Block zeichnen
          ctx.fillStyle = fillColor;
          ctx.fillRect(x, y, BASE_BLOCK_SIZE, BASE_BLOCK_SIZE);
-   
-         // --- SURPRISE: Goldene 0-Achse (Symmetrie-Spiegel) ---
-         if (row === col) {
-           ctx.fillStyle = `rgba(212, 175, 55, ${axisAlpha})`;
-           ctx.fillRect(x, y, BASE_BLOCK_SIZE, BASE_BLOCK_SIZE);
-           // Dezenter goldener Rahmen um die Achse
-           ctx.strokeStyle = `rgba(212, 175, 55, 0.8)`;
-           ctx.lineWidth = 1;
-           ctx.strokeRect(x, y, BASE_BLOCK_SIZE, BASE_BLOCK_SIZE);
-         }
    
          // --- MATCH PULSIEREN (Pi = Blau, Phi = Rot) ---
          const isPiMatch = mapState.piMatches?.has(tokenId);
@@ -228,8 +203,7 @@
      if (animationFrameId) return;
      
      const loop = () => {
-       // Nur zeichnen, wenn es Matches gibt, um Performance zu sparen.
-       // Ansonsten reicht das Zeichnen bei Interaktion (Drag/Zoom).
+       // Zeichnet nur neu, wenn es Matches gibt, um Performance zu sparen.
        if ((mapState.piMatches?.size > 0) || (mapState.phiMatches?.size > 0)) {
          drawPyramid();
        }
