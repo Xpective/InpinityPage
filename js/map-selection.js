@@ -877,17 +877,17 @@
              <span class="detail-value" style="color: ${isAxis ? '#2ecc71' : '#98a9b9'}">${isAxis ? '✅ Yes' : '❌ No'}</span>
            </div>
            
-           <!-- GETRENNTE SPIEGEL-CHECKS -->
+           <!-- GETRENNTE SPIEGEL-CHECKS MIT PULSIERENDEN KLASSEN -->
            ${!isAxis ? `
-           <div class="detail-row math-data-row">
+           <div class="detail-row math-data-row ${isPiMirrorMatch ? 'pi-match-pulse' : ''}">
              <span class="detail-label">Mirror π</span>
              <span class="detail-value" style="color: ${isPiMirrorMatch ? '#4a90e2' : '#98a9b9'}">
                <span style="font-weight:bold;">[${mirrorPi}]</span> ${isPiMirrorMatch ? '✅ Match!' : '❌ Differs'}
              </span>
            </div>
-           <div class="detail-row math-data-row">
+           <div class="detail-row math-data-row ${isPhiMirrorMatch ? 'phi-match-pulse' : ''}">
              <span class="detail-label">Mirror φ</span>
-             <span class="detail-value" style="color: ${isPhiMirrorMatch ? '#d4af37' : '#98a9b9'}">
+             <span class="detail-value" style="color: ${isPhiMirrorMatch ? '#e74c3c' : '#98a9b9'}">
                <span style="font-weight:bold;">[${mirrorPhi}]</span> ${isPhiMirrorMatch ? '✅ Match!' : '❌ Differs'}
              </span>
            </div>
