@@ -700,7 +700,7 @@
      let protectionSlotTxt = "-";
      let protectionOwnerTxt = "-";
    
-     // FETCH MATHEMATICAL DATA
+     // FETCH MATHEMATICAL DATA & SYMMETRY MIRROR
      let piDigit = "?";
      let phiDigit = "?";
      let isAxis = false;
@@ -715,20 +715,27 @@
          piDigit = blockInfo.piDigit;
          phiDigit = blockInfo.phiDigit;
          
-         const row = blockInfo.row.toNumber ? blockInfo.row.toNumber() : Number(blockInfo.row);
-         const col = blockInfo.col.toNumber ? blockInfo.col.toNumber() : Number(blockInfo.col);
+         const numericTokenId = parseInt(tokenId, 10);
          
-         // KORREKTUR FÜR PYRAMIDE (1, 3, 5, 7... Blöcke pro Reihe)
-         // Die Mitte (0-Achse) liegt immer bei (row - 1)
-         isAxis = (col === row - 1);
+         // 0-basierte Berechnung (Row 0, Col 0 ist die Spitze)
+         const row = Math.ceil(Math.sqrt(numericTokenId)) - 1;
+         
+         // Start-ID der aktuellen Reihe
+         const startIdOfRow = Math.pow(row, 2) + 1;
+         
+         // Spalte (Index) innerhalb der Reihe (0-basiert)
+         const col = numericTokenId - startIdOfRow;
+   
+         // 0-Achse: Die Mitte ist immer da, wo col === row ist
+         isAxis = (col === row);
          piEqualsPhi = (piDigit === phiDigit);
    
          // BERECHNUNG DES SYMMETRIE-SPIEGELS
-         const mirrorCol = (2 * (row - 1)) - col;
+         // Formel für den Spiegel-Index: (2 * row) - col
+         const mirrorCol = (2 * row) - col;
          
+         // Wenn es nicht der mittlere Block ist (der spiegelt sich selbst)
          if (mirrorCol !== col && mirrorCol >= 0) {
-           // Start-ID der aktuellen Reihe: (row - 1)^2 + 1
-           const startIdOfRow = Math.pow(row - 1, 2) + 1;
            const mirrorTokenId = startIdOfRow + mirrorCol;
            
            try {
@@ -875,6 +882,8 @@
              <span class="detail-label">0-Axis (Center)</span>
              <span class="detail-value" style="color: ${isAxis ? '#2ecc71' : '#98a9b9'}">${isAxis ? '✅ Yes' : '❌ No'}</span>
            </div>
+           
+           <!-- Der Mirror-Check wird NUR angezeigt, wenn es nicht die Mitte ist -->
            ${!isAxis && mirrorPi !== "?" ? `
            <div class="detail-row math-data-row">
              <span class="detail-label">Mirror (Opposite)</span>
