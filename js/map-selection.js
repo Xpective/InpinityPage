@@ -716,42 +716,39 @@
        try {
          const blockInfo = await nftReadOnlyContract.blockData(tokenId);
          
-         // Werte sicher auslesen (Array-Indizes: 0=pi, 1=phi, 2=row, 3=col, 4=revealed)
+         // Werte sicher in echte Zahlen umwandeln
          piDigit = Number(readTupleValue(blockInfo, "piDigit", 0, 0));
          phiDigit = Number(readTupleValue(blockInfo, "phiDigit", 1, 0));
          
-         const row = Number(readTupleValue(blockInfo, "row", 2, 0)); // Startet bei 1
-         const col = Number(readTupleValue(blockInfo, "col", 3, 0)); // Startet bei 0
+         // row und col als echte Zahlen (0-basiert)
+         const row = Number(readTupleValue(blockInfo, "row", 2, 0));
+         const col = Number(readTupleValue(blockInfo, "col", 3, 0));
    
-         // DIE ACHSE: (z.B. row 1 col 0 / row 2 col 1 / row 3 col 2)
-         isAxis = (col === row - 1);
+         // DIE ACHSE: 0,0 / 1,1 / 2,2 / 3,3 ... (Da row und col bei 0 starten)
+         isAxis = (row === col);
          piEqualsPhi = (piDigit === phiDigit);
    
          // BERECHNUNG DES SYMMETRIE-SPIEGELS
-         const mirrorCol = (2 * (row - 1)) - col;
+         const mirrorCol = (2 * row) - col;
          
          // Wenn es nicht der mittlere Block ist
          if (!isAxis && mirrorCol >= 0) {
-           // Start ID der Reihe im Contract (exakt: 1, 4, 9, 16...)
-           const startIdOfRow = Math.pow(row - 1, 2) + 1;
+           // Start ID der Reihe im Contract (exakt 0-basiert: 0, 1, 4, 9, 16...)
+           const startIdOfRow = Math.pow(row, 2);
            const mirrorTokenId = startIdOfRow + mirrorCol;
            
            try {
              const mirrorInfo = await nftReadOnlyContract.blockData(mirrorTokenId);
              
-             const rev = readTupleValue(mirrorInfo, "revealed", 4, false);
+             mirrorPi = Number(readTupleValue(mirrorInfo, "piDigit", 0, 0));
+             mirrorPhi = Number(readTupleValue(mirrorInfo, "phiDigit", 1, 0));
              
-             if (rev) {
-               mirrorPi = Number(readTupleValue(mirrorInfo, "piDigit", 0, 0));
-               mirrorPhi = Number(readTupleValue(mirrorInfo, "phiDigit", 1, 0));
-               mirrorStatus = "revealed";
-               
-               // REINER ZAHLENVERGLEICH
-               isPiMirrorMatch = (piDigit === mirrorPi);
-               isPhiMirrorMatch = (phiDigit === mirrorPhi);
-             } else {
-               mirrorStatus = "unrevealed";
-             }
+             const rev = readTupleValue(mirrorInfo, "revealed", 4, false);
+             mirrorStatus = rev ? "revealed" : "unrevealed";
+             
+             // REINER ZAHLENVERGLEICH (Pi und Phi getrennt)
+             isPiMirrorMatch = (piDigit === mirrorPi);
+             isPhiMirrorMatch = (phiDigit === mirrorPhi);
              
            } catch(e) { 
              mirrorStatus = "not_minted"; 
@@ -892,13 +889,12 @@
              <span class="detail-value" style="color: ${isAxis ? '#2ecc71' : '#98a9b9'}">${isAxis ? '✅ Yes' : '❌ No'}</span>
            </div>
            
-           <!-- GETRENNTE SPIEGEL-CHECKS OHNE IDs, ABER MIT UNREVEALED STATUS -->
+           <!-- GETRENNTE SPIEGEL-CHECKS OHNE IDs -->
            ${!isAxis ? `
            <div class="detail-row math-data-row">
              <span class="detail-label">Mirror π</span>
              <span class="detail-value" style="color: ${isPiMirrorMatch ? '#4a90e2' : '#98a9b9'}">
                ${
-                 mirrorStatus === 'unrevealed' ? '⏳ Unrevealed' :
                  mirrorStatus === 'not_minted' ? '— Not Minted' : 
                  `<span style="font-weight:bold;">[${mirrorPi}]</span> ${isPiMirrorMatch ? '✅ Match!' : '❌ Differs'}`
                }
@@ -908,7 +904,6 @@
              <span class="detail-label">Mirror φ</span>
              <span class="detail-value" style="color: ${isPhiMirrorMatch ? '#d4af37' : '#98a9b9'}">
                ${
-                 mirrorStatus === 'unrevealed' ? '⏳ Unrevealed' :
                  mirrorStatus === 'not_minted' ? '— Not Minted' : 
                  `<span style="font-weight:bold;">[${mirrorPhi}]</span> ${isPhiMirrorMatch ? '✅ Match!' : '❌ Differs'}`
                }
