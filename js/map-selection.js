@@ -706,20 +706,20 @@
      let isAxis = false;
      let piEqualsPhi = false;
      
-     // Getrennte Spiegel-Variablen
      let isPiMirrorMatch = false;
      let isPhiMirrorMatch = false;
      let mirrorPi = "?";
      let mirrorPhi = "?";
      let mirrorStatus = "unknown"; 
+     let mirrorTokenId = 0;
    
      if (token?.owner && nftReadOnlyContract) {
        try {
          const blockInfo = await nftReadOnlyContract.blockData(tokenId);
-         piDigit = blockInfo.piDigit;
-         phiDigit = blockInfo.phiDigit;
          
-         // DIREKTES AUSLESEN AUS DEM SMART CONTRACT (0-basiert)
+         piDigit = readTupleValue(blockInfo, "piDigit", 0, "?");
+         phiDigit = readTupleValue(blockInfo, "phiDigit", 1, "?");
+         
          const row = blockInfo.row.toNumber ? blockInfo.row.toNumber() : Number(blockInfo.row);
          const col = blockInfo.col.toNumber ? blockInfo.col.toNumber() : Number(blockInfo.col);
    
@@ -727,27 +727,27 @@
          isAxis = (row === col);
          piEqualsPhi = (piDigit === phiDigit);
    
-         // BERECHNUNG DES SYMMETRIE-SPIEGELS
+         // BERECHNUNG DES SYMMETRIE-SPIEGELS (Spalte und Token ID)
          const mirrorCol = (2 * row) - col;
          
          // Wenn es nicht der mittlere Block ist
-         if (mirrorCol !== col && mirrorCol >= 0) {
+         if (!isAxis && mirrorCol >= 0) {
            // Start ID der Reihe im Contract (exakt 0-basiert: 0, 1, 4, 9, 16...)
            const startIdOfRow = Math.pow(row, 2);
-           const mirrorTokenId = startIdOfRow + mirrorCol;
+           mirrorTokenId = startIdOfRow + mirrorCol;
            
            try {
              const mirrorInfo = await nftReadOnlyContract.blockData(mirrorTokenId);
              
-             mirrorPi = readTupleValue(mirrorInfo, "piDigit", 0, 0);
-             mirrorPhi = readTupleValue(mirrorInfo, "phiDigit", 1, 0);
+             mirrorPi = readTupleValue(mirrorInfo, "piDigit", 0, "?");
+             mirrorPhi = readTupleValue(mirrorInfo, "phiDigit", 1, "?");
              
              const rev = readTupleValue(mirrorInfo, "revealed", 4, false);
              mirrorStatus = rev ? "revealed" : "unrevealed";
              
-             // Getrennte Prüfung für Pi und Phi
-             isPiMirrorMatch = (piDigit === mirrorPi);
-             isPhiMirrorMatch = (phiDigit === mirrorPhi);
+             // REINER ZAHLENVERGLEICH (Pi und Phi getrennt)
+             isPiMirrorMatch = (piDigit == mirrorPi);
+             isPhiMirrorMatch = (phiDigit == mirrorPhi);
              
            } catch(e) { 
              mirrorStatus = "not_minted"; 
@@ -888,10 +888,10 @@
              <span class="detail-value" style="color: ${isAxis ? '#2ecc71' : '#98a9b9'}">${isAxis ? '✅ Yes' : '❌ No'}</span>
            </div>
            
-           <!-- GETRENNTE SPIEGEL-CHECKS FÜR PI UND PHI (Zeigt jetzt immer den Status an) -->
-           ${!isAxis ? `
+           <!-- GETRENNTE SPIEGEL-CHECKS (Token ID bleibt im Code, Zahlen werden angezeigt) -->
+           ${!isAxis && mirrorTokenId > 0 ? `
            <div class="detail-row math-data-row">
-             <span class="detail-label">Mirror π (Pi)</span>
+             <span class="detail-label" title="Comparing with block #${mirrorTokenId}">Mirror π (#${mirrorTokenId})</span>
              <span class="detail-value" style="color: ${isPiMirrorMatch ? '#4a90e2' : '#98a9b9'}">
                ${
                  mirrorStatus === 'not_minted' ? '— Not Minted' : 
@@ -900,7 +900,7 @@
              </span>
            </div>
            <div class="detail-row math-data-row">
-             <span class="detail-label">Mirror φ (Phi)</span>
+             <span class="detail-label" title="Comparing with block #${mirrorTokenId}">Mirror φ (#${mirrorTokenId})</span>
              <span class="detail-value" style="color: ${isPhiMirrorMatch ? '#d4af37' : '#98a9b9'}">
                ${
                  mirrorStatus === 'not_minted' ? '— Not Minted' : 
