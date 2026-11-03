@@ -711,30 +711,30 @@
      let mirrorPi = "?";
      let mirrorPhi = "?";
      let mirrorStatus = "unknown"; 
-     let mirrorTokenId = 0;
    
      if (token?.owner && nftReadOnlyContract) {
        try {
          const blockInfo = await nftReadOnlyContract.blockData(tokenId);
          
+         // FIX: Index-basiertes Auslesen, da der Contract Arrays zurückgibt (0=pi, 1=phi, 2=row, 3=col)
          piDigit = readTupleValue(blockInfo, "piDigit", 0, "?");
          phiDigit = readTupleValue(blockInfo, "phiDigit", 1, "?");
          
-         const row = blockInfo.row.toNumber ? blockInfo.row.toNumber() : Number(blockInfo.row);
-         const col = blockInfo.col.toNumber ? blockInfo.col.toNumber() : Number(blockInfo.col);
+         const row = readTupleValue(blockInfo, "row", 2, 0);
+         const col = readTupleValue(blockInfo, "col", 3, 0);
    
          // DIE ACHSE: 0,0 / 1,1 / 2,2 / 3,3 ...
          isAxis = (row === col);
          piEqualsPhi = (piDigit === phiDigit);
    
-         // BERECHNUNG DES SYMMETRIE-SPIEGELS (Spalte und Token ID)
+         // BERECHNUNG DES SYMMETRIE-SPIEGELS
          const mirrorCol = (2 * row) - col;
          
          // Wenn es nicht der mittlere Block ist
          if (!isAxis && mirrorCol >= 0) {
            // Start ID der Reihe im Contract (exakt 0-basiert: 0, 1, 4, 9, 16...)
            const startIdOfRow = Math.pow(row, 2);
-           mirrorTokenId = startIdOfRow + mirrorCol;
+           const mirrorTokenId = startIdOfRow + mirrorCol;
            
            try {
              const mirrorInfo = await nftReadOnlyContract.blockData(mirrorTokenId);
@@ -888,10 +888,10 @@
              <span class="detail-value" style="color: ${isAxis ? '#2ecc71' : '#98a9b9'}">${isAxis ? '✅ Yes' : '❌ No'}</span>
            </div>
            
-           <!-- GETRENNTE SPIEGEL-CHECKS (Token ID bleibt im Code, Zahlen werden angezeigt) -->
-           ${!isAxis && mirrorTokenId > 0 ? `
+           <!-- GETRENNTE SPIEGEL-CHECKS OHNE TOKEN IDs -->
+           ${!isAxis ? `
            <div class="detail-row math-data-row">
-             <span class="detail-label" title="Comparing with block #${mirrorTokenId}">Mirror π (#${mirrorTokenId})</span>
+             <span class="detail-label">Mirror π</span>
              <span class="detail-value" style="color: ${isPiMirrorMatch ? '#4a90e2' : '#98a9b9'}">
                ${
                  mirrorStatus === 'not_minted' ? '— Not Minted' : 
@@ -900,7 +900,7 @@
              </span>
            </div>
            <div class="detail-row math-data-row">
-             <span class="detail-label" title="Comparing with block #${mirrorTokenId}">Mirror φ (#${mirrorTokenId})</span>
+             <span class="detail-label">Mirror φ</span>
              <span class="detail-value" style="color: ${isPhiMirrorMatch ? '#d4af37' : '#98a9b9'}">
                ${
                  mirrorStatus === 'not_minted' ? '— Not Minted' : 
