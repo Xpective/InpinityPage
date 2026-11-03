@@ -705,7 +705,10 @@
      let phiDigit = "?";
      let isAxis = false;
      let piEqualsPhi = false;
-     let isMirrorMatch = false;
+     
+     // Getrennte Spiegel-Variablen
+     let isPiMirrorMatch = false;
+     let isPhiMirrorMatch = false;
      let mirrorPi = "?";
      let mirrorPhi = "?";
    
@@ -737,9 +740,10 @@
              mirrorPi = mirrorInfo.piDigit;
              mirrorPhi = mirrorInfo.phiDigit;
              
-             if (piDigit === mirrorPi && phiDigit === mirrorPhi) {
-               isMirrorMatch = true;
-             }
+             // Getrennte Prüfung für Pi und Phi
+             isPiMirrorMatch = (piDigit === mirrorPi);
+             isPhiMirrorMatch = (phiDigit === mirrorPhi);
+             
            } catch(e) { /* Block existiert evtl. noch nicht */ }
          }
        } catch (e) {
@@ -877,11 +881,15 @@
              <span class="detail-value" style="color: ${isAxis ? '#2ecc71' : '#98a9b9'}">${isAxis ? '✅ Yes' : '❌ No'}</span>
            </div>
            
-           <!-- Der Mirror-Check wird NUR angezeigt, wenn es nicht die Mitte ist -->
+           <!-- GETRENNTE SPIEGEL-CHECKS FÜR PI UND PHI -->
            ${!isAxis && mirrorPi !== "?" ? `
            <div class="detail-row math-data-row">
-             <span class="detail-label">Mirror (Opposite)</span>
-             <span class="detail-value" style="color: ${isMirrorMatch ? '#2ecc71' : '#98a9b9'}">${isMirrorMatch ? '✅ Match!' : '❌ Differs'}</span>
+             <span class="detail-label">Mirror π (Pi)</span>
+             <span class="detail-value" style="color: ${isPiMirrorMatch ? '#4a90e2' : '#98a9b9'}">${isPiMirrorMatch ? '✅ Match!' : '❌ Differs'}</span>
+           </div>
+           <div class="detail-row math-data-row">
+             <span class="detail-label">Mirror φ (Phi)</span>
+             <span class="detail-value" style="color: ${isPhiMirrorMatch ? '#d4af37' : '#98a9b9'}">${isPhiMirrorMatch ? '✅ Match!' : '❌ Differs'}</span>
            </div>
            ` : ''}
    
