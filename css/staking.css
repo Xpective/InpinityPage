@@ -825,4 +825,30 @@
     .nft-position-card {
         padding: 0.85rem;
     }
+    /* ═══════════════════════════════════════════════════════════
+   MINI-FIXES FÜR TUTORIAL-INTEGRATION
+   ═══════════════════════════════════════════════════════════ */
+
+/* 1) Light Theme: Füllstandsbalken-Glow dezenter */
+[data-theme="light"] .pool-fill-progress {
+    box-shadow: 0 0 8px rgba(0, 200, 83, 0.2);
+}
+
+/* 2) Help-Button: nicht hinter dem Site-Footer verschwinden lassen */
+.staking-page .tutorial-help-btn {
+    z-index: 1500;
+}
+
+/* 3) Mobile: Help-Button über dem Wallet-Bar platzieren, 
+      damit er nicht mit dem "Connect Wallet"-Button überlappt */
+@media (max-width: 768px) {
+    .tutorial-help-btn {
+        bottom: 1rem;
+        right: 1rem;
+        z-index: 1500;
+    }
+    .staking-page {
+        padding-bottom: 6rem; /* extra Platz für den Help-Button */
+    }
+}
 }

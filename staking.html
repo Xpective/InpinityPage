@@ -20,6 +20,349 @@
     <link rel="icon" type="image/png" href="favicon.webp">
     <meta name="description" content="Stake INPI tokens or Uniswap V4 LP positions on Base and earn passive rewards.">
     <meta name="theme-color" content="#140f1f">
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- TUTORIAL CSS                                            -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <style>
+    .tutorial-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+    }
+    .tutorial-overlay.active {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .tutorial-modal {
+        position: relative;
+        width: 100%;
+        max-width: 620px;
+        max-height: 92vh;
+        overflow-y: auto;
+        background: linear-gradient(160deg, #1a1030 0%, #140f1f 100%);
+        border: 1px solid rgba(255, 215, 0, 0.4);
+        border-radius: 20px;
+        padding: 2rem 2rem 1.25rem;
+        color: #fff;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 80px rgba(255, 215, 0, 0.08);
+        transform: scale(0.95);
+        transition: transform 0.25s ease;
+    }
+    .tutorial-overlay.active .tutorial-modal {
+        transform: scale(1);
+    }
+
+    .tutorial-close {
+        position: absolute;
+        top: 0.75rem;
+        right: 0.85rem;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.08);
+        border: none;
+        color: #fff;
+        font-size: 1.4rem;
+        line-height: 1;
+        cursor: pointer;
+        transition: background 0.15s ease, transform 0.15s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+    }
+    .tutorial-close:hover {
+        background: rgba(255, 255, 255, 0.15);
+        transform: rotate(90deg);
+    }
+
+    .tutorial-progress {
+        display: flex;
+        gap: 0.4rem;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+    }
+    .tutorial-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+    }
+    .tutorial-dot.active {
+        background: var(--quinary-color, #ffd700);
+        width: 24px;
+        border-radius: 4px;
+        box-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+    }
+    .tutorial-dot.passed {
+        background: rgba(255, 215, 0, 0.5);
+    }
+
+    .tutorial-slide { display: none; animation: tutorialFadeIn 0.35s ease; }
+    .tutorial-slide.active { display: block; }
+
+    @keyframes tutorialFadeIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .tutorial-icon {
+        font-size: 3.2rem;
+        text-align: center;
+        margin-bottom: 1rem;
+        filter: drop-shadow(0 4px 12px rgba(255, 215, 0, 0.35));
+        animation: tutorialBounce 2s ease-in-out infinite;
+    }
+    @keyframes tutorialBounce {
+        0%, 100% { transform: translateY(0); }
+        50%      { transform: translateY(-6px); }
+    }
+
+    .tutorial-slide h2 {
+        font-size: 1.55rem;
+        color: var(--quinary-color, #ffd700);
+        text-align: center;
+        margin: 0 0 1.2rem;
+        font-weight: 900;
+        letter-spacing: -0.01em;
+    }
+
+    .tutorial-slide p {
+        line-height: 1.65;
+        margin: 0 0 1rem;
+        color: rgba(255, 255, 255, 0.88);
+        font-size: 0.95rem;
+    }
+    .tutorial-slide p:last-child { margin-bottom: 0; }
+    .tutorial-slide strong { color: #fff; font-weight: 700; }
+    .tutorial-slide a {
+        color: var(--quinary-color, #ffd700);
+        text-decoration: underline;
+        text-underline-offset: 2px;
+    }
+    .tutorial-slide code {
+        font-family: "Roboto Mono", monospace;
+        background: rgba(0, 0, 0, 0.35);
+        padding: 0.15rem 0.45rem;
+        border-radius: 5px;
+        font-size: 0.85em;
+        color: var(--quinary-color, #ffd700);
+    }
+
+    .tutorial-list {
+        list-style: none;
+        padding: 0;
+        margin: 1rem 0;
+    }
+    .tutorial-list li {
+        padding: 0.5rem 0 0.5rem 1rem;
+        font-size: 0.92rem;
+        line-height: 1.55;
+        color: rgba(255, 255, 255, 0.9);
+        border-left: 3px solid rgba(255, 215, 0, 0.3);
+        margin-bottom: 0.4rem;
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 4px;
+    }
+    .tutorial-list-numbered {
+        counter-reset: tutorial-counter;
+        list-style: none;
+        padding: 0;
+    }
+    .tutorial-list-numbered li {
+        counter-increment: tutorial-counter;
+        position: relative;
+        padding-left: 2.5rem;
+        border-left: none;
+        background: rgba(255, 215, 0, 0.04);
+    }
+    .tutorial-list-numbered li::before {
+        content: counter(tutorial-counter);
+        position: absolute;
+        left: 0.5rem;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: var(--quinary-color, #ffd700);
+        color: #000;
+        font-weight: 900;
+        font-size: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .tutorial-checklist li {
+        border-left-color: rgba(0, 200, 83, 0.6);
+        background: rgba(0, 200, 83, 0.05);
+    }
+
+    .tutorial-highlight {
+        margin: 1rem 0;
+        padding: 0.8rem 1rem;
+        background: rgba(255, 215, 0, 0.08);
+        border: 1px solid rgba(255, 215, 0, 0.3);
+        border-radius: 10px;
+        font-size: 0.88rem;
+        line-height: 1.55;
+    }
+
+    .tutorial-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0;
+        font-size: 0.88rem;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    .tutorial-table tr { border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
+    .tutorial-table tr:last-child { border-bottom: none; }
+    .tutorial-table td { padding: 0.6rem 0.9rem; color: rgba(255, 255, 255, 0.9); }
+    .tutorial-table td:first-child { width: 40%; }
+    .tutorial-table td:nth-child(2) {
+        width: 30%;
+        text-align: center;
+        color: var(--quinary-color, #ffd700);
+    }
+    .tutorial-table td:last-child { text-align: right; font-size: 0.8rem; opacity: 0.8; }
+
+    .tutorial-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.75rem;
+        margin-top: 1.75rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .tutorial-btn {
+        padding: 0.7rem 1.3rem;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        background: rgba(255, 255, 255, 0.06);
+        color: #fff;
+        font-weight: 700;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .tutorial-btn:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.12);
+        transform: translateY(-1px);
+    }
+    .tutorial-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .tutorial-btn.primary {
+        background: var(--quinary-color, #ffd700);
+        border-color: var(--quinary-color, #ffd700);
+        color: #000;
+    }
+    .tutorial-btn.primary:hover {
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+        background: #ffe14d;
+    }
+
+    .tutorial-counter {
+        font-size: 0.82rem;
+        color: rgba(255, 255, 255, 0.6);
+        font-weight: 600;
+    }
+
+    .tutorial-footer { text-align: center; margin-top: 1rem; }
+    .tutorial-skip {
+        background: transparent;
+        border: none;
+        color: rgba(255, 255, 255, 0.4);
+        font-size: 0.82rem;
+        cursor: pointer;
+        padding: 0.4rem;
+        transition: color 0.15s ease;
+    }
+    .tutorial-skip:hover { color: rgba(255, 255, 255, 0.8); }
+
+    .tutorial-help-btn {
+        position: fixed;
+        bottom: 1.5rem;
+        right: 1.5rem;
+        z-index: 1000;
+        background: var(--quinary-color, #ffd700);
+        color: #000;
+        border: none;
+        border-radius: 999px;
+        padding: 0.75rem 1.25rem;
+        font-weight: 800;
+        font-size: 0.9rem;
+        cursor: pointer;
+        box-shadow: 0 8px 24px rgba(255, 215, 0, 0.3), 0 0 0 0 rgba(255, 215, 0, 0.7);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+        animation: tutorialPulse 2.5s ease-in-out infinite;
+    }
+    .tutorial-help-btn:hover {
+        transform: translateY(-2px) scale(1.05);
+        box-shadow: 0 12px 32px rgba(255, 215, 0, 0.5);
+        animation: none;
+    }
+    @keyframes tutorialPulse {
+        0%, 100% { box-shadow: 0 8px 24px rgba(255, 215, 0, 0.3), 0 0 0 0 rgba(255, 215, 0, 0.6); }
+        50%      { box-shadow: 0 8px 24px rgba(255, 215, 0, 0.5), 0 0 0 12px rgba(255, 215, 0, 0); }
+    }
+
+    [data-theme="light"] .tutorial-modal {
+        background: linear-gradient(160deg, #faf7ff 0%, #f0ebfa 100%);
+        color: #2a1a4a;
+    }
+    [data-theme="light"] .tutorial-slide p { color: rgba(42, 26, 74, 0.85); }
+    [data-theme="light"] .tutorial-slide strong { color: #1a1030; }
+    [data-theme="light"] .tutorial-list li {
+        color: rgba(42, 26, 74, 0.85);
+        background: rgba(106, 79, 179, 0.05);
+    }
+    [data-theme="light"] .tutorial-table { background: rgba(106, 79, 179, 0.06); }
+    [data-theme="light"] .tutorial-table td { color: rgba(42, 26, 74, 0.9); }
+    [data-theme="light"] .tutorial-btn {
+        border-color: rgba(106, 79, 179, 0.2);
+        background: rgba(106, 79, 179, 0.08);
+        color: #2a1a4a;
+    }
+    [data-theme="light"] .tutorial-close {
+        background: rgba(106, 79, 179, 0.1);
+        color: #2a1a4a;
+    }
+    [data-theme="light"] .tutorial-skip { color: rgba(42, 26, 74, 0.5); }
+
+    @media (max-width: 640px) {
+        .tutorial-modal { padding: 1.5rem 1.25rem 1rem; max-height: 95vh; border-radius: 16px; }
+        .tutorial-icon { font-size: 2.5rem; }
+        .tutorial-slide h2 { font-size: 1.25rem; }
+        .tutorial-btn { padding: 0.6rem 0.9rem; font-size: 0.82rem; }
+        .tutorial-help-btn {
+            bottom: 1rem;
+            right: 1rem;
+            padding: 0.6rem 1rem;
+            font-size: 0.8rem;
+        }
+        .tutorial-help-btn span:first-child { display: none; }
+        .tutorial-table { font-size: 0.78rem; }
+        .tutorial-table td { padding: 0.5rem 0.6rem; }
+    }
+    </style>
 </head>
 
 <body class="staking-page">
@@ -60,18 +403,17 @@
     </section>
 
     <!-- ══════════════════════════════════════════════════ -->
-    <!-- POOL OVERVIEW — sichtbar auch ohne Wallet          -->
+    <!-- POOL OVERVIEW — visible without wallet             -->
     <!-- ══════════════════════════════════════════════════ -->
     <section class="pool-overview">
-        <h2>Live Pool-Übersicht</h2>
-        <p class="pool-subtitle">Aktualisiert automatisch alle 30 Sekunden · Kein Wallet-Login nötig</p>
+        <h2>Live Pool Overview</h2>
+        <p class="pool-subtitle">Auto-refreshes every 30 seconds · No wallet login required</p>
 
-        <!-- OLD: INPI Staking (1000 Jahre) -->
         <div class="pool-card pool-card-wide">
             <div class="pool-header">
                 <div>
                     <span class="pool-name">🪙 INPI Staking</span>
-                    <span class="pool-subname">1000-Jahre Distribution</span>
+                    <span class="pool-subname">1000-Year Distribution</span>
                 </div>
                 <span class="pool-badge badge-green">Live</span>
             </div>
@@ -79,17 +421,16 @@
                 <div class="pool-fill-progress" id="oldFill" style="width: 0%"></div>
             </div>
             <div class="pool-stats">
-                <span id="oldStaked">0 INPI gestakt</span>
+                <span id="oldStaked">0 INPI staked</span>
                 <span id="oldPercent">0%</span>
             </div>
             <div class="pool-detail">
-                <span>Reward-Rate: <strong id="oldRate">0</strong> INPI/s ·
-                      <strong id="oldRateDay">0</strong> INPI/Tag</span>
-                <span>Reward-Pool: <strong id="oldPool">0</strong> INPI</span>
+                <span>Reward rate: <strong id="oldRate">0</strong> INPI/s ·
+                      <strong id="oldRateDay">0</strong> INPI/day</span>
+                <span>Reward pool: <strong id="oldPool">0</strong> INPI</span>
             </div>
         </div>
 
-        <!-- NEW: NFT Pools -->
         <div class="pool-grid">
             <div class="pool-card">
                 <div class="pool-header">
@@ -154,53 +495,51 @@
     </section>
 
     <!-- ══════════════════════════════════════════════════ -->
-    <!-- WALLET BAR                                         -->
+    <!-- WALLET BAR + STAKING SECTIONS                      -->
     <!-- ══════════════════════════════════════════════════ -->
     <section class="staking-shell">
         <div class="staking-container">
 
             <div class="wallet-bar">
                 <div class="wallet-left">
-                    <div class="wallet-status" id="walletStatusText">🔴 Wallet nicht verbunden</div>
+                    <div class="wallet-status" id="walletStatusText">🔴 Wallet not connected</div>
                     <div class="wallet-address" id="walletStatus" style="display:none;"></div>
                 </div>
                 <div class="wallet-balance-group" id="tokenBalanceInfo" style="display:none;">
                     <div class="wallet-balance-label">INPI Balance</div>
                     <div class="wallet-balance" id="tokenBalance">0</div>
                 </div>
-                <button id="connectWalletBtn" class="btn">🔌 Wallet verbinden</button>
+                <button id="connectWalletBtn" class="btn">🔌 Connect Wallet</button>
             </div>
 
-            <!-- ══════════════════════════════════════════════ -->
-            <!-- TAB 1: INPI TOKEN STAKING (OLD)               -->
-            <!-- ══════════════════════════════════════════════ -->
+            <!-- INPI TOKEN STAKING (OLD) -->
             <div class="staking-section">
                 <h2>🪙 INPI Token Staking</h2>
-                <p class="section-sub">Klassisches Token-Staking · 1000-Jahre-Distribution · Belohnungen kontinuierlich</p>
+                <p class="section-sub">Classic token staking · 1000-year distribution · Continuous rewards</p>
 
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <h3>Dein Stake</h3>
+                        <h3>Your Stake</h3>
                         <div class="stat-value" id="oldUserStaked">0</div>
-                        <div class="stat-label">INPI gestakt</div>
+                        <div class="stat-label">INPI staked</div>
                     </div>
                     <div class="stat-card">
                         <h3>Pending Rewards</h3>
                         <div class="stat-value" id="oldUserPending">0</div>
-                        <div class="stat-label">INPI claimbar</div>
+                        <div class="stat-label">INPI claimable</div>
                     </div>
                     <div class="stat-card">
-                        <h3>Dein Anteil</h3>
+                        <h3>Your Share</h3>
                         <div class="stat-value" id="oldUserShare">0%</div>
-                        <div class="stat-label">am Pool</div>
+                        <div class="stat-label">of the pool</div>
                     </div>
                 </div>
 
                 <div class="staking-card">
                     <h3>Stake / Unstake INPI</h3>
                     <div class="form-group">
-                        <label for="stakeAmount">Betrag (INPI)</label>
-                        <input type="number" id="stakeAmount" placeholder="z.B. 1000" step="any">
+                        <label for="stakeAmount">Amount (INPI)</label>
+                        <input type="number" id="stakeAmount" placeholder="e.g. 1000" step="any">
                     </div>
                     <div class="button-group">
                         <button id="stakeBtn" class="btn" disabled>🔒 Stake</button>
@@ -210,20 +549,18 @@
                 </div>
             </div>
 
-            <!-- ══════════════════════════════════════════════ -->
-            <!-- TAB 2: NFT STAKING (NEW)                      -->
-            <!-- ══════════════════════════════════════════════ -->
+            <!-- NFT STAKING (NEW) -->
             <div class="staking-section">
                 <h2>🎨 NFT Pool Staking (Uniswap V4)</h2>
-                <p class="section-sub">Stake deine Uniswap-V4 LP-Position (NFT) und verdiene INPI mit Boost</p>
+                <p class="section-sub">Stake your Uniswap V4 LP position (NFT) and earn INPI with boost</p>
 
                 <div class="info-note" style="margin-bottom:16px;">
-                    <strong>Voraussetzung:</strong> Du brauchst eine Uniswap-V4-Position (ETH-INPI, USDC-INPI oder EURC-INPI), mindestens 10 EUR Wert.
-                    Erstelle sie auf <a href="https://app.uniswap.org/pool" target="_blank">app.uniswap.org/pool</a>.
+                    <strong>Requirement:</strong> You need a Uniswap V4 position (ETH-INPI, USDC-INPI or EURC-INPI) worth at least 10 EUR.
+                    Create one at <a href="https://app.uniswap.org/pool" target="_blank">app.uniswap.org/pool</a>.
                 </div>
 
                 <div class="form-group">
-                    <label for="nftSafeSelect">Pool auswählen</label>
+                    <label for="nftSafeSelect">Select Pool</label>
                     <select id="nftSafeSelect" class="form-input">
                         <option value="eth">⚡ ETH-INPI Safe</option>
                         <option value="usdc">💵 USDC-INPI Safe</option>
@@ -232,24 +569,24 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="nftTokenId">Token-ID deiner Uniswap-Position</label>
-                    <input type="number" id="nftTokenId" placeholder="z.B. 123456" step="1">
-                    <small style="color:#888;">Zu finden auf app.uniswap.org/pool → deine Position anklicken</small>
+                    <label for="nftTokenId">Token ID of your Uniswap Position</label>
+                    <input type="number" id="nftTokenId" placeholder="e.g. 123456" step="1">
+                    <small style="color:#888;">Find it on app.uniswap.org/pool → click your position</small>
                 </div>
 
                 <div class="form-group">
-                    <label for="nftLockDuration">Sperrdauer</label>
+                    <label for="nftLockDuration">Lock Duration</label>
                     <select id="nftLockDuration" class="form-input">
-                        <option value="0">Flexibel (jederzeit, kein Boost)</option>
-                        <option value="7776000">3 Monate (Boost 1,68×)</option>
-                        <option value="15552000">6 Monate (Boost 3,28×)</option>
-                        <option value="23328000">9 Monate (Boost 5,40×)</option>
-                        <option value="31536000">12 Monate (Boost 8,00×)</option>
+                        <option value="0">Flexible (anytime, no boost)</option>
+                        <option value="7776000">3 months (1.68× boost)</option>
+                        <option value="15552000">6 months (3.28× boost)</option>
+                        <option value="23328000">9 months (5.40× boost)</option>
+                        <option value="31536000">12 months (8.00× boost)</option>
                     </select>
                 </div>
 
                 <div class="button-group">
-                    <button id="nftApproveBtn" class="btn" disabled>✅ NFT Approve</button>
+                    <button id="nftApproveBtn" class="btn" disabled>✅ Approve NFT</button>
                     <button id="nftStakeBtn" class="btn" disabled>🎯 Stake NFT</button>
                 </div>
 
@@ -273,10 +610,152 @@
     <p class="footer-version">Version 0.29.0</p>
 </footer>
 
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- TUTORIAL OVERLAY                                            -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="tutorialOverlay" class="tutorial-overlay" aria-hidden="true">
+    <div class="tutorial-modal" role="dialog" aria-labelledby="tutorialTitle">
+
+        <button class="tutorial-close" id="tutorialClose" aria-label="Close tutorial">×</button>
+
+        <div class="tutorial-progress" id="tutorialProgress">
+            <span class="tutorial-dot active"></span>
+            <span class="tutorial-dot"></span>
+            <span class="tutorial-dot"></span>
+            <span class="tutorial-dot"></span>
+            <span class="tutorial-dot"></span>
+            <span class="tutorial-dot"></span>
+            <span class="tutorial-dot"></span>
+            <span class="tutorial-dot"></span>
+        </div>
+
+        <div class="tutorial-slide active" data-step="1">
+            <div class="tutorial-icon">🎯</div>
+            <h2 id="tutorialTitle">Welcome to Inpinity Staking</h2>
+            <p>Two ways to earn passive <strong>INPI rewards</strong> on Base — classic token staking, or the new NFT pools that put your Uniswap V4 positions to work.</p>
+            <p>This quick tour shows you how everything works. Takes about 60 seconds.</p>
+            <div class="tutorial-highlight">💡 <strong>You can reopen this tutorial anytime</strong> with the "How it works" button.</div>
+        </div>
+
+        <div class="tutorial-slide" data-step="2">
+            <div class="tutorial-icon">💧</div>
+            <h2>What is a Liquidity Pool?</h2>
+            <p>A liquidity pool is a shared vault that lets traders swap tokens. When you provide tokens to a pool (e.g. <strong>USDC + INPI</strong>), you become a <strong>Liquidity Provider (LP)</strong> and earn a share of trading fees.</p>
+            <ul class="tutorial-list">
+                <li>💵 You deposit two tokens at equal value</li>
+                <li>🔄 Traders pay a small fee on every swap</li>
+                <li>📈 You earn a slice of every trade — automatically</li>
+            </ul>
+            <p>On Uniswap V4, your LP position is represented as an <strong>NFT (Token ID)</strong>.</p>
+        </div>
+
+        <div class="tutorial-slide" data-step="3">
+            <div class="tutorial-icon">💰</div>
+            <h2>Why Stake Your LP Position?</h2>
+            <p>Your LP position already earns trading fees. But by staking it here, you unlock <strong>3 more reward streams</strong> on top:</p>
+            <ul class="tutorial-list">
+                <li>⚡ <strong>INPI rewards</strong> — from a 10-year vesting pool</li>
+                <li>🚀 <strong>Boost multipliers</strong> — up to 8× for long locks</li>
+                <li>🎨 <strong>NFT rarity bonus</strong> — up to +20% from your Inpinity NFT collection</li>
+            </ul>
+            <p>Your NFT stays <strong>100% yours</strong> — the safe only holds it temporarily. On unstake, it always comes back.</p>
+        </div>
+
+        <div class="tutorial-slide" data-step="4">
+            <div class="tutorial-icon">🦄</div>
+            <h2>Step 1 — Create your Pool Position</h2>
+            <p>You need a Uniswap V4 LP position before you can stake:</p>
+            <ol class="tutorial-list tutorial-list-numbered">
+                <li>Go to <a href="https://app.uniswap.org/pool" target="_blank" rel="noopener">app.uniswap.org/pool</a></li>
+                <li>Connect your wallet</li>
+                <li>Select tokens — e.g. <strong>USDC + INPI</strong> (contract: <code>0x232FB1…7d0D</code>)</li>
+                <li>Choose a fee tier and price range</li>
+                <li>Enter the amount and confirm in your wallet</li>
+                <li>You'll receive an <strong>NFT (Token ID)</strong> representing your position</li>
+            </ol>
+            <div class="tutorial-highlight">⚠️ <strong>Minimum position value:</strong> 10 EUR (or equivalent).</div>
+        </div>
+
+        <div class="tutorial-slide" data-step="5">
+            <div class="tutorial-icon">🎯</div>
+            <h2>Step 2 — Stake your NFT</h2>
+            <p>Once you have your Uniswap position NFT:</p>
+            <ol class="tutorial-list tutorial-list-numbered">
+                <li>Find your <strong>Token ID</strong> on <a href="https://app.uniswap.org/pool" target="_blank" rel="noopener">app.uniswap.org/pool</a> → click your position</li>
+                <li>Come back to this page</li>
+                <li>Paste the Token ID and select your pool</li>
+                <li>Choose a lock duration (see next slide)</li>
+                <li>Click <strong>"Approve NFT"</strong>, then <strong>"Stake NFT"</strong></li>
+            </ol>
+            <p>That's it — you're earning! 🎉</p>
+        </div>
+
+        <div class="tutorial-slide" data-step="6">
+            <div class="tutorial-icon">🔒</div>
+            <h2>Lock Duration = Higher Boost</h2>
+            <p>Longer locks earn bigger multipliers. You can still unstake early — you'll just pay a small penalty on your <strong>unearned rewards</strong> (never on your principal NFT).</p>
+            <table class="tutorial-table">
+                <tr><td>🟢 Flexible</td><td><strong>1.00×</strong></td><td>0% penalty</td></tr>
+                <tr><td>🔵 3 months</td><td><strong>1.68×</strong></td><td>up to 15%</td></tr>
+                <tr><td>🟣 6 months</td><td><strong>3.28×</strong></td><td>up to 11%</td></tr>
+                <tr><td>🟠 9 months</td><td><strong>5.40×</strong></td><td>up to 7%</td></tr>
+                <tr><td>🔴 12 months</td><td><strong>8.00×</strong></td><td>up to 3%</td></tr>
+            </table>
+            <p>The boost decreases over time as the lock expires — no need to renew to keep it active.</p>
+        </div>
+
+        <div class="tutorial-slide" data-step="7">
+            <div class="tutorial-icon">🎨</div>
+            <h2>Stack Your NFT Boost</h2>
+            <p>Holding <strong>Inpinity NFTs</strong> in your wallet grants permanent bonuses, scaled by rarity:</p>
+            <table class="tutorial-table">
+                <tr><td>🥉 Bronze</td><td><strong>1.00×</strong></td></tr>
+                <tr><td>🥈 Silver</td><td><strong>1.03×</strong></td></tr>
+                <tr><td>🥇 Gold</td><td><strong>1.06×</strong></td></tr>
+                <tr><td>💠 Platinum</td><td><strong>1.10×</strong></td></tr>
+                <tr><td>💎 Diamond</td><td><strong>1.15×</strong></td></tr>
+            </table>
+            <p>Bonus: <strong>+1% per extra NFT</strong> you hold (max +5%, capped at 1.20× total).</p>
+            <p>All multipliers stack: <code>Duration × Wallet Tier × NFT Boost</code> — capped at <strong>10× total</strong>.</p>
+        </div>
+
+        <div class="tutorial-slide" data-step="8">
+            <div class="tutorial-icon">🚀</div>
+            <h2>Ready to Start?</h2>
+            <p>You're all set. Quick reminders:</p>
+            <ul class="tutorial-list tutorial-checklist">
+                <li>✅ Verify all contract addresses on the <a href="index.html">homepage</a></li>
+                <li>✅ Your NFT (principal) is always <strong>100% returned</strong> on unstake</li>
+                <li>✅ Rewards accumulate every second — claim anytime (1h cooldown)</li>
+                <li>✅ <strong>Emergency exit</strong> available if the pool is paused</li>
+                <li>✅ No lockup on your NFT — flexible exit with small reward penalty</li>
+            </ul>
+            <p style="margin-top:1.2rem;">Questions? Check the <a href="faq.html">FAQ</a> or ask in our community.</p>
+        </div>
+
+        <div class="tutorial-nav">
+            <button class="tutorial-btn tutorial-prev" id="tutorialPrev" disabled>← Back</button>
+            <span class="tutorial-counter" id="tutorialCounter">1 / 8</span>
+            <button class="tutorial-btn tutorial-next primary" id="tutorialNext">Next →</button>
+        </div>
+
+        <div class="tutorial-footer">
+            <button class="tutorial-skip" id="tutorialSkip">Skip tutorial</button>
+        </div>
+
+    </div>
+</div>
+
+<button class="tutorial-help-btn" id="tutorialHelpBtn" aria-label="Open tutorial">
+    <span>❓</span> How it works
+</button>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SCRIPTS                                                     -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+
+<!-- 1. Theme Switcher -->
 <script>
-/* ═══════════════════════════════════════════════════════════════
-   THEME SWITCHER
-   ═══════════════════════════════════════════════════════════════ */
 document.addEventListener("DOMContentLoaded", () => {
     const root = document.documentElement;
     const dots = document.querySelectorAll(".themeDots .dot");
@@ -298,10 +777,8 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
+<!-- 2. Main Staking Logic -->
 <script>
-/* ═══════════════════════════════════════════════════════════════
-   CONFIG
-   ═══════════════════════════════════════════════════════════════ */
 const CONFIG = {
     RPC_URL: "https://mainnet.base.org",
     INPI: "0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D",
@@ -312,18 +789,14 @@ const CONFIG = {
         usdc: { addr: "0x767Bc11dF9fD4a26262B22cFBB63B37ff449a1f2", name: "USDC-INPI" },
         eurc: { addr: "0xc9D434c1F53440946c5e4a0fD73799b286574794", name: "EURC-INPI" }
     },
-    // Zielbudgets (für Füllstandsbalken) — anpassen wenn aufgestockt wird
     TARGETS: {
-        old: 100_000_000n * 10n**18n,  // 100 Mio INPI Ziel für alte Staking
-        eth: 17_500_000n * 10n**18n,   // 17,5 Mio
-        usdc: 15_000_000n * 10n**18n,  // 15 Mio
-        eurc: 10_000_000n * 10n**18n   // 10 Mio
+        old:  100_000_000n * 10n**18n,
+        eth:   17_500_000n * 10n**18n,
+        usdc:  15_000_000n * 10n**18n,
+        eurc:  10_000_000n * 10n**18n
     }
 };
 
-/* ═══════════════════════════════════════════════════════════════
-   ABIS
-   ═══════════════════════════════════════════════════════════════ */
 const TOKEN_ABI = [
     "function balanceOf(address) view returns (uint256)",
     "function decimals() view returns (uint8)",
@@ -369,9 +842,6 @@ const ERC721_ABI = [
     "function isApprovedForAll(address,address) view returns (bool)"
 ];
 
-/* ═══════════════════════════════════════════════════════════════
-   READ-ONLY PROVIDER & POOL STATS (OHNE WALLET)
-   ═══════════════════════════════════════════════════════════════ */
 const readProvider = new ethers.JsonRpcProvider(CONFIG.RPC_URL);
 
 function fmtINPI(wei, dp = 2) {
@@ -389,7 +859,6 @@ function setBar(fillId, percentId, valueId, current, target, suffix) {
 }
 
 async function loadPoolStats() {
-    // ─── OLD Staking ───
     try {
         const oldStake = new ethers.Contract(CONFIG.OLD_STAKING, OLD_STAKING_ABI, readProvider);
         const inpi = new ethers.Contract(CONFIG.INPI, TOKEN_ABI, readProvider);
@@ -398,13 +867,12 @@ async function loadPoolStats() {
         const rate = await oldStake.rewardRate();
         const poolBalance = await inpi.balanceOf(CONFIG.OLD_STAKING);
 
-        setBar("oldFill", "oldPercent", "oldStaked", totalStaked, CONFIG.TARGETS.old, "INPI gestakt");
+        setBar("oldFill", "oldPercent", "oldStaked", totalStaked, CONFIG.TARGETS.old, "INPI staked");
         document.getElementById("oldPool").textContent = fmtINPI(poolBalance, 0);
         document.getElementById("oldRate").textContent = Number(ethers.formatUnits(rate, 18)).toFixed(6);
         document.getElementById("oldRateDay").textContent = (Number(ethers.formatUnits(rate, 18)) * 86400).toFixed(2);
     } catch (e) { console.warn("Old staking stats:", e); }
 
-    // ─── NEW Safes ───
     for (const [key, cfg] of Object.entries(CONFIG.SAFES)) {
         try {
             const safe = new ethers.Contract(cfg.addr, SAFE_ABI, readProvider);
@@ -423,9 +891,6 @@ async function loadPoolStats() {
 loadPoolStats();
 setInterval(loadPoolStats, 30_000);
 
-/* ═══════════════════════════════════════════════════════════════
-   WALLET STATE
-   ═══════════════════════════════════════════════════════════════ */
 let signer = null;
 let userAddress = null;
 let tokenContract = null;
@@ -434,11 +899,8 @@ let registryContract = null;
 let safeContracts = {};
 let refreshInterval = null;
 
-/* ═══════════════════════════════════════════════════════════════
-   WALLET CONNECT
-   ═══════════════════════════════════════════════════════════════ */
 async function connectWallet() {
-    if (!window.ethereum) return alert("Bitte MetaMask oder kompatible Wallet installieren.");
+    if (!window.ethereum) return alert("Please install MetaMask or a compatible wallet.");
 
     try {
         const provider = new ethers.BrowserProvider(window.ethereum);
@@ -454,15 +916,13 @@ async function connectWallet() {
             safeContracts[key] = new ethers.Contract(cfg.addr, SAFE_ABI, signer);
         }
 
-        // UI
-        document.getElementById("walletStatusText").textContent = "🟢 Wallet verbunden";
+        document.getElementById("walletStatusText").textContent = "🟢 Wallet connected";
         document.getElementById("walletStatus").textContent = userAddress.slice(0, 6) + "..." + userAddress.slice(-4);
         document.getElementById("walletStatus").style.display = "inline-block";
-        document.getElementById("connectWalletBtn").textContent = "✅ Verbunden";
+        document.getElementById("connectWalletBtn").textContent = "✅ Connected";
         document.getElementById("connectWalletBtn").disabled = true;
         document.getElementById("tokenBalanceInfo").style.display = "block";
 
-        // Enable inputs
         document.getElementById("stakeBtn").disabled = false;
         document.getElementById("unstakeBtn").disabled = false;
         document.getElementById("claimOldBtn").disabled = false;
@@ -470,17 +930,15 @@ async function connectWallet() {
         document.getElementById("nftStakeBtn").disabled = false;
 
         await refreshUserData();
+        await loadUserNFTs();
         if (refreshInterval) clearInterval(refreshInterval);
         refreshInterval = setInterval(refreshUserData, 15_000);
     } catch (e) {
         console.error(e);
-        alert("Verbindung fehlgeschlagen: " + (e.message || "unbekannt"));
+        alert("Connection failed: " + (e.message || "unknown"));
     }
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   USER DATA REFRESH
-   ═══════════════════════════════════════════════════════════════ */
 async function refreshUserData() {
     if (!userAddress || !oldStakingContract) return;
 
@@ -488,7 +946,6 @@ async function refreshUserData() {
         const bal = await tokenContract.balanceOf(userAddress);
         document.getElementById("tokenBalance").textContent = fmtINPI(bal, 2);
 
-        // OLD staking
         const staked = await oldStakingContract.balanceOf(userAddress);
         const earned = await oldStakingContract.earned(userAddress);
         const total = await oldStakingContract.totalSupply();
@@ -501,13 +958,10 @@ async function refreshUserData() {
     } catch (e) { console.warn("Refresh user data:", e); }
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   OLD STAKING ACTIONS
-   ═══════════════════════════════════════════════════════════════ */
 async function oldStake() {
-    if (!userAddress) return alert("Bitte Wallet verbinden.");
+    if (!userAddress) return alert("Please connect your wallet.");
     const amount = document.getElementById("stakeAmount").value.trim();
-    if (!amount || isNaN(amount) || Number(amount) <= 0) return alert("Ungültiger Betrag.");
+    if (!amount || isNaN(amount) || Number(amount) <= 0) return alert("Invalid amount.");
 
     try {
         const wei = ethers.parseUnits(amount, 18);
@@ -520,91 +974,80 @@ async function oldStake() {
         await tx.wait();
         document.getElementById("stakeAmount").value = "";
         await refreshUserData();
-        alert("Stake erfolgreich!");
-    } catch (e) { alert("Stake fehlgeschlagen: " + (e.message || "")); }
+        alert("Stake successful!");
+    } catch (e) { alert("Stake failed: " + (e.message || "")); }
 }
 
 async function oldUnstake() {
-    if (!userAddress) return alert("Bitte Wallet verbinden.");
+    if (!userAddress) return alert("Please connect your wallet.");
     const amount = document.getElementById("stakeAmount").value.trim();
-    if (!amount || isNaN(amount) || Number(amount) <= 0) return alert("Ungültiger Betrag.");
+    if (!amount || isNaN(amount) || Number(amount) <= 0) return alert("Invalid amount.");
     try {
         const tx = await oldStakingContract.withdraw(ethers.parseUnits(amount, 18));
         await tx.wait();
         document.getElementById("stakeAmount").value = "";
         await refreshUserData();
-        alert("Unstake erfolgreich!");
-    } catch (e) { alert("Unstake fehlgeschlagen: " + (e.message || "")); }
+        alert("Unstake successful!");
+    } catch (e) { alert("Unstake failed: " + (e.message || "")); }
 }
 
 async function oldClaim() {
-    if (!userAddress) return alert("Bitte Wallet verbinden.");
+    if (!userAddress) return alert("Please connect your wallet.");
     try {
         const tx = await oldStakingContract.getReward();
         await tx.wait();
         await refreshUserData();
-        alert("Rewards geclaimt!");
-    } catch (e) { alert("Claim fehlgeschlagen: " + (e.message || "")); }
+        alert("Rewards claimed!");
+    } catch (e) { alert("Claim failed: " + (e.message || "")); }
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   NEW NFT STAKING ACTIONS
-   ═══════════════════════════════════════════════════════════════ */
 async function nftApprove() {
-    if (!userAddress) return alert("Bitte Wallet verbinden.");
+    if (!userAddress) return alert("Please connect your wallet.");
     const tokenId = document.getElementById("nftTokenId").value.trim();
-    if (!tokenId) return alert("Bitte Token-ID eingeben.");
+    if (!tokenId) return alert("Please enter a Token ID.");
     const poolKey = document.getElementById("nftSafeSelect").value;
     const safeAddr = CONFIG.SAFES[poolKey].addr;
 
     try {
-        // User muss die NFT an das Safe approven
-        // WICHTIG: Der NFT gehört dem Uniswap PositionManager, nicht dem User direkt.
-        // Der User ist "owner" der Position, aber der NFT-Contract ist der PositionManager.
-        // Deshalb: approve auf dem PositionManager aufrufen!
         const V4_POSITION_MANAGER = "0x7C5f5A4bBd8fD63184577525326123B519429bDc";
         const pm = new ethers.Contract(V4_POSITION_MANAGER, ERC721_ABI, signer);
 
-        // Prüfen ob User Owner der Position ist
         const owner = await pm.ownerOf(tokenId);
         if (owner.toLowerCase() !== userAddress.toLowerCase()) {
-            return alert("Du bist nicht Besitzer dieser Position. Token-ID prüfen.");
+            return alert("You are not the owner of this position. Please check the Token ID.");
         }
 
         const tx = await pm.approve(safeAddr, tokenId);
         await tx.wait();
-        alert("NFT approved! Du kannst jetzt staken.");
+        alert("NFT approved! You can now stake.");
     } catch (e) {
         console.error(e);
-        alert("Approve fehlgeschlagen: " + (e.message || ""));
+        alert("Approve failed: " + (e.message || ""));
     }
 }
 
 async function nftStake() {
-    if (!userAddress) return alert("Bitte Wallet verbinden.");
+    if (!userAddress) return alert("Please connect your wallet.");
     const tokenId = document.getElementById("nftTokenId").value.trim();
     const lockDuration = document.getElementById("nftLockDuration").value;
     const poolKey = document.getElementById("nftSafeSelect").value;
 
-    if (!tokenId) return alert("Bitte Token-ID eingeben.");
+    if (!tokenId) return alert("Please enter a Token ID.");
 
     try {
         const safe = safeContracts[poolKey];
         const tx = await safe.stakeNFT(tokenId, lockDuration);
         await tx.wait();
         document.getElementById("nftTokenId").value = "";
-        alert("NFT erfolgreich gestakt! 🎉");
+        alert("NFT staked successfully! 🎉");
         await refreshUserData();
         await loadUserNFTs();
     } catch (e) {
         console.error(e);
-        alert("Stake fehlgeschlagen: " + (e.message || ""));
+        alert("Stake failed: " + (e.message || ""));
     }
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   USER NFT POSITIONS ANZEIGEN
-   ═══════════════════════════════════════════════════════════════ */
 async function loadUserNFTs() {
     if (!userAddress) return;
     const container = document.getElementById("nftPositionsList");
@@ -617,7 +1060,7 @@ async function loadUserNFTs() {
             if (count === 0) continue;
 
             const header = document.createElement("h4");
-            header.textContent = cfg.name + " (" + count + " Position" + (count !== 1 ? "en" : "") + ")";
+            header.textContent = cfg.name + " (" + count + " Position" + (count !== 1 ? "s" : "") + ")";
             container.appendChild(header);
 
             for (let i = 0; i < count; i++) {
@@ -635,10 +1078,10 @@ async function loadUserNFTs() {
                         <span>NFT #${pos.tokenId}</span>
                     </div>
                     <div class="nft-pos-stats">
-                        <div><span>Wert:</span> <strong>${fmtINPI(pos.amountEUR, 2)} EUR</strong></div>
+                        <div><span>Value:</span> <strong>${fmtINPI(pos.amountEUR, 2)} EUR</strong></div>
                         <div><span>Boost:</span> <strong>${(Number(ethers.formatUnits(boost, 18))).toFixed(2)}×</strong></div>
                         <div><span>Pending:</span> <strong>${fmtINPI(pending, 4)} INPI</strong></div>
-                        <div><span>Sperre:</span> <strong>${pos.lockDuration === 0n ? "Flexibel" : Number(pos.lockDuration / 86400n) + " Tage"}</strong></div>
+                        <div><span>Lock:</span> <strong>${pos.lockDuration === 0n ? "Flexible" : Number(pos.lockDuration / 86400n) + " days"}</strong></div>
                         ${penalty > 0n ? `<div style="color:#f80;"><span>Penalty:</span> <strong>${fmtINPI(penalty, 4)} INPI</strong></div>` : ""}
                     </div>
                     <div class="nft-pos-actions">
@@ -654,39 +1097,35 @@ async function loadUserNFTs() {
 
 async function nftClaim(posId) {
     try {
-        // Finde das richtige Safe — probiere alle durch
         for (const [key, safe] of Object.entries(safeContracts)) {
             try {
                 const tx = await safe.claim(posId);
                 await tx.wait();
-                alert("Rewards geclaimt!");
+                alert("Rewards claimed!");
                 await loadUserNFTs();
                 await refreshUserData();
                 return;
-            } catch (_) { /* nächster Safe */ }
+            } catch (_) {}
         }
-    } catch (e) { alert("Claim fehlgeschlagen: " + (e.message || "")); }
+    } catch (e) { alert("Claim failed: " + (e.message || "")); }
 }
 
 async function nftUnstake(posId) {
-    if (!confirm("Position wirklich entnehmen? Bei laufender Sperre wird eine Penalty auf Rewards fällig.")) return;
+    if (!confirm("Really remove this position? An active lock will incur a penalty on rewards.")) return;
     try {
         for (const [key, safe] of Object.entries(safeContracts)) {
             try {
                 const tx = await safe.unstake(posId);
                 await tx.wait();
-                alert("NFT zurückgegeben!");
+                alert("NFT returned!");
                 await loadUserNFTs();
                 await refreshUserData();
                 return;
-            } catch (_) { /* nächster Safe */ }
+            } catch (_) {}
         }
-    } catch (e) { alert("Unstake fehlgeschlagen: " + (e.message || "")); }
+    } catch (e) { alert("Unstake failed: " + (e.message || "")); }
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   EVENT LISTENERS
-   ═══════════════════════════════════════════════════════════════ */
 document.getElementById("connectWalletBtn").addEventListener("click", connectWallet);
 document.getElementById("stakeBtn").addEventListener("click", oldStake);
 document.getElementById("unstakeBtn").addEventListener("click", oldUnstake);
@@ -694,13 +1133,112 @@ document.getElementById("claimOldBtn").addEventListener("click", oldClaim);
 document.getElementById("nftApproveBtn").addEventListener("click", nftApprove);
 document.getElementById("nftStakeBtn").addEventListener("click", nftStake);
 
-// Auto-connect wenn schon verbunden
 window.addEventListener("load", async () => {
     if (window.ethereum && window.ethereum.selectedAddress) {
         await connectWallet();
-        await loadUserNFTs();
     }
 });
+</script>
+
+<!-- 3. Tutorial Controller -->
+<script>
+(function() {
+    const STORAGE_KEY = "inpinity-tutorial-seen-v1";
+    const overlay = document.getElementById("tutorialOverlay");
+    const slides = document.querySelectorAll(".tutorial-slide");
+    const dots = document.querySelectorAll(".tutorial-dot");
+    const prevBtn = document.getElementById("tutorialPrev");
+    const nextBtn = document.getElementById("tutorialNext");
+    const closeBtn = document.getElementById("tutorialClose");
+    const skipBtn = document.getElementById("tutorialSkip");
+    const counter = document.getElementById("tutorialCounter");
+    const helpBtn = document.getElementById("tutorialHelpBtn");
+
+    const total = slides.length;
+    let current = 1;
+
+    function updateUI() {
+        slides.forEach((s, i) => s.classList.toggle("active", (i + 1) === current));
+        dots.forEach((d, i) => {
+            d.classList.toggle("active", (i + 1) === current);
+            d.classList.toggle("passed", (i + 1) < current);
+        });
+        counter.textContent = current + " / " + total;
+        prevBtn.disabled = current === 1;
+        if (current === total) {
+            nextBtn.textContent = "Start Staking 🚀";
+        } else {
+            nextBtn.textContent = "Next →";
+        }
+        nextBtn.classList.add("primary");
+    }
+
+    function show() {
+        overlay.classList.add("active");
+        overlay.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+        updateUI();
+    }
+
+    function hide(markSeen) {
+        overlay.classList.remove("active");
+        overlay.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+        if (markSeen) {
+            try { localStorage.setItem(STORAGE_KEY, "1"); } catch (_) {}
+        }
+    }
+
+    function goTo(n) {
+        if (n < 1 || n > total) return;
+        current = n;
+        updateUI();
+    }
+
+    function next() {
+        if (current === total) {
+            hide(true);
+            document.querySelector(".staking-section:last-child")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        } else {
+            goTo(current + 1);
+        }
+    }
+
+    function prev() { goTo(current - 1); }
+
+    prevBtn.addEventListener("click", prev);
+    nextBtn.addEventListener("click", next);
+    closeBtn.addEventListener("click", () => hide(true));
+    skipBtn.addEventListener("click", () => hide(true));
+    helpBtn.addEventListener("click", () => { current = 1; show(); });
+
+    overlay.addEventListener("click", (e) => {
+        if (e.target === overlay) hide(true);
+    });
+
+    document.addEventListener("keydown", (e) => {
+        if (!overlay.classList.contains("active")) return;
+        if (e.key === "Escape") hide(true);
+        if (e.key === "ArrowRight") next();
+        if (e.key === "ArrowLeft") prev();
+    });
+
+    let seen = false;
+    try { seen = !!localStorage.getItem(STORAGE_KEY); } catch (_) {}
+    if (!seen) {
+        setTimeout(() => {
+            current = 1;
+            show();
+        }, 1200);
+    }
+
+    window.__inpinityTutorial = {
+        show,
+        hide,
+        goTo,
+        reset: () => { try { localStorage.removeItem(STORAGE_KEY); } catch(_){} }
+    };
+})();
 </script>
 </body>
 </html>
