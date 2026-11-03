@@ -48,6 +48,8 @@
      handleUnlockSlot3,
      handleSaveBastionTitle
    } from "./map-actions.js";
+   import { precalculateMatches } from "./map-selection.js";
+
    
    /* =========================================================
       MODULE FLAGS / GUARDS
@@ -522,4 +524,7 @@
      populateAttackerSelect();
      drawPyramid();
      await applyAttackDeepLinkContext();
+
+     // ... (am Ende von initMapPage) ...
+    precalculateMatches(); // Startet den Hintergrund-Scan
    }
