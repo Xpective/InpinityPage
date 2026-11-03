@@ -70,6 +70,70 @@
         flex-wrap: wrap;
       }
     }
+
+    /* Mathematical Proof Accordion */
+    details.math-proof {
+      margin: 1rem 0;
+      border-top: 1px solid #2a3f4a;
+      padding-top: 0.8rem;
+    }
+    details.math-proof summary {
+      cursor: pointer;
+      color: #d4af37;
+      font-weight: 700;
+      font-size: 0.95rem;
+      list-style: none; /* Hide default triangle */
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    details.math-proof summary::-webkit-details-marker {
+      display: none; /* Hide default triangle for Safari */
+    }
+    details.math-proof summary .toggle-icon {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #d4af37;
+    }
+    /* Show minus when open, plus when closed */
+    details.math-proof[open] summary .toggle-icon::before {
+      content: "−"; 
+    }
+    details.math-proof:not([open]) summary .toggle-icon::before {
+      content: "+"; 
+    }
+    details.math-proof .proof-content {
+      margin-top: 0.8rem;
+      font-size: 0.85rem;
+      color: #98a9b9;
+      line-height: 1.5;
+      text-align: left;
+    }
+    details.math-proof .proof-content ul {
+      margin: 0.5rem 0;
+      padding-left: 1.2rem;
+    }
+    details.math-proof .proof-content li {
+      margin-bottom: 0.4rem;
+    }
+    details.math-proof .proof-content a {
+      color: #d4af37;
+      text-decoration: underline;
+      word-break: break-all;
+      display: inline-block;
+      margin-top: 0.5rem;
+    }
+    details.math-proof .proof-content a:hover {
+      color: #ffb347;
+    }
+    details.math-proof .fazit {
+      margin-top: 0.8rem;
+      padding: 0.6rem;
+      background: rgba(212, 175, 55, 0.1);
+      border-left: 3px solid #d4af37;
+      border-radius: 4px;
+      color: #e2e8f0;
+    }
   </style>
 </head>
 <body>
@@ -455,6 +519,33 @@
             <p style="color:#98a9b9;">Connect wallet</p>
           </div>
         </div>
+
+        <!-- MATHEMATICAL PROOF ACCORDION START -->
+        <details class="math-proof">
+          <summary>
+            🔍 Mathematical Rarity Proof
+            <span class="toggle-icon"></span>
+          </summary>
+          
+          <div class="proof-content">
+            <p><strong>Rarity is not random.</strong> It is a deterministic calculation based on the unique mathematical properties of each block.</p>
+            
+            <ul>
+              <li><strong>0-Axis Symmetry:</strong> The 0-axis acts as a mirror. If the same number reflects on the opposite side of the row, the symmetry increases the block's rarity.</li>
+              <li><strong>Pi = Phi:</strong> When the digits of Pi and Phi match at the exact same position.</li>
+              <li><strong>Matching Pairs:</strong> When the digit forms a consecutive matching pair with its neighbor.</li>
+            </ul>
+
+            <p>The <code>calculateRarity</code> function in the InpinityNFT smart contract is the sole authority. It is immutable and permanently verifiable on-chain:</p>
+            
+            <a href="https://basescan.org/address/0x277a0D5864293C78d7387C54B48c35D5E9578Ab1#code" target="_blank" rel="noopener noreferrer">🔗 Verify on Basescan Smart Contract</a>
+
+            <div class="fazit">
+              <strong>Conclusion:</strong> Every block is a unique, mathematically generated fingerprint—a true artwork etched permanently into the blockchain.
+            </div>
+          </div>
+        </details>
+        <!-- MATHEMATICAL PROOF ACCORDION END -->
 
         <h4 style="color:#d4af37; margin:1.4rem 0 0.8rem;">Legend</h4>
         <div class="legend-item"><div class="color-box color-gray"></div> Not minted</div>
