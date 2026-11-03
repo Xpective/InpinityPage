@@ -2,7 +2,6 @@
 <html lang="en" data-theme="basic">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inpinity - Staking</title>
 
@@ -19,18 +18,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
 
     <link rel="icon" type="image/png" href="favicon.webp">
-    <meta name="description" content="Stake your INPI tokens on Base and earn passive rewards in the Inpinity ecosystem.">
-    <meta name="keywords" content="Inpinity, staking, INPI, Base, Uniswap">
-    <meta name="author" content="Xpective">
-    <meta property="og:title" content="Inpinity - Staking">
-    <meta property="og:description" content="Stake your INPI tokens and earn passive rewards.">
-    <meta property="og:image" content="logo_background.jpg">
-    <meta property="og:url" content="https://inpinity.online/staking.html">
-    <meta name="twitter:card" content="logo_background.webp">
-    <meta name="twitter:site" content="@unxpective">
-    <meta name="twitter:creator" content="@Inpinity1">
+    <meta name="description" content="Stake INPI tokens or Uniswap V4 LP positions on Base and earn passive rewards.">
     <meta name="theme-color" content="#140f1f">
-    <meta name="robots" content="index,follow">
 </head>
 
 <body class="staking-page">
@@ -45,11 +34,10 @@
             <li><a href="whitepaper.html">Whitepaper</a></li>
             <li><a href="faq.html">FAQ</a></li>
         </ul>
-
         <div class="themeDots" aria-label="Theme switcher">
-            <button type="button" class="dot light" title="Light Theme" aria-label="Light Theme"></button>
-            <button type="button" class="dot dark" title="Dark Theme" aria-label="Dark Theme"></button>
-            <button type="button" class="dot basic" title="Basic Theme" aria-label="Basic Theme"></button>
+            <button type="button" class="dot light" title="Light"></button>
+            <button type="button" class="dot dark" title="Dark"></button>
+            <button type="button" class="dot basic" title="Basic"></button>
         </div>
     </nav>
 </header>
@@ -57,115 +45,223 @@
 <main class="page-wrap staking-main">
     <section class="staking-hero">
         <p class="eyebrow">Inpinity Staking</p>
-        <h1>Stake INPI and Earn Rewards</h1>
+        <h1>Stake &amp; Earn Rewards</h1>
         <p class="hero-lead">
-            Stake your INPI tokens on Base, monitor your balance, track pending rewards, and manage your position through a clean on-chain dashboard.
+            Stake INPI tokens (long-term pool) or Uniswap V4 LP positions (NFT pools) and earn passive rewards on Base.
         </p>
     </section>
 
     <section class="info-banner warning-note">
         <p>
-            ⚠️ <strong>Official INPI token only:</strong>
+            ⚠️ <strong>Official INPI token:</strong>
             <code>0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</code>.
-            Only interact with this contract. Verify every address on our <a href="index.html">homepage</a>.
+            Verify every address on the <a href="index.html">homepage</a>.
         </p>
     </section>
 
-    <section class="links-section">
-        <a class="link-chip" href="https://base.org/" target="_blank" rel="noopener">⚡ Base L2</a>
-        <a class="link-chip" href="https://uniswap.org/" target="_blank" rel="noopener">🦄 Uniswap</a>
+    <!-- ══════════════════════════════════════════════════ -->
+    <!-- POOL OVERVIEW — sichtbar auch ohne Wallet          -->
+    <!-- ══════════════════════════════════════════════════ -->
+    <section class="pool-overview">
+        <h2>Live Pool-Übersicht</h2>
+        <p class="pool-subtitle">Aktualisiert automatisch alle 30 Sekunden · Kein Wallet-Login nötig</p>
+
+        <!-- OLD: INPI Staking (1000 Jahre) -->
+        <div class="pool-card pool-card-wide">
+            <div class="pool-header">
+                <div>
+                    <span class="pool-name">🪙 INPI Staking</span>
+                    <span class="pool-subname">1000-Jahre Distribution</span>
+                </div>
+                <span class="pool-badge badge-green">Live</span>
+            </div>
+            <div class="pool-fill-bar">
+                <div class="pool-fill-progress" id="oldFill" style="width: 0%"></div>
+            </div>
+            <div class="pool-stats">
+                <span id="oldStaked">0 INPI gestakt</span>
+                <span id="oldPercent">0%</span>
+            </div>
+            <div class="pool-detail">
+                <span>Reward-Rate: <strong id="oldRate">0</strong> INPI/s ·
+                      <strong id="oldRateDay">0</strong> INPI/Tag</span>
+                <span>Reward-Pool: <strong id="oldPool">0</strong> INPI</span>
+            </div>
+        </div>
+
+        <!-- NEW: NFT Pools -->
+        <div class="pool-grid">
+            <div class="pool-card">
+                <div class="pool-header">
+                    <div>
+                        <span class="pool-name">⚡ ETH-INPI</span>
+                        <span class="pool-subname">NFT Safe</span>
+                    </div>
+                    <span class="pool-badge badge-blue">V4</span>
+                </div>
+                <div class="pool-fill-bar">
+                    <div class="pool-fill-progress" id="ethFill" style="width: 0%"></div>
+                </div>
+                <div class="pool-stats">
+                    <span id="ethPool">0 INPI Pool</span>
+                    <span id="ethPercent">0%</span>
+                </div>
+                <div class="pool-detail">
+                    <span>Rate: <strong id="ethRate">0</strong> INPI/s</span>
+                </div>
+            </div>
+
+            <div class="pool-card">
+                <div class="pool-header">
+                    <div>
+                        <span class="pool-name">💵 USDC-INPI</span>
+                        <span class="pool-subname">NFT Safe</span>
+                    </div>
+                    <span class="pool-badge badge-blue">V4</span>
+                </div>
+                <div class="pool-fill-bar">
+                    <div class="pool-fill-progress" id="usdcFill" style="width: 0%"></div>
+                </div>
+                <div class="pool-stats">
+                    <span id="usdcPool">0 INPI Pool</span>
+                    <span id="usdcPercent">0%</span>
+                </div>
+                <div class="pool-detail">
+                    <span>Rate: <strong id="usdcRate">0</strong> INPI/s</span>
+                </div>
+            </div>
+
+            <div class="pool-card">
+                <div class="pool-header">
+                    <div>
+                        <span class="pool-name">💶 EURC-INPI</span>
+                        <span class="pool-subname">NFT Safe</span>
+                    </div>
+                    <span class="pool-badge badge-blue">V4</span>
+                </div>
+                <div class="pool-fill-bar">
+                    <div class="pool-fill-progress" id="eurcFill" style="width: 0%"></div>
+                </div>
+                <div class="pool-stats">
+                    <span id="eurcPool">0 INPI Pool</span>
+                    <span id="eurcPercent">0%</span>
+                </div>
+                <div class="pool-detail">
+                    <span>Rate: <strong id="eurcRate">0</strong> INPI/s</span>
+                </div>
+            </div>
+        </div>
     </section>
 
+    <!-- ══════════════════════════════════════════════════ -->
+    <!-- WALLET BAR                                         -->
+    <!-- ══════════════════════════════════════════════════ -->
     <section class="staking-shell">
         <div class="staking-container">
+
             <div class="wallet-bar">
                 <div class="wallet-left">
-                    <div class="wallet-status" id="walletStatusText">🔴 Wallet not connected</div>
+                    <div class="wallet-status" id="walletStatusText">🔴 Wallet nicht verbunden</div>
                     <div class="wallet-address" id="walletStatus" style="display:none;"></div>
                 </div>
-
                 <div class="wallet-balance-group" id="tokenBalanceInfo" style="display:none;">
                     <div class="wallet-balance-label">INPI Balance</div>
                     <div class="wallet-balance" id="tokenBalance">0</div>
                 </div>
-
-                <button id="connectWalletBtn" class="btn">🔌 Connect Wallet</button>
+                <button id="connectWalletBtn" class="btn">🔌 Wallet verbinden</button>
             </div>
 
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <h3>Your Staked INPI</h3>
-                    <div class="stat-value" id="stakedBalance">0</div>
-                    <div class="stat-label">Currently staked</div>
+            <!-- ══════════════════════════════════════════════ -->
+            <!-- TAB 1: INPI TOKEN STAKING (OLD)               -->
+            <!-- ══════════════════════════════════════════════ -->
+            <div class="staking-section">
+                <h2>🪙 INPI Token Staking</h2>
+                <p class="section-sub">Klassisches Token-Staking · 1000-Jahre-Distribution · Belohnungen kontinuierlich</p>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Dein Stake</h3>
+                        <div class="stat-value" id="oldUserStaked">0</div>
+                        <div class="stat-label">INPI gestakt</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Pending Rewards</h3>
+                        <div class="stat-value" id="oldUserPending">0</div>
+                        <div class="stat-label">INPI claimbar</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Dein Anteil</h3>
+                        <div class="stat-value" id="oldUserShare">0%</div>
+                        <div class="stat-label">am Pool</div>
+                    </div>
                 </div>
 
-                <div class="stat-card">
-                    <h3>Pending Rewards</h3>
-                    <div class="stat-value" id="pendingRewards">0</div>
-                    <div class="stat-label">Claimable INPI</div>
-                </div>
-
-                <div class="stat-card">
-                    <h3>Total Staked</h3>
-                    <div class="stat-value" id="totalStaked">0</div>
-                    <div class="stat-label">Across all users</div>
+                <div class="staking-card">
+                    <h3>Stake / Unstake INPI</h3>
+                    <div class="form-group">
+                        <label for="stakeAmount">Betrag (INPI)</label>
+                        <input type="number" id="stakeAmount" placeholder="z.B. 1000" step="any">
+                    </div>
+                    <div class="button-group">
+                        <button id="stakeBtn" class="btn" disabled>🔒 Stake</button>
+                        <button id="unstakeBtn" class="btn btn-secondary" disabled>🔓 Unstake</button>
+                        <button id="claimOldBtn" class="btn claim-btn" disabled>💰 Claim</button>
+                    </div>
                 </div>
             </div>
 
-            <div class="rate-panel">
-                <div class="rate-item">
-                    <div class="rate-value" id="ratePerSecond">0</div>
-                    <div class="rate-label">INPI / sec</div>
-                </div>
-                <div class="rate-item">
-                    <div class="rate-value" id="ratePerDay">0</div>
-                    <div class="rate-label">INPI / day</div>
-                </div>
-                <div class="rate-item">
-                    <div class="rate-value" id="ratePerYear">0</div>
-                    <div class="rate-label">INPI / year</div>
-                </div>
-            </div>
+            <!-- ══════════════════════════════════════════════ -->
+            <!-- TAB 2: NFT STAKING (NEW)                      -->
+            <!-- ══════════════════════════════════════════════ -->
+            <div class="staking-section">
+                <h2>🎨 NFT Pool Staking (Uniswap V4)</h2>
+                <p class="section-sub">Stake deine Uniswap-V4 LP-Position (NFT) und verdiene INPI mit Boost</p>
 
-            <div class="staking-card">
-                <h2>Stake or Unstake</h2>
+                <div class="info-note" style="margin-bottom:16px;">
+                    <strong>Voraussetzung:</strong> Du brauchst eine Uniswap-V4-Position (ETH-INPI, USDC-INPI oder EURC-INPI), mindestens 10 EUR Wert.
+                    Erstelle sie auf <a href="https://app.uniswap.org/pool" target="_blank">app.uniswap.org/pool</a>.
+                </div>
 
                 <div class="form-group">
-                    <label for="stakeAmount">Amount</label>
-                    <input type="number" id="stakeAmount" placeholder="e.g. 1000" step="any">
+                    <label for="nftSafeSelect">Pool auswählen</label>
+                    <select id="nftSafeSelect" class="form-input">
+                        <option value="eth">⚡ ETH-INPI Safe</option>
+                        <option value="usdc">💵 USDC-INPI Safe</option>
+                        <option value="eurc">💶 EURC-INPI Safe</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="nftTokenId">Token-ID deiner Uniswap-Position</label>
+                    <input type="number" id="nftTokenId" placeholder="z.B. 123456" step="1">
+                    <small style="color:#888;">Zu finden auf app.uniswap.org/pool → deine Position anklicken</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="nftLockDuration">Sperrdauer</label>
+                    <select id="nftLockDuration" class="form-input">
+                        <option value="0">Flexibel (jederzeit, kein Boost)</option>
+                        <option value="7776000">3 Monate (Boost 1,68×)</option>
+                        <option value="15552000">6 Monate (Boost 3,28×)</option>
+                        <option value="23328000">9 Monate (Boost 5,40×)</option>
+                        <option value="31536000">12 Monate (Boost 8,00×)</option>
+                    </select>
                 </div>
 
                 <div class="button-group">
-                    <button id="stakeBtn" class="btn" disabled>🔒 Stake</button>
-                    <button id="unstakeBtn" class="btn btn-secondary" disabled>🔓 Unstake</button>
+                    <button id="nftApproveBtn" class="btn" disabled>✅ NFT Approve</button>
+                    <button id="nftStakeBtn" class="btn" disabled>🎯 Stake NFT</button>
                 </div>
 
-                <div class="info-note">
-                    <strong>Note:</strong> Rewards accumulate continuously based on your share of the total staking pool.
-                    You can claim rewards without unstaking your tokens.
-                </div>
+                <div id="nftPositionsList" class="nft-positions-list"></div>
             </div>
 
-            <div class="staking-card">
-                <h2>Claim Rewards</h2>
-
-                <div class="claim-box">
-                    <span class="claim-label">Available now</span>
-                    <span class="claim-value"><span id="claimableAmount">0</span> INPI</span>
-                </div>
-
-                <button id="claimBtn" class="btn claim-btn" disabled>💰 Claim Rewards</button>
-
-                <div class="info-note">
-                    <strong>Tip:</strong> Claiming sends only your earned rewards to your wallet. Your staked INPI stays active until you manually unstake.
-                </div>
-            </div>
         </div>
     </section>
 </main>
 
 <footer class="site-footer">
-    <p>© 2026 INPINITY. All rights reserved. Built on Base.</p>
+    <p>© 2026 INPINITY. Built on Base.</p>
     <div class="footer-links">
         <a href="game.html">Game</a>
         <a href="mint.html">Mint</a>
@@ -173,239 +269,438 @@
         <a href="staking.html">Staking</a>
         <a href="whitepaper.html">Whitepaper</a>
         <a href="faq.html">FAQ</a>
-        <a href="privacypolicy.html">Privacy</a>
-        <a href="termsofuse.html">Terms</a>
     </div>
-    <p class="footer-version">Version 0.28.0</p>
+    <p class="footer-version">Version 0.29.0</p>
 </footer>
 
 <script>
+/* ═══════════════════════════════════════════════════════════════
+   THEME SWITCHER
+   ═══════════════════════════════════════════════════════════════ */
 document.addEventListener("DOMContentLoaded", () => {
     const root = document.documentElement;
     const dots = document.querySelectorAll(".themeDots .dot");
-
-    function applyTheme(theme) {
-        root.setAttribute("data-theme", theme);
-        try {
-            localStorage.setItem("inpinity-theme", theme);
-        } catch (_) {}
-
-        dots.forEach(dot => {
-            const active =
-                (theme === "light" && dot.classList.contains("light")) ||
-                (theme === "dark" && dot.classList.contains("dark")) ||
-                (theme === "basic" && dot.classList.contains("basic"));
-            dot.classList.toggle("active", active);
-        });
+    function applyTheme(t) {
+        root.setAttribute("data-theme", t);
+        try { localStorage.setItem("inpinity-theme", t); } catch(_) {}
+        dots.forEach(d => d.classList.toggle("active",
+            (t === "light" && d.classList.contains("light")) ||
+            (t === "dark" && d.classList.contains("dark")) ||
+            (t === "basic" && d.classList.contains("basic"))
+        ));
     }
-
-    let savedTheme = "basic";
-    try {
-        savedTheme = localStorage.getItem("inpinity-theme") || "basic";
-    } catch (_) {}
-
-    applyTheme(savedTheme);
-
-    document.querySelector(".themeDots .dot.light")?.addEventListener("click", () => applyTheme("light"));
-    document.querySelector(".themeDots .dot.dark")?.addEventListener("click", () => applyTheme("dark"));
-    document.querySelector(".themeDots .dot.basic")?.addEventListener("click", () => applyTheme("basic"));
+    let saved = "basic";
+    try { saved = localStorage.getItem("inpinity-theme") || "basic"; } catch(_) {}
+    applyTheme(saved);
+    document.querySelector(".dot.light")?.addEventListener("click", () => applyTheme("light"));
+    document.querySelector(".dot.dark")?.addEventListener("click", () => applyTheme("dark"));
+    document.querySelector(".dot.basic")?.addEventListener("click", () => applyTheme("basic"));
 });
 </script>
 
 <script>
-(function() {
-    const TOKEN_ADDRESS = '0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D';
-    const STAKING_ADDRESS = '0xF8c74E4fEe036C91228268E804f83eD8f55a6524';
-
-    const TOKEN_ABI = [
-        "function balanceOf(address owner) view returns (uint256)",
-        "function decimals() view returns (uint8)",
-        "function approve(address spender, uint256 amount) returns (bool)",
-        "function allowance(address owner, address spender) view returns (uint256)"
-    ];
-
-    const STAKING_ABI = [
-        "function stake(uint256 amount) external",
-        "function withdraw(uint256 amount) external",
-        "function getReward() external",
-        "function balanceOf(address account) view returns (uint256)",
-        "function earned(address account) view returns (uint256)",
-        "function totalSupply() view returns (uint256)",
-        "function rewardRate() view returns (uint256)"
-    ];
-
-    const connectBtn = document.getElementById('connectWalletBtn');
-    const walletStatus = document.getElementById('walletStatus');
-    const walletStatusText = document.getElementById('walletStatusText');
-    const tokenBalanceInfo = document.getElementById('tokenBalanceInfo');
-    const tokenBalanceSpan = document.getElementById('tokenBalance');
-    const stakedBalanceSpan = document.getElementById('stakedBalance');
-    const pendingRewardsSpan = document.getElementById('pendingRewards');
-    const totalStakedSpan = document.getElementById('totalStaked');
-    const ratePerSecondSpan = document.getElementById('ratePerSecond');
-    const ratePerDaySpan = document.getElementById('ratePerDay');
-    const ratePerYearSpan = document.getElementById('ratePerYear');
-    const stakeAmountInput = document.getElementById('stakeAmount');
-    const stakeBtn = document.getElementById('stakeBtn');
-    const unstakeBtn = document.getElementById('unstakeBtn');
-    const claimBtn = document.getElementById('claimBtn');
-    const claimableAmountSpan = document.getElementById('claimableAmount');
-
-    let provider, signer, userAddress = null;
-    let tokenContract, stakingContract;
-    let decimals = 18;
-    let intervalId = null;
-
-    function formatAddress(address) {
-        return address ? address.substring(0, 6) + '...' + address.substring(address.length - 4) : '';
+/* ═══════════════════════════════════════════════════════════════
+   CONFIG
+   ═══════════════════════════════════════════════════════════════ */
+const CONFIG = {
+    RPC_URL: "https://mainnet.base.org",
+    INPI: "0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D",
+    OLD_STAKING: "0xF8c74E4fEe036C91228268E804f83eD8f55a6524",
+    REGISTRY: "0xEe021A0894D8c54fA1690fB1cAD337B8F8B82D05",
+    SAFES: {
+        eth:  { addr: "0x8d6C5125443f4310817B4032EE5A1692F8af039B", name: "ETH-INPI" },
+        usdc: { addr: "0x767Bc11dF9fD4a26262B22cFBB63B37ff449a1f2", name: "USDC-INPI" },
+        eurc: { addr: "0xc9D434c1F53440946c5e4a0fD73799b286574794", name: "EURC-INPI" }
+    },
+    // Zielbudgets (für Füllstandsbalken) — anpassen wenn aufgestockt wird
+    TARGETS: {
+        old: 100_000_000n * 10n**18n,  // 100 Mio INPI Ziel für alte Staking
+        eth: 17_500_000n * 10n**18n,   // 17,5 Mio
+        usdc: 15_000_000n * 10n**18n,  // 15 Mio
+        eurc: 10_000_000n * 10n**18n   // 10 Mio
     }
+};
 
-    function fmt(value) {
-        return Number(ethers.formatUnits(value, decimals)).toLocaleString(undefined, { maximumFractionDigits: 2 });
-    }
+/* ═══════════════════════════════════════════════════════════════
+   ABIS
+   ═══════════════════════════════════════════════════════════════ */
+const TOKEN_ABI = [
+    "function balanceOf(address) view returns (uint256)",
+    "function decimals() view returns (uint8)",
+    "function approve(address,uint256) returns (bool)",
+    "function allowance(address,address) view returns (uint256)"
+];
 
-    async function updateBalances() {
-        if (!userAddress || !tokenContract || !stakingContract) return;
+const OLD_STAKING_ABI = [
+    "function stake(uint256 amount) external",
+    "function withdraw(uint256 amount) external",
+    "function getReward() external",
+    "function balanceOf(address) view returns (uint256)",
+    "function earned(address) view returns (uint256)",
+    "function totalSupply() view returns (uint256)",
+    "function rewardRate() view returns (uint256)"
+];
 
+const SAFE_ABI = [
+    "function positions(uint256) view returns (uint256 tokenId, uint256 amountEUR, uint256 lockStart, uint256 lockDuration, uint256 rewardDebt, uint256 pendingRewards, uint256 effectiveBoost, uint256 lastClaim, bool exists)",
+    "function pendingRewards(uint256) view returns (uint256)",
+    "function previewPenalty(uint256) view returns (uint256)",
+    "function currentBoost(uint256) view returns (uint256)",
+    "function totalWeighted() view returns (uint256)",
+    "function rewardRatePerSec() view returns (uint256)",
+    "function userPositionsLength(address) view returns (uint256)",
+    "function userPositions(address,uint256) view returns (uint256)",
+    "function positionOwner(uint256) view returns (address)",
+    "function stakeNFT(uint256 tokenId, uint256 lockDuration) external",
+    "function unstake(uint256 id) external",
+    "function claim(uint256 id) external",
+    "function syncBoost(uint256 id) external"
+];
+
+const REGISTRY_ABI = [
+    "function totalStakeEUR(address) view returns (uint256)"
+];
+
+const ERC721_ABI = [
+    "function ownerOf(uint256) view returns (address)",
+    "function balanceOf(address) view returns (uint256)",
+    "function approve(address,uint256) external",
+    "function getApproved(uint256) view returns (address)",
+    "function isApprovedForAll(address,address) view returns (bool)"
+];
+
+/* ═══════════════════════════════════════════════════════════════
+   READ-ONLY PROVIDER & POOL STATS (OHNE WALLET)
+   ═══════════════════════════════════════════════════════════════ */
+const readProvider = new ethers.JsonRpcProvider(CONFIG.RPC_URL);
+
+function fmtINPI(wei, dp = 2) {
+    return Number(ethers.formatUnits(wei, 18)).toLocaleString(undefined, { maximumFractionDigits: dp });
+}
+
+function setBar(fillId, percentId, valueId, current, target, suffix) {
+    const pct = target > 0n ? Number((current * 10000n) / target) / 100 : 0;
+    const fill = document.getElementById(fillId);
+    const pctEl = document.getElementById(percentId);
+    const valEl = document.getElementById(valueId);
+    if (fill) fill.style.width = Math.min(pct, 100) + "%";
+    if (pctEl) pctEl.textContent = pct.toFixed(2) + "%";
+    if (valEl) valEl.textContent = fmtINPI(current, 0) + " " + suffix;
+}
+
+async function loadPoolStats() {
+    // ─── OLD Staking ───
+    try {
+        const oldStake = new ethers.Contract(CONFIG.OLD_STAKING, OLD_STAKING_ABI, readProvider);
+        const inpi = new ethers.Contract(CONFIG.INPI, TOKEN_ABI, readProvider);
+
+        const totalStaked = await oldStake.totalSupply();
+        const rate = await oldStake.rewardRate();
+        const poolBalance = await inpi.balanceOf(CONFIG.OLD_STAKING);
+
+        setBar("oldFill", "oldPercent", "oldStaked", totalStaked, CONFIG.TARGETS.old, "INPI gestakt");
+        document.getElementById("oldPool").textContent = fmtINPI(poolBalance, 0);
+        document.getElementById("oldRate").textContent = Number(ethers.formatUnits(rate, 18)).toFixed(6);
+        document.getElementById("oldRateDay").textContent = (Number(ethers.formatUnits(rate, 18)) * 86400).toFixed(2);
+    } catch (e) { console.warn("Old staking stats:", e); }
+
+    // ─── NEW Safes ───
+    for (const [key, cfg] of Object.entries(CONFIG.SAFES)) {
         try {
-            const tokenBalWei = await tokenContract.balanceOf(userAddress);
-            tokenBalanceSpan.textContent = fmt(tokenBalWei);
+            const safe = new ethers.Contract(cfg.addr, SAFE_ABI, readProvider);
+            const inpi = new ethers.Contract(CONFIG.INPI, TOKEN_ABI, readProvider);
 
-            const stakedWei = await stakingContract.balanceOf(userAddress);
-            stakedBalanceSpan.textContent = fmt(stakedWei);
+            const poolBalance = await inpi.balanceOf(cfg.addr);
+            const rate = await safe.rewardRatePerSec();
+            const target = CONFIG.TARGETS[key];
 
-            const earnedWei = await stakingContract.earned(userAddress);
-            pendingRewardsSpan.textContent = fmt(earnedWei);
-            claimableAmountSpan.textContent = fmt(earnedWei);
-
-            const totalWei = await stakingContract.totalSupply();
-            totalStakedSpan.textContent = fmt(totalWei);
-
-            const rateWei = await stakingContract.rewardRate();
-            const ratePerSec = Number(ethers.formatUnits(rateWei, decimals));
-            ratePerSecondSpan.textContent = ratePerSec.toLocaleString(undefined, { maximumFractionDigits: 6 });
-            ratePerDaySpan.textContent = (ratePerSec * 86400).toLocaleString(undefined, { maximumFractionDigits: 2 });
-            ratePerYearSpan.textContent = (ratePerSec * 31536000).toLocaleString(undefined, { maximumFractionDigits: 2 });
-
-            stakeBtn.disabled = (tokenBalWei === 0n);
-            unstakeBtn.disabled = (stakedWei === 0n);
-            claimBtn.disabled = (earnedWei === 0n);
-        } catch (err) {
-            console.error('Error updating balances:', err);
-        }
+            setBar(key + "Fill", key + "Percent", key + "Pool", poolBalance, target, "INPI Pool");
+            document.getElementById(key + "Rate").textContent = Number(ethers.formatUnits(rate, 18)).toFixed(6);
+        } catch (e) { console.warn("Safe " + key + " stats:", e); }
     }
+}
 
-    async function connectWallet() {
-        if (!window.ethereum) {
-            alert('MetaMask or another Web3 wallet is not installed.');
-            return;
+loadPoolStats();
+setInterval(loadPoolStats, 30_000);
+
+/* ═══════════════════════════════════════════════════════════════
+   WALLET STATE
+   ═══════════════════════════════════════════════════════════════ */
+let signer = null;
+let userAddress = null;
+let tokenContract = null;
+let oldStakingContract = null;
+let registryContract = null;
+let safeContracts = {};
+let refreshInterval = null;
+
+/* ═══════════════════════════════════════════════════════════════
+   WALLET CONNECT
+   ═══════════════════════════════════════════════════════════════ */
+async function connectWallet() {
+    if (!window.ethereum) return alert("Bitte MetaMask oder kompatible Wallet installieren.");
+
+    try {
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        signer = await provider.getSigner();
+        userAddress = await signer.getAddress();
+
+        tokenContract = new ethers.Contract(CONFIG.INPI, TOKEN_ABI, signer);
+        oldStakingContract = new ethers.Contract(CONFIG.OLD_STAKING, OLD_STAKING_ABI, signer);
+        registryContract = new ethers.Contract(CONFIG.REGISTRY, REGISTRY_ABI, provider);
+
+        for (const [key, cfg] of Object.entries(CONFIG.SAFES)) {
+            safeContracts[key] = new ethers.Contract(cfg.addr, SAFE_ABI, signer);
         }
 
-        try {
-            provider = new ethers.BrowserProvider(window.ethereum);
-            await provider.send("eth_requestAccounts", []);
-            signer = await provider.getSigner();
-            userAddress = await signer.getAddress();
+        // UI
+        document.getElementById("walletStatusText").textContent = "🟢 Wallet verbunden";
+        document.getElementById("walletStatus").textContent = userAddress.slice(0, 6) + "..." + userAddress.slice(-4);
+        document.getElementById("walletStatus").style.display = "inline-block";
+        document.getElementById("connectWalletBtn").textContent = "✅ Verbunden";
+        document.getElementById("connectWalletBtn").disabled = true;
+        document.getElementById("tokenBalanceInfo").style.display = "block";
 
-            walletStatusText.textContent = "🟢 Wallet connected";
-            walletStatus.textContent = formatAddress(userAddress);
-            walletStatus.style.display = 'inline-block';
-            connectBtn.textContent = '✅ Connected';
-            connectBtn.disabled = true;
+        // Enable inputs
+        document.getElementById("stakeBtn").disabled = false;
+        document.getElementById("unstakeBtn").disabled = false;
+        document.getElementById("claimOldBtn").disabled = false;
+        document.getElementById("nftApproveBtn").disabled = false;
+        document.getElementById("nftStakeBtn").disabled = false;
 
-            tokenContract = new ethers.Contract(TOKEN_ADDRESS, TOKEN_ABI, signer);
-            stakingContract = new ethers.Contract(STAKING_ADDRESS, STAKING_ABI, signer);
-
-            decimals = await tokenContract.decimals();
-
-            tokenBalanceInfo.style.display = 'block';
-
-            await updateBalances();
-
-            if (intervalId) clearInterval(intervalId);
-            intervalId = setInterval(updateBalances, 15000);
-        } catch (err) {
-            console.error(err);
-            alert('Connection failed.');
-        }
+        await refreshUserData();
+        if (refreshInterval) clearInterval(refreshInterval);
+        refreshInterval = setInterval(refreshUserData, 15_000);
+    } catch (e) {
+        console.error(e);
+        alert("Verbindung fehlgeschlagen: " + (e.message || "unbekannt"));
     }
+}
 
-    async function stake() {
-        if (!userAddress) return alert('Please connect wallet.');
+/* ═══════════════════════════════════════════════════════════════
+   USER DATA REFRESH
+   ═══════════════════════════════════════════════════════════════ */
+async function refreshUserData() {
+    if (!userAddress || !oldStakingContract) return;
 
-        const amount = stakeAmountInput.value.trim();
-        if (!amount || isNaN(amount) || Number(amount) <= 0) {
-            return alert('Enter a valid amount.');
+    try {
+        const bal = await tokenContract.balanceOf(userAddress);
+        document.getElementById("tokenBalance").textContent = fmtINPI(bal, 2);
+
+        // OLD staking
+        const staked = await oldStakingContract.balanceOf(userAddress);
+        const earned = await oldStakingContract.earned(userAddress);
+        const total = await oldStakingContract.totalSupply();
+
+        document.getElementById("oldUserStaked").textContent = fmtINPI(staked, 2);
+        document.getElementById("oldUserPending").textContent = fmtINPI(earned, 4);
+        document.getElementById("oldUserShare").textContent = total > 0n
+            ? (Number((staked * 10000n) / total) / 100).toFixed(2) + "%"
+            : "0%";
+    } catch (e) { console.warn("Refresh user data:", e); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   OLD STAKING ACTIONS
+   ═══════════════════════════════════════════════════════════════ */
+async function oldStake() {
+    if (!userAddress) return alert("Bitte Wallet verbinden.");
+    const amount = document.getElementById("stakeAmount").value.trim();
+    if (!amount || isNaN(amount) || Number(amount) <= 0) return alert("Ungültiger Betrag.");
+
+    try {
+        const wei = ethers.parseUnits(amount, 18);
+        const allowance = await tokenContract.allowance(userAddress, CONFIG.OLD_STAKING);
+        if (allowance < wei) {
+            const appr = await tokenContract.approve(CONFIG.OLD_STAKING, wei);
+            await appr.wait();
+        }
+        const tx = await oldStakingContract.stake(wei);
+        await tx.wait();
+        document.getElementById("stakeAmount").value = "";
+        await refreshUserData();
+        alert("Stake erfolgreich!");
+    } catch (e) { alert("Stake fehlgeschlagen: " + (e.message || "")); }
+}
+
+async function oldUnstake() {
+    if (!userAddress) return alert("Bitte Wallet verbinden.");
+    const amount = document.getElementById("stakeAmount").value.trim();
+    if (!amount || isNaN(amount) || Number(amount) <= 0) return alert("Ungültiger Betrag.");
+    try {
+        const tx = await oldStakingContract.withdraw(ethers.parseUnits(amount, 18));
+        await tx.wait();
+        document.getElementById("stakeAmount").value = "";
+        await refreshUserData();
+        alert("Unstake erfolgreich!");
+    } catch (e) { alert("Unstake fehlgeschlagen: " + (e.message || "")); }
+}
+
+async function oldClaim() {
+    if (!userAddress) return alert("Bitte Wallet verbinden.");
+    try {
+        const tx = await oldStakingContract.getReward();
+        await tx.wait();
+        await refreshUserData();
+        alert("Rewards geclaimt!");
+    } catch (e) { alert("Claim fehlgeschlagen: " + (e.message || "")); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   NEW NFT STAKING ACTIONS
+   ═══════════════════════════════════════════════════════════════ */
+async function nftApprove() {
+    if (!userAddress) return alert("Bitte Wallet verbinden.");
+    const tokenId = document.getElementById("nftTokenId").value.trim();
+    if (!tokenId) return alert("Bitte Token-ID eingeben.");
+    const poolKey = document.getElementById("nftSafeSelect").value;
+    const safeAddr = CONFIG.SAFES[poolKey].addr;
+
+    try {
+        // User muss die NFT an das Safe approven
+        // WICHTIG: Der NFT gehört dem Uniswap PositionManager, nicht dem User direkt.
+        // Der User ist "owner" der Position, aber der NFT-Contract ist der PositionManager.
+        // Deshalb: approve auf dem PositionManager aufrufen!
+        const V4_POSITION_MANAGER = "0x7C5f5A4bBd8fD63184577525326123B519429bDc";
+        const pm = new ethers.Contract(V4_POSITION_MANAGER, ERC721_ABI, signer);
+
+        // Prüfen ob User Owner der Position ist
+        const owner = await pm.ownerOf(tokenId);
+        if (owner.toLowerCase() !== userAddress.toLowerCase()) {
+            return alert("Du bist nicht Besitzer dieser Position. Token-ID prüfen.");
         }
 
-        try {
-            const amountWei = ethers.parseUnits(amount.toString(), decimals);
-            const allowance = await tokenContract.allowance(userAddress, STAKING_ADDRESS);
+        const tx = await pm.approve(safeAddr, tokenId);
+        await tx.wait();
+        alert("NFT approved! Du kannst jetzt staken.");
+    } catch (e) {
+        console.error(e);
+        alert("Approve fehlgeschlagen: " + (e.message || ""));
+    }
+}
 
-            if (allowance < amountWei) {
-                const approveTx = await tokenContract.approve(STAKING_ADDRESS, amountWei);
-                await approveTx.wait();
+async function nftStake() {
+    if (!userAddress) return alert("Bitte Wallet verbinden.");
+    const tokenId = document.getElementById("nftTokenId").value.trim();
+    const lockDuration = document.getElementById("nftLockDuration").value;
+    const poolKey = document.getElementById("nftSafeSelect").value;
+
+    if (!tokenId) return alert("Bitte Token-ID eingeben.");
+
+    try {
+        const safe = safeContracts[poolKey];
+        const tx = await safe.stakeNFT(tokenId, lockDuration);
+        await tx.wait();
+        document.getElementById("nftTokenId").value = "";
+        alert("NFT erfolgreich gestakt! 🎉");
+        await refreshUserData();
+        await loadUserNFTs();
+    } catch (e) {
+        console.error(e);
+        alert("Stake fehlgeschlagen: " + (e.message || ""));
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   USER NFT POSITIONS ANZEIGEN
+   ═══════════════════════════════════════════════════════════════ */
+async function loadUserNFTs() {
+    if (!userAddress) return;
+    const container = document.getElementById("nftPositionsList");
+    container.innerHTML = "";
+
+    for (const [key, cfg] of Object.entries(CONFIG.SAFES)) {
+        try {
+            const safe = safeContracts[key];
+            const count = Number(await safe.userPositionsLength(userAddress));
+            if (count === 0) continue;
+
+            const header = document.createElement("h4");
+            header.textContent = cfg.name + " (" + count + " Position" + (count !== 1 ? "en" : "") + ")";
+            container.appendChild(header);
+
+            for (let i = 0; i < count; i++) {
+                const posId = await safe.userPositions(userAddress, i);
+                const pos = await safe.positions(posId);
+                const pending = await safe.pendingRewards(posId);
+                const boost = await safe.currentBoost(posId);
+                const penalty = await safe.previewPenalty(posId);
+
+                const card = document.createElement("div");
+                card.className = "nft-position-card";
+                card.innerHTML = `
+                    <div class="nft-pos-header">
+                        <strong>Position #${posId}</strong>
+                        <span>NFT #${pos.tokenId}</span>
+                    </div>
+                    <div class="nft-pos-stats">
+                        <div><span>Wert:</span> <strong>${fmtINPI(pos.amountEUR, 2)} EUR</strong></div>
+                        <div><span>Boost:</span> <strong>${(Number(ethers.formatUnits(boost, 18))).toFixed(2)}×</strong></div>
+                        <div><span>Pending:</span> <strong>${fmtINPI(pending, 4)} INPI</strong></div>
+                        <div><span>Sperre:</span> <strong>${pos.lockDuration === 0n ? "Flexibel" : Number(pos.lockDuration / 86400n) + " Tage"}</strong></div>
+                        ${penalty > 0n ? `<div style="color:#f80;"><span>Penalty:</span> <strong>${fmtINPI(penalty, 4)} INPI</strong></div>` : ""}
+                    </div>
+                    <div class="nft-pos-actions">
+                        <button class="btn btn-small" onclick="nftClaim(${posId})" ${pending === 0n ? "disabled" : ""}>Claim</button>
+                        <button class="btn btn-small btn-secondary" onclick="nftUnstake(${posId})">Unstake</button>
+                    </div>
+                `;
+                container.appendChild(card);
             }
-
-            const tx = await stakingContract.stake(amountWei);
-            await tx.wait();
-
-            stakeAmountInput.value = '';
-            await updateBalances();
-            alert('Staking successful!');
-        } catch (err) {
-            console.error(err);
-            alert('Staking failed: ' + (err.message || 'unknown error'));
-        }
+        } catch (e) { console.warn("Load NFTs for " + key + ":", e); }
     }
+}
 
-    async function unstake() {
-        if (!userAddress) return alert('Please connect wallet.');
-
-        const amount = stakeAmountInput.value.trim();
-        if (!amount || isNaN(amount) || Number(amount) <= 0) {
-            return alert('Enter a valid amount.');
+async function nftClaim(posId) {
+    try {
+        // Finde das richtige Safe — probiere alle durch
+        for (const [key, safe] of Object.entries(safeContracts)) {
+            try {
+                const tx = await safe.claim(posId);
+                await tx.wait();
+                alert("Rewards geclaimt!");
+                await loadUserNFTs();
+                await refreshUserData();
+                return;
+            } catch (_) { /* nächster Safe */ }
         }
+    } catch (e) { alert("Claim fehlgeschlagen: " + (e.message || "")); }
+}
 
-        try {
-            const amountWei = ethers.parseUnits(amount.toString(), decimals);
-            const tx = await stakingContract.withdraw(amountWei);
-            await tx.wait();
-
-            stakeAmountInput.value = '';
-            await updateBalances();
-            alert('Unstaking successful!');
-        } catch (err) {
-            console.error(err);
-            alert('Unstaking failed: ' + (err.message || 'unknown error'));
+async function nftUnstake(posId) {
+    if (!confirm("Position wirklich entnehmen? Bei laufender Sperre wird eine Penalty auf Rewards fällig.")) return;
+    try {
+        for (const [key, safe] of Object.entries(safeContracts)) {
+            try {
+                const tx = await safe.unstake(posId);
+                await tx.wait();
+                alert("NFT zurückgegeben!");
+                await loadUserNFTs();
+                await refreshUserData();
+                return;
+            } catch (_) { /* nächster Safe */ }
         }
+    } catch (e) { alert("Unstake fehlgeschlagen: " + (e.message || "")); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   EVENT LISTENERS
+   ═══════════════════════════════════════════════════════════════ */
+document.getElementById("connectWalletBtn").addEventListener("click", connectWallet);
+document.getElementById("stakeBtn").addEventListener("click", oldStake);
+document.getElementById("unstakeBtn").addEventListener("click", oldUnstake);
+document.getElementById("claimOldBtn").addEventListener("click", oldClaim);
+document.getElementById("nftApproveBtn").addEventListener("click", nftApprove);
+document.getElementById("nftStakeBtn").addEventListener("click", nftStake);
+
+// Auto-connect wenn schon verbunden
+window.addEventListener("load", async () => {
+    if (window.ethereum && window.ethereum.selectedAddress) {
+        await connectWallet();
+        await loadUserNFTs();
     }
-
-    async function claim() {
-        if (!userAddress) return alert('Please connect wallet.');
-
-        try {
-            const tx = await stakingContract.getReward();
-            await tx.wait();
-            await updateBalances();
-            alert('Rewards claimed!');
-        } catch (err) {
-            console.error(err);
-            alert('Claim failed: ' + (err.message || 'unknown error'));
-        }
-    }
-
-    connectBtn.addEventListener('click', connectWallet);
-    stakeBtn.addEventListener('click', stake);
-    unstakeBtn.addEventListener('click', unstake);
-    claimBtn.addEventListener('click', claim);
-
-    window.addEventListener('load', async () => {
-        if (window.ethereum && window.ethereum.selectedAddress) {
-            await connectWallet();
-        }
-    });
-})();
+});
 </script>
 </body>
 </html>
