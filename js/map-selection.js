@@ -656,8 +656,8 @@
      const nftReadOnlyContract = getReadOnlyNFTContract();
      if (!nftReadOnlyContract) return;
    
-     for (let row = 0; row < 100; row++) {
-       for (let col = 0; col < row; col++) { // Nur linke Seite berechnen
+     for (let row = 1; row < 100; row++) { // Startet bei 1 (Reihe 0 ist die Spitze)
+       for (let col = 0; col < row; col++) { // Nur linke Seite berechnen, rechte wird gespiegelt
          const tokenId = (row * 2048) + col;
          const mirrorCol = (2 * row) - col;
          const mirrorTokenId = (row * 2048) + mirrorCol;
@@ -787,7 +787,25 @@
              isPiMirrorMatch = (piDigit === mirrorPi);
              isPhiMirrorMatch = (phiDigit === mirrorPhi);
              
-             // Matches werden hier nicht mehr gesetzt, das macht jetzt precalculateMatches()
+             // SOFORTIGES UPDATE DER MAP BEIM KLICK
+             if (!mapState.piMatches) mapState.piMatches = new Set();
+             if (!mapState.phiMatches) mapState.phiMatches = new Set();
+   
+             if (isPiMirrorMatch) {
+               mapState.piMatches.add(String(tokenId));
+               mapState.piMatches.add(String(mirrorTokenId));
+             } else {
+               mapState.piMatches.delete(String(tokenId));
+               mapState.piMatches.delete(String(mirrorTokenId));
+             }
+   
+             if (isPhiMirrorMatch) {
+               mapState.phiMatches.add(String(tokenId));
+               mapState.phiMatches.add(String(mirrorTokenId));
+             } else {
+               mapState.phiMatches.delete(String(tokenId));
+               mapState.phiMatches.delete(String(mirrorTokenId));
+             }
              
            } catch(e) { /* Block existiert nicht */ }
          }
