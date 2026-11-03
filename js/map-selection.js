@@ -711,6 +711,7 @@
      let isPhiMirrorMatch = false;
      let mirrorPi = "?";
      let mirrorPhi = "?";
+     let mirrorRevealed = false;
    
      if (token?.owner && nftReadOnlyContract) {
        try {
@@ -731,18 +732,23 @@
          
          // Wenn es nicht der mittlere Block ist
          if (mirrorCol !== col && mirrorCol >= 0) {
-           // Start ID der Reihe im Contract (1-basiert: 1, 4, 9, 16...)
-           const startIdOfRow = Math.pow(row, 2) + 1;
+           // Start ID der Reihe im Contract (exakt 0-basiert: 0, 1, 4, 9, 16...)
+           const startIdOfRow = Math.pow(row, 2);
            const mirrorTokenId = startIdOfRow + mirrorCol;
            
            try {
              const mirrorInfo = await nftReadOnlyContract.blockData(mirrorTokenId);
-             mirrorPi = mirrorInfo.piDigit;
-             mirrorPhi = mirrorInfo.phiDigit;
              
-             // Getrennte Prüfung für Pi und Phi
-             isPiMirrorMatch = (piDigit === mirrorPi);
-             isPhiMirrorMatch = (phiDigit === mirrorPhi);
+             // WICHTIG: Nur vergleichen, wenn der Block auch enthüllt/gemintet ist!
+             if (mirrorInfo.revealed) {
+               mirrorPi = mirrorInfo.piDigit;
+               mirrorPhi = mirrorInfo.phiDigit;
+               mirrorRevealed = true;
+               
+               // Getrennte Prüfung für Pi und Phi
+               isPiMirrorMatch = (piDigit === mirrorPi);
+               isPhiMirrorMatch = (phiDigit === mirrorPhi);
+             }
              
            } catch(e) { /* Block existiert evtl. noch nicht */ }
          }
@@ -882,7 +888,7 @@
            </div>
            
            <!-- GETRENNTE SPIEGEL-CHECKS FÜR PI UND PHI -->
-           ${!isAxis && mirrorPi !== "?" ? `
+           ${!isAxis && mirrorRevealed ? `
            <div class="detail-row math-data-row">
              <span class="detail-label">Mirror π (Pi)</span>
              <span class="detail-value" style="color: ${isPiMirrorMatch ? '#4a90e2' : '#98a9b9'}">${isPiMirrorMatch ? '✅ Match!' : '❌ Differs'}</span>
