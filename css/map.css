@@ -328,6 +328,19 @@ body {
   word-break: break-word;
 }
 
+/* MATH DATA ROW STYLING */
+.math-data-row {
+  padding: 0.15rem 0;
+  border-bottom: 1px dashed rgba(42, 63, 74, 0.6);
+}
+.math-data-row:last-of-type {
+  border-bottom: none;
+  margin-bottom: 0.65rem;
+}
+.math-data-row .detail-label {
+  color: #b0c4d8; 
+}
+
 .rarity-bronze {
   color: #cd7f32;
   font-weight: 700;
