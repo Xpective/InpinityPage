@@ -705,15 +705,42 @@
      let phiDigit = "?";
      let isAxis = false;
      let piEqualsPhi = false;
+     let isMirrorMatch = false;
+     let mirrorPi = "?";
+     let mirrorPhi = "?";
    
      if (token?.owner && nftReadOnlyContract) {
        try {
          const blockInfo = await nftReadOnlyContract.blockData(tokenId);
          piDigit = blockInfo.piDigit;
          phiDigit = blockInfo.phiDigit;
+         
+         const row = blockInfo.row.toNumber ? blockInfo.row.toNumber() : Number(blockInfo.row);
          const col = blockInfo.col.toNumber ? blockInfo.col.toNumber() : Number(blockInfo.col);
-         isAxis = (col === 0);
+         
+         // KORREKTUR FÜR PYRAMIDE (1, 3, 5, 7... Blöcke pro Reihe)
+         // Die Mitte (0-Achse) liegt immer bei (row - 1)
+         isAxis = (col === row - 1);
          piEqualsPhi = (piDigit === phiDigit);
+   
+         // BERECHNUNG DES SYMMETRIE-SPIEGELS
+         const mirrorCol = (2 * (row - 1)) - col;
+         
+         if (mirrorCol !== col && mirrorCol >= 0) {
+           // Start-ID der aktuellen Reihe: (row - 1)^2 + 1
+           const startIdOfRow = Math.pow(row - 1, 2) + 1;
+           const mirrorTokenId = startIdOfRow + mirrorCol;
+           
+           try {
+             const mirrorInfo = await nftReadOnlyContract.blockData(mirrorTokenId);
+             mirrorPi = mirrorInfo.piDigit;
+             mirrorPhi = mirrorInfo.phiDigit;
+             
+             if (piDigit === mirrorPi && phiDigit === mirrorPhi) {
+               isMirrorMatch = true;
+             }
+           } catch(e) { /* Block existiert evtl. noch nicht */ }
+         }
        } catch (e) {
          console.warn("Could not fetch blockData", e);
        }
@@ -845,9 +872,15 @@
              <span class="detail-value" style="color: ${piEqualsPhi ? '#2ecc71' : '#98a9b9'}">${piEqualsPhi ? '✅ Yes' : '❌ No'}</span>
            </div>
            <div class="detail-row math-data-row">
-             <span class="detail-label">0-Axis Mirror</span>
+             <span class="detail-label">0-Axis (Center)</span>
              <span class="detail-value" style="color: ${isAxis ? '#2ecc71' : '#98a9b9'}">${isAxis ? '✅ Yes' : '❌ No'}</span>
            </div>
+           ${!isAxis && mirrorPi !== "?" ? `
+           <div class="detail-row math-data-row">
+             <span class="detail-label">Mirror (Opposite)</span>
+             <span class="detail-value" style="color: ${isMirrorMatch ? '#2ecc71' : '#98a9b9'}">${isMirrorMatch ? '✅ Match!' : '❌ Differs'}</span>
+           </div>
+           ` : ''}
    
            ${rarityDisplay}
            <div class="detail-row"><span class="detail-label">Farming</span><span class="detail-value">${farmVersionTxt}</span></div>
