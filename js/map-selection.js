@@ -719,18 +719,18 @@
          const row = blockInfo.row.toNumber ? blockInfo.row.toNumber() : Number(blockInfo.row);
          const col = blockInfo.col.toNumber ? blockInfo.col.toNumber() : Number(blockInfo.col);
    
-         // 0-Achse (Mitte): Da row und col bei 0 beginnen, ist die Mitte immer col === row
-         isAxis = (col === row);
+         // DIE ACHSE: 0,0 / 1,1 / 2,2 / 3,3 ...
+         isAxis = (row === col);
          piEqualsPhi = (piDigit === phiDigit);
    
          // BERECHNUNG DES SYMMETRIE-SPIEGELS
-         // Formel für den gespiegelten Index in der Reihe: (2 * row) - col
          const mirrorCol = (2 * row) - col;
          
-         // Wenn es nicht der mittlere Block ist (der spiegelt sich selbst)
+         // Wenn es nicht der mittlere Block ist
          if (mirrorCol !== col && mirrorCol >= 0) {
-           // ID des gespiegelten Blocks: row^2 + mirrorCol
-           const mirrorTokenId = Math.pow(row, 2) + mirrorCol;
+           // Start ID der Reihe im Contract (1-basiert: 1, 4, 9, 16...)
+           const startIdOfRow = Math.pow(row, 2) + 1;
+           const mirrorTokenId = startIdOfRow + mirrorCol;
            
            try {
              const mirrorInfo = await nftReadOnlyContract.blockData(mirrorTokenId);
