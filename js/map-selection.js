@@ -715,19 +715,22 @@
          piDigit = blockInfo.piDigit;
          phiDigit = blockInfo.phiDigit;
          
-         // DIREKTES AUSLESEN AUS DEM SMART CONTRACT
+         // DIREKTES AUSLESEN AUS DEM SMART CONTRACT (0-basiert)
          const row = blockInfo.row.toNumber ? blockInfo.row.toNumber() : Number(blockInfo.row);
          const col = blockInfo.col.toNumber ? blockInfo.col.toNumber() : Number(blockInfo.col);
    
-         // 0-Achse: Da Reihe bei 1 startet und Spalte bei 0, ist die Mitte immer col === row - 1
-         isAxis = (col === row - 1);
+         // 0-Achse (Mitte): Da row und col bei 0 beginnen, ist die Mitte immer col === row
+         isAxis = (col === row);
          piEqualsPhi = (piDigit === phiDigit);
    
          // BERECHNUNG DES SYMMETRIE-SPIEGELS
-         const mirrorCol = (2 * (row - 1)) - col;
+         // Formel für den gespiegelten Index in der Reihe: (2 * row) - col
+         const mirrorCol = (2 * row) - col;
          
+         // Wenn es nicht der mittlere Block ist (der spiegelt sich selbst)
          if (mirrorCol !== col && mirrorCol >= 0) {
-           const mirrorTokenId = Math.pow(row - 1, 2) + 1 + mirrorCol;
+           // ID des gespiegelten Blocks: row^2 + mirrorCol
+           const mirrorTokenId = Math.pow(row, 2) + mirrorCol;
            
            try {
              const mirrorInfo = await nftReadOnlyContract.blockData(mirrorTokenId);
