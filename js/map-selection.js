@@ -718,37 +718,29 @@
          piDigit = Number(readTupleValue(blockInfo, "piDigit", 0, 0));
          phiDigit = Number(readTupleValue(blockInfo, "phiDigit", 1, 0));
          
-         // 0-basierte Werte direkt aus dem Contract
          const row = Number(readTupleValue(blockInfo, "row", 2, 0));
          const col = Number(readTupleValue(blockInfo, "col", 3, 0));
    
-         // DIE ACHSE: (0,0 / 1,1 / 2,2 ...)
          isAxis = (row === col);
          piEqualsPhi = (piDigit === phiDigit);
    
-         // BERECHNUNG DES SYMMETRIE-SPIEGELS
+         // DIE KORREKTE TOKEN ID BERECHNUNG FÜR DEIN 2048ER RASTER
          const mirrorCol = (2 * row) - col;
          
-         // Wenn es nicht der mittlere Block ist
          if (!isAxis && mirrorCol >= 0) {
-           // Start ID der Reihe im Contract (0, 1, 4, 9, 16...)
-           const startIdOfRow = Math.pow(row, 2);
-           const mirrorTokenId = startIdOfRow + mirrorCol;
+           // Jede Reihe startet bei row * 2048
+           const mirrorTokenId = (row * 2048) + mirrorCol;
            
            try {
              const mirrorInfo = await nftReadOnlyContract.blockData(mirrorTokenId);
              
-             // Zahlen holen, egal ob revealed oder nicht. Wenn unrevealed, gibt Contract 0.
              mirrorPi = Number(readTupleValue(mirrorInfo, "piDigit", 0, 0));
              mirrorPhi = Number(readTupleValue(mirrorInfo, "phiDigit", 1, 0));
              
-             // REINER ZAHLENVERGLEICH
              isPiMirrorMatch = (piDigit === mirrorPi);
              isPhiMirrorMatch = (phiDigit === mirrorPhi);
              
-           } catch(e) { 
-             /* Block existiert nicht */ 
-           }
+           } catch(e) { /* Block existiert nicht */ }
          }
        } catch (e) {
          console.warn("Could not fetch blockData", e);
@@ -885,7 +877,7 @@
              <span class="detail-value" style="color: ${isAxis ? '#2ecc71' : '#98a9b9'}">${isAxis ? '✅ Yes' : '❌ No'}</span>
            </div>
            
-           <!-- GETRENNTE SPIEGEL-CHECKS OHNE IDs -->
+           <!-- GETRENNTE SPIEGEL-CHECKS -->
            ${!isAxis ? `
            <div class="detail-row math-data-row">
              <span class="detail-label">Mirror π</span>
