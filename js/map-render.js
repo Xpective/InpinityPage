@@ -23,6 +23,8 @@
    const container = byId("canvasContainer");
    const tooltip = byId("tooltip");
    
+   let animationFrameId = null;
+   
    export function getCanvasElements() {
      return { canvas, ctx, container, tooltip };
    }
@@ -76,11 +78,32 @@
      const userAttacks = getUserAttacks();
    
      ctx.clearRect(0, 0, canvas.width, canvas.height);
+     
+     // --- SURPRISE: Kosmischer Hintergrund ---
+     const time = Date.now();
+     const rotation = time / 10000; // Sehr langsame Rotation
+     ctx.save();
+     ctx.translate(canvas.width / 2, canvas.height / 2);
+     ctx.rotate(rotation);
+     ctx.font = 'bold 40vw "Inter", sans-serif';
+     ctx.fillStyle = 'rgba(212, 175, 55, 0.02)'; // Extrem transparentes Gold
+     ctx.textAlign = 'center';
+     ctx.textBaseline = 'middle';
+     ctx.fillText('π', -canvas.width / 4, 0);
+     ctx.fillText('φ', canvas.width / 4, 0);
+     ctx.restore();
+   
      ctx.save();
      ctx.translate(mapState.offsetX, mapState.offsetY);
      ctx.scale(mapState.scale, mapState.scale);
    
      const now = Math.floor(Date.now() / 1000);
+     
+     // Pulsierende Animation berechnen (0.0 bis 1.0)
+     const pulse = (Math.sin(time / 300) + 1) / 2;
+     const piAlpha = 0.1 + pulse * 0.4; // Blau transparent
+     const phiAlpha = 0.1 + pulse * 0.4; // Rot transparent
+     const axisAlpha = 0.2 + pulse * 0.3; // Goldene Achse
    
      for (let row = 0; row < 100; row++) {
        const blocksInRow = 2 * row + 1;
@@ -129,15 +152,44 @@
            }
          }
    
+         // Basis-Block zeichnen
          ctx.fillStyle = fillColor;
          ctx.fillRect(x, y, BASE_BLOCK_SIZE, BASE_BLOCK_SIZE);
    
+         // --- SURPRISE: Goldene 0-Achse (Symmetrie-Spiegel) ---
+         if (row === col) {
+           ctx.fillStyle = `rgba(212, 175, 55, ${axisAlpha})`;
+           ctx.fillRect(x, y, BASE_BLOCK_SIZE, BASE_BLOCK_SIZE);
+           // Dezenter goldener Rahmen um die Achse
+           ctx.strokeStyle = `rgba(212, 175, 55, 0.8)`;
+           ctx.lineWidth = 1;
+           ctx.strokeRect(x, y, BASE_BLOCK_SIZE, BASE_BLOCK_SIZE);
+         }
+   
+         // --- MATCH PULSIEREN (Pi = Blau, Phi = Rot) ---
+         const isPiMatch = mapState.piMatches?.has(tokenId);
+         const isPhiMatch = mapState.phiMatches?.has(tokenId);
+   
+         if (isPiMatch && isPhiMatch) {
+           // Lila Puls, wenn beides matcht
+           ctx.fillStyle = `rgba(155, 89, 182, ${Math.max(piAlpha, phiAlpha)})`;
+           ctx.fillRect(x, y, BASE_BLOCK_SIZE, BASE_BLOCK_SIZE);
+         } else if (isPiMatch) {
+           ctx.fillStyle = `rgba(74, 144, 226, ${piAlpha})`;
+           ctx.fillRect(x, y, BASE_BLOCK_SIZE, BASE_BLOCK_SIZE);
+         } else if (isPhiMatch) {
+           ctx.fillStyle = `rgba(231, 76, 60, ${phiAlpha})`;
+           ctx.fillRect(x, y, BASE_BLOCK_SIZE, BASE_BLOCK_SIZE);
+         }
+   
+         // Bestehender Stroke (z.B. Farming)
          if (strokeColor) {
            ctx.strokeStyle = strokeColor;
            ctx.lineWidth = lineWidth;
            ctx.strokeRect(x, y, BASE_BLOCK_SIZE, BASE_BLOCK_SIZE);
          }
    
+         // Selected Outline
          if (mapState.selectedTokenId === tokenId) {
            ctx.save();
            ctx.strokeStyle = "#ffffff";
@@ -169,6 +221,22 @@
      }
    
      ctx.restore();
+   }
+   
+   // Startet die Animationsschleife für das Pulsieren
+   export function startRenderLoop() {
+     if (animationFrameId) return;
+     
+     const loop = () => {
+       // Nur zeichnen, wenn es Matches gibt, um Performance zu sparen.
+       // Ansonsten reicht das Zeichnen bei Interaktion (Drag/Zoom).
+       if ((mapState.piMatches?.size > 0) || (mapState.phiMatches?.size > 0)) {
+         drawPyramid();
+       }
+       animationFrameId = requestAnimationFrame(loop);
+     };
+     
+     loop();
    }
    
    export function centerPyramid() {
@@ -371,6 +439,9 @@
      window.addEventListener("mouseup", handleGlobalMouseUp);
    
      if (!canvas) return;
+   
+     // Startet das kontinuierliche Pulsieren der Matches
+     startRenderLoop();
    
      canvas.addEventListener("wheel", handleWheel, { passive: false });
      canvas.addEventListener("click", handleClick);

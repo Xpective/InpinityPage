@@ -23,6 +23,7 @@
      getReadOnlyNFTContract
    } from "./map-data.js";
    import { populateAttackerSelect } from "./map-ui.js";
+   import { drawPyramid } from "./map-render.js"; // NEU: Import für Canvas-Update
    
    function readTupleValue(tuple, key, index, fallback = null) {
      if (!tuple) return fallback;
@@ -740,6 +741,26 @@
              isPiMirrorMatch = (piDigit === mirrorPi);
              isPhiMirrorMatch = (phiDigit === mirrorPhi);
              
+             // NEU: Speichere Matches im globalen State für die Canvas-Karte
+             if (!mapState.piMatches) mapState.piMatches = new Set();
+             if (!mapState.phiMatches) mapState.phiMatches = new Set();
+   
+             if (isPiMirrorMatch) {
+               mapState.piMatches.add(String(tokenId));
+               mapState.piMatches.add(String(mirrorTokenId));
+             } else {
+               mapState.piMatches.delete(String(tokenId));
+               mapState.piMatches.delete(String(mirrorTokenId));
+             }
+   
+             if (isPhiMirrorMatch) {
+               mapState.phiMatches.add(String(tokenId));
+               mapState.phiMatches.add(String(mirrorTokenId));
+             } else {
+               mapState.phiMatches.delete(String(tokenId));
+               mapState.phiMatches.delete(String(mirrorTokenId));
+             }
+             
            } catch(e) { /* Block existiert nicht */ }
          }
        } catch (e) {
@@ -958,6 +979,8 @@
        if (pirateBoostInput) pirateBoostInput.style.display = "block";
    
        await refreshSelectedTargetAttackPreview();
+       // Canvas nach dem Update neu zeichnen, damit die Matches pulsieren
+       drawPyramid();
        return;
      }
    
@@ -1008,10 +1031,15 @@
          pirateBoostInput.style.display = "none";
        }
    
+       // Canvas nach dem Update neu zeichnen, damit die Matches pulsieren
+       drawPyramid();
        return;
      }
    
      if (boostOptions) boostOptions.style.display = "none";
      if (buyBoostBtn) buyBoostBtn.style.display = "none";
      if (pirateBoostInput) pirateBoostInput.style.display = "none";
+     
+     // Canvas nach dem Update neu zeichnen
+     drawPyramid();
    }
