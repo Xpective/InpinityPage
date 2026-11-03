@@ -720,21 +720,21 @@
          piDigit = Number(readTupleValue(blockInfo, "piDigit", 0, 0));
          phiDigit = Number(readTupleValue(blockInfo, "phiDigit", 1, 0));
          
-         // row ist 1-basiert, col ist 0-basiert!
-         const row = Number(readTupleValue(blockInfo, "row", 2, 1));
+         // row und col als echte Zahlen (0-basiert)
+         const row = Number(readTupleValue(blockInfo, "row", 2, 0));
          const col = Number(readTupleValue(blockInfo, "col", 3, 0));
    
-         // DIE ACHSE: row=1 col=0 / row=2 col=1 / row=3 col=2 ...
-         isAxis = (col === row - 1);
+         // DIE ACHSE: 0,0 / 1,1 / 2,2 / 3,3 ... (Da row und col bei 0 starten)
+         isAxis = (row === col);
          piEqualsPhi = (piDigit === phiDigit);
    
          // BERECHNUNG DES SYMMETRIE-SPIEGELS
-         const mirrorCol = (2 * (row - 1)) - col;
+         const mirrorCol = (2 * row) - col;
          
          // Wenn es nicht der mittlere Block ist
          if (!isAxis && mirrorCol >= 0) {
-           // Start ID der Reihe im Contract (1-basiert: 1, 4, 9, 16...)
-           const startIdOfRow = Math.pow(row - 1, 2) + 1;
+           // Start ID der Reihe im Contract (exakt 0-basiert: 0, 1, 4, 9, 16...)
+           const startIdOfRow = Math.pow(row, 2);
            const mirrorTokenId = startIdOfRow + mirrorCol;
            
            try {
