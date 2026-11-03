@@ -739,10 +739,12 @@
            try {
              const mirrorInfo = await nftReadOnlyContract.blockData(mirrorTokenId);
              
-             // WICHTIG: Nur vergleichen, wenn der Block auch enthüllt/gemintet ist!
-             if (mirrorInfo.revealed) {
-               mirrorPi = mirrorInfo.piDigit;
-               mirrorPhi = mirrorInfo.phiDigit;
+             // WICHTIG: readTupleValue nutzen, da ethers das manchmal nicht als .revealed auflöst!
+             const rev = readTupleValue(mirrorInfo, "revealed", 4, false);
+             
+             if (rev) {
+               mirrorPi = readTupleValue(mirrorInfo, "piDigit", 0, 0);
+               mirrorPhi = readTupleValue(mirrorInfo, "phiDigit", 1, 0);
                mirrorRevealed = true;
                
                // Getrennte Prüfung für Pi und Phi
