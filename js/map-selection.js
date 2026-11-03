@@ -716,18 +716,18 @@
        try {
          const blockInfo = await nftReadOnlyContract.blockData(tokenId);
          
-         // FIX: Index-basiertes Auslesen, da der Contract Arrays zurückgibt (0=pi, 1=phi, 2=row, 3=col)
-         piDigit = readTupleValue(blockInfo, "piDigit", 0, "?");
-         phiDigit = readTupleValue(blockInfo, "phiDigit", 1, "?");
+         // FIX: Werte sicher in echte Zahlen umwandeln, damit Math.pow() funktioniert!
+         piDigit = Number(readTupleValue(blockInfo, "piDigit", 0, 0));
+         phiDigit = Number(readTupleValue(blockInfo, "phiDigit", 1, 0));
          
-         const row = readTupleValue(blockInfo, "row", 2, 0);
-         const col = readTupleValue(blockInfo, "col", 3, 0);
+         const row = Number(readTupleValue(blockInfo, "row", 2, 0));
+         const col = Number(readTupleValue(blockInfo, "col", 3, 0));
    
          // DIE ACHSE: 0,0 / 1,1 / 2,2 / 3,3 ...
          isAxis = (row === col);
          piEqualsPhi = (piDigit === phiDigit);
    
-         // BERECHNUNG DES SYMMETRIE-SPIEGELS
+         // BERECHNUNG DES SYMMETRIE-SPIEGELS (Spalte und Token ID)
          const mirrorCol = (2 * row) - col;
          
          // Wenn es nicht der mittlere Block ist
@@ -739,15 +739,15 @@
            try {
              const mirrorInfo = await nftReadOnlyContract.blockData(mirrorTokenId);
              
-             mirrorPi = readTupleValue(mirrorInfo, "piDigit", 0, "?");
-             mirrorPhi = readTupleValue(mirrorInfo, "phiDigit", 1, "?");
+             mirrorPi = Number(readTupleValue(mirrorInfo, "piDigit", 0, 0));
+             mirrorPhi = Number(readTupleValue(mirrorInfo, "phiDigit", 1, 0));
              
              const rev = readTupleValue(mirrorInfo, "revealed", 4, false);
              mirrorStatus = rev ? "revealed" : "unrevealed";
              
              // REINER ZAHLENVERGLEICH (Pi und Phi getrennt)
-             isPiMirrorMatch = (piDigit == mirrorPi);
-             isPhiMirrorMatch = (phiDigit == mirrorPhi);
+             isPiMirrorMatch = (piDigit === mirrorPi);
+             isPhiMirrorMatch = (phiDigit === mirrorPhi);
              
            } catch(e) { 
              mirrorStatus = "not_minted"; 
@@ -888,7 +888,7 @@
              <span class="detail-value" style="color: ${isAxis ? '#2ecc71' : '#98a9b9'}">${isAxis ? '✅ Yes' : '❌ No'}</span>
            </div>
            
-           <!-- GETRENNTE SPIEGEL-CHECKS OHNE TOKEN IDs -->
+           <!-- GETRENNTE SPIEGEL-CHECKS OHNE IDs -->
            ${!isAxis ? `
            <div class="detail-row math-data-row">
              <span class="detail-label">Mirror π</span>
