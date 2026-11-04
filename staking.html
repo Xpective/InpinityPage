@@ -19,7 +19,7 @@
     <meta name="theme-color" content="#140f1f">
     <style>
     /* ═══════════════════════════════════════════════════════ */
-    /* DEIN BESTEHENDES CSS (unverändert)                       */
+    /* DEIN BESTEHENDES CSS                                     */
     /* ═══════════════════════════════════════════════════════ */
     .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin: 1.5rem auto; max-width: 980px; }
     .stat-box { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.10); border-radius: 14px; padding: 1rem; text-align: center; }
@@ -38,10 +38,10 @@
     .price-ticker-age.stale { color: #ff5252; }
     .charts-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 1.25rem; margin: 1.5rem auto; max-width: 980px; }
     .chart-card { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.10); border-radius: 18px; padding: 1.25rem; }
-    .chart-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .chart-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;}
     .chart-card-title { color: var(--quinary-color, #ffd700); font-weight: 800; font-size: 1rem; margin: 0; }
     .chart-card-badge { font-size: 0.72rem; padding: 0.2rem 0.6rem; border-radius: 6px; background: rgba(0, 200, 83, 0.15); color: #00e676; font-weight: 700; }
-    .chart-body { position: relative; height: 220px; }
+    .chart-body { position: relative; height: 220px; transition: opacity 0.3s; }
     .chart-body-donut { height: 200px; }
     .donut-legend { margin-top: 0.75rem; font-size: 0.82rem; }
     .donut-legend-item { display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0; border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
@@ -69,6 +69,22 @@
     [data-theme="light"] .stat-box-value { color: var(--quinary-color, #6a4fb3); }
     [data-theme="light"] .portfolio-item-value.green { color: #00875a; }
     [data-theme="light"] .portfolio-item-value.gold  { color: var(--quinary-color, #6a4fb3); }
+    
+    /* ═══════════════════════════════════════════════════════ */
+    /* NEUES CSS FÜR DIE CHART VERBESSERUNGEN                    */
+    /* ═══════════════════════════════════════════════════════ */
+    .chart-controls { display: flex; gap: 0.4rem; }
+    .chart-btn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #aaa; font-size: 0.75rem; font-weight: 700; padding: 0.3rem 0.7rem; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
+    .chart-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    .chart-btn.active { background: rgba(255, 215, 0, 0.15); border-color: rgba(255, 215, 0, 0.4); color: var(--quinary-color, #ffd700); }
+    .chart-stats-mini { display: flex; gap: 0.5rem; margin-top: 0.4rem; flex-wrap: wrap; }
+    .chart-stat-item { font-size: 0.68rem; padding: 0.15rem 0.4rem; border-radius: 4px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); }
+    .chart-stat-item span { opacity: 0.6; margin-right: 0.2rem; }
+    .chart-stat-item.high { color: #00e676; }
+    .chart-stat-item.low { color: #ff5252; }
+    .chart-stat-item.yesterday { color: #ffaa00; }
+    [data-theme="light"] .chart-stat-item { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.05); }
+
     @media (max-width: 900px) { .charts-grid { grid-template-columns: 1fr; } .price-ticker-grid { grid-template-columns: repeat(2, 1fr); } .stats-row, .portfolio-grid { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 480px) { .price-ticker-grid, .stats-row, .portfolio-grid { grid-template-columns: 1fr; } }
     .tutorial-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
@@ -182,9 +198,21 @@
 
     <section class="charts-grid">
         <div class="chart-card">
+            <!-- IDEA 1 & 2: Timeframe Switcher + Mini Stats -->
             <div class="chart-card-header">
-                <h3 class="chart-card-title">📈 INPI / EUR · 7 Days</h3>
-                <span class="chart-card-badge">live</span>
+                <div>
+                    <h3 class="chart-card-title">📈 INPI / EUR · <span id="chartTimeframeLabel">7 Days</span></h3>
+                    <div class="chart-stats-mini" id="chartStats">
+                        <div class="chart-stat-item yesterday"><span>24h:</span><strong id="statChartYesterday">—</strong></div>
+                        <div class="chart-stat-item high"><span>High:</span><strong id="statChartHigh">—</strong></div>
+                        <div class="chart-stat-item low"><span>Low:</span><strong id="statChartLow">—</strong></div>
+                    </div>
+                </div>
+                <div class="chart-controls">
+                    <button class="chart-btn" data-hours="24">1D</button>
+                    <button class="chart-btn" data-hours="72">3D</button>
+                    <button class="chart-btn active" data-hours="168">7D</button>
+                </div>
             </div>
             <div class="chart-body"><canvas id="priceChart"></canvas></div>
         </div>
@@ -546,11 +574,12 @@ const ERC721_ABI = [
 
 <script>
 /* =====================================================
-   CHARTS CONTROLLER
+   CHARTS CONTROLLER (Upgraded!)
 ===================================================== */
 (function() {
     let priceChart = null, tvlDonut = null;
     let lastPriceData = null, lastTvlData = null;
+    let currentChartHours = 168; // Default 7 Days
 
     const readProvider = new ethers.JsonRpcProvider(CONFIG.RPC_URL);
 
@@ -560,7 +589,6 @@ const ERC721_ABI = [
             try {
                 const contract = new ethers.Contract(safe.addr, SAFE_ABI, readProvider);
                 const nextId = Number(await contract.nextPositionId());
-                console.log(`Scanning ${safe.name}: nextPositionId=${nextId}`);
                 for (let id = 1; id < nextId; id++) {
                     try {
                         const pos = await contract.positions(id);
@@ -589,7 +617,6 @@ const ERC721_ABI = [
             if (posRes.ok) {
                 const posData = await posRes.json();
                 if (posData.success && posData.positions && posData.positions.length > 0) {
-                    console.log('Bot returned', posData.positions.length, 'positions');
                     const mapped = [];
                     for (const pos of posData.positions) {
                         if (pos.error) continue;
@@ -615,7 +642,6 @@ const ERC721_ABI = [
             }
         } catch (e) { console.warn('Bot discovery failed:', e.message); }
 
-        console.log('Falling back to on-chain discovery...');
         const onChain = await discoverOnChain();
         return onChain.map(p => ({
             safeKey: p.safeKey,
@@ -632,22 +658,103 @@ const ERC721_ABI = [
             grid: isLight ? 'rgba(106,79,179,0.12)' : 'rgba(255,255,255,0.06)',
             accent: '#ffd700',
             accentFill: isLight ? 'rgba(255,215,0,0.15)' : 'rgba(255,215,0,0.10)',
-            donutColors: ['#00c853', '#2979ff', '#ff9800']
+            donutColors: ['#00c853', '#2979ff', '#ff9800'],
+            lineHigh: '#00e676',
+            lineLow: '#ff5252',
+            lineYesterday: '#ffaa00'
         };
     }
 
-    function drawPriceChart(prices, labels) {
+    function drawPriceChart(prices, labels, stats) {
         const el = document.getElementById('priceChart');
         if (!el) return;
         const c = themeColors();
         if (priceChart) priceChart.destroy();
+
+        // Datasets aufbauen
+        const datasets = [
+            { 
+                label: 'INPI / EUR', 
+                data: prices, 
+                borderColor: c.accent, 
+                backgroundColor: c.accentFill, 
+                fill: true, 
+                tension: 0.35, 
+                pointRadius: 0, 
+                pointHoverRadius: 5, 
+                borderWidth: 2,
+                order: 1
+            }
+        ];
+
+        // Idea 2: High/Low/Yesterday horizontale Linien (nur wenn Daten da sind)
+        if (stats && prices.length > 0) {
+            if (stats.high) {
+                datasets.push({
+                    label: 'High',
+                    data: new Array(prices.length).fill(stats.high),
+                    borderColor: c.lineHigh,
+                    borderDash: [5, 5],
+                    borderWidth: 1.5,
+                    pointRadius: 0,
+                    fill: false,
+                    order: 2
+                });
+            }
+            if (stats.low && stats.low !== Infinity) {
+                datasets.push({
+                    label: 'Low',
+                    data: new Array(prices.length).fill(stats.low),
+                    borderColor: c.lineLow,
+                    borderDash: [5, 5],
+                    borderWidth: 1.5,
+                    pointRadius: 0,
+                    fill: false,
+                    order: 3
+                });
+            }
+            if (stats.yesterdayClose) {
+                datasets.push({
+                    label: '24h ago',
+                    data: new Array(prices.length).fill(stats.yesterdayClose),
+                    borderColor: c.lineYesterday,
+                    borderDash: [2, 4],
+                    borderWidth: 1.5,
+                    pointRadius: 0,
+                    fill: false,
+                    order: 4
+                });
+            }
+        }
+
         priceChart = new Chart(el, {
             type: 'line',
-            data: { labels, datasets: [{ label: 'INPI / EUR', data: prices, borderColor: c.accent, backgroundColor: c.accentFill, fill: true, tension: 0.35, pointRadius: 0, pointHoverRadius: 5, borderWidth: 2 }] },
+            data: { labels, datasets },
             options: {
                 responsive: true, maintainAspectRatio: false, interaction: { intersect: false, mode: 'index' },
-                plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(26,16,48,0.95)', borderColor: 'rgba(255,215,0,0.4)', borderWidth: 1, padding: 10, callbacks: { label: ctx => '€ ' + Number(ctx.parsed.y).toFixed(6) } } },
-                scales: { x: { grid: { display: false }, ticks: { color: c.text, maxRotation: 0, autoSkip: true, maxTicksLimit: 7, font: { size: 10 } } }, y: { grid: { color: c.grid }, ticks: { color: c.text, callback: v => '€' + Number(v).toFixed(5), font: { size: 10 } } } }
+                plugins: { 
+                    legend: { display: false }, 
+                    tooltip: { 
+                        backgroundColor: 'rgba(26,16,48,0.95)', 
+                        borderColor: 'rgba(255,215,0,0.4)', 
+                        borderWidth: 1, 
+                        padding: 10, 
+                        callbacks: { 
+                            label: ctx => {
+                                let lbl = ctx.dataset.label || '';
+                                if (lbl === 'INPI / EUR') return '€ ' + Number(ctx.parsed.y).toFixed(6);
+                                if (lbl === 'High') return 'High: € ' + Number(ctx.parsed.y).toFixed(6);
+                                if (lbl === 'Low') return 'Low: € ' + Number(ctx.parsed.y).toFixed(6);
+                                if (lbl === '24h ago') return '24h ago: € ' + Number(ctx.parsed.y).toFixed(6);
+                                return lbl;
+                            } 
+                        } 
+                    } 
+                },
+                scales: { 
+                    x: { grid: { display: false }, ticks: { color: c.text, maxRotation: 0, autoSkip: true, maxTicksLimit: 7, font: { size: 10 } } }, 
+                    y: { grid: { color: c.grid }, ticks: { color: c.text, callback: v => '€' + Number(v).toFixed(5), font: { size: 10 } } } 
+                }
             }
         });
     }
@@ -680,44 +787,102 @@ const ERC721_ABI = [
     }
 
     async function loadPriceChart() {
+        // UI Updates
+        const tfLabel = document.getElementById('chartTimeframeLabel');
+        if (tfLabel) tfLabel.textContent = currentChartHours === 24 ? '24 Hours' : currentChartHours === 72 ? '3 Days' : '7 Days';
+        
+        const statYesterdayEl = document.getElementById('statChartYesterday');
+        const statHighEl = document.getElementById('statChartHigh');
+        const statLowEl = document.getElementById('statChartLow');
+        
+        // Skeleton Loading
+        const chartBody = document.querySelector('.chart-body');
+        if (!lastPriceData) chartBody.style.opacity = '0.3';
+
         try {
-            let prices = null, labels = null;
+            let prices = [], labels = [], stats = null;
+
+            // IDEA 3: Bevorzuge unseren KV Bot History Endpunkt
             try {
-                const res = await fetch('https://api.coingecko.com/api/v3/coins/inpinity/market_chart?vs_currency=eur&days=7&interval=daily');
+                const res = await fetch(`${CONFIG.BOT_URL}/api/price-history?hours=${currentChartHours}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.success && data.snapshots && data.snapshots.length > 0) {
+                        prices = data.snapshots.map(s => s.inpi);
+                        labels = data.snapshots.map(s => {
+                            const d = new Date(s.t);
+                            return currentChartHours <= 24 
+                                ? d.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' })
+                                : d.toLocaleDateString('en', { month: 'short', day: 'numeric', hour: '2-digit' });
+                        });
+                        stats = data.stats;
+                    }
+                }
+            } catch (e) { console.warn('Bot history fetch failed, falling back to CoinGecko', e); }
+
+            // Fallback auf CoinGecko (falls Bot keine Daten hat)
+            if (prices.length === 0) {
+                const days = currentChartHours / 24;
+                const res = await fetch(`https://api.coingecko.com/api/v3/coins/inpinity/market_chart?vs_currency=eur&days=${days}`);
                 if (res.ok) {
                     const data = await res.json();
                     if (data.prices && data.prices.length > 0) {
                         prices = data.prices.map(p => p[1]);
-                        labels = data.prices.map(p => new Date(p[0]).toLocaleDateString('en', { month: 'short', day: 'numeric' }));
+                        labels = data.prices.map(p => {
+                            const d = new Date(p[0]);
+                            return currentChartHours <= 24 
+                                ? d.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' })
+                                : d.toLocaleDateString('en', { month: 'short', day: 'numeric' });
+                        });
+                        
+                        // Manuelles High/Low berechnen, falls Fallback genutzt wird
+                        let h = 0, l = Infinity;
+                        prices.forEach(p => { if(p>h) h=p; if(p<l) l=p; });
+                        stats = { high: h, low: l, yesterdayClose: prices[Math.max(0, prices.length - 25)] };
                     }
                 }
-            } catch (_) {}
-            if (!prices) {
-                const health = await fetch(CONFIG.BOT_URL + '/api/health').then(r => r.json());
-                const inpiPrice = health.oracle?.prices?.find(p => p.token === 'INPI');
-                if (inpiPrice) {
-                    const p = Number(inpiPrice.priceEUR);
-                    prices = [p, p, p, p, p, p, p];
-                    const now = new Date();
-                    labels = Array.from({length: 7}, (_, i) => new Date(now.getTime() - (6 - i) * 86400000).toLocaleDateString('en', { month: 'short', day: 'numeric' }));
-                }
             }
-            if (!prices) throw new Error('no prices');
+
+            if (prices.length === 0) throw new Error('Keine Preisdaten verfügbar');
+
             const current = prices[prices.length - 1];
             const prev = prices[Math.max(0, prices.length - 2)];
             const change = prev > 0 ? ((current - prev) / prev * 100) : 0;
+            
+            // Header Stats Update
             document.getElementById('statInpiPrice').textContent = '€ ' + current.toFixed(6);
             const changeEl = document.getElementById('statInpiChange');
-            changeEl.textContent = (change >= 0 ? '+' : '') + change.toFixed(2) + '% (24h)';
+            changeEl.textContent = (change >= 0 ? '+' : '') + change.toFixed(2) + '% (letzter Tick)';
             changeEl.style.color = change >= 0 ? '#00c853' : '#ff5252';
-            lastPriceData = { prices, labels };
-            drawPriceChart(prices, labels);
+
+            // Mini Chart Stats Update
+            if (stats) {
+                if (statHighEl) statHighEl.textContent = '€' + Number(stats.high).toFixed(5);
+                if (statLowEl) statLowEl.textContent = '€' + Number(stats.low).toFixed(5);
+                if (statYesterdayEl) statYesterdayEl.textContent = stats.yesterdayClose ? '€' + Number(stats.yesterdayClose).toFixed(5) : '—';
+            }
+
+            lastPriceData = { prices, labels, stats };
+            chartBody.style.opacity = '1';
+            drawPriceChart(prices, labels, stats);
+
         } catch (e) {
-            console.warn('Price chart failed:', e.message);
+            console.warn('Price chart failed completely:', e.message);
             const parent = document.getElementById('priceChart')?.parentElement;
-            if (parent) parent.innerHTML = '<p style="color:#888;font-size:0.85rem;text-align:center;padding:2rem;">Price data unavailable</p>';
+            if (parent && !lastPriceData) parent.innerHTML = '<p style="color:#888;font-size:0.85rem;text-align:center;padding:2rem;">Price data unavailable</p>';
+            chartBody.style.opacity = '1';
         }
     }
+
+    // Chart Timeframe Buttons Event Listener
+    document.querySelectorAll('.chart-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            document.querySelectorAll('.chart-btn').forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+            currentChartHours = parseInt(e.target.dataset.hours);
+            loadPriceChart();
+        });
+    });
 
     async function loadTvlDonut() {
         try {
@@ -735,14 +900,6 @@ const ERC721_ABI = [
 
             lastTvlData = { labels, values };
             drawTvlDonut(labels, values);
-
-            console.log('✓ TVL by safe (EUR):', {
-                'ETH-INPI': totals.eth.toFixed(2),
-                'USDC-INPI': totals.usdc.toFixed(2),
-                'EURC-INPI': totals.eurc.toFixed(2),
-                'Total': sum.toFixed(2),
-                'Count': positions.length
-            });
         } catch (e) {
             console.warn('TVL donut failed:', e.message);
         }
@@ -802,7 +959,7 @@ const ERC721_ABI = [
 
     window.__inpinityCharts = {
         redrawAll: () => {
-            if (lastPriceData) drawPriceChart(lastPriceData.prices, lastPriceData.labels);
+            if (lastPriceData) drawPriceChart(lastPriceData.prices, lastPriceData.labels, lastPriceData.stats);
             if (lastTvlData) drawTvlDonut(lastTvlData.labels, lastTvlData.values);
         },
         refresh: loadAll
