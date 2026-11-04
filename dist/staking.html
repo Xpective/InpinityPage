@@ -50,6 +50,20 @@
         margin-top: 0.2rem;
     }
 
+    /* ★ NEU: Countdown Badge */
+    .update-countdown {
+        font-size: 0.72rem;
+        color: #00c853;
+        font-weight: 700;
+        padding: 0.15rem 0.5rem;
+        background: rgba(0, 200, 83, 0.12);
+        border-radius: 6px;
+        display: inline-block;
+        margin-top: 0.25rem;
+        font-family: monospace;
+    }
+    .update-countdown.warn { color: #ffaa00; background: rgba(255, 170, 0, 0.12); }
+
     .price-ticker-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
@@ -139,7 +153,7 @@
         vertical-align: middle;
     }
 
-    /* Portfolio Summary (★ NEU) */
+    /* Portfolio Summary */
     .portfolio-summary {
         display: none;
         background: linear-gradient(160deg, rgba(255, 215, 0, 0.08) 0%, rgba(0, 200, 83, 0.05) 100%);
@@ -182,7 +196,7 @@
     .portfolio-item-value.green { color: #00e676; }
     .portfolio-item-value.gold  { color: var(--quinary-color, #ffd700); }
 
-    /* Position APR (★ NEU) */
+    /* Position APR */
     .nft-pos-apr-row {
         margin-top: 0.75rem;
         padding-top: 0.75rem;
@@ -200,6 +214,31 @@
         font-size: 0.95rem;
         margin-top: 0.15rem;
     }
+    .nft-pos-apr-value.warn-apr { color: #ffaa00; }
+
+    .apr-warning-note {
+        margin-top: 0.6rem;
+        font-size: 0.72rem;
+        opacity: 0.75;
+        padding: 0.4rem 0.6rem;
+        background: rgba(255, 170, 0, 0.08);
+        border-left: 2px solid #ffaa00;
+        border-radius: 4px;
+        line-height: 1.5;
+    }
+
+    /* ★ NEU: Share Button */
+    .nft-pos-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    .nft-pos-actions .btn-share {
+        background: rgba(255, 215, 0, 0.15);
+        color: var(--quinary-color, #ffd700);
+        border: 1px solid rgba(255, 215, 0, 0.4);
+    }
+    .nft-pos-actions .btn-share:hover { background: rgba(255, 215, 0, 0.25); }
 
     /* Theme: Light */
     [data-theme="light"] .chart-card,
@@ -221,15 +260,12 @@
         .charts-grid { grid-template-columns: 1fr; }
         .price-ticker-grid { grid-template-columns: repeat(2, 1fr); }
         .stats-row, .portfolio-grid { grid-template-columns: repeat(2, 1fr); }
-        .nft-pos-apr-row { grid-template-columns: repeat(3, 1fr); }
     }
     @media (max-width: 480px) {
         .price-ticker-grid, .stats-row, .portfolio-grid { grid-template-columns: 1fr; }
     }
 
-    /* ═══════════════════════════════════════════════════════ */
-    /* TUTORIAL CSS (komprimiert, unverändert)                 */
-    /* ═══════════════════════════════════════════════════════ */
+    /* TUTORIAL CSS */
     .tutorial-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
     .tutorial-overlay.active { opacity: 1; pointer-events: auto; }
     .tutorial-modal { position: relative; width: 100%; max-width: 620px; max-height: 92vh; overflow-y: auto; background: linear-gradient(160deg,#1a1030 0%,#140f1f 100%); border: 1px solid rgba(255,215,0,0.4); border-radius: 20px; padding: 2rem 2rem 1.25rem; color: #fff; box-shadow: 0 20px 60px rgba(0,0,0,0.5); transform: scale(0.95); transition: transform 0.25s ease; }
@@ -329,7 +365,7 @@
         </p>
     </section>
 
-    <!-- ═══ LIVE STATS ROW ═══ -->
+    <!-- LIVE STATS ROW -->
     <section class="stats-row">
         <div class="stat-box">
             <div class="stat-box-label">INPI Price</div>
@@ -350,10 +386,12 @@
             <div class="stat-box-label">Bot Status</div>
             <div class="stat-box-value" id="statBotStatus">—</div>
             <div class="stat-box-sub" id="statBotSub">loading…</div>
+            <!-- ★ NEU: Countdown -->
+            <div class="update-countdown" id="updateCountdown">—</div>
         </div>
     </section>
 
-    <!-- ═══ LIVE PRICE TICKER ═══ -->
+    <!-- LIVE PRICE TICKER -->
     <section class="price-ticker-grid">
         <div class="price-ticker">
             <div class="price-ticker-token">ETH</div>
@@ -377,7 +415,7 @@
         </div>
     </section>
 
-    <!-- ═══ CHARTS GRID ═══ -->
+    <!-- CHARTS GRID -->
     <section class="charts-grid">
         <div class="chart-card">
             <div class="chart-card-header">
@@ -401,7 +439,7 @@
         </div>
     </section>
 
-    <!-- ═══ POOL OVERVIEW ═══ -->
+    <!-- POOL OVERVIEW -->
     <section class="pool-overview">
         <h2>Live Pool Overview</h2>
         <p class="pool-subtitle">Auto-refreshes every 30 seconds · No wallet login required</p>
@@ -491,10 +529,9 @@
         </div>
     </section>
 
-    <!-- ═══ WALLET + STAKING ═══ -->
+    <!-- WALLET + STAKING -->
     <section class="staking-shell">
         <div class="staking-container">
-
             <div class="wallet-bar">
                 <div class="wallet-left">
                     <div class="wallet-status" id="walletStatusText">🔴 Wallet not connected</div>
@@ -507,7 +544,7 @@
                 <button id="connectWalletBtn" class="btn">🔌 Connect Wallet</button>
             </div>
 
-            <!-- ★ NEU: Portfolio Summary -->
+            <!-- Portfolio Summary -->
             <div class="portfolio-summary" id="portfolioSummary">
                 <h3>📊 Your Portfolio Overview</h3>
                 <div class="portfolio-grid">
@@ -534,7 +571,6 @@
             <div class="staking-section">
                 <h2>🪙 INPI Token Staking</h2>
                 <p class="section-sub">Classic token staking · 1000-year distribution · Continuous rewards</p>
-
                 <div class="stats-grid">
                     <div class="stat-card">
                         <h3>Your Stake</h3>
@@ -552,7 +588,6 @@
                         <div class="stat-label">of the pool</div>
                     </div>
                 </div>
-
                 <div class="staking-card">
                     <h3>Stake / Unstake INPI</h3>
                     <div class="form-group">
@@ -567,7 +602,7 @@
                 </div>
             </div>
 
-            <!-- NFT STAKING (V2) -->
+            <!-- NFT STAKING -->
             <div class="staking-section">
                 <h2>🎨 NFT Pool Staking (Uniswap V4)</h2>
                 <p class="section-sub">Stake your Uniswap V4 LP position (NFT) and earn INPI with boost · ETH-INPI uses native ETH (no WETH needed)</p>
@@ -610,7 +645,6 @@
 
                 <div id="nftPositionsList" class="nft-positions-list"></div>
             </div>
-
         </div>
     </section>
 </main>
@@ -625,10 +659,10 @@
         <a href="whitepaper.html">Whitepaper</a>
         <a href="faq.html">FAQ</a>
     </div>
-    <p class="footer-version">Version 0.30.0 · V2</p>
+    <p class="footer-version">Version 0.31.0 · V2.1</p>
 </footer>
 
-<!-- ═══ TUTORIAL OVERLAY ═══ -->
+<!-- TUTORIAL OVERLAY -->
 <div id="tutorialOverlay" class="tutorial-overlay" aria-hidden="true">
     <div class="tutorial-modal" role="dialog" aria-labelledby="tutorialTitle">
         <button class="tutorial-close" id="tutorialClose" aria-label="Close tutorial">×</button>
@@ -678,12 +712,12 @@
             <ol class="tutorial-list tutorial-list-numbered">
                 <li>Go to <a href="https://app.uniswap.org/pool" target="_blank" rel="noopener">app.uniswap.org/pool</a></li>
                 <li>Connect your wallet</li>
-                <li>Select tokens — e.g. <strong>USDC + INPI</strong> (contract: <code>0x232FB1…7d0D</code>)</li>
+                <li>Select tokens — e.g. <strong>USDC + INPI</strong></li>
                 <li>Choose a fee tier and price range</li>
                 <li>Enter the amount and confirm in your wallet</li>
                 <li>You'll receive an <strong>NFT (Token ID)</strong> representing your position</li>
             </ol>
-            <div class="tutorial-highlight">⚠️ <strong>Minimum position value:</strong> 10 EUR (or equivalent). For ETH-INPI use <strong>native ETH</strong> (Uniswap will prompt "Unwrap WETH").</div>
+            <div class="tutorial-highlight">⚠️ <strong>Minimum:</strong> 10 EUR. For ETH-INPI use <strong>native ETH</strong> (Uniswap prompts "Unwrap WETH").</div>
         </div>
 
         <div class="tutorial-slide" data-step="5">
@@ -691,19 +725,18 @@
             <h2>Step 2 — Stake your NFT</h2>
             <p>Once you have your Uniswap position NFT:</p>
             <ol class="tutorial-list tutorial-list-numbered">
-                <li>Find your <strong>Token ID</strong> on <a href="https://app.uniswap.org/pool" target="_blank" rel="noopener">app.uniswap.org/pool</a> → click your position</li>
+                <li>Find your <strong>Token ID</strong> on Uniswap</li>
                 <li>Come back to this page</li>
                 <li>Paste the Token ID and select your pool</li>
-                <li>Choose a lock duration (see next slide)</li>
+                <li>Choose a lock duration</li>
                 <li>Click <strong>"Approve NFT"</strong>, then <strong>"Stake NFT"</strong></li>
             </ol>
-            <p>That's it — you're earning! 🎉</p>
         </div>
 
         <div class="tutorial-slide" data-step="6">
             <div class="tutorial-icon">🔒</div>
             <h2>Lock Duration = Higher Boost</h2>
-            <p>Longer locks earn bigger multipliers. You can still unstake early — you'll just pay a small penalty on your <strong>unearned rewards</strong> (never on your principal NFT).</p>
+            <p>Longer locks earn bigger multipliers. You can still unstake early — you'll just pay a small penalty on your <strong>unearned rewards</strong> (never on your NFT).</p>
             <table class="tutorial-table">
                 <tr><td>🟢 Flexible</td><td><strong>1.00×</strong></td><td>0% penalty</td></tr>
                 <tr><td>🔵 3 months</td><td><strong>1.68×</strong></td><td>up to 15%</td></tr>
@@ -716,7 +749,7 @@
         <div class="tutorial-slide" data-step="7">
             <div class="tutorial-icon">🎨</div>
             <h2>Stack Your NFT Boost</h2>
-            <p>Holding <strong>Inpinity NFTs</strong> in your wallet grants permanent bonuses, scaled by rarity:</p>
+            <p>Holding <strong>Inpinity NFTs</strong> in your wallet grants permanent bonuses:</p>
             <table class="tutorial-table">
                 <tr><td>🥉 Bronze</td><td><strong>1.00×</strong></td></tr>
                 <tr><td>🥈 Silver</td><td><strong>1.03×</strong></td></tr>
@@ -724,20 +757,19 @@
                 <tr><td>💠 Platinum</td><td><strong>1.10×</strong></td></tr>
                 <tr><td>💎 Diamond</td><td><strong>1.15×</strong></td></tr>
             </table>
-            <p>Bonus: <strong>+1% per extra NFT</strong> you hold (max +5%, capped at 1.20× total).</p>
-            <p>All multipliers stack: <code>Duration × Wallet Tier × NFT Boost</code> — capped at <strong>10× total</strong>.</p>
+            <p>Bonus: <strong>+1% per extra NFT</strong> (max +5%, cap 1.20×).</p>
         </div>
 
         <div class="tutorial-slide" data-step="8">
             <div class="tutorial-icon">🚀</div>
             <h2>Ready to Start?</h2>
-            <p>You're all set. Quick reminders:</p>
+            <p>Quick reminders:</p>
             <ul class="tutorial-list tutorial-checklist">
                 <li>✅ Verify all contract addresses on the <a href="index.html">homepage</a></li>
-                <li>✅ Your NFT (principal) is always <strong>100% returned</strong> on unstake</li>
+                <li>✅ Your NFT is always <strong>100% returned</strong> on unstake</li>
                 <li>✅ Rewards accumulate every second — claim anytime (1h cooldown)</li>
-                <li>✅ <strong>Emergency exit</strong> available if the pool is paused</li>
-                <li>✅ <strong>Live APR</strong> shown per position — see expected yearly earnings</li>
+                <li>✅ <strong>Emergency exit</strong> if the pool is paused</li>
+                <li>✅ <strong>Live APR</strong> + <strong>Share button</strong> per position</li>
             </ul>
         </div>
 
@@ -757,7 +789,7 @@
     <span>❓</span> How it works
 </button>
 
-<!-- ═══ THEME SWITCHER ═══ -->
+<!-- THEME SWITCHER -->
 <script>
 document.addEventListener("DOMContentLoaded", () => {
     const root = document.documentElement;
@@ -781,13 +813,12 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
-<!-- ═══ CONFIG + ABIs (V2) ═══ -->
+<!-- CONFIG + ABIs -->
 <script>
 const CONFIG = {
     RPC_URL: "https://mainnet.base.org",
     BOT_URL: "https://inpinity-keeper-bot.s-plat.workers.dev",
 
-    // ═══ V2 CONTRACTS (VERIFIZIERT) ═══
     INPI: "0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D",
     OLD_STAKING: "0xF8c74E4fEe036C91228268E804f83eD8f55a6524",
     PRICE_ORACLE: "0xa08006643807879C3771F82D3CF8923583a5846e",
@@ -832,33 +863,20 @@ const OLD_STAKING_ABI = [
     "function rewardRate() view returns (uint256)"
 ];
 
-// ★ V2 Safe-ABI mit 13 Feldern
 const SAFE_ABI = [
     "function positions(uint256) view returns (uint256 tokenId, uint128 liquidity, uint128 sqrtPriceX96, int24 tickLower, int24 tickUpper, uint256 amountEUR, uint256 lockStart, uint256 lockDuration, uint256 rewardDebt, uint256 pendingRewards, uint256 effectiveBoost, uint256 lastClaim, bool exists)",
     "function pendingRewards(uint256) view returns (uint256)",
     "function previewPenalty(uint256) view returns (uint256)",
     "function currentBoost(uint256) view returns (uint256)",
-    "function liveValueEUR(uint256) view returns (uint256)",
     "function totalWeighted() view returns (uint256)",
     "function rewardRatePerSec() view returns (uint256)",
     "function userPositionsLength(address) view returns (uint256)",
     "function userPositions(address,uint256) view returns (uint256)",
     "function positionOwner(uint256) view returns (address)",
-    "function token0() view returns (address)",
-    "function token1() view returns (address)",
     "function stakeNFT(uint256 tokenId, uint256 lockDuration) external",
     "function unstake(uint256 id) external",
     "function claim(uint256 id) external",
     "function syncBoost(uint256 id) external"
-];
-
-const ORACLE_ABI = [
-    "function priceEUR(address) view returns (uint256)",
-    "function lastUpdate(address) view returns (uint256)"
-];
-
-const REGISTRY_ABI = [
-    "function totalStakeEUR(address) view returns (uint256)"
 ];
 
 const ERC721_ABI = [
@@ -870,7 +888,7 @@ const ERC721_ABI = [
 ];
 </script>
 
-<!-- ═══ CHARTS CONTROLLER ═══ -->
+<!-- CHARTS CONTROLLER -->
 <script>
 (function() {
     let priceChart = null, tvlDonut = null;
@@ -970,7 +988,6 @@ const ERC721_ABI = [
     async function loadPriceChart() {
         try {
             let prices = null, labels = null;
-            // Versuch CoinGecko
             try {
                 const res = await fetch('https://api.coingecko.com/api/v3/coins/inpinity/market_chart?vs_currency=eur&days=7&interval=daily');
                 if (res.ok) {
@@ -982,7 +999,6 @@ const ERC721_ABI = [
                 }
             } catch (_) {}
 
-            // Fallback: Bot-Health
             if (!prices) {
                 const health = await fetch(CONFIG.BOT_URL + '/api/health').then(r => r.json());
                 const inpiPrice = health.oracle?.prices?.find(p => p.token === 'INPI');
@@ -1045,12 +1061,10 @@ const ERC721_ABI = [
             else { statusEl.textContent = '🔴 Critical'; statusEl.style.color = '#ff5252'; }
             subEl.textContent = 'Gas: ' + (data.wallet?.ethBalance || '?') + ' ETH';
 
-            // Positionen
             const posRes = await fetch(CONFIG.BOT_URL + '/api/positions');
             const posData = await posRes.json();
             document.getElementById('statActivePositions').textContent = posData.count || 0;
 
-            // Ticker
             const prices = data.oracle?.prices || [];
             const tickers = { ETH: 'tickEth', USDC: 'tickUsdc', INPI: 'tickInpi', EURC: 'tickEure' };
             const ageTickers = { ETH: 'tickEthAge', USDC: 'tickUsdcAge', INPI: 'tickInpiAge', EURC: 'tickEureAge' };
@@ -1063,11 +1077,35 @@ const ERC721_ABI = [
                     ageEl.className = 'price-ticker-age ' + (p.isStale ? 'stale' : p.ageMinutes < 30 ? 'fresh' : 'warn');
                 }
             });
+
+            // ★ Countdown basierend auf ältestem Oracle-Update
+            updateCountdown(prices);
         } catch (e) {
             console.warn('Bot health failed:', e.message);
             const statusEl = document.getElementById('statBotStatus');
             if (statusEl) { statusEl.textContent = '🔴 Offline'; statusEl.style.color = '#ff5252'; }
         }
+    }
+
+    // ★ Countdown zum nächsten Oracle-Update
+    function updateCountdown(prices) {
+        const el = document.getElementById('updateCountdown');
+        if (!el || !prices || prices.length === 0) return;
+
+        // Nächstes Update = alle 15 Minuten (Bot-Cron)
+        const now = new Date();
+        const minutes = now.getMinutes();
+        let minutesUntil;
+        if (minutes < 15) minutesUntil = 15 - minutes;
+        else if (minutes < 30) minutesUntil = 30 - minutes;
+        else if (minutes < 45) minutesUntil = 45 - minutes;
+        else minutesUntil = 60 - minutes;
+
+        const secsUntil = minutesUntil * 60 - now.getSeconds();
+        const m = Math.floor(secsUntil / 60);
+        const s = secsUntil % 60;
+        el.textContent = `⏱ Next update: ${m}:${String(s).padStart(2,'0')}`;
+        el.className = 'update-countdown' + (minutesUntil < 3 ? ' warn' : '');
     }
 
     async function loadAll() {
@@ -1085,10 +1123,11 @@ const ERC721_ABI = [
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadAll);
     else loadAll();
     setInterval(loadAll, 60_000);
+    setInterval(() => loadBotHealth(), 10_000); // Countdown tickt alle 10s
 })();
 </script>
 
-<!-- ═══ MAIN STAKING LOGIC (V2) ═══ -->
+<!-- MAIN STAKING LOGIC -->
 <script>
 const readProvider = new ethers.JsonRpcProvider(CONFIG.RPC_URL);
 
@@ -1139,18 +1178,15 @@ let tokenContract = null, oldStakingContract = null;
 let safeContracts = {};
 let refreshInterval = null;
 
-// ★ Globale Werte für APR-Berechnung
 let globalInpiPriceEUR = 0;
 let globalCachedPools = {};
 
 async function loadGlobalValues() {
     try {
-        // INPI-Preis aus Bot
         const health = await fetch(CONFIG.BOT_URL + '/api/health').then(r => r.json());
         const inpiP = health.oracle?.prices?.find(p => p.token === 'INPI');
         globalInpiPriceEUR = inpiP ? Number(inpiP.priceEUR) : 0;
 
-        // Cache für Safes
         for (const [key, cfg] of Object.entries(CONFIG.SAFES)) {
             const safe = new ethers.Contract(cfg.addr, SAFE_ABI, readProvider);
             const [totalW, rate] = await Promise.all([safe.totalWeighted(), safe.rewardRatePerSec()]);
@@ -1291,7 +1327,6 @@ async function nftStake() {
     const poolKey = document.getElementById("nftSafeSelect").value;
     if (!tokenId) return alert("Enter Token ID.");
 
-    // Pre-Stake Oracle-Prepare (best-effort)
     try { await fetch(`${CONFIG.BOT_URL}/api/prepare?id=${tokenId}`).catch(() => {}); } catch (_) {}
 
     try {
@@ -1318,17 +1353,14 @@ async function nftStake() {
     }
 }
 
-// ★ BERECHNUNG: Live-APR + Expected Yearly pro Position
+// APR-Berechnung
 function computePositionApr(poolKey, pos, inpiPriceEUR) {
     const pool = globalCachedPools[poolKey];
     if (!pool || pool.totalWeighted === 0n || !inpiPriceEUR) return null;
 
-    // userWeighted = liquidity × boost (beide 128-bit bzw 1e18)
     const userWeighted = (BigInt(pos.liquidity) * BigInt(pos.effectiveBoost)) / 10n**18n;
     if (userWeighted === 0n) return null;
 
-    // share = userWeighted / totalWeighted
-    // dailyINPI (in wei) = rewardRatePerSec × 86400 × userWeighted / totalWeighted
     const dailyINPIWei = (pool.rewardRate * 86400n * userWeighted) / pool.totalWeighted;
     const yearlyINPIWei = dailyINPIWei * 365n;
 
@@ -1341,6 +1373,15 @@ function computePositionApr(poolKey, pos, inpiPriceEUR) {
     const sharePct = Number(userWeighted) / Number(pool.totalWeighted) * 100;
 
     return { dailyINPI, yearlyINPI, yearlyEUR, apr, sharePct };
+}
+
+// ★ Format APR mit passender Präzision
+function fmtApr(apr) {
+    if (apr === 0) return "0.00%";
+    if (apr < 0.01) return apr.toFixed(4) + "%";
+    if (apr < 0.1) return apr.toFixed(3) + "%";
+    if (apr < 1) return apr.toFixed(2) + "%";
+    return apr.toFixed(1) + "%";
 }
 
 async function loadUserNFTs() {
@@ -1366,12 +1407,22 @@ async function loadUserNFTs() {
                 const pending = await safe.pendingRewards(posId);
                 const boost = await safe.currentBoost(posId);
                 const penalty = await safe.previewPenalty(posId);
-                const liveEUR = await safe.liveValueEUR(posId);
+
+                // ★ FIX: liveValueEUR über Bot-API (präzise) statt on-chain (Overflow)
+                let liveEUR = pos.amountEUR; // Fallback
+                try {
+                    const valRes = await fetch(`${CONFIG.BOT_URL}/api/value?id=${pos.tokenId}`);
+                    if (valRes.ok) {
+                        const valData = await valRes.json();
+                        if (valData.success && valData.valueEUR) {
+                            liveEUR = ethers.parseUnits(valData.valueEUR, 18);
+                        }
+                    }
+                } catch (_) { /* Fallback bleibt */ }
 
                 const posStakeEUR = Number(ethers.formatUnits(pos.amountEUR, 18));
                 const posPendingINPI = Number(ethers.formatUnits(pending, 18));
 
-                // ★ APR Berechnung
                 const apr = computePositionApr(key, pos, globalInpiPriceEUR);
 
                 totalStakeEUR += posStakeEUR;
@@ -1383,11 +1434,13 @@ async function loadUserNFTs() {
 
                 let aprHtml = "";
                 if (apr) {
+                    const isTinyApr = apr.apr < 0.1;
+                    const aprClass = isTinyApr ? "nft-pos-apr-value warn-apr" : "nft-pos-apr-value";
                     aprHtml = `
                         <div class="nft-pos-apr-row">
                             <div class="nft-pos-apr-item">
                                 <div class="nft-pos-apr-label">Live APR</div>
-                                <div class="nft-pos-apr-value">${apr.apr.toFixed(1)}%</div>
+                                <div class="${aprClass}">${fmtApr(apr.apr)}</div>
                             </div>
                             <div class="nft-pos-apr-item">
                                 <div class="nft-pos-apr-label">Yearly (EUR)</div>
@@ -1399,6 +1452,12 @@ async function loadUserNFTs() {
                             </div>
                         </div>
                     `;
+                    if (isTinyApr) {
+                        aprHtml += `<div class="apr-warning-note">
+                            ⚠️ <strong>Test-Budget aktiv:</strong> Aktuell sind nur 100 INPI pro Safe im Umlauf.
+                            Sobald wir auf das volle Budget (17,5 Mio. INPI) aufstocken, steigt die APR deutlich.
+                        </div>`;
+                    }
                 }
 
                 card.innerHTML = `
@@ -1418,6 +1477,7 @@ async function loadUserNFTs() {
                     <div class="nft-pos-actions">
                         <button class="btn btn-small" onclick="nftClaim(${posId})" ${pending === 0n ? "disabled" : ""}>Claim</button>
                         <button class="btn btn-small btn-secondary" onclick="nftUnstake(${posId})">Unstake</button>
+                        <button class="btn btn-small btn-share" onclick="sharePosition(${posId}, '${cfg.name}', ${posStakeEUR}, ${apr ? apr.apr : 0})">🔗 Share</button>
                     </div>
                 `;
                 container.appendChild(card);
@@ -1425,12 +1485,31 @@ async function loadUserNFTs() {
         } catch (e) { console.warn("Load NFTs " + key + ":", e); }
     }
 
-    // ★ Portfolio Summary
     document.getElementById("portStakeEUR").textContent = "€ " + totalStakeEUR.toFixed(2);
     document.getElementById("portPending").textContent = totalPending.toFixed(4) + " INPI";
     document.getElementById("portYearlyEUR").textContent = "€ " + totalYearlyEUR.toFixed(2);
     const portAPR = totalStakeEUR > 0 ? (totalYearlyEUR / totalStakeEUR) * 100 : 0;
-    document.getElementById("portAPR").textContent = portAPR.toFixed(1) + "%";
+    document.getElementById("portAPR").textContent = fmtApr(portAPR);
+}
+
+// ★ NEU: Share Position
+function sharePosition(posId, poolName, stakeEUR, apr) {
+    const aprText = apr > 0 ? `${fmtApr(apr)} APR` : "earning INPI";
+    const text = `🎨 I'm staking ${stakeEUR.toFixed(2)}€ in the ${poolName} pool on Inpinity!\n\n🎯 ${aprText}\n🔒 Rewards accumulate every second\n\n🔗 https://inpinity.online/staking`;
+
+    if (navigator.share) {
+        navigator.share({
+            title: 'My Inpinity Position',
+            text: text,
+            url: 'https://inpinity.online/staking'
+        }).catch(() => {});
+    } else {
+        navigator.clipboard.writeText(text).then(() => {
+            alert("✅ Copied to clipboard!\n\n" + text);
+        }).catch(() => {
+            prompt("Copy this:", text);
+        });
+    }
 }
 
 async function nftClaim(posId) {
@@ -1482,7 +1561,7 @@ window.addEventListener("load", async () => {
 });
 </script>
 
-<!-- ═══ TUTORIAL CONTROLLER ═══ -->
+<!-- TUTORIAL CONTROLLER -->
 <script>
 (function() {
     const STORAGE_KEY = "inpinity-tutorial-seen-v1";
