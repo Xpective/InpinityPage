@@ -14,258 +14,67 @@
     <meta name="theme-color" content="#140f1f">
 
     <style>
-    /* ═══════════════════════════════════════════════════════ */
-    /* STATS ROW + TICKER + CHARTS                             */
-    /* ═══════════════════════════════════════════════════════ */
-    .stats-row {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 1rem;
-        margin: 1.5rem auto;
-        max-width: 980px;
-    }
-    .stat-box {
-        background: rgba(255, 255, 255, 0.04);
-        border: 1px solid rgba(255, 255, 255, 0.10);
-        border-radius: 14px;
-        padding: 1rem;
-        text-align: center;
-    }
-    .stat-box-label {
-        font-size: 0.75rem;
-        opacity: 0.7;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        font-weight: 700;
-    }
-    .stat-box-value {
-        font-size: 1.35rem;
-        font-weight: 900;
-        color: var(--quinary-color, #ffd700);
-        margin-top: 0.4rem;
-    }
-    .stat-box-sub {
-        font-size: 0.72rem;
-        opacity: 0.6;
-        margin-top: 0.2rem;
-    }
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin: 1.5rem auto; max-width: 980px; }
+    .stat-box { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.10); border-radius: 14px; padding: 1rem; text-align: center; }
+    .stat-box-label { font-size: 0.75rem; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; }
+    .stat-box-value { font-size: 1.35rem; font-weight: 900; color: var(--quinary-color, #ffd700); margin-top: 0.4rem; }
+    .stat-box-sub { font-size: 0.72rem; opacity: 0.6; margin-top: 0.2rem; }
 
-    /* ★ NEU: Countdown Badge */
-    .update-countdown {
-        font-size: 0.72rem;
-        color: #00c853;
-        font-weight: 700;
-        padding: 0.15rem 0.5rem;
-        background: rgba(0, 200, 83, 0.12);
-        border-radius: 6px;
-        display: inline-block;
-        margin-top: 0.25rem;
-        font-family: monospace;
-    }
+    .update-countdown { font-size: 0.72rem; color: #00c853; font-weight: 700; padding: 0.15rem 0.5rem; background: rgba(0, 200, 83, 0.12); border-radius: 6px; display: inline-block; margin-top: 0.25rem; font-family: monospace; }
     .update-countdown.warn { color: #ffaa00; background: rgba(255, 170, 0, 0.12); }
 
-    .price-ticker-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 0.75rem;
-        margin: 1.5rem auto;
-        max-width: 980px;
-    }
-    .price-ticker {
-        background: rgba(255, 255, 255, 0.04);
-        border: 1px solid rgba(255, 255, 255, 0.10);
-        border-radius: 12px;
-        padding: 0.9rem 1rem;
-        text-align: center;
-    }
-    .price-ticker-token {
-        font-size: 0.78rem;
-        color: var(--text-color);
-        opacity: 0.7;
-        font-weight: 700;
-        letter-spacing: 0.03em;
-    }
-    .price-ticker-value {
-        font-size: 1.15rem;
-        font-weight: 900;
-        color: #fff;
-        margin: 0.35rem 0 0.2rem;
-    }
-    .price-ticker-age {
-        font-size: 0.7rem;
-        font-weight: 600;
-    }
+    .price-ticker-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; margin: 1.5rem auto; max-width: 980px; }
+    .price-ticker { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.10); border-radius: 12px; padding: 0.9rem 1rem; text-align: center; }
+    .price-ticker-token { font-size: 0.78rem; color: var(--text-color); opacity: 0.7; font-weight: 700; letter-spacing: 0.03em; }
+    .price-ticker-value { font-size: 1.15rem; font-weight: 900; color: #fff; margin: 0.35rem 0 0.2rem; }
+    .price-ticker-age { font-size: 0.7rem; font-weight: 600; }
     .price-ticker-age.fresh { color: #00c853; }
     .price-ticker-age.warn  { color: #ffaa00; }
     .price-ticker-age.stale { color: #ff5252; }
 
-    .charts-grid {
-        display: grid;
-        grid-template-columns: 2fr 1fr;
-        gap: 1.25rem;
-        margin: 1.5rem auto;
-        max-width: 980px;
-    }
-    .chart-card {
-        background: rgba(255, 255, 255, 0.04);
-        border: 1px solid rgba(255, 255, 255, 0.10);
-        border-radius: 18px;
-        padding: 1.25rem;
-        position: relative;
-    }
-    .chart-card-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
-    }
-    .chart-card-title {
-        color: var(--quinary-color, #ffd700);
-        font-weight: 800;
-        font-size: 1rem;
-        margin: 0;
-    }
-    .chart-card-badge {
-        font-size: 0.72rem;
-        padding: 0.2rem 0.6rem;
-        border-radius: 6px;
-        background: rgba(0, 200, 83, 0.15);
-        color: #00e676;
-        font-weight: 700;
-    }
+    .charts-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 1.25rem; margin: 1.5rem auto; max-width: 980px; }
+    .chart-card { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.10); border-radius: 18px; padding: 1.25rem; position: relative; }
+    .chart-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .chart-card-title { color: var(--quinary-color, #ffd700); font-weight: 800; font-size: 1rem; margin: 0; }
+    .chart-card-badge { font-size: 0.72rem; padding: 0.2rem 0.6rem; border-radius: 6px; background: rgba(0, 200, 83, 0.15); color: #00e676; font-weight: 700; }
     .chart-body { position: relative; height: 220px; }
     .chart-body-donut { height: 200px; }
     .donut-legend { margin-top: 0.75rem; font-size: 0.82rem; }
-    .donut-legend-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.4rem 0;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    }
+    .donut-legend-item { display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0; border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
     .donut-legend-item:last-child { border-bottom: none; }
-    .donut-legend-dot {
-        display: inline-block;
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        margin-right: 0.5rem;
-        vertical-align: middle;
-    }
+    .donut-legend-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 0.5rem; vertical-align: middle; }
 
-    /* Portfolio Summary */
-    .portfolio-summary {
-        display: none;
-        background: linear-gradient(160deg, rgba(255, 215, 0, 0.08) 0%, rgba(0, 200, 83, 0.05) 100%);
-        border: 1px solid rgba(255, 215, 0, 0.3);
-        border-radius: 16px;
-        padding: 1.5rem;
-        margin: 1.5rem 0;
-    }
+    .portfolio-summary { display: none; background: linear-gradient(160deg, rgba(255, 215, 0, 0.08) 0%, rgba(0, 200, 83, 0.05) 100%); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 16px; padding: 1.5rem; margin: 1.5rem 0; }
     .portfolio-summary.visible { display: block; }
-    .portfolio-summary h3 {
-        margin: 0 0 1rem;
-        color: var(--quinary-color, #ffd700);
-        font-size: 1.1rem;
-        font-weight: 800;
-    }
-    .portfolio-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 1rem;
-    }
-    .portfolio-item {
-        text-align: center;
-        padding: 0.75rem;
-        background: rgba(0, 0, 0, 0.2);
-        border-radius: 10px;
-    }
-    .portfolio-item-label {
-        font-size: 0.72rem;
-        opacity: 0.7;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        font-weight: 700;
-    }
-    .portfolio-item-value {
-        font-size: 1.15rem;
-        font-weight: 900;
-        color: #fff;
-        margin-top: 0.3rem;
-    }
+    .portfolio-summary h3 { margin: 0 0 1rem; color: var(--quinary-color, #ffd700); font-size: 1.1rem; font-weight: 800; }
+    .portfolio-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+    .portfolio-item { text-align: center; padding: 0.75rem; background: rgba(0, 0, 0, 0.2); border-radius: 10px; }
+    .portfolio-item-label { font-size: 0.72rem; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; }
+    .portfolio-item-value { font-size: 1.15rem; font-weight: 900; color: #fff; margin-top: 0.3rem; }
     .portfolio-item-value.green { color: #00e676; }
     .portfolio-item-value.gold  { color: var(--quinary-color, #ffd700); }
 
-    /* Position APR */
-    .nft-pos-apr-row {
-        margin-top: 0.75rem;
-        padding-top: 0.75rem;
-        border-top: 1px dashed rgba(255, 215, 0, 0.3);
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 0.5rem;
-        font-size: 0.78rem;
-    }
+    .nft-pos-apr-row { margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px dashed rgba(255, 215, 0, 0.3); display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; font-size: 0.78rem; }
     .nft-pos-apr-item { text-align: center; }
     .nft-pos-apr-label { opacity: 0.65; font-size: 0.7rem; }
-    .nft-pos-apr-value {
-        color: #00e676;
-        font-weight: 900;
-        font-size: 0.95rem;
-        margin-top: 0.15rem;
-    }
+    .nft-pos-apr-value { color: #00e676; font-weight: 900; font-size: 0.95rem; margin-top: 0.15rem; }
     .nft-pos-apr-value.warn-apr { color: #ffaa00; }
 
-    .apr-warning-note {
-        margin-top: 0.6rem;
-        font-size: 0.72rem;
-        opacity: 0.75;
-        padding: 0.4rem 0.6rem;
-        background: rgba(255, 170, 0, 0.08);
-        border-left: 2px solid #ffaa00;
-        border-radius: 4px;
-        line-height: 1.5;
-    }
+    .apr-warning-note { margin-top: 0.6rem; font-size: 0.72rem; opacity: 0.75; padding: 0.4rem 0.6rem; background: rgba(255, 170, 0, 0.08); border-left: 2px solid #ffaa00; border-radius: 4px; line-height: 1.5; }
 
-    /* ★ NEU: Share Button */
-    .nft-pos-actions {
-        display: flex;
-        gap: 0.5rem;
-        flex-wrap: wrap;
-    }
-    .nft-pos-actions .btn-share {
-        background: rgba(255, 215, 0, 0.15);
-        color: var(--quinary-color, #ffd700);
-        border: 1px solid rgba(255, 215, 0, 0.4);
-    }
+    .nft-pos-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .nft-pos-actions .btn-share { background: rgba(255, 215, 0, 0.15); color: var(--quinary-color, #ffd700); border: 1px solid rgba(255, 215, 0, 0.4); }
     .nft-pos-actions .btn-share:hover { background: rgba(255, 215, 0, 0.25); }
 
-    /* Theme: Light */
-    [data-theme="light"] .chart-card,
-    [data-theme="light"] .price-ticker,
-    [data-theme="light"] .stat-box {
-        background: rgba(106, 79, 179, 0.06);
-        border-color: rgba(106, 79, 179, 0.16);
-    }
-    [data-theme="light"] .price-ticker-value,
-    [data-theme="light"] .stat-box-value,
-    [data-theme="light"] .portfolio-item-value {
-        color: #1a1030;
-    }
+    [data-theme="light"] .chart-card, [data-theme="light"] .price-ticker, [data-theme="light"] .stat-box { background: rgba(106, 79, 179, 0.06); border-color: rgba(106, 79, 179, 0.16); }
+    [data-theme="light"] .price-ticker-value, [data-theme="light"] .stat-box-value, [data-theme="light"] .portfolio-item-value { color: #1a1030; }
     [data-theme="light"] .stat-box-value { color: var(--quinary-color, #6a4fb3); }
     [data-theme="light"] .portfolio-item-value.green { color: #00875a; }
     [data-theme="light"] .portfolio-item-value.gold  { color: var(--quinary-color, #6a4fb3); }
 
-    @media (max-width: 900px) {
-        .charts-grid { grid-template-columns: 1fr; }
-        .price-ticker-grid { grid-template-columns: repeat(2, 1fr); }
-        .stats-row, .portfolio-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (max-width: 480px) {
-        .price-ticker-grid, .stats-row, .portfolio-grid { grid-template-columns: 1fr; }
-    }
+    @media (max-width: 900px) { .charts-grid { grid-template-columns: 1fr; } .price-ticker-grid { grid-template-columns: repeat(2, 1fr); } .stats-row, .portfolio-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 480px) { .price-ticker-grid, .stats-row, .portfolio-grid { grid-template-columns: 1fr; } }
 
-    /* TUTORIAL CSS */
     .tutorial-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
     .tutorial-overlay.active { opacity: 1; pointer-events: auto; }
     .tutorial-modal { position: relative; width: 100%; max-width: 620px; max-height: 92vh; overflow-y: auto; background: linear-gradient(160deg,#1a1030 0%,#140f1f 100%); border: 1px solid rgba(255,215,0,0.4); border-radius: 20px; padding: 2rem 2rem 1.25rem; color: #fff; box-shadow: 0 20px 60px rgba(0,0,0,0.5); transform: scale(0.95); transition: transform 0.25s ease; }
@@ -365,7 +174,6 @@
         </p>
     </section>
 
-    <!-- LIVE STATS ROW -->
     <section class="stats-row">
         <div class="stat-box">
             <div class="stat-box-label">INPI Price</div>
@@ -378,7 +186,7 @@
             <div class="stat-box-sub">staked NFTs</div>
         </div>
         <div class="stat-box">
-            <div class="stat-box-label">Total TVL (est.)</div>
+            <div class="stat-box-label">Total TVL (EUR)</div>
             <div class="stat-box-value" id="statTvl">—</div>
             <div class="stat-box-sub">ETH + USDC + EURC</div>
         </div>
@@ -386,12 +194,10 @@
             <div class="stat-box-label">Bot Status</div>
             <div class="stat-box-value" id="statBotStatus">—</div>
             <div class="stat-box-sub" id="statBotSub">loading…</div>
-            <!-- ★ NEU: Countdown -->
             <div class="update-countdown" id="updateCountdown">—</div>
         </div>
     </section>
 
-    <!-- LIVE PRICE TICKER -->
     <section class="price-ticker-grid">
         <div class="price-ticker">
             <div class="price-ticker-token">ETH</div>
@@ -415,7 +221,6 @@
         </div>
     </section>
 
-    <!-- CHARTS GRID -->
     <section class="charts-grid">
         <div class="chart-card">
             <div class="chart-card-header">
@@ -429,7 +234,7 @@
 
         <div class="chart-card">
             <div class="chart-card-header">
-                <h3 class="chart-card-title">🍩 TVL Distribution</h3>
+                <h3 class="chart-card-title">🍩 TVL Distribution (EUR)</h3>
                 <span class="chart-card-badge">on-chain</span>
             </div>
             <div class="chart-body chart-body-donut">
@@ -439,7 +244,6 @@
         </div>
     </section>
 
-    <!-- POOL OVERVIEW -->
     <section class="pool-overview">
         <h2>Live Pool Overview</h2>
         <p class="pool-subtitle">Auto-refreshes every 30 seconds · No wallet login required</p>
@@ -529,7 +333,6 @@
         </div>
     </section>
 
-    <!-- WALLET + STAKING -->
     <section class="staking-shell">
         <div class="staking-container">
             <div class="wallet-bar">
@@ -544,7 +347,6 @@
                 <button id="connectWalletBtn" class="btn">🔌 Connect Wallet</button>
             </div>
 
-            <!-- Portfolio Summary -->
             <div class="portfolio-summary" id="portfolioSummary">
                 <h3>📊 Your Portfolio Overview</h3>
                 <div class="portfolio-grid">
@@ -567,7 +369,6 @@
                 </div>
             </div>
 
-            <!-- INPI TOKEN STAKING -->
             <div class="staking-section">
                 <h2>🪙 INPI Token Staking</h2>
                 <p class="section-sub">Classic token staking · 1000-year distribution · Continuous rewards</p>
@@ -602,7 +403,6 @@
                 </div>
             </div>
 
-            <!-- NFT STAKING -->
             <div class="staking-section">
                 <h2>🎨 NFT Pool Staking (Uniswap V4)</h2>
                 <p class="section-sub">Stake your Uniswap V4 LP position (NFT) and earn INPI with boost · ETH-INPI uses native ETH (no WETH needed)</p>
@@ -659,10 +459,9 @@
         <a href="whitepaper.html">Whitepaper</a>
         <a href="faq.html">FAQ</a>
     </div>
-    <p class="footer-version">Version 0.31.0 · V2.1</p>
+    <p class="footer-version">Version 0.32.0 · V2.2</p>
 </footer>
 
-<!-- TUTORIAL OVERLAY -->
 <div id="tutorialOverlay" class="tutorial-overlay" aria-hidden="true">
     <div class="tutorial-modal" role="dialog" aria-labelledby="tutorialTitle">
         <button class="tutorial-close" id="tutorialClose" aria-label="Close tutorial">×</button>
@@ -789,7 +588,6 @@
     <span>❓</span> How it works
 </button>
 
-<!-- THEME SWITCHER -->
 <script>
 document.addEventListener("DOMContentLoaded", () => {
     const root = document.documentElement;
@@ -813,7 +611,6 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
-<!-- CONFIG + ABIs -->
 <script>
 const CONFIG = {
     RPC_URL: "https://mainnet.base.org",
@@ -873,6 +670,7 @@ const SAFE_ABI = [
     "function userPositionsLength(address) view returns (uint256)",
     "function userPositions(address,uint256) view returns (uint256)",
     "function positionOwner(uint256) view returns (address)",
+    "function stakedTokenIds(uint256) view returns (bool)",
     "function stakeNFT(uint256 tokenId, uint256 lockDuration) external",
     "function unstake(uint256 id) external",
     "function claim(uint256 id) external",
@@ -888,7 +686,6 @@ const ERC721_ABI = [
 ];
 </script>
 
-<!-- CHARTS CONTROLLER -->
 <script>
 (function() {
     let priceChart = null, tvlDonut = null;
@@ -912,33 +709,11 @@ const ERC721_ABI = [
         if (priceChart) priceChart.destroy();
         priceChart = new Chart(el, {
             type: 'line',
-            data: {
-                labels,
-                datasets: [{
-                    label: 'INPI / EUR',
-                    data: prices,
-                    borderColor: c.accent,
-                    backgroundColor: c.accentFill,
-                    fill: true, tension: 0.35,
-                    pointRadius: 0, pointHoverRadius: 5,
-                    pointHoverBackgroundColor: c.accent, borderWidth: 2
-                }]
-            },
+            data: { labels, datasets: [{ label: 'INPI / EUR', data: prices, borderColor: c.accent, backgroundColor: c.accentFill, fill: true, tension: 0.35, pointRadius: 0, pointHoverRadius: 5, pointHoverBackgroundColor: c.accent, borderWidth: 2 }] },
             options: {
-                responsive: true, maintainAspectRatio: false,
-                interaction: { intersect: false, mode: 'index' },
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: 'rgba(26,16,48,0.95)',
-                        borderColor: 'rgba(255,215,0,0.4)', borderWidth: 1, padding: 10,
-                        callbacks: { label: ctx => '€ ' + Number(ctx.parsed.y).toFixed(6) }
-                    }
-                },
-                scales: {
-                    x: { grid: { display: false }, ticks: { color: c.text, maxRotation: 0, autoSkip: true, maxTicksLimit: 7, font: { size: 10 } } },
-                    y: { grid: { color: c.grid }, ticks: { color: c.text, callback: v => '€' + Number(v).toFixed(5), font: { size: 10 } } }
-                }
+                responsive: true, maintainAspectRatio: false, interaction: { intersect: false, mode: 'index' },
+                plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(26,16,48,0.95)', borderColor: 'rgba(255,215,0,0.4)', borderWidth: 1, padding: 10, callbacks: { label: ctx => '€ ' + Number(ctx.parsed.y).toFixed(6) } } },
+                scales: { x: { grid: { display: false }, ticks: { color: c.text, maxRotation: 0, autoSkip: true, maxTicksLimit: 7, font: { size: 10 } } }, y: { grid: { color: c.grid }, ticks: { color: c.text, callback: v => '€' + Number(v).toFixed(5), font: { size: 10 } } } }
             }
         });
     }
@@ -948,15 +723,20 @@ const ERC721_ABI = [
         if (!el) return;
         const c = themeColors();
         if (tvlDonut) tvlDonut.destroy();
+
+        // Wenn alle Werte 0 sind: zeige leeren Ring
+        const sum = values.reduce((a,b)=>a+b, 0);
+        const isEmpty = sum === 0;
+
         tvlDonut = new Chart(el, {
             type: 'doughnut',
             data: {
                 labels,
                 datasets: [{
-                    data: values,
-                    backgroundColor: c.donutColors,
+                    data: isEmpty ? [1,1,1] : values,
+                    backgroundColor: isEmpty ? ['rgba(255,255,255,0.1)','rgba(255,255,255,0.1)','rgba(255,255,255,0.1)'] : c.donutColors,
                     borderColor: 'rgba(0,0,0,0.2)',
-                    borderWidth: 2, hoverOffset: 6
+                    borderWidth: 2, hoverOffset: isEmpty ? 0 : 6
                 }]
             },
             options: {
@@ -964,9 +744,8 @@ const ERC721_ABI = [
                 plugins: {
                     legend: { display: false },
                     tooltip: {
-                        backgroundColor: 'rgba(26,16,48,0.95)',
-                        borderColor: 'rgba(255,215,0,0.4)', borderWidth: 1, padding: 10,
-                        callbacks: { label: ctx => ctx.label + ': ' + Number(ctx.parsed).toLocaleString(undefined, { maximumFractionDigits: 2 }) }
+                        backgroundColor: 'rgba(26,16,48,0.95)', borderColor: 'rgba(255,215,0,0.4)', borderWidth: 1, padding: 10,
+                        callbacks: { label: ctx => isEmpty ? 'No TVL yet' : ctx.label + ': €' + Number(ctx.parsed).toLocaleString(undefined, { maximumFractionDigits: 2 }) }
                     }
                 }
             }
@@ -974,12 +753,11 @@ const ERC721_ABI = [
 
         const legendEl = document.getElementById('tvlLegend');
         if (legendEl) {
-            const total = values.reduce((a, b) => a + b, 0);
             legendEl.innerHTML = labels.map((l, i) => {
-                const pct = total > 0 ? (values[i] / total * 100).toFixed(1) : '0.0';
+                const pct = sum > 0 ? (values[i] / sum * 100).toFixed(1) : '0.0';
                 return `<div class="donut-legend-item">
                     <span><span class="donut-legend-dot" style="background:${c.donutColors[i]}"></span>${l}</span>
-                    <span><strong>${Number(values[i]).toLocaleString(undefined, { maximumFractionDigits: 2 })}</strong> · ${pct}%</span>
+                    <span><strong>€${Number(values[i]).toLocaleString(undefined, { maximumFractionDigits: 2 })}</strong> · ${pct}%</span>
                 </div>`;
             }).join('');
         }
@@ -1032,21 +810,62 @@ const ERC721_ABI = [
         }
     }
 
+    // ★★★ NEU: TVL in EUR (nicht Liquidity-Einheiten) ★★★
     async function loadTvlDonut() {
         try {
+            // 1. Hole alle Positionen mit EUR-Werten vom Bot
+            const posRes = await fetch(CONFIG.BOT_URL + '/api/positions');
+            const posData = await posRes.json();
+
+            // 2. Aggregiere EUR-Werte pro Safe
+            const safeTotalsEUR = { eth: 0, usdc: 0, eurc: 0 };
+            const safeCounts = { eth: 0, usdc: 0, eurc: 0 };
             const provider = new ethers.JsonRpcProvider(CONFIG.RPC_URL);
-            const labels = [], values = [];
-            for (const [key, safe] of Object.entries(CONFIG.SAFES)) {
-                const contract = new ethers.Contract(safe.addr, SAFE_ABI, provider);
-                const total = await contract.totalWeighted();
-                labels.push(safe.name);
-                values.push(Number(ethers.formatUnits(total, 18)));
+
+            if (posData.success && posData.positions) {
+                for (const pos of posData.positions) {
+                    if (pos.error) continue;
+                    const tokenId = pos.tokenId;
+                    const valueEUR = parseFloat(pos.valueEUR) || 0;
+
+                    // Prüfe on-chain, in welchem Safe diese Token-ID liegt
+                    for (const [key, safe] of Object.entries(CONFIG.SAFES)) {
+                        try {
+                            const contract = new ethers.Contract(safe.addr, SAFE_ABI, provider);
+                            const isStaked = await contract.stakedTokenIds(tokenId);
+                            if (isStaked) {
+                                safeTotalsEUR[key] += valueEUR;
+                                safeCounts[key] += 1;
+                                break;
+                            }
+                        } catch (_) {}
+                    }
+                }
             }
-            const sum = values.reduce((a, b) => a + b, 0);
-            document.getElementById('statTvl').textContent = sum > 0 ? sum.toLocaleString(undefined, { maximumFractionDigits: 2 }) : '0';
+
+            // 3. Fallback: Wenn Bot keine Positionen liefert, nutze totalWeighted als relative Anzeige
+            //    (nur wenn Bot komplett tot ist)
+            let labels = [], values = [];
+            for (const [key, safe] of Object.entries(CONFIG.SAFES)) {
+                labels.push(safe.name);
+                values.push(safeTotalsEUR[key]);
+            }
+
+            const sum = values.reduce((a,b)=>a+b, 0);
+            document.getElementById('statTvl').textContent = sum > 0 ? '€ ' + sum.toLocaleString(undefined, { maximumFractionDigits: 2 }) : '€ 0.00';
+
             lastTvlData = { labels, values };
             drawTvlDonut(labels, values);
-        } catch (e) { console.warn('TVL donut failed:', e.message); }
+
+            console.log('TVL by safe (EUR):', {
+                'ETH-INPI': safeTotalsEUR.eth.toFixed(2),
+                'USDC-INPI': safeTotalsEUR.usdc.toFixed(2),
+                'EURC-INPI': safeTotalsEUR.eurc.toFixed(2),
+                'Total': sum.toFixed(2)
+            });
+        } catch (e) {
+            console.warn('TVL donut failed:', e.message);
+        }
     }
 
     async function loadBotHealth() {
@@ -1078,7 +897,6 @@ const ERC721_ABI = [
                 }
             });
 
-            // ★ Countdown basierend auf ältestem Oracle-Update
             updateCountdown(prices);
         } catch (e) {
             console.warn('Bot health failed:', e.message);
@@ -1087,12 +905,9 @@ const ERC721_ABI = [
         }
     }
 
-    // ★ Countdown zum nächsten Oracle-Update
     function updateCountdown(prices) {
         const el = document.getElementById('updateCountdown');
         if (!el || !prices || prices.length === 0) return;
-
-        // Nächstes Update = alle 15 Minuten (Bot-Cron)
         const now = new Date();
         const minutes = now.getMinutes();
         let minutesUntil;
@@ -1123,11 +938,10 @@ const ERC721_ABI = [
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadAll);
     else loadAll();
     setInterval(loadAll, 60_000);
-    setInterval(() => loadBotHealth(), 10_000); // Countdown tickt alle 10s
+    setInterval(() => loadBotHealth(), 10_000);
 })();
 </script>
 
-<!-- MAIN STAKING LOGIC -->
 <script>
 const readProvider = new ethers.JsonRpcProvider(CONFIG.RPC_URL);
 
@@ -1190,10 +1004,7 @@ async function loadGlobalValues() {
         for (const [key, cfg] of Object.entries(CONFIG.SAFES)) {
             const safe = new ethers.Contract(cfg.addr, SAFE_ABI, readProvider);
             const [totalW, rate] = await Promise.all([safe.totalWeighted(), safe.rewardRatePerSec()]);
-            globalCachedPools[key] = {
-                totalWeighted: totalW,
-                rewardRate: rate
-            };
+            globalCachedPools[key] = { totalWeighted: totalW, rewardRate: rate };
         }
     } catch (e) { console.warn("loadGlobalValues:", e.message); }
 }
@@ -1353,7 +1164,6 @@ async function nftStake() {
     }
 }
 
-// APR-Berechnung
 function computePositionApr(poolKey, pos, inpiPriceEUR) {
     const pool = globalCachedPools[poolKey];
     if (!pool || pool.totalWeighted === 0n || !inpiPriceEUR) return null;
@@ -1375,7 +1185,6 @@ function computePositionApr(poolKey, pos, inpiPriceEUR) {
     return { dailyINPI, yearlyINPI, yearlyEUR, apr, sharePct };
 }
 
-// ★ Format APR mit passender Präzision
 function fmtApr(apr) {
     if (apr === 0) return "0.00%";
     if (apr < 0.01) return apr.toFixed(4) + "%";
@@ -1408,8 +1217,7 @@ async function loadUserNFTs() {
                 const boost = await safe.currentBoost(posId);
                 const penalty = await safe.previewPenalty(posId);
 
-                // ★ FIX: liveValueEUR über Bot-API (präzise) statt on-chain (Overflow)
-                let liveEUR = pos.amountEUR; // Fallback
+                let liveEUR = pos.amountEUR;
                 try {
                     const valRes = await fetch(`${CONFIG.BOT_URL}/api/value?id=${pos.tokenId}`);
                     if (valRes.ok) {
@@ -1418,7 +1226,7 @@ async function loadUserNFTs() {
                             liveEUR = ethers.parseUnits(valData.valueEUR, 18);
                         }
                     }
-                } catch (_) { /* Fallback bleibt */ }
+                } catch (_) {}
 
                 const posStakeEUR = Number(ethers.formatUnits(pos.amountEUR, 18));
                 const posPendingINPI = Number(ethers.formatUnits(pending, 18));
@@ -1492,23 +1300,16 @@ async function loadUserNFTs() {
     document.getElementById("portAPR").textContent = fmtApr(portAPR);
 }
 
-// ★ NEU: Share Position
 function sharePosition(posId, poolName, stakeEUR, apr) {
     const aprText = apr > 0 ? `${fmtApr(apr)} APR` : "earning INPI";
     const text = `🎨 I'm staking ${stakeEUR.toFixed(2)}€ in the ${poolName} pool on Inpinity!\n\n🎯 ${aprText}\n🔒 Rewards accumulate every second\n\n🔗 https://inpinity.online/staking`;
 
     if (navigator.share) {
-        navigator.share({
-            title: 'My Inpinity Position',
-            text: text,
-            url: 'https://inpinity.online/staking'
-        }).catch(() => {});
+        navigator.share({ title: 'My Inpinity Position', text, url: 'https://inpinity.online/staking' }).catch(() => {});
     } else {
         navigator.clipboard.writeText(text).then(() => {
             alert("✅ Copied to clipboard!\n\n" + text);
-        }).catch(() => {
-            prompt("Copy this:", text);
-        });
+        }).catch(() => { prompt("Copy this:", text); });
     }
 }
 
@@ -1561,7 +1362,6 @@ window.addEventListener("load", async () => {
 });
 </script>
 
-<!-- TUTORIAL CONTROLLER -->
 <script>
 (function() {
     const STORAGE_KEY = "inpinity-tutorial-seen-v1";
