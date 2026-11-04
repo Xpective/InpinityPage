@@ -1,4 +1,3 @@
-html
 <!DOCTYPE html>
 <html lang="en" data-theme="basic">
 <head>
@@ -77,17 +76,27 @@ html
     .chart-controls { display: flex; gap: 0.4rem; }
     .chart-btn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #aaa; font-size: 0.75rem; font-weight: 700; padding: 0.3rem 0.7rem; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
     .chart-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
-    .chart-btn.active { background: rgba(255, 215, 0, 0.15); border-color: rgba(255, 215, 0, 0.4); color: var(--quinary-color, #ffd700); }
+    .chart-btn.active { background: rgba(255, 215, 0, 0.15); border-color: rgba(255, 215, 0, 0.4); color: var(--quinary-color, #ffd700); box-shadow: 0 0 10px rgba(255,215,0,0.2); }
     .chart-stats-mini { display: flex; gap: 0.5rem; margin-top: 0.4rem; flex-wrap: wrap; }
     .chart-stat-item { font-size: 0.68rem; padding: 0.15rem 0.4rem; border-radius: 4px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); }
     .chart-stat-item span { opacity: 0.6; margin-right: 0.2rem; }
-    .chart-stat-item.high { color: #00e676; }
-    .chart-stat-item.low { color: #ff5252; }
-    .chart-stat-item.yesterday { color: #ffaa00; }
+    .chart-stat-item.high { color: #00e676; border-color: rgba(0,230,118,0.2); }
+    .chart-stat-item.low { color: #ff5252; border-color: rgba(255,82,82,0.2); }
+    .chart-stat-item.yesterday { color: #ffaa00; border-color: rgba(255,170,0,0.2); }
     [data-theme="light"] .chart-stat-item { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.05); }
+
+    /* NEU: Buy / Sell Buttons */
+    .trade-actions { display: flex; gap: 10px; margin-top: 15px; }
+    .trade-btn { flex: 1; padding: 0.8rem; border-radius: 10px; font-weight: 800; text-align: center; text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; display: flex; justify-content: center; align-items: center; gap: 5px; font-size: 0.95rem; }
+    .trade-btn:hover { transform: translateY(-2px); }
+    .trade-btn.buy { background: linear-gradient(135deg, #00c853, #009624); color: #fff; box-shadow: 0 4px 15px rgba(0,200,83,0.3); }
+    .trade-btn.buy:hover { box-shadow: 0 6px 20px rgba(0,200,83,0.5); }
+    .trade-btn.sell { background: linear-gradient(135deg, #ff5252, #d32f2f); color: #fff; box-shadow: 0 4px 15px rgba(255,82,82,0.3); }
+    .trade-btn.sell:hover { box-shadow: 0 6px 20px rgba(255,82,82,0.5); }
 
     @media (max-width: 900px) { .charts-grid { grid-template-columns: 1fr; } .price-ticker-grid { grid-template-columns: repeat(2, 1fr); } .stats-row, .portfolio-grid { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 480px) { .price-ticker-grid, .stats-row, .portfolio-grid { grid-template-columns: 1fr; } }
+    
     .tutorial-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
     .tutorial-overlay.active { opacity: 1; pointer-events: auto; }
     .tutorial-modal { position: relative; width: 100%; max-width: 620px; max-height: 92vh; overflow-y: auto; background: linear-gradient(160deg,#1a1030 0%,#140f1f 100%); border: 1px solid rgba(255,215,0,0.4); border-radius: 20px; padding: 2rem 2rem 1.25rem; color: #fff; box-shadow: 0 20px 60px rgba(0,0,0,0.5); transform: scale(0.95); transition: transform 0.25s ease; }
@@ -199,7 +208,6 @@ html
 
     <section class="charts-grid">
         <div class="chart-card">
-            <!-- IDEA 1 & 2: Timeframe Switcher + Mini Stats -->
             <div class="chart-card-header">
                 <div>
                     <h3 class="chart-card-title">📈 INPI / EUR · <span id="chartTimeframeLabel">7 Days</span></h3>
@@ -216,6 +224,18 @@ html
                 </div>
             </div>
             <div class="chart-body"><canvas id="priceChart"></canvas></div>
+            
+            <!-- NEU: Buy & Sell Buttons direkt unter dem Chart -->
+            <div class="trade-actions">
+                <a href="https://app.uniswap.org/swap?chain=base&outputCurrency=0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D" target="_blank" class="trade-btn buy">
+                    🟢 Buy INPI
+                </a>
+                <a href="https://app.uniswap.org/swap?chain=base&inputCurrency=0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D" target="_blank" class="trade-btn sell">
+                    🔴 Sell INPI
+                </a>
+            </div>
+            <!-- Ende Buy & Sell Buttons -->
+
         </div>
         <div class="chart-card">
             <div class="chart-card-header">
@@ -521,6 +541,7 @@ const CONFIG = {
         INPI: "0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D",
         EURC: "0x60a3E35Cc302bFA44Cb288Bc5a4F316Fdb1adb42"
     },
+    GECKO_POOL: "0x2da60979434c607e283ad7956bdcd21b83fa756fa156ef45f996e2b34d2e12a8",
     TARGETS: {
         old:  100_000_000n * 10n**18n,
         eth:   17_500_000n * 10n**18n,
@@ -575,7 +596,7 @@ const ERC721_ABI = [
 
 <script>
 /* =====================================================
-   CHARTS CONTROLLER (Upgraded!)
+   CHARTS CONTROLLER (GECKOTERMINAL LIVE DATA)
 ===================================================== */
 (function() {
     let priceChart = null, tvlDonut = null;
@@ -672,23 +693,35 @@ const ERC721_ABI = [
         const c = themeColors();
         if (priceChart) priceChart.destroy();
 
-        // Datasets aufbauen
+        // Wunderschöner Gradient unter der Linie
+        const ctx = el.getContext('2d');
+        let gradient = ctx.createLinearGradient(0, 0, 0, 250);
+        if (document.documentElement.getAttribute('data-theme') === 'light') {
+            gradient.addColorStop(0, 'rgba(106, 79, 179, 0.4)');
+            gradient.addColorStop(1, 'rgba(106, 79, 179, 0.0)');
+        } else {
+            gradient.addColorStop(0, 'rgba(255, 215, 0, 0.4)');
+            gradient.addColorStop(1, 'rgba(255, 215, 0, 0.0)');
+        }
+
         const datasets = [
             { 
                 label: 'INPI / EUR', 
                 data: prices, 
                 borderColor: c.accent, 
-                backgroundColor: c.accentFill, 
+                backgroundColor: gradient, 
                 fill: true, 
-                tension: 0.35, 
+                tension: 0.4, // Schön geschwungen
                 pointRadius: 0, 
-                pointHoverRadius: 5, 
-                borderWidth: 2,
+                pointHoverRadius: 6, 
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: c.accent,
+                pointHoverBorderWidth: 2,
+                borderWidth: 3,
                 order: 1
             }
         ];
 
-        // Idea 2: High/Low/Yesterday horizontale Linien (nur wenn Daten da sind)
         if (stats && prices.length > 0) {
             if (stats.high) {
                 datasets.push({
@@ -737,13 +770,16 @@ const ERC721_ABI = [
                     legend: { display: false }, 
                     tooltip: { 
                         backgroundColor: 'rgba(26,16,48,0.95)', 
+                        titleColor: '#ffd700',
+                        bodyColor: '#fff',
                         borderColor: 'rgba(255,215,0,0.4)', 
                         borderWidth: 1, 
-                        padding: 10, 
+                        padding: 12,
+                        displayColors: false,
                         callbacks: { 
                             label: ctx => {
                                 let lbl = ctx.dataset.label || '';
-                                if (lbl === 'INPI / EUR') return '€ ' + Number(ctx.parsed.y).toFixed(6);
+                                if (lbl === 'INPI / EUR') return 'Price: € ' + Number(ctx.parsed.y).toFixed(6);
                                 if (lbl === 'High') return 'High: € ' + Number(ctx.parsed.y).toFixed(6);
                                 if (lbl === 'Low') return 'Low: € ' + Number(ctx.parsed.y).toFixed(6);
                                 if (lbl === '24h ago') return '24h ago: € ' + Number(ctx.parsed.y).toFixed(6);
@@ -796,70 +832,57 @@ const ERC721_ABI = [
         if (!lastPriceData) chartBody.style.opacity = '0.3';
 
         try {
-            // 1. VERSUCH: Historische Daten aus deiner KV (Bot-Endpunkt)
-            const res = await fetch(`${CONFIG.BOT_URL}/api/price-history?hours=${currentChartHours}`);
+            // 1. VERSUCH: GeckoTerminal API (OHLCV) - Liefert echte Kerzendaten
+            let timeframe = 'hour', aggregate = 1;
+            if (currentChartHours === 168) { timeframe = 'day'; aggregate = 1; }
+            else if (currentChartHours === 72) { timeframe = 'hour'; aggregate = 4; }
+            
+            const geckoUrl = `https://api.geckoterminal.com/api/v2/networks/base/pools/${CONFIG.GECKO_POOL}/ohlcv/${timeframe}?aggregate=${aggregate}&limit=100`;
+            const res = await fetch(geckoUrl);
+            
             if (res.ok) {
                 const data = await res.json();
-                if (data.success && data.snapshots && data.snapshots.length > 0) {
-                    const prices = data.snapshots.map(s => s.inpi);
-                    
-                    // KORREKTUR: Zeitstempel richtig formatieren
-                    const labels = data.snapshots.map(s => {
-                        const d = new Date(s.t);
+                const ohlcvList = data.data.attributes.ohlcv_list; // [[timestamp, open, high, low, close, volume], ...]
+                
+                if (ohlcvList && ohlcvList.length > 0) {
+                    // GeckoTerminal liefert Daten von Neu nach Alt -> wir drehen sie um
+                    ohlcvList.reverse();
+
+                    const prices = ohlcvList.map(o => parseFloat(o[4])); // Close price
+                    const labels = ohlcvList.map(o => {
+                        const d = new Date(o[0] * 1000);
                         const timeStr = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
                         const dateStr = d.toLocaleDateString('en-GB', { month: 'short', day: 'numeric' });
-                        return currentChartHours <= 24 ? timeStr : `${dateStr}, ${timeStr}`;
+                        return currentChartHours <= 24 ? timeStr : (currentChartHours === 72 ? `${dateStr}, ${timeStr}` : dateStr);
                     });
 
-                    const stats = data.stats;
-
-                    // KORREKTUR: Den aktuellen INPI Preis oben in der Stat-Box aktualisieren
-                    const currentPrice = prices[prices.length - 1];
-                    const prevPrice = prices.length > 1 ? prices[prices.length - 2] : currentPrice;
-                    const change = prevPrice > 0 ? ((currentPrice - prevPrice) / prevPrice * 100) : 0;
+                    // Echte Höchst- und Tiefstwerte aus den Kerzen berechnen
+                    let high = 0, low = Infinity;
+                    ohlcvList.forEach(o => {
+                        const h = parseFloat(o[2]);
+                        const l = parseFloat(o[3]);
+                        if (h > high) high = h;
+                        if (l < low) low = l;
+                    });
                     
+                    const currentPrice = prices[prices.length - 1];
+                    // 24h Wert ermitteln (ca. 24 Stunden zurück)
+                    const yesterdayIdx = Math.max(0, prices.length - (currentChartHours === 168 ? 1 : (currentChartHours === 72 ? 6 : 24)));
+                    const yesterdayClose = prices[yesterdayIdx];
+                    
+                    const stats = { high, low, yesterdayClose };
+
+                    // UI aktualisieren
+                    const change = yesterdayClose > 0 ? ((currentPrice - yesterdayClose) / yesterdayClose * 100) : 0;
                     document.getElementById('statInpiPrice').textContent = '€ ' + currentPrice.toFixed(6);
                     const changeEl = document.getElementById('statInpiChange');
-                    changeEl.textContent = (change >= 0 ? '+' : '') + change.toFixed(2) + '% (letzter Tick)';
+                    changeEl.textContent = (change >= 0 ? '+' : '') + change.toFixed(2) + '% (24h)';
                     changeEl.style.color = change >= 0 ? '#00c853' : '#ff5252';
 
-                    // Stats (High/Low/Yesterday) im Chart-Header aktualisieren
-                    document.getElementById('statChartHigh').textContent = stats.high ? '€' + Number(stats.high).toFixed(5) : '—';
-                    document.getElementById('statChartLow').textContent = stats.low ? '€' + Number(stats.low).toFixed(5) : '—';
-                    document.getElementById('statChartYesterday').textContent = stats.yesterdayClose ? '€' + Number(stats.yesterdayClose).toFixed(5) : '—';
+                    document.getElementById('statChartHigh').textContent = '€' + high.toFixed(5);
+                    document.getElementById('statChartLow').textContent = '€' + low.toFixed(5);
+                    document.getElementById('statChartYesterday').textContent = '€' + yesterdayClose.toFixed(5);
 
-                    lastPriceData = { prices, labels, stats };
-                    chartBody.style.opacity = '1';
-                    drawPriceChart(prices, labels, stats);
-                    return; // Wichtig: Abbrechen, wenn Bot-Daten erfolgreich geladen wurden
-                }
-            }
-        } catch (e) {
-            console.warn('Bot price-history fehlgeschlagen, Fallback auf CoinGecko', e);
-        }
-
-        // 2. FALLBACK: CoinGecko (falls der Bot noch keine Daten hat)
-        try {
-            const days = currentChartHours / 24;
-            const cgRes = await fetch(`https://api.coingecko.com/api/v3/coins/inpinity/market_chart?vs_currency=eur&days=${days}`);
-            if (cgRes.ok) {
-                const cgData = await cgRes.json();
-                if (cgData.prices && cgData.prices.length > 0) {
-                    const prices = cgData.prices.map(p => p[1]);
-                    const labels = cgData.prices.map(p => {
-                        const d = new Date(p[0]);
-                        const timeStr = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
-                        const dateStr = d.toLocaleDateString('en-GB', { month: 'short', day: 'numeric' });
-                        return currentChartHours <= 24 ? timeStr : dateStr;
-                    });
-                    // High/Low manuell berechnen
-                    let high = 0, low = Infinity;
-                    prices.forEach(p => { if (p > high) high = p; if (p < low) low = p; });
-                    const stats = { high, low, yesterdayClose: prices[Math.max(0, prices.length - 25)] };
-                    
-                    // Stat Boxen aktualisieren
-                    document.getElementById('statInpiPrice').textContent = '€ ' + prices[prices.length - 1].toFixed(6);
-                    
                     lastPriceData = { prices, labels, stats };
                     chartBody.style.opacity = '1';
                     drawPriceChart(prices, labels, stats);
@@ -867,10 +890,36 @@ const ERC721_ABI = [
                 }
             }
         } catch (e) {
-            console.warn('CoinGecko Fallback fehlgeschlagen', e);
+            console.warn('GeckoTerminal OHLCV fehlgeschlagen', e);
         }
 
-        // 3. LETZTER FALLBACK: Aktueller Oracle-Preis (flacher Strahl)
+        // 2. FALLBACK: Bot History (falls GeckoTerminal mal blockt)
+        try {
+            const res = await fetch(`${CONFIG.BOT_URL}/api/price-history?hours=${currentChartHours}`);
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success && data.snapshots && data.snapshots.length > 0) {
+                    const prices = data.snapshots.map(s => s.inpi);
+                    const labels = data.snapshots.map(s => {
+                        const d = new Date(s.t);
+                        const timeStr = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+                        const dateStr = d.toLocaleDateString('en-GB', { month: 'short', day: 'numeric' });
+                        return currentChartHours <= 24 ? timeStr : `${dateStr}, ${timeStr}`;
+                    });
+                    const stats = data.stats;
+                    document.getElementById('statInpiPrice').textContent = '€ ' + prices[prices.length - 1].toFixed(6);
+                    document.getElementById('statChartHigh').textContent = stats.high ? '€' + Number(stats.high).toFixed(5) : '—';
+                    document.getElementById('statChartLow').textContent = stats.low ? '€' + Number(stats.low).toFixed(5) : '—';
+                    document.getElementById('statChartYesterday').textContent = stats.yesterdayClose ? '€' + Number(stats.yesterdayClose).toFixed(5) : '—';
+                    lastPriceData = { prices, labels, stats };
+                    chartBody.style.opacity = '1';
+                    drawPriceChart(prices, labels, stats);
+                    return;
+                }
+            }
+        } catch (e) { console.warn('Bot history fallback failed', e); }
+
+        // 3. LETZTER FALLBACK: Flatline
         try {
             const health = await fetch(CONFIG.BOT_URL + '/api/health').then(r => r.json());
             const inpiPrice = health.oracle?.prices?.find(p => p.token === 'INPI');
@@ -885,9 +934,7 @@ const ERC721_ABI = [
                 chartBody.style.opacity = '1';
                 drawPriceChart(prices, labels, null);
             }
-        } catch (e) {
-            console.warn('Auch Oracle-Fallback fehlgeschlagen', e);
-        }
+        } catch (e) { console.warn('Auch Oracle-Fallback fehlgeschlagen', e); }
     }
 
     // Chart Timeframe Buttons Event Listener
@@ -1392,4 +1439,4 @@ window.addEventListener("load", async () => {
 })();
 </script>
 </body>
-</html> 
+</html>
