@@ -18,6 +18,9 @@
     <meta name="description" content="Stake INPI tokens or Uniswap V4 LP positions on Base.">
     <meta name="theme-color" content="#140f1f">
     <style>
+    /* ═══════════════════════════════════════════════════════ */
+    /* DEIN BESTEHENDES CSS (unverändert)                       */
+    /* ═══════════════════════════════════════════════════════ */
     .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin: 1.5rem auto; max-width: 980px; }
     .stat-box { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.10); border-radius: 14px; padding: 1rem; text-align: center; }
     .stat-box-label { font-size: 0.75rem; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; }
@@ -339,7 +342,6 @@
     <p class="footer-version">Version 0.33.0 · V2.3</p>
 </footer>
 
-<!-- Tutorial Overlay (identisch zur vorherigen Version) -->
 <div id="tutorialOverlay" class="tutorial-overlay" aria-hidden="true">
     <div class="tutorial-modal" role="dialog" aria-labelledby="tutorialTitle">
         <button class="tutorial-close" id="tutorialClose" aria-label="Close tutorial">×</button>
@@ -442,6 +444,9 @@
 <button class="tutorial-help-btn" id="tutorialHelpBtn" aria-label="Open tutorial"><span>❓</span> How it works</button>
 
 <script>
+/* =====================================================
+   THEME SWITCHER
+===================================================== */
 document.addEventListener("DOMContentLoaded", () => {
     const root = document.documentElement;
     const dots = document.querySelectorAll(".themeDots .dot");
@@ -465,6 +470,9 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 
 <script>
+/* =====================================================
+   CONFIG + ABIs
+===================================================== */
 const CONFIG = {
     RPC_URL: "https://mainnet.base.org",
     BOT_URL: "https://inpinity-keeper-bot.s-plat.workers.dev",
@@ -536,15 +544,16 @@ const ERC721_ABI = [
 ];
 </script>
 
-<!-- ★★★ NEU: ON-CHAIN DISCOVERY + CHARTS ★★★ -->
 <script>
+/* =====================================================
+   CHARTS CONTROLLER
+===================================================== */
 (function() {
     let priceChart = null, tvlDonut = null;
     let lastPriceData = null, lastTvlData = null;
 
     const readProvider = new ethers.JsonRpcProvider(CONFIG.RPC_URL);
 
-    // ★ Robuste Discovery: iteriert über nextPositionId statt getLogs
     async function discoverOnChain() {
         const positions = [];
         for (const [key, safe] of Object.entries(CONFIG.SAFES)) {
@@ -574,16 +583,13 @@ const ERC721_ABI = [
         return positions;
     }
 
-    // ★ KOMBINIERT: versuche Bot, fallback on-chain
     async function discoverPositions() {
-        // 1. Versuch Bot
         try {
             const posRes = await fetch(CONFIG.BOT_URL + '/api/positions');
             if (posRes.ok) {
                 const posData = await posRes.json();
                 if (posData.success && posData.positions && posData.positions.length > 0) {
                     console.log('Bot returned', posData.positions.length, 'positions');
-                    // Mappe auf Safe-Keys
                     const mapped = [];
                     for (const pos of posData.positions) {
                         if (pos.error) continue;
@@ -609,14 +615,13 @@ const ERC721_ABI = [
             }
         } catch (e) { console.warn('Bot discovery failed:', e.message); }
 
-        // 2. Fallback: on-chain
         console.log('Falling back to on-chain discovery...');
         const onChain = await discoverOnChain();
         return onChain.map(p => ({
             safeKey: p.safeKey,
             safeName: p.safeName,
             tokenId: p.tokenId,
-            valueEUR: p.amountEUR  // Snapshot (besser als 0)
+            valueEUR: p.amountEUR
         }));
     }
 
@@ -714,7 +719,6 @@ const ERC721_ABI = [
         }
     }
 
-    // ★★★ Kernfix: TVL über discoverPositions ★★★
     async function loadTvlDonut() {
         try {
             const positions = await discoverPositions();
@@ -811,8 +815,10 @@ const ERC721_ABI = [
 })();
 </script>
 
-<!-- Main Staking Logic -->
 <script>
+/* =====================================================
+   MAIN STAKING LOGIC
+===================================================== */
 const readProvider = new ethers.JsonRpcProvider(CONFIG.RPC_URL);
 
 function fmtINPI(wei, dp = 2) {
@@ -1171,6 +1177,9 @@ window.addEventListener("load", async () => {
 </script>
 
 <script>
+/* =====================================================
+   TUTORIAL CONTROLLER
+===================================================== */
 (function() {
     const STORAGE_KEY = "inpinity-tutorial-seen-v1";
     const overlay = document.getElementById("tutorialOverlay");
