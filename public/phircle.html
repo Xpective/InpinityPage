@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Phircle V12 — Correct Farms & Wider Center</title>
+<title>Phircle V13 — Live Farms & Perfect Geometry</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin:0; padding:0; height:100%; overflow:hidden;
@@ -96,7 +96,7 @@
 
 <div id="hud">
   <h1>
-    <span>🌀 PHIRCLE V12</span>
+    <span>🌀 PHIRCLE V13</span>
     <button onclick="document.getElementById('hud').classList.toggle('collapsed')">HIDE</button>
   </h1>
   <div class="hud-content">
@@ -294,17 +294,18 @@ const view = { zoom:1, ox:0, oy:0, tZoom:1, tOx:0, tOy:0 };
 function resize() {
   W = canvas.width = innerWidth; H = canvas.height = innerHeight;
   CX = W/2; CY = H/2;
-  MAX_R = Math.max(100, Math.min(W, H) / 2 - 80);
+  // VIEL GRÖSSERER RADIUS
+  MAX_R = Math.max(150, Math.min(W, H) * 0.48);
 }
 window.addEventListener('resize', resize); resize();
 
 // ============================================================
-// GEOMETRY — Wider Center (Exponent 0.65 statt 0.85)
+// GEOMETRY — Linear (Exponent 1.0) für perfekten Kreis
 // ============================================================
 function blockRadius(row) {
   if (row === 0) return 0;
-  // Kleinerer Exponent = mehr Platz in der Mitte
-  return MAX_R * Math.pow(row / MAX_ROW, 0.65) * explosionFactor;
+  // Linearer Verlauf verhindert Überlappung außen
+  return MAX_R * (row / MAX_ROW) * explosionFactor;
 }
 
 function blockPosition(row, col) {
@@ -314,14 +315,14 @@ function blockPosition(row, col) {
 }
 
 const blockSize = row => {
-  const base = MAX_R / 110;
+  const base = MAX_R / 130; // Etwas kleiner für mehr Abstand
   const lodFactor = Math.max(0.6, Math.min(1.5, view.zoom));
-  const sizeFactor = 0.9 + (row / MAX_ROW) * 0.3;
+  const sizeFactor = 0.9 + (row / MAX_ROW) * 0.2;
   return Math.max(2.5, base * sizeFactor * lodFactor);
 };
 
 // ============================================================
-// SUBGRAPH FETCH (Robust mit Retries)
+// SUBGRAPH FETCH (Fehler behoben!)
 // ============================================================
 async function fetchGraphQL(query, retries = 3) {
   for (let i = 0; i < retries; i++) {
@@ -365,14 +366,14 @@ async function loadLive() {
     }
   }
 
-  // 2. Farms (Korrekte Felder wie in subgraph.js)
-  const dataFarms = await fetchGraphQL(`{ farmV6S(first: 1000) { blockNumber active stopTime } }`);
+  // 2. Farms (KORRIGIERTE ABFRAGE OHNE stopTime)
+  const dataFarms = await fetchGraphQL(`{ farmV6S(first: 1000) { id tokenId active } }`);
   if (dataFarms?.farmV6S) {
-    const now = Date.now() / 1000;
     for (const f of dataFarms.farmV6S) {
-      const stopTime = Number(f.stopTime) || 0;
-      if (f.active && (stopTime === 0 || stopTime > now)) {
-        const m = minted.get(parseInt(f.blockNumber));
+      if (f.active === true) {
+        // Fallback auf id, falls tokenId nicht existiert
+        const tokenId = parseInt(f.tokenId || f.id);
+        const m = minted.get(tokenId);
         if (m) m.farming = true;
       }
     }
@@ -395,7 +396,7 @@ async function loadLive() {
     }
   }
   
-  // 4. Partnerships (optional)
+  // 4. Partnerships
   for (const field of ['partnerships', 'partnershipV2S', 'partners']) {
     const dataPartners = await fetchGraphQL(`{ ${field}(first: 1000) { tokenId partnerId } }`);
     const ps = dataPartners?.[field];
@@ -419,22 +420,21 @@ async function loadLive() {
 }
 
 // ============================================================
-// RARITY (Rate-Limit-schonend: Batch 5, 250ms Pause)
+// RARITY (Sanftes Rate-Limiting: Batch 1, 80ms Pause)
 // ============================================================
 async function prefetchRarities() {
   const ids = [...minted.keys()];
-  for (let i = 0; i < ids.length; i += 5) {
-    const batch = ids.slice(i, i + 5);
-    await Promise.all(batch.map(async id => {
-      if (rarityCache.has(id)) return;
-      try {
-        const r = await nftContract.calculateRarity(id);
-        rarityCache.set(id, Number(r));
-      } catch(e) {
-        rarityCache.set(id, null);
-      }
-    }));
-    await new Promise(r => setTimeout(r, 250));
+  for (let i = 0; i < ids.length; i++) {
+    const id = ids[i];
+    if (rarityCache.has(id)) continue;
+    try {
+      const r = await nftContract.calculateRarity(id);
+      rarityCache.set(id, Number(r));
+    } catch(e) {
+      rarityCache.set(id, null);
+    }
+    // 80ms Pause um RPC 429 Fehler zu vermeiden
+    await new Promise(r => setTimeout(r, 80));
   }
   console.log('[phircle] Rarities prefetched');
 }
