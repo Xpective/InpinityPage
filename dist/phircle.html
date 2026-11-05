@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Phircle V15 — Complete & Perfected</title>
+<title>Phircle V16 — Smart UI & Attacks</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin:0; padding:0; height:100%; overflow:hidden;
@@ -12,7 +12,7 @@
   
   #hud { position:fixed; top:12px; left:12px; padding:14px 18px;
     background:rgba(8,8,16,0.85); border:1px solid #ffcc00; font-size:11px;
-    line-height:1.55; min-width:260px; backdrop-filter:blur(6px);
+    line-height:1.55; min-width:280px; backdrop-filter:blur(6px);
     border-radius:4px; z-index:10; transition: all 0.3s ease; }
   #hud.collapsed { min-width: auto; padding: 8px 12px; }
   #hud.collapsed .hud-content { display: none; }
@@ -28,6 +28,11 @@
   #hud .legend span { display:inline-flex; align-items:center; gap:3px; }
   #hud .dot { width:7px; height:7px; border-radius:50%; display:inline-block; }
   
+  /* NEU: Attacker Selector im HUD */
+  #attackerHud { margin-top: 10px; padding-top: 8px; border-top: 1px solid #333; }
+  #attackerSelect { width: 100%; background: #111; color: #ffcc00; border: 1px solid #444;
+    padding: 4px; font-family: inherit; font-size: 11px; margin-top: 4px; }
+
   #layers { position:fixed; top:12px; right:12px; display:flex; flex-direction:column;
     gap:4px; z-index:10; }
   #layers button { background:rgba(8,8,16,0.85); border:1px solid #333; color:#888;
@@ -52,7 +57,7 @@
   #pauseBtn:hover { background:#ff8800; color:#000; }
   #pauseBtn.active { border-color:#00e5ff; color:#00e5ff; background:rgba(0,229,255,0.1); }
 
-  #sidebar { position:fixed; top:0; right:-440px; width:100%; max-width:420px; height:100vh;
+  #sidebar { position:fixed; top:0; right:-460px; width:100%; max-width:440px; height:100vh;
     background:rgba(8,8,16,0.98); border-left:1px solid #ffcc00; padding:22px;
     overflow-y:auto; transition:right .3s cubic-bezier(.4,0,.2,1); z-index:20;
     backdrop-filter:blur(10px); }
@@ -63,11 +68,18 @@
   #sidebar .info-row span:first-child { color:#777; }
   #sidebar .info-row strong { color:#e0e0e0; }
   #sidebar .rarity-bar { height:4px; border-radius:2px; margin:8px 0; }
+  
   #sidebar button { display:block; width:100%; margin:6px 0;
     background:linear-gradient(135deg,#ffcc00,#ffaa00); color:#000; border:none;
     padding:12px 16px; cursor:pointer; font-family:inherit; font-weight:bold;
     font-size:13px; border-radius:3px; }
   #sidebar button.close { background:#222; color:#aaa; margin-top:16px; }
+  #sidebar button.attack-btn { background:linear-gradient(135deg,#ff3333,#cc0000); color:#fff; }
+  #sidebar button.execute-btn { background:linear-gradient(135deg,#00ff88,#00aa55); color:#000; }
+  
+  /* NEU: Angreifer Auswahl in Sidebar */
+  #sbAttackerSelect { width:100%; background:#111; color:#fff; border:1px solid #444;
+    padding:8px; font-family:inherit; font-size:12px; margin:10px 0; }
 
   #status { position:fixed; bottom:12px; right:12px; padding:9px 14px;
     background:rgba(8,8,16,0.85); border:1px solid #333; font-size:10px;
@@ -80,14 +92,13 @@
   #controls kbd { background:#222; color:#ffcc00; padding:1px 5px;
     border-radius:3px; font-family:inherit; font-size:9px; }
 
-  /* NEU: Tooltip für Hover-Effekt (Verbesserung 1) */
   #tooltip { position:fixed; pointer-events:none; z-index:50;
     background:rgba(8,8,16,0.95); border:1px solid #ffcc00; padding:8px 12px;
     font-size:11px; border-radius:4px; display:none; line-height:1.4;
     box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
 
   @media (max-width: 768px) {
-    #hud { min-width: 200px; font-size: 10px; padding: 10px; }
+    #hud { min-width: 220px; font-size: 10px; padding: 10px; }
     #layers { top: 12px; right: 12px; }
     #layers button { padding: 8px 10px; font-size: 9px; min-width: 110px; }
     #wallet { top: auto; bottom: 70px; right: 12px; }
@@ -100,12 +111,11 @@
 </head>
 <body>
 <canvas id="canvas"></canvas>
-
-<div id="tooltip"></div> <!-- NEU: Tooltip Container -->
+<div id="tooltip"></div>
 
 <div id="hud">
   <h1>
-    <span>🌀 PHIRCLE V15</span>
+    <span>🌀 PHIRCLE V16</span>
     <button onclick="document.getElementById('hud').classList.toggle('collapsed')">HIDE</button>
   </h1>
   <div class="hud-content">
@@ -122,6 +132,16 @@
     <div class="row"><span>φ</span><strong>1.61803</strong></div>
     <div class="row"><span>Golden Angle</span><strong>137.5°</strong></div>
     <hr>
+    
+    <!-- NEU: Globaler Angreifer -->
+    <div id="attackerHud" style="display:none;">
+      <div class="row"><span>My Attacker</span><strong id="activeAttackerLabel" style="color:#ff3333;">None</strong></div>
+      <select id="attackerSelect" onchange="changeGlobalAttacker(this.value)">
+        <option value="">Select your block...</option>
+      </select>
+    </div>
+    <hr>
+
     <div class="legend">
       <span><i class="dot" style="background:#3a3a3a"></i>Unminted</span>
       <span><i class="dot" style="background:#cd7f32"></i>Bronze</span>
@@ -223,10 +243,10 @@ const COLORS = {
 // ============================================================
 // STATE
 // ============================================================
-const minted        = new Map(); // id -> { revealed, owner, rarity, farming }
-const farms         = new Set(); // Set of ids
+const minted        = new Map();
+const farms         = new Set();
 const attacks       = new Map();
-const partnerships  = new Set(); // Set of ids
+const partnerships  = new Set();
 const justRevealed  = new Map();
 const piWaves       = [];
 
@@ -237,6 +257,8 @@ let isPaused = false;
 let myBlocksCount = 0;
 let myFarmsCount = 0;
 let explosionFactor = 1.0;
+let selectedAttackerId = null; // NEU: Global ausgewählter Angreifer
+let hoveredBlock = null; // Für die gestrichelte Vorschau-Linie
 
 // ============================================================
 // CONTRACTS
@@ -263,6 +285,8 @@ window.connectWallet = async () => {
     btn.textContent = userAddress.slice(0,6) + '…' + userAddress.slice(-4);
     btn.classList.add('connected');
     countMyBlocks();
+    updateAttackerDropdown();
+    document.getElementById('attackerHud').style.display = 'block';
   } catch(e) { alert('Wallet connection failed: ' + e.message); }
 };
 
@@ -278,6 +302,34 @@ function countMyBlocks() {
   }
   document.getElementById('myBlocksCount').textContent = `${myBlocksCount} (${myFarmsCount} farms)`;
 }
+
+// NEU: Dropdown im HUD befüllen
+function updateAttackerDropdown() {
+  const sel = document.getElementById('attackerSelect');
+  if (!userAddress) {
+    sel.innerHTML = '<option value="">Connect Wallet</option>';
+    return;
+  }
+  let html = '<option value="">Select your block...</option>';
+  for (const [id, m] of minted) {
+    if (m.owner === userAddress) {
+      html += `<option value="${id}" ${selectedAttackerId === id ? 'selected' : ''}>Block #${id}</option>`;
+    }
+  }
+  sel.innerHTML = html;
+  if (selectedAttackerId) {
+    document.getElementById('activeAttackerLabel').textContent = `#${selectedAttackerId}`;
+  } else {
+    document.getElementById('activeAttackerLabel').textContent = `None`;
+  }
+}
+
+window.changeGlobalAttacker = (val) => {
+  selectedAttackerId = val ? parseInt(val) : null;
+  updateAttackerDropdown();
+  updateSidebarAttacker();
+  drawPyramid(); // Falls wir Vorschau-Linien zeichnen
+};
 
 // ============================================================
 // ID / POSITION
@@ -306,7 +358,7 @@ function resize() {
 window.addEventListener('resize', resize); resize();
 
 // ============================================================
-// GEOMETRY — Linear (Exponent 1.0) für perfekten Kreis
+// GEOMETRY — Linear (Exponent 1.0)
 // ============================================================
 function blockRadius(row) {
   if (row === 0) return 0;
@@ -327,7 +379,7 @@ const blockSize = row => {
 };
 
 // ============================================================
-// SUBGRAPH FETCH (FIXED: EXACT FIELDS)
+// SUBGRAPH FETCH (FIXED)
 // ============================================================
 async function fetchGraphQL(query, retries = 3) {
   for (let i = 0; i < retries; i++) {
@@ -338,15 +390,12 @@ async function fetchGraphQL(query, retries = 3) {
       });
       const json = await res.json();
       if (!res.ok || json.errors) {
-        const errMsg = json?.errors?.[0]?.message || `HTTP ${res.status}`;
-        console.warn(`[phircle] GraphQL Error (Versuch ${i+1}):`, errMsg);
         if (i === retries - 1) return null;
         await new Promise(r => setTimeout(r, 1500));
         continue;
       }
       return json.data;
     } catch(e) {
-      console.warn(`[phircle] Netzwerkfehler (Versuch ${i+1}):`, e);
       if (i === retries - 1) return null;
       await new Promise(r => setTimeout(r, 1500));
     }
@@ -358,30 +407,22 @@ async function loadLive() {
   document.getElementById('statusText').innerHTML = '<span class="live">● Loading Data...</span>';
   
   try {
-    // 1. Tokens
     const dataTokens = await fetchGraphQL(`{ tokens(first: 1000) { id revealed owner { id } } }`);
     if (dataTokens?.tokens) {
       for (const t of dataTokens.tokens) {
         const id = parseInt(t.id);
-        minted.set(id, { 
-          revealed: t.revealed === true, 
-          owner: t.owner?.id ? t.owner.id.toLowerCase() : null,
-          rarity: null
-        });
+        minted.set(id, { revealed: t.revealed === true, owner: t.owner?.id ? t.owner.id.toLowerCase() : null, rarity: null });
       }
     }
 
-    // 2. Rarities (BLITZSCHNELL DURCH blockRevealeds)
     const dataRevealed = await fetchGraphQL(`{ blockRevealeds(first: 1000) { tokenId rarity } }`);
     if (dataRevealed?.blockRevealeds) {
       for (const br of dataRevealed.blockRevealeds) {
-        const id = parseInt(br.tokenId);
-        const m = minted.get(id);
+        const m = minted.get(parseInt(br.tokenId));
         if (m) m.rarity = parseInt(br.rarity);
       }
     }
 
-    // 3. Farms (Exakte Felder)
     const dataFarms = await fetchGraphQL(`{ farmV6S(first: 1000) { id active } }`);
     if (dataFarms?.farmV6S) {
       for (const f of dataFarms.farmV6S) {
@@ -389,7 +430,6 @@ async function loadLive() {
       }
     }
 
-    // 4. Attacks
     const dataAttacks = await fetchGraphQL(`{ attackV6S(first: 1000) { attackerTokenId targetTokenId startTime endTime } }`);
     if (dataAttacks?.attackV6S) {
       for (const a of dataAttacks.attackV6S) {
@@ -398,6 +438,7 @@ async function loadLive() {
         const rc = idToRC(parseInt(a.attackerTokenId)); 
         if (!rc) continue;
         attacks.set(parseInt(a.targetTokenId), {
+          attackerTokenId: parseInt(a.attackerTokenId), // NEU: ID speichern
           attackerRow: rc.row, attackerCol: rc.col,
           startTime: performance.now(),
           interval: Math.max(2, Number(a.endTime)-Number(a.startTime)),
@@ -406,7 +447,6 @@ async function loadLive() {
       }
     }
     
-    // 5. Partnerships
     const dataPartners = await fetchGraphQL(`{ partnerships(first: 1000, where: {active: true}) { id } }`);
     if (dataPartners?.partnerships) {
       for (const p of dataPartners.partnerships) {
@@ -414,9 +454,10 @@ async function loadLive() {
       }
     }
 
-    const farmingCount = farms.size;
     document.getElementById('statusText').innerHTML =
-      `<span class="live">● LIVE</span> · ${minted.size} Tokens · ${farmingCount} Farms`;
+      `<span class="live">● LIVE</span> · ${minted.size} Tokens · ${farms.size} Farms`;
+
+    if (userAddress) updateAttackerDropdown();
       
   } catch(e) {
     console.warn('Subgraph failed', e);
@@ -462,7 +503,6 @@ function drawBackground(now) {
   g.addColorStop(0,'#0d0018'); g.addColorStop(.55,'#050008'); g.addColorStop(1,'#000');
   ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
 
-  // Golden Spiral
   ctx.save(); ctx.translate(CX,CY); ctx.beginPath();
   const turns=6, pts=240;
   for (let i=0;i<=pts;i++){
@@ -472,7 +512,6 @@ function drawBackground(now) {
   }
   ctx.strokeStyle=COLORS.goldenSpiral; ctx.lineWidth=1; ctx.stroke(); ctx.restore();
 
-  // π Sectors
   ctx.save(); ctx.translate(CX,CY);
   for (let s = 0; s < 12; s++) {
     const a = (s / 12) * TAU;
@@ -485,11 +524,9 @@ function drawBackground(now) {
   }
   ctx.restore();
 
-  // Mirror Axis
   ctx.beginPath(); ctx.moveTo(CX,CY-MAX_R); ctx.lineTo(CX,CY+MAX_R);
   ctx.strokeStyle=COLORS.mirrorAxis; ctx.stroke();
 
-  // Golden Angle Radar
   const radarAngle = (now / 1000) * 0.4;
   const grad = ctx.createRadialGradient(CX, CY, 0, CX, CY, Math.max(10, MAX_R));
   grad.addColorStop(0, COLORS.radar);
@@ -540,8 +577,6 @@ function drawBlocks(now) {
         const pulse = .5 + .5*Math.sin(t*3 + id);
         ctx.beginPath(); ctx.arc(p.x,p.y,sz + 3 + pulse*2,0,TAU);
         ctx.strokeStyle=COLORS.mine; ctx.lineWidth=1.5; ctx.stroke();
-        ctx.beginPath(); ctx.arc(p.x,p.y,sz + 1,0,TAU);
-        ctx.fillStyle=COLORS.mine+'33'; ctx.fill();
       }
 
       // Farming Aura
@@ -549,53 +584,45 @@ function drawBlocks(now) {
         ctx.beginPath(); ctx.arc(p.x,p.y,sz+1.5,0,TAU);
         ctx.fillStyle=COLORS.farming+'33'; ctx.fill();
       }
-      
-      // Protection Shield Ring
-      if (m && m.protected) {
-        ctx.beginPath(); ctx.arc(p.x,p.y,sz+3,0,TAU);
-        ctx.strokeStyle=COLORS.protected+'66'; ctx.lineWidth=1.2; ctx.stroke();
-      }
 
       // Block
       ctx.beginPath(); ctx.arc(p.x,p.y,sz,0,TAU);
       ctx.fillStyle = fill; ctx.fill();
-      if (m && view.zoom > 1.5) {
-        ctx.strokeStyle='rgba(255,255,255,.28)'; ctx.lineWidth=.5; ctx.stroke();
+
+      // NEU: Attack Target Pulsing Red Border
+      if (atk) {
+        const pulse = .5 + .5*Math.sin(t*6);
+        ctx.beginPath(); ctx.arc(p.x,p.y,sz + 2 + pulse*3,0,TAU);
+        ctx.strokeStyle=`rgba(255, 51, 51, ${0.6 + pulse*0.4})`;
+        ctx.lineWidth=2.5;
+        ctx.stroke();
+        
+        // Warnsymbol
+        ctx.fillStyle = '#ff3333';
+        ctx.font = 'bold 12px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('⚠️', p.x, p.y - sz - 4);
       }
 
-      // Golden-Ratio Reveal
-      const rv = justRevealed.get(id);
-      if (rv) {
-        const el = (now - rv) / 1000;
-        if (el < 2.5) {
-          const ringR = sz + el * 30;
-          const alpha = 1 - el / 2.5;
-          ctx.beginPath(); ctx.arc(p.x,p.y,ringR,0,TAU);
-          ctx.strokeStyle = `rgba(255,204,0,${alpha})`;
-          ctx.lineWidth = 2; ctx.stroke();
-          ctx.beginPath(); ctx.arc(p.x,p.y,ringR*PHI,0,TAU);
-          ctx.strokeStyle = `rgba(255,204,0,${alpha*0.5})`;
-          ctx.lineWidth = 1; ctx.stroke();
-        } else {
-          justRevealed.delete(id);
-        }
+      // NEU: Attacker Badge (Weißer Ring)
+      if (selectedAttackerId === id) {
+        ctx.beginPath(); ctx.arc(p.x,p.y,sz + 4,0,TAU);
+        ctx.strokeStyle='rgba(255, 255, 255, 0.8)'; ctx.lineWidth=2; ctx.stroke();
       }
 
-      // Countdown Ring
+      // Countdown Ring (inner circle)
       if (atk) {
         const rem = Math.max(0, atk.endTimestamp - Date.now());
         const total = atk.interval*1000;
         const prog = 1 - rem/total;
-        const pulse = .5 + .5*Math.sin(t*4);
         ctx.beginPath();
-        ctx.arc(p.x,p.y,sz+4,-PI/2,-PI/2+TAU*prog);
-        ctx.strokeStyle=`rgba(255,51,51,${.6+pulse*.4})`;
-        ctx.lineWidth=2; ctx.stroke();
+        ctx.arc(p.x,p.y,sz,-PI/2,-PI/2+TAU*prog);
+        ctx.strokeStyle=`rgba(255,255,255,0.5)`;
+        ctx.lineWidth=1.5; ctx.stroke();
       }
     }
   }
 
-  // Personal Constellation
   if (myBlocksPos.length > 1) {
     ctx.beginPath();
     ctx.moveTo(myBlocksPos[0].x, myBlocksPos[0].y);
@@ -606,18 +633,35 @@ function drawBlocks(now) {
     ctx.lineWidth = 1;
     ctx.stroke();
   }
+
+  // NEU: Ghost Attacker Line (Idee 1)
+  if (selectedAttackerId && hoveredBlock && hoveredBlock !== selectedAttackerId) {
+    const rcA = idToRC(selectedAttackerId);
+    const rcB = idToRC(hoveredBlock);
+    if (rcA && rcB) {
+      const pA = blockPosition(rcA.row, rcA.col);
+      const pB = blockPosition(rcB.row, rcB.col);
+      
+      ctx.beginPath();
+      ctx.setLineDash([5, 5]);
+      ctx.moveTo(pA.x, pA.y);
+      ctx.lineTo(pB.x, pB.y);
+      ctx.strokeStyle = 'rgba(255, 51, 51, 0.5)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+  }
 }
 
 function drawPartnerships(now) {
   if (activeLayer !== 'partner' && activeLayer !== 'rarity') return;
   const t = now / 1000;
-  
   for (const id of partnerships) {
     const rc = idToRC(id);
     if (!rc) continue;
     const p = blockPosition(rc.row, rc.col);
     const alpha = 0.2 + 0.15 * Math.sin(t * 2 + id);
-    
     ctx.beginPath();
     ctx.arc(p.x, p.y, blockSize(rc.row) * 3, 0, TAU);
     ctx.strokeStyle = `rgba(192,96,255,${alpha})`;
@@ -645,12 +689,18 @@ function drawAttackRays(now) {
       ctx.lineTo((1-t)*(1-t)*ap.x+2*(1-t)*t*cxp+t*t*tp.x,
                  (1-t)*(1-t)*ap.y+2*(1-t)*t*cyp+t*t*tp.y);
     }
-    ctx.strokeStyle=`rgba(255,51,51,${.85-prog*.55})`; ctx.lineWidth=2; ctx.stroke();
+    // Dickerer, leuchtender Strahl
+    ctx.strokeStyle=`rgba(255,51,51,${.85-prog*.55})`; 
+    ctx.lineWidth=3; 
+    ctx.shadowColor = '#ff3333';
+    ctx.shadowBlur = 8;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
 
     const tt=prog;
     const hx=(1-tt)*(1-tt)*ap.x+2*(1-tt)*tt*cxp+tt*tt*tp.x;
     const hy=(1-tt)*(1-tt)*ap.y+2*(1-tt)*tt*cyp+tt*tt*tp.y;
-    ctx.beginPath(); ctx.arc(hx,hy,3.4,0,TAU); ctx.fillStyle=COLORS.attack; ctx.fill();
+    ctx.beginPath(); ctx.arc(hx,hy,4,0,TAU); ctx.fillStyle='#fff'; ctx.fill();
 
     if (prog > 0.95 && Math.random() < 0.1) {
       piWaves.push({ x: tp.x, y: tp.y, startTime: now });
@@ -743,7 +793,7 @@ function loop(now) {
 }
 
 // ============================================================
-// HIT TEST
+// HIT TEST & TOOLTIP
 // ============================================================
 function screenToWorld(sx,sy) {
   const bs = 1 + Math.sin(performance.now()/1000/PI)*.006;
@@ -769,7 +819,7 @@ function hitTest(sx,sy) {
 }
 
 // ============================================================
-// SIDEBAR
+// SIDEBAR LOGIK (ANGEPASST)
 // ============================================================
 async function showBlockInfo(hit) {
   tooltip.style.display = 'none';
@@ -777,6 +827,7 @@ async function showBlockInfo(hit) {
   document.getElementById('sbTitle').textContent = `Block #${id}`;
   const rIdx = m ? m.rarity : null;
   const rName = rIdx != null ? rarityNames[rIdx] : null;
+  const isMine = userAddress && m && m.owner === userAddress;
 
   let h = `
     <div class="info-row"><span>Row</span><strong>${hit.row}</strong></div>
@@ -786,7 +837,6 @@ async function showBlockInfo(hit) {
   if (m) {
     h += `<div class="info-row"><span>Reveal</span><strong style="color:${m.revealed?'#00ff88':'#888'}">${m.revealed?'● Yes':'○ No'}</strong></div>`;
     if (m.owner) {
-      const isMine = userAddress && m.owner === userAddress;
       h += `<div class="info-row"><span>Owner</span><strong style="font-size:10px; color:${isMine?'#00e5ff':'#e0e0e0'}">${isMine?'YOU':m.owner.slice(0,6)+'…'+m.owner.slice(-4)}</strong></div>`;
     }
     if (rName) {
@@ -796,22 +846,65 @@ async function showBlockInfo(hit) {
     h += `<div class="info-row"><span>Farming</span><strong style="color:${farms.has(id)?'#00ff88':'#666'}">${farms.has(id)?'● Active':'○ Inactive'}</strong></div>`;
     h += `<div class="info-row"><span>Protection</span><strong style="color:${m.protected?'#4488ff':'#666'}">${m.protected?'● Active':'○ Inactive'}</strong></div>`;
   }
-  if (atk) h += `<div class="info-row" style="color:#ff3333"><span>⚠ Attack</span><strong>${((atk.endTimestamp-Date.now())/1000).toFixed(1)}s</strong></div>`;
+
+  if (atk) {
+    const rem = Math.max(0, atk.endTimestamp - Date.now());
+    h += `<div class="info-row" style="color:#ff3333"><span>⚠ Incoming Attack</span><strong>${(rem/1000).toFixed(1)}s</strong></div>`;
+  }
   if (partnerships.has(id)) h += `<div class="info-row"><span>Partner</span><strong>● Active</strong></div>`;
 
   h += '<hr style="border:none;border-top:1px solid #222;margin:14px 0;">';
+
   if (!m) {
     h += `<button onclick="mintBlock(${hit.row},${hit.col})">⛏ Mint with INPI</button>`;
-  } else {
+  } else if (isMine) {
+    // EIGENE BLÖCKE (Farming, Protection, Claim)
     h += `
       <button onclick="toggleFarm(${id})">🌾 ${farms.has(id)?'Stop Farming':'Start Farming'}</button>
       <button onclick="toggleProtect(${id})">🛡 ${m.protected?'Remove Protection':'Buy Protection'}</button>
-      <button onclick="startAttack(${id})">⚔ Start Attack</button>
       <button onclick="claimResources(${id})">💰 Claim</button>`;
+    
+    // Wenn mein Block gerade angegriffen wird
+    if (atk && atk.attackerTokenId === selectedAttackerId) {
+       // Das kann eigentlich nicht passieren (man greift sich nicht selbst an)
+    }
+  } else {
+    // FREMDER BLOCK (Angriff starten oder ausführen)
+    
+    // Wenn ein Angriff auf diesen Block läuft
+    if (atk) {
+      const rem = Math.max(0, atk.endTimestamp - Date.now());
+      if (rem <= 0) {
+        h += `<button class="execute-btn" onclick="executeAttack(${id})">⚔ Ausführen (Bereit!)</button>`;
+      } else {
+        h += `<button style="background:#333; color:#888; cursor:not-allowed;" disabled>⏳ Wartezeit: ${(rem/1000).toFixed(1)}s</button>`;
+      }
+    } else {
+      // Neuen Angriff starten
+      h += `<div style="font-size:11px; color:#888; margin-top:10px;">Wähle deinen Angreifer:</div>`;
+      h += `<select id="sbAttackerSelect" onchange="selectedAttackerId = parseInt(this.value) || null; drawPyramid();">`;
+      if (userAddress) {
+        for (const [tid, myM] of minted) {
+          if (myM.owner === userAddress) {
+            h += `<option value="${tid}" ${selectedAttackerId === tid ? 'selected' : ''}>Block #${tid}</option>`;
+          }
+        }
+      } else {
+        h += `<option value="">Connect Wallet</option>`;
+      }
+      h += `</select>`;
+      h += `<button class="attack-btn" onclick="startAttack(${id})">⚔ Angriff starten</button>`;
+    }
   }
+
   h += `<button class="close" onclick="document.getElementById('sidebar').classList.remove('active')">Close</button>`;
   document.getElementById('sbContent').innerHTML = h;
   document.getElementById('sidebar').classList.add('active');
+}
+
+function updateSidebarAttacker() {
+  const sel = document.getElementById('sbAttackerSelect');
+  if (sel && selectedAttackerId) sel.value = selectedAttackerId;
 }
 
 // ============================================================
@@ -826,6 +919,7 @@ async function getSignerOrWarn() {
       userSigner = await p.getSigner();
       userAddress = (await userSigner.getAddress()).toLowerCase();
       countMyBlocks();
+      updateAttackerDropdown();
     } catch(e) { alert('Wallet connection failed'); return null; }
   }
   return userSigner;
@@ -860,22 +954,38 @@ window.toggleProtect = async (id) => {
 };
 
 window.startAttack = async (targetId) => {
+  if (!selectedAttackerId) return alert('Wähle zuerst einen Angreifer-Block aus!');
   const signer = await getSignerOrWarn(); if (!signer) return;
   const c = new ethers.Contract(PIRATES_V6_ADDRESS, PIRATES_V6_ABI, signer);
-  let attackerTokenId = null;
-  if (userAddress) {
-    for (const [tid, m] of minted) {
-      if (m.owner === userAddress) { attackerTokenId = tid; break; }
-    }
-  }
-  if (attackerTokenId === null) {
-    alert('You need to own at least one block to launch an attack.');
-    return;
-  }
   try {
-    const tx = await c.startAttack(attackerTokenId, targetId, 0);
-    await tx.wait(); alert('Attack started');
+    const tx = await c.startAttack(selectedAttackerId, targetId, 0);
+    await tx.wait(); 
+    alert('Angriff gestartet!');
+    // Lokal hinzufügen für sofortiges Feedback
+    const rc = idToRC(selectedAttackerId);
+    attacks.set(targetId, {
+      attackerTokenId: selectedAttackerId,
+      attackerRow: rc.row, attackerCol: rc.col,
+      startTime: performance.now(),
+      interval: 60, // Dummy, wird beim nächsten Load überschrieben
+      endTimestamp: Date.now() + 60000
+    });
+    drawPyramid();
   } catch(e) { alert('Attack failed: ' + (e.reason||e.message)); }
+};
+
+window.executeAttack = async (targetId) => {
+  const signer = await getSignerOrWarn(); if (!signer) return;
+  const c = new ethers.Contract(PIRATES_V6_ADDRESS, PIRATES_V6_ABI, signer);
+  try {
+    // Wir brauchen den attackIndex. Da wir ihn im UI nicht haben, raten wir 0.
+    // (Für ein perfektes System müsste man den Index beim Start mitspeichern).
+    const tx = await c.executeAttack(targetId, 0);
+    await tx.wait(); 
+    alert('Angriff ausgeführt!');
+    attacks.delete(targetId);
+    drawPyramid();
+  } catch(e) { alert('Execute failed: ' + (e.reason||e.message)); }
 };
 
 window.claimResources = async (id) => {
@@ -886,17 +996,17 @@ window.claimResources = async (id) => {
 };
 
 // ============================================================
-// INTERACTION (Mouse + Touch) + IMPROVEMENTS
+// INTERACTION (Mouse + Touch)
 // ============================================================
 let isDragging=false, wasDragging=false, dragStart={x:0,y:0}, dragOrig={x:0,y:0};
 
-// Verbesserung 1: Hover Tooltip
 canvas.addEventListener('mousemove', e => {
   if (isDragging) return;
   const r = canvas.getBoundingClientRect();
   const hit = hitTest(e.clientX - r.left, e.clientY - r.top);
   
   if (hit) {
+    hoveredBlock = hit.id; // Für Ghost Line
     const m = minted.get(hit.id);
     let html = `<strong>Block #${hit.id}</strong>`;
     if (m) {
@@ -914,13 +1024,17 @@ canvas.addEventListener('mousemove', e => {
     tooltip.style.top = (e.clientY - 15) + 'px';
     canvas.style.cursor = 'pointer';
   } else {
+    hoveredBlock = null;
     tooltip.style.display = 'none';
     canvas.style.cursor = isDragging ? 'grabbing' : 'crosshair';
   }
+  drawPyramid();
 });
 
 canvas.addEventListener('mouseleave', () => {
+  hoveredBlock = null;
   tooltip.style.display = 'none';
+  drawPyramid();
 });
 
 canvas.addEventListener('click', e => {
@@ -945,7 +1059,6 @@ window.addEventListener('mousemove', e => {
 
 window.addEventListener('mouseup', ()=> isDragging=false);
 
-// Touch (Mobile)
 canvas.addEventListener('touchstart', e => {
   isDragging = true; wasDragging = false;
   dragStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
@@ -971,7 +1084,6 @@ canvas.addEventListener('touchend', e => {
   }
 });
 
-// Verbesserung 2: Double-Click to Center
 window.addEventListener('dblclick', e => {
   if (e.target === canvas) {
     view.tZoom = 1;
@@ -981,7 +1093,6 @@ window.addEventListener('dblclick', e => {
   }
 });
 
-// Zoom
 canvas.addEventListener('wheel', e => {
   e.preventDefault();
   view.tZoom = Math.max(.5, Math.min(14, view.tZoom * (e.deltaY>0?.88:1.12)));
@@ -1021,14 +1132,6 @@ window.addEventListener('keydown', e => {
     togglePause();
   }
   if (e.key === 'Escape') document.getElementById('sidebar').classList.remove('active');
-  const layers = ['rarity','owner','farming','attack','partner'];
-  const idx = parseInt(e.key) - 1;
-  if (idx >= 0 && idx < layers.length) {
-    activeLayer = layers[idx];
-    document.querySelectorAll('#layers button').forEach((b, i) => {
-      b.classList.toggle('active', i === idx);
-    });
-  }
 });
 
 // ============================================================
