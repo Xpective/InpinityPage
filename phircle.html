@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phircle V1 — Inpinity Pyramid als Kreis</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; overflow: hidden;
+    background: #000; color: #e0e0e0; font-family: 'Courier New', monospace; }
+  canvas { display: block; cursor: crosshair; }
+
+  #hud { position: fixed; top: 12px; left: 12px; padding: 14px 18px;
+    background: rgba(8,8,16,0.82); border: 1px solid #ffcc00;
+    font-size: 12px; line-height: 1.6; min-width: 230px;
+    backdrop-filter: blur(6px); border-radius: 4px; z-index: 10; }
+  #hud h1 { color: #ffcc00; margin: 0 0 8px; font-size: 15px; letter-spacing: 2px; }
+  #hud .row { display: flex; justify-content: space-between; color: #888; }
+  #hud .row strong { color: #ffcc00; font-weight: bold; }
+  #hud hr { border: none; border-top: 1px solid #222; margin: 8px 0; }
+  #hud .legend { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; font-size: 10px; }
+  #hud .legend span { display: inline-flex; align-items: center; gap: 4px; }
+  #hud .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+  #sidebar { position: fixed; top: 0; right: -430px; width: 420px; height: 100vh;
+    background: rgba(8,8,16,0.97); border-left: 1px solid #ffcc00;
+    padding: 22px; overflow-y: auto; transition: right 0.3s cubic-bezier(.4,0,.2,1);
+    z-index: 20; backdrop-filter: blur(8px); }
+  #sidebar.active { right: 0; }
+  #sidebar h2 { color: #ffcc00; margin: 0 0 14px; font-size: 17px; letter-spacing: 1px; }
+  #sidebar .info-row { display: flex; justify-content: space-between;
+    padding: 7px 0; border-bottom: 1px solid #1a1a1a; font-size: 12px; }
+  #sidebar .info-row span:first-child { color: #777; }
+  #sidebar .info-row strong { color: #e0e0e0; }
+  #sidebar button { display: block; width: 100%; margin: 7px 0;
+    background: linear-gradient(135deg, #ffcc00, #ffaa00); color: #000;
+    border: none; padding: 11px 16px; cursor: pointer; font-family: inherit;
+    font-weight: bold; font-size: 13px; letter-spacing: 0.5px;
+    border-radius: 3px; transition: transform 0.1s, box-shadow 0.2s; }
+  #sidebar button:hover { transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(255,204,0,0.35); }
+  #sidebar button.danger { background: linear-gradient(135deg, #ff4444, #cc0000); color: #fff; }
+  #sidebar button.close { background: #222; color: #aaa; margin-top: 18px; }
+  #sidebar button.close:hover { background: #333; color: #fff; }
+
+  #controls { position: fixed; bottom: 12px; left: 12px; padding: 9px 14px;
+    background: rgba(8,8,16,0.82); border: 1px solid #333; font-size: 11px;
+    color: #777; border-radius: 4px; z-index: 10; }
+  #controls kbd { background: #222; color: #ffcc00; padding: 2px 6px;
+    border-radius: 3px; font-family: inherit; font-size: 10px; }
+</style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<div id="hud">
+  <h1>🌀 PHIRCLE V1</h1>
+  <div class="row"><span>Reihen</span><strong>100 (0–99)</strong></div>
+  <div class="row"><span>Blöcke</span><strong>10.000</strong></div>
+  <div class="row"><span>Minted</span><strong id="mintedCount">0</strong></div>
+  <div class="row"><span>Unminted</span><strong id="unmintedCount">0</strong></div>
+  <hr>
+  <div class="row"><span>π</span><strong>3.14159</strong></div>
+  <div class="row"><span>φ</span><strong>1.61803</strong></div>
+  <hr>
+  <div class="legend">
+    <span><i class="dot" style="background:#555"></i>Unminted</span>
+    <span><i class="dot" style="background:#cd7f32"></i>Bronze</span>
+    <span><i class="dot" style="background:#c0c0c0"></i>Silber</span>
+    <span><i class="dot" style="background:#ffcc00"></i>Gold</span>
+    <span><i class="dot" style="background:#e5e4e2"></i>Platin</span>
+    <span><i class="dot" style="background:#b9f2ff"></i>Diamant</span>
+    <span><i class="dot" style="background:#ff3333"></i>Angriff</span>
+  </div>
+</div>
+
+<div id="sidebar">
+  <h2 id="sbTitle">Block Info</h2>
+  <div id="sbContent"></div>
+</div>
+
+<div id="controls">
+  <kbd>Mausrad</kbd> Zoom · <kbd>Drag</kbd> Pan · <kbd>Klick</kbd> Block · <kbd>ESC</kbd> schließen
+</div>
+
+<script>
+'use strict';
+
+// ============================================================
+// KONFIGURATION
+// ============================================================
+const PHI = (1 + Math.sqrt(5)) / 2;
+const PI  = Math.PI;
+const MAX_ROW = 99;
+const TOTAL_ROWS = 100;
+const ID_STRIDE = 2049;   // id(r,c) = 2049*r + c  →  (0,0)=0, (1,0)=2049...
+const CENTER_ANGLE = -PI / 2;  // Spiegelachse zeigt nach oben
+const RADIUS_POWER = 0.5;      // sqrt-Verteilung → innen mehr Platz
+
+const COLORS = {
+  unminted:      '#555555',
+  unmintedEdge:  '#6a6a6a',
+  bronze:        '#cd7f32',
+  silver:        '#c0c0c0',
+  gold:          '#ffcc00',
+  platinum:      '#e5e4e2',
+  diamond:       '#b9f2ff',
+  farming:       '#00ff88',
+  protected:     '#4488ff',
+  attack:        '#ff3333',
+  mirrorAxis:    'rgba(255,204,0,0.16)',
+  goldenSpiral:  'rgba(255,204,0,0.05)',
+};
+
+// ============================================================
+// ID-FORMEL
+// ============================================================
+function blockId(row, col) {
+  return ID_STRIDE * row + col;
+}
+
+// ============================================================
+// DATEN (später aus Contract lesen)
+// ============================================================
+const mintedBlocks = new Map();
+const attackedBlocks = new Map();
+
+// Bekannte, vom User bestätigte Blöcke:
+mintedBlocks.set(blockId(0, 0), { rarity: 'gold',   farming: false, protected: false });
+mintedBlocks.set(blockId(1, 0), { rarity: 'bronze', farming: true,  protected: false });
+mintedBlocks.set(blockId(1, 1), { rarity: 'silver', farming: false, protected: true  });
+mintedBlocks.set(blockId(1, 2), { rarity: 'gold',   farming: true,  protected: false });
+
+// Demo-Modus (URL: ?demo=false zum Deaktivieren)
+const DEMO = new URLSearchParams(location.search).get('demo') !== 'false';
+if (DEMO) {
+  const rarities = ['bronze','silver','gold','platinum','diamond'];
+  for (let i = 0; i < 700; i++) {
+    const row = Math.floor(Math.random() * 100);
+    const col = Math.floor(Math.random() * (2 * row + 1));
+    const id = blockId(row, col);
+    if (mintedBlocks.has(id)) continue;
+    const rarity = rarities[Math.floor(Math.random() * rarities.length)];
+    mintedBlocks.set(id, {
+      rarity,
+      farming:   Math.random() < 0.35,
+      protected: Math.random() < 0.20,
+    });
+  }
+  for (let i = 0; i < 10; i++) {
+    const tRow = 1 + Math.floor(Math.random() * 98);
+    const tCol = Math.floor(Math.random() * (2 * tRow + 1));
+    const aRow = Math.floor(Math.random() * 100);
+    const aCol = Math.floor(Math.random() * (2 * aRow + 1));
+    attackedBlocks.set(blockId(tRow, tCol), {
+      attackerRow: aRow,
+      attackerCol: aCol,
+      interval: 2.5 + Math.random() * 4,
+      startTime: performance.now(),
+    });
+  }
+}
+
+// ============================================================
+// CANVAS
+// ============================================================
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+let W, H, CX, CY, MAX_R;
+
+const view = {
+  zoom: 1, ox: 0, oy: 0,
+  tZoom: 1, tOx: 0, tOy: 0,
+};
+
+function resize() {
+  W = canvas.width  = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+  CX = W / 2;
+  CY = H / 2;
+  MAX_R = Math.min(W, H) / 2 - 60;
+}
+
+// ============================================================
+// GEOMETRIE
+// ============================================================
+function rowRadius(row) {
+  return Math.pow(row / MAX_ROW, RADIUS_POWER) * MAX_R;
+}
+
+function blockPosition(row, col) {
+  const r = rowRadius(row);
+  const n = 2 * row + 1;
+  const step = (2 * PI) / n;
+  const angle = CENTER_ANGLE + (col - row) * step;
+  return { x: CX + Math.cos(angle) * r, y: CY + Math.sin(angle) * r, angle, r };
+}
+
+function blockSize(row) {
+  return Math.max(2.5, MAX_R / 105);
+}
+
+// ============================================================
+// ZEICHNEN
+// ============================================================
+function applyView() {
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.translate(CX + view.ox, CY + view.oy);
+  ctx.scale(view.zoom, view.zoom);
+  ctx.translate(-CX, -CY);
+}
+
+function drawBackground() {
+  const g = ctx.createRadialGradient(CX, CY, 0, CX, CY, MAX_R * 1.6);
+  g.addColorStop(0, '#0d0018');
+  g.addColorStop(0.55, '#050008');
+  g.addColorStop(1, '#000000');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, H);
+
+  // Goldene Spirale (φ)
+  ctx.save();
+  ctx.translate(CX, CY);
+  ctx.beginPath();
+  const turns = 6, pts = 220;
+  for (let i = 0; i <= pts; i++) {
+    const t = i / pts;
+    const a = t * turns * 2 * PI;
+    const r = ((Math.pow(PHI, t * turns) - 1) / (Math.pow(PHI, turns) - 1)) * MAX_R;
+    const x = Math.cos(a) * r, y = Math.sin(a) * r;
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.strokeStyle = COLORS.goldenSpiral;
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.restore();
+
+  // Spiegelachse (0-Achse)
+  ctx.beginPath();
+  ctx.moveTo(CX, CY - MAX_R);
+  ctx.lineTo(CX, CY + MAX_R);
+  ctx.strokeStyle = COLORS.mirrorAxis;
+  ctx.lineWidth = 1;
+  ctx.stroke();
+}
+
+function rarityColor(r) {
+  return COLORS[r] || COLORS.gold;
+}
+
+function drawBlocks(now) {
+  for (let row = 0; row <= MAX_ROW; row++) {
+    const n = 2 * row + 1;
+    const sz = blockSize(row);
+    for (let col = 0; col < n; col++) {
+      const p = blockPosition(row, col);
+      const id = blockId(row, col);
+      const m = mintedBlocks.get(id);
+      const atk = attackedBlocks.get(id);
+
+      let fill = COLORS.unminted;
+      let glow = null;
+
+      if (m) {
+        fill = rarityColor(m.rarity);
+        if (m.protected) glow = COLORS.protected;
+        else if (m.farming) glow = COLORS.farming;
+      }
+      if (atk) glow = COLORS.attack;
+
+      if (glow) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, sz + 2, 0, 2 * PI);
+        ctx.fillStyle = glow + '55';
+        ctx.fill();
+      }
+
+      if (atk) {
+        const el = (now - atk.startTime) / 1000;
+        const pulse = (Math.sin(el * atk.interval * 2) + 1) / 2;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, sz + 2.5 + pulse * 3.5, 0, 2 * PI);
+        ctx.strokeStyle = `rgba(255,51,51,${0.35 + pulse * 0.65})`;
+        ctx.lineWidth = 1.6;
+        ctx.stroke();
+      }
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, sz, 0, 2 * PI);
+      ctx.fillStyle = fill;
+      ctx.fill();
+
+      if (m) {
+        ctx.strokeStyle = 'rgba(255,255,255,0.32)';
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+    }
+  }
+}
+
+function drawAttackRays(now) {
+  for (const [targetId, atk] of attackedBlocks) {
+    // Ziel finden
+    let tp = null;
+    for (let r = 0; r <= MAX_ROW && !tp; r++) {
+      for (let c = 0; c < 2 * r + 1; c++) {
+        if (blockId(r, c) === targetId) { tp = blockPosition(r, c); break; }
+      }
+    }
+    if (!tp) continue;
+
+    // Angreifer
+    const aRow = Math.min(atk.attackerRow, MAX_ROW);
+    const aCol = Math.min(atk.attackerCol, 2 * aRow);
+    const ap = blockPosition(aRow, aCol);
+
+    const el = (now - atk.startTime) / 1000;
+    const prog = (el % atk.interval) / atk.interval;
+
+    // Perpendikularer Kontrollpunkt für Kurve
+    const mx = (ap.x + tp.x) / 2;
+    const my = (ap.y + tp.y) / 2;
+    const dx = tp.x - ap.x, dy = tp.y - ap.y;
+    const cxp = mx - dy * 0.28;
+    const cyp = my + dx * 0.28;
+
+    ctx.beginPath();
+    ctx.moveTo(ap.x, ap.y);
+    const steps = 24;
+    const upto = Math.max(1, Math.floor(steps * prog));
+    for (let i = 1; i <= upto; i++) {
+      const t = i / steps;
+      const x = (1-t)*(1-t)*ap.x + 2*(1-t)*t*cxp + t*t*tp.x;
+      const y = (1-t)*(1-t)*ap.y + 2*(1-t)*t*cyp + t*t*tp.y;
+      ctx.lineTo(x, y);
+    }
+    const alpha = 0.85 - prog * 0.55;
+    ctx.strokeStyle = `rgba(255,51,51,${alpha})`;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Glühender Kopf
+    const tt = prog;
+    const hx = (1-tt)*(1-tt)*ap.x + 2*(1-tt)*tt*cxp + tt*tt*tp.x;
+    const hy = (1-tt)*(1-tt)*ap.y + 2*(1-tt)*tt*cyp + tt*tt*tp.y;
+    ctx.beginPath();
+    ctx.arc(hx, hy, 3.2, 0, 2 * PI);
+    ctx.fillStyle = COLORS.attack;
+    ctx.fill();
+  }
+}
+
+function drawCenter() {
+  const pulse = (Math.sin(performance.now() / 1000) + 1) / 2;
+  ctx.beginPath();
+  ctx.arc(CX, CY, 7 + pulse * 2, 0, 2 * PI);
+  ctx.fillStyle = COLORS.gold;
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(CX, CY, 11 + pulse * 4, 0, 2 * PI);
+  ctx.strokeStyle = `rgba(255,204,0,${0.28 + pulse * 0.32})`;
+  ctx.lineWidth = 1;
+  ctx.stroke();
+}
+
+// ============================================================
+// LOOP
+// ============================================================
+let lastStats = 0;
+function loop(now) {
+  view.zoom += (view.tZoom - view.zoom) * 0.12;
+  view.ox   += (view.tOx   - view.ox)   * 0.12;
+  view.oy   += (view.tOy   - view.oy)   * 0.12;
+
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+
+  drawBackground();
+
+  ctx.save();
+  applyView();
+  drawBlocks(now);
+  drawAttackRays(now);
+  drawCenter();
+  ctx.restore();
+
+  if (now - lastStats > 500) {
+    lastStats = now;
+    const m = mintedBlocks.size;
+    document.getElementById('mintedCount').textContent   = m;
+    document.getElementById('unmintedCount').textContent = 10000 - m;
+  }
+
+  requestAnimationFrame(loop);
+}
+
+// ============================================================
+// INTERAKTION
+// ============================================================
+function screenToWorld(sx, sy) {
+  return {
+    x: (sx - CX - view.ox) / view.zoom + CX,
+    y: (sy - CY - view.oy) / view.zoom + CY,
+  };
+}
+
+function hitTest(sx, sy) {
+  const w = screenToWorld(sx, sy);
+  let best = null, bestD = Infinity;
+  for (let row = 0; row <= MAX_ROW; row++) {
+    const n = 2 * row + 1;
+    const hitR = Math.max(blockSize(row) * 1.6, 9);
+    for (let col = 0; col < n; col++) {
+      const p = blockPosition(row, col);
+      const dx = w.x - p.x, dy = w.y - p.y;
+      const d = Math.sqrt(dx*dx + dy*dy);
+      if (d < hitR && d < bestD) { bestD = d; best = { row, col, p, sz: blockSize(row) }; }
+    }
+  }
+  return best;
+}
+
+function showBlockInfo(hit) {
+  const id = blockId(hit.row, hit.col);
+  const m = mintedBlocks.get(id);
+  const atk = attackedBlocks.get(id);
+
+  document.getElementById('sbTitle').textContent = `Block #${id}`;
+
+  let h = `
+    <div class="info-row"><span>Reihe</span><strong>${hit.row}</strong></div>
+    <div class="info-row"><span>Spalte</span><strong>${hit.col}</strong></div>
+    <div class="info-row"><span>ID</span><strong>#${id}</strong></div>
+    <div class="info-row"><span>Status</span><strong style="color:${m ? '#ffcc00' : '#888'}">${m ? 'Gemintet' : 'Unminted'}</strong></div>
+  `;
+
+  if (m) {
+    h += `
+      <div class="info-row"><span>Rarität</span><strong style="color:${rarityColor(m.rarity)}">${m.rarity.toUpperCase()}</strong></div>
+      <div class="info-row"><span>Farming</span><strong style="color:${m.farming ? '#00ff88' : '#666'}">${m.farming ? '● Aktiv' : '○ Inaktiv'}</strong></div>
+      <div class="info-row"><span>Schutz</span><strong style="color:${m.protected ? '#4488ff' : '#666'}">${m.protected ? '● Aktiv' : '○ Inaktiv'}</strong></div>
+    `;
+  }
+  if (atk) {
+    h += `<div class="info-row" style="color:#ff3333"><span>⚠ Angriff</span><strong>Aktiv</strong></div>`;
+  }
+
+  h += '<hr style="border:none;border-top:1px solid #222;margin:16px 0;">';
+
+  if (!m) {
+    h += `<button onclick="alert('Mint-Funktion: hier später InpinityNFT.mintWithINPI() aufrufen')">⛏ Block minten</button>`;
+  } else {
+    h += `
+      <button onclick="alert('FarmingV6.startFarming() aufrufen')">🌾 ${m.farming ? 'Farming stoppen' : 'Farming starten'}</button>
+      <button onclick="alert('MercenaryV4.setProtection() aufrufen')">🛡 ${m.protected ? 'Schutz entfernen' : 'Schutz kaufen'}</button>
+      <button onclick="alert('PiratesV6.startAttack() aufrufen')">⚔ Angriff starten</button>
+      <button onclick="alert('FarmingV6.claim() aufrufen')">💰 Claim</button>
+    `;
+  }
+  h += `<button class="close" onclick="document.getElementById('sidebar').classList.remove('active')">Schließen</button>`;
+
+  document.getElementById('sbContent').innerHTML = h;
+  document.getElementById('sidebar').classList.add('active');
+}
+
+// Mouse events
+canvas.addEventListener('click', (e) => {
+  if (wasDragging) return;
+  const r = canvas.getBoundingClientRect();
+  const hit = hitTest(e.clientX - r.left, e.clientY - r.top);
+  if (hit) showBlockInfo(hit);
+});
+
+canvas.addEventListener('mousemove', (e) => {
+  const r = canvas.getBoundingClientRect();
+  const hit = hitTest(e.clientX - r.left, e.clientY - r.top);
+  canvas.style.cursor = hit ? 'pointer' : (isDragging ? 'grabbing' : 'crosshair');
+});
+
+canvas.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const f = e.deltaY > 0 ? 0.9 : 1.1;
+  view.tZoom = Math.max(0.5, Math.min(12, view.tZoom * f));
+}, { passive: false });
+
+// Drag
+let isDragging = false, wasDragging = false;
+let dragStart = { x: 0, y: 0 }, dragOrig = { x: 0, y: 0 };
+
+canvas.addEventListener('mousedown', (e) => {
+  isDragging = true;
+  wasDragging = false;
+  dragStart = { x: e.clientX, y: e.clientY };
+  dragOrig  = { x: view.tOx, y: view.tOy };
+});
+
+window.addEventListener('mousemove', (e) => {
+  if (!isDragging) return;
+  const dx = e.clientX - dragStart.x;
+  const dy = e.clientY - dragStart.y;
+  if (Math.abs(dx) > 5 || Math.abs(dy) > 5) wasDragging = true;
+  view.tOx = dragOrig.x + dx;
+  view.tOy = dragOrig.y + dy;
+});
+
+window.addEventListener('mouseup', () => { isDragging = false; });
+
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') document.getElementById('sidebar').classList.remove('active');
+});
+
+// ============================================================
+// START
+// ============================================================
+window.addEventListener('resize', resize);
+resize();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
