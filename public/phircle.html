@@ -3,13 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Phircle V18 — Mobile & Focus</title>
+<title>Phircle V19 — Ultimate UX</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin:0; padding:0; height:100%; overflow:hidden;
     background:#000; color:#e0e0e0; font-family:'Courier New',monospace; user-select: none; }
   canvas { display:block; cursor:crosshair; touch-action: none; }
   
+  /* ============ HUD ============ */
   #hud { position:fixed; top:12px; left:12px; padding:14px 18px;
     background:rgba(8,8,16,0.92); border:1px solid #ffcc00; font-size:11px;
     line-height:1.55; min-width:280px; backdrop-filter:blur(6px);
@@ -17,11 +18,11 @@
   #hud.collapsed { min-width: auto; padding: 8px 12px; }
   #hud.collapsed .hud-content { display: none; }
   #hud h1 { color:#ffcc00; margin:0; font-size:14px; letter-spacing:2px;
-    display: flex; justify-content: flex-start; align-items: center; gap:10px; }
+    display: flex; justify-content: flex-start; align-items: center; gap:6px; }
   #hud h1 .title { flex:1; }
   #hud h1 button { background: rgba(0,0,0,0.5); border: 1px solid #ffcc00; color: #ffcc00;
-    cursor: pointer; font-family: inherit; font-size: 10px; padding: 3px 8px;
-    border-radius: 3px; min-width: 50px; }
+    cursor: pointer; font-family: inherit; font-size: 10px; padding: 3px 6px;
+    border-radius: 3px; min-width: 44px; }
   #hud .hud-content { margin-top: 8px; }
   #hud .row { display:flex; justify-content:space-between; color:#888; }
   #hud .row strong { color:#ffcc00; }
@@ -30,6 +31,7 @@
   #hud .legend span { display:inline-flex; align-items:center; gap:3px; }
   #hud .dot { width:7px; height:7px; border-radius:50%; display:inline-block; }
 
+  /* ============ LAYERS ============ */
   #layers { position:fixed; top:12px; right:12px; display:flex; flex-direction:column;
     gap:4px; z-index:10; }
   #layers button { background:rgba(8,8,16,0.85); border:1px solid #333; color:#888;
@@ -40,6 +42,7 @@
   #layers button.my-farms { border-color: #00e5ff; color: #00e5ff; }
   #layers button.my-farms.active { background: #00e5ff; color: #000; }
 
+  /* ============ WALLET ============ */
   #wallet { position:fixed; top:12px; right:150px; padding:8px 14px;
     background:rgba(8,8,16,0.85); border:1px solid #333; color:#888;
     font-family:inherit; font-size:10px; cursor:pointer; border-radius:3px; z-index:10;
@@ -47,13 +50,16 @@
   #wallet:hover { border-color:#ffcc00; color:#fff; }
   #wallet.connected { border-color:#00ff88; color:#00ff88; }
 
+  /* ============ PAUSE ============ */
   #pauseBtn { position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
     padding:12px 24px; background:rgba(8,8,16,0.95); border:2px solid #ff8800; color:#ff8800;
     font-family:inherit; font-size:14px; font-weight:bold; cursor:pointer; border-radius:30px;
-    z-index:10; letter-spacing:2px; transition:all 0.2s; display:flex; align-items:center; gap:8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+    z-index:10; letter-spacing:2px; transition:all 0.2s; display:flex; align-items:center; gap:8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
   #pauseBtn:hover { background:#ff8800; color:#000; }
   #pauseBtn.active { border-color:#00e5ff; color:#00e5ff; background:rgba(0,229,255,0.1); }
 
+  /* ============ SIDEBAR ============ */
   #sidebar { position:fixed; top:0; right:-460px; width:100%; max-width:440px; height:100vh;
     background:rgba(8,8,16,0.98); border-left:1px solid #ffcc00; padding:22px;
     overflow-y:auto; transition:right .3s cubic-bezier(.4,0,.2,1); z-index:20;
@@ -82,6 +88,7 @@
   #sidebar .note { font-size:11px; color:#888; padding:10px; background:rgba(255,51,51,0.1);
     border-left:3px solid #ff3333; border-radius:3px; margin:10px 0; }
 
+  /* ============ STATUS & CONTROLS ============ */
   #status { position:fixed; bottom:12px; right:12px; padding:9px 14px;
     background:rgba(8,8,16,0.85); border:1px solid #333; font-size:10px;
     color:#888; border-radius:4px; z-index:10; }
@@ -98,6 +105,131 @@
     font-size:11px; border-radius:4px; display:none; line-height:1.4;
     box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
 
+  /* ============ IDEEN-STYLES ============ */
+  /* Search Button */
+  #searchBtn { background: rgba(0,0,0,0.5); border: 1px solid #ffcc00; color: #ffcc00;
+    cursor: pointer; font-family: inherit; font-size: 12px; padding: 3px 8px;
+    border-radius: 3px; }
+  #searchBtn:hover { background:#ffcc00; color:#000; }
+
+  /* Sound Toggle */
+  #soundBtn { position:fixed; bottom:20px; right:140px; width:44px; height:44px;
+    background:rgba(8,8,16,0.85); border:1px solid #333; color:#888; border-radius:50%;
+    cursor:pointer; font-size:18px; z-index:10; display:flex; align-items:center; justify-content:center;
+    transition:all 0.2s; }
+  #soundBtn:hover { border-color:#ffcc00; color:#ffcc00; }
+  #soundBtn.active { color:#00ff88; border-color:#00ff88; }
+
+  /* Tutorial Button */
+  #tutorialBtn { position:fixed; bottom:20px; right:200px; width:44px; height:44px;
+    background:rgba(8,8,16,0.85); border:1px solid #333; color:#888; border-radius:50%;
+    cursor:pointer; font-size:18px; z-index:10; display:flex; align-items:center; justify-content:center;
+    transition:all 0.2s; }
+  #tutorialBtn:hover { border-color:#ffcc00; color:#ffcc00; }
+
+  /* Toast Container */
+  #toasts { position:fixed; bottom:90px; left:50%; transform:translateX(-50%);
+    z-index:100; display:flex; flex-direction:column; gap:8px; align-items:center;
+    pointer-events:none; max-width:calc(100vw - 20px); }
+  .toast { background:rgba(8,8,16,0.98); border-left:4px solid #ffcc00;
+    padding:12px 20px; border-radius:6px; font-size:12px; color:#fff;
+    box-shadow:0 4px 20px rgba(0,0,0,0.6); animation:toastIn 0.3s ease;
+    pointer-events:auto; max-width:400px; }
+  .toast.success { border-color:#00ff88; }
+  .toast.error { border-color:#ff3333; }
+  .toast.info { border-color:#00e5ff; }
+  .toast.out { animation:toastOut 0.3s ease forwards; }
+  @keyframes toastIn { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes toastOut { to { opacity:0; transform:translateY(-20px); } }
+
+  /* Tutorial Modal */
+  #tutorial { position:fixed; inset:0; background:rgba(0,0,0,0.85);
+    z-index:200; display:none; align-items:center; justify-content:center; padding:20px; }
+  #tutorial.active { display:flex; }
+  .tutorial-card { background:linear-gradient(135deg,#0d0018,#0a0f16);
+    border:2px solid #ffcc00; border-radius:12px; padding:32px;
+    max-width:520px; width:100%; position:relative;
+    box-shadow:0 0 60px rgba(255,204,0,0.3); }
+  .tutorial-step { font-size:10px; color:#888; letter-spacing:2px; margin-bottom:6px; }
+  .tutorial-title { font-size:20px; color:#ffcc00; margin-bottom:14px; letter-spacing:1px; }
+  .tutorial-body { font-size:13px; line-height:1.7; color:#d0d0d0; margin-bottom:20px; min-height:100px; }
+  .tutorial-body strong { color:#00e5ff; }
+  .tutorial-body em { color:#ffcc00; font-style:normal; }
+  .tutorial-nav { display:flex; justify-content:space-between; align-items:center; }
+  .tutorial-nav button { background:linear-gradient(135deg,#ffcc00,#ffaa00); color:#000;
+    border:none; padding:10px 20px; cursor:pointer; font-family:inherit;
+    font-weight:bold; font-size:12px; border-radius:4px; }
+  .tutorial-nav button.secondary { background:#222; color:#aaa; }
+  .tutorial-nav button:disabled { opacity:0.3; cursor:not-allowed; }
+  .tutorial-dots { display:flex; gap:8px; }
+  .tutorial-dots span { width:8px; height:8px; border-radius:50%; background:#333; }
+  .tutorial-dots span.active { background:#ffcc00; }
+  .tutorial-close { position:absolute; top:12px; right:12px; background:none;
+    border:1px solid #444; color:#888; width:30px; height:30px; border-radius:50%;
+    cursor:pointer; font-size:16px; }
+
+  /* Search Modal */
+  #searchModal { position:fixed; inset:0; background:rgba(0,0,0,0.85);
+    z-index:150; display:none; align-items:flex-start; justify-content:center;
+    padding-top:15vh; }
+  #searchModal.active { display:flex; }
+  .search-box { background:rgba(8,8,16,0.98); border:2px solid #ffcc00;
+    border-radius:8px; width:90%; max-width:560px; padding:20px;
+    box-shadow:0 0 60px rgba(255,204,0,0.3); }
+  .search-box h3 { color:#ffcc00; margin:0 0 14px; font-size:14px;
+    letter-spacing:2px; text-transform:uppercase; }
+  .search-box input { width:100%; background:#000; border:1px solid #444;
+    color:#fff; padding:12px 16px; font-family:inherit; font-size:14px;
+    border-radius:4px; outline:none; }
+  .search-box input:focus { border-color:#ffcc00; }
+  .search-results { margin-top:14px; max-height:340px; overflow-y:auto; }
+  .search-result { padding:10px 12px; border-bottom:1px solid #1a1a1a;
+    cursor:pointer; font-size:12px; color:#d0d0d0; border-radius:3px; }
+  .search-result:hover { background:rgba(255,204,0,0.1); color:#ffcc00; }
+  .search-result strong { color:#ffcc00; }
+  .search-hint { font-size:10px; color:#666; margin-top:12px; letter-spacing:1px; }
+
+  /* Filter Chips */
+  #filterChips { position:fixed; bottom:90px; left:12px; display:flex;
+    gap:6px; flex-wrap:wrap; z-index:10; max-width:300px; }
+  .filter-chip { background:rgba(8,8,16,0.85); border:1px solid #333;
+    color:#888; padding:6px 12px; border-radius:14px; font-size:10px;
+    cursor:pointer; transition:all 0.2s; letter-spacing:1px; }
+  .filter-chip:hover { border-color:#ffcc00; color:#fff; }
+  .filter-chip.active { background:#ffcc00; color:#000; border-color:#ffcc00; }
+
+  /* Block History */
+  #blockHistory { position:fixed; bottom:90px; right:12px; display:flex;
+    gap:6px; flex-wrap:wrap-reverse; z-index:10; max-width:260px; justify-content:flex-end; }
+  .history-chip { background:rgba(8,8,16,0.85); border:1px solid #00e5ff;
+    color:#00e5ff; padding:5px 10px; border-radius:12px; font-size:10px;
+    cursor:pointer; transition:all 0.2s; }
+  .history-chip:hover { background:#00e5ff; color:#000; }
+
+  /* Loading Overlay */
+  #loadingOverlay { position:fixed; inset:0; background:rgba(0,0,0,0.95);
+    z-index:300; display:flex; flex-direction:column; align-items:center;
+    justify-content:center; transition:opacity 0.5s; }
+  #loadingOverlay.hidden { opacity:0; pointer-events:none; }
+  .loading-spinner { width:80px; height:80px; border:3px solid #ffcc00;
+    border-top-color:transparent; border-radius:50%;
+    animation:spin 1s linear infinite; margin-bottom:20px; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .loading-text { color:#ffcc00; font-size:14px; letter-spacing:3px; }
+
+  /* Attack Profit Predictor */
+  .profit-box { background:rgba(0,255,136,0.08); border:1px solid #00ff88;
+    padding:12px; border-radius:4px; margin:10px 0; font-size:12px; }
+  .profit-box .label { color:#888; font-size:10px; letter-spacing:1px; text-transform:uppercase; }
+  .profit-box .value { color:#00ff88; font-size:18px; font-weight:bold; margin:4px 0; }
+  .profit-box .sub { color:#888; font-size:11px; }
+
+  /* Radar Minimap */
+  #radar { position:fixed; bottom:90px; right:12px; width:120px; height:120px;
+    background:rgba(8,8,16,0.9); border:1px solid #ffcc00; border-radius:50%;
+    z-index:10; display:none; cursor:pointer; }
+  #radar.active { display:block; }
+
   @media (max-width: 768px) {
     #hud { min-width: auto; max-width: calc(100vw - 24px); font-size: 10px; padding: 10px; }
     #hud.collapsed { padding: 6px 10px; }
@@ -109,18 +241,37 @@
     #status { display: block; bottom: 70px; left: 12px; font-size: 9px; }
     #pauseBtn { bottom: 15px; font-size: 12px; padding: 10px 20px; }
     #sidebar { max-width: 100%; }
-    /* HUD collapsed startet weiter links, damit die Layer nicht stört */
+    #soundBtn, #tutorialBtn { bottom: auto; top: 200px; width:38px; height:38px; font-size:14px; }
+    #soundBtn { right: 12px; }
+    #tutorialBtn { right: 58px; }
+    #filterChips { bottom: 130px; left: 12px; max-width: 200px; }
+    #filterChips .filter-chip { padding: 5px 9px; font-size: 9px; }
+    #blockHistory { bottom: 130px; right: 12px; max-width: 200px; }
+    .history-chip { padding: 4px 8px; font-size: 9px; }
+    .tutorial-card { padding: 24px 20px; }
+    .tutorial-title { font-size: 16px; }
+    .tutorial-body { font-size: 12px; }
+    #radar { width: 90px; height: 90px; bottom: 130px; }
   }
 </style>
 </head>
 <body>
+
+<!-- LOADING OVERLAY -->
+<div id="loadingOverlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">LOADING PHIRCLE...</div>
+</div>
+
 <canvas id="canvas"></canvas>
 <div id="tooltip"></div>
 
+<!-- HUD -->
 <div id="hud" class="collapsed">
   <h1>
     <button id="hudToggle" onclick="toggleHud()">SHOW</button>
-    <span class="title">🌀 PHIRCLE V18</span>
+    <button id="searchBtn" onclick="openSearch()" title="Search (Ctrl+K)">🔍</button>
+    <span class="title">🌀 PHIRCLE V19</span>
   </h1>
   <div class="hud-content">
     <div class="row"><span>Rows</span><strong>100</strong></div>
@@ -136,13 +287,6 @@
     <div class="row"><span>φ</span><strong>1.61803</strong></div>
     <div class="row"><span>Golden Angle</span><strong>137.5°</strong></div>
     <hr>
-    <div id="attackerHud" style="display:none;">
-      <div class="row"><span>My Attacker</span><strong id="activeAttackerLabel" style="color:#ff3333;">None</strong></div>
-      <select id="attackerSelect" onchange="changeGlobalAttacker(this.value)">
-        <option value="">Select your block...</option>
-      </select>
-    </div>
-    <hr>
     <div class="legend">
       <span><i class="dot" style="background:#3a3a3a"></i>Unminted</span>
       <span><i class="dot" style="background:#cd7f32"></i>Bronze</span>
@@ -157,6 +301,7 @@
   </div>
 </div>
 
+<!-- LAYERS -->
 <div id="layers">
   <button data-layer="rarity" class="active">◆ RARITY</button>
   <button data-layer="owner">◉ OWNER</button>
@@ -166,14 +311,62 @@
   <button id="btnMyFarms" class="my-farms">💎 MY FARMS</button>
 </div>
 
+<!-- FILTER CHIPS -->
+<div id="filterChips">
+  <button class="filter-chip" data-filter="mine" onclick="toggleFilter('mine')">👤 Mine</button>
+  <button class="filter-chip" data-filter="farming" onclick="toggleFilter('farming')">🌾 Farming</button>
+  <button class="filter-chip" data-filter="attacked" onclick="toggleFilter('attacked')">⚔ Attacked</button>
+</div>
+
+<!-- BLOCK HISTORY -->
+<div id="blockHistory"></div>
+
+<!-- RADAR -->
+<canvas id="radar" onclick="toggleRadarZoom()"></canvas>
+
+<!-- BUTTONS -->
 <div id="wallet" onclick="connectWallet()">🔌 Wallet</div>
 <div id="pauseBtn" onclick="togglePause()">⏸️ PAUSE / EXPLODE</div>
+<button id="soundBtn" class="active" onclick="toggleSound()" title="Sound On/Off">🔊</button>
+<button id="tutorialBtn" onclick="startTutorial()" title="Tutorial">❓</button>
 
+<!-- SIDEBAR -->
 <div id="sidebar"><h2 id="sbTitle">Block Info</h2><div id="sbContent"></div></div>
+
+<!-- CONTROLS -->
 <div id="controls">
-  <kbd>Scroll</kbd> Zoom · <kbd>Drag</kbd> Pan · <kbd>Click</kbd> Block · <kbd>ESC</kbd> Close · <kbd>Space</kbd> Pause · <kbd>Double-Click</kbd> Center
+  <kbd>Scroll</kbd> Zoom · <kbd>Pinch</kbd> Zoom · <kbd>Drag</kbd> Pan · <kbd>Click</kbd> Block · <kbd>ESC</kbd> Close · <kbd>Space</kbd> Pause · <kbd>Ctrl+K</kbd> Search
 </div>
 <div id="status"><span id="statusText">Loading...</span></div>
+
+<!-- TOASTS -->
+<div id="toasts"></div>
+
+<!-- TUTORIAL MODAL -->
+<div id="tutorial">
+  <div class="tutorial-card">
+    <button class="tutorial-close" onclick="closeTutorial()">×</button>
+    <div class="tutorial-step" id="tutStep">STEP 1 / 5</div>
+    <div class="tutorial-title" id="tutTitle">Welcome to Phircle</div>
+    <div class="tutorial-body" id="tutBody"></div>
+    <div class="tutorial-nav">
+      <button class="secondary" id="tutPrev" onclick="prevTutStep()">← Back</button>
+      <div class="tutorial-dots" id="tutDots"></div>
+      <button id="tutNext" onclick="nextTutStep()">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- SEARCH MODAL -->
+<div id="searchModal" onclick="if(event.target===this)closeSearch()">
+  <div class="search-box">
+    <h3>🔍 Search / Command</h3>
+    <input type="text" id="searchInput" placeholder="Block #1234 or 'pause' or 'tutorial'..." 
+           oninput="runSearch(this.value)" autocomplete="off">
+    <div class="search-results" id="searchResults"></div>
+    <div class="search-hint">Try: "#1234" · "my farms" · "pause" · "tutorial" · "wallet"</div>
+  </div>
+</div>
 
 <script type="module">
 import { ethers } from 'https://cdn.jsdelivr.net/npm/ethers@6.13.4/+esm';
@@ -198,6 +391,15 @@ const RARITY_PRODUCTION = {
   2: [0, 1, 2, 3, 4],
   3: [0, 1, 2, 3, 4, 6],
   4: [0, 1, 2, 3, 4, 6, 8]
+};
+
+// Geschätzte Tages-Produktion pro Rarität (für Profit-Predictor)
+const RARITY_DAILY_OUTPUT = {
+  0: 18,   // Bronze ~18 Ressourcen/Tag
+  1: 37,   // Silver
+  2: 57,   // Gold
+  3: 78,   // Platinum
+  4: 108   // Diamond
 };
 
 const NFT_ABI = [
@@ -245,7 +447,9 @@ const minted        = new Map();
 const farms         = new Set();
 const attacks       = new Map();
 const partnerships  = new Set();
-const attackHistory = []; // NEU: Für Attack History Trail
+const attackHistory = [];
+const blockHistory  = []; // NEU: Letzte geklickte Blöcke
+const activeFilters = new Set(); // NEU: Filter
 
 let activeLayer = 'rarity';
 let userAddress = null;
@@ -254,9 +458,321 @@ let isPaused = false;
 let myBlocksCount = 0;
 let myFarmsCount = 0;
 let explosionFactor = 1.0;
-let selectedAttackerId = null;   // Angreifer (global)
-let lastClickedBlockId = null;   // Zuletzt geklickter Block (für Ghost Line)
+let selectedAttackerId = null;
+let lastClickedBlockId = null;
 let hoveredBlock = null;
+let soundEnabled = true;
+let radarMode = false;
+
+// ============================================================
+// SOUND SYSTEM (Idee 6)
+// ============================================================
+let audioCtx = null;
+function initAudio() {
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    catch(e) { /* ignore */ }
+  }
+}
+function playSound(freq = 440, duration = 0.08, type = 'sine', volume = 0.04) {
+  if (!soundEnabled || !audioCtx) return;
+  try {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration);
+  } catch(e) { /* ignore */ }
+}
+
+window.toggleSound = () => {
+  soundEnabled = !soundEnabled;
+  document.getElementById('soundBtn').classList.toggle('active', soundEnabled);
+  document.getElementById('soundBtn').textContent = soundEnabled ? '🔊' : '🔇';
+  if (soundEnabled) { initAudio(); playSound(660, 0.1); }
+  toast(soundEnabled ? 'Sound enabled' : 'Sound disabled', 'info');
+};
+
+// ============================================================
+// HAPTIC (Idee 7)
+// ============================================================
+function haptic(pattern = [10]) {
+  if (navigator.vibrate) {
+    try { navigator.vibrate(pattern); } catch(e) {}
+  }
+}
+
+// ============================================================
+// TOASTS (Idee 3)
+// ============================================================
+function toast(message, type = 'info', duration = 3000) {
+  const container = document.getElementById('toasts');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = message;
+  container.appendChild(el);
+  setTimeout(() => {
+    el.classList.add('out');
+    setTimeout(() => el.remove(), 300);
+  }, duration);
+}
+
+// ============================================================
+// LOADING OVERLAY (Idee 8)
+// ============================================================
+function hideLoading() {
+  const ov = document.getElementById('loadingOverlay');
+  if (ov) { ov.classList.add('hidden'); setTimeout(() => ov.style.display = 'none', 500); }
+}
+
+// ============================================================
+// TUTORIAL (Idee 2)
+// ============================================================
+const TUTORIAL_STEPS = [
+  {
+    title: "Willkommen bei Phircle",
+    body: "Das ist die <strong>Inpinity Pyramid</strong> als Kreis. 10.000 Blöcke, angeordnet in 100 Ringen um die Spitze in der Mitte. <em>Wische, um zu erkunden. Zoome mit zwei Fingern.</em>"
+  },
+  {
+    title: "Deine Layer",
+    body: "Rechts siehst du die <strong>Layer-Leiste</strong>: RARITY zeigt Seltenheit, OWNER zeigt Besitzer, FARMING zeigt aktive Farmen, ATTACK zeigt laufende Angriffe. <em>Klicke einen Layer, um die Karte umzufärben.</em>"
+  },
+  {
+    title: "Block auswählen",
+    body: "<strong>Tippe auf einen Block</strong>, um ihn zu inspizieren. Bei deinen eigenen Blöcken kannst du <em>Farming starten, Claimen und als Angreifer setzen</em>. Bei fremden Blöcken kannst du <em>Angriffe starten</em>."
+  },
+  {
+    title: "Quantum Freeze",
+    body: "Drücke <strong>PAUSE/EXPLODE</strong> (oder Leertaste) — die Ringe <em>explodieren nach außen</em> und der Zoom springt auf 2×. Perfekt, um präzise Blöcke anzutippen. Nochmal drücken für Live-Ansicht."
+  },
+  {
+    title: "Angriff starten",
+    body: "Klicke einen <strong>fremden Block</strong> an. Wähle deinen <em>Angreifer-Block</em> und die <em>Ressource</em> (abhängig von der Rarität des Ziels). Der <strong>Profit-Predictor</strong> zeigt dir, wie viel du stehlen würdest."
+  }
+];
+
+let tutStep = 0;
+
+window.startTutorial = () => {
+  tutStep = 0;
+  renderTutStep();
+  document.getElementById('tutorial').classList.add('active');
+};
+
+function renderTutStep() {
+  const step = TUTORIAL_STEPS[tutStep];
+  document.getElementById('tutStep').textContent = `STEP ${tutStep+1} / ${TUTORIAL_STEPS.length}`;
+  document.getElementById('tutTitle').textContent = step.title;
+  document.getElementById('tutBody').innerHTML = step.body;
+  document.getElementById('tutPrev').disabled = tutStep === 0;
+  const nextBtn = document.getElementById('tutNext');
+  nextBtn.textContent = tutStep === TUTORIAL_STEPS.length - 1 ? 'Fertig ✓' : 'Next →';
+  document.getElementById('tutDots').innerHTML = TUTORIAL_STEPS.map((_, i) =>
+    `<span class="${i === tutStep ? 'active' : ''}"></span>`).join('');
+}
+
+window.nextTutStep = () => {
+  if (tutStep < TUTORIAL_STEPS.length - 1) {
+    tutStep++;
+    renderTutStep();
+    playSound(520 + tutStep * 60, 0.06);
+  } else {
+    closeTutorial();
+  }
+};
+window.prevTutStep = () => {
+  if (tutStep > 0) { tutStep--; renderTutStep(); }
+};
+window.closeTutorial = () => {
+  document.getElementById('tutorial').classList.remove('active');
+  localStorage.setItem('phircle_tutorial_done_v19', '1');
+};
+
+// ============================================================
+// SEARCH (Idee 4)
+// ============================================================
+window.openSearch = () => {
+  document.getElementById('searchModal').classList.add('active');
+  setTimeout(() => document.getElementById('searchInput').focus(), 100);
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchResults').innerHTML = '';
+};
+
+window.closeSearch = () => {
+  document.getElementById('searchModal').classList.remove('active');
+};
+
+window.runSearch = (query) => {
+  const q = query.trim().toLowerCase();
+  const results = document.getElementById('searchResults');
+  if (!q) { results.innerHTML = ''; return; }
+
+  const items = [];
+
+  // Block ID search
+  const blockMatch = q.match(/^#?(\d+)$/);
+  if (blockMatch) {
+    const id = parseInt(blockMatch[1]);
+    if (id >= 0 && id < 10000) {
+      const rc = idToRC(id);
+      if (rc) items.push({ icon: '📦', text: `Block #${id} (Row ${rc.row}, Col ${rc.col})`,
+        action: () => { closeSearch(); focusOnBlock(rc.row, rc.col); showBlockInfo({ row: rc.row, col: rc.col, id }); } });
+    }
+  }
+
+  // Actions
+  const actions = [
+    { keywords: ['pause', 'freeze', 'quantum'], icon: '⏸️', text: 'Toggle Pause / Explode', action: () => { closeSearch(); togglePause(); } },
+    { keywords: ['tutorial', 'help', 'anleitung'], icon: '❓', text: 'Open Tutorial', action: () => { closeSearch(); startTutorial(); } },
+    { keywords: ['wallet', 'connect', 'metamask'], icon: '🔌', text: 'Connect Wallet', action: () => { closeSearch(); connectWallet(); } },
+    { keywords: ['farm', 'farming', 'layer'], icon: '🌾', text: 'Switch to FARMING Layer', action: () => { closeSearch(); switchLayer('farming'); } },
+    { keywords: ['attack', 'layer'], icon: '⚔️', text: 'Switch to ATTACK Layer', action: () => { closeSearch(); switchLayer('attack'); } },
+    { keywords: ['mine', 'my farms', 'eigene'], icon: '💎', text: 'Show MY FARMS', action: () => { closeSearch(); switchLayer('my-farms'); } },
+    { keywords: ['rarity', 'layer'], icon: '◆', text: 'Switch to RARITY Layer', action: () => { closeSearch(); switchLayer('rarity'); } },
+    { keywords: ['owner', 'layer'], icon: '◉', text: 'Switch to OWNER Layer', action: () => { closeSearch(); switchLayer('owner'); } },
+    { keywords: ['sound', 'audio', 'ton'], icon: '🔊', text: 'Toggle Sound', action: () => { closeSearch(); toggleSound(); } },
+    { keywords: ['center', 'reset', 'zoom'], icon: '🎯', text: 'Reset View', action: () => { closeSearch(); view.tZoom = 1; view.tOx = 0; view.tOy = 0; } },
+  ];
+
+  for (const a of actions) {
+    if (a.keywords.some(k => k.includes(q) || q.includes(k)) || a.text.toLowerCase().includes(q)) {
+      items.push(a);
+    }
+  }
+
+  if (!items.length) {
+    results.innerHTML = `<div style="padding:20px;text-align:center;color:#666;">Keine Treffer für "${query}"</div>`;
+    return;
+  }
+
+  results.innerHTML = items.slice(0, 8).map((it, i) =>
+    `<div class="search-result" data-idx="${i}">${it.icon} ${it.text}</div>`
+  ).join('');
+
+  results.querySelectorAll('.search-result').forEach(el => {
+    el.addEventListener('click', () => items[parseInt(el.dataset.idx)].action());
+  });
+};
+
+function switchLayer(layer) {
+  activeLayer = layer;
+  document.querySelectorAll('#layers button').forEach(b => b.classList.remove('active'));
+  if (layer === 'my-farms') {
+    document.getElementById('btnMyFarms').classList.add('active');
+  } else {
+    const btn = document.querySelector(`#layers button[data-layer="${layer}"]`);
+    if (btn) btn.classList.add('active');
+  }
+}
+
+// ============================================================
+// FILTERS (Idee 5)
+// ============================================================
+window.toggleFilter = (filter) => {
+  if (activeFilters.has(filter)) {
+    activeFilters.delete(filter);
+  } else {
+    activeFilters.add(filter);
+  }
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.classList.toggle('active', activeFilters.has(chip.dataset.filter));
+  });
+  playSound(480, 0.05);
+  haptic([5]);
+};
+
+function isBlockVisible(id, m) {
+  if (activeFilters.size === 0) return true;
+  if (activeFilters.has('mine') && (!m || m.owner !== userAddress)) return false;
+  if (activeFilters.has('farming') && !farms.has(id)) return false;
+  if (activeFilters.has('attacked') && !attacks.has(id)) return false;
+  return true;
+}
+
+// ============================================================
+// BLOCK HISTORY (Idee 9)
+// ============================================================
+function addToHistory(id) {
+  const existing = blockHistory.indexOf(id);
+  if (existing >= 0) blockHistory.splice(existing, 1);
+  blockHistory.unshift(id);
+  if (blockHistory.length > 5) blockHistory.pop();
+  renderBlockHistory();
+}
+
+function renderBlockHistory() {
+  const el = document.getElementById('blockHistory');
+  el.innerHTML = blockHistory.map(id => {
+    const m = minted.get(id);
+    const icon = m ? (farms.has(id) ? '🌾' : '📦') : '⭕';
+    return `<div class="history-chip" onclick="jumpToBlock(${id})">${icon} #${id}</div>`;
+  }).join('');
+}
+
+window.jumpToBlock = (id) => {
+  const rc = idToRC(id);
+  if (rc) {
+    focusOnBlock(rc.row, rc.col);
+    showBlockInfo({ row: rc.row, col: rc.col, id });
+  }
+};
+
+// ============================================================
+// RADAR MINIMAP (Idee 10)
+// ============================================================
+window.toggleRadarZoom = () => {
+  radarMode = !radarMode;
+  view.tZoom = radarMode ? 0.5 : 1.0;
+  view.tOx = 0; view.tOy = 0;
+};
+
+function drawRadar(now) {
+  const radarCanvas = document.getElementById('radar');
+  if (!radarCanvas.classList.contains('active')) return;
+  const rctx = radarCanvas.getContext('2d');
+  const R = radarCanvas.width = 120;
+  const r = R / 2;
+  
+  rctx.clearRect(0, 0, R, R);
+  rctx.beginPath();
+  rctx.arc(r, r, r - 2, 0, TAU);
+  rctx.fillStyle = 'rgba(0,0,0,0.5)';
+  rctx.fill();
+  rctx.strokeStyle = '#ffcc00';
+  rctx.stroke();
+  
+  // Zeige alle Blöcke als Punkte
+  for (const [id, m] of minted) {
+    const rc = idToRC(id);
+    if (!rc) continue;
+    const dist = rc.row / MAX_ROW;
+    const ang = CENTER_ANGLE + ((rc.col - rc.row) / (2*rc.row+1)) * TAU;
+    const px = r + Math.cos(ang) * dist * (r - 4);
+    const py = r + Math.sin(ang) * dist * (r - 4);
+    
+    let color = '#666';
+    if (m.owner === userAddress) color = '#00e5ff';
+    else if (farms.has(id)) color = '#00ff88';
+    else if (attacks.has(id)) color = '#ff3333';
+    else if (m.rarity != null) color = COLORS[rarityNames[m.rarity].toLowerCase()];
+    
+    rctx.beginPath();
+    rctx.arc(px, py, 1.2, 0, TAU);
+    rctx.fillStyle = color;
+    rctx.fill();
+  }
+  
+  // Sichtbereichsrahmen
+  rctx.strokeStyle = 'rgba(255,204,0,0.5)';
+  rctx.lineWidth = 1;
+  rctx.beginPath();
+  rctx.arc(r, r, (r - 4) * (1 / view.zoom), 0, TAU);
+  rctx.stroke();
+}
 
 // ============================================================
 // CONTRACTS
@@ -272,7 +788,7 @@ async function connectReadOnly() {
 }
 
 window.connectWallet = async () => {
-  if (!window.ethereum) return alert('No wallet found. Please install MetaMask.');
+  if (!window.ethereum) return toast('No wallet found. Please install MetaMask.', 'error');
   try {
     await window.ethereum.request({ method: 'eth_requestAccounts' });
     const p = new ethers.BrowserProvider(window.ethereum);
@@ -282,9 +798,10 @@ window.connectWallet = async () => {
     btn.textContent = userAddress.slice(0,6) + '…' + userAddress.slice(-4);
     btn.classList.add('connected');
     countMyBlocks();
-    updateAttackerDropdown();
-    document.getElementById('attackerHud').style.display = 'none'; // NEU: HUD-Dropdown versteckt
-  } catch(e) { alert('Wallet connection failed: ' + e.message); }
+    playSound(880, 0.15);
+    haptic([20, 50, 20]);
+    toast('Wallet connected ✓', 'success');
+  } catch(e) { toast('Wallet connection failed: ' + e.message, 'error'); }
 };
 
 function countMyBlocks() {
@@ -299,32 +816,6 @@ function countMyBlocks() {
   }
   document.getElementById('myBlocksCount').textContent = `${myBlocksCount} (${myFarmsCount} farms)`;
 }
-
-function updateAttackerDropdown() {
-  const sel = document.getElementById('attackerSelect');
-  if (!sel) return;
-  if (!userAddress) {
-    sel.innerHTML = '<option value="">Connect Wallet</option>';
-    return;
-  }
-  let html = '<option value="">Select your block...</option>';
-  for (const [id, m] of minted) {
-    if (m.owner === userAddress) {
-      html += `<option value="${id}" ${selectedAttackerId === id ? 'selected' : ''}>Block #${id}</option>`;
-    }
-  }
-  sel.innerHTML = html;
-  if (selectedAttackerId) {
-    document.getElementById('activeAttackerLabel').textContent = `#${selectedAttackerId}`;
-  } else {
-    document.getElementById('activeAttackerLabel').textContent = `None`;
-  }
-}
-
-window.changeGlobalAttacker = (val) => {
-  selectedAttackerId = val ? parseInt(val) : null;
-  updateAttackerDropdown();
-};
 
 window.toggleHud = () => {
   const hud = document.getElementById('hud');
@@ -376,7 +867,6 @@ const blockSize = row => {
   return Math.max(2.5, base * sizeFactor * lodFactor);
 };
 
-// Idee 1: Smart Auto-Focus
 function focusOnBlock(row, col) {
   const p = blockPosition(row, col);
   const targetZoom = Math.max(view.tZoom, 2.0);
@@ -466,12 +956,12 @@ async function loadLive() {
     document.getElementById('statusText').innerHTML =
       `<span class="live">● LIVE</span> · ${minted.size} Tokens · ${farms.size} Farms`;
 
-    if (userAddress) updateAttackerDropdown();
-      
+    countMyBlocks();
   } catch(e) {
     console.warn('Subgraph failed', e);
     document.getElementById('statusText').innerHTML = '<span class="demo">● Subgraph offline</span>';
   }
+  hideLoading();
 }
 
 // ============================================================
@@ -485,6 +975,9 @@ function ownerColor(addr) {
 }
 
 function getBlockColor(id, m) {
+  if (activeFilters.size > 0 && !isBlockVisible(id, m)) {
+    return '#151515';
+  }
   if (activeLayer === 'my-farms') {
     if (!m) return COLORS.unminted;
     if (farms.has(id)) return COLORS.farming;
@@ -563,19 +1056,22 @@ function drawBlocks(now) {
       const isMine = userAddress && m && m.owner === userAddress;
       if (isMine) myBlocksPos.push(p);
 
-      if (m && !m.revealed) {
+      // Filter-Dim
+      const isDimmed = activeFilters.size > 0 && !isBlockVisible(id, m);
+
+      if (m && !m.revealed && !isDimmed) {
         const sp = .35 + .3*Math.sin(t*2+id);
         ctx.beginPath(); ctx.arc(p.x,p.y,sz*1.6,0,TAU);
         ctx.fillStyle=`rgba(140,100,255,${sp*.3})`; ctx.fill();
       }
       
-      if (isMine) {
+      if (isMine && !isDimmed) {
         const pulse = .5 + .5*Math.sin(t*3 + id);
         ctx.beginPath(); ctx.arc(p.x,p.y,sz + 3 + pulse*2,0,TAU);
         ctx.strokeStyle=COLORS.mine; ctx.lineWidth=1.5; ctx.stroke();
       }
 
-      if (m && farms.has(id) && activeLayer !== 'farming' && activeLayer !== 'my-farms' && !isMine) {
+      if (m && farms.has(id) && activeLayer !== 'farming' && activeLayer !== 'my-farms' && !isMine && !isDimmed) {
         ctx.beginPath(); ctx.arc(p.x,p.y,sz+1.5,0,TAU);
         ctx.fillStyle=COLORS.farming+'33'; ctx.fill();
       }
@@ -583,7 +1079,7 @@ function drawBlocks(now) {
       ctx.beginPath(); ctx.arc(p.x,p.y,sz,0,TAU);
       ctx.fillStyle = fill; ctx.fill();
 
-      if (atk) {
+      if (atk && !isDimmed) {
         const pulse = .5 + .5*Math.sin(t*6);
         ctx.beginPath(); ctx.arc(p.x,p.y,sz + 2 + pulse*3,0,TAU);
         ctx.strokeStyle=`rgba(255, 51, 51, ${0.6 + pulse*0.4})`;
@@ -595,7 +1091,7 @@ function drawBlocks(now) {
         ctx.strokeStyle='rgba(255, 255, 255, 0.8)'; ctx.lineWidth=2; ctx.stroke();
       }
 
-      if (atk) {
+      if (atk && !isDimmed) {
         const rem = Math.max(0, atk.endTimestamp - Date.now());
         const total = atk.interval*1000;
         const prog = 1 - rem/total;
@@ -616,7 +1112,7 @@ function drawBlocks(now) {
     ctx.strokeStyle = 'rgba(0, 229, 255, 0.15)'; ctx.lineWidth = 1; ctx.stroke();
   }
 
-  // Ghost Line zwischen Attacker und zuletzt geklicktem Block (Idee 3 - jetzt permanent)
+  // Ghost Line zwischen Attacker und Ziel
   if (selectedAttackerId && lastClickedBlockId && lastClickedBlockId !== selectedAttackerId) {
     const rcA = idToRC(selectedAttackerId);
     const rcB = idToRC(lastClickedBlockId);
@@ -634,7 +1130,6 @@ function drawBlocks(now) {
     }
   }
 
-  // Hover Ghost Line (falls noch kein lastClickedBlock)
   if (selectedAttackerId && !lastClickedBlockId && hoveredBlock && hoveredBlock !== selectedAttackerId) {
     const rcA = idToRC(selectedAttackerId);
     const rcB = idToRC(hoveredBlock);
@@ -701,7 +1196,6 @@ function drawAttackRays(now) {
     ctx.beginPath(); ctx.arc(hx,hy,4,0,TAU); ctx.fillStyle='#fff'; ctx.fill();
   }
 
-  // Idee 2: Attack History Trail
   for (let i = attackHistory.length - 1; i >= 0; i--) {
     const h = attackHistory[i];
     const el = (now - h.startTime) / 1000;
@@ -714,7 +1208,6 @@ function drawAttackRays(now) {
     ctx.lineWidth = 4 * alpha + 1;
     ctx.stroke();
     
-    // Goldener Stern am Ziel
     ctx.beginPath();
     ctx.arc(h.toP.x, h.toP.y, 6 * alpha, 0, TAU);
     ctx.fillStyle = `rgba(255, 220, 80, ${alpha * 0.6})`;
@@ -771,6 +1264,8 @@ function loop(now) {
   drawCenter(now);
   ctx.restore();
 
+  drawRadar(now);
+
   if (now-lastStats > 600) {
     lastStats = now;
     document.getElementById('mintedCount').textContent = minted.size.toLocaleString('en-US');
@@ -796,7 +1291,7 @@ function screenToWorld(sx,sy) {
 function hitTest(sx,sy) {
   const w = screenToWorld(sx,sy); let best=null, bestD=Infinity;
   for (let row=0; row<=MAX_ROW; row++) {
-    const n=2*row+1, hitR=Math.max(blockSize(row)*1.7,10);
+    const n=2*row+1, hitR=Math.max(blockSize(row)*1.7,12);
     const ringRot=isPaused?0:(1/Math.pow(PI,4-Math.min(4,row/25)))*.3*(performance.now()/1000);
     for (let col=0; col<n; col++) {
       let p=blockPosition(row,col);
@@ -812,21 +1307,42 @@ function hitTest(sx,sy) {
 }
 
 // ============================================================
+// SUPER-IDEE: Attack Profit Predictor
+// ============================================================
+function getProfitPrediction(targetRarity, resourceId, protectionLevel = 0) {
+  const baseOutput = RARITY_DAILY_OUTPUT[targetRarity] ?? 0;
+  const resourceShare = RARITY_PRODUCTION[targetRarity]?.length || 1;
+  const perResource = baseOutput / resourceShare;
+  
+  // Basis-Steal 25% (bei Boost 50%)
+  const baseStealPercent = 0.25;
+  const protectionFactor = 1 - (protectionLevel / 100);
+  const effectiveStealPercent = baseStealPercent * protectionFactor;
+  
+  const estimatedSteal = Math.max(1, Math.round(perResource * effectiveStealPercent));
+  const profitScore = estimatedSteal > perResource * 0.15 ? 'good' : 'low';
+  
+  return {
+    estimatedSteal,
+    effectiveStealPercent: Math.round(effectiveStealPercent * 100),
+    profitScore,
+    perResource
+  };
+}
+
+// ============================================================
 // SIDEBAR
 // ============================================================
 async function showBlockInfo(hit) {
   tooltip.style.display = 'none';
+  playSound(660, 0.05);
+  haptic([5]);
 
-  // Idee 1: Smart Auto-Focus auf den angeklickten Block
-  if (view.tZoom < 1.5) {
-    focusOnBlock(hit.row, hit.col);
-  }
+  if (view.tZoom < 1.5) focusOnBlock(hit.row, hit.col);
 
-  // Ghost-Line-State: Wenn derselbe Block nochmal geklickt wird, deselektieren
-  if (lastClickedBlockId === hit.id) {
-    lastClickedBlockId = null;
-  } else {
+  if (lastClickedBlockId !== hit.id) {
     lastClickedBlockId = hit.id;
+    addToHistory(hit.id);
   }
 
   const id = hit.id, m = minted.get(id), atk = attacks.get(id);
@@ -863,7 +1379,6 @@ async function showBlockInfo(hit) {
   if (!m) {
     h += `<button onclick="mintBlock(${hit.row},${hit.col})">⛏ Mint with INPI</button>`;
   } else if (isMine) {
-    // Eigener Block: Auch als Angreifer nutzbar
     if (selectedAttackerId !== id) {
       h += `<button class="clear-btn" onclick="setAttackerFromSidebar(${id})" style="background:#ff3333; color:#fff;">⚔ Als Angreifer setzen</button>`;
     } else {
@@ -874,7 +1389,6 @@ async function showBlockInfo(hit) {
       <button onclick="toggleFarm(${id})">🌾 ${farms.has(id)?'Stop Farming':'Start Farming'}</button>
       <button onclick="claimResources(${id})">💰 Claim</button>`;
   } else {
-    // Fremder Block
     if (atk) {
       const rem = Math.max(0, atk.endTimestamp - Date.now());
       if (rem <= 0) {
@@ -886,7 +1400,7 @@ async function showBlockInfo(hit) {
       }
     } else {
       h += `<div class="label">1. Wähle deinen Angreifer</div>`;
-      h += `<select id="sbAttackerSelect" onchange="onSidebarAttackerChange(this.value)">`;
+      h += `<select id="sbAttackerSelect" onchange="updateProfitPreview(${id})">`;
       if (userAddress) {
         let found = false;
         for (const [tid, myM] of minted) {
@@ -903,11 +1417,21 @@ async function showBlockInfo(hit) {
       
       const prodIds = rIdx != null ? RARITY_PRODUCTION[rIdx] : [0, 1, 2];
       h += `<div class="label">2. Wähle zu stehlende Ressource</div>`;
-      h += `<select id="sbResourceSelect">`;
+      h += `<select id="sbResourceSelect" onchange="updateProfitPreview(${id})">`;
       for (const resId of prodIds) {
         h += `<option value="${resId}">${resourceNames[resId]}</option>`;
       }
       h += `</select>`;
+      
+      // SUPER-IDEE: Profit Predictor
+      if (rIdx != null) {
+        const prediction = getProfitPrediction(rIdx, 0);
+        h += `<div class="profit-box" id="profitBox">
+          <div class="label">💰 Profit Predictor</div>
+          <div class="value">~${prediction.estimatedSteal} ${resourceNames[0]}</div>
+          <div class="sub">Steal: ${prediction.effectiveStealPercent}% · Erwartet: ${prediction.perResource} ${resourceNames[0]}/Tag</div>
+        </div>`;
+      }
       
       h += `<div class="label">3. Optional: Pirate Boost (+25% Steal)</div>`;
       h += `<button style="background:#333; color:#ffb347; font-size:11px; padding:8px;" onclick="buyPirateBoost()">⚡ Pirate Boost kaufen (100 PIT/Tag)</button>`;
@@ -925,24 +1449,36 @@ async function showBlockInfo(hit) {
   document.getElementById('sidebar').classList.add('active');
 }
 
-window.onSidebarAttackerChange = (val) => {
-  if (val) {
-    selectedAttackerId = parseInt(val);
-    updateAttackerDropdown();
-  }
+// Super-Idee: Live Profit-Update bei Ressource-Änderung
+window.updateProfitPreview = (targetId) => {
+  const m = minted.get(targetId);
+  const resourceSel = document.getElementById('sbResourceSelect');
+  const profitBox = document.getElementById('profitBox');
+  if (!m || m.rarity == null || !profitBox || !resourceSel) return;
+  
+  const resourceId = parseInt(resourceSel.value);
+  const prediction = getProfitPrediction(m.rarity, resourceId);
+  
+  profitBox.innerHTML = `
+    <div class="label">💰 Profit Predictor</div>
+    <div class="value">~${prediction.estimatedSteal} ${resourceNames[resourceId]}</div>
+    <div class="sub">Steal: ${prediction.effectiveStealPercent}% · Erwartet: ${prediction.perResource.toFixed(1)} ${resourceNames[resourceId]}/Tag</div>
+    <div class="sub" style="color:${prediction.profitScore === 'good' ? '#00ff88' : '#ff8800'}; margin-top:4px; font-weight:bold;">
+      ${prediction.profitScore === 'good' ? '✅ Guter Deal!' : '⚠️ Niedriges Profit'}
+    </div>
+  `;
 };
 
 window.setAttackerFromSidebar = (id) => {
   selectedAttackerId = id;
   lastClickedBlockId = id;
-  updateAttackerDropdown();
+  playSound(880, 0.08);
   showBlockInfo({ row: Math.floor(id / ID_STRIDE), col: id % ID_STRIDE, id });
 };
 
 window.clearSelection = () => {
   selectedAttackerId = null;
   lastClickedBlockId = null;
-  updateAttackerDropdown();
   document.getElementById('sidebar').classList.remove('active');
 };
 
@@ -950,7 +1486,7 @@ window.clearSelection = () => {
 // CONTRACT HOOKS
 // ============================================================
 async function getSignerOrWarn() {
-  if (!window.ethereum) { alert('No wallet found'); return null; }
+  if (!window.ethereum) { toast('No wallet found', 'error'); return null; }
   if (!userSigner) {
     try {
       await window.ethereum.request({ method: 'eth_requestAccounts' });
@@ -958,8 +1494,7 @@ async function getSignerOrWarn() {
       userSigner = await p.getSigner();
       userAddress = (await userSigner.getAddress()).toLowerCase();
       countMyBlocks();
-      updateAttackerDropdown();
-    } catch(e) { alert('Wallet connection failed'); return null; }
+    } catch(e) { toast('Wallet connection failed', 'error'); return null; }
   }
   return userSigner;
 }
@@ -967,8 +1502,13 @@ async function getSignerOrWarn() {
 window.mintBlock = async (row,col) => {
   const signer = await getSignerOrWarn(); if (!signer) return;
   const nft = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
-  try { const tx = await nft.mintWithINPI(row,col); await tx.wait(); alert('Mint OK'); }
-  catch(e) { alert('Mint failed: ' + (e.reason||e.message)); }
+  try { 
+    const tx = await nft.mintWithINPI(row,col); 
+    await tx.wait(); 
+    toast('Block gemintet ✓', 'success');
+    playSound(660, 0.15);
+  }
+  catch(e) { toast('Mint failed: ' + (e.reason||e.message), 'error'); }
 };
 
 window.toggleFarm = async (id) => {
@@ -979,35 +1519,43 @@ window.toggleFarm = async (id) => {
     const tx = isFarming ? await c.stopFarming(id) : await c.startFarming(id);
     await tx.wait(); 
     if (isFarming) farms.delete(id); else farms.add(id);
-    alert('Farming OK');
-  } catch(e) { alert('Farming failed: ' + (e.reason||e.message)); }
+    toast(isFarming ? 'Farming gestoppt' : 'Farming gestartet ✓', 'success');
+    playSound(isFarming ? 400 : 720, 0.12);
+    haptic([10, 30, 10]);
+  } catch(e) { toast('Farming failed: ' + (e.reason||e.message), 'error'); }
 };
 
 window.claimResources = async (id) => {
   const signer = await getSignerOrWarn(); if (!signer) return;
   const c = new ethers.Contract(FARMING_V6_ADDRESS, FARMING_V6_ABI, signer);
-  try { const tx = await c.claimResources(id); await tx.wait(); alert('Claim OK'); }
-  catch(e) { alert('Claim failed: ' + (e.reason||e.message)); }
+  try { 
+    const tx = await c.claimResources(id); 
+    await tx.wait(); 
+    toast('Ressourcen geclaimt ✓', 'success');
+    playSound(880, 0.15);
+  }
+  catch(e) { toast('Claim failed: ' + (e.reason||e.message), 'error'); }
 };
 
 window.startAttackFromSidebar = async (targetId) => {
   const attackerSel = document.getElementById('sbAttackerSelect');
   const resourceSel = document.getElementById('sbResourceSelect');
-  if (!attackerSel || !attackerSel.value) return alert('Wähle zuerst einen Angreifer!');
-  if (!resourceSel) return alert('Wähle eine Ressource!');
+  if (!attackerSel || !attackerSel.value) return toast('Wähle zuerst einen Angreifer!', 'error');
+  if (!resourceSel) return toast('Wähle eine Ressource!', 'error');
   
   const attackerId = parseInt(attackerSel.value);
   const resourceId = parseInt(resourceSel.value);
   
   selectedAttackerId = attackerId;
-  updateAttackerDropdown();
   
   const signer = await getSignerOrWarn(); if (!signer) return;
   const c = new ethers.Contract(PIRATES_V6_ADDRESS, PIRATES_V6_ABI, signer);
   try {
     const tx = await c.startAttack(attackerId, targetId, resourceId);
     await tx.wait();
-    alert(`Angriff von Block #${attackerId} auf #${targetId} gestartet!\nRessource: ${resourceNames[resourceId]}`);
+    toast(`Angriff gestartet: #${attackerId} → #${targetId}`, 'success');
+    playSound(220, 0.2, 'sawtooth');
+    haptic([30, 50, 30]);
     
     const rc = idToRC(attackerId);
     attacks.set(targetId, {
@@ -1020,7 +1568,7 @@ window.startAttackFromSidebar = async (targetId) => {
       endTimestamp: Date.now() + 60000
     });
     setTimeout(() => loadLive(), 2000);
-  } catch(e) { alert('Attack failed: ' + (e.reason||e.message)); }
+  } catch(e) { toast('Attack failed: ' + (e.reason||e.message), 'error'); }
 };
 
 window.executeAttack = async (targetId, attackIndex) => {
@@ -1030,9 +1578,10 @@ window.executeAttack = async (targetId, attackIndex) => {
   try {
     const tx = await c.executeAttack(targetId, attackIndex);
     await tx.wait(); 
-    alert('Angriff ausgeführt!');
+    toast('Angriff ausgeführt! 💰', 'success');
+    playSound(440, 0.3, 'triangle');
+    haptic([50, 30, 50]);
     
-    // Idee 2: Attack History Trail
     if (atk) {
       const targetRc = idToRC(targetId);
       if (targetRc) {
@@ -1046,22 +1595,23 @@ window.executeAttack = async (targetId, attackIndex) => {
     
     attacks.delete(targetId);
     loadLive();
-  } catch(e) { alert('Execute failed: ' + (e.reason||e.message)); }
+  } catch(e) { toast('Execute failed: ' + (e.reason||e.message), 'error'); }
 };
 
 window.buyPirateBoost = async () => {
-  if (!selectedAttackerId) return alert('Wähle zuerst einen Angreifer!');
+  if (!selectedAttackerId) return toast('Wähle zuerst einen Angreifer!', 'error');
   const signer = await getSignerOrWarn(); if (!signer) return;
   const c = new ethers.Contract(PIRATES_V6_ADDRESS, PIRATES_V6_ABI, signer);
   try {
     const tx = await c.buyPirateBoost(selectedAttackerId, 1);
     await tx.wait();
-    alert('Pirate Boost aktiviert!');
-  } catch(e) { alert('Boost failed: ' + (e.reason||e.message)); }
+    toast('Pirate Boost aktiviert ⚡', 'success');
+    playSound(740, 0.15);
+  } catch(e) { toast('Boost failed: ' + (e.reason||e.message), 'error'); }
 };
 
 // ============================================================
-// INTERACTION
+// INTERACTION — MOUSE
 // ============================================================
 let isDragging=false, wasDragging=false, dragStart={x:0,y:0}, dragOrig={x:0,y:0};
 
@@ -1122,31 +1672,103 @@ window.addEventListener('mousemove', e => {
 
 window.addEventListener('mouseup', ()=> isDragging=false);
 
+// ============================================================
+// IDEEN-FIX: PINCH ZOOM (2 Finger)
+// ============================================================
+let touchMode = null;
+let touchStartDist = 0;
+let touchStartZoom = 1;
+let touchStartMidX = 0, touchStartMidY = 0;
+let touchStartOx = 0, touchStartOy = 0;
+
 canvas.addEventListener('touchstart', e => {
-  isDragging = true; wasDragging = false;
-  dragStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-  dragOrig = { x: view.tOx, y: view.tOy };
+  initAudio();
   tooltip.style.display = 'none';
+  
+  if (e.touches.length === 1) {
+    touchMode = 'drag';
+    isDragging = true;
+    wasDragging = false;
+    dragStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    dragOrig = { x: view.tOx, y: view.tOy };
+  } else if (e.touches.length === 2) {
+    touchMode = 'pinch';
+    isDragging = false;
+    touchStartDist = Math.hypot(
+      e.touches[0].clientX - e.touches[1].clientX,
+      e.touches[0].clientY - e.touches[1].clientY
+    );
+    touchStartZoom = view.tZoom;
+    touchStartMidX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+    touchStartMidY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+    touchStartOx = view.tOx;
+    touchStartOy = view.tOy;
+    e.preventDefault();
+  }
 }, {passive: false});
 
 canvas.addEventListener('touchmove', e => {
-  if (!isDragging) return;
-  const dx = e.touches[0].clientX - dragStart.x;
-  const dy = e.touches[0].clientY - dragStart.y;
-  if (Math.abs(dx) > 5 || Math.abs(dy) > 5) wasDragging = true;
-  view.tOx = dragOrig.x + dx; view.tOy = dragOrig.y + dy;
+  if (touchMode === 'drag' && e.touches.length === 1) {
+    const dx = e.touches[0].clientX - dragStart.x;
+    const dy = e.touches[0].clientY - dragStart.y;
+    if (Math.abs(dx) > 5 || Math.abs(dy) > 5) wasDragging = true;
+    view.tOx = dragOrig.x + dx;
+    view.tOy = dragOrig.y + dy;
+  } else if (touchMode === 'pinch' && e.touches.length === 2) {
+    const dist = Math.hypot(
+      e.touches[0].clientX - e.touches[1].clientX,
+      e.touches[0].clientY - e.touches[1].clientY
+    );
+    const scale = dist / touchStartDist;
+    const newZoom = Math.max(0.5, Math.min(14, touchStartZoom * scale));
+    
+    // Zoom-Zentrum beim aktuellen Mid-Point halten
+    const rect = canvas.getBoundingClientRect();
+    const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
+    const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
+    
+    // Welt-Koordinate des Start-Midpoints
+    const startMidXRel = touchStartMidX - rect.left;
+    const startMidYRel = touchStartMidY - rect.top;
+    const worldX = (startMidXRel - CX - touchStartOx) / touchStartZoom + CX;
+    const worldY = (startMidYRel - CY - touchStartOy) / touchStartZoom + CY;
+    
+    view.tZoom = newZoom;
+    view.tOx = midX - CX - (worldX - CX) * newZoom;
+    view.tOy = midY - CY - (worldY - CY) * newZoom;
+    
+    e.preventDefault();
+  }
 }, {passive: false});
 
 canvas.addEventListener('touchend', e => {
-  isDragging = false;
-  if (!wasDragging) {
-    const r = canvas.getBoundingClientRect();
-    const touch = e.changedTouches[0];
-    const hit = hitTest(touch.clientX - r.left, touch.clientY - r.top);
-    if (hit) showBlockInfo(hit);
+  if (e.touches.length === 0) {
+    if (touchMode === 'drag' && !wasDragging) {
+      const r = canvas.getBoundingClientRect();
+      const touch = e.changedTouches[0];
+      const hit = hitTest(touch.clientX - r.left, touch.clientY - r.top);
+      if (hit) showBlockInfo(hit);
+    }
+    isDragging = false;
+    touchMode = null;
+  } else if (e.touches.length === 1 && touchMode === 'pinch') {
+    // Pinch → Drag Übergang
+    touchMode = 'drag';
+    dragStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    dragOrig = { x: view.tOx, y: view.tOy };
+    wasDragging = true;
+    isDragging = true;
   }
+}, {passive: false});
+
+canvas.addEventListener('touchcancel', e => {
+  touchMode = null;
+  isDragging = false;
 });
 
+// ============================================================
+// DOUBLE-CLICK
+// ============================================================
 window.addEventListener('dblclick', e => {
   if (e.target === canvas) {
     view.tZoom = 1; view.tOx = 0; view.tOy = 0;
@@ -1154,6 +1776,9 @@ window.addEventListener('dblclick', e => {
   }
 });
 
+// ============================================================
+// ZOOM (Desktop)
+// ============================================================
 canvas.addEventListener('wheel', e => {
   e.preventDefault();
   view.tZoom = Math.max(.5, Math.min(14, view.tZoom * (e.deltaY>0?.88:1.12)));
@@ -1168,35 +1793,53 @@ document.querySelectorAll('#layers button').forEach(btn => {
     btn.classList.add('active');
     if (btn.id === 'btnMyFarms') activeLayer = 'my-farms';
     else activeLayer = btn.dataset.layer;
+    playSound(440, 0.05);
   });
 });
 
-// FIX: Auto-Zoom bei Pause (Mobile 2.8×, Desktop 2.0×)
 window.togglePause = () => {
   isPaused = !isPaused;
   const btn = document.getElementById('pauseBtn');
   const status = document.getElementById('statusText');
   if (isPaused) {
-    // Sanfter Auto-Zoom
     view.tZoom = IS_MOBILE ? 2.8 : 2.0;
     view.tOx = 0; view.tOy = 0;
     btn.innerHTML = "▶️ RESUME";
     btn.classList.add('active');
     status.innerHTML = '<span style="color:#ff8800">● QUANTUM FREEZE</span>';
+    playSound(220, 0.2, 'sine');
+    haptic([20, 50, 20]);
   } else {
     view.tZoom = 1.0;
     view.tOx = 0; view.tOy = 0;
     btn.innerHTML = "⏸️ PAUSE / EXPLODE";
     btn.classList.remove('active');
     status.innerHTML = '<span class="live">● LIVE</span>';
+    playSound(440, 0.2, 'sine');
   }
 };
 
+// ============================================================
+// KEYBOARD SHORTCUTS
+// ============================================================
 window.addEventListener('keydown', e => {
   if (e.code === 'Space') { e.preventDefault(); togglePause(); }
   if (e.key === 'Escape') {
     document.getElementById('sidebar').classList.remove('active');
+    closeSearch();
+    closeTutorial();
     lastClickedBlockId = null;
+  }
+  // Ctrl+K / Cmd+K → Search
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    e.preventDefault();
+    openSearch();
+  }
+  // Layer Shortcuts 1-5
+  if (e.key >= '1' && e.key <= '5') {
+    const layers = ['rarity', 'owner', 'farming', 'attack', 'partner'];
+    const idx = parseInt(e.key) - 1;
+    if (idx >= 0 && idx < layers.length) switchLayer(layers[idx]);
   }
 });
 
@@ -1204,9 +1847,24 @@ window.addEventListener('keydown', e => {
 // INIT
 // ============================================================
 (async () => {
+  initAudio();
   await connectReadOnly();
   await loadLive();
   requestAnimationFrame(loop);
+  
+  // Tutorial beim ersten Besuch zeigen
+  if (!localStorage.getItem('phircle_tutorial_done_v19')) {
+    setTimeout(() => startTutorial(), 1500);
+  }
+  
+  // Radar-Toggle Button im HUD (nach dem Laden)
+  setTimeout(() => {
+    // Auto-Polling alle 30s
+    setInterval(() => loadLive(), 30000);
+  }, 5000);
+  
+  // Radar standardmäßig aktivieren (dezent)
+  document.getElementById('radar').classList.add('active');
 })();
 </script>
 </body>
