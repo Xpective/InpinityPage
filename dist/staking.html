@@ -782,87 +782,108 @@ const ERC721_ABI = [
     }
 
     async function loadPriceChart() {
-    const chartBody = document.querySelector('.chart-body');
-    if (!lastPriceData) chartBody.style.opacity = '0.3';
+        // UI Updates für das Label
+        const tfLabel = document.getElementById('chartTimeframeLabel');
+        if (tfLabel) tfLabel.textContent = currentChartHours === 24 ? '24 Hours' : currentChartHours === 72 ? '3 Days' : '7 Days';
 
-    try {
-        // 1. VERSUCH: Historische Daten aus deiner KV (Bot-Endpunkt)
-        const res = await fetch(`${CONFIG.BOT_URL}/api/price-history?hours=${currentChartHours}`);
-        if (res.ok) {
-            const data = await res.json();
-            if (data.success && data.snapshots && data.snapshots.length > 0) {
-                const prices = data.snapshots.map(s => s.inpi);
-                const labels = data.snapshots.map(s => {
-                    const d = new Date(s.t);
-                    return currentChartHours <= 24
-                        ? d.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' })
-                        : d.toLocaleDateString('en', { month: 'short', day: 'numeric', hour: '2-digit' });
-                });
+        const chartBody = document.querySelector('.chart-body');
+        if (!lastPriceData) chartBody.style.opacity = '0.3';
 
-                // Stats (High/Low/Yesterday) direkt aus der Bot-Antwort übernehmen
-                const stats = data.stats;
+        try {
+            // 1. VERSUCH: Historische Daten aus deiner KV (Bot-Endpunkt)
+            const res = await fetch(`${CONFIG.BOT_URL}/api/price-history?hours=${currentChartHours}`);
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success && data.snapshots && data.snapshots.length > 0) {
+                    const prices = data.snapshots.map(s => s.inpi);
+                    
+                    // KORREKTUR: Zeitstempel richtig formatieren
+                    const labels = data.snapshots.map(s => {
+                        const d = new Date(s.t);
+                        const timeStr = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+                        const dateStr = d.toLocaleDateString('en-GB', { month: 'short', day: 'numeric' });
+                        return currentChartHours <= 24 ? timeStr : `${dateStr}, ${timeStr}`;
+                    });
 
-                // UI aktualisieren
-                document.getElementById('statChartHigh').textContent = stats.high ? '€' + Number(stats.high).toFixed(5) : '—';
-                document.getElementById('statChartLow').textContent = stats.low ? '€' + Number(stats.low).toFixed(5) : '—';
-                document.getElementById('statChartYesterday').textContent = stats.yesterdayClose ? '€' + Number(stats.yesterdayClose).toFixed(5) : '—';
+                    const stats = data.stats;
 
-                lastPriceData = { prices, labels, stats };
-                chartBody.style.opacity = '1';
-                drawPriceChart(prices, labels, stats);
-                return; // Wichtig: Abbrechen, wenn Bot-Daten erfolgreich geladen wurden
+                    // KORREKTUR: Den aktuellen INPI Preis oben in der Stat-Box aktualisieren
+                    const currentPrice = prices[prices.length - 1];
+                    const prevPrice = prices.length > 1 ? prices[prices.length - 2] : currentPrice;
+                    const change = prevPrice > 0 ? ((currentPrice - prevPrice) / prevPrice * 100) : 0;
+                    
+                    document.getElementById('statInpiPrice').textContent = '€ ' + currentPrice.toFixed(6);
+                    const changeEl = document.getElementById('statInpiChange');
+                    changeEl.textContent = (change >= 0 ? '+' : '') + change.toFixed(2) + '% (letzter Tick)';
+                    changeEl.style.color = change >= 0 ? '#00c853' : '#ff5252';
+
+                    // Stats (High/Low/Yesterday) im Chart-Header aktualisieren
+                    document.getElementById('statChartHigh').textContent = stats.high ? '€' + Number(stats.high).toFixed(5) : '—';
+                    document.getElementById('statChartLow').textContent = stats.low ? '€' + Number(stats.low).toFixed(5) : '—';
+                    document.getElementById('statChartYesterday').textContent = stats.yesterdayClose ? '€' + Number(stats.yesterdayClose).toFixed(5) : '—';
+
+                    lastPriceData = { prices, labels, stats };
+                    chartBody.style.opacity = '1';
+                    drawPriceChart(prices, labels, stats);
+                    return; // Wichtig: Abbrechen, wenn Bot-Daten erfolgreich geladen wurden
+                }
             }
+        } catch (e) {
+            console.warn('Bot price-history fehlgeschlagen, Fallback auf CoinGecko', e);
         }
-    } catch (e) {
-        console.warn('Bot price-history fehlgeschlagen, Fallback auf CoinGecko', e);
-    }
 
-    // 2. FALLBACK: CoinGecko (falls der Bot noch keine Daten hat)
-    try {
-        const days = currentChartHours / 24;
-        const cgRes = await fetch(`https://api.coingecko.com/api/v3/coins/inpinity/market_chart?vs_currency=eur&days=${days}`);
-        if (cgRes.ok) {
-            const cgData = await cgRes.json();
-            if (cgData.prices && cgData.prices.length > 0) {
-                const prices = cgData.prices.map(p => p[1]);
-                const labels = cgData.prices.map(p => {
-                    const d = new Date(p[0]);
-                    return currentChartHours <= 24
-                        ? d.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' })
-                        : d.toLocaleDateString('en', { month: 'short', day: 'numeric' });
-                });
-                // High/Low manuell berechnen
-                let high = 0, low = Infinity;
-                prices.forEach(p => { if (p > high) high = p; if (p < low) low = p; });
-                const stats = { high, low, yesterdayClose: prices[Math.max(0, prices.length - 25)] };
-                lastPriceData = { prices, labels, stats };
-                chartBody.style.opacity = '1';
-                drawPriceChart(prices, labels, stats);
-                return;
+        // 2. FALLBACK: CoinGecko (falls der Bot noch keine Daten hat)
+        try {
+            const days = currentChartHours / 24;
+            const cgRes = await fetch(`https://api.coingecko.com/api/v3/coins/inpinity/market_chart?vs_currency=eur&days=${days}`);
+            if (cgRes.ok) {
+                const cgData = await cgRes.json();
+                if (cgData.prices && cgData.prices.length > 0) {
+                    const prices = cgData.prices.map(p => p[1]);
+                    const labels = cgData.prices.map(p => {
+                        const d = new Date(p[0]);
+                        const timeStr = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+                        const dateStr = d.toLocaleDateString('en-GB', { month: 'short', day: 'numeric' });
+                        return currentChartHours <= 24 ? timeStr : dateStr;
+                    });
+                    // High/Low manuell berechnen
+                    let high = 0, low = Infinity;
+                    prices.forEach(p => { if (p > high) high = p; if (p < low) low = p; });
+                    const stats = { high, low, yesterdayClose: prices[Math.max(0, prices.length - 25)] };
+                    
+                    // Stat Boxen aktualisieren
+                    document.getElementById('statInpiPrice').textContent = '€ ' + prices[prices.length - 1].toFixed(6);
+                    
+                    lastPriceData = { prices, labels, stats };
+                    chartBody.style.opacity = '1';
+                    drawPriceChart(prices, labels, stats);
+                    return;
+                }
             }
+        } catch (e) {
+            console.warn('CoinGecko Fallback fehlgeschlagen', e);
         }
-    } catch (e) {
-        console.warn('CoinGecko Fallback fehlgeschlagen', e);
+
+        // 3. LETZTER FALLBACK: Aktueller Oracle-Preis (flacher Strahl)
+        try {
+            const health = await fetch(CONFIG.BOT_URL + '/api/health').then(r => r.json());
+            const inpiPrice = health.oracle?.prices?.find(p => p.token === 'INPI');
+            if (inpiPrice) {
+                const p = Number(inpiPrice.priceEUR);
+                document.getElementById('statInpiPrice').textContent = '€ ' + p.toFixed(6);
+                const prices = [p, p, p, p, p, p, p];
+                const labels = Array.from({ length: 7 }, (_, i) =>
+                    new Date(Date.now() - (6 - i) * 86400000).toLocaleDateString('en', { month: 'short', day: 'numeric' })
+                );
+                lastPriceData = { prices, labels, stats: null };
+                chartBody.style.opacity = '1';
+                drawPriceChart(prices, labels, null);
+            }
+        } catch (e) {
+            console.warn('Auch Oracle-Fallback fehlgeschlagen', e);
+        }
     }
 
-    // 3. LETZTER FALLBACK: Aktueller Oracle-Preis (flacher Strahl)
-    try {
-        const health = await fetch(CONFIG.BOT_URL + '/api/health').then(r => r.json());
-        const inpiPrice = health.oracle?.prices?.find(p => p.token === 'INPI');
-        if (inpiPrice) {
-            const p = Number(inpiPrice.priceEUR);
-            const prices = [p, p, p, p, p, p, p];
-            const labels = Array.from({ length: 7 }, (_, i) =>
-                new Date(Date.now() - (6 - i) * 86400000).toLocaleDateString('en', { month: 'short', day: 'numeric' })
-            );
-            lastPriceData = { prices, labels, stats: null };
-            chartBody.style.opacity = '1';
-            drawPriceChart(prices, labels, null);
-        }
-    } catch (e) {
-        console.warn('Auch Oracle-Fallback fehlgeschlagen', e);
-    }
-}
     // Chart Timeframe Buttons Event Listener
     document.querySelectorAll('.chart-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
