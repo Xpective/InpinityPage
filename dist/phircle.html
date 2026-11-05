@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Phircle V4 — Perfected</title>
+<title>Phircle V5 — Pause & Klarheit</title>
 <style>
   * { box-sizing: border-box; }
   html, body { margin:0; padding:0; height:100%; overflow:hidden;
@@ -65,7 +65,7 @@
 <canvas id="canvas"></canvas>
 
 <div id="hud">
-  <h1>🌀 PHIRCLE V4</h1>
+  <h1>🌀 PHIRCLE V5</h1>
   <div class="row"><span>Reihen</span><strong>100</strong></div>
   <div class="row"><span>Blöcke</span><strong>10.000</strong></div>
   <div class="row"><span>Minted</span><strong id="mintedCount">–</strong></div>
@@ -104,7 +104,7 @@
 
 <div id="sidebar"><h2 id="sbTitle">Block Info</h2><div id="sbContent"></div></div>
 <div id="controls">
-  <kbd>Mausrad</kbd> Zoom · <kbd>Drag</kbd> Pan · <kbd>Klick</kbd> Block · <kbd>ESC</kbd> schließen · <kbd>1-5</kbd> Layer
+  <kbd>Mausrad</kbd> Zoom · <kbd>Drag</kbd> Pan · <kbd>Klick</kbd> Block · <kbd>ESC</kbd> schließen · <kbd>Leertaste</kbd> Pause
 </div>
 <div id="status"><span id="statusText">Lade…</span></div>
 
@@ -200,13 +200,13 @@ const piWaves       = [];
 let activeLayer = 'rarity';
 let userAddress = null;
 let userSigner  = null;
+let isPaused = false; // NEU: Pause-Zustand
 
 // ============================================================
 // CONTRACTS
 // ============================================================
 let provider, nftContract, farmingContract, piratesContract, mercenaryContract, partnershipContract;
 async function connectReadOnly() {
-  // Bevorzugt Wallet, sonst public RPC
   if (window.ethereum) {
     provider = new ethers.BrowserProvider(window.ethereum);
   } else {
@@ -258,7 +258,7 @@ function resize() {
 window.addEventListener('resize', resize); resize();
 
 // ============================================================
-// GEOMETRIE — Fibonacci-Ringe
+// GEOMETRIE — Fibonacci-Ringe (mit angepasstem inneren Abstand)
 // ============================================================
 const FIB = (() => { const a=[0,1]; while(a.at(-1)<MAX_ROW+1) a.push(a.at(-1)+a.at(-2)); return a; })();
 function fibRadius(row) {
@@ -266,7 +266,9 @@ function fibRadius(row) {
   const n = FIB.length-1, t = row/MAX_ROW, idx = t*n;
   const lo = Math.floor(idx), hi = Math.min(Math.ceil(idx), n);
   const v = FIB[lo]*(1-(idx-lo)) + FIB[hi]*(idx-lo);
-  return (v/FIB[n]) * MAX_R;
+  // NEU: Sanfterer Anstieg im inneren Bereich, um Überlappung zu reduzieren
+  const scale = Math.pow(row / MAX_ROW, 0.8); 
+  return (v/FIB[n]) * MAX_R * (0.5 + 0.5 * scale);
 }
 function blockPosition(row, col) {
   const r = fibRadius(row), n = 2*row+1, step = TAU/n;
@@ -334,7 +336,6 @@ async function loadLive() {
         });
       }
     } catch(e) { console.warn('attacks', e); }
-    // Partnerschaften
     for (const field of ['partnerships', 'partnershipV2S', 'partners']) {
       try {
         const ps = await fetchAll(field, 'tokenId partnerId');
@@ -462,7 +463,7 @@ function drawBlocks(now) {
     const ringRot = (1/Math.pow(PI, 4-Math.min(4,row/25))) * .3 * t;
     for (let col=0; col<n; col++) {
       let p = blockPosition(row, col);
-      if (row>0) {
+      if (row>0 && !isPaused) { // NEU: Rotation nur wenn nicht pausiert
         const dx=p.x-CX, dy=p.y-CY, c=Math.cos(ringRot), s=Math.sin(ringRot);
         p = { x:CX+dx*c-dy*s, y:CY+dx*s+dy*c };
       }
@@ -692,8 +693,10 @@ function hitTest(sx,sy) {
     const ringRot=(1/Math.pow(PI,4-Math.min(4,row/25)))*.3*(performance.now()/1000);
     for (let col=0; col<n; col++) {
       let p=blockPosition(row,col);
-      if (row>0) { const dx=p.x-CX, dy=p.y-CY, c=Math.cos(ringRot), s=Math.sin(ringRot);
-        p={x:CX+dx*c-dy*s, y:CY+dx*s+dy*c}; }
+      if (row>0 && !isPaused) { // NEU: Rotation nur wenn nicht pausiert
+        const dx=p.x-CX, dy=p.y-CY, c=Math.cos(ringRot), s=Math.sin(ringRot);
+        p={x:CX+dx*c-dy*s, y:CY+dx*s+dy*c};
+      }
       const dx=w.x-p.x, dy=w.y-p.y, d=Math.sqrt(dx*dx+dy*dy);
       if (d<hitR && d<bestD) { bestD=d; best={row,col,id:blockId(row,col)}; }
     }
@@ -827,15 +830,15 @@ window.addEventListener('mousemove', e => {
 });
 window.addEventListener('mouseup', ()=> isDragging=false);
 
-document.querySelectorAll('#layers button').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('#layers button').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    activeLayer = btn.dataset.layer;
-  });
-});
-
+// Pause-Funktion (NEU)
 window.addEventListener('keydown', e => {
+  if (e.code === 'Space') { // Leertaste
+    e.preventDefault();
+    isPaused = !isPaused;
+    document.getElementById('statusText').innerHTML = isPaused 
+      ? '<span style="color:#ff8800">● PAUSIERT</span> · Klicke Blöcke an' 
+      : '<span class="live">● LIVE</span> · Animation läuft';
+  }
   if (e.key === 'Escape') document.getElementById('sidebar').classList.remove('active');
   const layers = ['rarity','owner','farming','attack','partner'];
   const idx = parseInt(e.key) - 1;
