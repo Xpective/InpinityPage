@@ -120,14 +120,23 @@
                         <div class="chart-stat-item low"><span>Low:</span><strong id="statChartLow">—</strong></div>
                     </div>
                 </div>
-                <!-- ★ NEU: Chart Buttons für 30D und ALL -->
-                <div class="chart-controls">
-                    <button class="chart-btn" data-hours="24">1D</button>
-                    <button class="chart-btn" data-hours="72">3D</button>
-                    <button class="chart-btn active" data-hours="168">7D</button>
-                    <button class="chart-btn" data-hours="720">30D</button>
-                    <button class="chart-btn" data-hours="0">ALL</button>
+                
+                <div class="chart-controls-wrapper" style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end;">
+                    <!-- ★ TOP-IDEE: Pool Switcher -->
+                    <div class="chart-controls pool-controls">
+                        <button class="chart-btn pool-btn active" data-pool="eth">ETH Pool</button>
+                        <button class="chart-btn pool-btn" data-pool="usdc">USDC Pool</button>
+                    </div>
+                    <!-- Zeitraum Buttons -->
+                    <div class="chart-controls">
+                        <button class="chart-btn timeframe-btn" data-hours="24">1D</button>
+                        <button class="chart-btn timeframe-btn" data-hours="72">3D</button>
+                        <button class="chart-btn timeframe-btn active" data-hours="168">7D</button>
+                        <button class="chart-btn timeframe-btn" data-hours="720">30D</button>
+                        <button class="chart-btn timeframe-btn" data-hours="0">ALL</button>
+                    </div>
                 </div>
+
             </div>
             <div class="chart-body"><canvas id="priceChart"></canvas></div>
             
@@ -433,7 +442,9 @@ const CONFIG = {
         INPI: "0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D",
         EURC: "0x60a3E35Cc302bFA44Cb288Bc5a4F316Fdb1adb42"
     },
-    GECKO_POOL: "0x7b26696184f74e8f790c21b23e10a68583f9cf0b7fc911db1eab510f6e5740cb",
+    // ★ TOP-IDEE: Beide Pool-IDs für den Chart-Switcher
+    GECKO_POOL_ETH: "0x2da60979434c607e283ad7956bdcd21b83fa756fa156ef45f996e2b34d2e12a8",
+    GECKO_POOL_USDC: "0x7b26696184f74e8f790c21b23e10a68583f9cf0b7fc911db1eab510f6e5740cb",
     TARGETS: {
         old:  100_000_000n * 10n**18n,
         eth:   17_500_000n * 10n**18n,
@@ -494,11 +505,15 @@ const ERC721_ABI = [
     let priceChart = null, tvlDonut = null;
     let lastPriceData = null, lastTvlData = null;
     
-    // ★ TOP-IDEE: Persistenter Chart State
+    // ★ TOP-IDEE: Persistenter Chart State (Zeitraum & Pool)
     let currentChartHours = 168; 
+    let activeGeckoPool = 'eth'; 
+
     try { 
         const savedTf = localStorage.getItem("inpinity-chart-tf"); 
         if (savedTf !== null) currentChartHours = parseInt(savedTf);
+        const savedPool = localStorage.getItem("inpinity-chart-pool");
+        if (savedPool !== null) activeGeckoPool = savedPool;
     } catch(_) {}
 
     const readProvider = new ethers.JsonRpcProvider(CONFIG.RPC_URL);
@@ -721,9 +736,15 @@ const ERC721_ABI = [
     }
 
     function updateChartButtonsUI() {
-        document.querySelectorAll('.chart-btn').forEach(b => {
+        // Update Timeframe Buttons
+        document.querySelectorAll('.timeframe-btn').forEach(b => {
             const hours = parseInt(b.dataset.hours);
             b.classList.toggle('active', hours === currentChartHours);
+        });
+        
+        // Update Pool Switcher Buttons
+        document.querySelectorAll('.pool-btn').forEach(b => {
+            b.classList.toggle('active', b.dataset.pool === activeGeckoPool);
         });
         
         const tfLabel = document.getElementById('chartTimeframeLabel');
@@ -742,6 +763,9 @@ const ERC721_ABI = [
         const chartBody = document.querySelector('.chart-body');
         if (!lastPriceData) chartBody.style.opacity = '0.3';
 
+        // Bestimme die richtige Pool-ID basierend auf der Auswahl
+        const poolId = activeGeckoPool === 'eth' ? CONFIG.GECKO_POOL_ETH : CONFIG.GECKO_POOL_USDC;
+
         try {
             // 1. VERSUCH: GeckoTerminal API (OHLCV)
             let timeframe = 'hour', aggregate = 1, limit = 100;
@@ -751,7 +775,7 @@ const ERC721_ABI = [
             else if (currentChartHours === 720) { timeframe = 'day'; aggregate = 1; limit = 30; }
             else if (currentChartHours === 0) { timeframe = 'day'; aggregate = 1; limit = 1000; }
             
-            const geckoUrl = `https://api.geckoterminal.com/api/v2/networks/base/pools/${CONFIG.GECKO_POOL}/ohlcv/${timeframe}?aggregate=${aggregate}&limit=${limit}`;
+            const geckoUrl = `https://api.geckoterminal.com/api/v2/networks/base/pools/${poolId}/ohlcv/${timeframe}?aggregate=${aggregate}&limit=${limit}`;
             const res = await fetch(geckoUrl);
             
             if (res.ok) {
@@ -790,7 +814,9 @@ const ERC721_ABI = [
                     document.getElementById('statChartHigh').textContent = '€' + high.toFixed(5);
                     document.getElementById('statChartLow').textContent = '€' + low.toFixed(5);
                     document.getElementById('statChartYesterday').textContent = '€' + yesterdayClose.toFixed(5);
-                    if (sourceBadge) { sourceBadge.textContent = 'Live: Gecko'; sourceBadge.style.color = '#00e676'; }
+                    
+                    const poolName = activeGeckoPool === 'eth' ? 'ETH Pool' : 'USDC Pool';
+                    if (sourceBadge) { sourceBadge.textContent = `Live: Gecko (${poolName})`; sourceBadge.style.color = '#00e676'; }
 
                     lastPriceData = { prices, labels, stats };
                     chartBody.style.opacity = '1';
@@ -802,7 +828,6 @@ const ERC721_ABI = [
 
         // 2. FALLBACK: Bot History (Achtung: Bot speichert nur 7 Tage!)
         try {
-            // Wenn 30D oder ALL gewählt ist, limitieren wir den Bot-Request auf 168h (7 Tage), da er nicht mehr hat
             const botFetchHours = (currentChartHours === 720 || currentChartHours === 0) ? 168 : currentChartHours;
             const res = await fetch(`${CONFIG.BOT_URL}/api/price-history?hours=${botFetchHours}`);
             
@@ -821,6 +846,7 @@ const ERC721_ABI = [
                     document.getElementById('statChartHigh').textContent = stats.high ? '€' + Number(stats.high).toFixed(5) : '—';
                     document.getElementById('statChartLow').textContent = stats.low ? '€' + Number(stats.low).toFixed(5) : '—';
                     document.getElementById('statChartYesterday').textContent = stats.yesterdayClose ? '€' + Number(stats.yesterdayClose).toFixed(5) : '—';
+                    
                     if (sourceBadge) { sourceBadge.textContent = 'Live: Bot (Max 7D)'; sourceBadge.style.color = '#ffaa00'; }
 
                     lastPriceData = { prices, labels, stats };
@@ -851,12 +877,24 @@ const ERC721_ABI = [
         } catch (e) { console.warn('Auch Oracle-Fallback fehlgeschlagen', e); }
     }
 
-    document.querySelectorAll('.chart-btn').forEach(btn => {
+    // Event Listeners für Timeframe-Buttons
+    document.querySelectorAll('.timeframe-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
-            document.querySelectorAll('.chart-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.timeframe-btn').forEach(b => b.classList.remove('active'));
             e.target.classList.add('active');
             currentChartHours = parseInt(e.target.dataset.hours);
             try { localStorage.setItem("inpinity-chart-tf", currentChartHours); } catch(_) {}
+            loadPriceChart();
+        });
+    });
+
+    // Event Listeners für Pool-Switcher (ETH / USDC)
+    document.querySelectorAll('.pool-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            document.querySelectorAll('.pool-btn').forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+            activeGeckoPool = e.target.dataset.pool;
+            try { localStorage.setItem("inpinity-chart-pool", activeGeckoPool); } catch(_) {}
             loadPriceChart();
         });
     });
