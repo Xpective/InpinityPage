@@ -17,143 +17,6 @@
     <link rel="icon" type="image/png" href="favicon.webp">
     <meta name="description" content="Stake INPI tokens or Uniswap V4 LP positions on Base.">
     <meta name="theme-color" content="#140f1f">
-    <style>
-    /* ═══════════════════════════════════════════════════════ */
-    /* DEIN BESTEHENDES CSS                                     */
-    /* ═══════════════════════════════════════════════════════ */
-    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin: 1.5rem auto; max-width: 980px; }
-    .stat-box { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.10); border-radius: 14px; padding: 1rem; text-align: center; position: relative; }
-    .stat-box-label { font-size: 0.75rem; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; }
-    .stat-box-value { font-size: 1.35rem; font-weight: 900; color: var(--quinary-color, #ffd700); margin-top: 0.4rem; }
-    .stat-box-sub { font-size: 0.72rem; opacity: 0.6; margin-top: 0.2rem; }
-    .update-countdown { font-size: 0.72rem; color: #00c853; font-weight: 700; padding: 0.15rem 0.5rem; background: rgba(0, 200, 83, 0.12); border-radius: 6px; display: inline-block; margin-top: 0.25rem; font-family: monospace; }
-    .update-countdown.warn { color: #ffaa00; background: rgba(255, 170, 0, 0.12); }
-    
-    /* ★ TOP-IDEE: Oracle Freshness Badge */
-    .oracle-badge { position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; border-radius: 50%; background: #00c853; box-shadow: 0 0 8px #00c853; transition: all 0.3s; }
-    .oracle-badge.stale { background: #ff5252; box-shadow: 0 0 8px #ff5252; }
-    .oracle-badge.warn { background: #ffaa00; box-shadow: 0 0 8px #ffaa00; }
-    
-    .price-ticker-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; margin: 1.5rem auto; max-width: 980px; }
-    .price-ticker { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.10); border-radius: 12px; padding: 0.9rem 1rem; text-align: center; position: relative; }
-    .price-ticker-token { font-size: 0.78rem; opacity: 0.7; font-weight: 700; letter-spacing: 0.03em; }
-    .price-ticker-value { font-size: 1.15rem; font-weight: 900; color: #fff; margin: 0.35rem 0 0.2rem; }
-    .price-ticker-age { font-size: 0.7rem; font-weight: 600; }
-    .price-ticker-age.fresh { color: #00c853; }
-    .price-ticker-age.warn  { color: #ffaa00; }
-    .price-ticker-age.stale { color: #ff5252; }
-    
-    .charts-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 1.25rem; margin: 1.5rem auto; max-width: 980px; }
-    .chart-card { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.10); border-radius: 18px; padding: 1.25rem; }
-    .chart-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;}
-    .chart-card-title { color: var(--quinary-color, #ffd700); font-weight: 800; font-size: 1rem; margin: 0; }
-    .chart-card-badge { font-size: 0.72rem; padding: 0.2rem 0.6rem; border-radius: 6px; background: rgba(0, 200, 83, 0.15); color: #00e676; font-weight: 700; }
-    .chart-body { position: relative; height: 220px; transition: opacity 0.3s; }
-    .chart-body-donut { height: 200px; }
-    .donut-legend { margin-top: 0.75rem; font-size: 0.82rem; }
-    .donut-legend-item { display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0; border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
-    .donut-legend-item:last-child { border-bottom: none; }
-    .donut-legend-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 0.5rem; vertical-align: middle; }
-    .portfolio-summary { display: none; background: linear-gradient(160deg, rgba(255, 215, 0, 0.08) 0%, rgba(0, 200, 83, 0.05) 100%); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 16px; padding: 1.5rem; margin: 1.5rem 0; }
-    .portfolio-summary.visible { display: block; }
-    .portfolio-summary h3 { margin: 0 0 1rem; color: var(--quinary-color, #ffd700); font-size: 1.1rem; font-weight: 800; }
-    .portfolio-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
-    .portfolio-item { text-align: center; padding: 0.75rem; background: rgba(0, 0, 0, 0.2); border-radius: 10px; }
-    .portfolio-item-label { font-size: 0.72rem; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; }
-    .portfolio-item-value { font-size: 1.15rem; font-weight: 900; color: #fff; margin-top: 0.3rem; }
-    .portfolio-item-value.green { color: #00e676; }
-    .portfolio-item-value.gold  { color: var(--quinary-color, #ffd700); }
-    .nft-pos-apr-row { margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px dashed rgba(255, 215, 0, 0.3); display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; font-size: 0.78rem; }
-    .nft-pos-apr-item { text-align: center; }
-    .nft-pos-apr-label { opacity: 0.65; font-size: 0.7rem; }
-    .nft-pos-apr-value { color: #00e676; font-weight: 900; font-size: 0.95rem; margin-top: 0.15rem; }
-    .nft-pos-apr-value.warn-apr { color: #ffaa00; }
-    .apr-warning-note { margin-top: 0.6rem; font-size: 0.72rem; opacity: 0.75; padding: 0.4rem 0.6rem; background: rgba(255, 170, 0, 0.08); border-left: 2px solid #ffaa00; border-radius: 4px; line-height: 1.5; }
-    .nft-pos-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-    .nft-pos-actions .btn-share { background: rgba(255, 215, 0, 0.15); color: var(--quinary-color, #ffd700); border: 1px solid rgba(255, 215, 0, 0.4); }
-    [data-theme="light"] .chart-card, [data-theme="light"] .price-ticker, [data-theme="light"] .stat-box { background: rgba(106, 79, 179, 0.06); border-color: rgba(106, 79, 179, 0.16); }
-    [data-theme="light"] .price-ticker-value, [data-theme="light"] .stat-box-value, [data-theme="light"] .portfolio-item-value { color: #1a1030; }
-    [data-theme="light"] .stat-box-value { color: var(--quinary-color, #6a4fb3); }
-    [data-theme="light"] .portfolio-item-value.green { color: #00875a; }
-    [data-theme="light"] .portfolio-item-value.gold  { color: var(--quinary-color, #6a4fb3); }
-    
-    /* ═══════════════════════════════════════════════════════ */
-    /* CHART VERBESSERUNGEN                                     */
-    /* ═══════════════════════════════════════════════════════ */
-    .chart-controls { display: flex; gap: 0.4rem; }
-    .chart-btn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #aaa; font-size: 0.75rem; font-weight: 700; padding: 0.3rem 0.7rem; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
-    .chart-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
-    .chart-btn.active { background: rgba(255, 215, 0, 0.15); border-color: rgba(255, 215, 0, 0.4); color: var(--quinary-color, #ffd700); box-shadow: 0 0 10px rgba(255,215,0,0.2); }
-    
-    /* ★ TOP-IDEE: Neues Badge für die Chart-Datenquelle */
-    .chart-source-badge { font-size: 0.65rem; padding: 0.1rem 0.4rem; border-radius: 4px; background: rgba(0,0,0,0.3); color: #aaa; margin-left: 0.5rem; font-weight: 600; text-transform: uppercase; }
-    
-    .chart-stats-mini { display: flex; gap: 0.5rem; margin-top: 0.4rem; flex-wrap: wrap; }
-    .chart-stat-item { font-size: 0.68rem; padding: 0.15rem 0.4rem; border-radius: 4px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); }
-    .chart-stat-item span { opacity: 0.6; margin-right: 0.2rem; }
-    .chart-stat-item.high { color: #00e676; border-color: rgba(0,230,118,0.2); }
-    .chart-stat-item.low { color: #ff5252; border-color: rgba(255,82,82,0.2); }
-    .chart-stat-item.yesterday { color: #ffaa00; border-color: rgba(255,170,0,0.2); }
-    [data-theme="light"] .chart-stat-item { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.05); }
-
-    /* NEU: Buy / Sell Buttons */
-    .trade-actions { display: flex; gap: 10px; margin-top: 15px; }
-    .trade-btn { flex: 1; padding: 0.8rem; border-radius: 10px; font-weight: 800; text-align: center; text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; display: flex; justify-content: center; align-items: center; gap: 5px; font-size: 0.95rem; }
-    .trade-btn:hover { transform: translateY(-2px); }
-    .trade-btn.buy { background: linear-gradient(135deg, #00c853, #009624); color: #fff; box-shadow: 0 4px 15px rgba(0,200,83,0.3); }
-    .trade-btn.buy:hover { box-shadow: 0 6px 20px rgba(0,200,83,0.5); }
-    .trade-btn.sell { background: linear-gradient(135deg, #ff5252, #d32f2f); color: #fff; box-shadow: 0 4px 15px rgba(255,82,82,0.3); }
-    .trade-btn.sell:hover { box-shadow: 0 6px 20px rgba(255,82,82,0.5); }
-
-    @media (max-width: 900px) { .charts-grid { grid-template-columns: 1fr; } .price-ticker-grid { grid-template-columns: repeat(2, 1fr); } .stats-row, .portfolio-grid { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 480px) { .price-ticker-grid, .stats-row, .portfolio-grid { grid-template-columns: 1fr; } }
-    
-    .tutorial-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
-    .tutorial-overlay.active { opacity: 1; pointer-events: auto; }
-    .tutorial-modal { position: relative; width: 100%; max-width: 620px; max-height: 92vh; overflow-y: auto; background: linear-gradient(160deg,#1a1030 0%,#140f1f 100%); border: 1px solid rgba(255,215,0,0.4); border-radius: 20px; padding: 2rem 2rem 1.25rem; color: #fff; box-shadow: 0 20px 60px rgba(0,0,0,0.5); transform: scale(0.95); transition: transform 0.25s ease; }
-    .tutorial-overlay.active .tutorial-modal { transform: scale(1); }
-    .tutorial-close { position: absolute; top: 0.75rem; right: 0.85rem; width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.08); border: none; color: #fff; font-size: 1.4rem; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; }
-    .tutorial-progress { display: flex; gap: 0.4rem; justify-content: center; margin-bottom: 1.5rem; }
-    .tutorial-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.2); transition: all 0.3s ease; }
-    .tutorial-dot.active { background: var(--quinary-color, #ffd700); width: 24px; border-radius: 4px; }
-    .tutorial-dot.passed { background: rgba(255,215,0,0.5); }
-    .tutorial-slide { display: none; animation: tutorialFadeIn 0.35s ease; }
-    .tutorial-slide.active { display: block; }
-    @keyframes tutorialFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-    .tutorial-icon { font-size: 3.2rem; text-align: center; margin-bottom: 1rem; }
-    .tutorial-slide h2 { font-size: 1.55rem; color: var(--quinary-color, #ffd700); text-align: center; margin: 0 0 1.2rem; font-weight: 900; }
-    .tutorial-slide p { line-height: 1.65; margin: 0 0 1rem; color: rgba(255,255,255,0.88); font-size: 0.95rem; }
-    .tutorial-slide strong { color: #fff; }
-    .tutorial-slide a { color: var(--quinary-color, #ffd700); text-decoration: underline; }
-    .tutorial-slide code { font-family: monospace; background: rgba(0,0,0,0.35); padding: 0.15rem 0.45rem; border-radius: 5px; color: var(--quinary-color, #ffd700); }
-    .tutorial-list { list-style: none; padding: 0; margin: 1rem 0; }
-    .tutorial-list li { padding: 0.5rem 0 0.5rem 1rem; font-size: 0.92rem; color: rgba(255,255,255,0.9); border-left: 3px solid rgba(255,215,0,0.3); margin-bottom: 0.4rem; background: rgba(255,255,255,0.02); border-radius: 4px; }
-    .tutorial-list-numbered { counter-reset: tc; list-style: none; padding: 0; }
-    .tutorial-list-numbered li { counter-increment: tc; position: relative; padding-left: 2.5rem; border-left: none; background: rgba(255,215,0,0.04); }
-    .tutorial-list-numbered li::before { content: counter(tc); position: absolute; left: 0.5rem; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; border-radius: 50%; background: var(--quinary-color, #ffd700); color: #000; font-weight: 900; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; }
-    .tutorial-highlight { margin: 1rem 0; padding: 0.8rem 1rem; background: rgba(255,215,0,0.08); border: 1px solid rgba(255,215,0,0.3); border-radius: 10px; font-size: 0.88rem; }
-    .tutorial-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.88rem; background: rgba(0,0,0,0.2); border-radius: 10px; overflow: hidden; }
-    .tutorial-table td { padding: 0.6rem 0.9rem; color: rgba(255,255,255,0.9); }
-    .tutorial-table td:nth-child(2) { text-align: center; color: var(--quinary-color, #ffd700); }
-    .tutorial-nav { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; margin-top: 1.75rem; padding-top: 1.25rem; border-top: 1px solid rgba(255,255,255,0.1); }
-    .tutorial-btn { padding: 0.7rem 1.3rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.06); color: #fff; font-weight: 700; cursor: pointer; }
-    .tutorial-btn.primary { background: var(--quinary-color, #ffd700); border-color: var(--quinary-color, #ffd700); color: #000; }
-    .tutorial-counter { font-size: 0.82rem; color: rgba(255,255,255,0.6); }
-    .tutorial-footer { text-align: center; margin-top: 1rem; }
-    .tutorial-skip { background: transparent; border: none; color: rgba(255,255,255,0.4); cursor: pointer; }
-    .tutorial-help-btn { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 1000; background: var(--quinary-color, #ffd700); color: #000; border: none; border-radius: 999px; padding: 0.75rem 1.25rem; font-weight: 800; cursor: pointer; box-shadow: 0 8px 24px rgba(255,215,0,0.3); display: flex; align-items: center; gap: 0.5rem; }
-    [data-theme="light"] .tutorial-modal { background: linear-gradient(160deg,#faf7ff 0%,#f0ebfa 100%); color: #2a1a4a; }
-    [data-theme="light"] .tutorial-slide p { color: rgba(42,26,74,0.85); }
-    [data-theme="light"] .tutorial-slide strong { color: #1a1030; }
-    [data-theme="light"] .tutorial-list li { color: rgba(42,26,74,0.85); }
-    @media (max-width: 640px) {
-        .tutorial-modal { padding: 1.5rem 1.25rem 1rem; }
-        .tutorial-icon { font-size: 2.5rem; }
-        .tutorial-slide h2 { font-size: 1.25rem; }
-        .tutorial-help-btn { bottom: 1rem; right: 1rem; padding: 0.6rem 1rem; font-size: 0.8rem; }
-        .tutorial-table { font-size: 0.78rem; }
-    }
-    </style>
 </head>
 <body class="staking-page">
 <header class="site-header">
@@ -185,6 +48,19 @@
     <section class="info-banner warning-note">
         <p>⚠️ <strong>Official INPI token:</strong> <code>0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</code>. Verify every address on the <a href="index.html">homepage</a>.</p>
     </section>
+
+    <!-- ★ NEU: Sticky Wallet Bar ganz oben -->
+    <div class="wallet-bar">
+        <div class="wallet-left">
+            <div class="wallet-status" id="walletStatusText">🔴 Wallet not connected</div>
+            <div class="wallet-address" id="walletStatus" style="display:none;"></div>
+        </div>
+        <div class="wallet-balance-group" id="tokenBalanceInfo" style="display:none;">
+            <div class="wallet-balance-label">INPI Balance</div>
+            <div class="wallet-balance" id="tokenBalance">0</div>
+        </div>
+        <button id="connectWalletBtn" class="btn">🔌 Connect Wallet</button>
+    </div>
 
     <section class="stats-row">
         <div class="stat-box">
@@ -244,15 +120,17 @@
                         <div class="chart-stat-item low"><span>Low:</span><strong id="statChartLow">—</strong></div>
                     </div>
                 </div>
+                <!-- ★ NEU: Chart Buttons für 30D und ALL -->
                 <div class="chart-controls">
                     <button class="chart-btn" data-hours="24">1D</button>
                     <button class="chart-btn" data-hours="72">3D</button>
                     <button class="chart-btn active" data-hours="168">7D</button>
+                    <button class="chart-btn" data-hours="720">30D</button>
+                    <button class="chart-btn" data-hours="0">ALL</button>
                 </div>
             </div>
             <div class="chart-body"><canvas id="priceChart"></canvas></div>
             
-            <!-- NEU: Buy & Sell Buttons direkt unter dem Chart -->
             <div class="trade-actions">
                 <a href="https://app.uniswap.org/swap?chain=base&outputCurrency=0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D" target="_blank" class="trade-btn buy">
                     🟢 Buy INPI
@@ -320,18 +198,7 @@
 
     <section class="staking-shell">
         <div class="staking-container">
-            <div class="wallet-bar">
-                <div class="wallet-left">
-                    <div class="wallet-status" id="walletStatusText">🔴 Wallet not connected</div>
-                    <div class="wallet-address" id="walletStatus" style="display:none;"></div>
-                </div>
-                <div class="wallet-balance-group" id="tokenBalanceInfo" style="display:none;">
-                    <div class="wallet-balance-label">INPI Balance</div>
-                    <div class="wallet-balance" id="tokenBalance">0</div>
-                </div>
-                <button id="connectWalletBtn" class="btn">🔌 Connect Wallet</button>
-            </div>
-
+            
             <div class="portfolio-summary" id="portfolioSummary">
                 <h3>📊 Your Portfolio Overview</h3>
                 <div class="portfolio-grid">
@@ -413,7 +280,7 @@
         <a href="whitepaper.html">Whitepaper</a>
         <a href="faq.html">FAQ</a>
     </div>
-    <p class="footer-version">Version 0.33.0 · V2.3</p>
+    <p class="footer-version">Version 0.34.0 · V2.4</p>
 </footer>
 
 <div id="tutorialOverlay" class="tutorial-overlay" aria-hidden="true">
@@ -566,7 +433,6 @@ const CONFIG = {
         INPI: "0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D",
         EURC: "0x60a3E35Cc302bFA44Cb288Bc5a4F316Fdb1adb42"
     },
-    // ★ TOP-IDEE: Der neue, liquide Pool auch im Frontend für die Charts
     GECKO_POOL: "0x7b26696184f74e8f790c21b23e10a68583f9cf0b7fc911db1eab510f6e5740cb",
     TARGETS: {
         old:  100_000_000n * 10n**18n,
@@ -627,7 +493,13 @@ const ERC721_ABI = [
 (function() {
     let priceChart = null, tvlDonut = null;
     let lastPriceData = null, lastTvlData = null;
-    let currentChartHours = 168; // Default 7 Days
+    
+    // ★ TOP-IDEE: Persistenter Chart State
+    let currentChartHours = 168; 
+    try { 
+        const savedTf = localStorage.getItem("inpinity-chart-tf"); 
+        if (savedTf !== null) currentChartHours = parseInt(savedTf);
+    } catch(_) {}
 
     const readProvider = new ethers.JsonRpcProvider(CONFIG.RPC_URL);
 
@@ -719,7 +591,6 @@ const ERC721_ABI = [
         const c = themeColors();
         if (priceChart) priceChart.destroy();
 
-        // Wunderschöner Gradient unter der Linie
         const ctx = el.getContext('2d');
         let gradient = ctx.createLinearGradient(0, 0, 0, 250);
         if (document.documentElement.getAttribute('data-theme') === 'light') {
@@ -737,7 +608,7 @@ const ERC721_ABI = [
                 borderColor: c.accent, 
                 backgroundColor: gradient, 
                 fill: true, 
-                tension: 0.4, // Schön geschwungen
+                tension: 0.4, 
                 pointRadius: 0, 
                 pointHoverRadius: 6, 
                 pointHoverBackgroundColor: '#fff',
@@ -849,33 +720,47 @@ const ERC721_ABI = [
         }
     }
 
-    async function loadPriceChart() {
-        // UI Updates für das Label
+    function updateChartButtonsUI() {
+        document.querySelectorAll('.chart-btn').forEach(b => {
+            const hours = parseInt(b.dataset.hours);
+            b.classList.toggle('active', hours === currentChartHours);
+        });
+        
         const tfLabel = document.getElementById('chartTimeframeLabel');
-        const sourceBadge = document.getElementById('chartSourceBadge');
-        if (tfLabel) tfLabel.textContent = currentChartHours === 24 ? '24 Hours' : currentChartHours === 72 ? '3 Days' : '7 Days';
+        if (tfLabel) {
+            if (currentChartHours === 24) tfLabel.textContent = '24 Hours';
+            else if (currentChartHours === 72) tfLabel.textContent = '3 Days';
+            else if (currentChartHours === 168) tfLabel.textContent = '7 Days';
+            else if (currentChartHours === 720) tfLabel.textContent = '30 Days';
+            else tfLabel.textContent = 'All Time';
+        }
+    }
 
+    async function loadPriceChart() {
+        updateChartButtonsUI();
+        const sourceBadge = document.getElementById('chartSourceBadge');
         const chartBody = document.querySelector('.chart-body');
         if (!lastPriceData) chartBody.style.opacity = '0.3';
 
         try {
-            // 1. VERSUCH: GeckoTerminal API (OHLCV) - Liefert echte Kerzendaten
-            let timeframe = 'hour', aggregate = 1;
-            if (currentChartHours === 168) { timeframe = 'day'; aggregate = 1; }
-            else if (currentChartHours === 72) { timeframe = 'hour'; aggregate = 4; }
+            // 1. VERSUCH: GeckoTerminal API (OHLCV)
+            let timeframe = 'hour', aggregate = 1, limit = 100;
+            if (currentChartHours === 24) { timeframe = 'hour'; aggregate = 1; limit = 24; }
+            else if (currentChartHours === 72) { timeframe = 'hour'; aggregate = 4; limit = 18; }
+            else if (currentChartHours === 168) { timeframe = 'day'; aggregate = 1; limit = 7; }
+            else if (currentChartHours === 720) { timeframe = 'day'; aggregate = 1; limit = 30; }
+            else if (currentChartHours === 0) { timeframe = 'day'; aggregate = 1; limit = 1000; }
             
-            const geckoUrl = `https://api.geckoterminal.com/api/v2/networks/base/pools/${CONFIG.GECKO_POOL}/ohlcv/${timeframe}?aggregate=${aggregate}&limit=100`;
+            const geckoUrl = `https://api.geckoterminal.com/api/v2/networks/base/pools/${CONFIG.GECKO_POOL}/ohlcv/${timeframe}?aggregate=${aggregate}&limit=${limit}`;
             const res = await fetch(geckoUrl);
             
             if (res.ok) {
                 const data = await res.json();
-                const ohlcvList = data.data.attributes.ohlcv_list; // [[timestamp, open, high, low, close, volume], ...]
+                const ohlcvList = data.data.attributes.ohlcv_list;
                 
                 if (ohlcvList && ohlcvList.length > 0) {
-                    // GeckoTerminal liefert Daten von Neu nach Alt -> wir drehen sie um
                     ohlcvList.reverse();
-
-                    const prices = ohlcvList.map(o => parseFloat(o[4])); // Close price
+                    const prices = ohlcvList.map(o => parseFloat(o[4]));
                     const labels = ohlcvList.map(o => {
                         const d = new Date(o[0] * 1000);
                         const timeStr = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
@@ -883,7 +768,6 @@ const ERC721_ABI = [
                         return currentChartHours <= 24 ? timeStr : (currentChartHours === 72 ? `${dateStr}, ${timeStr}` : dateStr);
                     });
 
-                    // Echte Höchst- und Tiefstwerte aus den Kerzen berechnen
                     let high = 0, low = Infinity;
                     ohlcvList.forEach(o => {
                         const h = parseFloat(o[2]);
@@ -893,13 +777,10 @@ const ERC721_ABI = [
                     });
                     
                     const currentPrice = prices[prices.length - 1];
-                    // 24h Wert ermitteln (ca. 24 Stunden zurück)
-                    const yesterdayIdx = Math.max(0, prices.length - (currentChartHours === 168 ? 1 : (currentChartHours === 72 ? 6 : 24)));
+                    const yesterdayIdx = Math.max(0, prices.length - (currentChartHours === 168 ? 1 : (currentChartHours === 72 ? 6 : (currentChartHours === 24 ? 24 : 1))));
                     const yesterdayClose = prices[yesterdayIdx];
-                    
                     const stats = { high, low, yesterdayClose };
 
-                    // UI aktualisieren
                     const change = yesterdayClose > 0 ? ((currentPrice - yesterdayClose) / yesterdayClose * 100) : 0;
                     document.getElementById('statInpiPrice').textContent = '€ ' + currentPrice.toFixed(6);
                     const changeEl = document.getElementById('statInpiChange');
@@ -909,7 +790,6 @@ const ERC721_ABI = [
                     document.getElementById('statChartHigh').textContent = '€' + high.toFixed(5);
                     document.getElementById('statChartLow').textContent = '€' + low.toFixed(5);
                     document.getElementById('statChartYesterday').textContent = '€' + yesterdayClose.toFixed(5);
-
                     if (sourceBadge) { sourceBadge.textContent = 'Live: Gecko'; sourceBadge.style.color = '#00e676'; }
 
                     lastPriceData = { prices, labels, stats };
@@ -918,13 +798,14 @@ const ERC721_ABI = [
                     return;
                 }
             }
-        } catch (e) {
-            console.warn('GeckoTerminal OHLCV fehlgeschlagen', e);
-        }
+        } catch (e) { console.warn('GeckoTerminal OHLCV fehlgeschlagen', e); }
 
-        // 2. FALLBACK: Bot History (falls GeckoTerminal mal blockt)
+        // 2. FALLBACK: Bot History (Achtung: Bot speichert nur 7 Tage!)
         try {
-            const res = await fetch(`${CONFIG.BOT_URL}/api/price-history?hours=${currentChartHours}`);
+            // Wenn 30D oder ALL gewählt ist, limitieren wir den Bot-Request auf 168h (7 Tage), da er nicht mehr hat
+            const botFetchHours = (currentChartHours === 720 || currentChartHours === 0) ? 168 : currentChartHours;
+            const res = await fetch(`${CONFIG.BOT_URL}/api/price-history?hours=${botFetchHours}`);
+            
             if (res.ok) {
                 const data = await res.json();
                 if (data.success && data.snapshots && data.snapshots.length > 0) {
@@ -933,15 +814,14 @@ const ERC721_ABI = [
                         const d = new Date(s.t);
                         const timeStr = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
                         const dateStr = d.toLocaleDateString('en-GB', { month: 'short', day: 'numeric' });
-                        return currentChartHours <= 24 ? timeStr : `${dateStr}, ${timeStr}`;
+                        return botFetchHours <= 24 ? timeStr : `${dateStr}, ${timeStr}`;
                     });
                     const stats = data.stats;
                     document.getElementById('statInpiPrice').textContent = '€ ' + prices[prices.length - 1].toFixed(6);
                     document.getElementById('statChartHigh').textContent = stats.high ? '€' + Number(stats.high).toFixed(5) : '—';
                     document.getElementById('statChartLow').textContent = stats.low ? '€' + Number(stats.low).toFixed(5) : '—';
                     document.getElementById('statChartYesterday').textContent = stats.yesterdayClose ? '€' + Number(stats.yesterdayClose).toFixed(5) : '—';
-                    
-                    if (sourceBadge) { sourceBadge.textContent = 'Live: Bot'; sourceBadge.style.color = '#ffaa00'; }
+                    if (sourceBadge) { sourceBadge.textContent = 'Live: Bot (Max 7D)'; sourceBadge.style.color = '#ffaa00'; }
 
                     lastPriceData = { prices, labels, stats };
                     chartBody.style.opacity = '1';
@@ -971,12 +851,12 @@ const ERC721_ABI = [
         } catch (e) { console.warn('Auch Oracle-Fallback fehlgeschlagen', e); }
     }
 
-    // Chart Timeframe Buttons Event Listener
     document.querySelectorAll('.chart-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             document.querySelectorAll('.chart-btn').forEach(b => b.classList.remove('active'));
             e.target.classList.add('active');
             currentChartHours = parseInt(e.target.dataset.hours);
+            try { localStorage.setItem("inpinity-chart-tf", currentChartHours); } catch(_) {}
             loadPriceChart();
         });
     });
@@ -997,9 +877,7 @@ const ERC721_ABI = [
 
             lastTvlData = { labels, values };
             drawTvlDonut(labels, values);
-        } catch (e) {
-            console.warn('TVL donut failed:', e.message);
-        }
+        } catch (e) { console.warn('TVL donut failed:', e.message); }
     }
 
     async function loadBotHealth() {
@@ -1027,21 +905,15 @@ const ERC721_ABI = [
                     ageEl.textContent = p.ageMinutes < 60 ? `${p.ageMinutes}min ago` : `${Math.floor(p.ageMinutes/60)}h ago`;
                     ageEl.className = 'price-ticker-age ' + (p.isStale ? 'stale' : p.ageMinutes < 30 ? 'fresh' : 'warn');
                 }
-                if (badgeEl) {
-                    badgeEl.className = 'oracle-badge ' + (p.isStale ? 'stale' : p.ageMinutes < 30 ? '' : 'warn');
-                }
+                if (badgeEl) { badgeEl.className = 'oracle-badge ' + (p.isStale ? 'stale' : p.ageMinutes < 30 ? '' : 'warn'); }
             });
             
-            // Update the main INPI Badge
             const mainBadge = document.getElementById('oracleBadge');
             const inpiP = prices.find(p => p.token === 'INPI');
-            if (mainBadge && inpiP) {
-                mainBadge.className = 'oracle-badge ' + (inpiP.isStale ? 'stale' : inpiP.ageMinutes < 30 ? '' : 'warn');
-            }
+            if (mainBadge && inpiP) { mainBadge.className = 'oracle-badge ' + (inpiP.isStale ? 'stale' : inpiP.ageMinutes < 30 ? '' : 'warn'); }
 
             updateCountdown(prices);
         } catch (e) {
-            console.warn('Bot health failed:', e.message);
             const statusEl = document.getElementById('statBotStatus');
             if (statusEl) { statusEl.textContent = '🔴 Offline'; statusEl.style.color = '#ff5252'; }
         }
