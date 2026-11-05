@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Phircle V5 — Pause & Klarheit</title>
+<title>Phircle V6 — Perfected Geometry</title>
 <style>
   * { box-sizing: border-box; }
   html, body { margin:0; padding:0; height:100%; overflow:hidden;
@@ -24,7 +24,7 @@
     gap:4px; z-index:10; }
   #layers button { background:rgba(8,8,16,0.82); border:1px solid #333; color:#888;
     padding:6px 12px; cursor:pointer; font-family:inherit; font-size:10px;
-    letter-spacing:1px; border-radius:3px; transition:all .2s; text-align:left; min-width:120px; }
+    letter-spacing:1px; border-radius:3px; transition:all .2s; text-align:left; min-width:130px; }
   #layers button:hover { border-color:#ffcc00; color:#fff; }
   #layers button.active { background:#ffcc00; color:#000; border-color:#ffcc00; }
   #wallet { position:fixed; top:12px; right:150px; padding:8px 14px;
@@ -65,38 +65,38 @@
 <canvas id="canvas"></canvas>
 
 <div id="hud">
-  <h1>🌀 PHIRCLE V5</h1>
-  <div class="row"><span>Reihen</span><strong>100</strong></div>
-  <div class="row"><span>Blöcke</span><strong>10.000</strong></div>
+  <h1>🌀 PHIRCLE V6</h1>
+  <div class="row"><span>Rows</span><strong>100</strong></div>
+  <div class="row"><span>Blocks</span><strong>10,000</strong></div>
   <div class="row"><span>Minted</span><strong id="mintedCount">–</strong></div>
   <div class="row"><span>Farming</span><strong id="farmCount">–</strong></div>
-  <div class="row"><span>Angriffe</span><strong id="attackCount">–</strong></div>
-  <div class="row"><span>Partner</span><strong id="partnerCount">–</strong></div>
-  <div class="row"><span>Kegel-Volumen</span><strong id="volCount">–</strong></div>
+  <div class="row"><span>Attacks</span><strong id="attackCount">–</strong></div>
+  <div class="row"><span>Partners</span><strong id="partnerCount">–</strong></div>
+  <div class="row"><span>Cone Volume</span><strong id="volCount">–</strong></div>
   <hr>
   <div class="row"><span>π</span><strong>3.14159</strong></div>
   <div class="row"><span>φ</span><strong>1.61803</strong></div>
-  <div class="row"><span>gold. Winkel</span><strong>137.5°</strong></div>
+  <div class="row"><span>Golden Angle</span><strong>137.5°</strong></div>
   <hr>
   <div class="legend">
     <span><i class="dot" style="background:#3a3a3a"></i>Unminted</span>
     <span><i class="dot" style="background:#cd7f32"></i>Bronze</span>
-    <span><i class="dot" style="background:#c0c0c0"></i>Silber</span>
+    <span><i class="dot" style="background:#c0c0c0"></i>Silver</span>
     <span><i class="dot" style="background:#ffcc00"></i>Gold</span>
-    <span><i class="dot" style="background:#e5e4e2"></i>Platin</span>
-    <span><i class="dot" style="background:#b9f2ff"></i>Diamant</span>
+    <span><i class="dot" style="background:#e5e4e2"></i>Platinum</span>
+    <span><i class="dot" style="background:#b9f2ff"></i>Diamond</span>
     <span><i class="dot" style="background:#00ff88"></i>Farm</span>
-    <span><i class="dot" style="background:#4488ff"></i>Schutz</span>
-    <span><i class="dot" style="background:#ff3333"></i>Angriff</span>
+    <span><i class="dot" style="background:#4488ff"></i>Shield</span>
+    <span><i class="dot" style="background:#ff3333"></i>Attack</span>
     <span><i class="dot" style="background:#c060ff"></i>Partner</span>
   </div>
 </div>
 
 <div id="layers">
-  <button data-layer="rarity" class="active">◆ RARITÄT</button>
-  <button data-layer="owner">◉ BESITZER</button>
+  <button data-layer="rarity" class="active">◆ RARITY</button>
+  <button data-layer="owner">◉ OWNER</button>
   <button data-layer="farming">🌾 FARMING</button>
-  <button data-layer="attack">⚔ ANGRIFF</button>
+  <button data-layer="attack">⚔ ATTACK</button>
   <button data-layer="partner">∞ PARTNER</button>
 </div>
 
@@ -104,21 +104,21 @@
 
 <div id="sidebar"><h2 id="sbTitle">Block Info</h2><div id="sbContent"></div></div>
 <div id="controls">
-  <kbd>Mausrad</kbd> Zoom · <kbd>Drag</kbd> Pan · <kbd>Klick</kbd> Block · <kbd>ESC</kbd> schließen · <kbd>Leertaste</kbd> Pause
+  <kbd>Scroll</kbd> Zoom · <kbd>Drag</kbd> Pan · <kbd>Click</kbd> Block · <kbd>ESC</kbd> Close · <kbd>Space</kbd> Pause
 </div>
-<div id="status"><span id="statusText">Lade…</span></div>
+<div id="status"><span id="statusText">Loading...</span></div>
 
 <script type="module">
 import { ethers } from 'https://cdn.jsdelivr.net/npm/ethers@6.13.4/+esm';
 
 // ============================================================
-// ROBUSTE IMPORTE MIT FALLBACKS
+// ROBUST IMPORTS WITH FALLBACKS
 // ============================================================
 let Config = {}, ABIs = {};
 try { Config = await import('./js/config.js'); }
-catch(e) { console.warn('[phircle] config.js fehlt, nutze Fallbacks', e); }
+catch(e) { console.warn('[phircle] config.js missing, using fallbacks', e); }
 try { ABIs = await import('./js/abis.js'); }
-catch(e) { console.warn('[phircle] abis.js fehlt, nutze Fallbacks', e); }
+catch(e) { console.warn('[phircle] abis.js missing, using fallbacks', e); }
 
 const WORKER_URL             = Config.WORKER_URL             ?? 'https://inpinity-worker-final.s-plat.workers.dev';
 const NFT_ADDRESS            = Config.NFT_ADDRESS            ?? '0x277a0D5864293C78d7387C54B48c35D5E9578Ab1';
@@ -167,7 +167,7 @@ const rarityNames = Config.rarityNames ?? ['Bronze', 'Silver', 'Gold', 'Platinum
 const PUBLIC_RPC = Config.PUBLIC_RPC ?? 'https://mainnet.base.org';
 
 // ============================================================
-// KONSTANTEN — π & φ
+// CONSTANTS — π & φ
 // ============================================================
 const PHI = (1 + Math.sqrt(5)) / 2;
 const PI  = Math.PI;
@@ -200,7 +200,7 @@ const piWaves       = [];
 let activeLayer = 'rarity';
 let userAddress = null;
 let userSigner  = null;
-let isPaused = false; // NEU: Pause-Zustand
+let isPaused = false;
 
 // ============================================================
 // CONTRACTS
@@ -221,7 +221,7 @@ async function connectReadOnly() {
 }
 
 window.connectWallet = async () => {
-  if (!window.ethereum) return alert('Keine Wallet gefunden. Bitte MetaMask installieren.');
+  if (!window.ethereum) return alert('No wallet found. Please install MetaMask.');
   try {
     await window.ethereum.request({ method: 'eth_requestAccounts' });
     const p = new ethers.BrowserProvider(window.ethereum);
@@ -231,7 +231,7 @@ window.connectWallet = async () => {
     btn.textContent = userAddress.slice(0,6) + '…' + userAddress.slice(-4);
     btn.classList.add('connected');
     await connectReadOnly();
-  } catch(e) { alert('Wallet-Verbindung fehlgeschlagen: ' + e.message); }
+  } catch(e) { alert('Wallet connection failed: ' + e.message); }
 };
 
 // ============================================================
@@ -258,27 +258,25 @@ function resize() {
 window.addEventListener('resize', resize); resize();
 
 // ============================================================
-// GEOMETRIE — Fibonacci-Ringe (mit angepasstem inneren Abstand)
+// GEOMETRY — Power Curve (No more squashed center)
 // ============================================================
-const FIB = (() => { const a=[0,1]; while(a.at(-1)<MAX_ROW+1) a.push(a.at(-1)+a.at(-2)); return a; })();
-function fibRadius(row) {
+function blockRadius(row) {
   if (row === 0) return 0;
-  const n = FIB.length-1, t = row/MAX_ROW, idx = t*n;
-  const lo = Math.floor(idx), hi = Math.min(Math.ceil(idx), n);
-  const v = FIB[lo]*(1-(idx-lo)) + FIB[hi]*(idx-lo);
-  // NEU: Sanfterer Anstieg im inneren Bereich, um Überlappung zu reduzieren
-  const scale = Math.pow(row / MAX_ROW, 0.8); 
-  return (v/FIB[n]) * MAX_R * (0.5 + 0.5 * scale);
+  // Power of 0.85 pushes the inner rings out, giving them more space
+  return MAX_R * Math.pow(row / MAX_ROW, 0.85);
 }
+
 function blockPosition(row, col) {
-  const r = fibRadius(row), n = 2*row+1, step = TAU/n;
+  const r = blockRadius(row), n = 2*row+1, step = TAU/n;
   const angle = CENTER_ANGLE + (col-row)*step;
   return { x: CX+Math.cos(angle)*r, y: CY+Math.sin(angle)*r, angle, r };
 }
+
 const blockSize = row => {
-  const base = MAX_R / 108;
-  const lodFactor = Math.max(0.5, Math.min(1.5, view.zoom));
-  return Math.max(1.5, base * (0.8 + row/MAX_ROW*0.6) * lodFactor);
+  const base = MAX_R / 110; // slightly smaller base
+  const lodFactor = Math.max(0.6, Math.min(1.5, view.zoom));
+  const sizeFactor = 0.9 + (row / MAX_ROW) * 0.3;
+  return Math.max(2.5, base * sizeFactor * lodFactor);
 };
 
 // ============================================================
@@ -306,7 +304,7 @@ async function fetchAll(field, subfields) {
 }
 
 async function loadLive() {
-  document.getElementById('statusText').innerHTML = '<span class="live">● Lade Tokens…</span>';
+  document.getElementById('statusText').innerHTML = '<span class="live">● Loading Tokens...</span>';
   try {
     const tokens = await fetchAll('tokens', 'id revealed owner { id }');
     for (const t of tokens) {
@@ -349,12 +347,12 @@ async function loadLive() {
           }
           break;
         }
-      } catch(e) { /* weiter */ }
+      } catch(e) { /* continue */ }
     }
     document.getElementById('statusText').innerHTML =
-      `<span class="live">● LIVE</span> · ${minted.size} Tokens · ${attacks.size} Angriffe`;
+      `<span class="live">● LIVE</span> · ${minted.size} Tokens · ${attacks.size} Attacks`;
   } catch(e) {
-    console.warn('Subgraph fehlgeschlagen', e);
+    console.warn('Subgraph failed', e);
     document.getElementById('statusText').innerHTML =
       '<span class="demo">● Subgraph offline</span>';
   }
@@ -388,7 +386,7 @@ function rarityColor(id, m) {
 }
 
 // ============================================================
-// LAYER-FARBEN
+// LAYER COLORS
 // ============================================================
 function ownerColor(addr) {
   if (!addr) return '#444';
@@ -406,14 +404,14 @@ function getBlockColor(id, row, col, m) {
 }
 
 // ============================================================
-// HINTERGRUND
+// BACKGROUND
 // ============================================================
 function drawBackground(now) {
   const g = ctx.createRadialGradient(CX,CY,0,CX,CY,MAX_R*1.7);
   g.addColorStop(0,'#0d0018'); g.addColorStop(.55,'#050008'); g.addColorStop(1,'#000');
   ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
 
-  // Goldene Spirale
+  // Golden Spiral
   ctx.save(); ctx.translate(CX,CY); ctx.beginPath();
   const turns=6, pts=240;
   for (let i=0;i<=pts;i++){
@@ -423,7 +421,7 @@ function drawBackground(now) {
   }
   ctx.strokeStyle=COLORS.goldenSpiral; ctx.lineWidth=1; ctx.stroke(); ctx.restore();
 
-  // π-Sektoren
+  // π Sectors
   ctx.save(); ctx.translate(CX,CY);
   for (let s = 0; s < 12; s++) {
     const a = (s / 12) * TAU;
@@ -436,11 +434,11 @@ function drawBackground(now) {
   }
   ctx.restore();
 
-  // Spiegelachse
+  // Mirror Axis
   ctx.beginPath(); ctx.moveTo(CX,CY-MAX_R); ctx.lineTo(CX,CY+MAX_R);
   ctx.strokeStyle=COLORS.mirrorAxis; ctx.stroke();
 
-  // Goldener-Winkel-Radar
+  // Golden Angle Radar
   const radarAngle = (now / 1000) * 0.4;
   const grad = ctx.createRadialGradient(CX, CY, 0, CX, CY, MAX_R);
   grad.addColorStop(0, COLORS.radar);
@@ -454,7 +452,7 @@ function drawBackground(now) {
 }
 
 // ============================================================
-// BLÖCKE
+// BLOCKS
 // ============================================================
 function drawBlocks(now) {
   const t = now/1000;
@@ -463,25 +461,25 @@ function drawBlocks(now) {
     const ringRot = (1/Math.pow(PI, 4-Math.min(4,row/25))) * .3 * t;
     for (let col=0; col<n; col++) {
       let p = blockPosition(row, col);
-      if (row>0 && !isPaused) { // NEU: Rotation nur wenn nicht pausiert
+      if (row>0 && !isPaused) {
         const dx=p.x-CX, dy=p.y-CY, c=Math.cos(ringRot), s=Math.sin(ringRot);
         p = { x:CX+dx*c-dy*s, y:CY+dx*s+dy*c };
       }
       const id = blockId(row,col), m = minted.get(id), atk = attacks.get(id);
       const fill = getBlockColor(id, row, col, m);
 
-      // Sternenstaub
+      // Stardust
       if (m && !m.revealed) {
         const sp = .35 + .3*Math.sin(t*2+id);
         ctx.beginPath(); ctx.arc(p.x,p.y,sz*1.6,0,TAU);
         ctx.fillStyle=`rgba(140,100,255,${sp*.3})`; ctx.fill();
       }
-      // Farming-Aura
+      // Farming Aura
       if (m && m.farming && activeLayer !== 'farming') {
         ctx.beginPath(); ctx.arc(p.x,p.y,sz+1.5,0,TAU);
         ctx.fillStyle=COLORS.farming+'33'; ctx.fill();
       }
-      // Schutz-Schild-Ring
+      // Protection Shield Ring
       if (m && m.protected) {
         ctx.beginPath(); ctx.arc(p.x,p.y,sz+3,0,TAU);
         ctx.strokeStyle=COLORS.protected+'66'; ctx.lineWidth=1.2; ctx.stroke();
@@ -512,7 +510,7 @@ function drawBlocks(now) {
         }
       }
 
-      // Countdown-Ring
+      // Countdown Ring
       if (atk) {
         const rem = Math.max(0, atk.endTimestamp - Date.now());
         const total = atk.interval*1000;
@@ -528,7 +526,7 @@ function drawBlocks(now) {
 }
 
 // ============================================================
-// PARTNER-KONSTELLATIONEN
+// PARTNER CONSTELLATIONS
 // ============================================================
 function drawPartnerships(now) {
   if (activeLayer !== 'partner' && activeLayer !== 'rarity') return;
@@ -557,7 +555,7 @@ function drawPartnerships(now) {
 }
 
 // ============================================================
-// ANGRIFFS-STRAHLEN
+// ATTACK RAYS
 // ============================================================
 function drawAttackRays(now) {
   for (const [targetId, atk] of attacks) {
@@ -585,7 +583,7 @@ function drawAttackRays(now) {
     const hy=(1-tt)*(1-tt)*ap.y+2*(1-tt)*tt*cyp+tt*tt*tp.y;
     ctx.beginPath(); ctx.arc(hx,hy,3.4,0,TAU); ctx.fillStyle=COLORS.attack; ctx.fill();
 
-    // π-Welle beim Auftreffen
+    // π wave on impact
     if (prog > 0.95 && Math.random() < 0.1) {
       piWaves.push({ x: tp.x, y: tp.y, startTime: now });
     }
@@ -593,7 +591,7 @@ function drawAttackRays(now) {
 }
 
 // ============================================================
-// π-WELLEN
+// π WAVES
 // ============================================================
 function drawPiWaves(now) {
   for (let i = piWaves.length - 1; i >= 0; i--) {
@@ -616,7 +614,7 @@ function drawPiWaves(now) {
 }
 
 // ============================================================
-// ZENTRUM — ewige Spirale
+// CENTER — Eternal Spiral
 // ============================================================
 function drawCenter(now) {
   const t = now / 1000;
@@ -668,7 +666,7 @@ function loop(now) {
   if (now-lastStats > 600) {
     lastStats = now;
     const farmingCount = [...minted.values()].filter(m => m.farming).length;
-    document.getElementById('mintedCount').textContent = minted.size.toLocaleString('de-DE');
+    document.getElementById('mintedCount').textContent = minted.size.toLocaleString('en-US');
     document.getElementById('attackCount').textContent = attacks.size;
     document.getElementById('farmCount').textContent   = farmingCount;
     document.getElementById('partnerCount').textContent = partnerships.size;
@@ -680,7 +678,7 @@ function loop(now) {
 }
 
 // ============================================================
-// HIT-TEST
+// HIT TEST
 // ============================================================
 function screenToWorld(sx,sy) {
   const bs = 1 + Math.sin(performance.now()/1000/PI)*.006;
@@ -693,7 +691,7 @@ function hitTest(sx,sy) {
     const ringRot=(1/Math.pow(PI,4-Math.min(4,row/25)))*.3*(performance.now()/1000);
     for (let col=0; col<n; col++) {
       let p=blockPosition(row,col);
-      if (row>0 && !isPaused) { // NEU: Rotation nur wenn nicht pausiert
+      if (row>0 && !isPaused) {
         const dx=p.x-CX, dy=p.y-CY, c=Math.cos(ringRot), s=Math.sin(ringRot);
         p={x:CX+dx*c-dy*s, y:CY+dx*s+dy*c};
       }
@@ -714,34 +712,34 @@ async function showBlockInfo(hit) {
   const rName = rIdx != null ? rarityNames[rIdx] : null;
 
   let h = `
-    <div class="info-row"><span>Reihe</span><strong>${hit.row}</strong></div>
-    <div class="info-row"><span>Spalte</span><strong>${hit.col}</strong></div>
+    <div class="info-row"><span>Row</span><strong>${hit.row}</strong></div>
+    <div class="info-row"><span>Column</span><strong>${hit.col}</strong></div>
     <div class="info-row"><span>ID</span><strong>#${id}</strong></div>
-    <div class="info-row"><span>Status</span><strong style="color:${m?'#ffcc00':'#888'}">${m?'Gemintet':'Unminted'}</strong></div>`;
+    <div class="info-row"><span>Status</span><strong style="color:${m?'#ffcc00':'#888'}">${m?'Minted':'Unminted'}</strong></div>`;
   if (m) {
-    h += `<div class="info-row"><span>Reveal</span><strong style="color:${m.revealed?'#00ff88':'#888'}">${m.revealed?'● Ja':'○ Nein'}</strong></div>`;
+    h += `<div class="info-row"><span>Reveal</span><strong style="color:${m.revealed?'#00ff88':'#888'}">${m.revealed?'● Yes':'○ No'}</strong></div>`;
     if (m.owner) h += `<div class="info-row"><span>Owner</span><strong style="font-size:10px">${m.owner.slice(0,6)}…${m.owner.slice(-4)}</strong></div>`;
     if (rName) {
-      h += `<div class="info-row"><span>Rarität</span><strong style="color:${COLORS[rName.toLowerCase()]||'#fff'}">${rName.toUpperCase()}</strong></div>`;
+      h += `<div class="info-row"><span>Rarity</span><strong style="color:${COLORS[rName.toLowerCase()]||'#fff'}">${rName.toUpperCase()}</strong></div>`;
       h += `<div class="rarity-bar" style="background:${COLORS[rName.toLowerCase()]||'#fff'}"></div>`;
     }
-    h += `<div class="info-row"><span>Farming</span><strong style="color:${m.farming?'#00ff88':'#666'}">${m.farming?'● Aktiv':'○ Inaktiv'}</strong></div>`;
-    h += `<div class="info-row"><span>Schutz</span><strong style="color:${m.protected?'#4488ff':'#666'}">${m.protected?'● Aktiv':'○ Inaktiv'}</strong></div>`;
+    h += `<div class="info-row"><span>Farming</span><strong style="color:${m.farming?'#00ff88':'#666'}">${m.farming?'● Active':'○ Inactive'}</strong></div>`;
+    h += `<div class="info-row"><span>Protection</span><strong style="color:${m.protected?'#4488ff':'#666'}">${m.protected?'● Active':'○ Inactive'}</strong></div>`;
   }
-  if (atk) h += `<div class="info-row" style="color:#ff3333"><span>⚠ Angriff</span><strong>${((atk.endTimestamp-Date.now())/1000).toFixed(1)}s</strong></div>`;
-  if (partnerships.has(id)) h += `<div class="info-row"><span>Partner</span><strong>${partnerships.get(id).length}</strong></div>`;
+  if (atk) h += `<div class="info-row" style="color:#ff3333"><span>⚠ Attack</span><strong>${((atk.endTimestamp-Date.now())/1000).toFixed(1)}s</strong></div>`;
+  if (partnerships.has(id)) h += `<div class="info-row"><span>Partners</span><strong>${partnerships.get(id).length}</strong></div>`;
 
   h += '<hr style="border:none;border-top:1px solid #222;margin:14px 0;">';
   if (!m) {
     h += `<button onclick="mintBlock(${hit.row},${hit.col})">⛏ Mint with INPI</button>`;
   } else {
     h += `
-      <button onclick="toggleFarm(${id})">🌾 ${m.farming?'Farming stoppen':'Farming starten'}</button>
-      <button onclick="toggleProtect(${id})">🛡 ${m.protected?'Schutz entfernen':'Schutz kaufen'}</button>
-      <button onclick="startAttack(${id})">⚔ Angriff starten</button>
+      <button onclick="toggleFarm(${id})">🌾 ${m.farming?'Stop Farming':'Start Farming'}</button>
+      <button onclick="toggleProtect(${id})">🛡 ${m.protected?'Remove Protection':'Buy Protection'}</button>
+      <button onclick="startAttack(${id})">⚔ Start Attack</button>
       <button onclick="claimResources(${id})">💰 Claim</button>`;
   }
-  h += `<button class="close" onclick="document.getElementById('sidebar').classList.remove('active')">Schließen</button>`;
+  h += `<button class="close" onclick="document.getElementById('sidebar').classList.remove('active')">Close</button>`;
   document.getElementById('sbContent').innerHTML = h;
   document.getElementById('sidebar').classList.add('active');
 }
@@ -750,14 +748,14 @@ async function showBlockInfo(hit) {
 // CONTRACT HOOKS
 // ============================================================
 async function getSignerOrWarn() {
-  if (!window.ethereum) { alert('Keine Wallet gefunden'); return null; }
+  if (!window.ethereum) { alert('No wallet found'); return null; }
   if (!userSigner) {
     try {
       await window.ethereum.request({ method: 'eth_requestAccounts' });
       const p = new ethers.BrowserProvider(window.ethereum);
       userSigner = await p.getSigner();
       userAddress = await userSigner.getAddress();
-    } catch(e) { alert('Wallet-Verbindung fehlgeschlagen'); return null; }
+    } catch(e) { alert('Wallet connection failed'); return null; }
   }
   return userSigner;
 }
@@ -765,7 +763,7 @@ window.mintBlock = async (row,col) => {
   const signer = await getSignerOrWarn(); if (!signer) return;
   const nft = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
   try { const tx = await nft.mintWithINPI(row,col); await tx.wait(); alert('Mint OK'); }
-  catch(e) { alert('Mint fehlgeschlagen: ' + (e.reason||e.message)); }
+  catch(e) { alert('Mint failed: ' + (e.reason||e.message)); }
 };
 window.toggleFarm = async (id) => {
   const signer = await getSignerOrWarn(); if (!signer) return;
@@ -774,33 +772,33 @@ window.toggleFarm = async (id) => {
   try {
     const tx = m?.farming ? await c.stopFarming(id) : await c.startFarming(id);
     await tx.wait(); alert('Farming OK');
-  } catch(e) { alert('Farming fehlgeschlagen: ' + (e.reason||e.message)); }
+  } catch(e) { alert('Farming failed: ' + (e.reason||e.message)); }
 };
 window.toggleProtect = async (id) => {
   const signer = await getSignerOrWarn(); if (!signer) return;
   const c = new ethers.Contract(MERCENARY_V4_ADDRESS, MERCENARY_V4_ABI, signer);
   try {
     const tx = await c.setProtection(0, id, 1, true);
-    await tx.wait(); alert('Schutz OK');
-  } catch(e) { alert('Schutz fehlgeschlagen: ' + (e.reason||e.message)); }
+    await tx.wait(); alert('Protection OK');
+  } catch(e) { alert('Protection failed: ' + (e.reason||e.message)); }
 };
 window.startAttack = async (targetId) => {
   const signer = await getSignerOrWarn(); if (!signer) return;
   const c = new ethers.Contract(PIRATES_V6_ADDRESS, PIRATES_V6_ABI, signer);
   try {
     const tx = await c.startAttack(0, targetId, 0);
-    await tx.wait(); alert('Angriff gestartet');
-  } catch(e) { alert('Angriff fehlgeschlagen: ' + (e.reason||e.message)); }
+    await tx.wait(); alert('Attack started');
+  } catch(e) { alert('Attack failed: ' + (e.reason||e.message)); }
 };
 window.claimResources = async (id) => {
   const signer = await getSignerOrWarn(); if (!signer) return;
   const c = new ethers.Contract(FARMING_V6_ADDRESS, FARMING_V6_ABI, signer);
   try { const tx = await c.claimResources(id); await tx.wait(); alert('Claim OK'); }
-  catch(e) { alert('Claim fehlgeschlagen: ' + (e.reason||e.message)); }
+  catch(e) { alert('Claim failed: ' + (e.reason||e.message)); }
 };
 
 // ============================================================
-// INTERAKTION
+// INTERACTION
 // ============================================================
 let isDragging=false, wasDragging=false, dragStart={x:0,y:0}, dragOrig={x:0,y:0};
 canvas.addEventListener('click', e => {
@@ -830,14 +828,14 @@ window.addEventListener('mousemove', e => {
 });
 window.addEventListener('mouseup', ()=> isDragging=false);
 
-// Pause-Funktion (NEU)
+// Pause Function
 window.addEventListener('keydown', e => {
-  if (e.code === 'Space') { // Leertaste
+  if (e.code === 'Space') {
     e.preventDefault();
     isPaused = !isPaused;
     document.getElementById('statusText').innerHTML = isPaused 
-      ? '<span style="color:#ff8800">● PAUSIERT</span> · Klicke Blöcke an' 
-      : '<span class="live">● LIVE</span> · Animation läuft';
+      ? '<span style="color:#ff8800">● PAUSED</span> · Click blocks' 
+      : '<span class="live">● LIVE</span> · Animation running';
   }
   if (e.key === 'Escape') document.getElementById('sidebar').classList.remove('active');
   const layers = ['rarity','owner','farming','attack','partner'];
