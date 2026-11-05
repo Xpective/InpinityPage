@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Phircle V6 — Perfected Geometry</title>
+<title>Phircle V8 — Explosion Pause & Live Data</title>
 <style>
   * { box-sizing: border-box; }
   html, body { margin:0; padding:0; height:100%; overflow:hidden;
@@ -12,8 +12,14 @@
   #hud { position:fixed; top:12px; left:12px; padding:14px 18px;
     background:rgba(8,8,16,0.82); border:1px solid #ffcc00; font-size:11px;
     line-height:1.55; min-width:260px; backdrop-filter:blur(6px);
-    border-radius:4px; z-index:10; }
-  #hud h1 { color:#ffcc00; margin:0 0 8px; font-size:14px; letter-spacing:2px; }
+    border-radius:4px; z-index:10; transition: all 0.3s ease; }
+  #hud.collapsed { min-width: auto; padding: 8px 12px; }
+  #hud.collapsed .hud-content { display: none; }
+  #hud h1 { color:#ffcc00; margin:0 0 8px; font-size:14px; letter-spacing:2px;
+    display: flex; justify-content: space-between; align-items: center; }
+  #hud h1 button { background: none; border: 1px solid #ffcc00; color: #ffcc00;
+    cursor: pointer; font-family: inherit; font-size: 10px; padding: 2px 6px;
+    border-radius: 3px; }
   #hud .row { display:flex; justify-content:space-between; color:#888; }
   #hud .row strong { color:#ffcc00; }
   #hud hr { border:none; border-top:1px solid #222; margin:6px 0; }
@@ -65,30 +71,37 @@
 <canvas id="canvas"></canvas>
 
 <div id="hud">
-  <h1>🌀 PHIRCLE V6</h1>
-  <div class="row"><span>Rows</span><strong>100</strong></div>
-  <div class="row"><span>Blocks</span><strong>10,000</strong></div>
-  <div class="row"><span>Minted</span><strong id="mintedCount">–</strong></div>
-  <div class="row"><span>Farming</span><strong id="farmCount">–</strong></div>
-  <div class="row"><span>Attacks</span><strong id="attackCount">–</strong></div>
-  <div class="row"><span>Partners</span><strong id="partnerCount">–</strong></div>
-  <div class="row"><span>Cone Volume</span><strong id="volCount">–</strong></div>
-  <hr>
-  <div class="row"><span>π</span><strong>3.14159</strong></div>
-  <div class="row"><span>φ</span><strong>1.61803</strong></div>
-  <div class="row"><span>Golden Angle</span><strong>137.5°</strong></div>
-  <hr>
-  <div class="legend">
-    <span><i class="dot" style="background:#3a3a3a"></i>Unminted</span>
-    <span><i class="dot" style="background:#cd7f32"></i>Bronze</span>
-    <span><i class="dot" style="background:#c0c0c0"></i>Silver</span>
-    <span><i class="dot" style="background:#ffcc00"></i>Gold</span>
-    <span><i class="dot" style="background:#e5e4e2"></i>Platinum</span>
-    <span><i class="dot" style="background:#b9f2ff"></i>Diamond</span>
-    <span><i class="dot" style="background:#00ff88"></i>Farm</span>
-    <span><i class="dot" style="background:#4488ff"></i>Shield</span>
-    <span><i class="dot" style="background:#ff3333"></i>Attack</span>
-    <span><i class="dot" style="background:#c060ff"></i>Partner</span>
+  <h1>
+    <span>🌀 PHIRCLE V8</span>
+    <button onclick="document.getElementById('hud').classList.toggle('collapsed')">HIDE</button>
+  </h1>
+  <div class="hud-content">
+    <div class="row"><span>Rows</span><strong>100</strong></div>
+    <div class="row"><span>Blocks</span><strong>10,000</strong></div>
+    <div class="row"><span>Minted</span><strong id="mintedCount">–</strong></div>
+    <div class="row"><span>My Blocks</span><strong id="myBlocksCount" style="color:#00e5ff">0</strong></div>
+    <div class="row"><span>Farming</span><strong id="farmCount">–</strong></div>
+    <div class="row"><span>Attacks</span><strong id="attackCount">–</strong></div>
+    <div class="row"><span>Partners</span><strong id="partnerCount">–</strong></div>
+    <div class="row"><span>Cone Volume</span><strong id="volCount">–</strong></div>
+    <hr>
+    <div class="row"><span>π</span><strong>3.14159</strong></div>
+    <div class="row"><span>φ</span><strong>1.61803</strong></div>
+    <div class="row"><span>Golden Angle</span><strong>137.5°</strong></div>
+    <hr>
+    <div class="legend">
+      <span><i class="dot" style="background:#3a3a3a"></i>Unminted</span>
+      <span><i class="dot" style="background:#cd7f32"></i>Bronze</span>
+      <span><i class="dot" style="background:#c0c0c0"></i>Silver</span>
+      <span><i class="dot" style="background:#ffcc00"></i>Gold</span>
+      <span><i class="dot" style="background:#e5e4e2"></i>Platinum</span>
+      <span><i class="dot" style="background:#b9f2ff"></i>Diamond</span>
+      <span><i class="dot" style="background:#00ff88"></i>Farm</span>
+      <span><i class="dot" style="background:#4488ff"></i>Shield</span>
+      <span><i class="dot" style="background:#ff3333"></i>Attack</span>
+      <span><i class="dot" style="background:#c060ff"></i>Partner</span>
+      <span><i class="dot" style="background:#00e5ff"></i>Mine</span>
+    </div>
   </div>
 </div>
 
@@ -104,7 +117,7 @@
 
 <div id="sidebar"><h2 id="sbTitle">Block Info</h2><div id="sbContent"></div></div>
 <div id="controls">
-  <kbd>Scroll</kbd> Zoom · <kbd>Drag</kbd> Pan · <kbd>Click</kbd> Block · <kbd>ESC</kbd> Close · <kbd>Space</kbd> Pause
+  <kbd>Scroll</kbd> Zoom · <kbd>Drag</kbd> Pan · <kbd>Click</kbd> Block · <kbd>ESC</kbd> Close · <kbd>Space</kbd> Pause/Explode
 </div>
 <div id="status"><span id="statusText">Loading...</span></div>
 
@@ -132,7 +145,7 @@ const NFT_ABI = ABIs.NFT_ABI ?? ABIs.InpinityNFT_ABI ?? [
   "function mintWithETH(uint256 row, uint256 col) payable",
   "function mintWithINPI(uint256 row, uint256 col)",
   "function mintMixed(uint256 row, uint256 col) payable",
-  "function revealBlock(uint256 tokenId, bytes piProof, bytes phiProof, uint8 piDigit, uint8 phiDigit)",
+  "function revealBlock(uint256 tokenId, bytes32[] piProof, bytes32[] phiProof, uint8 piDigit, uint8 phiDigit)",
   "function calculateRarity(uint256 tokenId) view returns (uint8)",
   "function currentMaxRow() view returns (uint256)",
   "function isValidPosition(uint256 row, uint256 col) view returns (bool)",
@@ -146,7 +159,7 @@ const FARMING_V6_ABI = ABIs.FARMING_V6_ABI ?? ABIs.FarmingV6_ABI ?? [
   "function buyBoost(uint256 tokenId, uint256 daysAmount)"
 ];
 const PIRATES_V6_ABI = ABIs.PIRATES_V6_ABI ?? ABIs.PiratesV6_ABI ?? [
-  "function startAttack(uint256 attackerTokenId, uint256 targetTokenId, uint256 resourceId)",
+  "function startAttack(uint256 attackerTokenId, uint256 targetTokenId, uint8 resourceId)",
   "function executeAttack(uint256 targetTokenId, uint256 attackIndex)",
   "function buyPirateBoost(uint256 tokenId, uint256 daysAmount)"
 ];
@@ -180,7 +193,7 @@ const COLORS = {
   unminted:'#3a3a3a', bronze:'#cd7f32', silver:'#c0c0c0',
   gold:'#ffcc00', platinum:'#e5e4e2', diamond:'#b9f2ff',
   farming:'#00ff88', protected:'#4488ff', attack:'#ff3333',
-  partner:'#c060ff',
+  partner:'#c060ff', mine:'#00e5ff',
   mirrorAxis:'rgba(255,204,0,.14)',
   goldenSpiral:'rgba(255,204,0,.045)',
   sector:'rgba(255,204,0,.035)',
@@ -201,6 +214,8 @@ let activeLayer = 'rarity';
 let userAddress = null;
 let userSigner  = null;
 let isPaused = false;
+let myBlocksCount = 0;
+let explosionFactor = 1.0; // For pause explosion
 
 // ============================================================
 // CONTRACTS
@@ -226,13 +241,23 @@ window.connectWallet = async () => {
     await window.ethereum.request({ method: 'eth_requestAccounts' });
     const p = new ethers.BrowserProvider(window.ethereum);
     userSigner = await p.getSigner();
-    userAddress = await userSigner.getAddress();
+    userAddress = (await userSigner.getAddress()).toLowerCase();
     const btn = document.getElementById('wallet');
     btn.textContent = userAddress.slice(0,6) + '…' + userAddress.slice(-4);
     btn.classList.add('connected');
     await connectReadOnly();
+    countMyBlocks();
   } catch(e) { alert('Wallet connection failed: ' + e.message); }
 };
+
+function countMyBlocks() {
+  if (!userAddress) return;
+  myBlocksCount = 0;
+  for (const m of minted.values()) {
+    if (m.owner && m.owner.toLowerCase() === userAddress) myBlocksCount++;
+  }
+  document.getElementById('myBlocksCount').textContent = myBlocksCount;
+}
 
 // ============================================================
 // ID / POSITION
@@ -258,12 +283,12 @@ function resize() {
 window.addEventListener('resize', resize); resize();
 
 // ============================================================
-// GEOMETRY — Power Curve (No more squashed center)
+// GEOMETRY — Power Curve + Explosion
 // ============================================================
 function blockRadius(row) {
   if (row === 0) return 0;
-  // Power of 0.85 pushes the inner rings out, giving them more space
-  return MAX_R * Math.pow(row / MAX_ROW, 0.85);
+  // Power curve for even distribution, multiplied by explosionFactor when paused
+  return MAX_R * Math.pow(row / MAX_ROW, 0.85) * explosionFactor;
 }
 
 function blockPosition(row, col) {
@@ -273,19 +298,19 @@ function blockPosition(row, col) {
 }
 
 const blockSize = row => {
-  const base = MAX_R / 110; // slightly smaller base
+  const base = MAX_R / 110;
   const lodFactor = Math.max(0.6, Math.min(1.5, view.zoom));
   const sizeFactor = 0.9 + (row / MAX_ROW) * 0.3;
   return Math.max(2.5, base * sizeFactor * lodFactor);
 };
 
 // ============================================================
-// SUBGRAPH
+// SUBGRAPH FETCH (FIXED)
 // ============================================================
-async function fetchAll(field, subfields) {
+async function fetchAll(field, subfields, where = "") {
   const pageSize = 1000; let skip = 0, all = [];
   while (true) {
-    const q = `{ ${field}(first:${pageSize}, skip:${skip}) { ${subfields} } }`;
+    const q = `{ ${field}(first:${pageSize}, skip:${skip}${where ? ", where:" + where : ""}) { ${subfields} } }`;
     let res, json;
     try {
       res = await fetch(`${WORKER_URL}/api/subgraph`, {
@@ -309,19 +334,29 @@ async function loadLive() {
     const tokens = await fetchAll('tokens', 'id revealed owner { id }');
     for (const t of tokens) {
       const id = parseInt(t.id); const rc = idToRC(id); if (!rc) continue;
-      minted.set(id, { revealed: t.revealed === true, owner: t.owner?.id || null,
-                       farming: false, protected: false });
+      minted.set(id, { 
+        revealed: t.revealed === true, 
+        owner: t.owner?.id ? t.owner.id.toLowerCase() : null,
+        farming: false, 
+        protected: false 
+      });
     }
+    // FIX: Farming V6 query with correct fields
     try {
-      const farms = await fetchAll('farmV6S', 'blockNumber active');
-      for (const f of farms) if (f.active) {
-        const m = minted.get(parseInt(f.blockNumber));
-        if (m) m.farming = true;
+      const farms = await fetchAll('farmV6S', 'blockNumber active stopTime');
+      const now = Date.now() / 1000;
+      for (const f of farms) {
+        const stopTime = Number(f.stopTime) || 0;
+        if (f.active && (stopTime === 0 || stopTime > now)) {
+          const m = minted.get(parseInt(f.blockNumber));
+          if (m) m.farming = true;
+        }
       }
     } catch(e) { console.warn('farms', e); }
+    
+    // FIX: Attacks V6 query
     try {
-      const atks = await fetchAll('attackV6S',
-        'attackerTokenId targetTokenId startTime endTime');
+      const atks = await fetchAll('attackV6S', 'attackerTokenId targetTokenId startTime endTime');
       for (const a of atks) {
         const end = Number(a.endTime)*1000;
         if (end < Date.now()) continue;
@@ -334,6 +369,8 @@ async function loadLive() {
         });
       }
     } catch(e) { console.warn('attacks', e); }
+    
+    // Partnerships (optional, may not exist)
     for (const field of ['partnerships', 'partnershipV2S', 'partners']) {
       try {
         const ps = await fetchAll(field, 'tokenId partnerId');
@@ -349,8 +386,12 @@ async function loadLive() {
         }
       } catch(e) { /* continue */ }
     }
+    
     document.getElementById('statusText').innerHTML =
       `<span class="live">● LIVE</span> · ${minted.size} Tokens · ${attacks.size} Attacks`;
+      
+    prefetchRarities();
+    
   } catch(e) {
     console.warn('Subgraph failed', e);
     document.getElementById('statusText').innerHTML =
@@ -359,7 +400,7 @@ async function loadLive() {
 }
 
 // ============================================================
-// RARITY on-chain
+// RARITY (pre-fetching)
 // ============================================================
 async function getRarity(id) {
   if (rarityCache.has(id)) return rarityCache.get(id);
@@ -370,10 +411,19 @@ async function getRarity(id) {
     rarityCache.set(id, idx);
     return idx;
   } catch(e) {
-    console.warn('calculateRarity failed', id, e);
     rarityCache.set(id, null);
     return null;
   }
+}
+
+async function prefetchRarities() {
+  const ids = [...minted.keys()];
+  for (let i = 0; i < ids.length; i += 10) {
+    const batch = ids.slice(i, i + 10);
+    await Promise.all(batch.map(id => getRarity(id)));
+    await new Promise(r => setTimeout(r, 100));
+  }
+  console.log('[phircle] Rarities prefetched');
 }
 
 function rarityColor(id, m) {
@@ -452,13 +502,16 @@ function drawBackground(now) {
 }
 
 // ============================================================
-// BLOCKS
+// BLOCKS & PERSONAL CONSTELLATION
 // ============================================================
 function drawBlocks(now) {
   const t = now/1000;
+  const myBlocksPos = [];
+
   for (let row=0; row<=MAX_ROW; row++) {
     const n = 2*row+1, sz = blockSize(row);
-    const ringRot = (1/Math.pow(PI, 4-Math.min(4,row/25))) * .3 * t;
+    // Rotation slows down when explosionFactor increases
+    const ringRot = isPaused ? 0 : (1/Math.pow(PI, 4-Math.min(4,row/25))) * .3 * t;
     for (let col=0; col<n; col++) {
       let p = blockPosition(row, col);
       if (row>0 && !isPaused) {
@@ -467,6 +520,9 @@ function drawBlocks(now) {
       }
       const id = blockId(row,col), m = minted.get(id), atk = attacks.get(id);
       const fill = getBlockColor(id, row, col, m);
+      
+      const isMine = userAddress && m && m.owner === userAddress;
+      if (isMine) myBlocksPos.push(p);
 
       // Stardust
       if (m && !m.revealed) {
@@ -474,8 +530,18 @@ function drawBlocks(now) {
         ctx.beginPath(); ctx.arc(p.x,p.y,sz*1.6,0,TAU);
         ctx.fillStyle=`rgba(140,100,255,${sp*.3})`; ctx.fill();
       }
+      
+      // MY BLOCKS AURA
+      if (isMine) {
+        const pulse = .5 + .5*Math.sin(t*3 + id);
+        ctx.beginPath(); ctx.arc(p.x,p.y,sz + 3 + pulse*2,0,TAU);
+        ctx.strokeStyle=COLORS.mine; ctx.lineWidth=1.5; ctx.stroke();
+        ctx.beginPath(); ctx.arc(p.x,p.y,sz + 1,0,TAU);
+        ctx.fillStyle=COLORS.mine+'33'; ctx.fill();
+      }
+
       // Farming Aura
-      if (m && m.farming && activeLayer !== 'farming') {
+      if (m && m.farming && activeLayer !== 'farming' && !isMine) {
         ctx.beginPath(); ctx.arc(p.x,p.y,sz+1.5,0,TAU);
         ctx.fillStyle=COLORS.farming+'33'; ctx.fill();
       }
@@ -522,6 +588,18 @@ function drawBlocks(now) {
         ctx.lineWidth=2; ctx.stroke();
       }
     }
+  }
+
+  // Draw Personal Constellation
+  if (myBlocksPos.length > 1) {
+    ctx.beginPath();
+    ctx.moveTo(myBlocksPos[0].x, myBlocksPos[0].y);
+    for (let i = 1; i < myBlocksPos.length; i++) {
+      ctx.lineTo(myBlocksPos[i].x, myBlocksPos[i].y);
+    }
+    ctx.strokeStyle = 'rgba(0, 229, 255, 0.15)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
   }
 }
 
@@ -583,7 +661,6 @@ function drawAttackRays(now) {
     const hy=(1-tt)*(1-tt)*ap.y+2*(1-tt)*tt*cyp+tt*tt*tp.y;
     ctx.beginPath(); ctx.arc(hx,hy,3.4,0,TAU); ctx.fillStyle=COLORS.attack; ctx.fill();
 
-    // π wave on impact
     if (prog > 0.95 && Math.random() < 0.1) {
       piWaves.push({ x: tp.x, y: tp.y, startTime: now });
     }
@@ -648,6 +725,10 @@ function loop(now) {
   view.ox += (view.tOx-view.ox)*.12;
   view.oy += (view.tOy-view.oy)*.12;
 
+  // Animate explosion factor
+  const targetExplosion = isPaused ? 1.6 : 1.0;
+  explosionFactor += (targetExplosion - explosionFactor) * 0.05;
+
   ctx.setTransform(1,0,0,1,0,0); ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H);
   drawBackground(now);
 
@@ -673,6 +754,7 @@ function loop(now) {
     const r = MAX_R;
     const vol = (PI * r * r * r * PHI / 3) / 1e9;
     document.getElementById('volCount').textContent = vol.toFixed(2) + ' km³';
+    if (userAddress) countMyBlocks();
   }
   requestAnimationFrame(loop);
 }
@@ -718,7 +800,10 @@ async function showBlockInfo(hit) {
     <div class="info-row"><span>Status</span><strong style="color:${m?'#ffcc00':'#888'}">${m?'Minted':'Unminted'}</strong></div>`;
   if (m) {
     h += `<div class="info-row"><span>Reveal</span><strong style="color:${m.revealed?'#00ff88':'#888'}">${m.revealed?'● Yes':'○ No'}</strong></div>`;
-    if (m.owner) h += `<div class="info-row"><span>Owner</span><strong style="font-size:10px">${m.owner.slice(0,6)}…${m.owner.slice(-4)}</strong></div>`;
+    if (m.owner) {
+      const isMine = userAddress && m.owner === userAddress;
+      h += `<div class="info-row"><span>Owner</span><strong style="font-size:10px; color:${isMine?'#00e5ff':'#e0e0e0'}">${isMine?'YOU':m.owner.slice(0,6)+'…'+m.owner.slice(-4)}</strong></div>`;
+    }
     if (rName) {
       h += `<div class="info-row"><span>Rarity</span><strong style="color:${COLORS[rName.toLowerCase()]||'#fff'}">${rName.toUpperCase()}</strong></div>`;
       h += `<div class="rarity-bar" style="background:${COLORS[rName.toLowerCase()]||'#fff'}"></div>`;
@@ -745,7 +830,7 @@ async function showBlockInfo(hit) {
 }
 
 // ============================================================
-// CONTRACT HOOKS
+// CONTRACT HOOKS (FIXED)
 // ============================================================
 async function getSignerOrWarn() {
   if (!window.ethereum) { alert('No wallet found'); return null; }
@@ -754,7 +839,8 @@ async function getSignerOrWarn() {
       await window.ethereum.request({ method: 'eth_requestAccounts' });
       const p = new ethers.BrowserProvider(window.ethereum);
       userSigner = await p.getSigner();
-      userAddress = await userSigner.getAddress();
+      userAddress = (await userSigner.getAddress()).toLowerCase();
+      countMyBlocks();
     } catch(e) { alert('Wallet connection failed'); return null; }
   }
   return userSigner;
@@ -785,8 +871,22 @@ window.toggleProtect = async (id) => {
 window.startAttack = async (targetId) => {
   const signer = await getSignerOrWarn(); if (!signer) return;
   const c = new ethers.Contract(PIRATES_V6_ADDRESS, PIRATES_V6_ABI, signer);
+  
+  // Find first own block to use as attacker
+  let attackerTokenId = null;
+  if (userAddress) {
+    for (const [tid, m] of minted) {
+      if (m.owner === userAddress) { attackerTokenId = tid; break; }
+    }
+  }
+  
+  if (attackerTokenId === null) {
+    alert('You need to own at least one block to launch an attack.');
+    return;
+  }
+  
   try {
-    const tx = await c.startAttack(0, targetId, 0);
+    const tx = await c.startAttack(attackerTokenId, targetId, 0);
     await tx.wait(); alert('Attack started');
   } catch(e) { alert('Attack failed: ' + (e.reason||e.message)); }
 };
@@ -828,13 +928,22 @@ window.addEventListener('mousemove', e => {
 });
 window.addEventListener('mouseup', ()=> isDragging=false);
 
-// Pause Function
+// LAYER BUTTONS
+document.querySelectorAll('#layers button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#layers button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeLayer = btn.dataset.layer;
+  });
+});
+
+// Pause Function (Spacebar)
 window.addEventListener('keydown', e => {
   if (e.code === 'Space') {
     e.preventDefault();
     isPaused = !isPaused;
     document.getElementById('statusText').innerHTML = isPaused 
-      ? '<span style="color:#ff8800">● PAUSED</span> · Click blocks' 
+      ? '<span style="color:#ff8800">● PAUSED (Exploded)</span> · Click blocks' 
       : '<span class="live">● LIVE</span> · Animation running';
   }
   if (e.key === 'Escape') document.getElementById('sidebar').classList.remove('active');
