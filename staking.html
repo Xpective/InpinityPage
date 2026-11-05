@@ -12,11 +12,127 @@
     <link rel="stylesheet" href="css/responsive.css" />
     <link rel="stylesheet" href="css/color.css" />
     <link rel="stylesheet" href="css/staking.css" />
+    
+    <!-- Externe Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <!-- ★ IDEE 5: Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
     <link rel="icon" type="image/png" href="favicon.webp">
     <meta name="description" content="Stake INPI tokens or Uniswap V4 LP positions on Base.">
     <meta name="theme-color" content="#140f1f">
+    
+    <style>
+        /* ★ NEU: CSS für die 7 Ideen */
+        
+        /* 1. Max Button */
+        .input-wrapper { 
+            position: relative; 
+            display: flex; 
+            align-items: center; 
+            width: 100%;
+        }
+        
+        .max-btn {
+            position: absolute; 
+            right: 12px; 
+            top: 50%; 
+            transform: translateY(-50%);
+            background: rgba(255, 215, 0, 0.15); 
+            color: var(--quinary-color);
+            border: 1px solid rgba(255, 215, 0, 0.4); 
+            border-radius: 6px;
+            padding: 0.2rem 0.5rem; 
+            font-size: 0.75rem; 
+            font-weight: 800; 
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .max-btn:hover { 
+            background: rgba(255, 215, 0, 0.3); 
+        }
+
+        /* 4. Add to Wallet Button */
+        .add-token-btn {
+            background: rgba(255, 165, 0, 0.15); 
+            color: #ff9900; 
+            border: 1px solid rgba(255, 165, 0, 0.4);
+            border-radius: 50%; 
+            width: 32px; 
+            height: 32px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            cursor: pointer; 
+            margin-left: 10px; 
+            font-size: 1.1rem; 
+            transition: all 0.2s;
+        }
+        
+        .add-token-btn:hover { 
+            background: rgba(255, 165, 0, 0.3); 
+            transform: scale(1.1); 
+        }
+
+        /* 6. Tooltips */
+        .info-tooltip { 
+            position: relative; 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            cursor: help; 
+            margin-left: 4px; 
+            width: 14px; 
+            height: 14px; 
+            border-radius: 50%; 
+            background: rgba(255,255,255,0.2); 
+            color: #fff; 
+            font-size: 0.6rem; 
+            font-weight: bold; 
+        }
+        
+        .info-tooltip .tooltiptext {
+            visibility: hidden; 
+            width: 220px; 
+            background-color: rgba(20,15,31,0.95);
+            color: #fff; 
+            text-align: center; 
+            border-radius: 8px; 
+            padding: 10px;
+            position: absolute; 
+            z-index: 9999; 
+            bottom: 150%; 
+            left: 50%; 
+            margin-left: -110px;
+            opacity: 0; 
+            transition: opacity 0.3s; 
+            font-size: 0.75rem; 
+            border: 1px solid var(--quinary-color);
+            font-weight: normal; 
+            line-height: 1.4; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        
+        .info-tooltip:hover .tooltiptext { 
+            visibility: visible; 
+            opacity: 1; 
+        }
+
+        /* 7. NFT Preview Avatar */
+        .nft-avatar {
+            width: 40px; 
+            height: 40px; 
+            border-radius: 50%; 
+            background: #2a1a4a;
+            border: 2px solid var(--quinary-color); 
+            object-fit: cover;
+            margin-right: 12px; 
+            display: inline-block; 
+            vertical-align: middle;
+        }
+    </style>
 </head>
 <body class="staking-page">
 <header class="site-header">
@@ -49,7 +165,7 @@
         <p>⚠️ <strong>Official INPI token:</strong> <code>0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</code>. Verify every address on the <a href="index.html">homepage</a>.</p>
     </section>
 
-    <!-- ★ NEU: Sticky Glass Wallet Bar mit X-Button -->
+    <!-- ★ Sticky Glass Wallet Bar mit X-Button und MetaMask Add-Button -->
     <div class="wallet-bar" id="walletBar">
         <!-- Schließen Button (X) -->
         <button class="wallet-close-btn" id="walletCloseBtn" aria-label="Close Wallet">×</button>
@@ -58,10 +174,16 @@
             <div class="wallet-status" id="walletStatusText">🔴 Wallet not connected</div>
             <div class="wallet-address" id="walletStatus" style="display:none;"></div>
         </div>
-        <div class="wallet-balance-group" id="tokenBalanceInfo" style="display:none;">
-            <div class="wallet-balance-label">INPI Balance</div>
-            <div class="wallet-balance" id="tokenBalance">0</div>
+        
+        <div class="wallet-balance-group" id="tokenBalanceInfo" style="display:none; align-items: center;">
+            <div>
+                <div class="wallet-balance-label">INPI Balance</div>
+                <div class="wallet-balance" id="tokenBalance">0</div>
+            </div>
+            <!-- ★ IDEE 4: Add to Wallet -->
+            <div class="add-token-btn" id="addTokenBtn" title="Add INPI to MetaMask">🦊</div>
         </div>
+        
         <button id="connectWalletBtn" class="btn">🔌 Connect Wallet</button>
     </div>
 
@@ -130,12 +252,10 @@
                 </div>
                 
                 <div class="chart-controls-wrapper" style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end;">
-                    <!-- ★ TOP-IDEE: Pool Switcher -->
                     <div class="chart-controls pool-controls">
                         <button class="chart-btn pool-btn active" data-pool="eth">ETH Pool</button>
                         <button class="chart-btn pool-btn" data-pool="usdc">USDC Pool</button>
                     </div>
-                    <!-- Zeitraum Buttons -->
                     <div class="chart-controls">
                         <button class="chart-btn timeframe-btn" data-hours="24">1D</button>
                         <button class="chart-btn timeframe-btn" data-hours="72">3D</button>
@@ -144,8 +264,8 @@
                         <button class="chart-btn timeframe-btn" data-hours="0">ALL</button>
                     </div>
                 </div>
-
             </div>
+            
             <div class="chart-body"><canvas id="priceChart"></canvas></div>
             
             <div class="trade-actions">
@@ -157,6 +277,7 @@
                 </a>
             </div>
         </div>
+        
         <div class="chart-card">
             <div class="chart-card-header">
                 <h3 class="chart-card-title">🍩 TVL Distribution (EUR)</h3>
@@ -182,6 +303,7 @@
                 <span>Reward pool: <strong id="oldPool">0</strong> INPI</span>
             </div>
         </div>
+        
         <div class="pool-grid">
             <div class="pool-card">
                 <div class="pool-header">
@@ -219,10 +341,23 @@
             <div class="portfolio-summary" id="portfolioSummary">
                 <h3>📊 Your Portfolio Overview</h3>
                 <div class="portfolio-grid">
-                    <div class="portfolio-item"><div class="portfolio-item-label">Total Staked (EUR)</div><div class="portfolio-item-value gold" id="portStakeEUR">€ 0.00</div></div>
-                    <div class="portfolio-item"><div class="portfolio-item-label">Pending Rewards</div><div class="portfolio-item-value green" id="portPending">0 INPI</div></div>
-                    <div class="portfolio-item"><div class="portfolio-item-label">Expected Yearly (EUR)</div><div class="portfolio-item-value green" id="portYearlyEUR">€ 0.00</div></div>
-                    <div class="portfolio-item"><div class="portfolio-item-label">Portfolio APR</div><div class="portfolio-item-value gold" id="portAPR">0%</div></div>
+                    <div class="portfolio-item">
+                        <div class="portfolio-item-label">Total Staked (EUR)</div>
+                        <div class="portfolio-item-value gold" id="portStakeEUR">€ 0.00</div>
+                    </div>
+                    <div class="portfolio-item">
+                        <div class="portfolio-item-label">Pending Rewards</div>
+                        <div class="portfolio-item-value green" id="portPending">0 INPI</div>
+                    </div>
+                    <div class="portfolio-item">
+                        <div class="portfolio-item-label">Expected Yearly (EUR)</div>
+                        <div class="portfolio-item-value green" id="portYearlyEUR">€ 0.00</div>
+                    </div>
+                    <div class="portfolio-item">
+                        <!-- ★ IDEE 6: Tooltip für APR -->
+                        <div class="portfolio-item-label">Portfolio APR <span class="info-tooltip">i<span class="tooltiptext">Annual Percentage Rate. Der geschätzte jährliche Ertrag basierend auf deinem Stake und den aktuellen Rewards.</span></span></div>
+                        <div class="portfolio-item-value gold" id="portAPR">0%</div>
+                    </div>
                 </div>
             </div>
 
@@ -230,15 +365,32 @@
                 <h2>🪙 INPI Token Staking</h2>
                 <p class="section-sub">Classic token staking · 1000-year distribution · Continuous rewards</p>
                 <div class="stats-grid">
-                    <div class="stat-card"><h3>Your Stake</h3><div class="stat-value" id="oldUserStaked">0</div><div class="stat-label">INPI staked</div></div>
-                    <div class="stat-card"><h3>Pending Rewards</h3><div class="stat-value" id="oldUserPending">0</div><div class="stat-label">INPI claimable</div></div>
-                    <div class="stat-card"><h3>Your Share</h3><div class="stat-value" id="oldUserShare">0%</div><div class="stat-label">of the pool</div></div>
+                    <div class="stat-card">
+                        <h3>Your Stake</h3>
+                        <div class="stat-value" id="oldUserStaked">0</div>
+                        <div class="stat-label">INPI staked</div>
+                    </div>
+                    <!-- ★ IDEE 2: Live Ticker für Pending -->
+                    <div class="stat-card">
+                        <h3>Pending Rewards</h3>
+                        <div class="stat-value" id="oldUserPending">0</div>
+                        <div class="stat-label">INPI claimable</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Your Share</h3>
+                        <div class="stat-value" id="oldUserShare">0%</div>
+                        <div class="stat-label">of the pool</div>
+                    </div>
                 </div>
                 <div class="staking-card">
                     <h3>Stake / Unstake INPI</h3>
                     <div class="form-group">
                         <label for="stakeAmount">Amount (INPI)</label>
-                        <input type="number" id="stakeAmount" placeholder="e.g. 1000" step="any">
+                        <!-- ★ IDEE 1: Max Button -->
+                        <div class="input-wrapper">
+                            <input type="number" id="stakeAmount" placeholder="e.g. 1000" step="any">
+                            <button class="max-btn" id="maxStakeBtn">MAX</button>
+                        </div>
                     </div>
                     <div class="button-group">
                         <button id="stakeBtn" class="btn" disabled>🔒 Stake</button>
@@ -297,8 +449,23 @@
         <a href="whitepaper.html">Whitepaper</a>
         <a href="faq.html">FAQ</a>
     </div>
-    <p class="footer-version">Version 0.34.0 · V2.4</p>
+    <p class="footer-version">Version 0.35.0 · V2.5</p>
 </footer>
+
+<!-- ★ IDEE 3: Custom Unstake Warning Modal -->
+<div id="unstakeWarningModal" class="tutorial-overlay" style="z-index: 10000; display: none;">
+    <div class="tutorial-modal" style="max-width: 450px; text-align: center; border-color: #ff5252;">
+        <div class="tutorial-icon" style="color: #ff5252;">⚠️</div>
+        <h2 style="color: #ff5252; font-size: 1.3rem;">Early Unstake Warning</h2>
+        <p style="color: rgba(255,255,255,0.9); line-height: 1.6; margin-bottom: 1.5rem;">
+            You are about to unstake this NFT. Because of your active lock, you will lose <strong id="penaltyAmountText" style="color: #ff5252; font-size: 1.1rem;">0</strong> INPI in unclaimed rewards.
+        </p>
+        <div style="display: flex; gap: 10px; justify-content: center;">
+            <button class="tutorial-btn" onclick="closeUnstakeModal()">Cancel</button>
+            <button class="tutorial-btn" style="background: #ff5252; color: #fff; border-color: #ff5252;" id="confirmUnstakeBtn">Unstake Anyway</button>
+        </div>
+    </div>
+</div>
 
 <div id="tutorialOverlay" class="tutorial-overlay" aria-hidden="true">
     <div class="tutorial-modal" role="dialog" aria-labelledby="tutorialTitle">
@@ -408,19 +575,31 @@
 document.addEventListener("DOMContentLoaded", () => {
     const root = document.documentElement;
     const dots = document.querySelectorAll(".themeDots .dot");
+    
     function applyTheme(t) {
         root.setAttribute("data-theme", t);
-        try { localStorage.setItem("inpinity-theme", t); } catch(_) {}
+        try { 
+            localStorage.setItem("inpinity-theme", t); 
+        } catch(_) {}
+        
         dots.forEach(d => d.classList.toggle("active",
             (t === "light" && d.classList.contains("light")) ||
             (t === "dark" && d.classList.contains("dark")) ||
             (t === "basic" && d.classList.contains("basic"))
         ));
-        if (window.__inpinityCharts?.redrawAll) window.__inpinityCharts.redrawAll();
+        
+        if (window.__inpinityCharts?.redrawAll) {
+            window.__inpinityCharts.redrawAll();
+        }
     }
+    
     let saved = "basic";
-    try { saved = localStorage.getItem("inpinity-theme") || "basic"; } catch(_) {}
+    try { 
+        saved = localStorage.getItem("inpinity-theme") || "basic"; 
+    } catch(_) {}
+    
     applyTheme(saved);
+    
     document.querySelector(".dot.light")?.addEventListener("click", () => applyTheme("light"));
     document.querySelector(".dot.dark")?.addEventListener("click", () => applyTheme("dark"));
     document.querySelector(".dot.basic")?.addEventListener("click", () => applyTheme("basic"));
@@ -530,12 +709,15 @@ const ERC721_ABI = [
             try {
                 const contract = new ethers.Contract(safe.addr, SAFE_ABI, readProvider);
                 const nextId = Number(await contract.nextPositionId());
+                
                 for (let id = 1; id < nextId; id++) {
                     try {
                         const pos = await contract.positions(id);
                         if (!pos.exists) continue;
+                        
                         const isActive = await contract.stakedTokenIds(pos.tokenId);
                         if (!isActive) continue;
+                        
                         positions.push({
                             safeKey: key,
                             safeName: safe.name,
@@ -545,9 +727,13 @@ const ERC721_ABI = [
                             liquidity: pos.liquidity,
                             boost: pos.effectiveBoost
                         });
-                    } catch (e) { console.warn(`Pos ${id} in ${safe.name}:`, e.message); }
+                    } catch (e) { 
+                        console.warn(`Pos ${id} in ${safe.name}:`, e.message); 
+                    }
                 }
-            } catch (e) { console.warn(`Discovery ${safe.name}:`, e.message); }
+            } catch (e) { 
+                console.warn(`Discovery ${safe.name}:`, e.message); 
+            }
         }
         return positions;
     }
@@ -561,11 +747,13 @@ const ERC721_ABI = [
                     const mapped = [];
                     for (const pos of posData.positions) {
                         if (pos.error) continue;
+                        
                         const tokenId = BigInt(pos.tokenId);
                         for (const [key, safe] of Object.entries(CONFIG.SAFES)) {
                             try {
                                 const c = new ethers.Contract(safe.addr, SAFE_ABI, readProvider);
                                 const isStaked = await c.stakedTokenIds(tokenId);
+                                
                                 if (isStaked) {
                                     mapped.push({
                                         safeKey: key,
@@ -581,7 +769,9 @@ const ERC721_ABI = [
                     if (mapped.length > 0) return mapped;
                 }
             }
-        } catch (e) { console.warn('Bot discovery failed:', e.message); }
+        } catch (e) { 
+            console.warn('Bot discovery failed:', e.message); 
+        }
 
         const onChain = await discoverOnChain();
         return onChain.map(p => ({
@@ -609,11 +799,13 @@ const ERC721_ABI = [
     function drawPriceChart(prices, labels, stats) {
         const el = document.getElementById('priceChart');
         if (!el) return;
+        
         const c = themeColors();
         if (priceChart) priceChart.destroy();
 
         const ctx = el.getContext('2d');
         let gradient = ctx.createLinearGradient(0, 0, 0, 250);
+        
         if (document.documentElement.getAttribute('data-theme') === 'light') {
             gradient.addColorStop(0, 'rgba(106, 79, 179, 0.4)');
             gradient.addColorStop(1, 'rgba(106, 79, 179, 0.0)');
@@ -653,6 +845,7 @@ const ERC721_ABI = [
                     order: 2
                 });
             }
+            
             if (stats.low && stats.low !== Infinity) {
                 datasets.push({
                     label: 'Low',
@@ -665,6 +858,7 @@ const ERC721_ABI = [
                     order: 3
                 });
             }
+            
             if (stats.yesterdayClose) {
                 datasets.push({
                     label: '24h ago',
@@ -683,7 +877,9 @@ const ERC721_ABI = [
             type: 'line',
             data: { labels, datasets },
             options: {
-                responsive: true, maintainAspectRatio: false, interaction: { intersect: false, mode: 'index' },
+                responsive: true, 
+                maintainAspectRatio: false, 
+                interaction: { intersect: false, mode: 'index' },
                 plugins: { 
                     legend: { display: false }, 
                     tooltip: { 
@@ -717,26 +913,54 @@ const ERC721_ABI = [
     function drawTvlDonut(labels, values) {
         const el = document.getElementById('tvlDonut');
         if (!el) return;
+        
         const c = themeColors();
         if (tvlDonut) tvlDonut.destroy();
+        
         const sum = values.reduce((a,b)=>a+b, 0);
         const isEmpty = sum === 0;
+        
         tvlDonut = new Chart(el, {
             type: 'doughnut',
-            data: { labels, datasets: [{ data: isEmpty ? [1,1,1] : values, backgroundColor: isEmpty ? ['rgba(255,255,255,0.1)','rgba(255,255,255,0.1)','rgba(255,255,255,0.1)'] : c.donutColors, borderColor: 'rgba(0,0,0,0.2)', borderWidth: 2, hoverOffset: isEmpty ? 0 : 6 }] },
+            data: { 
+                labels, 
+                datasets: [{ 
+                    data: isEmpty ? [1,1,1] : values, 
+                    backgroundColor: isEmpty ? ['rgba(255,255,255,0.1)','rgba(255,255,255,0.1)','rgba(255,255,255,0.1)'] : c.donutColors, 
+                    borderColor: 'rgba(0,0,0,0.2)', 
+                    borderWidth: 2, 
+                    hoverOffset: isEmpty ? 0 : 6 
+                }] 
+            },
             options: {
-                responsive: true, maintainAspectRatio: false, cutout: '65%',
-                plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(26,16,48,0.95)', borderColor: 'rgba(255,215,0,0.4)', borderWidth: 1, padding: 10, callbacks: { label: ctx => isEmpty ? 'No TVL yet' : ctx.label + ': €' + Number(ctx.parsed).toLocaleString(undefined, { maximumFractionDigits: 2 }) } } }
+                responsive: true, 
+                maintainAspectRatio: false, 
+                cutout: '65%',
+                plugins: { 
+                    legend: { display: false }, 
+                    tooltip: { 
+                        backgroundColor: 'rgba(26,16,48,0.95)', 
+                        borderColor: 'rgba(255,215,0,0.4)', 
+                        borderWidth: 1, 
+                        padding: 10, 
+                        callbacks: { 
+                            label: ctx => isEmpty ? 'No TVL yet' : ctx.label + ': €' + Number(ctx.parsed).toLocaleString(undefined, { maximumFractionDigits: 2 }) 
+                        } 
+                    } 
+                }
             }
         });
+        
         const legendEl = document.getElementById('tvlLegend');
         if (legendEl) {
             legendEl.innerHTML = labels.map((l, i) => {
                 const pct = sum > 0 ? (values[i] / sum * 100).toFixed(1) : '0.0';
-                return `<div class="donut-legend-item">
-                    <span><span class="donut-legend-dot" style="background:${c.donutColors[i]}"></span>${l}</span>
-                    <span><strong>€${Number(values[i]).toLocaleString(undefined, { maximumFractionDigits: 2 })}</strong> · ${pct}%</span>
-                </div>`;
+                return `
+                    <div class="donut-legend-item">
+                        <span><span class="donut-legend-dot" style="background:${c.donutColors[i]}"></span>${l}</span>
+                        <span><strong>€${Number(values[i]).toLocaleString(undefined, { maximumFractionDigits: 2 })}</strong> · ${pct}%</span>
+                    </div>
+                `;
             }).join('');
         }
     }
@@ -771,6 +995,7 @@ const ERC721_ABI = [
 
         try {
             let timeframe = 'hour', aggregate = 1, limit = 100;
+            
             if (currentChartHours === 24) { timeframe = 'hour'; aggregate = 1; limit = 24; }
             else if (currentChartHours === 72) { timeframe = 'hour'; aggregate = 4; limit = 18; }
             else if (currentChartHours === 168) { timeframe = 'day'; aggregate = 1; limit = 7; }
@@ -787,6 +1012,7 @@ const ERC721_ABI = [
                 if (ohlcvList && ohlcvList.length > 0) {
                     ohlcvList.reverse();
                     const prices = ohlcvList.map(o => parseFloat(o[4]));
+                    
                     const labels = ohlcvList.map(o => {
                         const d = new Date(o[0] * 1000);
                         const timeStr = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
@@ -808,6 +1034,7 @@ const ERC721_ABI = [
                     const stats = { high, low, yesterdayClose };
 
                     const change = yesterdayClose > 0 ? ((currentPrice - yesterdayClose) / yesterdayClose * 100) : 0;
+                    
                     document.getElementById('statInpiPrice').textContent = '€ ' + currentPrice.toFixed(6);
                     const changeEl = document.getElementById('statInpiChange');
                     changeEl.textContent = (change >= 0 ? '+' : '') + change.toFixed(2) + '% (24h)';
@@ -818,7 +1045,10 @@ const ERC721_ABI = [
                     document.getElementById('statChartYesterday').textContent = '€' + yesterdayClose.toFixed(5);
                     
                     const poolName = activeGeckoPool === 'eth' ? 'ETH Pool' : 'USDC Pool';
-                    if (sourceBadge) { sourceBadge.textContent = `Live: Gecko (${poolName})`; sourceBadge.style.color = '#00e676'; }
+                    if (sourceBadge) { 
+                        sourceBadge.textContent = `Live: Gecko (${poolName})`; 
+                        sourceBadge.style.color = '#00e676'; 
+                    }
 
                     lastPriceData = { prices, labels, stats };
                     chartBody.style.opacity = '1';
@@ -826,7 +1056,9 @@ const ERC721_ABI = [
                     return;
                 }
             }
-        } catch (e) { console.warn('GeckoTerminal OHLCV fehlgeschlagen', e); }
+        } catch (e) { 
+            console.warn('GeckoTerminal OHLCV fehlgeschlagen', e); 
+        }
 
         try {
             const botFetchHours = (currentChartHours === 720 || currentChartHours === 0) ? 168 : currentChartHours;
@@ -836,19 +1068,24 @@ const ERC721_ABI = [
                 const data = await res.json();
                 if (data.success && data.snapshots && data.snapshots.length > 0) {
                     const prices = data.snapshots.map(s => s.inpi);
+                    
                     const labels = data.snapshots.map(s => {
                         const d = new Date(s.t);
                         const timeStr = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
                         const dateStr = d.toLocaleDateString('en-GB', { month: 'short', day: 'numeric' });
                         return botFetchHours <= 24 ? timeStr : `${dateStr}, ${timeStr}`;
                     });
+                    
                     const stats = data.stats;
                     document.getElementById('statInpiPrice').textContent = '€ ' + prices[prices.length - 1].toFixed(6);
                     document.getElementById('statChartHigh').textContent = stats.high ? '€' + Number(stats.high).toFixed(5) : '—';
                     document.getElementById('statChartLow').textContent = stats.low ? '€' + Number(stats.low).toFixed(5) : '—';
                     document.getElementById('statChartYesterday').textContent = stats.yesterdayClose ? '€' + Number(stats.yesterdayClose).toFixed(5) : '—';
                     
-                    if (sourceBadge) { sourceBadge.textContent = 'Live: Bot (Max 7D)'; sourceBadge.style.color = '#ffaa00'; }
+                    if (sourceBadge) { 
+                        sourceBadge.textContent = 'Live: Bot (Max 7D)'; 
+                        sourceBadge.style.color = '#ffaa00'; 
+                    }
 
                     lastPriceData = { prices, labels, stats };
                     chartBody.style.opacity = '1';
@@ -856,25 +1093,35 @@ const ERC721_ABI = [
                     return;
                 }
             }
-        } catch (e) { console.warn('Bot history fallback failed', e); }
+        } catch (e) { 
+            console.warn('Bot history fallback failed', e); 
+        }
 
         try {
             const health = await fetch(CONFIG.BOT_URL + '/api/health').then(r => r.json());
             const inpiPrice = health.oracle?.prices?.find(p => p.token === 'INPI');
+            
             if (inpiPrice) {
                 const p = Number(inpiPrice.priceEUR);
                 document.getElementById('statInpiPrice').textContent = '€ ' + p.toFixed(6);
+                
                 const prices = [p, p, p, p, p, p, p];
                 const labels = Array.from({ length: 7 }, (_, i) =>
                     new Date(Date.now() - (6 - i) * 86400000).toLocaleDateString('en', { month: 'short', day: 'numeric' })
                 );
-                if (sourceBadge) { sourceBadge.textContent = 'Static'; sourceBadge.style.color = '#ff5252'; }
+                
+                if (sourceBadge) { 
+                    sourceBadge.textContent = 'Static'; 
+                    sourceBadge.style.color = '#ff5252'; 
+                }
                 
                 lastPriceData = { prices, labels, stats: null };
                 chartBody.style.opacity = '1';
                 drawPriceChart(prices, labels, null);
             }
-        } catch (e) { console.warn('Auch Oracle-Fallback fehlgeschlagen', e); }
+        } catch (e) { 
+            console.warn('Auch Oracle-Fallback fehlgeschlagen', e); 
+        }
     }
 
     document.querySelectorAll('.timeframe-btn').forEach(btn => {
@@ -882,7 +1129,11 @@ const ERC721_ABI = [
             document.querySelectorAll('.timeframe-btn').forEach(b => b.classList.remove('active'));
             e.target.classList.add('active');
             currentChartHours = parseInt(e.target.dataset.hours);
-            try { localStorage.setItem("inpinity-chart-tf", currentChartHours); } catch(_) {}
+            
+            try { 
+                localStorage.setItem("inpinity-chart-tf", currentChartHours); 
+            } catch(_) {}
+            
             loadPriceChart();
         });
     });
@@ -892,7 +1143,11 @@ const ERC721_ABI = [
             document.querySelectorAll('.pool-btn').forEach(b => b.classList.remove('active'));
             e.target.classList.add('active');
             activeGeckoPool = e.target.dataset.pool;
-            try { localStorage.setItem("inpinity-chart-pool", activeGeckoPool); } catch(_) {}
+            
+            try { 
+                localStorage.setItem("inpinity-chart-pool", activeGeckoPool); 
+            } catch(_) {}
+            
             loadPriceChart();
         });
     });
@@ -901,9 +1156,11 @@ const ERC721_ABI = [
         try {
             const positions = await discoverPositions();
             const totals = { eth: 0, usdc: 0, eurc: 0 };
+            
             for (const p of positions) {
                 totals[p.safeKey] = (totals[p.safeKey] || 0) + p.valueEUR;
             }
+            
             const labels = ['ETH-INPI', 'USDC-INPI', 'EURC-INPI'];
             const values = [totals.eth, totals.usdc, totals.eurc];
             const sum = values.reduce((a,b)=>a+b, 0);
@@ -913,18 +1170,30 @@ const ERC721_ABI = [
 
             lastTvlData = { labels, values };
             drawTvlDonut(labels, values);
-        } catch (e) { console.warn('TVL donut failed:', e.message); }
+        } catch (e) { 
+            console.warn('TVL donut failed:', e.message); 
+        }
     }
 
     async function loadBotHealth() {
         try {
             const res = await fetch(CONFIG.BOT_URL + '/api/health');
             const data = await res.json();
+            
             const statusEl = document.getElementById('statBotStatus');
             const subEl = document.getElementById('statBotSub');
-            if (data.status === 'healthy') { statusEl.textContent = '🟢 Healthy'; statusEl.style.color = '#00c853'; }
-            else if (data.status === 'warning') { statusEl.textContent = '🟡 Warning'; statusEl.style.color = '#ffaa00'; }
-            else { statusEl.textContent = '🔴 Critical'; statusEl.style.color = '#ff5252'; }
+            
+            if (data.status === 'healthy') { 
+                statusEl.textContent = '🟢 Healthy'; 
+                statusEl.style.color = '#00c853'; 
+            } else if (data.status === 'warning') { 
+                statusEl.textContent = '🟡 Warning'; 
+                statusEl.style.color = '#ffaa00'; 
+            } else { 
+                statusEl.textContent = '🔴 Critical'; 
+                statusEl.style.color = '#ff5252'; 
+            }
+            
             subEl.textContent = 'Gas: ' + (data.wallet?.ethBalance || '?') + ' ETH';
 
             const prices = data.oracle?.prices || [];
@@ -936,38 +1205,52 @@ const ERC721_ABI = [
                 const el = document.getElementById(tickers[p.token]);
                 const ageEl = document.getElementById(ageTickers[p.token]);
                 const badgeEl = document.getElementById(badgeTickers[p.token]);
+                
                 if (el) el.textContent = '€ ' + Number(p.priceEUR).toFixed(p.token === 'ETH' ? 2 : 6);
+                
                 if (ageEl) {
                     ageEl.textContent = p.ageMinutes < 60 ? `${p.ageMinutes}min ago` : `${Math.floor(p.ageMinutes/60)}h ago`;
                     ageEl.className = 'price-ticker-age ' + (p.isStale ? 'stale' : p.ageMinutes < 30 ? 'fresh' : 'warn');
                 }
-                if (badgeEl) { badgeEl.className = 'oracle-badge ' + (p.isStale ? 'stale' : p.ageMinutes < 30 ? '' : 'warn'); }
+                
+                if (badgeEl) { 
+                    badgeEl.className = 'oracle-badge ' + (p.isStale ? 'stale' : p.ageMinutes < 30 ? '' : 'warn'); 
+                }
             });
             
             const mainBadge = document.getElementById('oracleBadge');
             const inpiP = prices.find(p => p.token === 'INPI');
-            if (mainBadge && inpiP) { mainBadge.className = 'oracle-badge ' + (inpiP.isStale ? 'stale' : inpiP.ageMinutes < 30 ? '' : 'warn'); }
+            if (mainBadge && inpiP) { 
+                mainBadge.className = 'oracle-badge ' + (inpiP.isStale ? 'stale' : inpiP.ageMinutes < 30 ? '' : 'warn'); 
+            }
 
             updateCountdown(prices);
         } catch (e) {
             const statusEl = document.getElementById('statBotStatus');
-            if (statusEl) { statusEl.textContent = '🔴 Offline'; statusEl.style.color = '#ff5252'; }
+            if (statusEl) { 
+                statusEl.textContent = '🔴 Offline'; 
+                statusEl.style.color = '#ff5252'; 
+            }
         }
     }
 
     function updateCountdown(prices) {
         const el = document.getElementById('updateCountdown');
         if (!el || !prices || prices.length === 0) return;
+        
         const now = new Date();
         const minutes = now.getMinutes();
         let minutesUntil;
+        
         if (minutes < 15) minutesUntil = 15 - minutes;
         else if (minutes < 30) minutesUntil = 30 - minutes;
         else if (minutes < 45) minutesUntil = 45 - minutes;
         else minutesUntil = 60 - minutes;
+        
         const secsUntil = minutesUntil * 60 - now.getSeconds();
         const m = Math.floor(secsUntil / 60);
         const s = secsUntil % 60;
+        
         el.textContent = `⏱ Next update: ${m}:${String(s).padStart(2,'0')}`;
         el.className = 'update-countdown' + (minutesUntil < 3 ? ' warn' : '');
     }
@@ -986,6 +1269,7 @@ const ERC721_ABI = [
 
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadAll);
     else loadAll();
+    
     setInterval(loadAll, 60_000);
     setInterval(() => loadBotHealth(), 10_000);
 })();
@@ -993,11 +1277,76 @@ const ERC721_ABI = [
 
 <script>
 /* =====================================================
-   MAIN STAKING LOGIC
+   MAIN STAKING LOGIC (MIT DEN 7 IDEEN)
 ===================================================== */
 const readProvider = new ethers.JsonRpcProvider(CONFIG.RPC_URL);
 
-// ★ NEU: Wallet Bar Toggle Logik
+// ★ IDEE 1: Max Button Logik
+let globalUserBalance = 0n;
+document.getElementById("maxStakeBtn").addEventListener("click", () => {
+    if (globalUserBalance > 0n) {
+        document.getElementById("stakeAmount").value = ethers.formatUnits(globalUserBalance, 18);
+    }
+});
+
+// ★ IDEE 4: Add to Wallet Logik
+document.getElementById("addTokenBtn").addEventListener("click", async () => {
+    if (!window.ethereum) return alert("Please install MetaMask.");
+    try {
+        await window.ethereum.request({
+            method: 'wallet_watchAsset',
+            params: {
+                type: 'ERC20',
+                options: {
+                    address: CONFIG.INPI,
+                    symbol: 'INPI',
+                    decimals: 18,
+                    image: 'https://inpinity.online/favicon.webp',
+                },
+            },
+        });
+    } catch (e) { 
+        console.warn("Add to wallet failed:", e); 
+    }
+});
+
+// ★ IDEE 5: Confetti Logik
+function triggerConfetti() {
+    confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#ffd700', '#00c853', '#ffffff']
+    });
+}
+
+// ★ IDEE 3: Unstake Modal Logik
+let pendingUnstakeId = null;
+
+function openUnstakeModal(posId, penalty) {
+    pendingUnstakeId = posId;
+    document.getElementById("penaltyAmountText").textContent = fmtINPI(penalty, 4);
+    const modal = document.getElementById("unstakeWarningModal");
+    modal.style.display = "flex";
+    setTimeout(() => modal.classList.add("active"), 10);
+}
+
+function closeUnstakeModal() {
+    const modal = document.getElementById("unstakeWarningModal");
+    modal.classList.remove("active");
+    setTimeout(() => modal.style.display = "none", 300);
+    pendingUnstakeId = null;
+}
+
+document.getElementById("confirmUnstakeBtn").addEventListener("click", () => {
+    if (pendingUnstakeId) {
+        const idToUnstake = pendingUnstakeId;
+        closeUnstakeModal();
+        executeUnstake(idToUnstake);
+    }
+});
+
+// Wallet Bar Toggle Logik
 const walletBar = document.getElementById("walletBar");
 const walletCloseBtn = document.getElementById("walletCloseBtn");
 const walletMiniFab = document.getElementById("walletMiniFab");
@@ -1021,6 +1370,7 @@ function setBar(fillId, percentId, valueId, current, target, suffix) {
     const fill = document.getElementById(fillId);
     const pctEl = document.getElementById(percentId);
     const valEl = document.getElementById(valueId);
+    
     if (fill) fill.style.width = Math.min(pct, 100) + "%";
     if (pctEl) pctEl.textContent = pct.toFixed(2) + "%";
     if (valEl) valEl.textContent = fmtINPI(current, 0) + " " + suffix;
@@ -1033,11 +1383,14 @@ async function loadPoolStats() {
         const totalStaked = await oldStake.totalSupply();
         const rate = await oldStake.rewardRate();
         const poolBalance = await inpi.balanceOf(CONFIG.OLD_STAKING);
+        
         setBar("oldFill", "oldPercent", "oldStaked", totalStaked, CONFIG.TARGETS.old, "INPI staked");
         document.getElementById("oldPool").textContent = fmtINPI(poolBalance, 0);
         document.getElementById("oldRate").textContent = Number(ethers.formatUnits(rate, 18)).toFixed(6);
         document.getElementById("oldRateDay").textContent = (Number(ethers.formatUnits(rate, 18)) * 86400).toFixed(2);
-    } catch (e) { console.warn("Old staking:", e); }
+    } catch (e) { 
+        console.warn("Old staking:", e); 
+    }
 
     for (const [key, cfg] of Object.entries(CONFIG.SAFES)) {
         try {
@@ -1045,9 +1398,12 @@ async function loadPoolStats() {
             const inpi = new ethers.Contract(CONFIG.INPI, TOKEN_ABI, readProvider);
             const poolBalance = await inpi.balanceOf(cfg.addr);
             const rate = await safe.rewardRatePerSec();
+            
             setBar(key + "Fill", key + "Percent", key + "Pool", poolBalance, CONFIG.TARGETS[key], "INPI Pool");
             document.getElementById(key + "Rate").textContent = Number(ethers.formatUnits(rate, 18)).toFixed(6);
-        } catch (e) { console.warn("Safe " + key + ":", e); }
+        } catch (e) { 
+            console.warn("Safe " + key + ":", e); 
+        }
     }
 }
 
@@ -1058,6 +1414,7 @@ let signer = null, userAddress = null;
 let tokenContract = null, oldStakingContract = null;
 let safeContracts = {};
 let refreshInterval = null;
+let liveTickerInterval = null; // ★ IDEE 2
 let globalInpiPriceEUR = 0;
 let globalCachedPools = {};
 
@@ -1066,12 +1423,15 @@ async function loadGlobalValues() {
         const health = await fetch(CONFIG.BOT_URL + '/api/health').then(r => r.json());
         const inpiP = health.oracle?.prices?.find(p => p.token === 'INPI');
         globalInpiPriceEUR = inpiP ? Number(inpiP.priceEUR) : 0;
+        
         for (const [key, cfg] of Object.entries(CONFIG.SAFES)) {
             const safe = new ethers.Contract(cfg.addr, SAFE_ABI, readProvider);
             const [totalW, rate] = await Promise.all([safe.totalWeighted(), safe.rewardRatePerSec()]);
             globalCachedPools[key] = { totalWeighted: totalW, rewardRate: rate };
         }
-    } catch (e) { console.warn("loadGlobalValues:", e.message); }
+    } catch (e) { 
+        console.warn("loadGlobalValues:", e.message); 
+    }
 }
 
 async function connectWallet() {
@@ -1081,11 +1441,14 @@ async function connectWallet() {
         await provider.send("eth_requestAccounts", []);
         signer = await provider.getSigner();
         userAddress = await signer.getAddress();
+        
         tokenContract = new ethers.Contract(CONFIG.INPI, TOKEN_ABI, signer);
         oldStakingContract = new ethers.Contract(CONFIG.OLD_STAKING, OLD_STAKING_ABI, signer);
+        
         for (const [key, cfg] of Object.entries(CONFIG.SAFES)) {
             safeContracts[key] = new ethers.Contract(cfg.addr, SAFE_ABI, signer);
         }
+        
         document.getElementById("walletStatusText").textContent = "🟢 Wallet connected";
         document.getElementById("walletStatus").textContent = userAddress.slice(0, 6) + "..." + userAddress.slice(-4);
         document.getElementById("walletStatus").style.display = "inline-block";
@@ -1093,17 +1456,31 @@ async function connectWallet() {
         document.getElementById("connectWalletBtn").disabled = true;
         document.getElementById("tokenBalanceInfo").style.display = "block";
         document.getElementById("portfolioSummary").classList.add("visible");
+        
         ["stakeBtn", "unstakeBtn", "claimOldBtn", "nftApproveBtn", "nftStakeBtn"].forEach(id => {
             document.getElementById(id).disabled = false;
         });
+        
         await loadGlobalValues();
         await refreshUserData();
         await loadUserNFTs();
+        
         if (refreshInterval) clearInterval(refreshInterval);
         refreshInterval = setInterval(async () => {
             await loadGlobalValues();
             await refreshUserData();
         }, 15_000);
+
+        // ★ IDEE 2: Live Ticker für klassisches Staking
+        if (liveTickerInterval) clearInterval(liveTickerInterval);
+        liveTickerInterval = setInterval(async () => {
+            if (!userAddress || !oldStakingContract) return;
+            try {
+                const earned = await oldStakingContract.earned(userAddress);
+                document.getElementById("oldUserPending").textContent = fmtINPI(earned, 4);
+            } catch (_) {}
+        }, 2000); // Updates every 2 seconds
+
     } catch (e) {
         console.error(e);
         alert("Connection failed: " + (e.message || "unknown"));
@@ -1114,51 +1491,67 @@ async function refreshUserData() {
     if (!userAddress || !oldStakingContract) return;
     try {
         const bal = await tokenContract.balanceOf(userAddress);
+        globalUserBalance = bal; // Store for Max Button
+        
         document.getElementById("tokenBalance").textContent = fmtINPI(bal, 2);
-        // ★ NEU: Update Mini-Wallet Balance
         document.getElementById("miniBalance").textContent = fmtINPI(bal, 2);
         
         const staked = await oldStakingContract.balanceOf(userAddress);
         const earned = await oldStakingContract.earned(userAddress);
         const total = await oldStakingContract.totalSupply();
+        
         document.getElementById("oldUserStaked").textContent = fmtINPI(staked, 2);
         document.getElementById("oldUserPending").textContent = fmtINPI(earned, 4);
         document.getElementById("oldUserShare").textContent = total > 0n
             ? (Number((staked * 10000n) / total) / 100).toFixed(2) + "%"
             : "0%";
-    } catch (e) { console.warn("Refresh:", e); }
+    } catch (e) { 
+        console.warn("Refresh:", e); 
+    }
 }
 
 async function oldStake() {
     if (!userAddress) return alert("Connect wallet first.");
     const amount = document.getElementById("stakeAmount").value.trim();
     if (!amount || isNaN(amount) || Number(amount) <= 0) return alert("Invalid amount.");
+    
     try {
         const wei = ethers.parseUnits(amount, 18);
         const allowance = await tokenContract.allowance(userAddress, CONFIG.OLD_STAKING);
+        
         if (allowance < wei) {
             const appr = await tokenContract.approve(CONFIG.OLD_STAKING, wei);
             await appr.wait();
         }
+        
         const tx = await oldStakingContract.stake(wei);
         await tx.wait();
+        
         document.getElementById("stakeAmount").value = "";
         await refreshUserData();
+        
+        triggerConfetti(); // ★ IDEE 5
         alert("Stake successful!");
-    } catch (e) { alert("Stake failed: " + (e.shortMessage || e.message || "")); }
+    } catch (e) { 
+        alert("Stake failed: " + (e.shortMessage || e.message || "")); 
+    }
 }
 
 async function oldUnstake() {
     if (!userAddress) return alert("Connect wallet first.");
     const amount = document.getElementById("stakeAmount").value.trim();
     if (!amount || isNaN(amount) || Number(amount) <= 0) return alert("Invalid amount.");
+    
     try {
         const tx = await oldStakingContract.withdraw(ethers.parseUnits(amount, 18));
         await tx.wait();
+        
         document.getElementById("stakeAmount").value = "";
         await refreshUserData();
         alert("Unstake successful!");
-    } catch (e) { alert("Unstake failed: " + (e.shortMessage || e.message || "")); }
+    } catch (e) { 
+        alert("Unstake failed: " + (e.shortMessage || e.message || "")); 
+    }
 }
 
 async function oldClaim() {
@@ -1166,21 +1559,31 @@ async function oldClaim() {
     try {
         const tx = await oldStakingContract.getReward();
         await tx.wait();
+        
         await refreshUserData();
+        triggerConfetti(); // ★ IDEE 5
         alert("Rewards claimed!");
-    } catch (e) { alert("Claim failed: " + (e.shortMessage || e.message || "")); }
+    } catch (e) { 
+        alert("Claim failed: " + (e.shortMessage || e.message || "")); 
+    }
 }
 
 async function nftApprove() {
     if (!userAddress) return alert("Connect wallet first.");
     const tokenId = document.getElementById("nftTokenId").value.trim();
     if (!tokenId) return alert("Enter Token ID.");
+    
     const poolKey = document.getElementById("nftSafeSelect").value;
     const safeAddr = CONFIG.SAFES[poolKey].addr;
+    
     try {
         const pm = new ethers.Contract(CONFIG.POSITION_MANAGER, ERC721_ABI, signer);
         const owner = await pm.ownerOf(tokenId);
-        if (owner.toLowerCase() !== userAddress.toLowerCase()) return alert("You are not the owner of this position.");
+        
+        if (owner.toLowerCase() !== userAddress.toLowerCase()) {
+            return alert("You are not the owner of this position.");
+        }
+        
         const tx = await pm.approve(safeAddr, tokenId);
         await tx.wait();
         alert("✅ NFT approved! You can now stake.");
@@ -1195,26 +1598,39 @@ async function nftStake() {
     const tokenId = document.getElementById("nftTokenId").value.trim();
     const lockDuration = document.getElementById("nftLockDuration").value;
     const poolKey = document.getElementById("nftSafeSelect").value;
+    
     if (!tokenId) return alert("Enter Token ID.");
-    try { await fetch(`${CONFIG.BOT_URL}/api/prepare?id=${tokenId}`).catch(() => {}); } catch (_) {}
+    
+    try { 
+        await fetch(`${CONFIG.BOT_URL}/api/prepare?id=${tokenId}`).catch(() => {}); 
+    } catch (_) {}
+    
     try {
         const safe = safeContracts[poolKey];
         const tx = await safe.stakeNFT(tokenId, lockDuration);
         await tx.wait();
+        
         document.getElementById("nftTokenId").value = "";
-        alert("🎉 NFT staked successfully!");
         await loadGlobalValues();
         await refreshUserData();
         await loadUserNFTs();
-        if (window.__inpinityCharts?.refresh) window.__inpinityCharts.refresh();
+        
+        if (window.__inpinityCharts?.refresh) {
+            window.__inpinityCharts.refresh();
+        }
+        
+        triggerConfetti(); // ★ IDEE 5
+        alert("🎉 NFT staked successfully!");
     } catch (e) {
         console.error("Stake error:", e);
         const msg = e.shortMessage || e.message || "unknown";
         let hint = "";
+        
         if (msg.includes("wrong pool")) hint = "\n\n⚠️ NFT gehört nicht zum gewählten Pool.";
         else if (msg.includes("already staked")) hint = "\n\n⚠️ Bereits gestakt.";
         else if (msg.includes("below min")) hint = "\n\n⚠️ Position zu klein (Min 10 EUR).";
         else if (msg.includes("not owner")) hint = "\n\n⚠️ Du bist nicht Besitzer.";
+        
         alert("Stake failed: " + msg + hint);
     }
 }
@@ -1222,16 +1638,22 @@ async function nftStake() {
 function computePositionApr(poolKey, pos, inpiPriceEUR) {
     const pool = globalCachedPools[poolKey];
     if (!pool || pool.totalWeighted === 0n || !inpiPriceEUR) return null;
+    
     const userWeighted = (BigInt(pos.liquidity) * BigInt(pos.effectiveBoost)) / 10n**18n;
     if (userWeighted === 0n) return null;
+    
     const dailyINPIWei = (pool.rewardRate * 86400n * userWeighted) / pool.totalWeighted;
     const yearlyINPIWei = dailyINPIWei * 365n;
+    
     const dailyINPI = Number(ethers.formatUnits(dailyINPIWei, 18));
     const yearlyINPI = Number(ethers.formatUnits(yearlyINPIWei, 18));
+    
     const yearlyEUR = yearlyINPI * inpiPriceEUR;
     const stakeEUR = Number(ethers.formatUnits(pos.amountEUR, 18));
+    
     const apr = stakeEUR > 0 ? (yearlyEUR / stakeEUR) * 100 : 0;
     const sharePct = Number(userWeighted) / Number(pool.totalWeighted) * 100;
+    
     return { dailyINPI, yearlyINPI, yearlyEUR, apr, sharePct };
 }
 
@@ -1248,55 +1670,93 @@ async function loadUserNFTs() {
     const container = document.getElementById("nftPositionsList");
     container.innerHTML = "";
     let totalStakeEUR = 0, totalPending = 0, totalYearlyEUR = 0;
+    
     for (const [key, cfg] of Object.entries(CONFIG.SAFES)) {
         try {
             const safe = safeContracts[key];
             const count = Number(await safe.userPositionsLength(userAddress));
             if (count === 0) continue;
+            
             const header = document.createElement("h4");
             header.textContent = cfg.name + " (" + count + " Position" + (count !== 1 ? "s" : "") + ")";
             container.appendChild(header);
+            
             for (let i = 0; i < count; i++) {
                 const posId = await safe.userPositions(userAddress, i);
                 const pos = await safe.positions(posId);
                 const pending = await safe.pendingRewards(posId);
                 const boost = await safe.currentBoost(posId);
                 const penalty = await safe.previewPenalty(posId);
+                
                 let liveEUR = pos.amountEUR;
                 try {
                     const valRes = await fetch(`${CONFIG.BOT_URL}/api/value?id=${pos.tokenId}`);
                     if (valRes.ok) {
                         const valData = await valRes.json();
-                        if (valData.success && valData.valueEUR) liveEUR = ethers.parseUnits(valData.valueEUR, 18);
+                        if (valData.success && valData.valueEUR) {
+                            liveEUR = ethers.parseUnits(valData.valueEUR, 18);
+                        }
                     }
                 } catch (_) {}
+                
                 const posStakeEUR = Number(ethers.formatUnits(pos.amountEUR, 18));
                 const posPendingINPI = Number(ethers.formatUnits(pending, 18));
                 const apr = computePositionApr(key, pos, globalInpiPriceEUR);
+                
                 totalStakeEUR += posStakeEUR;
                 totalPending += posPendingINPI;
                 if (apr) totalYearlyEUR += apr.yearlyEUR;
+                
                 const card = document.createElement("div");
                 card.className = "nft-position-card";
                 let aprHtml = "";
+                
                 if (apr) {
                     const isTinyApr = apr.apr < 0.1;
                     const aprClass = isTinyApr ? "nft-pos-apr-value warn-apr" : "nft-pos-apr-value";
                     aprHtml = `
                         <div class="nft-pos-apr-row">
-                            <div class="nft-pos-apr-item"><div class="nft-pos-apr-label">Live APR</div><div class="${aprClass}">${fmtApr(apr.apr)}</div></div>
-                            <div class="nft-pos-apr-item"><div class="nft-pos-apr-label">Yearly (EUR)</div><div class="nft-pos-apr-value">€${apr.yearlyEUR.toFixed(2)}</div></div>
-                            <div class="nft-pos-apr-item"><div class="nft-pos-apr-label">Your Share</div><div class="nft-pos-apr-value">${apr.sharePct.toFixed(4)}%</div></div>
+                            <div class="nft-pos-apr-item">
+                                <!-- ★ IDEE 6: Tooltip -->
+                                <div class="nft-pos-apr-label">Live APR <span class="info-tooltip">i<span class="tooltiptext">Deine aktuelle jährliche Rendite basierend auf deiner Position und dem Pool.</span></span></div>
+                                <div class="${aprClass}">${fmtApr(apr.apr)}</div>
+                            </div>
+                            <div class="nft-pos-apr-item">
+                                <div class="nft-pos-apr-label">Yearly (EUR)</div>
+                                <div class="nft-pos-apr-value">€${apr.yearlyEUR.toFixed(2)}</div>
+                            </div>
+                            <div class="nft-pos-apr-item">
+                                <div class="nft-pos-apr-label">Your Share</div>
+                                <div class="nft-pos-apr-value">${apr.sharePct.toFixed(4)}%</div>
+                            </div>
                         </div>
                     `;
-                    if (isTinyApr) aprHtml += `<div class="apr-warning-note">⚠️ <strong>Test-Budget aktiv:</strong> Aktuell sind nur 100 INPI pro Safe im Umlauf.</div>`;
+                    if (isTinyApr) {
+                        aprHtml += `<div class="apr-warning-note">⚠️ <strong>Test-Budget aktiv:</strong> Aktuell sind nur 100 INPI pro Safe im Umlauf.</div>`;
+                    }
                 }
+                
+                // ★ IDEE 7: NFT Avatar via DiceBear API
+                const avatarUrl = `https://api.dicebear.com/7.x/identicon/svg?seed=${pos.tokenId}&backgroundColor=1a1030`;
+                
                 card.innerHTML = `
-                    <div class="nft-pos-header"><strong>Position #${posId}</strong><span>NFT #${pos.tokenId}</span></div>
+                    <div class="nft-pos-header">
+                        <div style="display:flex; align-items:center;">
+                            <img src="${avatarUrl}" class="nft-avatar" alt="NFT" onerror="this.style.display='none'">
+                            <div>
+                                <strong style="display:block; font-size:1rem;">Position #${posId}</strong>
+                                <span style="font-size:0.8rem; opacity:0.7;">NFT #${pos.tokenId}</span>
+                            </div>
+                        </div>
+                    </div>
                     <div class="nft-pos-stats">
                         <div><span>Stake Value:</span> <strong>${fmtINPI(pos.amountEUR, 2)} EUR</strong></div>
                         <div><span>Live Value:</span> <strong>${fmtINPI(liveEUR, 2)} EUR</strong></div>
-                        <div><span>Boost:</span> <strong>${(Number(ethers.formatUnits(boost, 18))).toFixed(2)}×</strong></div>
+                        <div>
+                            <!-- ★ IDEE 6: Tooltip -->
+                            <span>Boost <span class="info-tooltip">i<span class="tooltiptext">Multiplikator auf deine Rewards (Sperrdauer × Tier × NFT Rarity).</span></span>:</span> 
+                            <strong>${(Number(ethers.formatUnits(boost, 18))).toFixed(2)}×</strong>
+                        </div>
                         <div><span>Pending:</span> <strong>${fmtINPI(pending, 4)} INPI</strong></div>
                         <div><span>Lock:</span> <strong>${pos.lockDuration === 0n ? "Flexible" : Number(pos.lockDuration / 86400n) + " days"}</strong></div>
                         ${penalty > 0n ? `<div style="color:#f80;"><span>Penalty:</span> <strong>${fmtINPI(penalty, 4)} INPI</strong></div>` : ""}
@@ -1304,14 +1764,17 @@ async function loadUserNFTs() {
                     ${aprHtml}
                     <div class="nft-pos-actions">
                         <button class="btn btn-small" onclick="nftClaim(${posId})" ${pending === 0n ? "disabled" : ""}>Claim</button>
-                        <button class="btn btn-small btn-secondary" onclick="nftUnstake(${posId})">Unstake</button>
+                        <button class="btn btn-small btn-secondary" onclick="nftUnstake(${posId}, '${penalty}')">Unstake</button>
                         <button class="btn btn-small btn-share" onclick="sharePosition(${posId}, '${cfg.name}', ${posStakeEUR}, ${apr ? apr.apr : 0})">🔗 Share</button>
                     </div>
                 `;
                 container.appendChild(card);
             }
-        } catch (e) { console.warn("Load NFTs " + key + ":", e); }
+        } catch (e) { 
+            console.warn("Load NFTs " + key + ":", e); 
+        }
     }
+    
     document.getElementById("portStakeEUR").textContent = "€ " + totalStakeEUR.toFixed(2);
     document.getElementById("portPending").textContent = totalPending.toFixed(4) + " INPI";
     document.getElementById("portYearlyEUR").textContent = "€ " + totalYearlyEUR.toFixed(2);
@@ -1322,8 +1785,12 @@ async function loadUserNFTs() {
 function sharePosition(posId, poolName, stakeEUR, apr) {
     const aprText = apr > 0 ? `${fmtApr(apr)} APR` : "earning INPI";
     const text = `🎨 I'm staking ${stakeEUR.toFixed(2)}€ in the ${poolName} pool on Inpinity!\n\n🎯 ${aprText}\n🔗 https://inpinity.online/staking`;
-    if (navigator.share) navigator.share({ title: 'My Inpinity Position', text, url: 'https://inpinity.online/staking' }).catch(() => {});
-    else navigator.clipboard.writeText(text).then(() => alert("✅ Copied!\n\n" + text)).catch(() => prompt("Copy:", text));
+    
+    if (navigator.share) {
+        navigator.share({ title: 'My Inpinity Position', text, url: 'https://inpinity.online/staking' }).catch(() => {});
+    } else {
+        navigator.clipboard.writeText(text).then(() => alert("✅ Copied!\n\n" + text)).catch(() => prompt("Copy:", text));
+    }
 }
 
 async function nftClaim(posId) {
@@ -1332,31 +1799,55 @@ async function nftClaim(posId) {
             try {
                 const tx = await safe.claim(posId);
                 await tx.wait();
-                alert("Rewards claimed!");
+                
                 await loadUserNFTs();
                 await refreshUserData();
-                if (window.__inpinityCharts?.refresh) window.__inpinityCharts.refresh();
+                if (window.__inpinityCharts?.refresh) {
+                    window.__inpinityCharts.refresh();
+                }
+                
+                triggerConfetti(); // ★ IDEE 5
+                alert("Rewards claimed!");
                 return;
             } catch (_) {}
         }
-    } catch (e) { alert("Claim failed: " + (e.shortMessage || e.message || "")); }
+    } catch (e) { 
+        alert("Claim failed: " + (e.shortMessage || e.message || "")); 
+    }
 }
 
-async function nftUnstake(posId) {
-    if (!confirm("Really remove? Active lock = penalty on rewards.")) return;
+// ★ IDEE 3: Modifizierte Unstake Funktion
+async function nftUnstake(posId, penaltyStr) {
+    const penalty = BigInt(penaltyStr);
+    if (penalty > 0n) {
+        openUnstakeModal(posId, penalty);
+    } else {
+        if (confirm("Are you sure you want to unstake this NFT?")) {
+            executeUnstake(posId);
+        }
+    }
+}
+
+async function executeUnstake(posId) {
     try {
         for (const [key, safe] of Object.entries(safeContracts)) {
             try {
                 const tx = await safe.unstake(posId);
                 await tx.wait();
-                alert("NFT returned!");
+                
                 await loadUserNFTs();
                 await refreshUserData();
-                if (window.__inpinityCharts?.refresh) window.__inpinityCharts.refresh();
+                if (window.__inpinityCharts?.refresh) {
+                    window.__inpinityCharts.refresh();
+                }
+                
+                alert("NFT returned successfully!");
                 return;
             } catch (_) {}
         }
-    } catch (e) { alert("Unstake failed: " + (e.shortMessage || e.message || "")); }
+    } catch (e) { 
+        alert("Unstake failed: " + (e.shortMessage || e.message || "")); 
+    }
 }
 
 document.getElementById("connectWalletBtn").addEventListener("click", connectWallet);
@@ -1387,29 +1878,80 @@ window.addEventListener("load", async () => {
     const helpBtn = document.getElementById("tutorialHelpBtn");
     const total = slides.length;
     let current = 1;
+    
     function updateUI() {
         slides.forEach((s, i) => s.classList.toggle("active", (i + 1) === current));
-        dots.forEach((d, i) => { d.classList.toggle("active", (i + 1) === current); d.classList.toggle("passed", (i + 1) < current); });
+        dots.forEach((d, i) => { 
+            d.classList.toggle("active", (i + 1) === current); 
+            d.classList.toggle("passed", (i + 1) < current); 
+        });
         counter.textContent = current + " / " + total;
         prevBtn.disabled = current === 1;
         nextBtn.textContent = current === total ? "Start Staking 🚀" : "Next →";
     }
-    function show() { overlay.classList.add("active"); overlay.setAttribute("aria-hidden", "false"); document.body.style.overflow = "hidden"; updateUI(); }
-    function hide(markSeen) { overlay.classList.remove("active"); overlay.setAttribute("aria-hidden", "true"); document.body.style.overflow = ""; if (markSeen) { try { localStorage.setItem(STORAGE_KEY, "1"); } catch (_) {} } }
-    function goTo(n) { if (n < 1 || n > total) return; current = n; updateUI(); }
-    function next() { if (current === total) { hide(true); document.querySelector(".staking-section:last-child")?.scrollIntoView({ behavior: "smooth" }); } else goTo(current + 1); }
-    function prev() { goTo(current - 1); }
+    
+    function show() { 
+        overlay.classList.add("active"); 
+        overlay.setAttribute("aria-hidden", "false"); 
+        document.body.style.overflow = "hidden"; 
+        updateUI(); 
+    }
+    
+    function hide(markSeen) { 
+        overlay.classList.remove("active"); 
+        overlay.setAttribute("aria-hidden", "true"); 
+        document.body.style.overflow = ""; 
+        if (markSeen) { 
+            try { localStorage.setItem(STORAGE_KEY, "1"); } catch (_) {} 
+        } 
+    }
+    
+    function goTo(n) { 
+        if (n < 1 || n > total) return; 
+        current = n; 
+        updateUI(); 
+    }
+    
+    function next() { 
+        if (current === total) { 
+            hide(true); 
+            document.querySelector(".staking-section:last-child")?.scrollIntoView({ behavior: "smooth" }); 
+        } else {
+            goTo(current + 1); 
+        }
+    }
+    
+    function prev() { 
+        goTo(current - 1); 
+    }
+    
     prevBtn.addEventListener("click", prev);
     nextBtn.addEventListener("click", next);
     closeBtn.addEventListener("click", () => hide(true));
     skipBtn.addEventListener("click", () => hide(true));
     helpBtn.addEventListener("click", () => { current = 1; show(); });
-    overlay.addEventListener("click", (e) => { if (e.target === overlay) hide(true); });
-    document.addEventListener("keydown", (e) => { if (!overlay.classList.contains("active")) return; if (e.key === "Escape") hide(true); if (e.key === "ArrowRight") next(); if (e.key === "ArrowLeft") prev(); });
+    
+    overlay.addEventListener("click", (e) => { 
+        if (e.target === overlay) hide(true); 
+    });
+    
+    document.addEventListener("keydown", (e) => { 
+        if (!overlay.classList.contains("active")) return; 
+        if (e.key === "Escape") hide(true); 
+        if (e.key === "ArrowRight") next(); 
+        if (e.key === "ArrowLeft") prev(); 
+    });
+    
     let seen = false;
     try { seen = !!localStorage.getItem(STORAGE_KEY); } catch (_) {}
     if (!seen) setTimeout(() => { current = 1; show(); }, 1200);
-    window.__inpinityTutorial = { show, hide, goTo, reset: () => { try { localStorage.removeItem(STORAGE_KEY); } catch(_){} } };
+    
+    window.__inpinityTutorial = { 
+        show, 
+        hide, 
+        goTo, 
+        reset: () => { try { localStorage.removeItem(STORAGE_KEY); } catch(_){} } 
+    };
 })();
 </script>
 </body>
