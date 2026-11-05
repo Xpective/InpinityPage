@@ -22,20 +22,27 @@
     /* DEIN BESTEHENDES CSS                                     */
     /* ═══════════════════════════════════════════════════════ */
     .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin: 1.5rem auto; max-width: 980px; }
-    .stat-box { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.10); border-radius: 14px; padding: 1rem; text-align: center; }
+    .stat-box { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.10); border-radius: 14px; padding: 1rem; text-align: center; position: relative; }
     .stat-box-label { font-size: 0.75rem; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; }
     .stat-box-value { font-size: 1.35rem; font-weight: 900; color: var(--quinary-color, #ffd700); margin-top: 0.4rem; }
     .stat-box-sub { font-size: 0.72rem; opacity: 0.6; margin-top: 0.2rem; }
     .update-countdown { font-size: 0.72rem; color: #00c853; font-weight: 700; padding: 0.15rem 0.5rem; background: rgba(0, 200, 83, 0.12); border-radius: 6px; display: inline-block; margin-top: 0.25rem; font-family: monospace; }
     .update-countdown.warn { color: #ffaa00; background: rgba(255, 170, 0, 0.12); }
+    
+    /* ★ TOP-IDEE: Oracle Freshness Badge */
+    .oracle-badge { position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; border-radius: 50%; background: #00c853; box-shadow: 0 0 8px #00c853; transition: all 0.3s; }
+    .oracle-badge.stale { background: #ff5252; box-shadow: 0 0 8px #ff5252; }
+    .oracle-badge.warn { background: #ffaa00; box-shadow: 0 0 8px #ffaa00; }
+    
     .price-ticker-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; margin: 1.5rem auto; max-width: 980px; }
-    .price-ticker { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.10); border-radius: 12px; padding: 0.9rem 1rem; text-align: center; }
+    .price-ticker { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.10); border-radius: 12px; padding: 0.9rem 1rem; text-align: center; position: relative; }
     .price-ticker-token { font-size: 0.78rem; opacity: 0.7; font-weight: 700; letter-spacing: 0.03em; }
     .price-ticker-value { font-size: 1.15rem; font-weight: 900; color: #fff; margin: 0.35rem 0 0.2rem; }
     .price-ticker-age { font-size: 0.7rem; font-weight: 600; }
     .price-ticker-age.fresh { color: #00c853; }
     .price-ticker-age.warn  { color: #ffaa00; }
     .price-ticker-age.stale { color: #ff5252; }
+    
     .charts-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 1.25rem; margin: 1.5rem auto; max-width: 980px; }
     .chart-card { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.10); border-radius: 18px; padding: 1.25rem; }
     .chart-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;}
@@ -71,12 +78,16 @@
     [data-theme="light"] .portfolio-item-value.gold  { color: var(--quinary-color, #6a4fb3); }
     
     /* ═══════════════════════════════════════════════════════ */
-    /* NEUES CSS FÜR DIE CHART VERBESSERUNGEN                    */
+    /* CHART VERBESSERUNGEN                                     */
     /* ═══════════════════════════════════════════════════════ */
     .chart-controls { display: flex; gap: 0.4rem; }
     .chart-btn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #aaa; font-size: 0.75rem; font-weight: 700; padding: 0.3rem 0.7rem; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
     .chart-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
     .chart-btn.active { background: rgba(255, 215, 0, 0.15); border-color: rgba(255, 215, 0, 0.4); color: var(--quinary-color, #ffd700); box-shadow: 0 0 10px rgba(255,215,0,0.2); }
+    
+    /* ★ TOP-IDEE: Neues Badge für die Chart-Datenquelle */
+    .chart-source-badge { font-size: 0.65rem; padding: 0.1rem 0.4rem; border-radius: 4px; background: rgba(0,0,0,0.3); color: #aaa; margin-left: 0.5rem; font-weight: 600; text-transform: uppercase; }
+    
     .chart-stats-mini { display: flex; gap: 0.5rem; margin-top: 0.4rem; flex-wrap: wrap; }
     .chart-stat-item { font-size: 0.68rem; padding: 0.15rem 0.4rem; border-radius: 4px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); }
     .chart-stat-item span { opacity: 0.6; margin-right: 0.2rem; }
@@ -177,6 +188,7 @@
 
     <section class="stats-row">
         <div class="stat-box">
+            <div class="oracle-badge" id="oracleBadge"></div>
             <div class="stat-box-label">INPI Price</div>
             <div class="stat-box-value" id="statInpiPrice">—</div>
             <div class="stat-box-sub" id="statInpiChange">—</div>
@@ -200,17 +212,32 @@
     </section>
 
     <section class="price-ticker-grid">
-        <div class="price-ticker"><div class="price-ticker-token">ETH</div><div class="price-ticker-value" id="tickEth">—</div><div class="price-ticker-age" id="tickEthAge">—</div></div>
-        <div class="price-ticker"><div class="price-ticker-token">USDC</div><div class="price-ticker-value" id="tickUsdc">—</div><div class="price-ticker-age" id="tickUsdcAge">—</div></div>
-        <div class="price-ticker"><div class="price-ticker-token">INPI</div><div class="price-ticker-value" id="tickInpi">—</div><div class="price-ticker-age" id="tickInpiAge">—</div></div>
-        <div class="price-ticker"><div class="price-ticker-token">EURC</div><div class="price-ticker-value" id="tickEure">—</div><div class="price-ticker-age" id="tickEureAge">—</div></div>
+        <div class="price-ticker">
+            <div class="oracle-badge" id="tickEthBadge"></div>
+            <div class="price-ticker-token">ETH</div><div class="price-ticker-value" id="tickEth">—</div><div class="price-ticker-age" id="tickEthAge">—</div>
+        </div>
+        <div class="price-ticker">
+            <div class="oracle-badge" id="tickUsdcBadge"></div>
+            <div class="price-ticker-token">USDC</div><div class="price-ticker-value" id="tickUsdc">—</div><div class="price-ticker-age" id="tickUsdcAge">—</div>
+        </div>
+        <div class="price-ticker">
+            <div class="oracle-badge" id="tickInpiBadge"></div>
+            <div class="price-ticker-token">INPI</div><div class="price-ticker-value" id="tickInpi">—</div><div class="price-ticker-age" id="tickInpiAge">—</div>
+        </div>
+        <div class="price-ticker">
+            <div class="oracle-badge" id="tickEureBadge"></div>
+            <div class="price-ticker-token">EURC</div><div class="price-ticker-value" id="tickEure">—</div><div class="price-ticker-age" id="tickEureAge">—</div>
+        </div>
     </section>
 
     <section class="charts-grid">
         <div class="chart-card">
             <div class="chart-card-header">
                 <div>
-                    <h3 class="chart-card-title">📈 INPI / EUR · <span id="chartTimeframeLabel">7 Days</span></h3>
+                    <h3 class="chart-card-title">
+                        📈 INPI / EUR · <span id="chartTimeframeLabel">7 Days</span>
+                        <span class="chart-source-badge" id="chartSourceBadge">—</span>
+                    </h3>
                     <div class="chart-stats-mini" id="chartStats">
                         <div class="chart-stat-item yesterday"><span>24h:</span><strong id="statChartYesterday">—</strong></div>
                         <div class="chart-stat-item high"><span>High:</span><strong id="statChartHigh">—</strong></div>
@@ -234,8 +261,6 @@
                     🔴 Sell INPI
                 </a>
             </div>
-            <!-- Ende Buy & Sell Buttons -->
-
         </div>
         <div class="chart-card">
             <div class="chart-card-header">
@@ -541,7 +566,8 @@ const CONFIG = {
         INPI: "0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D",
         EURC: "0x60a3E35Cc302bFA44Cb288Bc5a4F316Fdb1adb42"
     },
-    GECKO_POOL: "0x2da60979434c607e283ad7956bdcd21b83fa756fa156ef45f996e2b34d2e12a8",
+    // ★ TOP-IDEE: Der neue, liquide Pool auch im Frontend für die Charts
+    GECKO_POOL: "0x7b26696184f74e8f790c21b23e10a68583f9cf0b7fc911db1eab510f6e5740cb",
     TARGETS: {
         old:  100_000_000n * 10n**18n,
         eth:   17_500_000n * 10n**18n,
@@ -596,7 +622,7 @@ const ERC721_ABI = [
 
 <script>
 /* =====================================================
-   CHARTS CONTROLLER (GECKOTERMINAL LIVE DATA)
+   CHARTS CONTROLLER (SMART CHART SOURCE SWITCHING)
 ===================================================== */
 (function() {
     let priceChart = null, tvlDonut = null;
@@ -826,6 +852,7 @@ const ERC721_ABI = [
     async function loadPriceChart() {
         // UI Updates für das Label
         const tfLabel = document.getElementById('chartTimeframeLabel');
+        const sourceBadge = document.getElementById('chartSourceBadge');
         if (tfLabel) tfLabel.textContent = currentChartHours === 24 ? '24 Hours' : currentChartHours === 72 ? '3 Days' : '7 Days';
 
         const chartBody = document.querySelector('.chart-body');
@@ -883,6 +910,8 @@ const ERC721_ABI = [
                     document.getElementById('statChartLow').textContent = '€' + low.toFixed(5);
                     document.getElementById('statChartYesterday').textContent = '€' + yesterdayClose.toFixed(5);
 
+                    if (sourceBadge) { sourceBadge.textContent = 'Live: Gecko'; sourceBadge.style.color = '#00e676'; }
+
                     lastPriceData = { prices, labels, stats };
                     chartBody.style.opacity = '1';
                     drawPriceChart(prices, labels, stats);
@@ -911,6 +940,9 @@ const ERC721_ABI = [
                     document.getElementById('statChartHigh').textContent = stats.high ? '€' + Number(stats.high).toFixed(5) : '—';
                     document.getElementById('statChartLow').textContent = stats.low ? '€' + Number(stats.low).toFixed(5) : '—';
                     document.getElementById('statChartYesterday').textContent = stats.yesterdayClose ? '€' + Number(stats.yesterdayClose).toFixed(5) : '—';
+                    
+                    if (sourceBadge) { sourceBadge.textContent = 'Live: Bot'; sourceBadge.style.color = '#ffaa00'; }
+
                     lastPriceData = { prices, labels, stats };
                     chartBody.style.opacity = '1';
                     drawPriceChart(prices, labels, stats);
@@ -919,7 +951,7 @@ const ERC721_ABI = [
             }
         } catch (e) { console.warn('Bot history fallback failed', e); }
 
-        // 3. LETZTER FALLBACK: Flatline
+        // 3. LETZTER FALLBACK: Flatline vom Bot Health Check
         try {
             const health = await fetch(CONFIG.BOT_URL + '/api/health').then(r => r.json());
             const inpiPrice = health.oracle?.prices?.find(p => p.token === 'INPI');
@@ -930,6 +962,8 @@ const ERC721_ABI = [
                 const labels = Array.from({ length: 7 }, (_, i) =>
                     new Date(Date.now() - (6 - i) * 86400000).toLocaleDateString('en', { month: 'short', day: 'numeric' })
                 );
+                if (sourceBadge) { sourceBadge.textContent = 'Static'; sourceBadge.style.color = '#ff5252'; }
+                
                 lastPriceData = { prices, labels, stats: null };
                 chartBody.style.opacity = '1';
                 drawPriceChart(prices, labels, null);
@@ -982,15 +1016,29 @@ const ERC721_ABI = [
             const prices = data.oracle?.prices || [];
             const tickers = { ETH: 'tickEth', USDC: 'tickUsdc', INPI: 'tickInpi', EURC: 'tickEure' };
             const ageTickers = { ETH: 'tickEthAge', USDC: 'tickUsdcAge', INPI: 'tickInpiAge', EURC: 'tickEureAge' };
+            const badgeTickers = { ETH: 'tickEthBadge', USDC: 'tickUsdcBadge', INPI: 'tickInpiBadge', EURC: 'tickEureBadge' };
+            
             prices.forEach(p => {
                 const el = document.getElementById(tickers[p.token]);
                 const ageEl = document.getElementById(ageTickers[p.token]);
+                const badgeEl = document.getElementById(badgeTickers[p.token]);
                 if (el) el.textContent = '€ ' + Number(p.priceEUR).toFixed(p.token === 'ETH' ? 2 : 6);
                 if (ageEl) {
                     ageEl.textContent = p.ageMinutes < 60 ? `${p.ageMinutes}min ago` : `${Math.floor(p.ageMinutes/60)}h ago`;
                     ageEl.className = 'price-ticker-age ' + (p.isStale ? 'stale' : p.ageMinutes < 30 ? 'fresh' : 'warn');
                 }
+                if (badgeEl) {
+                    badgeEl.className = 'oracle-badge ' + (p.isStale ? 'stale' : p.ageMinutes < 30 ? '' : 'warn');
+                }
             });
+            
+            // Update the main INPI Badge
+            const mainBadge = document.getElementById('oracleBadge');
+            const inpiP = prices.find(p => p.token === 'INPI');
+            if (mainBadge && inpiP) {
+                mainBadge.className = 'oracle-badge ' + (inpiP.isStale ? 'stale' : inpiP.ageMinutes < 30 ? '' : 'warn');
+            }
+
             updateCountdown(prices);
         } catch (e) {
             console.warn('Bot health failed:', e.message);
