@@ -21,10 +21,10 @@
   <script defer src="main.js"></script>
   <link rel="icon" type="image/png" href="/assets/favicon-D6BGG7Y0.webp">
 
-  <meta content="Inpinity, FAQ, INPI, Base, NFT, FarmingV6, PiratesV6, MercenaryV4, Resources, ERC1155, Partnerships, UE5" name="keywords">
+  <meta content="Inpinity, FAQ, INPI, Base, NFT, FarmingV6, PiratesV6, MercenaryV4, Resources, ERC1155, Partnerships, UE5, Staking, Phircle" name="keywords">
   <meta content="Inpinity Team" name="Xpective">
   <meta property="og:title" content="Inpinity - FAQ">
-  <meta property="og:description" content="Frequently asked questions about Inpinity, the Pi-Phi Pyramid, NFTs, resources, attacks, staking, and the roadmap.">
+  <meta property="og:description" content="Frequently asked questions about Inpinity, the Pi-Phi Pyramid, NFTs, resources, attacks, staking, Phircle, and the roadmap.">
   <meta property="og:image" content="logo_background.jpg">
   <meta property="og:url" content="https://inpinity.online/faq.html">
   <meta name="twitter:card" content="logo_background.webp">
@@ -67,12 +67,20 @@
       margin-top: 2rem;
       color: gold;
     }
+    .faq-section.phircle-section h2 {
+      border-bottom-color: #00e5ff;
+      color: #00e5ff;
+    }
     details.faq-item {
       margin: 1rem 0;
       padding: 0.75rem 0.9rem;
       background-color: rgba(255,255,255,0.05);
       border-radius: 12px;
       border-left: 4px solid var(--quinary-color, gold);
+    }
+    details.faq-item.phircle-item {
+      border-left-color: #00e5ff;
+      background-color: rgba(0,229,255,0.04);
     }
     details.faq-item summary {
       font-weight: 800;
@@ -89,9 +97,14 @@
       transition: transform 0.2s;
       color: var(--quinary-color, gold);
     }
+    details.faq-item.phircle-item summary::before {
+      color: #00e5ff;
+    }
     details.faq-item[open] summary::before { transform: rotate(90deg); }
     .faq-answer { margin-top: 0.8rem; padding-left: 1.6rem; color: #ddd; line-height: 1.6; }
     .faq-answer a { color: var(--quinary-color, gold); text-decoration: underline; }
+    .faq-answer.phircle-answer a { color: #00e5ff; }
+    .faq-answer.phircle-answer { }
 
     .warning-note {
       background: #332211;
@@ -119,6 +132,7 @@
       display: flex;
       flex-wrap: wrap;
       gap: 0.6rem;
+      justify-content: center;
     }
     .pill {
       display: inline-block;
@@ -132,6 +146,106 @@
       text-decoration: none;
     }
     .pill:hover { background: rgba(255,215,0,0.12); }
+    .pill.phircle-pill {
+      border-color: #00e5ff;
+      color: #00e5ff;
+    }
+    .pill.phircle-pill:hover {
+      background: rgba(0,229,255,0.12);
+    }
+
+    /* Phircle Nav Link Highlight */
+    .nav-list a[href="phircle"] {
+      color: #00e5ff;
+      font-weight: 600;
+      position: relative;
+    }
+    .nav-list a[href="phircle"]::after {
+      content: "NEW";
+      position: absolute;
+      top: -8px;
+      right: -22px;
+      font-size: 0.55rem;
+      background: #00e5ff;
+      color: #000;
+      padding: 1px 4px;
+      border-radius: 3px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    /* Phircle Callout Box */
+    .phircle-callout {
+      margin: 1.5rem 0;
+      padding: 1rem 1.4rem;
+      background: linear-gradient(135deg, rgba(0,229,255,0.08), rgba(0,170,85,0.08));
+      border: 1px solid #00e5ff;
+      border-left: 4px solid #00e5ff;
+      border-radius: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .phircle-callout-icon {
+      font-size: 1.8rem;
+      animation: phircleSpin 8s linear infinite;
+    }
+    @keyframes phircleSpin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .phircle-callout-text {
+      flex: 1;
+      min-width: 220px;
+      line-height: 1.55;
+      color: #dbe7f3;
+    }
+    .phircle-callout-text strong { color: #00e5ff; }
+    .phircle-callout .btn-phircle {
+      background: linear-gradient(135deg, #00e5ff, #00aa55);
+      color: #000;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 0.5rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      font-family: inherit;
+      font-size: 0.85rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: transform 0.2s;
+      white-space: nowrap;
+    }
+    .phircle-callout .btn-phircle:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,229,255,0.4);
+    }
+
+    /* Boost Table */
+    .boost-table {
+      margin: 0.8rem 0;
+      border-collapse: collapse;
+      width: 100%;
+      max-width: 380px;
+      font-size: 0.9rem;
+    }
+    .boost-table td {
+      padding: 0.4rem 0.8rem;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .boost-table td:last-child {
+      text-align: right;
+      font-family: monospace;
+      color: var(--quinary-color, gold);
+      font-weight: 700;
+    }
+
+    @media (max-width: 640px) {
+      .phircle-callout { flex-direction: column; text-align: center; }
+    }
   </style>
   <link rel="stylesheet" crossorigin href="/assets/responsive-sg2mVcZF.css">
   <link rel="stylesheet" crossorigin href="/assets/light-D_11Ehwr.css">
@@ -145,6 +259,7 @@
         <li><a href="game.html">Game</a></li>
         <li><a href="mint.html">Mint</a></li>
         <li><a href="map.html">Pyramid Map</a></li>
+        <li><a href="phircle">Phircle</a></li>
         <li><a href="staking.html">Staking</a></li>
         <li><a href="whitepaper.html">Whitepaper</a></li>
         <li><a href="faq.html" aria-current="page">FAQ</a></li>
@@ -169,6 +284,8 @@
         <a class="pill" href="mint.html">⛏️ Mint</a>
         <a class="pill" href="map.html">🗺️ Map</a>
         <a class="pill" href="game.html">🎮 Game</a>
+        <a class="pill" href="staking.html">🪙 Staking</a>
+        <a class="pill phircle-pill" href="phircle">🌀 Phircle</a>
         <a class="pill" href="whitepaper.html">📘 Whitepaper</a>
       </div>
     </div>
@@ -208,6 +325,7 @@
             <li>Open <a href="game.html">Game</a> and reveal your block (proofs come from the worker).</li>
             <li>Start farming (FarmingV6), wait, then claim resources.</li>
             <li>Optionally protect your block and try a pirate attack.</li>
+            <li>Explore <a href="phircle">Phircle</a> for a circular view of everything.</li>
           </ol>
         </div>
       </details>
@@ -308,7 +426,7 @@
         <div class="faq-answer">
           <p>
             Use the "Random free block" button in Mint. It checks random Row/Col and stops when a block is not minted.
-            You can also explore the <a href="map.html">Pyramid Map</a> and choose a strategic location.
+            You can also explore the <a href="map.html">Pyramid Map</a> or <a href="phircle">Phircle</a> and choose a strategic location.
           </p>
         </div>
       </details>
@@ -376,6 +494,7 @@
             <li>Wait for the cooldown.</li>
             <li><strong>ExecuteAttack</strong> to attempt the steal.</li>
           </ol>
+          <p>You can launch and execute attacks from <a href="map.html">Pyramid Map</a> or <a href="phircle">Phircle</a>.</p>
         </div>
       </details>
 
@@ -435,6 +554,478 @@
     </div>
 
     <!-- =========================
+         STAKING (NEW)
+    ========================== -->
+    <div class="faq-section">
+      <h2>🪙 Staking (INPI + NFT Pools)</h2>
+
+      <details class="faq-item">
+        <summary>What is staking in Inpinity?</summary>
+        <div class="faq-answer">
+          <p>
+            Staking is a <strong>passive reward system</strong>. You lock assets in a contract and continuously earn
+            <strong>INPI tokens</strong>. Inpinity has two staking paths:
+          </p>
+          <ul>
+            <li><strong>Classic token staking</strong> — stake INPI tokens directly (1000-year distribution).</li>
+            <li><strong>NFT pool staking</strong> — stake your Uniswap V4 LP position (an NFT) in an ETH / USDC / EURC pool with INPI.</li>
+          </ul>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>What's the difference between INPI staking and NFT pool staking?</summary>
+        <div class="faq-answer">
+          <p>
+            <strong>INPI staking</strong> is simple: you deposit INPI, you earn INPI. It's the base pool with a long-term
+            reward rate. Best for passive holders.
+          </p>
+          <p>
+            <strong>NFT pool staking</strong> is more advanced: you provide liquidity on Uniswap V4 (e.g. ETH + INPI),
+            receive an LP NFT, and stake that NFT into a Safe. You earn <strong>INPI rewards plus trading fees</strong>,
+            with optional boost multipliers if you lock.
+          </p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>How do I stake INPI tokens?</summary>
+        <div class="faq-answer">
+          <ol>
+            <li>Go to <a href="staking.html">Staking</a> and connect your wallet (Base network).</li>
+            <li>In the "INPI Token Staking" section, enter an amount (or click <strong>MAX</strong>).</li>
+            <li>Click <strong>Stake</strong>. Approve INPI first if prompted.</li>
+            <li>Rewards start accruing immediately.</li>
+            <li>Click <strong>Claim</strong> anytime to collect pending INPI, or <strong>Unstake</strong> to withdraw.</li>
+          </ol>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>How do I stake an NFT (Uniswap V4 LP position)?</summary>
+        <div class="faq-answer">
+          <ol>
+            <li>First, create a Uniswap V4 LP position at <a href="https://app.uniswap.org/pool" target="_blank" rel="noopener">app.uniswap.org/pool</a> (e.g. ETH+INPI, USDC+INPI, or EURC+INPI).</li>
+            <li>You receive an <strong>NFT</strong> — this is your LP position. Find its <strong>Token ID</strong>.</li>
+            <li>On <a href="staking.html">Staking</a>, paste the Token ID, choose your pool (ETH / USDC / EURC), and pick a lock duration.</li>
+            <li>Click <strong>Approve NFT</strong>, then <strong>Stake NFT</strong>.</li>
+            <li>Your NFT is now earning INPI rewards with a boost multiplier.</li>
+            <li>At any time you can <strong>Claim</strong> rewards or <strong>Unstake</strong> (your NFT is always returned).</li>
+          </ol>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>What is a Uniswap V4 LP NFT and why does it matter?</summary>
+        <div class="faq-answer">
+          <p>
+            On Uniswap V4, every liquidity position is represented as an <strong>ERC-721 NFT</strong>. Staking the NFT
+            gives Inpinity permission to <em>hold</em> it temporarily — but <strong>ownership always stays yours</strong>.
+            When you unstake, the NFT is transferred back to your wallet automatically.
+          </p>
+          <p>
+            This design is powerful: it lets you earn <strong>three revenue streams</strong> from the same capital —
+            trading fees from Uniswap + INPI rewards from Inpinity + potential INPI price appreciation.
+          </p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>What are the lock duration boosts?</summary>
+        <div class="faq-answer">
+          <p>
+            The longer you lock your NFT, the higher the multiplier on your INPI rewards:
+          </p>
+          <table class="boost-table">
+            <tr><td>🟢 Flexible</td><td>1.00×</td></tr>
+            <tr><td>🔵 3 months</td><td>1.68×</td></tr>
+            <tr><td>🟣 6 months</td><td>3.28×</td></tr>
+            <tr><td>🟠 9 months</td><td>5.40×</td></tr>
+            <tr><td>🔴 12 months</td><td>8.00×</td></tr>
+          </table>
+          <p>
+            <strong>Flexible</strong> means you can unstake anytime with no penalty — but no boost.
+          </p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>What are NFT rarity boosts?</summary>
+        <div class="faq-answer">
+          <p>
+            If the NFT you stake represents a Pyramid Block (from your own Inpinity collection), its <strong>rarity</strong>
+            adds a bonus multiplier on top of the lock boost:
+          </p>
+          <table class="boost-table">
+            <tr><td>🥉 Bronze</td><td>1.00×</td></tr>
+            <tr><td>🥈 Silver</td><td>1.03×</td></tr>
+            <tr><td>🥇 Gold</td><td>1.06×</td></tr>
+            <tr><td>💠 Platinum</td><td>1.10×</td></tr>
+            <tr><td>💎 Diamond</td><td>1.15×</td></tr>
+          </table>
+          <p>
+            Lock boost × Rarity boost = <strong>stacked multiplier</strong> on your INPI rewards.
+          </p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>What happens if I unstake early?</summary>
+        <div class="faq-answer">
+          <p>
+            If you chose a <strong>locked</strong> duration (3, 6, 9, or 12 months) and unstake before it ends,
+            you lose a portion of your <strong>unclaimed pending rewards</strong> as a penalty. The exact amount
+            is shown in a confirmation popup before you sign the transaction.
+          </p>
+          <p>
+            Your NFT is still returned. Only pending rewards are penalized.
+          </p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>Where do my staking rewards come from?</summary>
+        <div class="faq-answer">
+          <p>
+            From a fixed allocation in the INPI tokenomics:
+          </p>
+          <ul>
+            <li><strong>Classic staking pool</strong>: 150,000,000 INPI reserved for staking rewards (1000-year distribution).</li>
+            <li><strong>NFT pools</strong>: each Safe has its own reward pool with a defined rate per second.</li>
+          </ul>
+          <p>
+            Rewards are paid in INPI, accumulate <strong>every second</strong>, and can be claimed anytime.
+          </p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>What's the minimum LP position size?</summary>
+        <div class="faq-answer">
+          <p>
+            The minimum stake value is <strong>10 EUR</strong> per NFT position. This avoids dust and ensures the
+            reward mechanism makes sense.
+          </p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>Why don't my pending rewards update instantly on the UI?</summary>
+        <div class="faq-answer">
+          <p>
+            Rewards accrue <strong>on-chain every second</strong>, but the UI reads them at intervals
+            (every ~15 seconds on Staking, plus a live 2-second ticker for the classic pool).
+            If you need the exact current value, refresh the page.
+          </p>
+          <p>
+            Your rewards are <strong>never lost</strong> due to UI delay — the contract holds the real balance.
+          </p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>Can I lose my NFT if something goes wrong?</summary>
+        <div class="faq-answer">
+          <p>
+            No. The Safe contract is designed so your NFT is only <strong>held temporarily</strong> — it never leaves
+            the custody of the contract unless you sign an unstake. Even in the worst case (Safe paused), the
+            contract has an <strong>emergency exit</strong> so you can always retrieve your NFT.
+          </p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>What contracts power staking?</summary>
+        <div class="faq-answer">
+          <ul>
+            <li><strong>Classic INPI Staking:</strong> <span class="token-address">0xF8c74E4fEe036C91228268E804f83eD8f55a6524</span></li>
+            <li><strong>ETH-INPI Safe:</strong> <span class="token-address">0xe50dd0D5b81118d340eAcA47E84855B384436FA1</span></li>
+            <li><strong>USDC-INPI Safe:</strong> <span class="token-address">0x7B4Fa98126857Ee76fEFFAac435F68070D49F4dd</span></li>
+            <li><strong>EURC-INPI Safe:</strong> <span class="token-address">0x1d0D8AA0889990B878390fcBF943E05D3236D6F9</span></li>
+          </ul>
+        </div>
+      </details>
+    </div>
+
+    <!-- =========================
+         PHIRCLE (NEW)
+    ========================== -->
+    <div class="faq-section phircle-section">
+      <h2>🌀 Phircle — The Pyramid as a Circle</h2>
+
+      <div class="phircle-callout">
+        <div class="phircle-callout-icon">🌀</div>
+        <div class="phircle-callout-text">
+          <strong>Phircle is live.</strong> Same contracts, same blocks, same rules — but the entire 10,000-block
+          pyramid rendered as a <strong>living circle</strong> with π (pi) and φ (phi) driving the layout.
+        </div>
+        <a href="phircle" class="btn-phircle">🌀 Open Phircle</a>
+      </div>
+
+      <details class="faq-item phircle-item">
+        <summary>What is Phircle?</summary>
+        <div class="faq-answer phircle-answer">
+          <p>
+            Phircle is a <strong>new circular view</strong> of the existing Inpinity Pyramid. Instead of a triangular
+            grid, all 10,000 blocks are arranged around a central tip — like a <strong>cone unrolled into a circle</strong>.
+            The layout follows the mathematical constants <strong>π</strong> and <strong>φ</strong>, echoing the
+            rarity logic that already runs on-chain.
+          </p>
+          <p>
+            It is not a new game, not a new contract, and not a new token — it is the same pyramid, seen
+            from a different angle, with all interactions available in one place.
+          </p>
+        </div>
+      </details>
+
+      <details class="faq-item phircle-item">
+        <summary>Is Phircle a new contract, token, or game?</summary>
+        <div class="faq-answer phircle-answer">
+          <p>
+            <strong>No.</strong> Phircle uses the exact same contracts as Mint, Game, and Pyramid Map:
+            InpinityNFT, ResourceToken, FarmingV6, PiratesV6, MercenaryV4, PartnershipV2.
+          </p>
+          <p>
+            Same blocks, same rarity, same rules. Only the <strong>visualization</strong> and the <strong>interaction flow</strong> are new.
+          </p>
+        </div>
+      </details>
+
+      <details class="faq-item phircle-item">
+        <summary>How does Phircle relate to the Pyramid Map?</summary>
+        <div class="faq-answer phircle-answer">
+          <p>
+            The Pyramid Map is a classic <strong>triangular grid</strong> — familiar, structured, great for
+            browsing exact coordinates.
+          </p>
+          <p>
+            Phircle is the <strong>circular equivalent</strong>. It's better for:
+          </p>
+          <ul>
+            <li>Seeing the whole pyramid in one glance.</li>
+            <li>Spotting π/φ symmetry and mirror blocks visually.</li>
+            <li>Launching and executing attacks with animated rays.</li>
+            <li>Fast decisions on mobile (zoom + tap on small circles).</li>
+          </ul>
+          <p>
+            Both views show the same on-chain reality. Use whichever feels faster for the task at hand.
+          </p>
+        </div>
+      </details>
+
+      <details class="faq-item phircle-item">
+        <summary>How do I attack from Phircle?</summary>
+        <div class="faq-answer phircle-answer">
+          <ol>
+            <li>Click any <strong>foreign block</strong> (not yours) on the circle.</li>
+            <li>In the sidebar, choose your <strong>attacker block</strong> (one of your own).</li>
+            <li>Choose the <strong>resource</strong> to steal — only resources that the target produces are shown.</li>
+            <li>Review the <strong>Profit Predictor</strong> — it shows an estimated steal amount and whether it's a "good deal".</li>
+            <li>Click <strong>Start Attack</strong>.</li>
+            <li>After the cooldown ends, return to Phircle and click the same block. The "Execute" button will be active.</li>
+          </ol>
+        </div>
+      </details>
+
+      <details class="faq-item phircle-item">
+        <summary>What is the Profit Predictor?</summary>
+        <div class="faq-answer phircle-answer">
+          <p>
+            Before you commit to an attack, the Profit Predictor estimates how much you'd steal based on:
+          </p>
+          <ul>
+            <li>Target's <strong>rarity</strong> (Diamond produces more than Bronze).</li>
+            <li>Which <strong>resource</strong> you selected.</li>
+            <li>Target's current <strong>protection level</strong> (mercenaries reduce the steal).</li>
+          </ul>
+          <p>
+            The result is shown as "✅ Good deal" or "⚠️ Low profit" — a quick way to avoid wasting gas on
+            attacks that won't pay off.
+          </p>
+        </div>
+      </details>
+
+      <details class="faq-item phircle-item">
+        <summary>What is "Quantum Freeze"?</summary>
+        <div class="faq-answer phircle-answer">
+          <p>
+            When you press the <strong>PAUSE / EXPLODE</strong> button (or the Space bar on desktop), Phircle:
+          </p>
+          <ul>
+            <li>Freezes all ring rotations.</li>
+            <li>Spreads the rings outward (like a slow explosion).</li>
+            <li>Zooms in automatically (2.8× on mobile, 2.0× on desktop).</li>
+            <li>Adds a subtle "quantum jitter" so blocks are visually distinct.</li>
+          </ul>
+          <p>
+            This is designed for <strong>precise selection on mobile</strong> — no more fat-finger mistakes on tiny blocks.
+            Press again to resume the live view.
+          </p>
+        </div>
+      </details>
+
+      <details class="faq-item phircle-item">
+        <summary>What is the War Room layer?</summary>
+        <div class="faq-answer phircle-answer">
+          <p>
+            War Room is a special layer that highlights only <strong>critical blocks</strong>:
+          </p>
+          <ul>
+            <li>🔴 Any block currently <strong>under attack</strong>.</li>
+            <li>🟠 Your own <strong>unprotected high-rarity</strong> blocks (Platinum / Diamond).</li>
+            <li>🟡 Any <strong>unprotected Diamond</strong> block across the map (potential targets).</li>
+          </ul>
+          <p>
+            Everything else fades to dark — so you immediately see where the action is.
+          </p>
+        </div>
+      </details>
+
+      <details class="faq-item phircle-item">
+        <summary>What is the Attack History Vault?</summary>
+        <div class="faq-answer phircle-answer">
+          <p>
+            Click the <strong>📜 HISTORY</strong> button in the Phircle layer menu to open a complete log of your
+            attacks — including ones that <strong>already executed</strong> and ones you <strong>cancelled</strong>.
+          </p>
+          <p>
+            You can filter by:
+          </p>
+          <ul>
+            <li><strong>All</strong> — full history.</li>
+            <li><strong>Executed</strong> — successful raids with stolen amounts.</li>
+            <li><strong>Cancelled</strong> — aborted attacks.</li>
+            <li><strong>Active</strong> — attacks still waiting for their execute window.</li>
+          </ul>
+          <p>
+            Unlike the Pyramid Map, Phircle remembers your past attacks even after the timer expires — so nothing is lost.
+          </p>
+        </div>
+      </details>
+
+      <details class="faq-item phircle-item">
+        <summary>What is the Owner Aura and Ghost Lines?</summary>
+        <div class="faq-answer phircle-answer">
+          <p>
+            <strong>Owner Aura</strong>: all blocks you own are highlighted with a cyan glow and connected by
+            faint cyan lines — your personal constellation within the pyramid.
+          </p>
+          <p>
+            <strong>Ghost Lines</strong>: when you've selected an attacker block and click a target (or hover over
+            one), a dashed red line draws between them — previewing the attack path before you commit.
+          </p>
+        </div>
+      </details>
+
+      <details class="faq-item phircle-item">
+        <summary>How does deep linking work?</summary>
+        <div class="faq-answer phircle-answer">
+          <p>
+            Every time you click a block in Phircle, the URL updates to something like
+            <code>inpinity.online/phircle#block/1234</code>. You can <strong>copy and share</strong> that link —
+            anyone who opens it will land directly on that block with the sidebar already open.
+          </p>
+          <p>
+            Every block also has a <strong>🔗 Share</strong> button in the sidebar that copies the link.
+          </p>
+        </div>
+      </details>
+
+      <details class="faq-item phircle-item">
+        <summary>Does Phircle work on mobile?</summary>
+        <div class="faq-answer phircle-answer">
+          <p>
+            Yes — Phircle is fully mobile-optimized:
+          </p>
+          <ul>
+            <li><strong>Pinch zoom</strong> with two fingers (like Google Maps).</li>
+            <li><strong>One-finger drag</strong> to pan.</li>
+            <li><strong>Tap a block</strong> to open its sidebar.</li>
+            <li><strong>Quantum Freeze</strong> (tap the pause button) makes blocks bigger and easier to tap precisely.</li>
+            <li>Auto-zoom and focus when you open a specific block via deep link.</li>
+          </ul>
+        </div>
+      </details>
+
+      <details class="faq-item phircle-item">
+        <summary>Why π and φ? Why not just a regular grid?</summary>
+        <div class="faq-answer phircle-answer">
+          <p>
+            Because the pyramid's rarity is <strong>already computed from π and φ</strong>. Mirror matches along the 0-axis,
+            Pi-digit equals Phi-digit coincidences, and Fibonacci-style spacing are all real on-chain calculations
+            (see the "Mathematical Rarity Proof" on the Pyramid Map).
+          </p>
+          <p>
+            Phircle makes those symmetries <strong>visible</strong>. Instead of reading numbers in a sidebar, you see
+            the mirrored blocks connect. The circle layout is not decorative — it's a visual map of the same math.
+          </p>
+        </div>
+      </details>
+
+      <details class="faq-item phircle-item">
+        <summary>Can I use Phircle without a wallet?</summary>
+        <div class="faq-answer phircle-answer">
+          <p>
+            Yes. You can <strong>view the whole map</strong>, browse blocks, see rarities, and explore symmetries
+            without connecting a wallet.
+          </p>
+          <p>
+            To <strong>mint, farm, claim, protect, or attack</strong>, you need to connect a wallet on Base network.
+          </p>
+        </div>
+      </details>
+
+      <details class="faq-item phircle-item">
+        <summary>Do I have to close the sidebar to see attacks?</summary>
+        <div class="faq-answer phircle-answer">
+          <p>
+            No. On desktop, the sidebar is a fixed panel on the right. On mobile, the sidebar slides in from the right —
+            and when it's active, the <strong>attack rays and animations remain visible</strong> in the background.
+          </p>
+          <p>
+            You can also tap anywhere on the canvas to close the sidebar and see the full map.
+          </p>
+        </div>
+      </details>
+
+      <details class="faq-item phircle-item">
+        <summary>Is there a tutorial in Phircle?</summary>
+        <div class="faq-answer phircle-answer">
+          <p>
+            Yes — the first time you open Phircle, a <strong>6-step tutorial</strong> appears automatically.
+            It explains:
+          </p>
+          <ol>
+            <li>The layout (Pyramid as a circle).</li>
+            <li>The layer bar (Rarity, Owner, Farming, Attack, Partner, My Farms, War Room).</li>
+            <li>How to select blocks and inspect them.</li>
+            <li>Quantum Freeze for precise tapping.</li>
+            <li>How to start an attack with the Profit Predictor.</li>
+            <li>Deep linking and sharing.</li>
+          </ol>
+          <p>
+            You can reopen the tutorial anytime via the <strong>❓ button</strong> or by pressing <strong>Ctrl+K</strong>
+            and typing "tutorial".
+          </p>
+        </div>
+      </details>
+
+      <details class="faq-item phircle-item">
+        <summary>Can I find my own blocks easily in Phircle?</summary>
+        <div class="faq-answer phircle-answer">
+          <p>
+            Yes — three ways:
+          </p>
+          <ul>
+            <li>Click the <strong>💎 MY FARMS</strong> layer to highlight only your farms.</li>
+            <li>Use the <strong>👤 Mine</strong> filter chip at the bottom-left of the map.</li>
+            <li>Look for the <strong>cyan owner aura</strong> — your blocks glow and are connected by a personal constellation.</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+
+    <!-- =========================
          PARTNERSHIPS / ROADMAP
     ========================== -->
     <div class="faq-section">
@@ -464,7 +1055,7 @@
         <summary>When UE5?</summary>
         <div class="faq-answer">
           <p>
-            Roadmap direction: stabilize the web module (Mint/Map/Game), then introduce City systems,
+            Roadmap direction: stabilize the web module (Mint/Map/Game/Phircle), then introduce City systems,
             then bring ownership + city/resource state into a UE5 prototype, followed by a playable UE5 alpha.
           </p>
         </div>
@@ -488,6 +1079,7 @@
       <a href="game.html">Game</a>
       <a href="mint.html">Mint</a>
       <a href="map.html">Pyramid Map</a>
+      <a href="phircle">Phircle</a>
       <a href="staking.html">Staking</a>
       <a href="whitepaper.html">Whitepaper</a>
       <a href="faq.html">FAQ</a>

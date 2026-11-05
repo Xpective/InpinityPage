@@ -23,6 +23,135 @@
   <meta name="robots" content="index,follow" />
 
   <script defer src="main.js"></script>
+
+  <style>
+    /* ============ PHIRCLE NAV HIGHLIGHT ============ */
+    .nav-list a[href="phircle"] {
+      color: #00e5ff;
+      font-weight: 600;
+      position: relative;
+    }
+    .nav-list a[href="phircle"]::after {
+      content: "NEW";
+      position: absolute;
+      top: -8px;
+      right: -22px;
+      font-size: 0.55rem;
+      background: #00e5ff;
+      color: #000;
+      padding: 1px 4px;
+      border-radius: 3px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    /* ============ PHIRCLE LINK CHIP (Hero) ============ */
+    .link-chip.phircle-chip {
+      background: linear-gradient(135deg, rgba(0,229,255,0.12), rgba(0,170,85,0.12));
+      border: 1px solid #00e5ff;
+      color: #00e5ff;
+      font-weight: 700;
+      transition: all 0.2s;
+    }
+    .link-chip.phircle-chip:hover {
+      background: linear-gradient(135deg, #00e5ff, #00aa55);
+      color: #000;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,229,255,0.4);
+    }
+
+    /* ============ PHIRCLE HINT IN REVEAL CARD ============ */
+    .phircle-hint-box {
+      margin-top: 1rem;
+      padding: 0.9rem 1rem;
+      background: linear-gradient(135deg, rgba(0,229,255,0.08), rgba(0,170,85,0.08));
+      border: 1px solid #00e5ff;
+      border-radius: 0.6rem;
+      font-size: 0.85rem;
+      line-height: 1.55;
+      color: #dbe7f3;
+    }
+    .phircle-hint-box strong { color: #00e5ff; }
+    .phircle-hint-box a {
+      color: #00e5ff;
+      font-weight: 700;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      margin-top: 0.5rem;
+      padding: 0.4rem 0.9rem;
+      background: rgba(0,229,255,0.15);
+      border: 1px solid #00e5ff;
+      border-radius: 999px;
+      transition: all 0.2s;
+    }
+    .phircle-hint-box a:hover {
+      background: #00e5ff;
+      color: #000;
+    }
+
+    /* ============ PHIRCLE MINI BANNER (Under Main Grid) ============ */
+    .phircle-mini-banner {
+      margin: 2rem auto 0 auto;
+      max-width: 900px;
+      padding: 1.2rem 1.5rem;
+      background: linear-gradient(135deg, rgba(0,229,255,0.06), rgba(0,170,85,0.06));
+      border: 1px dashed #00e5ff;
+      border-radius: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      flex-wrap: wrap;
+    }
+    .phircle-mini-banner-icon {
+      font-size: 2rem;
+      animation: phircleFloat 3s ease-in-out infinite;
+    }
+    @keyframes phircleFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+    .phircle-mini-banner-text {
+      flex: 1;
+      min-width: 200px;
+    }
+    .phircle-mini-banner-title {
+      color: #00e5ff;
+      font-weight: 700;
+      margin-bottom: 0.3rem;
+      font-size: 1rem;
+    }
+    .phircle-mini-banner-desc {
+      color: #98a9b9;
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+    .phircle-mini-banner .btn-phircle {
+      background: linear-gradient(135deg, #00e5ff, #00aa55);
+      color: #000;
+      border: none;
+      padding: 0.7rem 1.4rem;
+      border-radius: 0.5rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      font-family: inherit;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: transform 0.2s;
+      white-space: nowrap;
+    }
+    .phircle-mini-banner .btn-phircle:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,229,255,0.4);
+    }
+    @media (max-width: 640px) {
+      .phircle-mini-banner { flex-direction: column; text-align: center; }
+    }
+  </style>
   <link rel="stylesheet" crossorigin href="/assets/mint-BxeUXvU7.css">
   <link rel="stylesheet" crossorigin href="/assets/responsive-sg2mVcZF.css">
   <link rel="stylesheet" crossorigin href="/assets/light-D_11Ehwr.css">
@@ -36,6 +165,7 @@
         <li><a href="game.html">Game</a></li>
         <li><a href="mint.html" aria-current="page">Mint</a></li>
         <li><a href="map.html">Pyramid Map</a></li>
+        <li><a href="phircle">Phircle</a></li>
         <li><a href="staking.html">Staking</a></li>
         <li><a href="whitepaper.html">Whitepaper</a></li>
         <li><a href="faq.html">FAQ</a></li>
@@ -63,6 +193,7 @@
           📄 NFT Contract
         </a>
         <a class="link-chip" href="game.html">🎮 Open Game</a>
+        <a class="link-chip phircle-chip" href="phircle">🌀 Open Phircle</a>
       </div>
     </section>
 
@@ -149,6 +280,14 @@
         <div id="revealMessage"></div>
         <div id="debugLog" class="debug-log">[Debug] Console output will appear here.</div>
 
+        <!-- PHIRCLE HINT BOX -->
+        <div class="phircle-hint-box">
+          <strong>🌀 Why Reveal?</strong><br>
+          Revealed blocks expose hidden <strong>π</strong> and <strong>φ</strong> digits. In <strong>Phircle</strong>, these digits determine mathematical mirrors, rarity, and profit potential — all visualized on the circular map.
+          <br>
+          <a href="phircle">🌀 Explore on Phircle</a>
+        </div>
+
         <div class="info-note">
           <strong>Phase 1:</strong> 10,000 blocks<br>
           <strong>INPI Token:</strong>
@@ -158,6 +297,18 @@
         </div>
       </div>
     </section>
+
+    <!-- PHIRCLE MINI BANNER -->
+    <div class="phircle-mini-banner">
+      <div class="phircle-mini-banner-icon">🌀</div>
+      <div class="phircle-mini-banner-text">
+        <div class="phircle-mini-banner-title">See your newly minted blocks in Phircle</div>
+        <div class="phircle-mini-banner-desc">
+          Every new block you mint appears instantly on the circular map. Watch the pyramid form, explore π & φ symmetries, and plan your attacks visually.
+        </div>
+      </div>
+      <a href="phircle" class="btn-phircle">🌀 Open Phircle →</a>
+    </div>
   </main>
 
   <footer class="site-footer">
@@ -166,13 +317,14 @@
       <a href="game.html">Game</a>
       <a href="mint.html">Mint</a>
       <a href="map.html">Pyramid Map</a>
+      <a href="phircle">Phircle</a>
       <a href="staking.html">Staking</a>
       <a href="whitepaper.html">Whitepaper</a>
       <a href="faq.html">FAQ</a>
       <a href="privacypolicy.html">Privacy</a>
       <a href="termsofuse.html">Terms</a>
     </div>
-    <p class="footer-version">Version 0.28.0</p>
+    <p class="footer-version">Version 0.29.0 (Phircle)</p>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>

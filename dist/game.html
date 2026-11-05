@@ -23,6 +23,52 @@
 
 
   <style>
+    /* ==== PHIRCLE NAV HIGHLIGHT ==== */
+    .nav-list a[href="phircle"] {
+      color: #00e5ff;
+      font-weight: 600;
+      position: relative;
+    }
+    .nav-list a[href="phircle"]::after {
+      content: "NEW";
+      position: absolute;
+      top: -8px;
+      right: -22px;
+      font-size: 0.55rem;
+      background: #00e5ff;
+      color: #000;
+      padding: 1px 4px;
+      border-radius: 3px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    /* ==== PHIRCLE FEATURE BANNER ==== */
+    .phircle-banner {
+      background: linear-gradient(135deg, rgba(0,229,255,0.08), rgba(0,170,85,0.08));
+      border: 1px solid #00e5ff;
+      border-radius: 0.8rem;
+      padding: 1rem 1.2rem;
+      margin: 1rem 0;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .phircle-banner-icon { font-size: 1.8rem; }
+    .phircle-banner-text { flex: 1; min-width: 200px; }
+    .phircle-banner-title { color: #00e5ff; font-weight: 700; margin-bottom: 0.3rem; }
+    .phircle-banner-desc { color: #98a9b9; font-size: 0.88rem; line-height: 1.5; }
+    .phircle-banner .btn-phircle {
+      background: linear-gradient(135deg, #00e5ff, #00aa55);
+      color: #000; border: none; padding: 0.7rem 1.4rem;
+      border-radius: 0.5rem; font-weight: 700; cursor: pointer;
+      text-decoration: none; font-family: inherit; font-size: 0.9rem;
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      transition: transform 0.2s;
+    }
+    .phircle-banner .btn-phircle:hover { transform: translateY(-2px); }
+
     /* ==== TUTORIAL + STATUS BAR STYLES ==== */
     .onboarding-modal {
       position: fixed; inset: 0; z-index: 9999;
@@ -83,8 +129,11 @@
       transition: border-color 0.2s, transform 0.2s;
     }
     .quick-action-card:hover { border-color: #d4af37; transform: translateY(-2px); }
+    .quick-action-card.phircle-card { border-color: #00e5ff; }
+    .quick-action-card.phircle-card:hover { border-color: #00e5ff; box-shadow: 0 0 20px rgba(0,229,255,0.3); }
     .quick-action-icon { font-size: 1.8rem; margin-bottom: 0.4rem; }
     .quick-action-title { font-weight: 600; color: #d4af37; margin-bottom: 0.2rem; }
+    .quick-action-card.phircle-card .quick-action-title { color: #00e5ff; }
     .quick-action-desc { font-size: 0.8rem; color: #98a9b9; }
 
     .section-number {
@@ -163,6 +212,7 @@
         <li><a href="game.html" aria-current="page">Game</a></li>
         <li><a href="mint.html">Mint</a></li>
         <li><a href="map.html">Pyramid Map</a></li>
+        <li><a href="phircle">Phircle</a></li>
         <li><a href="staking.html">Staking</a></li>
         <li><a href="whitepaper.html">Whitepaper</a></li>
         <li><a href="faq.html">FAQ</a></li>
@@ -187,6 +237,19 @@
           Connect your wallet, reveal and manage blocks, start farming, protect territory, review active pirate attacks, and
           exchange value inside the ecosystem with the active V6 flow and Mercenary V4 defense system.
         </p>
+
+        <!-- ========== PHIRCLE FEATURE BANNER ========== -->
+        <div class="phircle-banner">
+          <div class="phircle-banner-icon">🌀</div>
+          <div class="phircle-banner-text">
+            <div class="phircle-banner-title">Phircle is here — Pyramid as a Circle</div>
+            <div class="phircle-banner-desc">
+              Explore all 10,000 blocks as a living circle with π & φ. Attack, farm, claim, and defend directly on the map with visual attack rays, profit predictor, and quantum freeze.
+            </div>
+          </div>
+          <a href="phircle" class="btn-phircle">🌀 Open Phircle →</a>
+        </div>
+
         <div style="margin-top:1rem;">
           <button class="btn btn-small btn-secondary" id="reopenOnboarding" type="button">❓ Show tutorial again</button>
         </div>
@@ -628,7 +691,7 @@
                 <div>
                   <strong><span class="section-number">6</span>⚔️ Pirate Attack V6</strong>
                   <span class="section-subtitle" style="display:block;">
-                    Attacks are executed on the Pyramid Map.
+                    Attacks are executed on the Pyramid Map or Phircle.
                   </span>
                 </div>
                 <span class="v6-badge" id="pirateSummaryState">MAP</span>
@@ -643,25 +706,27 @@
                   </div>
                   <div class="attack-step">
                     <div class="attack-step-num">2</div>
-                    <div class="attack-step-title">Open Pyramid Map</div>
+                    <div class="attack-step-title">Open Pyramid Map or Phircle</div>
                     <div class="attack-step-desc">Click the button below</div>
                   </div>
                   <div class="attack-step">
                     <div class="attack-step-num">3</div>
                     <div class="attack-step-title">Click target → Attack</div>
-                    <div class="attack-step-desc">In the map sidebar → "Attack" button</div>
+                    <div class="attack-step-desc">In the sidebar → "Attack" button</div>
                   </div>
                 </div>
 
                 <div class="action-card" style="margin-bottom:1rem;">
-                  <h4>🗺️ Attack via Map</h4>
+                  <h4>🗺️ Attack via Map or Phircle</h4>
                   <div style="margin-top:0.5rem; font-size:0.92rem; line-height:1.65; color:#dbe7f3;">
                     • Use the map for visual target selection<br />
+                    • Or use <strong>Phircle</strong> for a circular view with profit predictor<br />
                     • Launch attacks there (cleaner flow)<br />
-                    • Execute ready attacks from the list below or directly in the map view
+                    • Execute ready attacks from the list below or directly in the map/phircle view
                   </div>
                   <div style="margin-top:1rem; display:flex; gap:0.7rem; flex-wrap:wrap;">
                     <a href="map.html#attack" class="btn" id="openMapAttackBtn">🗺️ Open Pyramid Map</a>
+                    <a href="phircle" class="btn" style="background:linear-gradient(135deg,#00e5ff,#00aa55); color:#000; font-weight:700;">🌀 Open Phircle</a>
                   </div>
                   <div id="attackMessage" style="margin-top:1rem;"></div>
                 </div>
@@ -727,7 +792,7 @@
             <div id="protectMessage" class="message" style="margin-top:0.5rem;"></div>
           </div>
 
-          <!-- ========== QUICK ACTIONS instead of empty text ========== -->
+          <!-- ========== QUICK ACTIONS ========== -->
           <div id="noBlockSelected" class="empty-state" style="margin-top:1rem; display:block;">
             <p style="font-size:1rem; margin-bottom:1rem;">Select a block from the grid above — or start here:</p>
             <div class="quick-actions">
@@ -740,6 +805,12 @@
                 <div class="quick-action-icon">🗺️</div>
                 <div class="quick-action-title">Pyramid Map</div>
                 <div class="quick-action-desc">All blocks & attacks</div>
+              </a>
+              <!-- PHIRCLE CARD -->
+              <a href="phircle" class="quick-action-card phircle-card">
+                <div class="quick-action-icon">🌀</div>
+                <div class="quick-action-title">Phircle</div>
+                <div class="quick-action-desc">Pyramid as a Circle — π & φ</div>
               </a>
               <a href="faq.html" class="quick-action-card">
                 <div class="quick-action-icon">❓</div>
@@ -864,7 +935,30 @@
             <li>Duration-based protection pricing (1–7 days)</li>
             <li>Immediate points on start + completion rewards</li>
             <li>Attack execution on Pyramid Map (more stable)</li>
+            <li><strong>NEW:</strong> Phircle — Pyramid as a Circle with π & φ, profit predictor, and visual attack rays</li>
           </ul>
+        </div>
+      </details>
+
+      <!-- PHIRCLE FAQ ENTRY -->
+      <details class="content-details">
+        <summary>🌀 What is Phircle?</summary>
+        <div class="details-body">
+          <p>
+            <strong>Phircle</strong> is the Inpinity Pyramid displayed as a <strong>living circle</strong>. All 100 rings wrap around the center with mathematical precision based on π and φ.
+          </p>
+          <ul>
+            <li>See all 10,000 blocks in one view</li>
+            <li>Quantum Freeze: pause & zoom to tap precisely</li>
+            <li>Profit Predictor: estimate steal before attacking</li>
+            <li>Attack History Vault: track all executed/cancelled attacks</li>
+            <li>War Room Layer: highlights critical blocks</li>
+            <li>Live Activity Feed: real-time events</li>
+            <li>Deep linking: share any block via URL</li>
+          </ul>
+          <p style="margin-top:0.8rem;">
+            <a href="phircle" style="color:#00e5ff; font-weight:700;">🌀 Open Phircle →</a>
+          </p>
         </div>
       </details>
 
@@ -912,7 +1006,7 @@
       <details class="content-details">
         <summary>How do attacks work?</summary>
         <div class="details-body">
-          <p>Heavy flow on <strong>Pyramid Map</strong>. In the Game page you can see active attacks, open/cancel them, and buy Pirate Boost.</p>
+          <p>Heavy flow on <strong>Pyramid Map</strong> or <strong>Phircle</strong>. In the Game page you can see active attacks, open/cancel them, and buy Pirate Boost. In Phircle you can also execute ready attacks directly with the visual interface.</p>
         </div>
       </details>
 
@@ -953,6 +1047,7 @@
       <a href="game.html">Game</a>
       <a href="mint.html">Mint</a>
       <a href="map.html">Pyramid Map</a>
+      <a href="phircle">Phircle</a>
       <a href="staking.html">Staking</a>
       <a href="whitepaper.html">Whitepaper</a>
       <a href="faq.html">FAQ</a>
@@ -960,7 +1055,7 @@
       <a href="termsofuse.html">Terms</a>
       <a href="https://discord.gg/95yj6Eg6" target="_blank" rel="noopener">Discord</a>
     </div>
-    <p class="footer-version">Version 0.28.0 (V6 + Mercenary V4 · UX)</p>
+    <p class="footer-version">Version 0.29.0 (V6 + Mercenary V4 · Phircle)</p>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
