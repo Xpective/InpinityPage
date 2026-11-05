@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Phircle V1 — Inpinity Pyramid als Kreis</title>
+<title>Phircle V2 — Inpinity Pyramid als Kreis</title>
 <style>
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; height: 100%; overflow: hidden;
@@ -12,42 +12,56 @@
 
   #hud { position: fixed; top: 12px; left: 12px; padding: 14px 18px;
     background: rgba(8,8,16,0.82); border: 1px solid #ffcc00;
-    font-size: 12px; line-height: 1.6; min-width: 230px;
+    font-size: 11px; line-height: 1.55; min-width: 250px;
     backdrop-filter: blur(6px); border-radius: 4px; z-index: 10; }
-  #hud h1 { color: #ffcc00; margin: 0 0 8px; font-size: 15px; letter-spacing: 2px; }
+  #hud h1 { color: #ffcc00; margin: 0 0 8px; font-size: 14px; letter-spacing: 2px; }
   #hud .row { display: flex; justify-content: space-between; color: #888; }
   #hud .row strong { color: #ffcc00; font-weight: bold; }
-  #hud hr { border: none; border-top: 1px solid #222; margin: 8px 0; }
-  #hud .legend { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; font-size: 10px; }
-  #hud .legend span { display: inline-flex; align-items: center; gap: 4px; }
-  #hud .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  #hud hr { border: none; border-top: 1px solid #222; margin: 6px 0; }
+  #hud .legend { display: flex; flex-wrap: wrap; gap: 4px 8px; margin-top: 4px; font-size: 9px; }
+  #hud .legend span { display: inline-flex; align-items: center; gap: 3px; }
+  #hud .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
 
-  #sidebar { position: fixed; top: 0; right: -430px; width: 420px; height: 100vh;
+  #layers { position: fixed; top: 12px; right: 12px; display: flex; flex-direction: column;
+    gap: 4px; z-index: 10; }
+  #layers button { background: rgba(8,8,16,0.82); border: 1px solid #333; color: #888;
+    padding: 6px 12px; cursor: pointer; font-family: inherit; font-size: 10px;
+    letter-spacing: 1px; border-radius: 3px; transition: all 0.2s; text-align: left; }
+  #layers button:hover { border-color: #ffcc00; color: #fff; }
+  #layers button.active { background: #ffcc00; color: #000; border-color: #ffcc00; }
+
+  #sidebar { position: fixed; top: 0; right: -440px; width: 420px; height: 100vh;
     background: rgba(8,8,16,0.97); border-left: 1px solid #ffcc00;
     padding: 22px; overflow-y: auto; transition: right 0.3s cubic-bezier(.4,0,.2,1);
     z-index: 20; backdrop-filter: blur(8px); }
   #sidebar.active { right: 0; }
   #sidebar h2 { color: #ffcc00; margin: 0 0 14px; font-size: 17px; letter-spacing: 1px; }
   #sidebar .info-row { display: flex; justify-content: space-between;
-    padding: 7px 0; border-bottom: 1px solid #1a1a1a; font-size: 12px; }
+    padding: 6px 0; border-bottom: 1px solid #1a1a1a; font-size: 12px; }
   #sidebar .info-row span:first-child { color: #777; }
   #sidebar .info-row strong { color: #e0e0e0; }
-  #sidebar button { display: block; width: 100%; margin: 7px 0;
+  #sidebar .rarity-bar { height: 4px; border-radius: 2px; margin: 10px 0; }
+  #sidebar button { display: block; width: 100%; margin: 6px 0;
     background: linear-gradient(135deg, #ffcc00, #ffaa00); color: #000;
-    border: none; padding: 11px 16px; cursor: pointer; font-family: inherit;
-    font-weight: bold; font-size: 13px; letter-spacing: 0.5px;
+    border: none; padding: 10px 16px; cursor: pointer; font-family: inherit;
+    font-weight: bold; font-size: 12px; letter-spacing: 0.5px;
     border-radius: 3px; transition: transform 0.1s, box-shadow 0.2s; }
   #sidebar button:hover { transform: translateY(-1px);
     box-shadow: 0 4px 14px rgba(255,204,0,0.35); }
-  #sidebar button.danger { background: linear-gradient(135deg, #ff4444, #cc0000); color: #fff; }
-  #sidebar button.close { background: #222; color: #aaa; margin-top: 18px; }
+  #sidebar button.close { background: #222; color: #aaa; margin-top: 16px; }
   #sidebar button.close:hover { background: #333; color: #fff; }
 
   #controls { position: fixed; bottom: 12px; left: 12px; padding: 9px 14px;
-    background: rgba(8,8,16,0.82); border: 1px solid #333; font-size: 11px;
+    background: rgba(8,8,16,0.82); border: 1px solid #333; font-size: 10px;
     color: #777; border-radius: 4px; z-index: 10; }
-  #controls kbd { background: #222; color: #ffcc00; padding: 2px 6px;
-    border-radius: 3px; font-family: inherit; font-size: 10px; }
+  #controls kbd { background: #222; color: #ffcc00; padding: 1px 5px;
+    border-radius: 3px; font-family: inherit; font-size: 9px; }
+
+  #status { position: fixed; bottom: 12px; right: 12px; padding: 9px 14px;
+    background: rgba(8,8,16,0.82); border: 1px solid #333; font-size: 10px;
+    color: #888; border-radius: 4px; z-index: 10; }
+  #status .live { color: #00ff88; }
+  #status .demo { color: #ff8800; }
 </style>
 </head>
 <body>
@@ -55,14 +69,17 @@
 <canvas id="canvas"></canvas>
 
 <div id="hud">
-  <h1>🌀 PHIRCLE V1</h1>
-  <div class="row"><span>Reihen</span><strong>100 (0–99)</strong></div>
-  <div class="row"><span>Blöcke</span><strong>10.000</strong></div>
-  <div class="row"><span>Minted</span><strong id="mintedCount">0</strong></div>
-  <div class="row"><span>Unminted</span><strong id="unmintedCount">0</strong></div>
+  <h1>🌀 PHIRCLE V2</h1>
+  <div class="row"><span>Reihen</span><strong>100</strong></div>
+  <div class="row"><span>Blöcke total</span><strong>10.000</strong></div>
+  <div class="row"><span>Minted</span><strong id="mintedCount">–</strong></div>
+  <div class="row"><span>Aktiv Farming</span><strong id="farmCount">–</strong></div>
+  <div class="row"><span>Aktive Angriffe</span><strong id="attackCount">–</strong></div>
+  <div class="row"><span>Kegel-Volumen</span><strong id="volCount">–</strong></div>
   <hr>
   <div class="row"><span>π</span><strong>3.14159</strong></div>
   <div class="row"><span>φ</span><strong>1.61803</strong></div>
+  <div class="row"><span>gold. Winkel</span><strong>137.5°</strong></div>
   <hr>
   <div class="legend">
     <span><i class="dot" style="background:#555"></i>Unminted</span>
@@ -71,8 +88,18 @@
     <span><i class="dot" style="background:#ffcc00"></i>Gold</span>
     <span><i class="dot" style="background:#e5e4e2"></i>Platin</span>
     <span><i class="dot" style="background:#b9f2ff"></i>Diamant</span>
+    <span><i class="dot" style="background:#00ff88"></i>Farm</span>
+    <span><i class="dot" style="background:#4488ff"></i>Schutz</span>
     <span><i class="dot" style="background:#ff3333"></i>Angriff</span>
   </div>
+</div>
+
+<div id="layers">
+  <button data-layer="rarity" class="active">◆ RARITÄT</button>
+  <button data-layer="owner">◉ BESITZER</button>
+  <button data-layer="farming">🌾 FARMING</button>
+  <button data-layer="attack">⚔ ANGRIFF</button>
+  <button data-layer="partner">∞ PARTNER</button>
 </div>
 
 <div id="sidebar">
@@ -81,152 +108,273 @@
 </div>
 
 <div id="controls">
-  <kbd>Mausrad</kbd> Zoom · <kbd>Drag</kbd> Pan · <kbd>Klick</kbd> Block · <kbd>ESC</kbd> schließen
+  <kbd>Mausrad</kbd> Zoom · <kbd>Drag</kbd> Pan · <kbd>Klick</kbd> Block · <kbd>ESC</kbd> schließen · <kbd>1-5</kbd> Layer
 </div>
 
-<script>
+<div id="status"><span id="statusText">Lade Subgraph…</span></div>
+
+<script type="module">
 'use strict';
 
 // ============================================================
-// KONFIGURATION
+// IMPORTE — aus deinem existierenden js/-Ordner
+// ============================================================
+let fetchAllWithPagination = null;
+try {
+  const sg = await import('./js/subgraph.js');
+  fetchAllWithPagination = sg.fetchAllWithPagination || sg.default;
+} catch (e) {
+  console.warn('[phircle] js/subgraph.js nicht gefunden — Demo-Modus');
+}
+
+// ============================================================
+// KONFIGURATION — π & φ als Fundament
 // ============================================================
 const PHI = (1 + Math.sqrt(5)) / 2;
 const PI  = Math.PI;
+const TAU = 2 * PI;
+const GOLDEN_ANGLE = PI * (3 - Math.sqrt(5)); // ≈ 2.39996 rad ≈ 137.5°
 const MAX_ROW = 99;
-const TOTAL_ROWS = 100;
-const ID_STRIDE = 2049;   // id(r,c) = 2049*r + c  →  (0,0)=0, (1,0)=2049...
-const CENTER_ANGLE = -PI / 2;  // Spiegelachse zeigt nach oben
-const RADIUS_POWER = 0.5;      // sqrt-Verteilung → innen mehr Platz
+const ID_STRIDE = 2049;
+const CENTER_ANGLE = -PI / 2;
 
+// φ-basierte Farbpalette (Hue-Werte bei φ · 360°)
 const COLORS = {
-  unminted:      '#555555',
-  unmintedEdge:  '#6a6a6a',
-  bronze:        '#cd7f32',
-  silver:        '#c0c0c0',
-  gold:          '#ffcc00',
-  platinum:      '#e5e4e2',
-  diamond:       '#b9f2ff',
-  farming:       '#00ff88',
-  protected:     '#4488ff',
-  attack:        '#ff3333',
-  mirrorAxis:    'rgba(255,204,0,0.16)',
-  goldenSpiral:  'rgba(255,204,0,0.05)',
+  unminted:     '#3a3a3a',
+  unmintedEdge: '#555555',
+  bronze:       '#cd7f32',
+  silver:       '#c0c0c0',
+  gold:         '#ffcc00',
+  platinum:     '#e5e4e2',
+  diamond:      '#b9f2ff',
+  farming:      '#00ff88',
+  protected:    '#4488ff',
+  attack:       '#ff3333',
+  partner:      '#c060ff',
+  mirrorAxis:   'rgba(255,204,0,0.14)',
+  goldenSpiral: 'rgba(255,204,0,0.045)',
 };
 
 // ============================================================
-// ID-FORMEL
+// FIBONACCI-RINGE — galaktische Idee #2
 // ============================================================
-function blockId(row, col) {
-  return ID_STRIDE * row + col;
+const FIB = (() => {
+  const arr = [0, 1];
+  while (arr[arr.length - 1] < MAX_ROW + 1) {
+    arr.push(arr[arr.length - 1] + arr[arr.length - 2]);
+  }
+  return arr;
+})(); // [0,1,1,2,3,5,8,13,21,34,55,89,144]
+
+// Interpoliere row → fibonacci-gewichteter Radius
+function fibRadius(row) {
+  if (row === 0) return 0;
+  const n = FIB.length - 1;
+  const t = row / MAX_ROW;
+  const idx = t * n;
+  const lo = Math.floor(idx), hi = Math.min(Math.ceil(idx), n);
+  const frac = idx - lo;
+  const fibLo = FIB[lo], fibHi = FIB[hi];
+  const val = fibLo * (1 - frac) + fibHi * frac;
+  return (val / FIB[n]) * MAX_R;
 }
 
 // ============================================================
-// DATEN (später aus Contract lesen)
+// ZUSTAND
 // ============================================================
-const mintedBlocks = new Map();
-const attackedBlocks = new Map();
+const minted        = new Map(); // id → { rarity, farming, protected, revealed, owner }
+const attacks       = new Map(); // targetId → { attackerRow, attackerCol, interval, startTime }
+const partnerships  = new Map(); // id → [partnerId, ...]
+const justRevealed  = new Map(); // id → time (für Reveal-Animation)
 
-// Bekannte, vom User bestätigte Blöcke:
-mintedBlocks.set(blockId(0, 0), { rarity: 'gold',   farming: false, protected: false });
-mintedBlocks.set(blockId(1, 0), { rarity: 'bronze', farming: true,  protected: false });
-mintedBlocks.set(blockId(1, 1), { rarity: 'silver', farming: false, protected: true  });
-mintedBlocks.set(blockId(1, 2), { rarity: 'gold',   farming: true,  protected: false });
+let activeLayer = 'rarity';
+let demoMode    = false;
 
-// Demo-Modus (URL: ?demo=false zum Deaktivieren)
-const DEMO = new URLSearchParams(location.search).get('demo') !== 'false';
-if (DEMO) {
-  const rarities = ['bronze','silver','gold','platinum','diamond'];
-  for (let i = 0; i < 700; i++) {
-    const row = Math.floor(Math.random() * 100);
-    const col = Math.floor(Math.random() * (2 * row + 1));
-    const id = blockId(row, col);
-    if (mintedBlocks.has(id)) continue;
-    const rarity = rarities[Math.floor(Math.random() * rarities.length)];
-    mintedBlocks.set(id, {
-      rarity,
-      farming:   Math.random() < 0.35,
-      protected: Math.random() < 0.20,
-    });
-  }
-  for (let i = 0; i < 10; i++) {
-    const tRow = 1 + Math.floor(Math.random() * 98);
-    const tCol = Math.floor(Math.random() * (2 * tRow + 1));
-    const aRow = Math.floor(Math.random() * 100);
-    const aCol = Math.floor(Math.random() * (2 * aRow + 1));
-    attackedBlocks.set(blockId(tRow, tCol), {
-      attackerRow: aRow,
-      attackerCol: aCol,
-      interval: 2.5 + Math.random() * 4,
-      startTime: performance.now(),
-    });
-  }
+// ============================================================
+// ID-FORMEL (verifiziert: row 0 → #0, row 1 → #2049, row 2 → #4097)
+// ============================================================
+function blockId(row, col) { return ID_STRIDE * row + col; }
+
+// Umkehrung: id → (row, col)
+function idToRC(id) {
+  const row = Math.floor(id / ID_STRIDE);
+  const col = id - row * ID_STRIDE;
+  if (row > MAX_ROW || col < 0 || col >= 2 * row + 1) return null;
+  return { row, col };
 }
 
 // ============================================================
-// CANVAS
+// CANVAS + VIEW
 // ============================================================
 const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
+const ctx = canvas.getContext('2d', { alpha: false });
 let W, H, CX, CY, MAX_R;
 
-const view = {
-  zoom: 1, ox: 0, oy: 0,
-  tZoom: 1, tOx: 0, tOy: 0,
-};
+const view = { zoom: 1, ox: 0, oy: 0, tZoom: 1, tOx: 0, tOy: 0 };
 
 function resize() {
   W = canvas.width  = window.innerWidth;
   H = canvas.height = window.innerHeight;
-  CX = W / 2;
-  CY = H / 2;
-  MAX_R = Math.min(W, H) / 2 - 60;
+  CX = W / 2; CY = H / 2;
+  MAX_R = Math.min(W, H) / 2 - 80;
 }
 
 // ============================================================
-// GEOMETRIE
+// POSITION — polar (row, col) → (x, y)
 // ============================================================
-function rowRadius(row) {
-  return Math.pow(row / MAX_ROW, RADIUS_POWER) * MAX_R;
-}
-
 function blockPosition(row, col) {
-  const r = rowRadius(row);
+  const r = fibRadius(row);
   const n = 2 * row + 1;
-  const step = (2 * PI) / n;
+  const step = TAU / n;
   const angle = CENTER_ANGLE + (col - row) * step;
   return { x: CX + Math.cos(angle) * r, y: CY + Math.sin(angle) * r, angle, r };
 }
 
 function blockSize(row) {
-  return Math.max(2.5, MAX_R / 105);
+  // LOD: inneres Drittel kompakt, äußeres etwas größer
+  const base = MAX_R / 108;
+  const t = row / MAX_ROW;
+  return Math.max(2.2, base * (0.8 + t * 0.6));
 }
 
 // ============================================================
-// ZEICHNEN
+// SUBGRAPH LADEN
 // ============================================================
-function applyView() {
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.translate(CX + view.ox, CY + view.oy);
-  ctx.scale(view.zoom, view.zoom);
-  ctx.translate(-CX, -CY);
+async function loadFromSubgraph() {
+  if (!fetchAllWithPagination) throw new Error('subgraph.js nicht geladen');
+  document.getElementById('statusText').innerHTML =
+    '<span class="live">● Lade Tokens…</span>';
+
+  // 1) Alle Tokens (Blöcke)
+  const tokens = await fetchAllWithPagination(
+    'tokens',
+    'id revealed owner { id }'
+  );
+
+  for (const t of tokens) {
+    const id = parseInt(t.id);
+    const rc = idToRC(id);
+    if (!rc) continue;
+    minted.set(id, {
+      revealed: t.revealed === true,
+      owner: t.owner?.id || null,
+      rarity: null,     // wird on-chain berechnet — Fallback unten
+      farming: false,
+      protected: false,
+    });
+  }
+
+  // 2) Farming V6 (aktiv?)
+  try {
+    const farms = await fetchAllWithPagination(
+      'farmV6S',
+      'blockNumber startTime lastAccrualTime boostExpiry active'
+    );
+    for (const f of farms) {
+      if (!f.active) continue;
+      const bid = parseInt(f.blockNumber);
+      const m = minted.get(bid);
+      if (m) m.farming = true;
+    }
+  } catch (e) { console.warn('[phircle] farms:', e); }
+
+  // 3) Attacks V6 (laufend)
+  try {
+    const atks = await fetchAllWithPagination(
+      'attackV6S',
+      'attackerTokenId targetTokenId startTime endTime protectionLevel'
+    );
+    const now = Date.now() / 1000;
+    for (const a of atks) {
+      const end = Number(a.endTime);
+      if (end * 1000 < Date.now()) continue;
+      const targetId = parseInt(a.targetTokenId);
+      const attackerId = parseInt(a.attackerTokenId);
+      const rc = idToRC(attackerId);
+      if (!rc) continue;
+      attacks.set(targetId, {
+        attackerRow: rc.row,
+        attackerCol: rc.col,
+        interval: Math.max(2, end - Number(a.startTime)),
+        startTime: performance.now(),
+        endTimestamp: end * 1000,
+      });
+    }
+  } catch (e) { console.warn('[phircle] attacks:', e); }
+
+  document.getElementById('statusText').innerHTML =
+    `<span class="live">● LIVE</span> · ${minted.size} Tokens · ${attacks.size} Angriffe`;
 }
 
-function drawBackground() {
-  const g = ctx.createRadialGradient(CX, CY, 0, CX, CY, MAX_R * 1.6);
+function loadDemo() {
+  demoMode = true;
+  const rarities = ['bronze','silver','gold','platinum','diamond'];
+  minted.set(0, { revealed: true, rarity: 'gold', farming: false, protected: false, owner: 'demo' });
+  for (let i = 0; i < 900; i++) {
+    const row = Math.floor(Math.random() * 100);
+    const col = Math.floor(Math.random() * (2 * row + 1));
+    const id = blockId(row, col);
+    if (minted.has(id)) continue;
+    minted.set(id, {
+      revealed: Math.random() < 0.7,
+      rarity: rarities[Math.floor(Math.random() * 5)],
+      farming: Math.random() < 0.35,
+      protected: Math.random() < 0.20,
+      owner: '0x' + Math.random().toString(16).slice(2, 8),
+    });
+  }
+  for (let i = 0; i < 8; i++) {
+    const tRow = 1 + Math.floor(Math.random() * 90);
+    const tCol = Math.floor(Math.random() * (2 * tRow + 1));
+    const aRow = Math.floor(Math.random() * 80);
+    const aCol = Math.floor(Math.random() * (2 * aRow + 1));
+    attacks.set(blockId(tRow, tCol), {
+      attackerRow: aRow, attackerCol: aCol,
+      interval: 3 + Math.random() * 4,
+      startTime: performance.now(),
+      endTimestamp: Date.now() + 30000,
+    });
+  }
+  // Fake-Partnerschaften
+  for (let i = 0; i < 15; i++) {
+    const r1 = Math.floor(Math.random() * 100), c1 = Math.floor(Math.random() * (2*r1+1));
+    const r2 = Math.floor(Math.random() * 100), c2 = Math.floor(Math.random() * (2*r2+1));
+    const id1 = blockId(r1, c1), id2 = blockId(r2, c2);
+    if (!partnerships.has(id1)) partnerships.set(id1, []);
+    if (!partnerships.has(id2)) partnerships.set(id2, []);
+    partnerships.get(id1).push(id2);
+    partnerships.get(id2).push(id1);
+  }
+  document.getElementById('statusText').innerHTML =
+    `<span class="demo">● DEMO</span> · ${minted.size} Tokens · ${attacks.size} Angriffe`;
+}
+
+// ============================================================
+// ATMEN DES UNIVERSUMS (Idee #20)
+// ============================================================
+function breathScale(now) {
+  return 1 + Math.sin(now / 1000 / PI) * 0.006;
+}
+
+// ============================================================
+// HINTERGRUND: Kegel-Projektion + goldene Spirale + π-Sektoren
+// ============================================================
+function drawBackground(now) {
+  const g = ctx.createRadialGradient(CX, CY, 0, CX, CY, MAX_R * 1.7);
   g.addColorStop(0, '#0d0018');
   g.addColorStop(0.55, '#050008');
   g.addColorStop(1, '#000000');
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, W, H);
 
-  // Goldene Spirale (φ)
+  // Goldene Spirale (Idee #11, #19)
   ctx.save();
   ctx.translate(CX, CY);
   ctx.beginPath();
-  const turns = 6, pts = 220;
+  const turns = 6, pts = 260;
   for (let i = 0; i <= pts; i++) {
     const t = i / pts;
-    const a = t * turns * 2 * PI;
+    const a = t * turns * TAU + now / 1000 * 0.02;
     const r = ((Math.pow(PHI, t * turns) - 1) / (Math.pow(PHI, turns) - 1)) * MAX_R;
     const x = Math.cos(a) * r, y = Math.sin(a) * r;
     i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
@@ -236,63 +384,168 @@ function drawBackground() {
   ctx.stroke();
   ctx.restore();
 
-  // Spiegelachse (0-Achse)
+  // π-Sektoren (Idee #7): 12 Sektoren, π-basiert
+  ctx.save();
+  ctx.translate(CX, CY);
+  for (let s = 0; s < 12; s++) {
+    const a = (s / 12) * TAU;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(Math.cos(a) * MAX_R, Math.sin(a) * MAX_R);
+    ctx.strokeStyle = 'rgba(255,204,0,0.035)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  // Spiegelachse 0-Achse (Idee #18)
   ctx.beginPath();
   ctx.moveTo(CX, CY - MAX_R);
   ctx.lineTo(CX, CY + MAX_R);
   ctx.strokeStyle = COLORS.mirrorAxis;
   ctx.lineWidth = 1;
   ctx.stroke();
+
+  // Goldener-Winkel-Radar (Idee #14)
+  const radarAngle = (now / 1000) * 0.4;
+  const grad = ctx.createRadialGradient(CX, CY, 0, CX, CY, MAX_R);
+  grad.addColorStop(0, 'rgba(255,204,0,0.10)');
+  grad.addColorStop(1, 'rgba(255,204,0,0)');
+  ctx.beginPath();
+  ctx.moveTo(CX, CY);
+  ctx.arc(CX, CY, MAX_R, radarAngle, radarAngle + GOLDEN_ANGLE);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
 }
 
-function rarityColor(r) {
-  return COLORS[r] || COLORS.gold;
+// ============================================================
+// HILFSFUNKTION: Farbe pro Layer
+// ============================================================
+function getBlockColor(id, row, col, m) {
+  if (activeLayer === 'rarity') {
+    if (!m) return COLORS.unminted;
+    if (!m.revealed) return '#2a2035'; // Sternenstaub-Andeutung
+    return COLORS[m.rarity] || COLORS.gold;
+  }
+  if (activeLayer === 'owner') {
+    if (!m) return COLORS.unminted;
+    if (!m.owner) return '#444';
+    // Farb-Hash aus Owner-Adresse
+    let h = 0;
+    for (let i = 2; i < m.owner.length; i++) h = (h * 31 + m.owner.charCodeAt(i)) | 0;
+    return `hsl(${Math.abs(h) % 360}, 65%, 55%)`;
+  }
+  if (activeLayer === 'farming') {
+    if (!m) return COLORS.unminted;
+    return m.farming ? COLORS.farming : '#202020';
+  }
+  if (activeLayer === 'attack') {
+    if (!m) return COLORS.unminted;
+    return attacks.has(id) ? COLORS.attack : '#202020';
+  }
+  if (activeLayer === 'partner') {
+    if (!m) return COLORS.unminted;
+    return partnerships.has(id) ? COLORS.partner : '#202020';
+  }
+  return COLORS.unminted;
 }
 
+// ============================================================
+// BLÖCKE ZEICHNEN
+// ============================================================
 function drawBlocks(now) {
+  const t = now / 1000;
+
   for (let row = 0; row <= MAX_ROW; row++) {
     const n = 2 * row + 1;
     const sz = blockSize(row);
+
+    // π-Rotation (Idee #3 galaktisch): äußere Ringe rotieren langsamer
+    const ringRot = (1 / Math.pow(PI, 4 - Math.min(4, row / 25))) * 0.3;
+    const rotOffset = t * ringRot;
+
     for (let col = 0; col < n; col++) {
-      const p = blockPosition(row, col);
-      const id = blockId(row, col);
-      const m = mintedBlocks.get(id);
-      const atk = attackedBlocks.get(id);
+      let p = blockPosition(row, col);
 
-      let fill = COLORS.unminted;
-      let glow = null;
-
-      if (m) {
-        fill = rarityColor(m.rarity);
-        if (m.protected) glow = COLORS.protected;
-        else if (m.farming) glow = COLORS.farming;
+      // Rotation anwenden (relativ zum Zentrum)
+      if (row > 0) {
+        const dx = p.x - CX, dy = p.y - CY;
+        const c = Math.cos(rotOffset), s = Math.sin(rotOffset);
+        p = { ...p, x: CX + dx * c - dy * s, y: CY + dx * s + dy * c };
       }
-      if (atk) glow = COLORS.attack;
 
-      if (glow) {
+      const id = blockId(row, col);
+      const m = minted.get(id);
+      const atk = attacks.get(id);
+      const fill = getBlockColor(id, row, col, m);
+
+      // Sternenstaub für unenthüllte (Idee #4)
+      if (m && !m.revealed) {
+        const sparkle = 0.35 + 0.3 * Math.sin(t * 2 + id);
         ctx.beginPath();
-        ctx.arc(p.x, p.y, sz + 2, 0, 2 * PI);
-        ctx.fillStyle = glow + '55';
+        ctx.arc(p.x, p.y, sz * 1.6, 0, TAU);
+        ctx.fillStyle = `rgba(140,100,255,${sparkle * 0.3})`;
         ctx.fill();
       }
 
-      if (atk) {
-        const el = (now - atk.startTime) / 1000;
-        const pulse = (Math.sin(el * atk.interval * 2) + 1) / 2;
+      // Schutz-Schild-Ring (Idee #10)
+      if (m && m.protected) {
         ctx.beginPath();
-        ctx.arc(p.x, p.y, sz + 2.5 + pulse * 3.5, 0, 2 * PI);
-        ctx.strokeStyle = `rgba(255,51,51,${0.35 + pulse * 0.65})`;
-        ctx.lineWidth = 1.6;
+        ctx.arc(p.x, p.y, sz + 3, 0, TAU);
+        ctx.strokeStyle = COLORS.protected + '66';
+        ctx.lineWidth = 1.2;
         ctx.stroke();
       }
 
+      // Farming-Aura
+      if (m && m.farming) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, sz + 1.5, 0, TAU);
+        ctx.fillStyle = COLORS.farming + '33';
+        ctx.fill();
+      }
+
+      // Block selbst
       ctx.beginPath();
-      ctx.arc(p.x, p.y, sz, 0, 2 * PI);
+      ctx.arc(p.x, p.y, sz, 0, TAU);
       ctx.fillStyle = fill;
       ctx.fill();
 
+      // Reveal-Animation (Idee #8 galaktisch)
+      const revealTime = justRevealed.get(id);
+      if (revealTime) {
+        const el = (now - revealTime) / 1000;
+        if (el < 2.5) {
+          const ringR = sz + el * 30;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, ringR, 0, TAU);
+          ctx.strokeStyle = `rgba(255,204,0,${1 - el / 2.5})`;
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        } else {
+          justRevealed.delete(id);
+        }
+      }
+
+      // Countdown-Ring für Angriffe (Idee #5)
+      if (atk) {
+        const remaining = Math.max(0, atk.endTimestamp - Date.now());
+        const total = atk.interval * 1000;
+        const prog = 1 - remaining / total;
+        const pulse = 0.5 + 0.5 * Math.sin(t * 4);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, sz + 4, -PI / 2, -PI / 2 + TAU * prog);
+        ctx.strokeStyle = `rgba(255,51,51,${0.6 + pulse * 0.4})`;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+
+      // Rand für gemintete Blöcke
       if (m) {
-        ctx.strokeStyle = 'rgba(255,255,255,0.32)';
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, sz, 0, TAU);
+        ctx.strokeStyle = 'rgba(255,255,255,0.28)';
         ctx.lineWidth = 0.5;
         ctx.stroke();
       }
@@ -300,35 +553,29 @@ function drawBlocks(now) {
   }
 }
 
+// ============================================================
+// ANGRIFFS-STRAHLEN (Blitz-Kurven, Idee #10 galaktisch)
+// ============================================================
 function drawAttackRays(now) {
-  for (const [targetId, atk] of attackedBlocks) {
-    // Ziel finden
-    let tp = null;
-    for (let r = 0; r <= MAX_ROW && !tp; r++) {
-      for (let c = 0; c < 2 * r + 1; c++) {
-        if (blockId(r, c) === targetId) { tp = blockPosition(r, c); break; }
-      }
-    }
-    if (!tp) continue;
-
-    // Angreifer
-    const aRow = Math.min(atk.attackerRow, MAX_ROW);
-    const aCol = Math.min(atk.attackerCol, 2 * aRow);
-    const ap = blockPosition(aRow, aCol);
+  for (const [targetId, atk] of attacks) {
+    const targetRC = idToRC(targetId);
+    if (!targetRC) continue;
+    const tp = blockPosition(targetRC.row, targetRC.col);
+    const ap = blockPosition(atk.attackerRow, atk.attackerCol);
 
     const el = (now - atk.startTime) / 1000;
     const prog = (el % atk.interval) / atk.interval;
 
-    // Perpendikularer Kontrollpunkt für Kurve
+    // Gekrümmte Bézier-Kurve (φ-Krümmung)
     const mx = (ap.x + tp.x) / 2;
     const my = (ap.y + tp.y) / 2;
     const dx = tp.x - ap.x, dy = tp.y - ap.y;
-    const cxp = mx - dy * 0.28;
-    const cyp = my + dx * 0.28;
+    const cxp = mx - dy * 0.28 / PHI;
+    const cyp = my + dx * 0.28 / PHI;
 
     ctx.beginPath();
     ctx.moveTo(ap.x, ap.y);
-    const steps = 24;
+    const steps = 28;
     const upto = Math.max(1, Math.floor(steps * prog));
     for (let i = 1; i <= upto; i++) {
       const t = i / steps;
@@ -336,8 +583,7 @@ function drawAttackRays(now) {
       const y = (1-t)*(1-t)*ap.y + 2*(1-t)*t*cyp + t*t*tp.y;
       ctx.lineTo(x, y);
     }
-    const alpha = 0.85 - prog * 0.55;
-    ctx.strokeStyle = `rgba(255,51,51,${alpha})`;
+    ctx.strokeStyle = `rgba(255,51,51,${0.85 - prog * 0.55})`;
     ctx.lineWidth = 2;
     ctx.stroke();
 
@@ -346,20 +592,56 @@ function drawAttackRays(now) {
     const hx = (1-tt)*(1-tt)*ap.x + 2*(1-tt)*tt*cxp + tt*tt*tp.x;
     const hy = (1-tt)*(1-tt)*ap.y + 2*(1-tt)*tt*cyp + tt*tt*tp.y;
     ctx.beginPath();
-    ctx.arc(hx, hy, 3.2, 0, 2 * PI);
+    ctx.arc(hx, hy, 3.4, 0, TAU);
     ctx.fillStyle = COLORS.attack;
     ctx.fill();
   }
 }
 
-function drawCenter() {
-  const pulse = (Math.sin(performance.now() / 1000) + 1) / 2;
+// ============================================================
+// PARTNER-KONSTELLATIONEN (Idee #9)
+// ============================================================
+function drawPartnerships(now) {
+  if (activeLayer !== 'partner' && activeLayer !== 'rarity') return;
+  const t = now / 1000;
+  const drawn = new Set();
+
+  for (const [id1, partners] of partnerships) {
+    const rc1 = idToRC(id1);
+    if (!rc1) continue;
+    const p1 = blockPosition(rc1.row, rc1.col);
+
+    for (const id2 of partners) {
+      const key = Math.min(id1, id2) + '-' + Math.max(id1, id2);
+      if (drawn.has(key)) continue;
+      drawn.add(key);
+
+      const rc2 = idToRC(id2);
+      if (!rc2) continue;
+      const p2 = blockPosition(rc2.row, rc2.col);
+
+      const alpha = 0.18 + 0.12 * Math.sin(t * 1.5 + id1);
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.strokeStyle = `rgba(192,96,255,${alpha})`;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+  }
+}
+
+// ============================================================
+// ZENTRUM (Kegel-Spitze)
+// ============================================================
+function drawCenter(now) {
+  const pulse = 0.5 + 0.5 * Math.sin(now / 1000);
   ctx.beginPath();
-  ctx.arc(CX, CY, 7 + pulse * 2, 0, 2 * PI);
+  ctx.arc(CX, CY, 7 + pulse * 2.5, 0, TAU);
   ctx.fillStyle = COLORS.gold;
   ctx.fill();
   ctx.beginPath();
-  ctx.arc(CX, CY, 11 + pulse * 4, 0, 2 * PI);
+  ctx.arc(CX, CY, 11 + pulse * 5, 0, TAU);
   ctx.strokeStyle = `rgba(255,204,0,${0.28 + pulse * 0.32})`;
   ctx.lineWidth = 1;
   ctx.stroke();
@@ -369,40 +651,63 @@ function drawCenter() {
 // LOOP
 // ============================================================
 let lastStats = 0;
+let stats = { minted: 0, farming: 0, attacks: 0, volume: 0 };
+
+function updateStats() {
+  stats.minted = minted.size;
+  stats.farming = 0;
+  for (const m of minted.values()) if (m.farming) stats.farming++;
+  stats.attacks = attacks.size;
+  // Kegel-Volumen: V = (1/3) · π · r² · h  mit h = r · φ
+  const r = MAX_R;
+  stats.volume = (PI * r * r * r * PHI / 3) / 1e9;
+}
+
 function loop(now) {
   view.zoom += (view.tZoom - view.zoom) * 0.12;
   view.ox   += (view.tOx   - view.ox)   * 0.12;
   view.oy   += (view.tOy   - view.oy)   * 0.12;
 
   ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, W, H);
 
-  drawBackground();
+  drawBackground(now);
 
+  // Atem des Universums (Idee #20)
+  const bs = breathScale(now);
   ctx.save();
-  applyView();
+  ctx.translate(CX + view.ox, CY + view.oy);
+  ctx.scale(view.zoom * bs, view.zoom * bs);
+  ctx.translate(-CX, -CY);
+
   drawBlocks(now);
   drawAttackRays(now);
-  drawCenter();
+  drawPartnerships(now);
+  drawCenter(now);
+
   ctx.restore();
 
-  if (now - lastStats > 500) {
+  if (now - lastStats > 600) {
     lastStats = now;
-    const m = mintedBlocks.size;
-    document.getElementById('mintedCount').textContent   = m;
-    document.getElementById('unmintedCount').textContent = 10000 - m;
+    updateStats();
+    document.getElementById('mintedCount').textContent = stats.minted.toLocaleString('de-DE');
+    document.getElementById('farmCount').textContent   = stats.farming;
+    document.getElementById('attackCount').textContent = stats.attacks;
+    document.getElementById('volCount').textContent    = stats.volume.toFixed(2) + ' km³';
   }
 
   requestAnimationFrame(loop);
 }
 
 // ============================================================
-// INTERAKTION
+// HIT-TEST
 // ============================================================
 function screenToWorld(sx, sy) {
+  const bs = breathScale(performance.now());
   return {
-    x: (sx - CX - view.ox) / view.zoom + CX,
-    y: (sy - CY - view.oy) / view.zoom + CY,
+    x: (sx - CX - view.ox) / (view.zoom * bs) + CX,
+    y: (sy - CY - view.oy) / (view.zoom * bs) + CY,
   };
 }
 
@@ -411,21 +716,33 @@ function hitTest(sx, sy) {
   let best = null, bestD = Infinity;
   for (let row = 0; row <= MAX_ROW; row++) {
     const n = 2 * row + 1;
-    const hitR = Math.max(blockSize(row) * 1.6, 9);
+    const hitR = Math.max(blockSize(row) * 1.7, 10);
+    const ringRot = (1 / Math.pow(PI, 4 - Math.min(4, row / 25))) * 0.3 * (performance.now() / 1000);
     for (let col = 0; col < n; col++) {
-      const p = blockPosition(row, col);
+      let p = blockPosition(row, col);
+      if (row > 0) {
+        const dx = p.x - CX, dy = p.y - CY;
+        const c = Math.cos(ringRot), s = Math.sin(ringRot);
+        p = { x: CX + dx * c - dy * s, y: CY + dx * s + dy * c };
+      }
       const dx = w.x - p.x, dy = w.y - p.y;
-      const d = Math.sqrt(dx*dx + dy*dy);
-      if (d < hitR && d < bestD) { bestD = d; best = { row, col, p, sz: blockSize(row) }; }
+      const d = Math.sqrt(dx * dx + dy * dy);
+      if (d < hitR && d < bestD) {
+        bestD = d;
+        best = { row, col, id: blockId(row, col) };
+      }
     }
   }
   return best;
 }
 
+// ============================================================
+// SIDEBAR
+// ============================================================
 function showBlockInfo(hit) {
-  const id = blockId(hit.row, hit.col);
-  const m = mintedBlocks.get(id);
-  const atk = attackedBlocks.get(id);
+  const id = hit.id;
+  const m = minted.get(id);
+  const atk = attacks.get(id);
 
   document.getElementById('sbTitle').textContent = `Block #${id}`;
 
@@ -433,39 +750,85 @@ function showBlockInfo(hit) {
     <div class="info-row"><span>Reihe</span><strong>${hit.row}</strong></div>
     <div class="info-row"><span>Spalte</span><strong>${hit.col}</strong></div>
     <div class="info-row"><span>ID</span><strong>#${id}</strong></div>
-    <div class="info-row"><span>Status</span><strong style="color:${m ? '#ffcc00' : '#888'}">${m ? 'Gemintet' : 'Unminted'}</strong></div>
+    <div class="info-row"><span>Status</span>
+      <strong style="color:${m ? '#ffcc00' : '#888'}">${m ? 'Gemintet' : 'Unminted'}</strong></div>
   `;
 
   if (m) {
     h += `
-      <div class="info-row"><span>Rarität</span><strong style="color:${rarityColor(m.rarity)}">${m.rarity.toUpperCase()}</strong></div>
-      <div class="info-row"><span>Farming</span><strong style="color:${m.farming ? '#00ff88' : '#666'}">${m.farming ? '● Aktiv' : '○ Inaktiv'}</strong></div>
-      <div class="info-row"><span>Schutz</span><strong style="color:${m.protected ? '#4488ff' : '#666'}">${m.protected ? '● Aktiv' : '○ Inaktiv'}</strong></div>
+      <div class="info-row"><span>Reveal</span>
+        <strong style="color:${m.revealed ? '#00ff88' : '#888'}">${m.revealed ? '● Ja' : '○ Nein'}</strong></div>
+      ${m.owner ? `<div class="info-row"><span>Owner</span>
+        <strong style="font-size:10px">${m.owner.slice(0,6)}…${m.owner.slice(-4)}</strong></div>` : ''}
+      ${m.revealed && m.rarity ? `
+        <div class="info-row"><span>Rarität</span>
+          <strong style="color:${COLORS[m.rarity]}">${m.rarity.toUpperCase()}</strong></div>
+        <div class="rarity-bar" style="background:${COLORS[m.rarity]}"></div>
+      ` : ''}
+      <div class="info-row"><span>Farming</span>
+        <strong style="color:${m.farming ? '#00ff88' : '#666'}">${m.farming ? '● Aktiv' : '○ Inaktiv'}</strong></div>
+      <div class="info-row"><span>Schutz</span>
+        <strong style="color:${m.protected ? '#4488ff' : '#666'}">${m.protected ? '● Aktiv' : '○ Inaktiv'}</strong></div>
     `;
   }
+
   if (atk) {
-    h += `<div class="info-row" style="color:#ff3333"><span>⚠ Angriff</span><strong>Aktiv</strong></div>`;
+    const remaining = Math.max(0, atk.endTimestamp - Date.now());
+    h += `<div class="info-row" style="color:#ff3333">
+      <span>⚠ Angriff</span><strong>${(remaining / 1000).toFixed(1)}s</strong></div>`;
   }
 
-  h += '<hr style="border:none;border-top:1px solid #222;margin:16px 0;">';
+  if (partnerships.has(id)) {
+    h += `<div class="info-row"><span>Partner</span><strong>${partnerships.get(id).length}</strong></div>`;
+  }
+
+  h += '<hr style="border:none;border-top:1px solid #222;margin:14px 0;">';
 
   if (!m) {
-    h += `<button onclick="alert('Mint-Funktion: hier später InpinityNFT.mintWithINPI() aufrufen')">⛏ Block minten</button>`;
+    h += `<button onclick="mintBlock(${hit.row},${hit.col})">⛏ Block minten</button>`;
   } else {
     h += `
-      <button onclick="alert('FarmingV6.startFarming() aufrufen')">🌾 ${m.farming ? 'Farming stoppen' : 'Farming starten'}</button>
-      <button onclick="alert('MercenaryV4.setProtection() aufrufen')">🛡 ${m.protected ? 'Schutz entfernen' : 'Schutz kaufen'}</button>
-      <button onclick="alert('PiratesV6.startAttack() aufrufen')">⚔ Angriff starten</button>
-      <button onclick="alert('FarmingV6.claim() aufrufen')">💰 Claim</button>
+      <button onclick="toggleFarm(${id})">🌾 ${m.farming ? 'Farming stoppen' : 'Farming starten'}</button>
+      <button onclick="toggleProtect(${id})">🛡 ${m.protected ? 'Schutz entfernen' : 'Schutz kaufen'}</button>
+      <button onclick="startAttack(${id})">⚔ Angriff starten</button>
+      <button onclick="claimResources(${id})">💰 Claim</button>
     `;
   }
   h += `<button class="close" onclick="document.getElementById('sidebar').classList.remove('active')">Schließen</button>`;
-
   document.getElementById('sbContent').innerHTML = h;
   document.getElementById('sidebar').classList.add('active');
 }
 
-// Mouse events
+// ============================================================
+// CONTRACT-HOOKS — Platzhalter für ethers.js-Integration
+// ============================================================
+window.mintBlock = (row, col) => {
+  console.log('[mint]', row, col, '→ InpinityNFT.mintWithINPI()');
+  alert(`Mint Block #${blockId(row, col)}\n\nHier später:\nInpinityNFT.mintWithINPI(${row}, ${col})`);
+};
+window.toggleFarm = (id) => {
+  console.log('[farm]', id, '→ FarmingV6');
+  alert(`Farming #${id}\n\nHier später:\nFarmingV6.startFarming(${id})`);
+};
+window.toggleProtect = (id) => {
+  console.log('[protect]', id, '→ MercenaryV4');
+  alert(`Schutz #${id}\n\nHier später:\nMercenaryV4.setProtection(${id}, ...)`);
+};
+window.startAttack = (id) => {
+  console.log('[attack]', id, '→ PiratesV6');
+  alert(`Angriff #${id}\n\nHier später:\nPiratesV6.startAttack(${id})`);
+};
+window.claimResources = (id) => {
+  console.log('[claim]', id, '→ FarmingV6');
+  alert(`Claim #${id}\n\nHier später:\nFarmingV6.claim(${id})`);
+};
+
+// ============================================================
+// INTERAKTION
+// ============================================================
+let isDragging = false, wasDragging = false;
+let dragStart = { x: 0, y: 0 }, dragOrig = { x: 0, y: 0 };
+
 canvas.addEventListener('click', (e) => {
   if (wasDragging) return;
   const r = canvas.getBoundingClientRect();
@@ -481,25 +844,19 @@ canvas.addEventListener('mousemove', (e) => {
 
 canvas.addEventListener('wheel', (e) => {
   e.preventDefault();
-  const f = e.deltaY > 0 ? 0.9 : 1.1;
-  view.tZoom = Math.max(0.5, Math.min(12, view.tZoom * f));
+  const f = e.deltaY > 0 ? 0.88 : 1.12;
+  view.tZoom = Math.max(0.5, Math.min(14, view.tZoom * f));
 }, { passive: false });
 
-// Drag
-let isDragging = false, wasDragging = false;
-let dragStart = { x: 0, y: 0 }, dragOrig = { x: 0, y: 0 };
-
 canvas.addEventListener('mousedown', (e) => {
-  isDragging = true;
-  wasDragging = false;
+  isDragging = true; wasDragging = false;
   dragStart = { x: e.clientX, y: e.clientY };
-  dragOrig  = { x: view.tOx, y: view.tOy };
+  dragOrig = { x: view.tOx, y: view.tOy };
 });
 
 window.addEventListener('mousemove', (e) => {
   if (!isDragging) return;
-  const dx = e.clientX - dragStart.x;
-  const dy = e.clientY - dragStart.y;
+  const dx = e.clientX - dragStart.x, dy = e.clientY - dragStart.y;
   if (Math.abs(dx) > 5 || Math.abs(dy) > 5) wasDragging = true;
   view.tOx = dragOrig.x + dx;
   view.tOy = dragOrig.y + dy;
@@ -507,15 +864,40 @@ window.addEventListener('mousemove', (e) => {
 
 window.addEventListener('mouseup', () => { isDragging = false; });
 
+// Layer-Toggle (Tasten 1-5)
+document.querySelectorAll('#layers button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#layers button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeLayer = btn.dataset.layer;
+  });
+});
+
 window.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') document.getElementById('sidebar').classList.remove('active');
+  const layers = ['rarity', 'owner', 'farming', 'attack', 'partner'];
+  const idx = parseInt(e.key) - 1;
+  if (idx >= 0 && idx < layers.length) {
+    activeLayer = layers[idx];
+    document.querySelectorAll('#layers button').forEach((b, i) => {
+      b.classList.toggle('active', i === idx);
+    });
+  }
 });
 
 // ============================================================
-// START
+// INIT
 // ============================================================
 window.addEventListener('resize', resize);
 resize();
+
+try {
+  await loadFromSubgraph();
+} catch (e) {
+  console.warn('[phircle] Subgraph fehlgeschlagen, lade Demo:', e);
+  loadDemo();
+}
+
 requestAnimationFrame(loop);
 </script>
 </body>
