@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Phircle V11 — Complete & Mobile</title>
+<title>Phircle V12 — Correct Farms & Wider Center</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin:0; padding:0; height:100%; overflow:hidden;
@@ -96,7 +96,7 @@
 
 <div id="hud">
   <h1>
-    <span>🌀 PHIRCLE V11</span>
+    <span>🌀 PHIRCLE V12</span>
     <button onclick="document.getElementById('hud').classList.toggle('collapsed')">HIDE</button>
   </h1>
   <div class="hud-content">
@@ -151,7 +151,7 @@
 import { ethers } from 'https://cdn.jsdelivr.net/npm/ethers@6.13.4/+esm';
 
 // ============================================================
-// INLINE CONFIG & ABIS (Vite MIME-Type Fix)
+// INLINE CONFIG & ABIS
 // ============================================================
 const WORKER_URL             = 'https://inpinity-worker-final.s-plat.workers.dev';
 const NFT_ADDRESS            = '0x277a0D5864293C78d7387C54B48c35D5E9578Ab1';
@@ -159,7 +159,6 @@ const FARMING_V6_ADDRESS     = '0x55Ee68e576E97288802D3b887d79Bf7177EfCb92';
 const PIRATES_V6_ADDRESS     = '0xc3A9c40fE8664A0aa9243a8DEe27ADf4E4f9e731';
 const MERCENARY_V4_ADDRESS   = '0x484d4ae1C70c938a4819B04d4b08DCBFf9639094';
 const PARTNERSHIP_V2_ADDRESS = '0xb18323efE4Cc8c36e10D664E287b4e2c82Fe3ad9';
-const INPI_ADDRESS           = '0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D';
 const PUBLIC_RPC             = 'https://mainnet.base.org';
 const MAX_ROW                = 99;
 const rarityNames            = ['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond'];
@@ -300,11 +299,12 @@ function resize() {
 window.addEventListener('resize', resize); resize();
 
 // ============================================================
-// GEOMETRY — Power Curve + Explosion
+// GEOMETRY — Wider Center (Exponent 0.65 statt 0.85)
 // ============================================================
 function blockRadius(row) {
   if (row === 0) return 0;
-  return MAX_R * Math.pow(row / MAX_ROW, 0.85) * explosionFactor;
+  // Kleinerer Exponent = mehr Platz in der Mitte
+  return MAX_R * Math.pow(row / MAX_ROW, 0.65) * explosionFactor;
 }
 
 function blockPosition(row, col) {
@@ -321,97 +321,110 @@ const blockSize = row => {
 };
 
 // ============================================================
-// SUBGRAPH FETCH
+// SUBGRAPH FETCH (Robust mit Retries)
 // ============================================================
-async function fetchGraphQL(query) {
-  const res = await fetch(`${WORKER_URL}/api/subgraph`, {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ query })
-  });
-  const json = await res.json();
-  if (json.errors) console.error('GraphQL Error:', json.errors);
-  return json.data;
+async function fetchGraphQL(query, retries = 3) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const res = await fetch(`${WORKER_URL}/api/subgraph`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ query })
+      });
+      const json = await res.json();
+      if (!res.ok || json.errors) {
+        const errMsg = json?.errors?.[0]?.message || `HTTP ${res.status}`;
+        console.warn(`[phircle] GraphQL Error (Versuch ${i+1}):`, errMsg);
+        if (i === retries - 1) return null;
+        await new Promise(r => setTimeout(r, 1500));
+        continue;
+      }
+      return json.data;
+    } catch(e) {
+      console.warn(`[phircle] Netzwerkfehler (Versuch ${i+1}):`, e);
+      if (i === retries - 1) return null;
+      await new Promise(r => setTimeout(r, 1500));
+    }
+  }
+  return null;
 }
 
 async function loadLive() {
   document.getElementById('statusText').innerHTML = '<span class="live">● Loading Data...</span>';
-  try {
-    // 1. Tokens
-    const dataTokens = await fetchGraphQL(`{ tokens(first: 1000) { id revealed owner { id } } }`);
-    if (dataTokens?.tokens) {
-      for (const t of dataTokens.tokens) {
-        const id = parseInt(t.id);
-        minted.set(id, { 
-          revealed: t.revealed === true, 
-          owner: t.owner?.id ? t.owner.id.toLowerCase() : null 
-        });
-      }
+  
+  // 1. Tokens
+  const dataTokens = await fetchGraphQL(`{ tokens(first: 1000) { id revealed owner { id } } }`);
+  if (dataTokens?.tokens) {
+    for (const t of dataTokens.tokens) {
+      const id = parseInt(t.id);
+      minted.set(id, { 
+        revealed: t.revealed === true, 
+        owner: t.owner?.id ? t.owner.id.toLowerCase() : null,
+        farming: false,
+        protected: false
+      });
     }
-
-    // 2. Farms (Exact fields)
-    const dataFarms = await fetchGraphQL(`{ farmV6S(first: 1000) { blockNumber active } }`);
-    if (dataFarms?.farmV6S) {
-      for (const f of dataFarms.farmV6S) {
-        if (f.active) {
-          const m = minted.get(parseInt(f.blockNumber));
-          if (m) m.farming = true;
-        }
-      }
-    }
-
-    // 3. Attacks
-    const dataAttacks = await fetchGraphQL(`{ attackV6S(first: 1000) { attackerTokenId targetTokenId startTime endTime } }`);
-    if (dataAttacks?.attackV6S) {
-      for (const a of dataAttacks.attackV6S) {
-        const end = Number(a.endTime)*1000;
-        if (end < Date.now()) continue;
-        const rc = idToRC(parseInt(a.attackerTokenId)); 
-        if (!rc) continue;
-        attacks.set(parseInt(a.targetTokenId), {
-          attackerRow: rc.row, attackerCol: rc.col,
-          startTime: performance.now(),
-          interval: Math.max(2, Number(a.endTime)-Number(a.startTime)),
-          endTimestamp: end
-        });
-      }
-    }
-    
-    // 4. Partnerships
-    for (const field of ['partnerships', 'partnershipV2S', 'partners']) {
-      try {
-        const dataPartners = await fetchGraphQL(`{ ${field}(first: 1000) { tokenId partnerId } }`);
-        const ps = dataPartners?.[field];
-        if (ps && ps.length) {
-          for (const p of ps) {
-            const a = parseInt(p.tokenId), b = parseInt(p.partnerId);
-            if (!partnerships.has(a)) partnerships.set(a, []);
-            if (!partnerships.has(b)) partnerships.set(b, []);
-            if (!partnerships.get(a).includes(b)) partnerships.get(a).push(b);
-            if (!partnerships.get(b).includes(a)) partnerships.get(b).push(a);
-          }
-          break;
-        }
-      } catch(e) { /* continue */ }
-    }
-    
-    document.getElementById('statusText').innerHTML =
-      `<span class="live">● LIVE</span> · ${minted.size} Tokens · ${attacks.size} Attacks`;
-      
-    prefetchRarities();
-    
-  } catch(e) {
-    console.warn('Subgraph failed', e);
-    document.getElementById('statusText').innerHTML = '<span class="demo">● Subgraph offline</span>';
   }
+
+  // 2. Farms (Korrekte Felder wie in subgraph.js)
+  const dataFarms = await fetchGraphQL(`{ farmV6S(first: 1000) { blockNumber active stopTime } }`);
+  if (dataFarms?.farmV6S) {
+    const now = Date.now() / 1000;
+    for (const f of dataFarms.farmV6S) {
+      const stopTime = Number(f.stopTime) || 0;
+      if (f.active && (stopTime === 0 || stopTime > now)) {
+        const m = minted.get(parseInt(f.blockNumber));
+        if (m) m.farming = true;
+      }
+    }
+  }
+
+  // 3. Attacks
+  const dataAttacks = await fetchGraphQL(`{ attackV6S(first: 1000) { attackerTokenId targetTokenId startTime endTime } }`);
+  if (dataAttacks?.attackV6S) {
+    for (const a of dataAttacks.attackV6S) {
+      const end = Number(a.endTime)*1000;
+      if (end < Date.now()) continue;
+      const rc = idToRC(parseInt(a.attackerTokenId)); 
+      if (!rc) continue;
+      attacks.set(parseInt(a.targetTokenId), {
+        attackerRow: rc.row, attackerCol: rc.col,
+        startTime: performance.now(),
+        interval: Math.max(2, Number(a.endTime)-Number(a.startTime)),
+        endTimestamp: end
+      });
+    }
+  }
+  
+  // 4. Partnerships (optional)
+  for (const field of ['partnerships', 'partnershipV2S', 'partners']) {
+    const dataPartners = await fetchGraphQL(`{ ${field}(first: 1000) { tokenId partnerId } }`);
+    const ps = dataPartners?.[field];
+    if (ps && ps.length) {
+      for (const p of ps) {
+        const a = parseInt(p.tokenId), b = parseInt(p.partnerId);
+        if (!partnerships.has(a)) partnerships.set(a, []);
+        if (!partnerships.has(b)) partnerships.set(b, []);
+        if (!partnerships.get(a).includes(b)) partnerships.get(a).push(b);
+        if (!partnerships.get(b).includes(a)) partnerships.get(b).push(a);
+      }
+      break;
+    }
+  }
+
+  const farmingCount = [...minted.values()].filter(m => m.farming).length;
+  document.getElementById('statusText').innerHTML =
+    `<span class="live">● LIVE</span> · ${minted.size} Tokens · ${farmingCount} Farms`;
+    
+  prefetchRarities();
 }
 
 // ============================================================
-// RARITY
+// RARITY (Rate-Limit-schonend: Batch 5, 250ms Pause)
 // ============================================================
 async function prefetchRarities() {
   const ids = [...minted.keys()];
-  for (let i = 0; i < ids.length; i += 20) {
-    const batch = ids.slice(i, i + 20);
+  for (let i = 0; i < ids.length; i += 5) {
+    const batch = ids.slice(i, i + 5);
     await Promise.all(batch.map(async id => {
       if (rarityCache.has(id)) return;
       try {
@@ -421,6 +434,7 @@ async function prefetchRarities() {
         rarityCache.set(id, null);
       }
     }));
+    await new Promise(r => setTimeout(r, 250));
   }
   console.log('[phircle] Rarities prefetched');
 }
@@ -444,8 +458,6 @@ function ownerColor(addr) {
 }
 
 function getBlockColor(id, m) {
-  const isMine = userAddress && m && m.owner === userAddress;
-
   if (activeLayer === 'my-farms') {
     if (!m) return COLORS.unminted;
     if (m.farming) return COLORS.farming;
@@ -523,7 +535,6 @@ function drawBlocks(now) {
         p = { x:CX+dx*c-dy*s, y:CY+dx*s+dy*c };
       }
       
-      // Quantum Jitter when paused
       if (isPaused && Math.random() > 0.8) {
         p.x += (Math.random() - 0.5) * 3;
         p.y += (Math.random() - 0.5) * 3;
@@ -556,6 +567,7 @@ function drawBlocks(now) {
         ctx.beginPath(); ctx.arc(p.x,p.y,sz+1.5,0,TAU);
         ctx.fillStyle=COLORS.farming+'33'; ctx.fill();
       }
+      
       // Protection Shield Ring
       if (m && m.protected) {
         ctx.beginPath(); ctx.arc(p.x,p.y,sz+3,0,TAU);
@@ -601,7 +613,7 @@ function drawBlocks(now) {
     }
   }
 
-  // Draw Personal Constellation
+  // Personal Constellation
   if (myBlocksPos.length > 1) {
     ctx.beginPath();
     ctx.moveTo(myBlocksPos[0].x, myBlocksPos[0].y);
@@ -758,7 +770,7 @@ function loop(now) {
 }
 
 // ============================================================
-// HIT TEST (Mouse + Touch)
+// HIT TEST
 // ============================================================
 function screenToWorld(sx,sy) {
   const bs = 1 + Math.sin(performance.now()/1000/PI)*.006;
