@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Phircle V13 — Live Farms & Perfect Geometry</title>
+<title>Phircle V15 — Complete & Perfected</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin:0; padding:0; height:100%; overflow:hidden;
@@ -80,6 +80,12 @@
   #controls kbd { background:#222; color:#ffcc00; padding:1px 5px;
     border-radius:3px; font-family:inherit; font-size:9px; }
 
+  /* NEU: Tooltip für Hover-Effekt (Verbesserung 1) */
+  #tooltip { position:fixed; pointer-events:none; z-index:50;
+    background:rgba(8,8,16,0.95); border:1px solid #ffcc00; padding:8px 12px;
+    font-size:11px; border-radius:4px; display:none; line-height:1.4;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+
   @media (max-width: 768px) {
     #hud { min-width: 200px; font-size: 10px; padding: 10px; }
     #layers { top: 12px; right: 12px; }
@@ -88,15 +94,18 @@
     #controls { display: none; }
     #status { display: block; bottom: 70px; left: 12px; font-size: 9px; }
     #pauseBtn { bottom: 15px; font-size: 12px; padding: 10px 20px; }
+    #sidebar { max-width: 100%; }
   }
 </style>
 </head>
 <body>
 <canvas id="canvas"></canvas>
 
+<div id="tooltip"></div> <!-- NEU: Tooltip Container -->
+
 <div id="hud">
   <h1>
-    <span>🌀 PHIRCLE V13</span>
+    <span>🌀 PHIRCLE V15</span>
     <button onclick="document.getElementById('hud').classList.toggle('collapsed')">HIDE</button>
   </h1>
   <div class="hud-content">
@@ -143,7 +152,7 @@
 
 <div id="sidebar"><h2 id="sbTitle">Block Info</h2><div id="sbContent"></div></div>
 <div id="controls">
-  <kbd>Scroll</kbd> Zoom · <kbd>Drag</kbd> Pan · <kbd>Click</kbd> Block · <kbd>ESC</kbd> Close · <kbd>Space</kbd> Pause
+  <kbd>Scroll</kbd> Zoom · <kbd>Drag</kbd> Pan · <kbd>Click</kbd> Block · <kbd>ESC</kbd> Close · <kbd>Space</kbd> Pause · <kbd>Double-Click</kbd> Center
 </div>
 <div id="status"><span id="statusText">Loading...</span></div>
 
@@ -164,13 +173,8 @@ const MAX_ROW                = 99;
 const rarityNames            = ['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond'];
 
 const NFT_ABI = [
-  "function mintWithETH(uint256 row, uint256 col) payable",
   "function mintWithINPI(uint256 row, uint256 col)",
-  "function mintMixed(uint256 row, uint256 col) payable",
-  "function revealBlock(uint256 tokenId, bytes32[] piProof, bytes32[] phiProof, uint8 piDigit, uint8 phiDigit)",
   "function calculateRarity(uint256 tokenId) view returns (uint8)",
-  "function currentMaxRow() view returns (uint256)",
-  "function isValidPosition(uint256 row, uint256 col) view returns (bool)",
   "function ownerOf(uint256 tokenId) view returns (address)",
   "function revealed(uint256 tokenId) view returns (bool)"
 ];
@@ -192,9 +196,7 @@ const MERCENARY_V4_ABI = [
 ];
 const PARTNERSHIP_V2_ABI = [
   "function isPartnerBlock(uint256 tokenId) view returns (bool)",
-  "function getPartnerBlock(uint256 partnerId) view returns (uint256)",
-  "function addPartner(uint256 partnerId)",
-  "function findPartnerToken(uint256 tokenId)"
+  "function getPartnerBlock(uint256 partnerId) view returns (uint256)"
 ];
 
 // ============================================================
@@ -221,10 +223,10 @@ const COLORS = {
 // ============================================================
 // STATE
 // ============================================================
-const minted        = new Map();
+const minted        = new Map(); // id -> { revealed, owner, rarity, farming }
+const farms         = new Set(); // Set of ids
 const attacks       = new Map();
-const partnerships  = new Map();
-const rarityCache   = new Map();
+const partnerships  = new Set(); // Set of ids
 const justRevealed  = new Map();
 const piWaves       = [];
 
@@ -233,6 +235,7 @@ let userAddress = null;
 let userSigner  = null;
 let isPaused = false;
 let myBlocksCount = 0;
+let myFarmsCount = 0;
 let explosionFactor = 1.0;
 
 // ============================================================
@@ -259,7 +262,6 @@ window.connectWallet = async () => {
     const btn = document.getElementById('wallet');
     btn.textContent = userAddress.slice(0,6) + '…' + userAddress.slice(-4);
     btn.classList.add('connected');
-    await connectReadOnly();
     countMyBlocks();
   } catch(e) { alert('Wallet connection failed: ' + e.message); }
 };
@@ -267,10 +269,14 @@ window.connectWallet = async () => {
 function countMyBlocks() {
   if (!userAddress) return;
   myBlocksCount = 0;
-  for (const m of minted.values()) {
-    if (m.owner && m.owner.toLowerCase() === userAddress) myBlocksCount++;
+  myFarmsCount = 0;
+  for (const [id, m] of minted) {
+    if (m.owner && m.owner === userAddress) {
+      myBlocksCount++;
+      if (farms.has(id)) myFarmsCount++;
+    }
   }
-  document.getElementById('myBlocksCount').textContent = myBlocksCount;
+  document.getElementById('myBlocksCount').textContent = `${myBlocksCount} (${myFarmsCount} farms)`;
 }
 
 // ============================================================
@@ -287,6 +293,7 @@ function idToRC(id) {
 // CANVAS / VIEW
 // ============================================================
 const canvas = document.getElementById('canvas');
+const tooltip = document.getElementById('tooltip');
 const ctx = canvas.getContext('2d', { alpha:false });
 let W, H, CX, CY, MAX_R;
 const view = { zoom:1, ox:0, oy:0, tZoom:1, tOx:0, tOy:0 };
@@ -294,8 +301,7 @@ const view = { zoom:1, ox:0, oy:0, tZoom:1, tOx:0, tOy:0 };
 function resize() {
   W = canvas.width = innerWidth; H = canvas.height = innerHeight;
   CX = W/2; CY = H/2;
-  // VIEL GRÖSSERER RADIUS
-  MAX_R = Math.max(150, Math.min(W, H) * 0.48);
+  MAX_R = Math.max(150, Math.min(W, H) * 0.45);
 }
 window.addEventListener('resize', resize); resize();
 
@@ -304,7 +310,6 @@ window.addEventListener('resize', resize); resize();
 // ============================================================
 function blockRadius(row) {
   if (row === 0) return 0;
-  // Linearer Verlauf verhindert Überlappung außen
   return MAX_R * (row / MAX_ROW) * explosionFactor;
 }
 
@@ -315,14 +320,14 @@ function blockPosition(row, col) {
 }
 
 const blockSize = row => {
-  const base = MAX_R / 130; // Etwas kleiner für mehr Abstand
+  const base = MAX_R / 130;
   const lodFactor = Math.max(0.6, Math.min(1.5, view.zoom));
   const sizeFactor = 0.9 + (row / MAX_ROW) * 0.2;
   return Math.max(2.5, base * sizeFactor * lodFactor);
 };
 
 // ============================================================
-// SUBGRAPH FETCH (Fehler behoben!)
+// SUBGRAPH FETCH (FIXED: EXACT FIELDS)
 // ============================================================
 async function fetchGraphQL(query, retries = 3) {
   for (let i = 0; i < retries; i++) {
@@ -352,99 +357,71 @@ async function fetchGraphQL(query, retries = 3) {
 async function loadLive() {
   document.getElementById('statusText').innerHTML = '<span class="live">● Loading Data...</span>';
   
-  // 1. Tokens
-  const dataTokens = await fetchGraphQL(`{ tokens(first: 1000) { id revealed owner { id } } }`);
-  if (dataTokens?.tokens) {
-    for (const t of dataTokens.tokens) {
-      const id = parseInt(t.id);
-      minted.set(id, { 
-        revealed: t.revealed === true, 
-        owner: t.owner?.id ? t.owner.id.toLowerCase() : null,
-        farming: false,
-        protected: false
-      });
-    }
-  }
-
-  // 2. Farms (KORRIGIERTE ABFRAGE OHNE stopTime)
-  const dataFarms = await fetchGraphQL(`{ farmV6S(first: 1000) { id tokenId active } }`);
-  if (dataFarms?.farmV6S) {
-    for (const f of dataFarms.farmV6S) {
-      if (f.active === true) {
-        // Fallback auf id, falls tokenId nicht existiert
-        const tokenId = parseInt(f.tokenId || f.id);
-        const m = minted.get(tokenId);
-        if (m) m.farming = true;
+  try {
+    // 1. Tokens
+    const dataTokens = await fetchGraphQL(`{ tokens(first: 1000) { id revealed owner { id } } }`);
+    if (dataTokens?.tokens) {
+      for (const t of dataTokens.tokens) {
+        const id = parseInt(t.id);
+        minted.set(id, { 
+          revealed: t.revealed === true, 
+          owner: t.owner?.id ? t.owner.id.toLowerCase() : null,
+          rarity: null
+        });
       }
     }
-  }
 
-  // 3. Attacks
-  const dataAttacks = await fetchGraphQL(`{ attackV6S(first: 1000) { attackerTokenId targetTokenId startTime endTime } }`);
-  if (dataAttacks?.attackV6S) {
-    for (const a of dataAttacks.attackV6S) {
-      const end = Number(a.endTime)*1000;
-      if (end < Date.now()) continue;
-      const rc = idToRC(parseInt(a.attackerTokenId)); 
-      if (!rc) continue;
-      attacks.set(parseInt(a.targetTokenId), {
-        attackerRow: rc.row, attackerCol: rc.col,
-        startTime: performance.now(),
-        interval: Math.max(2, Number(a.endTime)-Number(a.startTime)),
-        endTimestamp: end
-      });
-    }
-  }
-  
-  // 4. Partnerships
-  for (const field of ['partnerships', 'partnershipV2S', 'partners']) {
-    const dataPartners = await fetchGraphQL(`{ ${field}(first: 1000) { tokenId partnerId } }`);
-    const ps = dataPartners?.[field];
-    if (ps && ps.length) {
-      for (const p of ps) {
-        const a = parseInt(p.tokenId), b = parseInt(p.partnerId);
-        if (!partnerships.has(a)) partnerships.set(a, []);
-        if (!partnerships.has(b)) partnerships.set(b, []);
-        if (!partnerships.get(a).includes(b)) partnerships.get(a).push(b);
-        if (!partnerships.get(b).includes(a)) partnerships.get(b).push(a);
+    // 2. Rarities (BLITZSCHNELL DURCH blockRevealeds)
+    const dataRevealed = await fetchGraphQL(`{ blockRevealeds(first: 1000) { tokenId rarity } }`);
+    if (dataRevealed?.blockRevealeds) {
+      for (const br of dataRevealed.blockRevealeds) {
+        const id = parseInt(br.tokenId);
+        const m = minted.get(id);
+        if (m) m.rarity = parseInt(br.rarity);
       }
-      break;
     }
-  }
 
-  const farmingCount = [...minted.values()].filter(m => m.farming).length;
-  document.getElementById('statusText').innerHTML =
-    `<span class="live">● LIVE</span> · ${minted.size} Tokens · ${farmingCount} Farms`;
+    // 3. Farms (Exakte Felder)
+    const dataFarms = await fetchGraphQL(`{ farmV6S(first: 1000) { id active } }`);
+    if (dataFarms?.farmV6S) {
+      for (const f of dataFarms.farmV6S) {
+        if (f.active) farms.add(parseInt(f.id));
+      }
+    }
+
+    // 4. Attacks
+    const dataAttacks = await fetchGraphQL(`{ attackV6S(first: 1000) { attackerTokenId targetTokenId startTime endTime } }`);
+    if (dataAttacks?.attackV6S) {
+      for (const a of dataAttacks.attackV6S) {
+        const end = Number(a.endTime)*1000;
+        if (end < Date.now()) continue;
+        const rc = idToRC(parseInt(a.attackerTokenId)); 
+        if (!rc) continue;
+        attacks.set(parseInt(a.targetTokenId), {
+          attackerRow: rc.row, attackerCol: rc.col,
+          startTime: performance.now(),
+          interval: Math.max(2, Number(a.endTime)-Number(a.startTime)),
+          endTimestamp: end
+        });
+      }
+    }
     
-  prefetchRarities();
-}
-
-// ============================================================
-// RARITY (Sanftes Rate-Limiting: Batch 1, 80ms Pause)
-// ============================================================
-async function prefetchRarities() {
-  const ids = [...minted.keys()];
-  for (let i = 0; i < ids.length; i++) {
-    const id = ids[i];
-    if (rarityCache.has(id)) continue;
-    try {
-      const r = await nftContract.calculateRarity(id);
-      rarityCache.set(id, Number(r));
-    } catch(e) {
-      rarityCache.set(id, null);
+    // 5. Partnerships
+    const dataPartners = await fetchGraphQL(`{ partnerships(first: 1000, where: {active: true}) { id } }`);
+    if (dataPartners?.partnerships) {
+      for (const p of dataPartners.partnerships) {
+        partnerships.add(parseInt(p.id));
+      }
     }
-    // 80ms Pause um RPC 429 Fehler zu vermeiden
-    await new Promise(r => setTimeout(r, 80));
-  }
-  console.log('[phircle] Rarities prefetched');
-}
 
-function rarityColor(id, m) {
-  if (!m) return COLORS.unminted;
-  if (!m.revealed) return '#2a2035';
-  const idx = rarityCache.get(id);
-  if (idx == null) return '#888';
-  return COLORS[rarityNames[idx]?.toLowerCase()] || COLORS.gold;
+    const farmingCount = farms.size;
+    document.getElementById('statusText').innerHTML =
+      `<span class="live">● LIVE</span> · ${minted.size} Tokens · ${farmingCount} Farms`;
+      
+  } catch(e) {
+    console.warn('Subgraph failed', e);
+    document.getElementById('statusText').innerHTML = '<span class="demo">● Subgraph offline</span>';
+  }
 }
 
 // ============================================================
@@ -460,13 +437,18 @@ function ownerColor(addr) {
 function getBlockColor(id, m) {
   if (activeLayer === 'my-farms') {
     if (!m) return COLORS.unminted;
-    if (m.farming) return COLORS.farming;
+    if (farms.has(id)) return COLORS.farming;
     return '#202020';
   }
 
-  if (activeLayer === 'rarity')   return rarityColor(id, m);
+  if (activeLayer === 'rarity') {
+    if (!m) return COLORS.unminted;
+    if (!m.revealed) return '#2a2035';
+    if (m.rarity == null) return '#888';
+    return COLORS[rarityNames[m.rarity]?.toLowerCase()] || COLORS.gold;
+  }
   if (activeLayer === 'owner')    return m ? ownerColor(m.owner) : COLORS.unminted;
-  if (activeLayer === 'farming')  return m ? (m.farming ? COLORS.farming : '#202020') : COLORS.unminted;
+  if (activeLayer === 'farming')  return m ? (farms.has(id) ? COLORS.farming : '#202020') : COLORS.unminted;
   if (activeLayer === 'attack')   return m ? (attacks.has(id) ? COLORS.attack : '#202020') : COLORS.unminted;
   if (activeLayer === 'partner')  return m ? (partnerships.has(id) ? COLORS.partner : '#202020') : COLORS.unminted;
   return COLORS.unminted;
@@ -563,7 +545,7 @@ function drawBlocks(now) {
       }
 
       // Farming Aura
-      if (m && m.farming && activeLayer !== 'farming' && activeLayer !== 'my-farms' && !isMine) {
+      if (m && farms.has(id) && activeLayer !== 'farming' && activeLayer !== 'my-farms' && !isMine) {
         ctx.beginPath(); ctx.arc(p.x,p.y,sz+1.5,0,TAU);
         ctx.fillStyle=COLORS.farming+'33'; ctx.fill();
       }
@@ -629,26 +611,18 @@ function drawBlocks(now) {
 function drawPartnerships(now) {
   if (activeLayer !== 'partner' && activeLayer !== 'rarity') return;
   const t = now / 1000;
-  const drawn = new Set();
-  for (const [id1, partners] of partnerships) {
-    const rc1 = idToRC(id1);
-    if (!rc1) continue;
-    const p1 = blockPosition(rc1.row, rc1.col);
-    for (const id2 of partners) {
-      const key = Math.min(id1, id2) + '-' + Math.max(id1, id2);
-      if (drawn.has(key)) continue;
-      drawn.add(key);
-      const rc2 = idToRC(id2);
-      if (!rc2) continue;
-      const p2 = blockPosition(rc2.row, rc2.col);
-      const alpha = 0.18 + 0.12 * Math.sin(t * 1.5 + id1);
-      ctx.beginPath();
-      ctx.moveTo(p1.x, p1.y);
-      ctx.lineTo(p2.x, p2.y);
-      ctx.strokeStyle = `rgba(192,96,255,${alpha})`;
-      ctx.lineWidth = 1;
-      ctx.stroke();
-    }
+  
+  for (const id of partnerships) {
+    const rc = idToRC(id);
+    if (!rc) continue;
+    const p = blockPosition(rc.row, rc.col);
+    const alpha = 0.2 + 0.15 * Math.sin(t * 2 + id);
+    
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, blockSize(rc.row) * 3, 0, TAU);
+    ctx.strokeStyle = `rgba(192,96,255,${alpha})`;
+    ctx.lineWidth = 1;
+    ctx.stroke();
   }
 }
 
@@ -756,10 +730,9 @@ function loop(now) {
 
   if (now-lastStats > 600) {
     lastStats = now;
-    const farmingCount = [...minted.values()].filter(m => m.farming).length;
     document.getElementById('mintedCount').textContent = minted.size.toLocaleString('en-US');
     document.getElementById('attackCount').textContent = attacks.size;
-    document.getElementById('farmCount').textContent   = farmingCount;
+    document.getElementById('farmCount').textContent   = farms.size;
     document.getElementById('partnerCount').textContent = partnerships.size;
     const r = MAX_R;
     const vol = (PI * r * r * r * PHI / 3) / 1e9;
@@ -799,9 +772,10 @@ function hitTest(sx,sy) {
 // SIDEBAR
 // ============================================================
 async function showBlockInfo(hit) {
+  tooltip.style.display = 'none';
   const id = hit.id, m = minted.get(id), atk = attacks.get(id);
   document.getElementById('sbTitle').textContent = `Block #${id}`;
-  const rIdx = m && m.revealed ? rarityCache.get(id) : null;
+  const rIdx = m ? m.rarity : null;
   const rName = rIdx != null ? rarityNames[rIdx] : null;
 
   let h = `
@@ -819,18 +793,18 @@ async function showBlockInfo(hit) {
       h += `<div class="info-row"><span>Rarity</span><strong style="color:${COLORS[rName.toLowerCase()]||'#fff'}">${rName.toUpperCase()}</strong></div>`;
       h += `<div class="rarity-bar" style="background:${COLORS[rName.toLowerCase()]||'#fff'}"></div>`;
     }
-    h += `<div class="info-row"><span>Farming</span><strong style="color:${m.farming?'#00ff88':'#666'}">${m.farming?'● Active':'○ Inactive'}</strong></div>`;
+    h += `<div class="info-row"><span>Farming</span><strong style="color:${farms.has(id)?'#00ff88':'#666'}">${farms.has(id)?'● Active':'○ Inactive'}</strong></div>`;
     h += `<div class="info-row"><span>Protection</span><strong style="color:${m.protected?'#4488ff':'#666'}">${m.protected?'● Active':'○ Inactive'}</strong></div>`;
   }
   if (atk) h += `<div class="info-row" style="color:#ff3333"><span>⚠ Attack</span><strong>${((atk.endTimestamp-Date.now())/1000).toFixed(1)}s</strong></div>`;
-  if (partnerships.has(id)) h += `<div class="info-row"><span>Partners</span><strong>${partnerships.get(id).length}</strong></div>`;
+  if (partnerships.has(id)) h += `<div class="info-row"><span>Partner</span><strong>● Active</strong></div>`;
 
   h += '<hr style="border:none;border-top:1px solid #222;margin:14px 0;">';
   if (!m) {
     h += `<button onclick="mintBlock(${hit.row},${hit.col})">⛏ Mint with INPI</button>`;
   } else {
     h += `
-      <button onclick="toggleFarm(${id})">🌾 ${m.farming?'Stop Farming':'Start Farming'}</button>
+      <button onclick="toggleFarm(${id})">🌾 ${farms.has(id)?'Stop Farming':'Start Farming'}</button>
       <button onclick="toggleProtect(${id})">🛡 ${m.protected?'Remove Protection':'Buy Protection'}</button>
       <button onclick="startAttack(${id})">⚔ Start Attack</button>
       <button onclick="claimResources(${id})">💰 Claim</button>`;
@@ -867,11 +841,11 @@ window.mintBlock = async (row,col) => {
 window.toggleFarm = async (id) => {
   const signer = await getSignerOrWarn(); if (!signer) return;
   const c = new ethers.Contract(FARMING_V6_ADDRESS, FARMING_V6_ABI, signer);
-  const m = minted.get(id);
+  const isFarming = farms.has(id);
   try {
-    const tx = m?.farming ? await c.stopFarming(id) : await c.startFarming(id);
+    const tx = isFarming ? await c.stopFarming(id) : await c.startFarming(id);
     await tx.wait(); 
-    if (m) m.farming = !m.farming;
+    if (isFarming) farms.delete(id); else farms.add(id);
     alert('Farming OK');
   } catch(e) { alert('Farming failed: ' + (e.reason||e.message)); }
 };
@@ -912,9 +886,42 @@ window.claimResources = async (id) => {
 };
 
 // ============================================================
-// INTERACTION (Mouse + Touch)
+// INTERACTION (Mouse + Touch) + IMPROVEMENTS
 // ============================================================
 let isDragging=false, wasDragging=false, dragStart={x:0,y:0}, dragOrig={x:0,y:0};
+
+// Verbesserung 1: Hover Tooltip
+canvas.addEventListener('mousemove', e => {
+  if (isDragging) return;
+  const r = canvas.getBoundingClientRect();
+  const hit = hitTest(e.clientX - r.left, e.clientY - r.top);
+  
+  if (hit) {
+    const m = minted.get(hit.id);
+    let html = `<strong>Block #${hit.id}</strong>`;
+    if (m) {
+      const rarity = m.rarity != null ? rarityNames[m.rarity] : 'Unrevealed';
+      const isMine = userAddress && m.owner === userAddress;
+      html += `<br>${rarity}`;
+      if (farms.has(hit.id)) html += `<br><span style="color:#00ff88">Farming</span>`;
+      if (isMine) html += `<br><span style="color:#00e5ff">YOU</span>`;
+    } else {
+      html += `<br>Unminted`;
+    }
+    tooltip.innerHTML = html;
+    tooltip.style.display = 'block';
+    tooltip.style.left = (e.clientX + 15) + 'px';
+    tooltip.style.top = (e.clientY - 15) + 'px';
+    canvas.style.cursor = 'pointer';
+  } else {
+    tooltip.style.display = 'none';
+    canvas.style.cursor = isDragging ? 'grabbing' : 'crosshair';
+  }
+});
+
+canvas.addEventListener('mouseleave', () => {
+  tooltip.style.display = 'none';
+});
 
 canvas.addEventListener('click', e => {
   if (wasDragging) return;
@@ -926,6 +933,7 @@ canvas.addEventListener('click', e => {
 canvas.addEventListener('mousedown', e => {
   isDragging=true; wasDragging=false;
   dragStart={x:e.clientX,y:e.clientY}; dragOrig={x:view.tOx,y:view.tOy};
+  tooltip.style.display = 'none';
 });
 
 window.addEventListener('mousemove', e => {
@@ -942,6 +950,7 @@ canvas.addEventListener('touchstart', e => {
   isDragging = true; wasDragging = false;
   dragStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
   dragOrig = { x: view.tOx, y: view.tOy };
+  tooltip.style.display = 'none';
 }, {passive: false});
 
 canvas.addEventListener('touchmove', e => {
@@ -959,6 +968,16 @@ canvas.addEventListener('touchend', e => {
     const touch = e.changedTouches[0];
     const hit = hitTest(touch.clientX - r.left, touch.clientY - r.top);
     if (hit) showBlockInfo(hit);
+  }
+});
+
+// Verbesserung 2: Double-Click to Center
+window.addEventListener('dblclick', e => {
+  if (e.target === canvas) {
+    view.tZoom = 1;
+    view.tOx = 0;
+    view.tOy = 0;
+    tooltip.style.display = 'none';
   }
 });
 
