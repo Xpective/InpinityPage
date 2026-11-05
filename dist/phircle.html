@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phircle V4 — Perfected</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; height:100%; overflow:hidden;
+    background:#000; color:#e0e0e0; font-family:'Courier New',monospace; }
+  canvas { display:block; cursor:crosshair; }
+  #hud { position:fixed; top:12px; left:12px; padding:14px 18px;
+    background:rgba(8,8,16,0.82); border:1px solid #ffcc00; font-size:11px;
+    line-height:1.55; min-width:260px; backdrop-filter:blur(6px);
+    border-radius:4px; z-index:10; }
+  #hud h1 { color:#ffcc00; margin:0 0 8px; font-size:14px; letter-spacing:2px; }
+  #hud .row { display:flex; justify-content:space-between; color:#888; }
+  #hud .row strong { color:#ffcc00; }
+  #hud hr { border:none; border-top:1px solid #222; margin:6px 0; }
+  #hud .legend { display:flex; flex-wrap:wrap; gap:4px 8px; margin-top:6px; font-size:9px; }
+  #hud .legend span { display:inline-flex; align-items:center; gap:3px; }
+  #hud .dot { width:7px; height:7px; border-radius:50%; display:inline-block; }
+  #layers { position:fixed; top:12px; right:12px; display:flex; flex-direction:column;
+    gap:4px; z-index:10; }
+  #layers button { background:rgba(8,8,16,0.82); border:1px solid #333; color:#888;
+    padding:6px 12px; cursor:pointer; font-family:inherit; font-size:10px;
+    letter-spacing:1px; border-radius:3px; transition:all .2s; text-align:left; min-width:120px; }
+  #layers button:hover { border-color:#ffcc00; color:#fff; }
+  #layers button.active { background:#ffcc00; color:#000; border-color:#ffcc00; }
+  #wallet { position:fixed; top:12px; right:150px; padding:8px 14px;
+    background:rgba(8,8,16,0.82); border:1px solid #333; color:#888;
+    font-family:inherit; font-size:10px; cursor:pointer; border-radius:3px; z-index:10;
+    letter-spacing:1px; transition:all .2s; }
+  #wallet:hover { border-color:#ffcc00; color:#fff; }
+  #wallet.connected { border-color:#00ff88; color:#00ff88; }
+  #sidebar { position:fixed; top:0; right:-440px; width:420px; height:100vh;
+    background:rgba(8,8,16,0.97); border-left:1px solid #ffcc00; padding:22px;
+    overflow-y:auto; transition:right .3s cubic-bezier(.4,0,.2,1); z-index:20;
+    backdrop-filter:blur(8px); }
+  #sidebar.active { right:0; }
+  #sidebar h2 { color:#ffcc00; margin:0 0 14px; font-size:17px; }
+  #sidebar .info-row { display:flex; justify-content:space-between;
+    padding:6px 0; border-bottom:1px solid #1a1a1a; font-size:12px; }
+  #sidebar .info-row span:first-child { color:#777; }
+  #sidebar .info-row strong { color:#e0e0e0; }
+  #sidebar .rarity-bar { height:4px; border-radius:2px; margin:8px 0; }
+  #sidebar button { display:block; width:100%; margin:6px 0;
+    background:linear-gradient(135deg,#ffcc00,#ffaa00); color:#000; border:none;
+    padding:10px 16px; cursor:pointer; font-family:inherit; font-weight:bold;
+    font-size:12px; border-radius:3px; }
+  #sidebar button.close { background:#222; color:#aaa; margin-top:16px; }
+  #sidebar button:disabled { opacity:.4; cursor:not-allowed; }
+  #status { position:fixed; bottom:12px; right:12px; padding:9px 14px;
+    background:rgba(8,8,16,0.82); border:1px solid #333; font-size:10px;
+    color:#888; border-radius:4px; z-index:10; }
+  #status .live { color:#00ff88; } #status .demo { color:#ff8800; }
+  #controls { position:fixed; bottom:12px; left:12px; padding:9px 14px;
+    background:rgba(8,8,16,0.82); border:1px solid #333; font-size:10px;
+    color:#777; border-radius:4px; z-index:10; }
+  #controls kbd { background:#222; color:#ffcc00; padding:1px 5px;
+    border-radius:3px; font-family:inherit; font-size:9px; }
+</style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+
+<div id="hud">
+  <h1>🌀 PHIRCLE V4</h1>
+  <div class="row"><span>Reihen</span><strong>100</strong></div>
+  <div class="row"><span>Blöcke</span><strong>10.000</strong></div>
+  <div class="row"><span>Minted</span><strong id="mintedCount">–</strong></div>
+  <div class="row"><span>Farming</span><strong id="farmCount">–</strong></div>
+  <div class="row"><span>Angriffe</span><strong id="attackCount">–</strong></div>
+  <div class="row"><span>Partner</span><strong id="partnerCount">–</strong></div>
+  <div class="row"><span>Kegel-Volumen</span><strong id="volCount">–</strong></div>
+  <hr>
+  <div class="row"><span>π</span><strong>3.14159</strong></div>
+  <div class="row"><span>φ</span><strong>1.61803</strong></div>
+  <div class="row"><span>gold. Winkel</span><strong>137.5°</strong></div>
+  <hr>
+  <div class="legend">
+    <span><i class="dot" style="background:#3a3a3a"></i>Unminted</span>
+    <span><i class="dot" style="background:#cd7f32"></i>Bronze</span>
+    <span><i class="dot" style="background:#c0c0c0"></i>Silber</span>
+    <span><i class="dot" style="background:#ffcc00"></i>Gold</span>
+    <span><i class="dot" style="background:#e5e4e2"></i>Platin</span>
+    <span><i class="dot" style="background:#b9f2ff"></i>Diamant</span>
+    <span><i class="dot" style="background:#00ff88"></i>Farm</span>
+    <span><i class="dot" style="background:#4488ff"></i>Schutz</span>
+    <span><i class="dot" style="background:#ff3333"></i>Angriff</span>
+    <span><i class="dot" style="background:#c060ff"></i>Partner</span>
+  </div>
+</div>
+
+<div id="layers">
+  <button data-layer="rarity" class="active">◆ RARITÄT</button>
+  <button data-layer="owner">◉ BESITZER</button>
+  <button data-layer="farming">🌾 FARMING</button>
+  <button data-layer="attack">⚔ ANGRIFF</button>
+  <button data-layer="partner">∞ PARTNER</button>
+</div>
+
+<div id="wallet" onclick="connectWallet()">🔌 Wallet</div>
+
+<div id="sidebar"><h2 id="sbTitle">Block Info</h2><div id="sbContent"></div></div>
+<div id="controls">
+  <kbd>Mausrad</kbd> Zoom · <kbd>Drag</kbd> Pan · <kbd>Klick</kbd> Block · <kbd>ESC</kbd> schließen · <kbd>1-5</kbd> Layer
+</div>
+<div id="status"><span id="statusText">Lade…</span></div>
+
+<script type="module">
+import { ethers } from 'https://cdn.jsdelivr.net/npm/ethers@6.13.4/+esm';
+
+// ============================================================
+// ROBUSTE IMPORTE MIT FALLBACKS
+// ============================================================
+let Config = {}, ABIs = {};
+try { Config = await import('./js/config.js'); }
+catch(e) { console.warn('[phircle] config.js fehlt, nutze Fallbacks', e); }
+try { ABIs = await import('./js/abis.js'); }
+catch(e) { console.warn('[phircle] abis.js fehlt, nutze Fallbacks', e); }
+
+const WORKER_URL             = Config.WORKER_URL             ?? 'https://inpinity-worker-final.s-plat.workers.dev';
+const NFT_ADDRESS            = Config.NFT_ADDRESS            ?? '0x277a0D5864293C78d7387C54B48c35D5E9578Ab1';
+const FARMING_V6_ADDRESS     = Config.FARMING_V6_ADDRESS     ?? '0x55Ee68e576E97288802D3b887d79Bf7177EfCb92';
+const PIRATES_V6_ADDRESS     = Config.PIRATES_V6_ADDRESS     ?? '0xc3A9c40fE8664A0aa9243a8DEe27ADf4E4f9e731';
+const MERCENARY_V4_ADDRESS   = Config.MERCENARY_V4_ADDRESS   ?? '0x484d4ae1C70c938a4819B04d4b08DCBFf9639094';
+const PARTNERSHIP_V2_ADDRESS = Config.PARTNERSHIP_V2_ADDRESS ?? '0xb18323efE4Cc8c36e10D664E287b4e2c82Fe3ad9';
+const INPI_ADDRESS           = Config.INPI_ADDRESS           ?? '0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D';
+
+const NFT_ABI = ABIs.NFT_ABI ?? ABIs.InpinityNFT_ABI ?? [
+  "function mintWithETH(uint256 row, uint256 col) payable",
+  "function mintWithINPI(uint256 row, uint256 col)",
+  "function mintMixed(uint256 row, uint256 col) payable",
+  "function revealBlock(uint256 tokenId, bytes piProof, bytes phiProof, uint8 piDigit, uint8 phiDigit)",
+  "function calculateRarity(uint256 tokenId) view returns (uint8)",
+  "function currentMaxRow() view returns (uint256)",
+  "function isValidPosition(uint256 row, uint256 col) view returns (bool)",
+  "function ownerOf(uint256 tokenId) view returns (address)",
+  "function revealed(uint256 tokenId) view returns (bool)"
+];
+const FARMING_V6_ABI = ABIs.FARMING_V6_ABI ?? ABIs.FarmingV6_ABI ?? [
+  "function startFarming(uint256 tokenId)",
+  "function stopFarming(uint256 tokenId)",
+  "function claimResources(uint256 tokenId)",
+  "function buyBoost(uint256 tokenId, uint256 daysAmount)"
+];
+const PIRATES_V6_ABI = ABIs.PIRATES_V6_ABI ?? ABIs.PiratesV6_ABI ?? [
+  "function startAttack(uint256 attackerTokenId, uint256 targetTokenId, uint256 resourceId)",
+  "function executeAttack(uint256 targetTokenId, uint256 attackIndex)",
+  "function buyPirateBoost(uint256 tokenId, uint256 daysAmount)"
+];
+const MERCENARY_V4_ABI = ABIs.MERCENARY_V4_ABI ?? ABIs.MercenaryV4_ABI ?? [
+  "function setProtection(uint256 slotIndex, uint256 tokenId, uint256 durationDays, bool payInINPI)",
+  "function extendProtection(uint256 slotIndex, uint256 additionalDays, bool payInINPI)",
+  "function cancelProtection(uint256 slotIndex)"
+];
+const PARTNERSHIP_V2_ABI = ABIs.PARTNERSHIP_V2_ABI ?? ABIs.PartnershipV2_ABI ?? [
+  "function isPartnerBlock(uint256 tokenId) view returns (bool)",
+  "function getPartnerBlock(uint256 partnerId) view returns (uint256)",
+  "function addPartner(uint256 partnerId)",
+  "function findPartnerToken(uint256 tokenId)"
+];
+
+const MAX_ROW = Config.MAX_ROW ?? 99;
+const rarityNames = Config.rarityNames ?? ['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond'];
+const PUBLIC_RPC = Config.PUBLIC_RPC ?? 'https://mainnet.base.org';
+
+// ============================================================
+// KONSTANTEN — π & φ
+// ============================================================
+const PHI = (1 + Math.sqrt(5)) / 2;
+const PI  = Math.PI;
+const TAU = 2 * PI;
+const GOLDEN_ANGLE = PI * (3 - Math.sqrt(5));
+const ID_STRIDE = 2049;
+const CENTER_ANGLE = -PI / 2;
+
+const COLORS = {
+  unminted:'#3a3a3a', bronze:'#cd7f32', silver:'#c0c0c0',
+  gold:'#ffcc00', platinum:'#e5e4e2', diamond:'#b9f2ff',
+  farming:'#00ff88', protected:'#4488ff', attack:'#ff3333',
+  partner:'#c060ff',
+  mirrorAxis:'rgba(255,204,0,.14)',
+  goldenSpiral:'rgba(255,204,0,.045)',
+  sector:'rgba(255,204,0,.035)',
+  radar:'rgba(255,204,0,.10)',
+};
+
+// ============================================================
+// STATE
+// ============================================================
+const minted        = new Map();
+const attacks       = new Map();
+const partnerships  = new Map();
+const rarityCache   = new Map();
+const justRevealed  = new Map();
+const piWaves       = [];
+
+let activeLayer = 'rarity';
+let userAddress = null;
+let userSigner  = null;
+
+// ============================================================
+// CONTRACTS
+// ============================================================
+let provider, nftContract, farmingContract, piratesContract, mercenaryContract, partnershipContract;
+async function connectReadOnly() {
+  // Bevorzugt Wallet, sonst public RPC
+  if (window.ethereum) {
+    provider = new ethers.BrowserProvider(window.ethereum);
+  } else {
+    provider = new ethers.JsonRpcProvider(PUBLIC_RPC);
+  }
+  nftContract         = new ethers.Contract(NFT_ADDRESS, NFT_ABI, provider);
+  farmingContract     = new ethers.Contract(FARMING_V6_ADDRESS, FARMING_V6_ABI, provider);
+  piratesContract     = new ethers.Contract(PIRATES_V6_ADDRESS, PIRATES_V6_ABI, provider);
+  mercenaryContract   = new ethers.Contract(MERCENARY_V4_ADDRESS, MERCENARY_V4_ABI, provider);
+  partnershipContract = new ethers.Contract(PARTNERSHIP_V2_ADDRESS, PARTNERSHIP_V2_ABI, provider);
+  return true;
+}
+
+window.connectWallet = async () => {
+  if (!window.ethereum) return alert('Keine Wallet gefunden. Bitte MetaMask installieren.');
+  try {
+    await window.ethereum.request({ method: 'eth_requestAccounts' });
+    const p = new ethers.BrowserProvider(window.ethereum);
+    userSigner = await p.getSigner();
+    userAddress = await userSigner.getAddress();
+    const btn = document.getElementById('wallet');
+    btn.textContent = userAddress.slice(0,6) + '…' + userAddress.slice(-4);
+    btn.classList.add('connected');
+    await connectReadOnly();
+  } catch(e) { alert('Wallet-Verbindung fehlgeschlagen: ' + e.message); }
+};
+
+// ============================================================
+// ID / POSITION
+// ============================================================
+const blockId = (row, col) => ID_STRIDE * row + col;
+function idToRC(id) {
+  const row = Math.floor(id / ID_STRIDE);
+  const col = id - row * ID_STRIDE;
+  return (row <= MAX_ROW && col >= 0 && col < 2*row+1) ? { row, col } : null;
+}
+
+// ============================================================
+// CANVAS / VIEW
+// ============================================================
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d', { alpha:false });
+let W, H, CX, CY, MAX_R;
+const view = { zoom:1, ox:0, oy:0, tZoom:1, tOx:0, tOy:0 };
+function resize() {
+  W = canvas.width = innerWidth; H = canvas.height = innerHeight;
+  CX = W/2; CY = H/2; MAX_R = Math.min(W,H)/2 - 80;
+}
+window.addEventListener('resize', resize); resize();
+
+// ============================================================
+// GEOMETRIE — Fibonacci-Ringe
+// ============================================================
+const FIB = (() => { const a=[0,1]; while(a.at(-1)<MAX_ROW+1) a.push(a.at(-1)+a.at(-2)); return a; })();
+function fibRadius(row) {
+  if (row === 0) return 0;
+  const n = FIB.length-1, t = row/MAX_ROW, idx = t*n;
+  const lo = Math.floor(idx), hi = Math.min(Math.ceil(idx), n);
+  const v = FIB[lo]*(1-(idx-lo)) + FIB[hi]*(idx-lo);
+  return (v/FIB[n]) * MAX_R;
+}
+function blockPosition(row, col) {
+  const r = fibRadius(row), n = 2*row+1, step = TAU/n;
+  const angle = CENTER_ANGLE + (col-row)*step;
+  return { x: CX+Math.cos(angle)*r, y: CY+Math.sin(angle)*r, angle, r };
+}
+const blockSize = row => {
+  const base = MAX_R / 108;
+  const lodFactor = Math.max(0.5, Math.min(1.5, view.zoom));
+  return Math.max(1.5, base * (0.8 + row/MAX_ROW*0.6) * lodFactor);
+};
+
+// ============================================================
+// SUBGRAPH
+// ============================================================
+async function fetchAll(field, subfields) {
+  const pageSize = 1000; let skip = 0, all = [];
+  while (true) {
+    const q = `{ ${field}(first:${pageSize}, skip:${skip}) { ${subfields} } }`;
+    let res, json;
+    try {
+      res = await fetch(`${WORKER_URL}/api/subgraph`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ query: q })
+      });
+      json = await res.json();
+    } catch(e) { console.warn('fetchAll network:', field, e); break; }
+    const items = json?.data?.[field];
+    if (!items || items.length === 0) break;
+    all = all.concat(items);
+    if (items.length < pageSize) break;
+    skip += pageSize;
+  }
+  return all;
+}
+
+async function loadLive() {
+  document.getElementById('statusText').innerHTML = '<span class="live">● Lade Tokens…</span>';
+  try {
+    const tokens = await fetchAll('tokens', 'id revealed owner { id }');
+    for (const t of tokens) {
+      const id = parseInt(t.id); const rc = idToRC(id); if (!rc) continue;
+      minted.set(id, { revealed: t.revealed === true, owner: t.owner?.id || null,
+                       farming: false, protected: false });
+    }
+    try {
+      const farms = await fetchAll('farmV6S', 'blockNumber active');
+      for (const f of farms) if (f.active) {
+        const m = minted.get(parseInt(f.blockNumber));
+        if (m) m.farming = true;
+      }
+    } catch(e) { console.warn('farms', e); }
+    try {
+      const atks = await fetchAll('attackV6S',
+        'attackerTokenId targetTokenId startTime endTime');
+      for (const a of atks) {
+        const end = Number(a.endTime)*1000;
+        if (end < Date.now()) continue;
+        const rc = idToRC(parseInt(a.attackerTokenId)); if (!rc) continue;
+        attacks.set(parseInt(a.targetTokenId), {
+          attackerRow: rc.row, attackerCol: rc.col,
+          startTime: performance.now(),
+          interval: Math.max(2, Number(a.endTime)-Number(a.startTime)),
+          endTimestamp: end
+        });
+      }
+    } catch(e) { console.warn('attacks', e); }
+    // Partnerschaften
+    for (const field of ['partnerships', 'partnershipV2S', 'partners']) {
+      try {
+        const ps = await fetchAll(field, 'tokenId partnerId');
+        if (ps.length) {
+          for (const p of ps) {
+            const a = parseInt(p.tokenId), b = parseInt(p.partnerId);
+            if (!partnerships.has(a)) partnerships.set(a, []);
+            if (!partnerships.has(b)) partnerships.set(b, []);
+            if (!partnerships.get(a).includes(b)) partnerships.get(a).push(b);
+            if (!partnerships.get(b).includes(a)) partnerships.get(b).push(a);
+          }
+          break;
+        }
+      } catch(e) { /* weiter */ }
+    }
+    document.getElementById('statusText').innerHTML =
+      `<span class="live">● LIVE</span> · ${minted.size} Tokens · ${attacks.size} Angriffe`;
+  } catch(e) {
+    console.warn('Subgraph fehlgeschlagen', e);
+    document.getElementById('statusText').innerHTML =
+      '<span class="demo">● Subgraph offline</span>';
+  }
+}
+
+// ============================================================
+// RARITY on-chain
+// ============================================================
+async function getRarity(id) {
+  if (rarityCache.has(id)) return rarityCache.get(id);
+  if (!nftContract) return null;
+  try {
+    const r = await nftContract.calculateRarity(id);
+    const idx = Number(r);
+    rarityCache.set(id, idx);
+    return idx;
+  } catch(e) {
+    console.warn('calculateRarity failed', id, e);
+    rarityCache.set(id, null);
+    return null;
+  }
+}
+
+function rarityColor(id, m) {
+  if (!m) return COLORS.unminted;
+  if (!m.revealed) return '#2a2035';
+  const idx = rarityCache.get(id);
+  if (idx == null) return '#888';
+  const name = rarityNames[idx]?.toLowerCase();
+  return COLORS[name] || COLORS.gold;
+}
+
+// ============================================================
+// LAYER-FARBEN
+// ============================================================
+function ownerColor(addr) {
+  if (!addr) return '#444';
+  let h = 0;
+  for (let i = 2; i < addr.length; i++) h = (h * 31 + addr.charCodeAt(i)) | 0;
+  return `hsl(${Math.abs(h) % 360}, 65%, 55%)`;
+}
+function getBlockColor(id, row, col, m) {
+  if (activeLayer === 'rarity')   return rarityColor(id, m);
+  if (activeLayer === 'owner')    return m ? ownerColor(m.owner) : COLORS.unminted;
+  if (activeLayer === 'farming')  return m ? (m.farming ? COLORS.farming : '#202020') : COLORS.unminted;
+  if (activeLayer === 'attack')   return m ? (attacks.has(id) ? COLORS.attack : '#202020') : COLORS.unminted;
+  if (activeLayer === 'partner')  return m ? (partnerships.has(id) ? COLORS.partner : '#202020') : COLORS.unminted;
+  return COLORS.unminted;
+}
+
+// ============================================================
+// HINTERGRUND
+// ============================================================
+function drawBackground(now) {
+  const g = ctx.createRadialGradient(CX,CY,0,CX,CY,MAX_R*1.7);
+  g.addColorStop(0,'#0d0018'); g.addColorStop(.55,'#050008'); g.addColorStop(1,'#000');
+  ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+
+  // Goldene Spirale
+  ctx.save(); ctx.translate(CX,CY); ctx.beginPath();
+  const turns=6, pts=240;
+  for (let i=0;i<=pts;i++){
+    const t=i/pts, a=t*turns*TAU + now/1000*.02;
+    const r=((Math.pow(PHI,t*turns)-1)/(Math.pow(PHI,turns)-1))*MAX_R;
+    i===0?ctx.moveTo(Math.cos(a)*r,Math.sin(a)*r):ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r);
+  }
+  ctx.strokeStyle=COLORS.goldenSpiral; ctx.lineWidth=1; ctx.stroke(); ctx.restore();
+
+  // π-Sektoren
+  ctx.save(); ctx.translate(CX,CY);
+  for (let s = 0; s < 12; s++) {
+    const a = (s / 12) * TAU;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(Math.cos(a) * MAX_R, Math.sin(a) * MAX_R);
+    ctx.strokeStyle = COLORS.sector;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  // Spiegelachse
+  ctx.beginPath(); ctx.moveTo(CX,CY-MAX_R); ctx.lineTo(CX,CY+MAX_R);
+  ctx.strokeStyle=COLORS.mirrorAxis; ctx.stroke();
+
+  // Goldener-Winkel-Radar
+  const radarAngle = (now / 1000) * 0.4;
+  const grad = ctx.createRadialGradient(CX, CY, 0, CX, CY, MAX_R);
+  grad.addColorStop(0, COLORS.radar);
+  grad.addColorStop(1, 'rgba(255,204,0,0)');
+  ctx.beginPath();
+  ctx.moveTo(CX, CY);
+  ctx.arc(CX, CY, MAX_R, radarAngle, radarAngle + GOLDEN_ANGLE);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+}
+
+// ============================================================
+// BLÖCKE
+// ============================================================
+function drawBlocks(now) {
+  const t = now/1000;
+  for (let row=0; row<=MAX_ROW; row++) {
+    const n = 2*row+1, sz = blockSize(row);
+    const ringRot = (1/Math.pow(PI, 4-Math.min(4,row/25))) * .3 * t;
+    for (let col=0; col<n; col++) {
+      let p = blockPosition(row, col);
+      if (row>0) {
+        const dx=p.x-CX, dy=p.y-CY, c=Math.cos(ringRot), s=Math.sin(ringRot);
+        p = { x:CX+dx*c-dy*s, y:CY+dx*s+dy*c };
+      }
+      const id = blockId(row,col), m = minted.get(id), atk = attacks.get(id);
+      const fill = getBlockColor(id, row, col, m);
+
+      // Sternenstaub
+      if (m && !m.revealed) {
+        const sp = .35 + .3*Math.sin(t*2+id);
+        ctx.beginPath(); ctx.arc(p.x,p.y,sz*1.6,0,TAU);
+        ctx.fillStyle=`rgba(140,100,255,${sp*.3})`; ctx.fill();
+      }
+      // Farming-Aura
+      if (m && m.farming && activeLayer !== 'farming') {
+        ctx.beginPath(); ctx.arc(p.x,p.y,sz+1.5,0,TAU);
+        ctx.fillStyle=COLORS.farming+'33'; ctx.fill();
+      }
+      // Schutz-Schild-Ring
+      if (m && m.protected) {
+        ctx.beginPath(); ctx.arc(p.x,p.y,sz+3,0,TAU);
+        ctx.strokeStyle=COLORS.protected+'66'; ctx.lineWidth=1.2; ctx.stroke();
+      }
+
+      // Block
+      ctx.beginPath(); ctx.arc(p.x,p.y,sz,0,TAU);
+      ctx.fillStyle = fill; ctx.fill();
+      if (m && view.zoom > 1.5) {
+        ctx.strokeStyle='rgba(255,255,255,.28)'; ctx.lineWidth=.5; ctx.stroke();
+      }
+
+      // Golden-Ratio Reveal
+      const rv = justRevealed.get(id);
+      if (rv) {
+        const el = (now - rv) / 1000;
+        if (el < 2.5) {
+          const ringR = sz + el * 30;
+          const alpha = 1 - el / 2.5;
+          ctx.beginPath(); ctx.arc(p.x,p.y,ringR,0,TAU);
+          ctx.strokeStyle = `rgba(255,204,0,${alpha})`;
+          ctx.lineWidth = 2; ctx.stroke();
+          ctx.beginPath(); ctx.arc(p.x,p.y,ringR*PHI,0,TAU);
+          ctx.strokeStyle = `rgba(255,204,0,${alpha*0.5})`;
+          ctx.lineWidth = 1; ctx.stroke();
+        } else {
+          justRevealed.delete(id);
+        }
+      }
+
+      // Countdown-Ring
+      if (atk) {
+        const rem = Math.max(0, atk.endTimestamp - Date.now());
+        const total = atk.interval*1000;
+        const prog = 1 - rem/total;
+        const pulse = .5 + .5*Math.sin(t*4);
+        ctx.beginPath();
+        ctx.arc(p.x,p.y,sz+4,-PI/2,-PI/2+TAU*prog);
+        ctx.strokeStyle=`rgba(255,51,51,${.6+pulse*.4})`;
+        ctx.lineWidth=2; ctx.stroke();
+      }
+    }
+  }
+}
+
+// ============================================================
+// PARTNER-KONSTELLATIONEN
+// ============================================================
+function drawPartnerships(now) {
+  if (activeLayer !== 'partner' && activeLayer !== 'rarity') return;
+  const t = now / 1000;
+  const drawn = new Set();
+  for (const [id1, partners] of partnerships) {
+    const rc1 = idToRC(id1);
+    if (!rc1) continue;
+    const p1 = blockPosition(rc1.row, rc1.col);
+    for (const id2 of partners) {
+      const key = Math.min(id1, id2) + '-' + Math.max(id1, id2);
+      if (drawn.has(key)) continue;
+      drawn.add(key);
+      const rc2 = idToRC(id2);
+      if (!rc2) continue;
+      const p2 = blockPosition(rc2.row, rc2.col);
+      const alpha = 0.18 + 0.12 * Math.sin(t * 1.5 + id1);
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.strokeStyle = `rgba(192,96,255,${alpha})`;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+  }
+}
+
+// ============================================================
+// ANGRIFFS-STRAHLEN
+// ============================================================
+function drawAttackRays(now) {
+  for (const [targetId, atk] of attacks) {
+    const trc = idToRC(targetId); if (!trc) continue;
+    const tp = blockPosition(trc.row, trc.col);
+    const ap = blockPosition(atk.attackerRow, atk.attackerCol);
+    const el = (now-atk.startTime)/1000;
+    const prog = (el % atk.interval) / atk.interval;
+
+    const mx=(ap.x+tp.x)/2, my=(ap.y+tp.y)/2;
+    const dx=tp.x-ap.x, dy=tp.y-ap.y;
+    const cxp=mx-dy*.28/PHI, cyp=my+dx*.28/PHI;
+
+    ctx.beginPath(); ctx.moveTo(ap.x,ap.y);
+    const steps=28, upto=Math.max(1,Math.floor(steps*prog));
+    for (let i=1;i<=upto;i++){
+      const t=i/steps;
+      ctx.lineTo((1-t)*(1-t)*ap.x+2*(1-t)*t*cxp+t*t*tp.x,
+                 (1-t)*(1-t)*ap.y+2*(1-t)*t*cyp+t*t*tp.y);
+    }
+    ctx.strokeStyle=`rgba(255,51,51,${.85-prog*.55})`; ctx.lineWidth=2; ctx.stroke();
+
+    const tt=prog;
+    const hx=(1-tt)*(1-tt)*ap.x+2*(1-tt)*tt*cxp+tt*tt*tp.x;
+    const hy=(1-tt)*(1-tt)*ap.y+2*(1-tt)*tt*cyp+tt*tt*tp.y;
+    ctx.beginPath(); ctx.arc(hx,hy,3.4,0,TAU); ctx.fillStyle=COLORS.attack; ctx.fill();
+
+    // π-Welle beim Auftreffen
+    if (prog > 0.95 && Math.random() < 0.1) {
+      piWaves.push({ x: tp.x, y: tp.y, startTime: now });
+    }
+  }
+}
+
+// ============================================================
+// π-WELLEN
+// ============================================================
+function drawPiWaves(now) {
+  for (let i = piWaves.length - 1; i >= 0; i--) {
+    const w = piWaves[i];
+    const el = (now - w.startTime) / 1000;
+    if (el > 2) { piWaves.splice(i, 1); continue; }
+    const r = el * 80;
+    const alpha = 1 - el / 2;
+    ctx.beginPath();
+    ctx.arc(w.x, w.y, r, 0, TAU);
+    ctx.strokeStyle = `rgba(255,51,51,${alpha * 0.6})`;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(w.x, w.y, r * PHI, 0, TAU);
+    ctx.strokeStyle = `rgba(255,51,51,${alpha * 0.3})`;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+}
+
+// ============================================================
+// ZENTRUM — ewige Spirale
+// ============================================================
+function drawCenter(now) {
+  const t = now / 1000;
+  const pulse = .5+.5*Math.sin(t);
+  ctx.save();
+  ctx.translate(CX, CY);
+  ctx.beginPath();
+  for (let i = 0; i <= 60; i++) {
+    const a = i * 0.5 + t * 0.6;
+    const r = i * 0.35;
+    i === 0 ? ctx.moveTo(Math.cos(a)*r, Math.sin(a)*r)
+            : ctx.lineTo(Math.cos(a)*r, Math.sin(a)*r);
+  }
+  ctx.strokeStyle = `rgba(255,204,0,${0.25 + pulse * 0.3})`;
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.restore();
+
+  ctx.beginPath(); ctx.arc(CX,CY,7+pulse*2.5,0,TAU);
+  ctx.fillStyle=COLORS.gold; ctx.fill();
+  ctx.beginPath(); ctx.arc(CX,CY,11+pulse*5,0,TAU);
+  ctx.strokeStyle=`rgba(255,204,0,${.28+pulse*.32})`; ctx.stroke();
+}
+
+// ============================================================
+// LOOP
+// ============================================================
+let lastStats = 0;
+function loop(now) {
+  view.zoom += (view.tZoom-view.zoom)*.12;
+  view.ox += (view.tOx-view.ox)*.12;
+  view.oy += (view.tOy-view.oy)*.12;
+
+  ctx.setTransform(1,0,0,1,0,0); ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H);
+  drawBackground(now);
+
+  const bs = 1 + Math.sin(now/1000/PI)*.006;
+  ctx.save();
+  ctx.translate(CX+view.ox, CY+view.oy);
+  ctx.scale(view.zoom*bs, view.zoom*bs);
+  ctx.translate(-CX,-CY);
+  drawBlocks(now);
+  drawPartnerships(now);
+  drawAttackRays(now);
+  drawPiWaves(now);
+  drawCenter(now);
+  ctx.restore();
+
+  if (now-lastStats > 600) {
+    lastStats = now;
+    const farmingCount = [...minted.values()].filter(m => m.farming).length;
+    document.getElementById('mintedCount').textContent = minted.size.toLocaleString('de-DE');
+    document.getElementById('attackCount').textContent = attacks.size;
+    document.getElementById('farmCount').textContent   = farmingCount;
+    document.getElementById('partnerCount').textContent = partnerships.size;
+    const r = MAX_R;
+    const vol = (PI * r * r * r * PHI / 3) / 1e9;
+    document.getElementById('volCount').textContent = vol.toFixed(2) + ' km³';
+  }
+  requestAnimationFrame(loop);
+}
+
+// ============================================================
+// HIT-TEST
+// ============================================================
+function screenToWorld(sx,sy) {
+  const bs = 1 + Math.sin(performance.now()/1000/PI)*.006;
+  return { x:(sx-CX-view.ox)/(view.zoom*bs)+CX, y:(sy-CY-view.oy)/(view.zoom*bs)+CY };
+}
+function hitTest(sx,sy) {
+  const w = screenToWorld(sx,sy); let best=null, bestD=Infinity;
+  for (let row=0; row<=MAX_ROW; row++) {
+    const n=2*row+1, hitR=Math.max(blockSize(row)*1.7,10);
+    const ringRot=(1/Math.pow(PI,4-Math.min(4,row/25)))*.3*(performance.now()/1000);
+    for (let col=0; col<n; col++) {
+      let p=blockPosition(row,col);
+      if (row>0) { const dx=p.x-CX, dy=p.y-CY, c=Math.cos(ringRot), s=Math.sin(ringRot);
+        p={x:CX+dx*c-dy*s, y:CY+dx*s+dy*c}; }
+      const dx=w.x-p.x, dy=w.y-p.y, d=Math.sqrt(dx*dx+dy*dy);
+      if (d<hitR && d<bestD) { bestD=d; best={row,col,id:blockId(row,col)}; }
+    }
+  }
+  return best;
+}
+
+// ============================================================
+// SIDEBAR
+// ============================================================
+async function showBlockInfo(hit) {
+  const id = hit.id, m = minted.get(id), atk = attacks.get(id);
+  document.getElementById('sbTitle').textContent = `Block #${id}`;
+  const rIdx = m && m.revealed ? await getRarity(id) : null;
+  const rName = rIdx != null ? rarityNames[rIdx] : null;
+
+  let h = `
+    <div class="info-row"><span>Reihe</span><strong>${hit.row}</strong></div>
+    <div class="info-row"><span>Spalte</span><strong>${hit.col}</strong></div>
+    <div class="info-row"><span>ID</span><strong>#${id}</strong></div>
+    <div class="info-row"><span>Status</span><strong style="color:${m?'#ffcc00':'#888'}">${m?'Gemintet':'Unminted'}</strong></div>`;
+  if (m) {
+    h += `<div class="info-row"><span>Reveal</span><strong style="color:${m.revealed?'#00ff88':'#888'}">${m.revealed?'● Ja':'○ Nein'}</strong></div>`;
+    if (m.owner) h += `<div class="info-row"><span>Owner</span><strong style="font-size:10px">${m.owner.slice(0,6)}…${m.owner.slice(-4)}</strong></div>`;
+    if (rName) {
+      h += `<div class="info-row"><span>Rarität</span><strong style="color:${COLORS[rName.toLowerCase()]||'#fff'}">${rName.toUpperCase()}</strong></div>`;
+      h += `<div class="rarity-bar" style="background:${COLORS[rName.toLowerCase()]||'#fff'}"></div>`;
+    }
+    h += `<div class="info-row"><span>Farming</span><strong style="color:${m.farming?'#00ff88':'#666'}">${m.farming?'● Aktiv':'○ Inaktiv'}</strong></div>`;
+    h += `<div class="info-row"><span>Schutz</span><strong style="color:${m.protected?'#4488ff':'#666'}">${m.protected?'● Aktiv':'○ Inaktiv'}</strong></div>`;
+  }
+  if (atk) h += `<div class="info-row" style="color:#ff3333"><span>⚠ Angriff</span><strong>${((atk.endTimestamp-Date.now())/1000).toFixed(1)}s</strong></div>`;
+  if (partnerships.has(id)) h += `<div class="info-row"><span>Partner</span><strong>${partnerships.get(id).length}</strong></div>`;
+
+  h += '<hr style="border:none;border-top:1px solid #222;margin:14px 0;">';
+  if (!m) {
+    h += `<button onclick="mintBlock(${hit.row},${hit.col})">⛏ Mint with INPI</button>`;
+  } else {
+    h += `
+      <button onclick="toggleFarm(${id})">🌾 ${m.farming?'Farming stoppen':'Farming starten'}</button>
+      <button onclick="toggleProtect(${id})">🛡 ${m.protected?'Schutz entfernen':'Schutz kaufen'}</button>
+      <button onclick="startAttack(${id})">⚔ Angriff starten</button>
+      <button onclick="claimResources(${id})">💰 Claim</button>`;
+  }
+  h += `<button class="close" onclick="document.getElementById('sidebar').classList.remove('active')">Schließen</button>`;
+  document.getElementById('sbContent').innerHTML = h;
+  document.getElementById('sidebar').classList.add('active');
+}
+
+// ============================================================
+// CONTRACT HOOKS
+// ============================================================
+async function getSignerOrWarn() {
+  if (!window.ethereum) { alert('Keine Wallet gefunden'); return null; }
+  if (!userSigner) {
+    try {
+      await window.ethereum.request({ method: 'eth_requestAccounts' });
+      const p = new ethers.BrowserProvider(window.ethereum);
+      userSigner = await p.getSigner();
+      userAddress = await userSigner.getAddress();
+    } catch(e) { alert('Wallet-Verbindung fehlgeschlagen'); return null; }
+  }
+  return userSigner;
+}
+window.mintBlock = async (row,col) => {
+  const signer = await getSignerOrWarn(); if (!signer) return;
+  const nft = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
+  try { const tx = await nft.mintWithINPI(row,col); await tx.wait(); alert('Mint OK'); }
+  catch(e) { alert('Mint fehlgeschlagen: ' + (e.reason||e.message)); }
+};
+window.toggleFarm = async (id) => {
+  const signer = await getSignerOrWarn(); if (!signer) return;
+  const c = new ethers.Contract(FARMING_V6_ADDRESS, FARMING_V6_ABI, signer);
+  const m = minted.get(id);
+  try {
+    const tx = m?.farming ? await c.stopFarming(id) : await c.startFarming(id);
+    await tx.wait(); alert('Farming OK');
+  } catch(e) { alert('Farming fehlgeschlagen: ' + (e.reason||e.message)); }
+};
+window.toggleProtect = async (id) => {
+  const signer = await getSignerOrWarn(); if (!signer) return;
+  const c = new ethers.Contract(MERCENARY_V4_ADDRESS, MERCENARY_V4_ABI, signer);
+  try {
+    const tx = await c.setProtection(0, id, 1, true);
+    await tx.wait(); alert('Schutz OK');
+  } catch(e) { alert('Schutz fehlgeschlagen: ' + (e.reason||e.message)); }
+};
+window.startAttack = async (targetId) => {
+  const signer = await getSignerOrWarn(); if (!signer) return;
+  const c = new ethers.Contract(PIRATES_V6_ADDRESS, PIRATES_V6_ABI, signer);
+  try {
+    const tx = await c.startAttack(0, targetId, 0);
+    await tx.wait(); alert('Angriff gestartet');
+  } catch(e) { alert('Angriff fehlgeschlagen: ' + (e.reason||e.message)); }
+};
+window.claimResources = async (id) => {
+  const signer = await getSignerOrWarn(); if (!signer) return;
+  const c = new ethers.Contract(FARMING_V6_ADDRESS, FARMING_V6_ABI, signer);
+  try { const tx = await c.claimResources(id); await tx.wait(); alert('Claim OK'); }
+  catch(e) { alert('Claim fehlgeschlagen: ' + (e.reason||e.message)); }
+};
+
+// ============================================================
+// INTERAKTION
+// ============================================================
+let isDragging=false, wasDragging=false, dragStart={x:0,y:0}, dragOrig={x:0,y:0};
+canvas.addEventListener('click', e => {
+  if (wasDragging) return;
+  const r = canvas.getBoundingClientRect();
+  const hit = hitTest(e.clientX-r.left, e.clientY-r.top);
+  if (hit) showBlockInfo(hit);
+});
+canvas.addEventListener('mousemove', e => {
+  const r = canvas.getBoundingClientRect();
+  const hit = hitTest(e.clientX-r.left, e.clientY-r.top);
+  canvas.style.cursor = hit ? 'pointer' : (isDragging ? 'grabbing' : 'crosshair');
+});
+canvas.addEventListener('wheel', e => {
+  e.preventDefault();
+  view.tZoom = Math.max(.5, Math.min(14, view.tZoom * (e.deltaY>0?.88:1.12)));
+}, {passive:false});
+canvas.addEventListener('mousedown', e => {
+  isDragging=true; wasDragging=false;
+  dragStart={x:e.clientX,y:e.clientY}; dragOrig={x:view.tOx,y:view.tOy};
+});
+window.addEventListener('mousemove', e => {
+  if (!isDragging) return;
+  const dx=e.clientX-dragStart.x, dy=e.clientY-dragStart.y;
+  if (Math.abs(dx)>5||Math.abs(dy)>5) wasDragging=true;
+  view.tOx = dragOrig.x+dx; view.tOy = dragOrig.y+dy;
+});
+window.addEventListener('mouseup', ()=> isDragging=false);
+
+document.querySelectorAll('#layers button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#layers button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeLayer = btn.dataset.layer;
+  });
+});
+
+window.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.getElementById('sidebar').classList.remove('active');
+  const layers = ['rarity','owner','farming','attack','partner'];
+  const idx = parseInt(e.key) - 1;
+  if (idx >= 0 && idx < layers.length) {
+    activeLayer = layers[idx];
+    document.querySelectorAll('#layers button').forEach((b, i) => {
+      b.classList.toggle('active', i === idx);
+    });
+  }
+});
+
+// ============================================================
+// INIT
+// ============================================================
+(async () => {
+  await connectReadOnly();
+  await loadLive();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
