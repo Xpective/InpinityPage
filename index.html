@@ -35,6 +35,77 @@
   <script defer src="main.js"></script>
   <script defer src="https://forminit.com/sdk/v1/forminit.js"></script>
   <script type="module" src="/js/index-swap.js"></script>
+
+  <style>
+    /* Phircle Link Highlight */
+    .nav-list a[href="phircle"] {
+      color: #00e5ff;
+      font-weight: 600;
+      position: relative;
+    }
+    .nav-list a[href="phircle"]::after {
+      content: "NEW";
+      position: absolute;
+      top: -8px;
+      right: -22px;
+      font-size: 0.55rem;
+      background: #00e5ff;
+      color: #000;
+      padding: 1px 4px;
+      border-radius: 3px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    /* Smaller QR Codes */
+    .qr-cards-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      max-width: 700px;
+      margin: 2.5rem auto 0 auto;
+      padding: 0 1rem;
+    }
+    .qr-card {
+      background: #fff;
+      padding: 0.9rem;
+      border-radius: 12px;
+      text-align: center;
+      width: 190px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+    }
+    .qr-card img {
+      width: 100px;
+      height: 100px;
+      margin-bottom: 0.6rem;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .qr-card h4 {
+      color: #0b0e12;
+      margin: 0 0 0.35rem 0;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+    .qr-card .qr-address {
+      color: #666;
+      font-size: 0.6rem;
+      word-break: break-all;
+      margin-bottom: 0.6rem;
+      line-height: 1.3;
+    }
+    .qr-card .copy-btn {
+      border: none;
+      padding: 0.35rem 0.6rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      width: 100%;
+      font-size: 0.72rem;
+    }
+  </style>
 </head>
 
 <body>
@@ -45,6 +116,7 @@
         <li><a href="game.html">Game</a></li>
         <li><a href="mint.html">Mint</a></li>
         <li><a href="map.html">Pyramid Map</a></li>
+        <li><a href="phircle">Phircle</a></li>
         <li><a href="staking.html">Staking</a></li>
         <li><a href="whitepaper.html">Whitepaper</a></li>
         <li><a href="faq.html">FAQ</a></li>
@@ -59,6 +131,7 @@
   </header>
 
   <main class="index-main">
+    <!-- ============ HERO ============ -->
     <section class="hero-section">
       <div class="hero">
         <h1>Own a piece of the pyramid.</h1>
@@ -71,6 +144,7 @@
       <div class="hero-actions">
         <a class="cta-button hero-cta" href="mint.html">Mint a Block</a>
         <a class="cta-button" href="game.html" style="background:transparent; border:1px solid #2a3f4a;">Open Game</a>
+        <a class="cta-button" href="phircle" style="background:linear-gradient(135deg,#00e5ff,#00aa55); border:none; color:#000; font-weight:700;">🌀 Open Phircle</a>
       </div>
 
       <div class="marketplace-row">
@@ -83,99 +157,8 @@
       </div>
     </section>
 
-    <!-- THE PHILOSOPHY OF INPINITY -->
-    <section class="tokenomics-section" style="background: linear-gradient(180deg, rgba(20,15,31,0) 0%, rgba(20,15,31,0.8) 100%); border-top: 1px solid rgba(212, 175, 55, 0.15); border-bottom: 1px solid rgba(212, 175, 55, 0.15);">
-      <div class="section-head" style="text-align: center; max-width: 800px; margin: 0 auto 3rem auto;">
-        <h2 style="font-size: 2.2rem; background: linear-gradient(135deg, #f5e7c8, #d4af37); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">The Philosophy of Inpinity</h2>
-        <p class="tokenomics-intro" style="font-size: 1.1rem; color: #b0c4d8;">
-          More than just an NFT. A mathematical masterpiece, a philosophical manifesto, and a treasure hunt for perfect harmony.
-        </p>
-      </div>
-
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; max-width: 1100px; margin: 0 auto; padding: 0 1rem;">
-        
-        <!-- The Monad & Pythagoras -->
-        <div style="background: rgba(15, 26, 34, 0.6); border: 1px solid #2a3f4a; border-radius: 16px; padding: 2rem; position: relative; overflow: hidden;">
-          <div style="position: absolute; top: -20px; right: -10px; font-size: 6rem; color: rgba(212, 175, 55, 0.05); font-weight: bold;">1</div>
-          <h3 style="color: #d4af37; margin-top: 0; font-size: 1.3rem;">The Monad & The 1</h3>
-          <p style="color: #98a9b9; line-height: 1.6; font-size: 0.95rem;">
-            Inspired by the <strong>Pythagoreans</strong>, the number 1 represents the Monad – the origin from which everything emerges. You cannot divide 1 without getting two halves; in dividing, connection is created, not loss.
-          </p>
-          <p style="color: #98a9b9; line-height: 1.6; font-size: 0.95rem;">
-            Therefore, our journey of harmony (Phi) does not begin with the leading 1, but directly with <strong>6, 1, 8...</strong>. The 1 is omnipresent – it is the invisible foundation that encompasses the entire pyramid.
-          </p>
-        </div>
-
-        <!-- Pi & Phi -->
-        <div style="background: rgba(15, 26, 34, 0.6); border: 1px solid #2a3f4a; border-radius: 16px; padding: 2rem; position: relative; overflow: hidden;">
-          <div style="position: absolute; top: -20px; right: -10px; font-size: 6rem; color: rgba(74, 144, 226, 0.05); font-weight: bold;">π</div>
-          <h3 style="color: #4a90e2; margin-top: 0; font-size: 1.3rem;">The Circle & Nature</h3>
-          <p style="color: #98a9b9; line-height: 1.6; font-size: 0.95rem;">
-            <strong>Pi (3.14159...)</strong> is the infinite expanse, the circle, that which always completes itself. <strong>Phi (1.61803...)</strong> is the natural order, the measure that works in everything – from the arrangement of leaves to the structure of human existence.
-          </p>
-          <p style="color: #98a9b9; line-height: 1.6; font-size: 0.95rem;">
-            At the peak of the pyramid (Block 0), the <strong>3 (Pi)</strong> and the <strong>6 (Phi)</strong> meet. Two concepts sharing a space before the journey into the depths begins.
-          </p>
-        </div>
-
-        <!-- The Mirror -->
-        <div style="background: rgba(15, 26, 34, 0.6); border: 1px solid #2a3f4a; border-radius: 16px; padding: 2rem; position: relative; overflow: hidden;">
-          <div style="position: absolute; top: -20px; right: -10px; font-size: 6rem; color: rgba(155, 89, 182, 0.05); font-weight: bold;">φ</div>
-          <h3 style="color: #e74c3c; margin-top: 0; font-size: 1.3rem;">The Mirror & Rarity</h3>
-          <p style="color: #98a9b9; line-height: 1.6; font-size: 0.95rem;">
-            The 0-axis forms the symmetrical heart of the pyramid. When the exact same number (Pi or Phi) is on the left side at the same distance from the center as on the right side, a <strong>mathematical mirror</strong> is created.
-          </p>
-          <p style="color: #98a9b9; line-height: 1.6; font-size: 0.95rem;">
-            These blocks are not random rarities. They are proof of the universe's symmetry in numbers. <strong>Finding these mirrors is the core of the game.</strong>
-          </p>
-        </div>
-
-      </div>
-
-      <!-- Layer 1 & 2 Info -->
-      <div style="max-width: 900px; margin: 3rem auto 0 auto; text-align: center; background: rgba(212, 175, 55, 0.05); padding: 2rem; border-radius: 16px; border: 1px dashed rgba(212, 175, 55, 0.3);">
-        <h3 style="color: #d4af37; margin-top: 0;">The Key to Layer 2</h3>
-        <p style="color: #b0c4d8; line-height: 1.7; font-size: 1.05rem; max-width: 700px; margin: 0 auto;">
-          Every block that exhibits a mirror (match) is considered <strong>Layer 1</strong>. These mathematically rare blocks are not just collectibles. They act as the <strong>key to Layer 2</strong> – a previously introduced, animated universe that builds upon these harmonious structures.
-        </p>
-        <a href="map.html" class="cta-button" style="display: inline-block; margin-top: 1.5rem; background: transparent; border: 1px solid #d4af37; color: #d4af37;">Begin the Search on the Map</a>
-      </div>
-    </section>
-
-    <!-- SUPPORT THE VISION SECTION -->
-    <section class="tokenomics-section" style="background: rgba(20, 15, 31, 0.4); border-bottom: 1px solid rgba(212, 175, 55, 0.15);">
-      <div class="section-head" style="text-align: center; max-width: 800px; margin: 0 auto 2rem auto;">
-        <h2 style="color: #d4af37;">Fuel the Engine: Support the Vision</h2>
-        <p class="tokenomics-intro" style="font-size: 1rem; color: #b0c4d8;">
-          We are building something truly unique, but we need your help to cross the finish line. Our liquidity pool is currently a bit <strong>"shrimp-like"</strong>, and we urgently need to upgrade our hardware to run the <strong>Unreal Engine (UE)</strong> for the upcoming endgame.
-        </p>
-        <p style="color: #98a9b9; font-size: 0.9rem; margin-top: 1rem;">
-          If you love this mathematical masterpiece and want to see the endgame come to life, we humbly ask for your support. Every contribution, no matter how small, brings us closer to the final vision. Thank you from the bottom of our hearts. 🙏
-        </p>
-      </div>
-
-      <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 2rem; max-width: 800px; margin: 0 auto; padding: 0 1rem;">
-        
-        <!-- ETH / Base QR -->
-        <div style="background: #fff; padding: 1.5rem; border-radius: 16px; text-align: center; width: 280px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-          <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=0xcbc1cf1159b4db5b407684fde0e9e635e9e3726f" alt="ETH Base QR Code" style="width: 180px; height: 180px; margin-bottom: 1rem;">
-          <h4 style="color: #0b0e12; margin: 0 0 0.5rem 0; font-size: 1.1rem;">ETH (Base Network)</h4>
-          <p style="color: #666; font-size: 0.75rem; word-break: break-all; margin-bottom: 1rem;">0xcbc1cf1159b4db5b407684fde0e9e635e9e3726f</p>
-          <button type="button" class="copy-btn" data-copy="0xcbc1cf1159b4db5b407684fde0e9e635e9e3726f" style="background: #d4af37; color: #000; border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%;">Copy ETH Address</button>
-        </div>
-
-        <!-- BTC / Taproot QR -->
-        <div style="background: #fff; padding: 1.5rem; border-radius: 16px; text-align: center; width: 280px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-          <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=bc1p0q43sl583uvqhh4p6p3svwuqcys8cseyf3gk7smpmd742zqj2tqqgzarjj" alt="BTC Taproot QR Code" style="width: 180px; height: 180px; margin-bottom: 1rem;">
-          <h4 style="color: #0b0e12; margin: 0 0 0.5rem 0; font-size: 1.1rem;">BTC (Taproot)</h4>
-          <p style="color: #666; font-size: 0.75rem; word-break: break-all; margin-bottom: 1rem;">bc1p0q43sl583uvqhh4p6p3svwuqcys8cseyf3gk7smpmd742zqj2tqqgzarjj</p>
-          <button type="button" class="copy-btn" data-copy="bc1p0q43sl583uvqhh4p6p3svwuqcys8cseyf3gk7smpmd742zqj2tqqgzarjj" style="background: #f7931a; color: #fff; border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%;">Copy BTC Address</button>
-        </div>
-
-      </div>
-    </section>
-
-    <section class="tokenomics-section" style="padding-top:0;">
+    <!-- ============ GET INPI (MOVED TO TOP) ============ -->
+    <section class="tokenomics-section" style="padding-top:0; padding-bottom: 3rem;">
       <div class="section-head">
         <h2>Get INPI</h2>
         <p class="tokenomics-intro">
@@ -240,6 +223,99 @@
       </div>
     </section>
 
+    <!-- ============ THE PHILOSOPHY OF INPINITY ============ -->
+    <section class="tokenomics-section" style="background: linear-gradient(180deg, rgba(20,15,31,0) 0%, rgba(20,15,31,0.8) 100%); border-top: 1px solid rgba(212, 175, 55, 0.15); border-bottom: 1px solid rgba(212, 175, 55, 0.15);">
+      <div class="section-head" style="text-align: center; max-width: 800px; margin: 0 auto 3rem auto;">
+        <h2 style="font-size: 2.2rem; background: linear-gradient(135deg, #f5e7c8, #d4af37); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">The Philosophy of Inpinity</h2>
+        <p class="tokenomics-intro" style="font-size: 1.1rem; color: #b0c4d8;">
+          More than just an NFT. A mathematical masterpiece, a philosophical manifesto, and a treasure hunt for perfect harmony.
+        </p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; max-width: 1100px; margin: 0 auto; padding: 0 1rem;">
+        
+        <!-- The Monad & Pythagoras -->
+        <div style="background: rgba(15, 26, 34, 0.6); border: 1px solid #2a3f4a; border-radius: 16px; padding: 2rem; position: relative; overflow: hidden;">
+          <div style="position: absolute; top: -20px; right: -10px; font-size: 6rem; color: rgba(212, 175, 55, 0.05); font-weight: bold;">1</div>
+          <h3 style="color: #d4af37; margin-top: 0; font-size: 1.3rem;">The Monad & The 1</h3>
+          <p style="color: #98a9b9; line-height: 1.6; font-size: 0.95rem;">
+            Inspired by the <strong>Pythagoreans</strong>, the number 1 represents the Monad – the origin from which everything emerges. You cannot divide 1 without getting two halves; in dividing, connection is created, not loss.
+          </p>
+          <p style="color: #98a9b9; line-height: 1.6; font-size: 0.95rem;">
+            Therefore, our journey of harmony (Phi) does not begin with the leading 1, but directly with <strong>6, 1, 8...</strong>. The 1 is omnipresent – it is the invisible foundation that encompasses the entire pyramid.
+          </p>
+        </div>
+
+        <!-- Pi & Phi -->
+        <div style="background: rgba(15, 26, 34, 0.6); border: 1px solid #2a3f4a; border-radius: 16px; padding: 2rem; position: relative; overflow: hidden;">
+          <div style="position: absolute; top: -20px; right: -10px; font-size: 6rem; color: rgba(74, 144, 226, 0.05); font-weight: bold;">π</div>
+          <h3 style="color: #4a90e2; margin-top: 0; font-size: 1.3rem;">The Circle & Nature</h3>
+          <p style="color: #98a9b9; line-height: 1.6; font-size: 0.95rem;">
+            <strong>Pi (3.14159...)</strong> is the infinite expanse, the circle, that which always completes itself. <strong>Phi (1.61803...)</strong> is the natural order, the measure that works in everything – from the arrangement of leaves to the structure of human existence.
+          </p>
+          <p style="color: #98a9b9; line-height: 1.6; font-size: 0.95rem;">
+            At the peak of the pyramid (Block 0), the <strong>3 (Pi)</strong> and the <strong>6 (Phi)</strong> meet. Two concepts sharing a space before the journey into the depths begins.
+          </p>
+        </div>
+
+        <!-- The Mirror -->
+        <div style="background: rgba(15, 26, 34, 0.6); border: 1px solid #2a3f4a; border-radius: 16px; padding: 2rem; position: relative; overflow: hidden;">
+          <div style="position: absolute; top: -20px; right: -10px; font-size: 6rem; color: rgba(155, 89, 182, 0.05); font-weight: bold;">φ</div>
+          <h3 style="color: #e74c3c; margin-top: 0; font-size: 1.3rem;">The Mirror & Rarity</h3>
+          <p style="color: #98a9b9; line-height: 1.6; font-size: 0.95rem;">
+            The 0-axis forms the symmetrical heart of the pyramid. When the exact same number (Pi or Phi) is on the left side at the same distance from the center as on the right side, a <strong>mathematical mirror</strong> is created.
+          </p>
+          <p style="color: #98a9b9; line-height: 1.6; font-size: 0.95rem;">
+            These blocks are not random rarities. They are proof of the universe's symmetry in numbers. <strong>Finding these mirrors is the core of the game.</strong>
+          </p>
+        </div>
+
+      </div>
+
+      <!-- Layer 1 & 2 Info -->
+      <div style="max-width: 900px; margin: 3rem auto 0 auto; text-align: center; background: rgba(212, 175, 55, 0.05); padding: 2rem; border-radius: 16px; border: 1px dashed rgba(212, 175, 55, 0.3);">
+        <h3 style="color: #d4af37; margin-top: 0;">The Key to Layer 2</h3>
+        <p style="color: #b0c4d8; line-height: 1.7; font-size: 1.05rem; max-width: 700px; margin: 0 auto;">
+          Every block that exhibits a mirror (match) is considered <strong>Layer 1</strong>. These mathematically rare blocks are not just collectibles. They act as the <strong>key to Layer 2</strong> – a previously introduced, animated universe that builds upon these harmonious structures.
+        </p>
+        <a href="map.html" class="cta-button" style="display: inline-block; margin-top: 1.5rem; background: transparent; border: 1px solid #d4af37; color: #d4af37;">Begin the Search on the Map</a>
+        <a href="phircle" class="cta-button" style="display: inline-block; margin-top: 1.5rem; margin-left: 0.5rem; background: transparent; border: 1px solid #00e5ff; color: #00e5ff;">🌀 Explore Phircle</a>
+      </div>
+    </section>
+
+    <!-- ============ SUPPORT THE VISION (QR codes now at bottom + smaller) ============ -->
+    <section class="tokenomics-section" style="background: rgba(20, 15, 31, 0.4); border-bottom: 1px solid rgba(212, 175, 55, 0.15);">
+      <div class="section-head" style="text-align: center; max-width: 800px; margin: 0 auto 2rem auto;">
+        <h2 style="color: #d4af37;">Fuel the Engine: Support the Vision</h2>
+        <p class="tokenomics-intro" style="font-size: 1rem; color: #b0c4d8;">
+          We are building something truly unique, but we need your help to cross the finish line. Our liquidity pool is currently a bit <strong>"shrimp-like"</strong>, and we urgently need to upgrade our hardware to run the <strong>Unreal Engine (UE)</strong> for the upcoming endgame.
+        </p>
+        <p style="color: #98a9b9; font-size: 0.9rem; margin-top: 1rem;">
+          If you love this mathematical masterpiece and want to see the endgame come to life, we humbly ask for your support. Every contribution, no matter how small, brings us closer to the final vision. Thank you from the bottom of our hearts. 🙏
+        </p>
+      </div>
+
+      <!-- QR codes now at very bottom of section, smaller -->
+      <div class="qr-cards-row">
+        <!-- ETH / Base QR -->
+        <div class="qr-card">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=0xcbc1cf1159b4db5b407684fde0e9e635e9e3726f" alt="ETH Base QR Code">
+          <h4>ETH (Base)</h4>
+          <p class="qr-address">0xcbc1cf1159b4db5b407684fde0e9e635e9e3726f</p>
+          <button type="button" class="copy-btn" data-copy="0xcbc1cf1159b4db5b407684fde0e9e635e9e3726f" style="background: #d4af37; color: #000;">Copy</button>
+        </div>
+
+        <!-- BTC / Taproot QR -->
+        <div class="qr-card">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=bc1p0q43sl583uvqhh4p6p3svwuqcys8cseyf3gk7smpmd742zqj2tqqgzarjj" alt="BTC Taproot QR Code">
+          <h4>BTC (Taproot)</h4>
+          <p class="qr-address">bc1p0q43sl583uvqhh4p6p3svwuqcys8cseyf3gk7smpmd742zqj2tqqgzarjj</p>
+          <button type="button" class="copy-btn" data-copy="bc1p0q43sl583uvqhh4p6p3svwuqcys8cseyf3gk7smpmd742zqj2tqqgzarjj" style="background: #f7931a; color: #fff;">Copy</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CORE CONTRACTS ============ -->
     <section class="tokenomics-section">
       <div class="section-head">
         <h2>Core Contracts</h2>
@@ -293,6 +369,7 @@
             <a href="mint.html">Mint →</a>
             <a href="game.html">Game →</a>
             <a href="map.html">Map →</a>
+            <a href="phircle">Phircle →</a>
           </p>
           <p>
             <a href="https://basescan.org/address/0x277a0D5864293C78d7387C54B48c35D5E9578Ab1" target="_blank" rel="noopener">
@@ -307,6 +384,7 @@
       </div>
     </section>
 
+    <!-- ============ CONTACT ============ -->
     <section class="tokenomics-section">
       <div class="section-head">
         <h2>Contact</h2>
@@ -345,6 +423,7 @@
       <a href="game.html">Game</a>
       <a href="mint.html">Mint</a>
       <a href="map.html">Pyramid Map</a>
+      <a href="phircle">Phircle</a>
       <a href="staking.html">Staking</a>
       <a href="whitepaper.html">Whitepaper</a>
       <a href="faq.html">FAQ</a>

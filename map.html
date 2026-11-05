@@ -64,11 +64,75 @@
       box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.65);
     }
 
-    /* Make nav-links wrap on narrow screens so all 7 fit */
+    /* Make nav-links wrap on narrow screens so all 8 fit */
     @media (max-width: 900px) {
       .nav-links {
         flex-wrap: wrap;
       }
+    }
+
+    /* ============ PHIRCLE NAV HIGHLIGHT ============ */
+    .nav-links a[href="phircle"] {
+      color: #00e5ff;
+      font-weight: 600;
+      position: relative;
+    }
+    .nav-links a[href="phircle"]::after {
+      content: "NEW";
+      position: absolute;
+      top: -8px;
+      right: -22px;
+      font-size: 0.55rem;
+      background: #00e5ff;
+      color: #000;
+      padding: 1px 4px;
+      border-radius: 3px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    /* ============ PHIRCLE SWITCH BUTTON ============ */
+    .phircle-switch-wrap {
+      position: absolute;
+      top: 90px;
+      left: 20px;
+      z-index: 5;
+    }
+    .phircle-switch-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: linear-gradient(135deg, rgba(0,229,255,0.15), rgba(0,170,85,0.15));
+      border: 1px solid #00e5ff;
+      color: #00e5ff;
+      padding: 0.6rem 1.1rem;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      letter-spacing: 0.5px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      backdrop-filter: blur(8px);
+      font-family: inherit;
+    }
+    .phircle-switch-btn:hover {
+      background: linear-gradient(135deg, #00e5ff, #00aa55);
+      color: #000;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,229,255,0.4);
+    }
+    .phircle-switch-btn .phircle-icon {
+      font-size: 1rem;
+      animation: phirclePulse 2s ease-in-out infinite;
+    }
+    @keyframes phirclePulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+    }
+    @media (max-width: 640px) {
+      .phircle-switch-wrap { top: 80px; left: 10px; }
+      .phircle-switch-btn { padding: 0.5rem 0.9rem; font-size: 0.75rem; }
     }
 
     /* Mathematical Proof Accordion */
@@ -134,6 +198,23 @@
       border-radius: 4px;
       color: #e2e8f0;
     }
+
+    /* Phircle hint in footer-note */
+    .footer-note .phircle-hint {
+      margin-top: 0.5rem;
+      padding-top: 0.5rem;
+      border-top: 1px solid #2a3f4a;
+      color: #00e5ff;
+      font-size: 0.82rem;
+    }
+    .footer-note .phircle-hint a {
+      color: #00e5ff;
+      text-decoration: none;
+      font-weight: 700;
+    }
+    .footer-note .phircle-hint a:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
@@ -149,6 +230,7 @@
         <a href="game.html">Game</a>
         <a href="mint.html">Mint</a>
         <a href="map.html" aria-current="page">Map</a>
+        <a href="phircle">Phircle</a>
         <a href="staking.html">Staking</a>
         <a href="whitepaper.html">Whitepaper</a>
         <a href="faq.html">FAQ</a>
@@ -171,6 +253,14 @@
     <div class="canvas-container" id="canvasContainer">
       <canvas id="pyramidCanvas"></canvas>
       <div class="tooltip" id="tooltip"></div>
+
+      <!-- ============ PHIRCLE SWITCH BUTTON (floating on canvas) ============ -->
+      <div class="phircle-switch-wrap">
+        <a href="phircle" class="phircle-switch-btn" title="Open the Pyramid as a circle with π & φ">
+          <span class="phircle-icon">🌀</span>
+          <span>Open Phircle View</span>
+        </a>
+      </div>
     </div>
 
     <div class="legend-panel" id="legendPanel">
@@ -543,6 +633,11 @@
             <div class="fazit">
               <strong>Conclusion:</strong> Every block is a unique, mathematically generated fingerprint—a true artwork etched permanently into the blockchain.
             </div>
+
+            <!-- PHIRCLE HINT IN PROOF -->
+            <p style="margin-top:1rem; padding-top:0.8rem; border-top:1px solid #2a3f4a; color:#00e5ff;">
+              🌀 <strong>See this math in action:</strong> The <a href="phircle" style="color:#00e5ff; font-weight:700;">Phircle view</a> renders the entire pyramid as a circle, making π and φ symmetries visually obvious across the whole 10,000-block map.
+            </p>
           </div>
         </details>
         <!-- MATHEMATICAL PROOF ACCORDION END -->
@@ -566,6 +661,7 @@
           <p>100 rows · 10,000 blocks</p>
           <p>π · φ · V6</p>
           <p>Map: FarmingV6 + PiratesV6 + MercenaryV4</p>
+          <p class="phircle-hint">🌀 <a href="phircle">Open Phircle View</a> — Pyramid as a Circle</p>
         </div>
       </div>
     </div>

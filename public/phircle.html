@@ -3,47 +3,48 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Phircle V16 — Smart UI & Attacks</title>
+<title>Phircle V20 — Ultimate Edition</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin:0; padding:0; height:100%; overflow:hidden;
     background:#000; color:#e0e0e0; font-family:'Courier New',monospace; user-select: none; }
   canvas { display:block; cursor:crosshair; touch-action: none; }
-  
+
   #hud { position:fixed; top:12px; left:12px; padding:14px 18px;
-    background:rgba(8,8,16,0.85); border:1px solid #ffcc00; font-size:11px;
+    background:rgba(8,8,16,0.92); border:1px solid #ffcc00; font-size:11px;
     line-height:1.55; min-width:280px; backdrop-filter:blur(6px);
-    border-radius:4px; z-index:10; transition: all 0.3s ease; }
+    border-radius:4px; z-index:15; transition: all 0.3s ease; }
   #hud.collapsed { min-width: auto; padding: 8px 12px; }
   #hud.collapsed .hud-content { display: none; }
-  #hud h1 { color:#ffcc00; margin:0 0 8px; font-size:14px; letter-spacing:2px;
-    display: flex; justify-content: space-between; align-items: center; }
-  #hud h1 button { background: none; border: 1px solid #ffcc00; color: #ffcc00;
-    cursor: pointer; font-family: inherit; font-size: 10px; padding: 2px 6px;
-    border-radius: 3px; }
+  #hud h1 { color:#ffcc00; margin:0; font-size:14px; letter-spacing:2px;
+    display: flex; justify-content: flex-start; align-items: center; gap:6px; }
+  #hud h1 .title { flex:1; }
+  #hud h1 button { background: rgba(0,0,0,0.5); border: 1px solid #ffcc00; color: #ffcc00;
+    cursor: pointer; font-family: inherit; font-size: 10px; padding: 3px 6px;
+    border-radius: 3px; min-width: 44px; }
+  #hud .hud-content { margin-top: 8px; }
   #hud .row { display:flex; justify-content:space-between; color:#888; }
   #hud .row strong { color:#ffcc00; }
   #hud hr { border:none; border-top:1px solid #222; margin:6px 0; }
   #hud .legend { display:flex; flex-wrap:wrap; gap:4px 8px; margin-top:6px; font-size:9px; }
   #hud .legend span { display:inline-flex; align-items:center; gap:3px; }
   #hud .dot { width:7px; height:7px; border-radius:50%; display:inline-block; }
-  
-  /* NEU: Attacker Selector im HUD */
-  #attackerHud { margin-top: 10px; padding-top: 8px; border-top: 1px solid #333; }
-  #attackerSelect { width: 100%; background: #111; color: #ffcc00; border: 1px solid #444;
-    padding: 4px; font-family: inherit; font-size: 11px; margin-top: 4px; }
 
   #layers { position:fixed; top:12px; right:12px; display:flex; flex-direction:column;
     gap:4px; z-index:10; }
   #layers button { background:rgba(8,8,16,0.85); border:1px solid #333; color:#888;
     padding:6px 12px; cursor:pointer; font-family:inherit; font-size:10px;
-    letter-spacing:1px; border-radius:3px; transition:all .2s; text-align:left; min-width:130px; }
+    letter-spacing:1px; border-radius:3px; transition:all .2s; text-align:left; min-width:140px; }
   #layers button:hover { border-color:#ffcc00; color:#fff; }
   #layers button.active { background:#ffcc00; color:#000; border-color:#ffcc00; }
   #layers button.my-farms { border-color: #00e5ff; color: #00e5ff; }
   #layers button.my-farms.active { background: #00e5ff; color: #000; }
+  #layers button.war-room { border-color: #ff3333; color: #ff3333; }
+  #layers button.war-room.active { background: #ff3333; color: #fff; }
+  #layers button.history-layer { border-color: #ffaa00; color: #ffaa00; }
+  #layers button.history-layer.active { background: #ffaa00; color: #000; }
 
-  #wallet { position:fixed; top:12px; right:150px; padding:8px 14px;
+  #wallet { position:fixed; top:12px; right:160px; padding:8px 14px;
     background:rgba(8,8,16,0.85); border:1px solid #333; color:#888;
     font-family:inherit; font-size:10px; cursor:pointer; border-radius:3px; z-index:10;
     letter-spacing:1px; transition:all .2s; }
@@ -53,7 +54,8 @@
   #pauseBtn { position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
     padding:12px 24px; background:rgba(8,8,16,0.95); border:2px solid #ff8800; color:#ff8800;
     font-family:inherit; font-size:14px; font-weight:bold; cursor:pointer; border-radius:30px;
-    z-index:10; letter-spacing:2px; transition:all 0.2s; display:flex; align-items:center; gap:8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+    z-index:10; letter-spacing:2px; transition:all 0.2s; display:flex; align-items:center; gap:8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
   #pauseBtn:hover { background:#ff8800; color:#000; }
   #pauseBtn.active { border-color:#00e5ff; color:#00e5ff; background:rgba(0,229,255,0.1); }
 
@@ -62,13 +64,12 @@
     overflow-y:auto; transition:right .3s cubic-bezier(.4,0,.2,1); z-index:20;
     backdrop-filter:blur(10px); }
   #sidebar.active { right:0; }
-  #sidebar h2 { color:#ffcc00; margin:0 0 14px; font-size:17px; }
+  #sidebar h2 { color:#ffcc00; margin:0 0 14px; font-size:17px; display:flex; justify-content:space-between; align-items:center; }
   #sidebar .info-row { display:flex; justify-content:space-between;
     padding:6px 0; border-bottom:1px solid #1a1a1a; font-size:12px; }
   #sidebar .info-row span:first-child { color:#777; }
   #sidebar .info-row strong { color:#e0e0e0; }
   #sidebar .rarity-bar { height:4px; border-radius:2px; margin:8px 0; }
-  
   #sidebar button { display:block; width:100%; margin:6px 0;
     background:linear-gradient(135deg,#ffcc00,#ffaa00); color:#000; border:none;
     padding:12px 16px; cursor:pointer; font-family:inherit; font-weight:bold;
@@ -76,29 +77,190 @@
   #sidebar button.close { background:#222; color:#aaa; margin-top:16px; }
   #sidebar button.attack-btn { background:linear-gradient(135deg,#ff3333,#cc0000); color:#fff; }
   #sidebar button.execute-btn { background:linear-gradient(135deg,#00ff88,#00aa55); color:#000; }
-  
-  /* NEU: Angreifer Auswahl in Sidebar */
-  #sbAttackerSelect { width:100%; background:#111; color:#fff; border:1px solid #444;
-    padding:8px; font-family:inherit; font-size:12px; margin:10px 0; }
+  #sidebar button.clear-btn { background:#333; color:#ff8800; font-size:11px; padding:8px; margin-top:10px; }
+  #sidebar button.share-btn { background:#1a3a4a; color:#00e5ff; font-size:11px; padding:8px; }
+  #sidebar button:disabled { opacity:0.4; cursor:not-allowed; }
+  #sidebar select, #sidebar input { width:100%; background:#111; color:#fff; border:1px solid #444;
+    padding:8px; font-family:inherit; font-size:12px; margin:6px 0; border-radius:3px; }
+  #sidebar .label { font-size:11px; color:#888; margin-top:10px; text-transform:uppercase; letter-spacing:1px; }
+  #sidebar .note { font-size:11px; color:#888; padding:10px; background:rgba(255,51,51,0.1);
+    border-left:3px solid #ff3333; border-radius:3px; margin:10px 0; }
 
   #status { position:fixed; bottom:12px; right:12px; padding:9px 14px;
     background:rgba(8,8,16,0.85); border:1px solid #333; font-size:10px;
     color:#888; border-radius:4px; z-index:10; }
   #status .live { color:#00ff88; } #status .demo { color:#ff8800; }
-  
   #controls { position:fixed; bottom:12px; left:12px; padding:9px 14px;
     background:rgba(8,8,16,0.85); border:1px solid #333; font-size:10px;
     color:#777; border-radius:4px; z-index:10; }
   #controls kbd { background:#222; color:#ffcc00; padding:1px 5px;
     border-radius:3px; font-family:inherit; font-size:9px; }
-
   #tooltip { position:fixed; pointer-events:none; z-index:50;
     background:rgba(8,8,16,0.95); border:1px solid #ffcc00; padding:8px 12px;
     font-size:11px; border-radius:4px; display:none; line-height:1.4;
     box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
 
+  #searchBtn { background: rgba(0,0,0,0.5); border: 1px solid #ffcc00; color: #ffcc00;
+    cursor: pointer; font-family: inherit; font-size: 12px; padding: 3px 8px;
+    border-radius: 3px; }
+  #searchBtn:hover { background:#ffcc00; color:#000; }
+
+  #soundBtn { position:fixed; bottom:20px; right:140px; width:44px; height:44px;
+    background:rgba(8,8,16,0.85); border:1px solid #333; color:#888; border-radius:50%;
+    cursor:pointer; font-size:18px; z-index:10; display:flex; align-items:center; justify-content:center; }
+  #soundBtn:hover { border-color:#ffcc00; color:#ffcc00; }
+  #soundBtn.active { color:#00ff88; border-color:#00ff88; }
+
+  #tutorialBtn { position:fixed; bottom:20px; right:200px; width:44px; height:44px;
+    background:rgba(8,8,16,0.85); border:1px solid #333; color:#888; border-radius:50%;
+    cursor:pointer; font-size:18px; z-index:10; display:flex; align-items:center; justify-content:center; }
+  #tutorialBtn:hover { border-color:#ffcc00; color:#ffcc00; }
+
+  #toasts { position:fixed; bottom:90px; left:50%; transform:translateX(-50%);
+    z-index:100; display:flex; flex-direction:column; gap:8px; align-items:center;
+    pointer-events:none; max-width:calc(100vw - 20px); }
+  .toast { background:rgba(8,8,16,0.98); border-left:4px solid #ffcc00;
+    padding:12px 20px; border-radius:6px; font-size:12px; color:#fff;
+    box-shadow:0 4px 20px rgba(0,0,0,0.6); animation:toastIn 0.3s ease;
+    pointer-events:auto; max-width:400px; }
+  .toast.success { border-color:#00ff88; }
+  .toast.error { border-color:#ff3333; }
+  .toast.info { border-color:#00e5ff; }
+  .toast.out { animation:toastOut 0.3s ease forwards; }
+  @keyframes toastIn { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes toastOut { to { opacity:0; transform:translateY(-20px); } }
+
+  #tutorial { position:fixed; inset:0; background:rgba(0,0,0,0.85);
+    z-index:200; display:none; align-items:center; justify-content:center; padding:20px; }
+  #tutorial.active { display:flex; }
+  .tutorial-card { background:linear-gradient(135deg,#0d0018,#0a0f16);
+    border:2px solid #ffcc00; border-radius:12px; padding:32px;
+    max-width:520px; width:100%; position:relative;
+    box-shadow:0 0 60px rgba(255,204,0,0.3); }
+  .tutorial-step { font-size:10px; color:#888; letter-spacing:2px; margin-bottom:6px; }
+  .tutorial-title { font-size:20px; color:#ffcc00; margin-bottom:14px; letter-spacing:1px; }
+  .tutorial-body { font-size:13px; line-height:1.7; color:#d0d0d0; margin-bottom:20px; min-height:100px; }
+  .tutorial-body strong { color:#00e5ff; }
+  .tutorial-body em { color:#ffcc00; font-style:normal; }
+  .tutorial-nav { display:flex; justify-content:space-between; align-items:center; }
+  .tutorial-nav button { background:linear-gradient(135deg,#ffcc00,#ffaa00); color:#000;
+    border:none; padding:10px 20px; cursor:pointer; font-family:inherit;
+    font-weight:bold; font-size:12px; border-radius:4px; }
+  .tutorial-nav button.secondary { background:#222; color:#aaa; }
+  .tutorial-nav button:disabled { opacity:0.3; cursor:not-allowed; }
+  .tutorial-dots { display:flex; gap:8px; }
+  .tutorial-dots span { width:8px; height:8px; border-radius:50%; background:#333; }
+  .tutorial-dots span.active { background:#ffcc00; }
+  .tutorial-close { position:absolute; top:12px; right:12px; background:none;
+    border:1px solid #444; color:#888; width:30px; height:30px; border-radius:50%;
+    cursor:pointer; font-size:16px; }
+
+  #searchModal { position:fixed; inset:0; background:rgba(0,0,0,0.85);
+    z-index:150; display:none; align-items:flex-start; justify-content:center;
+    padding-top:15vh; }
+  #searchModal.active { display:flex; }
+  .search-box { background:rgba(8,8,16,0.98); border:2px solid #ffcc00;
+    border-radius:8px; width:90%; max-width:560px; padding:20px;
+    box-shadow:0 0 60px rgba(255,204,0,0.3); }
+  .search-box h3 { color:#ffcc00; margin:0 0 14px; font-size:14px;
+    letter-spacing:2px; text-transform:uppercase; }
+  .search-box input { width:100%; background:#000; border:1px solid #444;
+    color:#fff; padding:12px 16px; font-family:inherit; font-size:14px;
+    border-radius:4px; outline:none; }
+  .search-box input:focus { border-color:#ffcc00; }
+  .search-results { margin-top:14px; max-height:340px; overflow-y:auto; }
+  .search-result { padding:10px 12px; border-bottom:1px solid #1a1a1a;
+    cursor:pointer; font-size:12px; color:#d0d0d0; border-radius:3px; }
+  .search-result:hover { background:rgba(255,204,0,0.1); color:#ffcc00; }
+  .search-result strong { color:#ffcc00; }
+  .search-hint { font-size:10px; color:#666; margin-top:12px; letter-spacing:1px; }
+
+  #filterChips { position:fixed; bottom:90px; left:12px; display:flex;
+    gap:6px; flex-wrap:wrap; z-index:10; max-width:300px; }
+  .filter-chip { background:rgba(8,8,16,0.85); border:1px solid #333;
+    color:#888; padding:6px 12px; border-radius:14px; font-size:10px;
+    cursor:pointer; transition:all 0.2s; letter-spacing:1px; }
+  .filter-chip:hover { border-color:#ffcc00; color:#fff; }
+  .filter-chip.active { background:#ffcc00; color:#000; border-color:#ffcc00; }
+
+  #blockHistory { position:fixed; bottom:90px; right:12px; display:flex;
+    gap:6px; flex-wrap:wrap-reverse; z-index:10; max-width:260px; justify-content:flex-end; }
+  .history-chip { background:rgba(8,8,16,0.85); border:1px solid #00e5ff;
+    color:#00e5ff; padding:5px 10px; border-radius:12px; font-size:10px;
+    cursor:pointer; transition:all 0.2s; }
+  .history-chip:hover { background:#00e5ff; color:#000; }
+
+  #loadingOverlay { position:fixed; inset:0; background:rgba(0,0,0,0.95);
+    z-index:300; display:flex; flex-direction:column; align-items:center;
+    justify-content:center; transition:opacity 0.5s; }
+  #loadingOverlay.hidden { opacity:0; pointer-events:none; }
+  .loading-spinner { width:80px; height:80px; border:3px solid #ffcc00;
+    border-top-color:transparent; border-radius:50%;
+    animation:spin 1s linear infinite; margin-bottom:20px; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .loading-text { color:#ffcc00; font-size:14px; letter-spacing:3px; }
+
+  .profit-box { background:rgba(0,255,136,0.08); border:1px solid #00ff88;
+    padding:12px; border-radius:4px; margin:10px 0; font-size:12px; }
+  .profit-box .label { color:#888; font-size:10px; letter-spacing:1px; text-transform:uppercase; }
+  .profit-box .value { color:#00ff88; font-size:18px; font-weight:bold; margin:4px 0; }
+  .profit-box .sub { color:#888; font-size:11px; }
+
+  #radar { position:fixed; bottom:90px; right:12px; width:120px; height:120px;
+    background:rgba(8,8,16,0.9); border:1px solid #ffcc00; border-radius:50%;
+    z-index:10; display:none; cursor:pointer; }
+  #radar.active { display:block; }
+
+  /* FEATURE: Attack History Modal */
+  #attackHistoryModal { position:fixed; inset:0; background:rgba(0,0,0,0.9);
+    z-index:180; display:none; align-items:center; justify-content:center; padding:20px; }
+  #attackHistoryModal.active { display:flex; }
+  .history-card { background:rgba(8,8,16,0.98); border:2px solid #ffaa00;
+    border-radius:12px; max-width:600px; width:100%; max-height:80vh;
+    overflow-y:auto; padding:24px; position:relative;
+    box-shadow:0 0 60px rgba(255,170,0,0.3); }
+  .history-card h2 { color:#ffaa00; margin:0 0 16px; font-size:18px;
+    letter-spacing:2px; text-transform:uppercase; display:flex; justify-content:space-between; align-items:center; }
+  .history-tabs { display:flex; gap:8px; margin-bottom:16px; }
+  .history-tab { background:#1a1a1a; border:1px solid #333; color:#888;
+    padding:6px 14px; cursor:pointer; border-radius:4px; font-size:11px;
+    letter-spacing:1px; font-family:inherit; transition:all 0.2s; }
+  .history-tab.active { background:#ffaa00; color:#000; border-color:#ffaa00; }
+  .history-item { background:rgba(255,255,255,0.03); border-left:3px solid #555;
+    padding:12px 16px; margin:8px 0; border-radius:4px; font-size:12px;
+    display:flex; justify-content:space-between; align-items:center; }
+  .history-item.executed { border-left-color:#00ff88; }
+  .history-item.cancelled { border-left-color:#ff3333; }
+  .history-item.pending { border-left-color:#ffaa00; }
+  .history-item .hi-left { flex:1; }
+  .history-item .hi-title { color:#fff; font-weight:bold; margin-bottom:4px; }
+  .history-item .hi-meta { color:#888; font-size:10px; }
+  .history-item .hi-amount { color:#00ff88; font-weight:bold; font-size:14px; }
+
+  /* FEATURE: Live Activity Feed */
+  #activityFeed { position:fixed; bottom:90px; right:220px; width:260px;
+    background:rgba(8,8,16,0.92); border:1px solid #00e5ff; border-radius:6px;
+    z-index:10; overflow:hidden; transition:all 0.3s ease; max-height:280px; }
+  #activityFeed.collapsed { max-height:32px; }
+  .activity-header { background:rgba(0,229,255,0.1); color:#00e5ff;
+    padding:8px 12px; font-size:10px; letter-spacing:2px; cursor:pointer;
+    display:flex; justify-content:space-between; align-items:center;
+    font-weight:bold; text-transform:uppercase; }
+  .activity-header:hover { background:rgba(0,229,255,0.2); }
+  #activityItems { padding:6px; max-height:240px; overflow-y:auto; }
+  .activity-item { padding:6px 8px; margin:3px 0; font-size:10px;
+    color:#aaa; border-left:2px solid #333; background:rgba(255,255,255,0.02);
+    border-radius:3px; animation:actIn 0.4s ease; }
+  .activity-item.attack { border-left-color:#ff3333; color:#ff8888; }
+  .activity-item.executed { border-left-color:#00ff88; color:#88ffaa; }
+  .activity-item.mint { border-left-color:#ffcc00; color:#ffdd55; }
+  .activity-item.info { border-left-color:#00e5ff; color:#88ddff; }
+  @keyframes actIn { from { opacity:0; transform:translateX(20px); } to { opacity:1; transform:translateX(0); } }
+
   @media (max-width: 768px) {
-    #hud { min-width: 220px; font-size: 10px; padding: 10px; }
+    #hud { min-width: auto; max-width: calc(100vw - 24px); font-size: 10px; padding: 10px; }
+    #hud.collapsed { padding: 6px 10px; }
+    #hud h1 { font-size: 12px; }
     #layers { top: 12px; right: 12px; }
     #layers button { padding: 8px 10px; font-size: 9px; min-width: 110px; }
     #wallet { top: auto; bottom: 70px; right: 12px; }
@@ -106,17 +268,38 @@
     #status { display: block; bottom: 70px; left: 12px; font-size: 9px; }
     #pauseBtn { bottom: 15px; font-size: 12px; padding: 10px 20px; }
     #sidebar { max-width: 100%; }
+    #soundBtn, #tutorialBtn { bottom: auto; top: 220px; width:38px; height:38px; font-size:14px; }
+    #soundBtn { right: 12px; }
+    #tutorialBtn { right: 58px; }
+    #filterChips { bottom: 130px; left: 12px; max-width: 200px; }
+    #filterChips .filter-chip { padding: 5px 9px; font-size: 9px; }
+    #blockHistory { bottom: 130px; right: 12px; max-width: 200px; }
+    .history-chip { padding: 4px 8px; font-size: 9px; }
+    .tutorial-card { padding: 24px 20px; }
+    .tutorial-title { font-size: 16px; }
+    .tutorial-body { font-size: 12px; }
+    #radar { width: 90px; height: 90px; bottom: 130px; }
+    #activityFeed { width: 200px; right: 110px; max-height: 200px; }
+    .history-card { padding: 16px; }
+    .history-card h2 { font-size: 14px; }
   }
 </style>
 </head>
 <body>
+
+<div id="loadingOverlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">LOADING PHIRCLE...</div>
+</div>
+
 <canvas id="canvas"></canvas>
 <div id="tooltip"></div>
 
-<div id="hud">
+<div id="hud" class="collapsed">
   <h1>
-    <span>🌀 PHIRCLE V16</span>
-    <button onclick="document.getElementById('hud').classList.toggle('collapsed')">HIDE</button>
+    <button id="hudToggle" onclick="toggleHud()">SHOW</button>
+    <button id="searchBtn" onclick="openSearch()" title="Search (Ctrl+K)">🔍</button>
+    <span class="title">🌀 PHIRCLE V20</span>
   </h1>
   <div class="hud-content">
     <div class="row"><span>Rows</span><strong>100</strong></div>
@@ -124,7 +307,8 @@
     <div class="row"><span>Minted</span><strong id="mintedCount">–</strong></div>
     <div class="row"><span>My Blocks</span><strong id="myBlocksCount" style="color:#00e5ff">0</strong></div>
     <div class="row"><span>Farming</span><strong id="farmCount">–</strong></div>
-    <div class="row"><span>Attacks</span><strong id="attackCount">–</strong></div>
+    <div class="row"><span>Active Attacks</span><strong id="attackCount">–</strong></div>
+    <div class="row"><span>Executed</span><strong id="executedCount" style="color:#00ff88">–</strong></div>
     <div class="row"><span>Partners</span><strong id="partnerCount">–</strong></div>
     <div class="row"><span>Cone Volume</span><strong id="volCount">–</strong></div>
     <hr>
@@ -132,16 +316,6 @@
     <div class="row"><span>φ</span><strong>1.61803</strong></div>
     <div class="row"><span>Golden Angle</span><strong>137.5°</strong></div>
     <hr>
-    
-    <!-- NEU: Globaler Angreifer -->
-    <div id="attackerHud" style="display:none;">
-      <div class="row"><span>My Attacker</span><strong id="activeAttackerLabel" style="color:#ff3333;">None</strong></div>
-      <select id="attackerSelect" onchange="changeGlobalAttacker(this.value)">
-        <option value="">Select your block...</option>
-      </select>
-    </div>
-    <hr>
-
     <div class="legend">
       <span><i class="dot" style="background:#3a3a3a"></i>Unminted</span>
       <span><i class="dot" style="background:#cd7f32"></i>Bronze</span>
@@ -150,9 +324,7 @@
       <span><i class="dot" style="background:#e5e4e2"></i>Platinum</span>
       <span><i class="dot" style="background:#b9f2ff"></i>Diamond</span>
       <span><i class="dot" style="background:#00ff88"></i>Farm</span>
-      <span><i class="dot" style="background:#4488ff"></i>Shield</span>
       <span><i class="dot" style="background:#ff3333"></i>Attack</span>
-      <span><i class="dot" style="background:#c060ff"></i>Partner</span>
       <span><i class="dot" style="background:#00e5ff"></i>Mine</span>
     </div>
   </div>
@@ -165,22 +337,86 @@
   <button data-layer="attack">⚔ ATTACK</button>
   <button data-layer="partner">∞ PARTNER</button>
   <button id="btnMyFarms" class="my-farms">💎 MY FARMS</button>
+  <button id="btnWarRoom" class="war-room">🚨 WAR ROOM</button>
+  <button id="btnHistory" class="history-layer">📜 HISTORY</button>
 </div>
+
+<div id="filterChips">
+  <button class="filter-chip" data-filter="mine" onclick="toggleFilter('mine')">👤 Mine</button>
+  <button class="filter-chip" data-filter="farming" onclick="toggleFilter('farming')">🌾 Farming</button>
+  <button class="filter-chip" data-filter="attacked" onclick="toggleFilter('attacked')">⚔ Attacked</button>
+</div>
+
+<div id="blockHistory"></div>
+
+<!-- FEATURE: Live Activity Feed -->
+<div id="activityFeed">
+  <div class="activity-header" onclick="toggleActivityFeed()">
+    <span>📡 Live Activity</span>
+    <span id="activityToggle">−</span>
+  </div>
+  <div id="activityItems"></div>
+</div>
+
+<canvas id="radar" onclick="toggleRadarZoom()"></canvas>
 
 <div id="wallet" onclick="connectWallet()">🔌 Wallet</div>
 <div id="pauseBtn" onclick="togglePause()">⏸️ PAUSE / EXPLODE</div>
+<button id="soundBtn" class="active" onclick="toggleSound()" title="Sound On/Off">🔊</button>
+<button id="tutorialBtn" onclick="startTutorial()" title="Tutorial">❓</button>
 
 <div id="sidebar"><h2 id="sbTitle">Block Info</h2><div id="sbContent"></div></div>
+
 <div id="controls">
-  <kbd>Scroll</kbd> Zoom · <kbd>Drag</kbd> Pan · <kbd>Click</kbd> Block · <kbd>ESC</kbd> Close · <kbd>Space</kbd> Pause · <kbd>Double-Click</kbd> Center
+  <kbd>Scroll</kbd> Zoom · <kbd>Pinch</kbd> Zoom · <kbd>Drag</kbd> Pan · <kbd>Click</kbd> Block · <kbd>ESC</kbd> Close · <kbd>Space</kbd> Pause · <kbd>Ctrl+K</kbd> Search
 </div>
 <div id="status"><span id="statusText">Loading...</span></div>
+
+<div id="toasts"></div>
+
+<div id="tutorial">
+  <div class="tutorial-card">
+    <button class="tutorial-close" onclick="closeTutorial()">×</button>
+    <div class="tutorial-step" id="tutStep">STEP 1 / 6</div>
+    <div class="tutorial-title" id="tutTitle">Welcome to Phircle</div>
+    <div class="tutorial-body" id="tutBody"></div>
+    <div class="tutorial-nav">
+      <button class="secondary" id="tutPrev" onclick="prevTutStep()">← Back</button>
+      <div class="tutorial-dots" id="tutDots"></div>
+      <button id="tutNext" onclick="nextTutStep()">Next →</button>
+    </div>
+  </div>
+</div>
+
+<div id="searchModal" onclick="if(event.target===this)closeSearch()">
+  <div class="search-box">
+    <h3>🔍 Search / Command</h3>
+    <input type="text" id="searchInput" placeholder="Block #1234 or 'pause' or 'tutorial'..." 
+           oninput="runSearch(this.value)" autocomplete="off">
+    <div class="search-results" id="searchResults"></div>
+    <div class="search-hint">Try: "#1234" · "history" · "war room" · "pause" · "tutorial"</div>
+  </div>
+</div>
+
+<!-- FEATURE: Attack History Modal -->
+<div id="attackHistoryModal" onclick="if(event.target===this)closeAttackHistory()">
+  <div class="history-card">
+    <h2>📜 Attack History <button style="background:none;border:1px solid #444;color:#aaa;width:32px;height:32px;border-radius:50%;cursor:pointer;" onclick="closeAttackHistory()">×</button></h2>
+    <div class="history-tabs">
+      <button class="history-tab active" data-tab="all" onclick="filterAttackHistory('all')">All</button>
+      <button class="history-tab" data-tab="executed" onclick="filterAttackHistory('executed')">Executed</button>
+      <button class="history-tab" data-tab="cancelled" onclick="filterAttackHistory('cancelled')">Cancelled</button>
+      <button class="history-tab" data-tab="active" onclick="filterAttackHistory('active')">Active</button>
+    </div>
+    <div id="attackHistoryList"></div>
+  </div>
+</div>
 
 <script type="module">
 import { ethers } from 'https://cdn.jsdelivr.net/npm/ethers@6.13.4/+esm';
 
 // ============================================================
-// INLINE CONFIG & ABIS
+// CONFIG
 // ============================================================
 const WORKER_URL             = 'https://inpinity-worker-final.s-plat.workers.dev';
 const NFT_ADDRESS            = '0x277a0D5864293C78d7387C54B48c35D5E9578Ab1';
@@ -191,6 +427,12 @@ const PARTNERSHIP_V2_ADDRESS = '0xb18323efE4Cc8c36e10D664E287b4e2c82Fe3ad9';
 const PUBLIC_RPC             = 'https://mainnet.base.org';
 const MAX_ROW                = 99;
 const rarityNames            = ['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond'];
+const resourceNames          = ['Oil', 'Lemons', 'Iron', 'Gold', 'Platinum', 'Copper', 'Crystal', 'Obsidian', 'Mysterium', 'Aether'];
+
+const RARITY_PRODUCTION = {
+  0: [0, 1, 2], 1: [0, 1, 2, 3], 2: [0, 1, 2, 3, 4], 3: [0, 1, 2, 3, 4, 6], 4: [0, 1, 2, 3, 4, 6, 8]
+};
+const RARITY_DAILY_OUTPUT = { 0: 18, 1: 37, 2: 57, 3: 78, 4: 108 };
 
 const NFT_ABI = [
   "function mintWithINPI(uint256 row, uint256 col)",
@@ -210,45 +452,35 @@ const PIRATES_V6_ABI = [
   "function buyPirateBoost(uint256 tokenId, uint256 daysAmount)"
 ];
 const MERCENARY_V4_ABI = [
-  "function setProtection(uint256 slotIndex, uint256 tokenId, uint256 durationDays, bool payInINPI)",
-  "function extendProtection(uint256 slotIndex, uint256 additionalDays, bool payInINPI)",
-  "function cancelProtection(uint256 slotIndex)"
-];
-const PARTNERSHIP_V2_ABI = [
-  "function isPartnerBlock(uint256 tokenId) view returns (bool)",
-  "function getPartnerBlock(uint256 partnerId) view returns (uint256)"
+  "function setProtection(uint256 slotIndex, uint256 tokenId, uint256 durationDays, bool payInINPI)"
 ];
 
-// ============================================================
-// CONSTANTS — π & φ
-// ============================================================
 const PHI = (1 + Math.sqrt(5)) / 2;
 const PI  = Math.PI;
 const TAU = 2 * PI;
 const GOLDEN_ANGLE = PI * (3 - Math.sqrt(5));
 const ID_STRIDE = 2049;
 const CENTER_ANGLE = -PI / 2;
+const IS_MOBILE = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || innerWidth < 768;
 
 const COLORS = {
   unminted:'#3a3a3a', bronze:'#cd7f32', silver:'#c0c0c0',
   gold:'#ffcc00', platinum:'#e5e4e2', diamond:'#b9f2ff',
-  farming:'#00ff88', protected:'#4488ff', attack:'#ff3333',
-  partner:'#c060ff', mine:'#00e5ff',
-  mirrorAxis:'rgba(255,204,0,.14)',
-  goldenSpiral:'rgba(255,204,0,.045)',
-  sector:'rgba(255,204,0,.035)',
-  radar:'rgba(255,204,0,.10)',
+  farming:'#00ff88', attack:'#ff3333', partner:'#c060ff', mine:'#00e5ff'
 };
 
 // ============================================================
 // STATE
 // ============================================================
-const minted        = new Map();
-const farms         = new Set();
-const attacks       = new Map();
-const partnerships  = new Set();
-const justRevealed  = new Map();
-const piWaves       = [];
+const minted         = new Map();
+const farms          = new Set();
+const attacks        = new Map();      // Active attacks only
+const executedAttacks = [];            // FEATURE: History of executed/cancelled/expired
+const partnerships   = new Set();
+const attackHistory  = [];             // For visual trail
+const blockHistory   = [];
+const activeFilters  = new Set();
+const confettiParticles = [];          // FEATURE: Confetti
 
 let activeLayer = 'rarity';
 let userAddress = null;
@@ -257,25 +489,392 @@ let isPaused = false;
 let myBlocksCount = 0;
 let myFarmsCount = 0;
 let explosionFactor = 1.0;
-let selectedAttackerId = null; // NEU: Global ausgewählter Angreifer
-let hoveredBlock = null; // Für die gestrichelte Vorschau-Linie
+let selectedAttackerId = null;
+let lastClickedBlockId = null;
+let hoveredBlock = null;
+let soundEnabled = true;
+let radarMode = false;
+let historyFilter = 'all';
+
+// ============================================================
+// SOUND
+// ============================================================
+let audioCtx = null;
+function initAudio() {
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    catch(e) {}
+  }
+}
+function playSound(freq = 440, duration = 0.08, type = 'sine', volume = 0.04) {
+  if (!soundEnabled || !audioCtx) return;
+  try {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type; osc.frequency.value = freq;
+    gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(); osc.stop(audioCtx.currentTime + duration);
+  } catch(e) {}
+}
+window.toggleSound = () => {
+  soundEnabled = !soundEnabled;
+  document.getElementById('soundBtn').classList.toggle('active', soundEnabled);
+  document.getElementById('soundBtn').textContent = soundEnabled ? '🔊' : '🔇';
+  if (soundEnabled) { initAudio(); playSound(660, 0.1); }
+  toast(soundEnabled ? 'Sound enabled' : 'Sound disabled', 'info');
+};
+
+function haptic(pattern = [10]) {
+  if (navigator.vibrate) { try { navigator.vibrate(pattern); } catch(e) {} }
+}
+
+// ============================================================
+// TOASTS
+// ============================================================
+function toast(message, type = 'info', duration = 3000) {
+  const container = document.getElementById('toasts');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = message;
+  container.appendChild(el);
+  setTimeout(() => {
+    el.classList.add('out');
+    setTimeout(() => el.remove(), 300);
+  }, duration);
+}
+
+// ============================================================
+// FEATURE: LIVE ACTIVITY FEED
+// ============================================================
+const activityLog = [];
+function logActivity(message, type = 'info') {
+  const entry = { message, type, time: Date.now() };
+  activityLog.unshift(entry);
+  if (activityLog.length > 20) activityLog.pop();
+  renderActivityFeed();
+}
+
+function renderActivityFeed() {
+  const items = document.getElementById('activityItems');
+  const recent = activityLog.slice(0, 10);
+  items.innerHTML = recent.map(e => {
+    const ago = Math.floor((Date.now() - e.time) / 1000);
+    const timeStr = ago < 60 ? `${ago}s` : `${Math.floor(ago/60)}m`;
+    return `<div class="activity-item ${e.type}">${timeStr} · ${e.message}</div>`;
+  }).join('');
+}
+
+window.toggleActivityFeed = () => {
+  const feed = document.getElementById('activityFeed');
+  feed.classList.toggle('collapsed');
+  document.getElementById('activityToggle').textContent = feed.classList.contains('collapsed') ? '+' : '−';
+};
+
+// ============================================================
+// FEATURE: CONFETTI CELEBRATION
+// ============================================================
+function spawnConfetti(screenX, screenY, color = '#ffcc00') {
+  for (let i = 0; i < 40; i++) {
+    const angle = Math.random() * TAU;
+    const speed = 3 + Math.random() * 6;
+    confettiParticles.push({
+      x: screenX, y: screenY,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - 3,
+      life: 1.8, maxLife: 1.8,
+      color: Math.random() < 0.5 ? color : (Math.random() < 0.5 ? '#00ff88' : '#00e5ff'),
+      size: 3 + Math.random() * 4
+    });
+  }
+}
+
+function updateAndDrawConfetti(dt) {
+  for (let i = confettiParticles.length - 1; i >= 0; i--) {
+    const p = confettiParticles[i];
+    p.x += p.vx; p.y += p.vy; p.vy += 0.25;
+    p.vx *= 0.99; p.life -= dt;
+    if (p.life <= 0) { confettiParticles.splice(i, 1); continue; }
+    ctx.save();
+    ctx.globalAlpha = p.life / p.maxLife;
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, TAU);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+// ============================================================
+// LOADING
+// ============================================================
+function hideLoading() {
+  const ov = document.getElementById('loadingOverlay');
+  if (ov) { ov.classList.add('hidden'); setTimeout(() => ov.style.display = 'none', 500); }
+}
+
+// ============================================================
+// TUTORIAL
+// ============================================================
+const TUTORIAL_STEPS = [
+  { title: "Welcome to Phircle", body: "This is the <strong>Inpinity Pyramid</strong> as a circle. 10,000 blocks arranged in 100 rings around the tip in the center. <em>Swipe to explore. Pinch to zoom.</em>" },
+  { title: "Your Layers", body: "On the right you see the <strong>Layer Bar</strong>: RARITY shows rarity, OWNER shows owners, FARMING shows active farms, ATTACK shows live attacks. <em>NEW: WAR ROOM</em> highlights critical blocks, <em>HISTORY</em> shows executed attacks." },
+  { title: "Select a Block", body: "<strong>Tap a block</strong> to inspect it. On your own blocks you can <em>start farming, claim resources, and set as attacker</em>. On foreign blocks you can <em>start attacks</em>." },
+  { title: "Quantum Freeze", body: "Press <strong>PAUSE/EXPLODE</strong> (or Space) — the rings <em>explode outward</em> and zoom jumps to 2×. Perfect for precisely tapping blocks. Press again for live view." },
+  { title: "Start an Attack", body: "Click a <strong>foreign block</strong>. Choose your <em>attacker block</em> and <em>resource</em> (depends on target rarity). The <strong>Profit Predictor</strong> shows how much you'd steal. Track everything in <em>Attack History</em> (📜)." },
+  { title: "Share & Deep-Link", body: "Every block you click updates the URL — e.g. <em>#block/1234</em>. Copy & share it to link directly to that block. Use <strong>Ctrl+K</strong> for the command palette." }
+];
+let tutStep = 0;
+window.startTutorial = () => { tutStep = 0; renderTutStep(); document.getElementById('tutorial').classList.add('active'); };
+function renderTutStep() {
+  const step = TUTORIAL_STEPS[tutStep];
+  document.getElementById('tutStep').textContent = `STEP ${tutStep+1} / ${TUTORIAL_STEPS.length}`;
+  document.getElementById('tutTitle').textContent = step.title;
+  document.getElementById('tutBody').innerHTML = step.body;
+  document.getElementById('tutPrev').disabled = tutStep === 0;
+  document.getElementById('tutNext').textContent = tutStep === TUTORIAL_STEPS.length - 1 ? 'Finish ✓' : 'Next →';
+  document.getElementById('tutDots').innerHTML = TUTORIAL_STEPS.map((_, i) =>
+    `<span class="${i === tutStep ? 'active' : ''}"></span>`).join('');
+}
+window.nextTutStep = () => {
+  if (tutStep < TUTORIAL_STEPS.length - 1) { tutStep++; renderTutStep(); playSound(520 + tutStep * 60, 0.06); }
+  else closeTutorial();
+};
+window.prevTutStep = () => { if (tutStep > 0) { tutStep--; renderTutStep(); } };
+window.closeTutorial = () => {
+  document.getElementById('tutorial').classList.remove('active');
+  localStorage.setItem('phircle_tutorial_done_v20', '1');
+};
+
+// ============================================================
+// SEARCH
+// ============================================================
+window.openSearch = () => {
+  document.getElementById('searchModal').classList.add('active');
+  setTimeout(() => document.getElementById('searchInput').focus(), 100);
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchResults').innerHTML = '';
+};
+window.closeSearch = () => { document.getElementById('searchModal').classList.remove('active'); };
+
+window.runSearch = (query) => {
+  const q = query.trim().toLowerCase();
+  const results = document.getElementById('searchResults');
+  if (!q) { results.innerHTML = ''; return; }
+  const items = [];
+  const blockMatch = q.match(/^#?(\d+)$/);
+  if (blockMatch) {
+    const id = parseInt(blockMatch[1]);
+    if (id >= 0 && id < 10000) {
+      const rc = idToRC(id);
+      if (rc) items.push({ icon: '📦', text: `Block #${id} (Row ${rc.row}, Col ${rc.col})`,
+        action: () => { closeSearch(); focusOnBlock(rc.row, rc.col); showBlockInfo({ row: rc.row, col: rc.col, id }); } });
+    }
+  }
+  const actions = [
+    { keywords: ['pause','freeze','quantum'], icon: '⏸️', text: 'Toggle Pause / Explode', action: () => { closeSearch(); togglePause(); } },
+    { keywords: ['tutorial','help'], icon: '❓', text: 'Open Tutorial', action: () => { closeSearch(); startTutorial(); } },
+    { keywords: ['wallet','connect','metamask'], icon: '🔌', text: 'Connect Wallet', action: () => { closeSearch(); connectWallet(); } },
+    { keywords: ['farm','farming','layer'], icon: '🌾', text: 'Switch to FARMING Layer', action: () => { closeSearch(); switchLayer('farming'); } },
+    { keywords: ['attack','layer'], icon: '⚔️', text: 'Switch to ATTACK Layer', action: () => { closeSearch(); switchLayer('attack'); } },
+    { keywords: ['mine','my farms'], icon: '💎', text: 'Show MY FARMS', action: () => { closeSearch(); switchLayer('my-farms'); } },
+    { keywords: ['war','room','critical','danger'], icon: '🚨', text: 'Switch to WAR ROOM', action: () => { closeSearch(); switchLayer('war-room'); } },
+    { keywords: ['history','executed','log'], icon: '📜', text: 'Open Attack History', action: () => { closeSearch(); openAttackHistory(); } },
+    { keywords: ['sound','audio'], icon: '🔊', text: 'Toggle Sound', action: () => { closeSearch(); toggleSound(); } },
+    { keywords: ['center','reset','zoom'], icon: '🎯', text: 'Reset View', action: () => { closeSearch(); view.tZoom = 1; view.tOx = 0; view.tOy = 0; } },
+  ];
+  for (const a of actions) {
+    if (a.keywords.some(k => k.includes(q) || q.includes(k)) || a.text.toLowerCase().includes(q)) items.push(a);
+  }
+  if (!items.length) {
+    results.innerHTML = `<div style="padding:20px;text-align:center;color:#666;">No results for "${query}"</div>`;
+    return;
+  }
+  results.innerHTML = items.slice(0, 8).map((it, i) =>
+    `<div class="search-result" data-idx="${i}">${it.icon} ${it.text}</div>`).join('');
+  results.querySelectorAll('.search-result').forEach(el => {
+    el.addEventListener('click', () => items[parseInt(el.dataset.idx)].action());
+  });
+};
+
+function switchLayer(layer) {
+  activeLayer = layer;
+  document.querySelectorAll('#layers button').forEach(b => b.classList.remove('active'));
+  if (layer === 'my-farms') document.getElementById('btnMyFarms').classList.add('active');
+  else if (layer === 'war-room') document.getElementById('btnWarRoom').classList.add('active');
+  else {
+    const btn = document.querySelector(`#layers button[data-layer="${layer}"]`);
+    if (btn) btn.classList.add('active');
+  }
+}
+
+// ============================================================
+// FEATURE: ATTACK HISTORY MODAL
+// ============================================================
+window.openAttackHistory = () => {
+  document.getElementById('attackHistoryModal').classList.add('active');
+  renderAttackHistory();
+};
+window.closeAttackHistory = () => {
+  document.getElementById('attackHistoryModal').classList.remove('active');
+};
+window.filterAttackHistory = (tab) => {
+  historyFilter = tab;
+  document.querySelectorAll('.history-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  renderAttackHistory();
+};
+
+function renderAttackHistory() {
+  const list = document.getElementById('attackHistoryList');
+  let items = [];
+  // Active attacks
+  if (historyFilter === 'all' || historyFilter === 'active') {
+    for (const [targetId, atk] of attacks) {
+      items.push({
+        status: 'pending',
+        title: `#${atk.attackerTokenId} → #${targetId}`,
+        meta: `${resourceNames[atk.resource]} · Ready in ${Math.max(0, Math.floor((atk.endTimestamp - Date.now())/1000))}s`,
+        amount: '—',
+        attack: atk
+      });
+    }
+  }
+  // Executed/cancelled
+  if (historyFilter === 'all' || historyFilter === 'executed' || historyFilter === 'cancelled') {
+    for (const a of executedAttacks) {
+      let status = 'pending';
+      if (a.executed) status = 'executed';
+      else if (a.cancelled) status = 'cancelled';
+      else if (a.endTimestamp < Date.now()) status = 'executed'; // Expired = treated as executed
+      
+      if (historyFilter === 'executed' && status !== 'executed') continue;
+      if (historyFilter === 'cancelled' && status !== 'cancelled') continue;
+      
+      items.push({
+        status,
+        title: `#${a.attackerTokenId} → #${a.targetTokenId}`,
+        meta: `${resourceNames[a.resource]} · ${new Date(a.startTime * 1000).toLocaleString()}`,
+        amount: status === 'executed' ? `+${a.stolenAmount || '?'}` : '—',
+        attack: a
+      });
+    }
+  }
+  
+  if (!items.length) {
+    list.innerHTML = `<div style="padding:30px;text-align:center;color:#666;">No ${historyFilter === 'all' ? '' : historyFilter} attacks found.</div>`;
+    return;
+  }
+  
+  list.innerHTML = items.map(it => `
+    <div class="history-item ${it.status}">
+      <div class="hi-left">
+        <div class="hi-title">${it.title}</div>
+        <div class="hi-meta">${it.meta}</div>
+      </div>
+      <div class="hi-amount">${it.amount}</div>
+    </div>
+  `).join('');
+}
+
+// ============================================================
+// FILTERS
+// ============================================================
+window.toggleFilter = (filter) => {
+  if (activeFilters.has(filter)) activeFilters.delete(filter);
+  else activeFilters.add(filter);
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.classList.toggle('active', activeFilters.has(chip.dataset.filter));
+  });
+  playSound(480, 0.05); haptic([5]);
+};
+
+function isBlockVisible(id, m) {
+  if (activeFilters.size === 0) return true;
+  if (activeFilters.has('mine') && (!m || m.owner !== userAddress)) return false;
+  if (activeFilters.has('farming') && !farms.has(id)) return false;
+  if (activeFilters.has('attacked') && !attacks.has(id)) return false;
+  return true;
+}
+
+// ============================================================
+// BLOCK HISTORY
+// ============================================================
+function addToHistory(id) {
+  const existing = blockHistory.indexOf(id);
+  if (existing >= 0) blockHistory.splice(existing, 1);
+  blockHistory.unshift(id);
+  if (blockHistory.length > 5) blockHistory.pop();
+  renderBlockHistory();
+}
+function renderBlockHistory() {
+  const el = document.getElementById('blockHistory');
+  el.innerHTML = blockHistory.map(id => {
+    const m = minted.get(id);
+    const icon = m ? (farms.has(id) ? '🌾' : '📦') : '⭕';
+    return `<div class="history-chip" onclick="jumpToBlock(${id})">${icon} #${id}</div>`;
+  }).join('');
+}
+window.jumpToBlock = (id) => {
+  const rc = idToRC(id);
+  if (rc) { focusOnBlock(rc.row, rc.col); showBlockInfo({ row: rc.row, col: rc.col, id }); }
+};
+
+// ============================================================
+// RADAR
+// ============================================================
+window.toggleRadarZoom = () => {
+  radarMode = !radarMode;
+  view.tZoom = radarMode ? 0.5 : 1.0;
+  view.tOx = 0; view.tOy = 0;
+};
+
+function drawRadar(now) {
+  const radarCanvas = document.getElementById('radar');
+  if (!radarCanvas.classList.contains('active')) return;
+  const rctx = radarCanvas.getContext('2d');
+  const R = radarCanvas.width = 120;
+  const r = R / 2;
+  rctx.clearRect(0, 0, R, R);
+  rctx.beginPath(); rctx.arc(r, r, r - 2, 0, TAU);
+  rctx.fillStyle = 'rgba(0,0,0,0.5)'; rctx.fill();
+  rctx.strokeStyle = '#ffcc00'; rctx.stroke();
+  for (const [id, m] of minted) {
+    const rc = idToRC(id); if (!rc) continue;
+    const dist = rc.row / MAX_ROW;
+    const ang = CENTER_ANGLE + ((rc.col - rc.row) / (2*rc.row+1)) * TAU;
+    const px = r + Math.cos(ang) * dist * (r - 4);
+    const py = r + Math.sin(ang) * dist * (r - 4);
+    let color = '#666';
+    if (m.owner === userAddress) color = '#00e5ff';
+    else if (farms.has(id)) color = '#00ff88';
+    else if (attacks.has(id)) color = '#ff3333';
+    else if (m.rarity != null) color = COLORS[rarityNames[m.rarity].toLowerCase()];
+    rctx.beginPath(); rctx.arc(px, py, 1.2, 0, TAU);
+    rctx.fillStyle = color; rctx.fill();
+  }
+  rctx.strokeStyle = 'rgba(255,204,0,0.5)';
+  rctx.lineWidth = 1;
+  rctx.beginPath();
+  rctx.arc(r, r, (r - 4) * (1 / view.zoom), 0, TAU);
+  rctx.stroke();
+}
 
 // ============================================================
 // CONTRACTS
 // ============================================================
-let provider, nftContract, farmingContract, piratesContract, mercenaryContract, partnershipContract;
+let provider, nftContract, farmingContract, piratesContract, mercenaryContract;
 
 async function connectReadOnly() {
   provider = new ethers.JsonRpcProvider(PUBLIC_RPC);
-  nftContract         = new ethers.Contract(NFT_ADDRESS, NFT_ABI, provider);
-  farmingContract     = new ethers.Contract(FARMING_V6_ADDRESS, FARMING_V6_ABI, provider);
-  piratesContract     = new ethers.Contract(PIRATES_V6_ADDRESS, PIRATES_V6_ABI, provider);
-  mercenaryContract   = new ethers.Contract(MERCENARY_V4_ADDRESS, MERCENARY_V4_ABI, provider);
-  partnershipContract = new ethers.Contract(PARTNERSHIP_V2_ADDRESS, PARTNERSHIP_V2_ABI, provider);
+  nftContract       = new ethers.Contract(NFT_ADDRESS, NFT_ABI, provider);
+  farmingContract   = new ethers.Contract(FARMING_V6_ADDRESS, FARMING_V6_ABI, provider);
+  piratesContract   = new ethers.Contract(PIRATES_V6_ADDRESS, PIRATES_V6_ABI, provider);
+  mercenaryContract = new ethers.Contract(MERCENARY_V4_ADDRESS, MERCENARY_V4_ABI, provider);
 }
 
 window.connectWallet = async () => {
-  if (!window.ethereum) return alert('No wallet found. Please install MetaMask.');
+  if (!window.ethereum) return toast('No wallet found. Please install MetaMask.', 'error');
   try {
     await window.ethereum.request({ method: 'eth_requestAccounts' });
     const p = new ethers.BrowserProvider(window.ethereum);
@@ -285,15 +884,17 @@ window.connectWallet = async () => {
     btn.textContent = userAddress.slice(0,6) + '…' + userAddress.slice(-4);
     btn.classList.add('connected');
     countMyBlocks();
-    updateAttackerDropdown();
-    document.getElementById('attackerHud').style.display = 'block';
-  } catch(e) { alert('Wallet connection failed: ' + e.message); }
+    playSound(880, 0.15);
+    haptic([20, 50, 20]);
+    toast('Wallet connected ✓', 'success');
+    logActivity(`Wallet connected: ${userAddress.slice(0,6)}…`, 'info');
+    loadLive();
+  } catch(e) { toast('Wallet connection failed: ' + e.message, 'error'); }
 };
 
 function countMyBlocks() {
   if (!userAddress) return;
-  myBlocksCount = 0;
-  myFarmsCount = 0;
+  myBlocksCount = 0; myFarmsCount = 0;
   for (const [id, m] of minted) {
     if (m.owner && m.owner === userAddress) {
       myBlocksCount++;
@@ -303,32 +904,10 @@ function countMyBlocks() {
   document.getElementById('myBlocksCount').textContent = `${myBlocksCount} (${myFarmsCount} farms)`;
 }
 
-// NEU: Dropdown im HUD befüllen
-function updateAttackerDropdown() {
-  const sel = document.getElementById('attackerSelect');
-  if (!userAddress) {
-    sel.innerHTML = '<option value="">Connect Wallet</option>';
-    return;
-  }
-  let html = '<option value="">Select your block...</option>';
-  for (const [id, m] of minted) {
-    if (m.owner === userAddress) {
-      html += `<option value="${id}" ${selectedAttackerId === id ? 'selected' : ''}>Block #${id}</option>`;
-    }
-  }
-  sel.innerHTML = html;
-  if (selectedAttackerId) {
-    document.getElementById('activeAttackerLabel').textContent = `#${selectedAttackerId}`;
-  } else {
-    document.getElementById('activeAttackerLabel').textContent = `None`;
-  }
-}
-
-window.changeGlobalAttacker = (val) => {
-  selectedAttackerId = val ? parseInt(val) : null;
-  updateAttackerDropdown();
-  updateSidebarAttacker();
-  drawPyramid(); // Falls wir Vorschau-Linien zeichnen
+window.toggleHud = () => {
+  const hud = document.getElementById('hud');
+  hud.classList.toggle('collapsed');
+  document.getElementById('hudToggle').textContent = hud.classList.contains('collapsed') ? 'SHOW' : 'HIDE';
 };
 
 // ============================================================
@@ -342,7 +921,7 @@ function idToRC(id) {
 }
 
 // ============================================================
-// CANVAS / VIEW
+// CANVAS
 // ============================================================
 const canvas = document.getElementById('canvas');
 const tooltip = document.getElementById('tooltip');
@@ -357,9 +936,6 @@ function resize() {
 }
 window.addEventListener('resize', resize); resize();
 
-// ============================================================
-// GEOMETRY — Linear (Exponent 1.0)
-// ============================================================
 function blockRadius(row) {
   if (row === 0) return 0;
   return MAX_R * (row / MAX_ROW) * explosionFactor;
@@ -378,8 +954,16 @@ const blockSize = row => {
   return Math.max(2.5, base * sizeFactor * lodFactor);
 };
 
+function focusOnBlock(row, col) {
+  const p = blockPosition(row, col);
+  const targetZoom = Math.max(view.tZoom, 2.0);
+  view.tZoom = targetZoom;
+  view.tOx = -(p.x - CX) * targetZoom;
+  view.tOy = -(p.y - CY) * targetZoom;
+}
+
 // ============================================================
-// SUBGRAPH FETCH (FIXED)
+// SUBGRAPH FETCH — FIXED FOR EXECUTED ATTACKS
 // ============================================================
 async function fetchGraphQL(query, retries = 3) {
   for (let i = 0; i < retries; i++) {
@@ -405,7 +989,6 @@ async function fetchGraphQL(query, retries = 3) {
 
 async function loadLive() {
   document.getElementById('statusText').innerHTML = '<span class="live">● Loading Data...</span>';
-  
   try {
     const dataTokens = await fetchGraphQL(`{ tokens(first: 1000) { id revealed owner { id } } }`);
     if (dataTokens?.tokens) {
@@ -425,48 +1008,75 @@ async function loadLive() {
 
     const dataFarms = await fetchGraphQL(`{ farmV6S(first: 1000) { id active } }`);
     if (dataFarms?.farmV6S) {
-      for (const f of dataFarms.farmV6S) {
-        if (f.active) farms.add(parseInt(f.id));
-      }
+      for (const f of dataFarms.farmV6S) if (f.active) farms.add(parseInt(f.id));
     }
 
-    const dataAttacks = await fetchGraphQL(`{ attackV6S(first: 1000) { attackerTokenId targetTokenId startTime endTime } }`);
+    // FEATURE: Query now includes executed, cancelled, stolenAmount
+    const dataAttacks = await fetchGraphQL(`{ 
+      attackV6S(first: 1000) { 
+        attackerTokenId targetTokenId attackIndex resource 
+        startTime endTime executed cancelled stolenAmount 
+      } 
+    }`);
+    
+    attacks.clear();
+    executedAttacks.length = 0;
+    
     if (dataAttacks?.attackV6S) {
       for (const a of dataAttacks.attackV6S) {
-        const end = Number(a.endTime)*1000;
-        if (end < Date.now()) continue;
-        const rc = idToRC(parseInt(a.attackerTokenId)); 
+        const end = Number(a.endTime) * 1000;
+        const isExecuted = a.executed === true;
+        const isCancelled = a.cancelled === true;
+        const isExpired = end < Date.now();
+        
+        const rc = idToRC(parseInt(a.attackerTokenId));
         if (!rc) continue;
-        attacks.set(parseInt(a.targetTokenId), {
-          attackerTokenId: parseInt(a.attackerTokenId), // NEU: ID speichern
+        
+        const attackObj = {
+          attackerTokenId: parseInt(a.attackerTokenId),
           attackerRow: rc.row, attackerCol: rc.col,
-          startTime: performance.now(),
-          interval: Math.max(2, Number(a.endTime)-Number(a.startTime)),
-          endTimestamp: end
-        });
+          targetTokenId: parseInt(a.targetTokenId),
+          attackIndex: parseInt(a.attackIndex),
+          resource: parseInt(a.resource),
+          startTime: parseInt(a.startTime),
+          endTime: parseInt(a.endTime),
+          endTimestamp: end,
+          executed: isExecuted,
+          cancelled: isCancelled,
+          stolenAmount: a.stolenAmount || '0'
+        };
+        
+        // History = executed, cancelled, or expired
+        if (isExecuted || isCancelled || isExpired) {
+          executedAttacks.push(attackObj);
+        } else {
+          // Active = still running
+          attacks.set(attackObj.targetTokenId, {
+            ...attackObj,
+            startTime: performance.now(),
+            interval: Math.max(2, attackObj.endTime - attackObj.startTime)
+          });
+        }
       }
     }
     
     const dataPartners = await fetchGraphQL(`{ partnerships(first: 1000, where: {active: true}) { id } }`);
     if (dataPartners?.partnerships) {
-      for (const p of dataPartners.partnerships) {
-        partnerships.add(parseInt(p.id));
-      }
+      for (const p of dataPartners.partnerships) partnerships.add(parseInt(p.id));
     }
 
     document.getElementById('statusText').innerHTML =
       `<span class="live">● LIVE</span> · ${minted.size} Tokens · ${farms.size} Farms`;
-
-    if (userAddress) updateAttackerDropdown();
-      
+    countMyBlocks();
   } catch(e) {
     console.warn('Subgraph failed', e);
     document.getElementById('statusText').innerHTML = '<span class="demo">● Subgraph offline</span>';
   }
+  hideLoading();
 }
 
 // ============================================================
-// LAYER COLORS
+// COLORS — includes WAR ROOM layer
 // ============================================================
 function ownerColor(addr) {
   if (!addr) return '#444';
@@ -476,22 +1086,38 @@ function ownerColor(addr) {
 }
 
 function getBlockColor(id, m) {
+  if (activeFilters.size > 0 && !isBlockVisible(id, m)) return '#151515';
+  
+  if (activeLayer === 'war-room') {
+    // FEATURE: War Room highlights only critical blocks
+    if (!m) return '#0a0a0a';
+    if (attacks.has(id)) return '#ff0000';
+    if (m.owner === userAddress && !m.protected && m.rarity >= 3) return '#ff8800';
+    if (m.rarity >= 4 && !m.protected) return '#ffff00';
+    return '#151515';
+  }
+  
   if (activeLayer === 'my-farms') {
     if (!m) return COLORS.unminted;
-    if (farms.has(id)) return COLORS.farming;
-    return '#202020';
+    return farms.has(id) ? COLORS.farming : '#202020';
   }
-
   if (activeLayer === 'rarity') {
     if (!m) return COLORS.unminted;
     if (!m.revealed) return '#2a2035';
     if (m.rarity == null) return '#888';
     return COLORS[rarityNames[m.rarity]?.toLowerCase()] || COLORS.gold;
   }
-  if (activeLayer === 'owner')    return m ? ownerColor(m.owner) : COLORS.unminted;
-  if (activeLayer === 'farming')  return m ? (farms.has(id) ? COLORS.farming : '#202020') : COLORS.unminted;
-  if (activeLayer === 'attack')   return m ? (attacks.has(id) ? COLORS.attack : '#202020') : COLORS.unminted;
-  if (activeLayer === 'partner')  return m ? (partnerships.has(id) ? COLORS.partner : '#202020') : COLORS.unminted;
+  if (activeLayer === 'owner')   return m ? ownerColor(m.owner) : COLORS.unminted;
+  if (activeLayer === 'farming') return m ? (farms.has(id) ? COLORS.farming : '#202020') : COLORS.unminted;
+  if (activeLayer === 'attack') {
+    if (!m) return COLORS.unminted;
+    if (attacks.has(id)) return COLORS.attack;
+    // Show executed attacks as faded orange
+    const hasExecuted = executedAttacks.some(a => a.targetTokenId === id);
+    if (hasExecuted) return '#663300';
+    return '#202020';
+  }
+  if (activeLayer === 'partner') return m ? (partnerships.has(id) ? COLORS.partner : '#202020') : COLORS.unminted;
   return COLORS.unminted;
 }
 
@@ -502,7 +1128,6 @@ function drawBackground(now) {
   const g = ctx.createRadialGradient(CX,CY,0,CX,CY,Math.max(10, MAX_R*1.7));
   g.addColorStop(0,'#0d0018'); g.addColorStop(.55,'#050008'); g.addColorStop(1,'#000');
   ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
-
   ctx.save(); ctx.translate(CX,CY); ctx.beginPath();
   const turns=6, pts=240;
   for (let i=0;i<=pts;i++){
@@ -510,33 +1135,22 @@ function drawBackground(now) {
     const r=((Math.pow(PHI,t*turns)-1)/(Math.pow(PHI,turns)-1))*MAX_R;
     i===0?ctx.moveTo(Math.cos(a)*r,Math.sin(a)*r):ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r);
   }
-  ctx.strokeStyle=COLORS.goldenSpiral; ctx.lineWidth=1; ctx.stroke(); ctx.restore();
-
+  ctx.strokeStyle='rgba(255,204,0,.045)'; ctx.lineWidth=1; ctx.stroke(); ctx.restore();
   ctx.save(); ctx.translate(CX,CY);
   for (let s = 0; s < 12; s++) {
     const a = (s / 12) * TAU;
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.lineTo(Math.cos(a) * MAX_R, Math.sin(a) * MAX_R);
-    ctx.strokeStyle = COLORS.sector;
-    ctx.lineWidth = 1;
-    ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a) * MAX_R, Math.sin(a) * MAX_R);
+    ctx.strokeStyle = 'rgba(255,204,0,.035)'; ctx.lineWidth = 1; ctx.stroke();
   }
   ctx.restore();
-
   ctx.beginPath(); ctx.moveTo(CX,CY-MAX_R); ctx.lineTo(CX,CY+MAX_R);
-  ctx.strokeStyle=COLORS.mirrorAxis; ctx.stroke();
-
+  ctx.strokeStyle='rgba(255,204,0,.14)'; ctx.stroke();
   const radarAngle = (now / 1000) * 0.4;
   const grad = ctx.createRadialGradient(CX, CY, 0, CX, CY, Math.max(10, MAX_R));
-  grad.addColorStop(0, COLORS.radar);
+  grad.addColorStop(0, 'rgba(255,204,0,.10)');
   grad.addColorStop(1, 'rgba(255,204,0,0)');
-  ctx.beginPath();
-  ctx.moveTo(CX, CY);
-  ctx.arc(CX, CY, MAX_R, radarAngle, radarAngle + GOLDEN_ANGLE);
-  ctx.closePath();
-  ctx.fillStyle = grad;
-  ctx.fill();
+  ctx.beginPath(); ctx.moveTo(CX, CY); ctx.arc(CX, CY, MAX_R, radarAngle, radarAngle + GOLDEN_ANGLE);
+  ctx.closePath(); ctx.fillStyle = grad; ctx.fill();
 }
 
 function drawBlocks(now) {
@@ -546,72 +1160,48 @@ function drawBlocks(now) {
   for (let row=0; row<=MAX_ROW; row++) {
     const n = 2*row+1, sz = blockSize(row);
     const ringRot = isPaused ? 0 : (1/Math.pow(PI, 4-Math.min(4,row/25))) * .3 * t;
-    
     for (let col=0; col<n; col++) {
       let p = blockPosition(row, col);
       if (row>0 && !isPaused) {
         const dx=p.x-CX, dy=p.y-CY, c=Math.cos(ringRot), s=Math.sin(ringRot);
         p = { x:CX+dx*c-dy*s, y:CY+dx*s+dy*c };
       }
-      
       if (isPaused && Math.random() > 0.8) {
         p.x += (Math.random() - 0.5) * 3;
         p.y += (Math.random() - 0.5) * 3;
       }
-
       const id = blockId(row,col), m = minted.get(id), atk = attacks.get(id);
       const fill = getBlockColor(id, m);
       const isMine = userAddress && m && m.owner === userAddress;
-
       if (isMine) myBlocksPos.push(p);
-
-      // Stardust
-      if (m && !m.revealed) {
+      const isDimmed = activeFilters.size > 0 && !isBlockVisible(id, m);
+      if (m && !m.revealed && !isDimmed) {
         const sp = .35 + .3*Math.sin(t*2+id);
         ctx.beginPath(); ctx.arc(p.x,p.y,sz*1.6,0,TAU);
         ctx.fillStyle=`rgba(140,100,255,${sp*.3})`; ctx.fill();
       }
-      
-      // MY BLOCKS AURA
-      if (isMine) {
+      if (isMine && !isDimmed) {
         const pulse = .5 + .5*Math.sin(t*3 + id);
         ctx.beginPath(); ctx.arc(p.x,p.y,sz + 3 + pulse*2,0,TAU);
         ctx.strokeStyle=COLORS.mine; ctx.lineWidth=1.5; ctx.stroke();
       }
-
-      // Farming Aura
-      if (m && farms.has(id) && activeLayer !== 'farming' && activeLayer !== 'my-farms' && !isMine) {
+      if (m && farms.has(id) && activeLayer !== 'farming' && activeLayer !== 'my-farms' && !isMine && !isDimmed) {
         ctx.beginPath(); ctx.arc(p.x,p.y,sz+1.5,0,TAU);
         ctx.fillStyle=COLORS.farming+'33'; ctx.fill();
       }
-
-      // Block
       ctx.beginPath(); ctx.arc(p.x,p.y,sz,0,TAU);
       ctx.fillStyle = fill; ctx.fill();
-
-      // NEU: Attack Target Pulsing Red Border
-      if (atk) {
+      if (atk && !isDimmed) {
         const pulse = .5 + .5*Math.sin(t*6);
         ctx.beginPath(); ctx.arc(p.x,p.y,sz + 2 + pulse*3,0,TAU);
         ctx.strokeStyle=`rgba(255, 51, 51, ${0.6 + pulse*0.4})`;
-        ctx.lineWidth=2.5;
-        ctx.stroke();
-        
-        // Warnsymbol
-        ctx.fillStyle = '#ff3333';
-        ctx.font = 'bold 12px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText('⚠️', p.x, p.y - sz - 4);
+        ctx.lineWidth=2.5; ctx.stroke();
       }
-
-      // NEU: Attacker Badge (Weißer Ring)
       if (selectedAttackerId === id) {
         ctx.beginPath(); ctx.arc(p.x,p.y,sz + 4,0,TAU);
         ctx.strokeStyle='rgba(255, 255, 255, 0.8)'; ctx.lineWidth=2; ctx.stroke();
       }
-
-      // Countdown Ring (inner circle)
-      if (atk) {
+      if (atk && !isDimmed) {
         const rem = Math.max(0, atk.endTimestamp - Date.now());
         const total = atk.interval*1000;
         const prog = 1 - rem/total;
@@ -626,30 +1216,32 @@ function drawBlocks(now) {
   if (myBlocksPos.length > 1) {
     ctx.beginPath();
     ctx.moveTo(myBlocksPos[0].x, myBlocksPos[0].y);
-    for (let i = 1; i < myBlocksPos.length; i++) {
-      ctx.lineTo(myBlocksPos[i].x, myBlocksPos[i].y);
-    }
-    ctx.strokeStyle = 'rgba(0, 229, 255, 0.15)';
-    ctx.lineWidth = 1;
-    ctx.stroke();
+    for (let i = 1; i < myBlocksPos.length; i++) ctx.lineTo(myBlocksPos[i].x, myBlocksPos[i].y);
+    ctx.strokeStyle = 'rgba(0, 229, 255, 0.15)'; ctx.lineWidth = 1; ctx.stroke();
   }
 
-  // NEU: Ghost Attacker Line (Idee 1)
-  if (selectedAttackerId && hoveredBlock && hoveredBlock !== selectedAttackerId) {
+  if (selectedAttackerId && lastClickedBlockId && lastClickedBlockId !== selectedAttackerId) {
+    const rcA = idToRC(selectedAttackerId);
+    const rcB = idToRC(lastClickedBlockId);
+    if (rcA && rcB) {
+      const pA = blockPosition(rcA.row, rcA.col);
+      const pB = blockPosition(rcB.row, rcB.col);
+      ctx.beginPath(); ctx.setLineDash([6, 6]);
+      ctx.moveTo(pA.x, pA.y); ctx.lineTo(pB.x, pB.y);
+      ctx.strokeStyle = 'rgba(255, 51, 51, 0.7)';
+      ctx.lineWidth = 2; ctx.stroke(); ctx.setLineDash([]);
+    }
+  }
+  if (selectedAttackerId && !lastClickedBlockId && hoveredBlock && hoveredBlock !== selectedAttackerId) {
     const rcA = idToRC(selectedAttackerId);
     const rcB = idToRC(hoveredBlock);
     if (rcA && rcB) {
       const pA = blockPosition(rcA.row, rcA.col);
       const pB = blockPosition(rcB.row, rcB.col);
-      
-      ctx.beginPath();
-      ctx.setLineDash([5, 5]);
-      ctx.moveTo(pA.x, pA.y);
-      ctx.lineTo(pB.x, pB.y);
-      ctx.strokeStyle = 'rgba(255, 51, 51, 0.5)';
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-      ctx.setLineDash([]);
+      ctx.beginPath(); ctx.setLineDash([5, 5]);
+      ctx.moveTo(pA.x, pA.y); ctx.lineTo(pB.x, pB.y);
+      ctx.strokeStyle = 'rgba(255, 51, 51, 0.35)';
+      ctx.lineWidth = 1.5; ctx.stroke(); ctx.setLineDash([]);
     }
   }
 }
@@ -658,15 +1250,13 @@ function drawPartnerships(now) {
   if (activeLayer !== 'partner' && activeLayer !== 'rarity') return;
   const t = now / 1000;
   for (const id of partnerships) {
-    const rc = idToRC(id);
-    if (!rc) continue;
+    const rc = idToRC(id); if (!rc) continue;
     const p = blockPosition(rc.row, rc.col);
     const alpha = 0.2 + 0.15 * Math.sin(t * 2 + id);
     ctx.beginPath();
     ctx.arc(p.x, p.y, blockSize(rc.row) * 3, 0, TAU);
     ctx.strokeStyle = `rgba(192,96,255,${alpha})`;
-    ctx.lineWidth = 1;
-    ctx.stroke();
+    ctx.lineWidth = 1; ctx.stroke();
   }
 }
 
@@ -677,11 +1267,9 @@ function drawAttackRays(now) {
     const ap = blockPosition(atk.attackerRow, atk.attackerCol);
     const el = (now-atk.startTime)/1000;
     const prog = (el % atk.interval) / atk.interval;
-
     const mx=(ap.x+tp.x)/2, my=(ap.y+tp.y)/2;
     const dx=tp.x-ap.x, dy=tp.y-ap.y;
     const cxp=mx-dy*.28/PHI, cyp=my+dx*.28/PHI;
-
     ctx.beginPath(); ctx.moveTo(ap.x,ap.y);
     const steps=28, upto=Math.max(1,Math.floor(steps*prog));
     for (let i=1;i<=upto;i++){
@@ -689,50 +1277,31 @@ function drawAttackRays(now) {
       ctx.lineTo((1-t)*(1-t)*ap.x+2*(1-t)*t*cxp+t*t*tp.x,
                  (1-t)*(1-t)*ap.y+2*(1-t)*t*cyp+t*t*tp.y);
     }
-    // Dickerer, leuchtender Strahl
     ctx.strokeStyle=`rgba(255,51,51,${.85-prog*.55})`; 
-    ctx.lineWidth=3; 
-    ctx.shadowColor = '#ff3333';
-    ctx.shadowBlur = 8;
-    ctx.stroke();
-    ctx.shadowBlur = 0;
-
+    ctx.lineWidth=3; ctx.shadowColor = '#ff3333'; ctx.shadowBlur = 8;
+    ctx.stroke(); ctx.shadowBlur = 0;
     const tt=prog;
     const hx=(1-tt)*(1-tt)*ap.x+2*(1-tt)*tt*cxp+tt*tt*tp.x;
     const hy=(1-tt)*(1-tt)*ap.y+2*(1-tt)*tt*cyp+tt*tt*tp.y;
     ctx.beginPath(); ctx.arc(hx,hy,4,0,TAU); ctx.fillStyle='#fff'; ctx.fill();
-
-    if (prog > 0.95 && Math.random() < 0.1) {
-      piWaves.push({ x: tp.x, y: tp.y, startTime: now });
-    }
   }
-}
-
-function drawPiWaves(now) {
-  for (let i = piWaves.length - 1; i >= 0; i--) {
-    const w = piWaves[i];
-    const el = (now - w.startTime) / 1000;
-    if (el > 2) { piWaves.splice(i, 1); continue; }
-    const r = el * 80;
-    const alpha = 1 - el / 2;
-    ctx.beginPath();
-    ctx.arc(w.x, w.y, r, 0, TAU);
-    ctx.strokeStyle = `rgba(255,51,51,${alpha * 0.6})`;
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(w.x, w.y, r * PHI, 0, TAU);
-    ctx.strokeStyle = `rgba(255,51,51,${alpha * 0.3})`;
-    ctx.lineWidth = 1;
-    ctx.stroke();
+  for (let i = attackHistory.length - 1; i >= 0; i--) {
+    const h = attackHistory[i];
+    const el = (now - h.startTime) / 1000;
+    if (el > 3) { attackHistory.splice(i, 1); continue; }
+    const alpha = 1 - el / 3;
+    ctx.beginPath(); ctx.moveTo(h.fromP.x, h.fromP.y); ctx.lineTo(h.toP.x, h.toP.y);
+    ctx.strokeStyle = `rgba(255, 200, 50, ${alpha * 0.8})`;
+    ctx.lineWidth = 4 * alpha + 1; ctx.stroke();
+    ctx.beginPath(); ctx.arc(h.toP.x, h.toP.y, 6 * alpha, 0, TAU);
+    ctx.fillStyle = `rgba(255, 220, 80, ${alpha * 0.6})`; ctx.fill();
   }
 }
 
 function drawCenter(now) {
   const t = now / 1000;
   const pulse = .5+.5*Math.sin(t);
-  ctx.save();
-  ctx.translate(CX, CY);
+  ctx.save(); ctx.translate(CX, CY);
   ctx.beginPath();
   for (let i = 0; i <= 60; i++) {
     const a = i * 0.5 + t * 0.6;
@@ -741,10 +1310,7 @@ function drawCenter(now) {
             : ctx.lineTo(Math.cos(a)*r, Math.sin(a)*r);
   }
   ctx.strokeStyle = `rgba(255,204,0,${0.25 + pulse * 0.3})`;
-  ctx.lineWidth = 1;
-  ctx.stroke();
-  ctx.restore();
-
+  ctx.lineWidth = 1; ctx.stroke(); ctx.restore();
   ctx.beginPath(); ctx.arc(CX,CY,7+pulse*2.5,0,TAU);
   ctx.fillStyle=COLORS.gold; ctx.fill();
   ctx.beginPath(); ctx.arc(CX,CY,11+pulse*5,0,TAU);
@@ -755,33 +1321,36 @@ function drawCenter(now) {
 // LOOP
 // ============================================================
 let lastStats = 0;
+let lastFrameTime = performance.now();
 function loop(now) {
+  const dt = (now - lastFrameTime) / 1000;
+  lastFrameTime = now;
+  
   view.zoom += (view.tZoom-view.zoom)*.12;
   view.ox += (view.tOx-view.ox)*.12;
   view.oy += (view.tOy-view.oy)*.12;
-
   const targetExplosion = isPaused ? 2.5 : 1.0;
   explosionFactor += (targetExplosion - explosionFactor) * 0.05;
 
   ctx.setTransform(1,0,0,1,0,0); ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H);
   drawBackground(now);
-
   const bs = 1 + Math.sin(now/1000/PI)*.006;
   ctx.save();
   ctx.translate(CX+view.ox, CY+view.oy);
   ctx.scale(view.zoom*bs, view.zoom*bs);
   ctx.translate(-CX,-CY);
-  drawBlocks(now);
-  drawPartnerships(now);
-  drawAttackRays(now);
-  drawPiWaves(now);
-  drawCenter(now);
+  drawBlocks(now); drawPartnerships(now); drawAttackRays(now); drawCenter(now);
   ctx.restore();
+  
+  // FEATURE: Confetti
+  updateAndDrawConfetti(dt);
+  drawRadar(now);
 
   if (now-lastStats > 600) {
     lastStats = now;
     document.getElementById('mintedCount').textContent = minted.size.toLocaleString('en-US');
     document.getElementById('attackCount').textContent = attacks.size;
+    document.getElementById('executedCount').textContent = executedAttacks.length;
     document.getElementById('farmCount').textContent   = farms.size;
     document.getElementById('partnerCount').textContent = partnerships.size;
     const r = MAX_R;
@@ -793,7 +1362,7 @@ function loop(now) {
 }
 
 // ============================================================
-// HIT TEST & TOOLTIP
+// HIT TEST
 // ============================================================
 function screenToWorld(sx,sy) {
   const bs = 1 + Math.sin(performance.now()/1000/PI)*.006;
@@ -803,7 +1372,7 @@ function screenToWorld(sx,sy) {
 function hitTest(sx,sy) {
   const w = screenToWorld(sx,sy); let best=null, bestD=Infinity;
   for (let row=0; row<=MAX_ROW; row++) {
-    const n=2*row+1, hitR=Math.max(blockSize(row)*1.7,10);
+    const n=2*row+1, hitR=Math.max(blockSize(row)*1.7,12);
     const ringRot=isPaused?0:(1/Math.pow(PI,4-Math.min(4,row/25)))*.3*(performance.now()/1000);
     for (let col=0; col<n; col++) {
       let p=blockPosition(row,col);
@@ -819,15 +1388,46 @@ function hitTest(sx,sy) {
 }
 
 // ============================================================
-// SIDEBAR LOGIK (ANGEPASST)
+// PROFIT PREDICTOR
+// ============================================================
+function getProfitPrediction(targetRarity, resourceId, protectionLevel = 0) {
+  const baseOutput = RARITY_DAILY_OUTPUT[targetRarity] ?? 0;
+  const resourceShare = RARITY_PRODUCTION[targetRarity]?.length || 1;
+  const perResource = baseOutput / resourceShare;
+  const baseStealPercent = 0.25;
+  const protectionFactor = 1 - (protectionLevel / 100);
+  const effectiveStealPercent = baseStealPercent * protectionFactor;
+  const estimatedSteal = Math.max(1, Math.round(perResource * effectiveStealPercent));
+  return {
+    estimatedSteal,
+    effectiveStealPercent: Math.round(effectiveStealPercent * 100),
+    profitScore: estimatedSteal > perResource * 0.15 ? 'good' : 'low',
+    perResource
+  };
+}
+
+// ============================================================
+// SIDEBAR
 // ============================================================
 async function showBlockInfo(hit) {
   tooltip.style.display = 'none';
+  playSound(660, 0.05);
+  haptic([5]);
+  if (view.tZoom < 1.5) focusOnBlock(hit.row, hit.col);
+  if (lastClickedBlockId !== hit.id) {
+    lastClickedBlockId = hit.id;
+    addToHistory(hit.id);
+  }
+  
+  // FEATURE: Deep Linking
+  history.replaceState(null, '', `#block/${hit.id}`);
+
   const id = hit.id, m = minted.get(id), atk = attacks.get(id);
   document.getElementById('sbTitle').textContent = `Block #${id}`;
   const rIdx = m ? m.rarity : null;
   const rName = rIdx != null ? rarityNames[rIdx] : null;
   const isMine = userAddress && m && m.owner === userAddress;
+  const historyAttacks = executedAttacks.filter(a => a.targetTokenId === id || a.attackerTokenId === id);
 
   let h = `
     <div class="info-row"><span>Row</span><strong>${hit.row}</strong></div>
@@ -844,12 +1444,13 @@ async function showBlockInfo(hit) {
       h += `<div class="rarity-bar" style="background:${COLORS[rName.toLowerCase()]||'#fff'}"></div>`;
     }
     h += `<div class="info-row"><span>Farming</span><strong style="color:${farms.has(id)?'#00ff88':'#666'}">${farms.has(id)?'● Active':'○ Inactive'}</strong></div>`;
-    h += `<div class="info-row"><span>Protection</span><strong style="color:${m.protected?'#4488ff':'#666'}">${m.protected?'● Active':'○ Inactive'}</strong></div>`;
   }
-
   if (atk) {
     const rem = Math.max(0, atk.endTimestamp - Date.now());
     h += `<div class="info-row" style="color:#ff3333"><span>⚠ Incoming Attack</span><strong>${(rem/1000).toFixed(1)}s</strong></div>`;
+  }
+  if (historyAttacks.length) {
+    h += `<div class="info-row"><span>📜 History</span><strong>${historyAttacks.length} attacks</strong></div>`;
   }
   if (partnerships.has(id)) h += `<div class="info-row"><span>Partner</span><strong>● Active</strong></div>`;
 
@@ -858,60 +1459,121 @@ async function showBlockInfo(hit) {
   if (!m) {
     h += `<button onclick="mintBlock(${hit.row},${hit.col})">⛏ Mint with INPI</button>`;
   } else if (isMine) {
-    // EIGENE BLÖCKE (Farming, Protection, Claim)
+    if (selectedAttackerId !== id) {
+      h += `<button class="clear-btn" onclick="setAttackerFromSidebar(${id})" style="background:#ff3333; color:#fff;">⚔ Set as Attacker</button>`;
+    } else {
+      h += `<div class="note" style="background:rgba(0,229,255,0.1); border-left-color:#00e5ff; color:#00e5ff;">✓ This is your current attacker</div>`;
+    }
     h += `
       <button onclick="toggleFarm(${id})">🌾 ${farms.has(id)?'Stop Farming':'Start Farming'}</button>
-      <button onclick="toggleProtect(${id})">🛡 ${m.protected?'Remove Protection':'Buy Protection'}</button>
       <button onclick="claimResources(${id})">💰 Claim</button>`;
-    
-    // Wenn mein Block gerade angegriffen wird
-    if (atk && atk.attackerTokenId === selectedAttackerId) {
-       // Das kann eigentlich nicht passieren (man greift sich nicht selbst an)
-    }
   } else {
-    // FREMDER BLOCK (Angriff starten oder ausführen)
-    
-    // Wenn ein Angriff auf diesen Block läuft
     if (atk) {
       const rem = Math.max(0, atk.endTimestamp - Date.now());
       if (rem <= 0) {
-        h += `<button class="execute-btn" onclick="executeAttack(${id})">⚔ Ausführen (Bereit!)</button>`;
+        h += `<div class="note">⚔️ Attack is ready!</div>`;
+        h += `<button class="execute-btn" onclick="executeAttack(${id}, ${atk.attackIndex})">⚔ Execute (Ready!)</button>`;
       } else {
-        h += `<button style="background:#333; color:#888; cursor:not-allowed;" disabled>⏳ Wartezeit: ${(rem/1000).toFixed(1)}s</button>`;
+        h += `<div class="note">⏳ Attack in progress. Ready in ${(rem/1000).toFixed(1)}s</div>`;
+        h += `<button disabled>⏳ Wait</button>`;
       }
     } else {
-      // Neuen Angriff starten
-      h += `<div style="font-size:11px; color:#888; margin-top:10px;">Wähle deinen Angreifer:</div>`;
-      h += `<select id="sbAttackerSelect" onchange="selectedAttackerId = parseInt(this.value) || null; drawPyramid();">`;
+      h += `<div class="label">1. Choose your attacker</div>`;
+      h += `<select id="sbAttackerSelect" onchange="updateProfitPreview(${id})">`;
       if (userAddress) {
+        let found = false;
         for (const [tid, myM] of minted) {
           if (myM.owner === userAddress) {
+            found = true;
             h += `<option value="${tid}" ${selectedAttackerId === tid ? 'selected' : ''}>Block #${tid}</option>`;
           }
         }
+        if (!found) h += `<option value="">No owned blocks</option>`;
       } else {
         h += `<option value="">Connect Wallet</option>`;
       }
       h += `</select>`;
-      h += `<button class="attack-btn" onclick="startAttack(${id})">⚔ Angriff starten</button>`;
+      const prodIds = rIdx != null ? RARITY_PRODUCTION[rIdx] : [0, 1, 2];
+      h += `<div class="label">2. Choose resource to steal</div>`;
+      h += `<select id="sbResourceSelect" onchange="updateProfitPreview(${id})">`;
+      for (const resId of prodIds) h += `<option value="${resId}">${resourceNames[resId]}</option>`;
+      h += `</select>`;
+      if (rIdx != null) {
+        const prediction = getProfitPrediction(rIdx, 0);
+        h += `<div class="profit-box" id="profitBox">
+          <div class="label">💰 Profit Predictor</div>
+          <div class="value">~${prediction.estimatedSteal} ${resourceNames[0]}</div>
+          <div class="sub">Steal: ${prediction.effectiveStealPercent}% · Expected: ${prediction.perResource} ${resourceNames[0]}/day</div>
+        </div>`;
+      }
+      h += `<div class="label">3. Optional: Pirate Boost (+25% Steal)</div>`;
+      h += `<button style="background:#333; color:#ffb347; font-size:11px; padding:8px;" onclick="buyPirateBoost()">⚡ Buy Pirate Boost (100 PIT/day)</button>`;
+      h += `<button class="attack-btn" onclick="startAttackFromSidebar(${id})">⚔ Start Attack</button>`;
     }
   }
 
+  // FEATURE: Share button
+  h += `<button class="share-btn" onclick="shareBlock(${id})">🔗 Share Link</button>`;
+
+  if (lastClickedBlockId) {
+    h += `<button class="clear-btn" onclick="clearSelection()">✕ Clear Selection</button>`;
+  }
   h += `<button class="close" onclick="document.getElementById('sidebar').classList.remove('active')">Close</button>`;
   document.getElementById('sbContent').innerHTML = h;
   document.getElementById('sidebar').classList.add('active');
 }
 
-function updateSidebarAttacker() {
-  const sel = document.getElementById('sbAttackerSelect');
-  if (sel && selectedAttackerId) sel.value = selectedAttackerId;
-}
+window.updateProfitPreview = (targetId) => {
+  const m = minted.get(targetId);
+  const resourceSel = document.getElementById('sbResourceSelect');
+  const profitBox = document.getElementById('profitBox');
+  if (!m || m.rarity == null || !profitBox || !resourceSel) return;
+  const resourceId = parseInt(resourceSel.value);
+  const prediction = getProfitPrediction(m.rarity, resourceId);
+  profitBox.innerHTML = `
+    <div class="label">💰 Profit Predictor</div>
+    <div class="value">~${prediction.estimatedSteal} ${resourceNames[resourceId]}</div>
+    <div class="sub">Steal: ${prediction.effectiveStealPercent}% · Expected: ${prediction.perResource.toFixed(1)} ${resourceNames[resourceId]}/day</div>
+    <div class="sub" style="color:${prediction.profitScore === 'good' ? '#00ff88' : '#ff8800'}; margin-top:4px; font-weight:bold;">
+      ${prediction.profitScore === 'good' ? '✅ Good deal!' : '⚠️ Low profit'}
+    </div>
+  `;
+};
+
+// FEATURE: Share block
+window.shareBlock = async (id) => {
+  const url = `${location.origin}${location.pathname}#block/${id}`;
+  try {
+    if (navigator.share) {
+      await navigator.share({ title: `Phircle Block #${id}`, url });
+    } else {
+      await navigator.clipboard.writeText(url);
+      toast('Link copied to clipboard ✓', 'success');
+    }
+  } catch(e) {
+    toast('Could not share: ' + e.message, 'error');
+  }
+};
+
+window.setAttackerFromSidebar = (id) => {
+  selectedAttackerId = id;
+  lastClickedBlockId = id;
+  playSound(880, 0.08);
+  showBlockInfo({ row: Math.floor(id / ID_STRIDE), col: id % ID_STRIDE, id });
+};
+
+window.clearSelection = () => {
+  selectedAttackerId = null;
+  lastClickedBlockId = null;
+  history.replaceState(null, '', location.pathname);
+  document.getElementById('sidebar').classList.remove('active');
+};
 
 // ============================================================
 // CONTRACT HOOKS
 // ============================================================
 async function getSignerOrWarn() {
-  if (!window.ethereum) { alert('No wallet found'); return null; }
+  if (!window.ethereum) { toast('No wallet found', 'error'); return null; }
   if (!userSigner) {
     try {
       await window.ethereum.request({ method: 'eth_requestAccounts' });
@@ -919,8 +1581,7 @@ async function getSignerOrWarn() {
       userSigner = await p.getSigner();
       userAddress = (await userSigner.getAddress()).toLowerCase();
       countMyBlocks();
-      updateAttackerDropdown();
-    } catch(e) { alert('Wallet connection failed'); return null; }
+    } catch(e) { toast('Wallet connection failed', 'error'); return null; }
   }
   return userSigner;
 }
@@ -928,8 +1589,15 @@ async function getSignerOrWarn() {
 window.mintBlock = async (row,col) => {
   const signer = await getSignerOrWarn(); if (!signer) return;
   const nft = new ethers.Contract(NFT_ADDRESS, NFT_ABI, signer);
-  try { const tx = await nft.mintWithINPI(row,col); await tx.wait(); alert('Mint OK'); }
-  catch(e) { alert('Mint failed: ' + (e.reason||e.message)); }
+  try {
+    const tx = await nft.mintWithINPI(row,col);
+    await tx.wait();
+    toast('Block minted ✓', 'success');
+    playSound(660, 0.15);
+    spawnConfetti(innerWidth/2, innerHeight/2, '#ffcc00');
+    logActivity(`Block #${row * ID_STRIDE + col} minted`, 'mint');
+    loadLive();
+  } catch(e) { toast('Mint failed: ' + (e.reason||e.message), 'error'); }
 };
 
 window.toggleFarm = async (id) => {
@@ -938,65 +1606,95 @@ window.toggleFarm = async (id) => {
   const isFarming = farms.has(id);
   try {
     const tx = isFarming ? await c.stopFarming(id) : await c.startFarming(id);
-    await tx.wait(); 
+    await tx.wait();
     if (isFarming) farms.delete(id); else farms.add(id);
-    alert('Farming OK');
-  } catch(e) { alert('Farming failed: ' + (e.reason||e.message)); }
-};
-
-window.toggleProtect = async (id) => {
-  const signer = await getSignerOrWarn(); if (!signer) return;
-  const c = new ethers.Contract(MERCENARY_V4_ADDRESS, MERCENARY_V4_ABI, signer);
-  try {
-    const tx = await c.setProtection(0, id, 1, true);
-    await tx.wait(); alert('Protection OK');
-  } catch(e) { alert('Protection failed: ' + (e.reason||e.message)); }
-};
-
-window.startAttack = async (targetId) => {
-  if (!selectedAttackerId) return alert('Wähle zuerst einen Angreifer-Block aus!');
-  const signer = await getSignerOrWarn(); if (!signer) return;
-  const c = new ethers.Contract(PIRATES_V6_ADDRESS, PIRATES_V6_ABI, signer);
-  try {
-    const tx = await c.startAttack(selectedAttackerId, targetId, 0);
-    await tx.wait(); 
-    alert('Angriff gestartet!');
-    // Lokal hinzufügen für sofortiges Feedback
-    const rc = idToRC(selectedAttackerId);
-    attacks.set(targetId, {
-      attackerTokenId: selectedAttackerId,
-      attackerRow: rc.row, attackerCol: rc.col,
-      startTime: performance.now(),
-      interval: 60, // Dummy, wird beim nächsten Load überschrieben
-      endTimestamp: Date.now() + 60000
-    });
-    drawPyramid();
-  } catch(e) { alert('Attack failed: ' + (e.reason||e.message)); }
-};
-
-window.executeAttack = async (targetId) => {
-  const signer = await getSignerOrWarn(); if (!signer) return;
-  const c = new ethers.Contract(PIRATES_V6_ADDRESS, PIRATES_V6_ABI, signer);
-  try {
-    // Wir brauchen den attackIndex. Da wir ihn im UI nicht haben, raten wir 0.
-    // (Für ein perfektes System müsste man den Index beim Start mitspeichern).
-    const tx = await c.executeAttack(targetId, 0);
-    await tx.wait(); 
-    alert('Angriff ausgeführt!');
-    attacks.delete(targetId);
-    drawPyramid();
-  } catch(e) { alert('Execute failed: ' + (e.reason||e.message)); }
+    toast(isFarming ? 'Farming stopped' : 'Farming started ✓', 'success');
+    playSound(isFarming ? 400 : 720, 0.12);
+    haptic([10, 30, 10]);
+  } catch(e) { toast('Farming failed: ' + (e.reason||e.message), 'error'); }
 };
 
 window.claimResources = async (id) => {
   const signer = await getSignerOrWarn(); if (!signer) return;
   const c = new ethers.Contract(FARMING_V6_ADDRESS, FARMING_V6_ABI, signer);
-  try { const tx = await c.claimResources(id); await tx.wait(); alert('Claim OK'); }
-  catch(e) { alert('Claim failed: ' + (e.reason||e.message)); }
+  try {
+    const tx = await c.claimResources(id);
+    await tx.wait();
+    toast('Resources claimed ✓', 'success');
+    playSound(880, 0.15);
+    spawnConfetti(innerWidth/2, innerHeight/2, '#00ff88');
+  } catch(e) { toast('Claim failed: ' + (e.reason||e.message), 'error'); }
+};
+
+window.startAttackFromSidebar = async (targetId) => {
+  const attackerSel = document.getElementById('sbAttackerSelect');
+  const resourceSel = document.getElementById('sbResourceSelect');
+  if (!attackerSel || !attackerSel.value) return toast('Choose an attacker first!', 'error');
+  if (!resourceSel) return toast('Choose a resource!', 'error');
+  const attackerId = parseInt(attackerSel.value);
+  const resourceId = parseInt(resourceSel.value);
+  selectedAttackerId = attackerId;
+  const signer = await getSignerOrWarn(); if (!signer) return;
+  const c = new ethers.Contract(PIRATES_V6_ADDRESS, PIRATES_V6_ABI, signer);
+  try {
+    const tx = await c.startAttack(attackerId, targetId, resourceId);
+    await tx.wait();
+    toast(`Attack started: #${attackerId} → #${targetId}`, 'success');
+    playSound(220, 0.2, 'sawtooth');
+    haptic([30, 50, 30]);
+    logActivity(`Attack #${attackerId} → #${targetId} (${resourceNames[resourceId]})`, 'attack');
+    const rc = idToRC(attackerId);
+    attacks.set(targetId, {
+      attackerTokenId: attackerId, attackerRow: rc.row, attackerCol: rc.col,
+      attackIndex: 0, resource: resourceId,
+      startTime: performance.now(), interval: 60,
+      endTimestamp: Date.now() + 60000
+    });
+    setTimeout(() => loadLive(), 2000);
+  } catch(e) { toast('Attack failed: ' + (e.reason||e.message), 'error'); }
+};
+
+window.executeAttack = async (targetId, attackIndex) => {
+  const signer = await getSignerOrWarn(); if (!signer) return;
+  const c = new ethers.Contract(PIRATES_V6_ADDRESS, PIRATES_V6_ABI, signer);
+  const atk = attacks.get(targetId);
+  try {
+    const tx = await c.executeAttack(targetId, attackIndex);
+    await tx.wait();
+    toast('Attack executed! 💰', 'success');
+    playSound(440, 0.3, 'triangle');
+    haptic([50, 30, 50]);
+    spawnConfetti(innerWidth/2, innerHeight/2, '#00ff88');
+    logActivity(`Attack executed on #${targetId}`, 'executed');
+    if (atk) {
+      const targetRc = idToRC(targetId);
+      if (targetRc) {
+        attackHistory.push({
+          fromP: blockPosition(atk.attackerRow, atk.attackerCol),
+          toP: blockPosition(targetRc.row, targetRc.col),
+          startTime: performance.now()
+        });
+      }
+    }
+    attacks.delete(targetId);
+    loadLive();
+  } catch(e) { toast('Execute failed: ' + (e.reason||e.message), 'error'); }
+};
+
+window.buyPirateBoost = async () => {
+  if (!selectedAttackerId) return toast('Choose an attacker first!', 'error');
+  const signer = await getSignerOrWarn(); if (!signer) return;
+  const c = new ethers.Contract(PIRATES_V6_ADDRESS, PIRATES_V6_ABI, signer);
+  try {
+    const tx = await c.buyPirateBoost(selectedAttackerId, 1);
+    await tx.wait();
+    toast('Pirate Boost activated ⚡', 'success');
+    playSound(740, 0.15);
+  } catch(e) { toast('Boost failed: ' + (e.reason||e.message), 'error'); }
 };
 
 // ============================================================
-// INTERACTION (Mouse + Touch)
+// INTERACTION — MOUSE
 // ============================================================
 let isDragging=false, wasDragging=false, dragStart={x:0,y:0}, dragOrig={x:0,y:0};
 
@@ -1004,9 +1702,8 @@ canvas.addEventListener('mousemove', e => {
   if (isDragging) return;
   const r = canvas.getBoundingClientRect();
   const hit = hitTest(e.clientX - r.left, e.clientY - r.top);
-  
   if (hit) {
-    hoveredBlock = hit.id; // Für Ghost Line
+    hoveredBlock = hit.id;
     const m = minted.get(hit.id);
     let html = `<strong>Block #${hit.id}</strong>`;
     if (m) {
@@ -1028,67 +1725,113 @@ canvas.addEventListener('mousemove', e => {
     tooltip.style.display = 'none';
     canvas.style.cursor = isDragging ? 'grabbing' : 'crosshair';
   }
-  drawPyramid();
 });
 
-canvas.addEventListener('mouseleave', () => {
-  hoveredBlock = null;
-  tooltip.style.display = 'none';
-  drawPyramid();
-});
-
+canvas.addEventListener('mouseleave', () => { hoveredBlock = null; tooltip.style.display = 'none'; });
 canvas.addEventListener('click', e => {
   if (wasDragging) return;
   const r = canvas.getBoundingClientRect();
   const hit = hitTest(e.clientX-r.left, e.clientY-r.top);
   if (hit) showBlockInfo(hit);
 });
-
 canvas.addEventListener('mousedown', e => {
   isDragging=true; wasDragging=false;
   dragStart={x:e.clientX,y:e.clientY}; dragOrig={x:view.tOx,y:view.tOy};
   tooltip.style.display = 'none';
 });
-
 window.addEventListener('mousemove', e => {
   if (!isDragging) return;
   const dx=e.clientX-dragStart.x, dy=e.clientY-dragStart.y;
   if (Math.abs(dx)>5||Math.abs(dy)>5) wasDragging=true;
   view.tOx = dragOrig.x+dx; view.tOy = dragOrig.y+dy;
 });
-
 window.addEventListener('mouseup', ()=> isDragging=false);
 
+// ============================================================
+// TOUCH — PINCH ZOOM
+// ============================================================
+let touchMode = null;
+let touchStartDist = 0;
+let touchStartZoom = 1;
+let touchStartMidX = 0, touchStartMidY = 0;
+let touchStartOx = 0, touchStartOy = 0;
+
 canvas.addEventListener('touchstart', e => {
-  isDragging = true; wasDragging = false;
-  dragStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-  dragOrig = { x: view.tOx, y: view.tOy };
+  initAudio();
   tooltip.style.display = 'none';
+  if (e.touches.length === 1) {
+    touchMode = 'drag';
+    isDragging = true; wasDragging = false;
+    dragStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    dragOrig = { x: view.tOx, y: view.tOy };
+  } else if (e.touches.length === 2) {
+    touchMode = 'pinch';
+    isDragging = false;
+    touchStartDist = Math.hypot(
+      e.touches[0].clientX - e.touches[1].clientX,
+      e.touches[0].clientY - e.touches[1].clientY
+    );
+    touchStartZoom = view.tZoom;
+    touchStartMidX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+    touchStartMidY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+    touchStartOx = view.tOx;
+    touchStartOy = view.tOy;
+    e.preventDefault();
+  }
 }, {passive: false});
 
 canvas.addEventListener('touchmove', e => {
-  if (!isDragging) return;
-  const dx = e.touches[0].clientX - dragStart.x;
-  const dy = e.touches[0].clientY - dragStart.y;
-  if (Math.abs(dx) > 5 || Math.abs(dy) > 5) wasDragging = true;
-  view.tOx = dragOrig.x + dx; view.tOy = dragOrig.y + dy;
+  if (touchMode === 'drag' && e.touches.length === 1) {
+    const dx = e.touches[0].clientX - dragStart.x;
+    const dy = e.touches[0].clientY - dragStart.y;
+    if (Math.abs(dx) > 5 || Math.abs(dy) > 5) wasDragging = true;
+    view.tOx = dragOrig.x + dx;
+    view.tOy = dragOrig.y + dy;
+  } else if (touchMode === 'pinch' && e.touches.length === 2) {
+    const dist = Math.hypot(
+      e.touches[0].clientX - e.touches[1].clientX,
+      e.touches[0].clientY - e.touches[1].clientY
+    );
+    const scale = dist / touchStartDist;
+    const newZoom = Math.max(0.5, Math.min(14, touchStartZoom * scale));
+    const rect = canvas.getBoundingClientRect();
+    const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
+    const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
+    const startMidXRel = touchStartMidX - rect.left;
+    const startMidYRel = touchStartMidY - rect.top;
+    const worldX = (startMidXRel - CX - touchStartOx) / touchStartZoom + CX;
+    const worldY = (startMidYRel - CY - touchStartOy) / touchStartZoom + CY;
+    view.tZoom = newZoom;
+    view.tOx = midX - CX - (worldX - CX) * newZoom;
+    view.tOy = midY - CY - (worldY - CY) * newZoom;
+    e.preventDefault();
+  }
 }, {passive: false});
 
 canvas.addEventListener('touchend', e => {
-  isDragging = false;
-  if (!wasDragging) {
-    const r = canvas.getBoundingClientRect();
-    const touch = e.changedTouches[0];
-    const hit = hitTest(touch.clientX - r.left, touch.clientY - r.top);
-    if (hit) showBlockInfo(hit);
+  if (e.touches.length === 0) {
+    if (touchMode === 'drag' && !wasDragging) {
+      const r = canvas.getBoundingClientRect();
+      const touch = e.changedTouches[0];
+      const hit = hitTest(touch.clientX - r.left, touch.clientY - r.top);
+      if (hit) showBlockInfo(hit);
+    }
+    isDragging = false;
+    touchMode = null;
+  } else if (e.touches.length === 1 && touchMode === 'pinch') {
+    touchMode = 'drag';
+    dragStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    dragOrig = { x: view.tOx, y: view.tOy };
+    wasDragging = true;
+    isDragging = true;
   }
-});
+}, {passive: false});
+
+canvas.addEventListener('touchcancel', e => { touchMode = null; isDragging = false; });
 
 window.addEventListener('dblclick', e => {
   if (e.target === canvas) {
-    view.tZoom = 1;
-    view.tOx = 0;
-    view.tOy = 0;
+    view.tZoom = 1; view.tOx = 0; view.tOy = 0;
     tooltip.style.display = 'none';
   }
 });
@@ -1099,14 +1842,17 @@ canvas.addEventListener('wheel', e => {
 }, {passive:false});
 
 // ============================================================
-// UI BUTTONS & KEYBOARD
+// UI BUTTONS
 // ============================================================
 document.querySelectorAll('#layers button').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('#layers button').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    if (btn.id === 'btnMyFarms') activeLayer = 'my-farms';
-    else activeLayer = btn.dataset.layer;
+    if (btn.id === 'btnMyFarms') { activeLayer = 'my-farms'; }
+    else if (btn.id === 'btnWarRoom') { activeLayer = 'war-room'; playSound(180, 0.2, 'square'); }
+    else if (btn.id === 'btnHistory') { openAttackHistory(); return; }
+    else { activeLayer = btn.dataset.layer; }
+    playSound(440, 0.05);
   });
 });
 
@@ -1114,33 +1860,83 @@ window.togglePause = () => {
   isPaused = !isPaused;
   const btn = document.getElementById('pauseBtn');
   const status = document.getElementById('statusText');
-  
   if (isPaused) {
+    view.tZoom = IS_MOBILE ? 2.8 : 2.0;
+    view.tOx = 0; view.tOy = 0;
     btn.innerHTML = "▶️ RESUME";
     btn.classList.add('active');
-    status.innerHTML = '<span style="color:#ff8800">● QUANTUM FREEZE</span> · Tap blocks';
+    status.innerHTML = '<span style="color:#ff8800">● QUANTUM FREEZE</span>';
+    playSound(220, 0.2, 'sine');
+    haptic([20, 50, 20]);
   } else {
+    view.tZoom = 1.0;
+    view.tOx = 0; view.tOy = 0;
     btn.innerHTML = "⏸️ PAUSE / EXPLODE";
     btn.classList.remove('active');
-    status.innerHTML = '<span class="live">● LIVE</span> · Animation running';
+    status.innerHTML = '<span class="live">● LIVE</span>';
+    playSound(440, 0.2, 'sine');
   }
 };
 
+// ============================================================
+// KEYBOARD
+// ============================================================
 window.addEventListener('keydown', e => {
-  if (e.code === 'Space') {
-    e.preventDefault();
-    togglePause();
+  if (e.code === 'Space') { e.preventDefault(); togglePause(); }
+  if (e.key === 'Escape') {
+    document.getElementById('sidebar').classList.remove('active');
+    closeSearch();
+    closeTutorial();
+    closeAttackHistory();
+    lastClickedBlockId = null;
   }
-  if (e.key === 'Escape') document.getElementById('sidebar').classList.remove('active');
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    e.preventDefault();
+    openSearch();
+  }
+  if (e.key >= '1' && e.key <= '7') {
+    const layers = ['rarity', 'owner', 'farming', 'attack', 'partner', 'war-room', 'my-farms'];
+    const idx = parseInt(e.key) - 1;
+    if (idx >= 0 && idx < layers.length) switchLayer(layers[idx]);
+  }
 });
+
+// ============================================================
+// FEATURE: DEEP LINKING (parse on load)
+// ============================================================
+function parseDeepLink() {
+  const hash = window.location.hash;
+  const m = hash.match(/^#block\/(\d+)$/);
+  if (m) {
+    const id = parseInt(m[1]);
+    const rc = idToRC(id);
+    if (rc && id >= 0 && id < 10000) {
+      setTimeout(() => {
+        focusOnBlock(rc.row, rc.col);
+        showBlockInfo({ row: rc.row, col: rc.col, id });
+        logActivity(`Loaded from deep link: Block #${id}`, 'info');
+      }, 1500);
+    }
+  }
+}
 
 // ============================================================
 // INIT
 // ============================================================
 (async () => {
+  initAudio();
   await connectReadOnly();
   await loadLive();
   requestAnimationFrame(loop);
+  setInterval(() => loadLive(), 30000);
+  document.getElementById('radar').classList.add('active');
+  
+  if (!localStorage.getItem('phircle_tutorial_done_v20')) {
+    setTimeout(() => startTutorial(), 1500);
+  }
+  
+  logActivity('Phircle V20 loaded', 'info');
+  parseDeepLink();
 })();
 </script>
 </body>

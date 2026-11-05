@@ -132,6 +132,79 @@
             display: inline-block; 
             vertical-align: middle;
         }
+
+        /* ============ PHIRCLE NAV HIGHLIGHT ============ */
+        .nav-list a[href="phircle"] {
+            color: #00e5ff;
+            font-weight: 600;
+            position: relative;
+        }
+        .nav-list a[href="phircle"]::after {
+            content: "NEW";
+            position: absolute;
+            top: -8px;
+            right: -22px;
+            font-size: 0.55rem;
+            background: #00e5ff;
+            color: #000;
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        /* ============ PHIRCLE HERO HINT ============ */
+        .phircle-hero-hint {
+            margin-top: 1.2rem;
+            padding: 0.9rem 1.2rem;
+            background: linear-gradient(135deg, rgba(0,229,255,0.08), rgba(0,170,85,0.08));
+            border: 1px solid #00e5ff;
+            border-radius: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .phircle-hero-hint-icon {
+            font-size: 1.6rem;
+            animation: phircleSpin 6s linear infinite;
+        }
+        @keyframes phircleSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .phircle-hero-hint-text {
+            flex: 1;
+            min-width: 220px;
+            font-size: 0.9rem;
+            color: #dbe7f3;
+            line-height: 1.5;
+        }
+        .phircle-hero-hint-text strong { color: #00e5ff; }
+        .phircle-hero-hint .btn-phircle {
+            background: linear-gradient(135deg, #00e5ff, #00aa55);
+            color: #000;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 0.5rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            font-family: inherit;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: transform 0.2s;
+            white-space: nowrap;
+        }
+        .phircle-hero-hint .btn-phircle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,229,255,0.4);
+        }
+        @media (max-width: 640px) {
+            .phircle-hero-hint { flex-direction: column; text-align: center; }
+        }
     </style>
 </head>
 <body class="staking-page">
@@ -142,6 +215,7 @@
             <li><a href="game.html">Game</a></li>
             <li><a href="mint.html">Mint</a></li>
             <li><a href="map.html">Pyramid Map</a></li>
+            <li><a href="phircle">Phircle</a></li>
             <li><a href="staking.html" aria-current="page">Staking</a></li>
             <li><a href="whitepaper.html">Whitepaper</a></li>
             <li><a href="faq.html">FAQ</a></li>
@@ -159,6 +233,15 @@
         <p class="eyebrow">Inpinity Staking · V2</p>
         <h1>Stake &amp; Earn Rewards</h1>
         <p class="hero-lead">Stake INPI tokens (long-term pool) or Uniswap V4 LP positions (NFT pools) and earn passive rewards on Base.</p>
+
+        <!-- ★ PHIRCLE HERO HINT -->
+        <div class="phircle-hero-hint">
+            <div class="phircle-hero-hint-icon">🌀</div>
+            <div class="phircle-hero-hint-text">
+                <strong>Put your rewards to work:</strong> Every INPI you earn here can be spent in <strong>Phircle</strong> — the Pyramid as a circle — for attacks, defense, boosts, and expansion.
+            </div>
+            <a href="phircle" class="btn-phircle">🌀 Open Phircle</a>
+        </div>
     </section>
 
     <section class="info-banner warning-note">
@@ -445,11 +528,12 @@
         <a href="game.html">Game</a>
         <a href="mint.html">Mint</a>
         <a href="map.html">Pyramid Map</a>
+        <a href="phircle">Phircle</a>
         <a href="staking.html">Staking</a>
         <a href="whitepaper.html">Whitepaper</a>
         <a href="faq.html">FAQ</a>
     </div>
-    <p class="footer-version">Version 0.35.0 · V2.5</p>
+    <p class="footer-version">Version 0.36.0 · V2.5 · Phircle</p>
 </footer>
 
 <!-- ★ IDEE 3: Custom Unstake Warning Modal -->

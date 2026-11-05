@@ -18,7 +18,7 @@
   <script defer src="main.js"></script>
 
   <link rel="icon" type="image/png" href="favicon.webp" />
-  <meta name="keywords" content="Inpinity, Pyramid, NFT, Base, INPI, Whitepaper, Farming, Pirates, Mercenary" />
+  <meta name="keywords" content="Inpinity, Pyramid, NFT, Base, INPI, Whitepaper, Farming, Pirates, Mercenary, Phircle" />
   <meta name="author" content="Inpinity Team" />
   <meta property="og:title" content="Inpinity - Whitepaper" />
   <meta property="og:description" content="Official Whitepaper of Inpinity – an on-chain Pyramid ecosystem on Base." />
@@ -29,6 +29,94 @@
   <meta name="twitter:creator" content="@Inpinity1" />
   <meta name="theme-color" content="#FFD700" />
   <meta name="robots" content="index,follow" />
+
+  <style>
+    /* ============ PHIRCLE NAV HIGHLIGHT ============ */
+    .nav-list a[href="phircle"] {
+      color: #00e5ff;
+      font-weight: 600;
+      position: relative;
+    }
+    .nav-list a[href="phircle"]::after {
+      content: "NEW";
+      position: absolute;
+      top: -8px;
+      right: -22px;
+      font-size: 0.55rem;
+      background: #00e5ff;
+      color: #000;
+      padding: 1px 4px;
+      border-radius: 3px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    /* ============ PHIRCLE CALLOUT BOX ============ */
+    .phircle-callout {
+      margin: 1.5rem 0;
+      padding: 1.2rem 1.5rem;
+      background: linear-gradient(135deg, rgba(0,229,255,0.08), rgba(0,170,85,0.08));
+      border: 1px solid #00e5ff;
+      border-left: 4px solid #00e5ff;
+      border-radius: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      flex-wrap: wrap;
+    }
+    .phircle-callout-icon {
+      font-size: 2rem;
+      animation: phircleSpinSlow 12s linear infinite;
+    }
+    @keyframes phircleSpinSlow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .phircle-callout-text {
+      flex: 1;
+      min-width: 220px;
+      line-height: 1.6;
+    }
+    .phircle-callout-text strong { color: #00e5ff; }
+    .phircle-callout .btn-phircle {
+      background: linear-gradient(135deg, #00e5ff, #00aa55);
+      color: #000;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 0.5rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      font-family: inherit;
+      font-size: 0.85rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: transform 0.2s;
+      white-space: nowrap;
+    }
+    .phircle-callout .btn-phircle:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,229,255,0.4);
+    }
+    @media (max-width: 640px) {
+      .phircle-callout { flex-direction: column; text-align: center; }
+    }
+
+    /* ============ PHIRCLE SECTION BADGE ============ */
+    .phircle-new-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #00e5ff, #00aa55);
+      color: #000;
+      font-size: 0.6rem;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 10px;
+      letter-spacing: 1px;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+  </style>
 </head>
 
 <body>
@@ -39,6 +127,7 @@
         <li><a href="game.html">Game</a></li>
         <li><a href="mint.html">Mint</a></li>
         <li><a href="map.html">Pyramid Map</a></li>
+        <li><a href="phircle">Phircle</a></li>
         <li><a href="staking.html">Staking</a></li>
         <li><a href="whitepaper.html" aria-current="page">Whitepaper</a></li>
         <li><a href="faq.html">FAQ</a></li>
@@ -55,7 +144,7 @@
   <main>
     <div class="whitepaper-container">
       <h1>Whitepaper: Inpinity</h1>
-      <p class="version"><strong>Version 3.0 – October 2026</strong></p>
+      <p class="version"><strong>Version 3.1 – November 2026</strong></p>
 
       <h2>1. Introduction</h2>
       <p>
@@ -64,8 +153,8 @@
         <strong>UE5 game world</strong>.
       </p>
       <p>
-        The ecosystem is live through three web apps:
-        <span class="pill">Mint</span><span class="pill">Map</span><span class="pill">Game</span>
+        The ecosystem is live through four web apps:
+        <span class="pill">Mint</span><span class="pill">Map</span><span class="pill">Game</span><span class="pill">Phircle</span>
         and evolves step-by-step into <strong>Inpinity City</strong> (a persistent upgrade/crafting layer) and later a full
         <strong>Unreal Engine 5</strong> version of the game.
       </p>
@@ -88,6 +177,7 @@
             <a href="mint.html">Mint</a> ·
             <a href="map.html">Pyramid Map</a> ·
             <a href="game.html">Game Dashboard</a> ·
+            <a href="phircle">Phircle</a> ·
             <a href="staking.html">Staking</a>
           </td>
         </tr>
@@ -166,6 +256,81 @@
         <li><strong>Use resources</strong> for upgrades and the upcoming <strong>Inpinity City</strong> layer.</li>
       </ol>
 
+      <!-- ============ NEW: PHIRCLE SECTION ============ -->
+      <h3>3.4 Phircle — The Pyramid as a Circle <span class="phircle-new-badge">NEW</span></h3>
+      <p>
+        <strong>Phircle</strong> is the visual and interaction evolution of the Pyramid Map. Instead of a triangular grid,
+        the entire 10,000-block pyramid is rendered as a <strong>living circle</strong> — with the tip at the center and all
+        100 rings wrapped around it following mathematical constants <strong>π (pi)</strong> and <strong>φ (phi)</strong>.
+      </p>
+
+      <div class="phircle-callout">
+        <div class="phircle-callout-icon">🌀</div>
+        <div class="phircle-callout-text">
+          <strong>Phircle is live</strong> — same contracts, same blocks, same rules — but a completely new perspective on the pyramid.
+          Explore it now at <a href="phircle" style="color:#00e5ff;font-weight:700;">inpinity.online/phircle</a>.
+        </div>
+        <a href="phircle" class="btn-phircle">🌀 Open Phircle</a>
+      </div>
+
+      <h4>What Phircle adds to the ecosystem</h4>
+      <ul>
+        <li><strong>Unified interaction layer</strong>: every block action (mint, reveal, farm, claim, protect, attack, execute) is accessible directly from the circular view — no page switches needed.</li>
+        <li><strong>Visual attack rays</strong>: active pirate attacks are drawn as animated red beams from attacker to target, with a live countdown ring on the target block.</li>
+        <li><strong>Profit Predictor</strong>: before launching an attack, Phircle estimates the steal amount based on target rarity, chosen resource, and protection level — turning every attack into an informed decision.</li>
+        <li><strong>Attack History Vault</strong>: all executed, cancelled and expired attacks are kept in a searchable history, with stolen amounts per raid.</li>
+        <li><strong>War Room layer</strong>: a dedicated view that highlights only critical blocks — your unprotected high-rarity blocks and any block currently under attack.</li>
+        <li><strong>Quantum Freeze</strong>: pausing the view (Space or button) triggers an "explosion" that spreads the rings apart and zooms in, allowing precise selection on mobile.</li>
+        <li><strong>Deep linking</strong>: every block has a shareable URL (<code>#block/1234</code>) that opens directly to that block's Phircle detail.</li>
+        <li><strong>Live Activity Feed</strong>: real-time events (attacks, executes, mints, reveals) streamed in a panel on the right.</li>
+        <li><strong>Owner Aura &amp; Ghost Lines</strong>: your own blocks are highlighted with a cyan aura and connected as a constellation; when an attacker is selected, a dashed ghost line previews the attack path.</li>
+      </ul>
+
+      <h4>Why π and φ?</h4>
+      <p>
+        The pyramid is not random — every block's rarity is determined by mathematical properties derived from the digits of
+        π and φ (see <em>Mathematical Rarity Proof</em> in the Map). Phircle makes those symmetries <strong>visible</strong>:
+        mirrored matches along the 0-axis, Pi-digit equals Phi-digit coincidences, and Fibonacci-style ring spacing are all
+        drawn using the same constants. What is computed on-chain is now also <strong>shown</strong> on-screen.
+      </p>
+
+      <h4>How Phircle relates to other apps</h4>
+      <table>
+        <tr><th>App</th><th>Purpose</th><th>Best for</th></tr>
+        <tr>
+          <td><a href="mint.html">Mint</a></td>
+          <td>Create new blocks</td>
+          <td>Getting your first block</td>
+        </tr>
+        <tr>
+          <td><a href="game.html">Game Dashboard</a></td>
+          <td>Manage blocks &amp; detailed panels (protection, boosts, exchange)</td>
+          <td>Deep management &amp; portfolio review</td>
+        </tr>
+        <tr>
+          <td><a href="map.html">Pyramid Map</a></td>
+          <td>Classic 2D triangular view</td>
+          <td>Traditional grid navigation</td>
+        </tr>
+        <tr>
+          <td><a href="phircle"><strong>Phircle</strong></a></td>
+          <td>Circular π-φ view with all interactions</td>
+          <td>Fast decisions, attacks, and overview</td>
+        </tr>
+        <tr>
+          <td><a href="staking.html">Staking</a></td>
+          <td>Earn passive INPI</td>
+          <td>Passive income</td>
+        </tr>
+      </table>
+
+      <p>
+        Phircle does <strong>not</strong> introduce new contracts, new tokens, or new rules. It is purely a <strong>new view</strong>
+        of the same on-chain reality — but engineered so that strategy, attacks and rare-block hunting become
+        <strong>visually intuitive</strong>.
+      </p>
+      <!-- ============ END PHIRCLE SECTION ============ -->
+
       <h2>4. Tokenomics</h2>
       <p>
         The economic model of Inpinity is designed for long-term growth and stability. The total supply is fixed at
@@ -229,6 +394,17 @@
           <td>
             V6 farming + V6 pirates + Mercenary V4 live in Game/Map, improved UI/UX, clearer economy display,
             better resource visualization, attack execution clarity, and contract transparency.
+          </td>
+        </tr>
+        <tr>
+          <td><strong>Phircle View (Live)</strong></td>
+          <td>New circular view of the pyramid</td>
+          <td>
+            <ul>
+              <li><strong>Phircle</strong> live with all interactions unified: attack rays, profit predictor, war room, history vault</li>
+              <li>Quantum Freeze, deep linking, live activity feed</li>
+              <li>Owner aura &amp; ghost lines on top of the same on-chain data</li>
+            </ul>
           </td>
         </tr>
         <tr>
@@ -315,7 +491,7 @@
         <li><strong>Legal</strong>: This whitepaper is for informational purposes only and does not constitute financial advice.</li>
       </ul>
 
-      <div class="version">Version 3.0 – October 2026</div>
+      <div class="version">Version 3.1 – November 2026</div>
     </div>
   </main>
 
@@ -330,6 +506,7 @@
         <a href="game.html">Game</a>
         <a href="mint.html">Mint</a>
         <a href="map.html">Pyramid Map</a>
+        <a href="phircle">Phircle</a>
         <a href="staking.html">Staking</a>
         <a href="whitepaper.html">Whitepaper</a>
         <a href="faq.html">FAQ</a>
@@ -337,7 +514,7 @@
         <a href="termsofuse.html">Terms</a>
       </div>
 
-      <p class="footer-version">Whitepaper v3.0 – October 2026</p>
+      <p class="footer-version">Whitepaper v3.1 – November 2026</p>
     </div>
   </footer>
 </body>
