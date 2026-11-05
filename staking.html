@@ -49,8 +49,11 @@
         <p>⚠️ <strong>Official INPI token:</strong> <code>0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D</code>. Verify every address on the <a href="index.html">homepage</a>.</p>
     </section>
 
-    <!-- ★ NEU: Sticky Wallet Bar ganz oben -->
-    <div class="wallet-bar">
+    <!-- ★ NEU: Sticky Glass Wallet Bar mit X-Button -->
+    <div class="wallet-bar" id="walletBar">
+        <!-- Schließen Button (X) -->
+        <button class="wallet-close-btn" id="walletCloseBtn" aria-label="Close Wallet">×</button>
+        
         <div class="wallet-left">
             <div class="wallet-status" id="walletStatusText">🔴 Wallet not connected</div>
             <div class="wallet-address" id="walletStatus" style="display:none;"></div>
@@ -60,6 +63,11 @@
             <div class="wallet-balance" id="tokenBalance">0</div>
         </div>
         <button id="connectWalletBtn" class="btn">🔌 Connect Wallet</button>
+    </div>
+
+    <!-- ★ SUPER-IDEE: Mini-Wallet (erscheint, wenn das große Fenster geschlossen ist) -->
+    <div class="wallet-mini-fab" id="walletMiniFab">
+        💳 <span class="mini-balance" id="miniBalance">0</span> INPI
     </div>
 
     <section class="stats-row">
@@ -442,7 +450,6 @@ const CONFIG = {
         INPI: "0x232FB12582ac10d5fAd97e9ECa22670e8Ba67d0D",
         EURC: "0x60a3E35Cc302bFA44Cb288Bc5a4F316Fdb1adb42"
     },
-    // ★ TOP-IDEE: Beide Pool-IDs für den Chart-Switcher
     GECKO_POOL_ETH: "0x2da60979434c607e283ad7956bdcd21b83fa756fa156ef45f996e2b34d2e12a8",
     GECKO_POOL_USDC: "0x7b26696184f74e8f790c21b23e10a68583f9cf0b7fc911db1eab510f6e5740cb",
     TARGETS: {
@@ -505,7 +512,6 @@ const ERC721_ABI = [
     let priceChart = null, tvlDonut = null;
     let lastPriceData = null, lastTvlData = null;
     
-    // ★ TOP-IDEE: Persistenter Chart State (Zeitraum & Pool)
     let currentChartHours = 168; 
     let activeGeckoPool = 'eth'; 
 
@@ -736,13 +742,11 @@ const ERC721_ABI = [
     }
 
     function updateChartButtonsUI() {
-        // Update Timeframe Buttons
         document.querySelectorAll('.timeframe-btn').forEach(b => {
             const hours = parseInt(b.dataset.hours);
             b.classList.toggle('active', hours === currentChartHours);
         });
         
-        // Update Pool Switcher Buttons
         document.querySelectorAll('.pool-btn').forEach(b => {
             b.classList.toggle('active', b.dataset.pool === activeGeckoPool);
         });
@@ -763,11 +767,9 @@ const ERC721_ABI = [
         const chartBody = document.querySelector('.chart-body');
         if (!lastPriceData) chartBody.style.opacity = '0.3';
 
-        // Bestimme die richtige Pool-ID basierend auf der Auswahl
         const poolId = activeGeckoPool === 'eth' ? CONFIG.GECKO_POOL_ETH : CONFIG.GECKO_POOL_USDC;
 
         try {
-            // 1. VERSUCH: GeckoTerminal API (OHLCV)
             let timeframe = 'hour', aggregate = 1, limit = 100;
             if (currentChartHours === 24) { timeframe = 'hour'; aggregate = 1; limit = 24; }
             else if (currentChartHours === 72) { timeframe = 'hour'; aggregate = 4; limit = 18; }
@@ -826,7 +828,6 @@ const ERC721_ABI = [
             }
         } catch (e) { console.warn('GeckoTerminal OHLCV fehlgeschlagen', e); }
 
-        // 2. FALLBACK: Bot History (Achtung: Bot speichert nur 7 Tage!)
         try {
             const botFetchHours = (currentChartHours === 720 || currentChartHours === 0) ? 168 : currentChartHours;
             const res = await fetch(`${CONFIG.BOT_URL}/api/price-history?hours=${botFetchHours}`);
@@ -857,7 +858,6 @@ const ERC721_ABI = [
             }
         } catch (e) { console.warn('Bot history fallback failed', e); }
 
-        // 3. LETZTER FALLBACK: Flatline vom Bot Health Check
         try {
             const health = await fetch(CONFIG.BOT_URL + '/api/health').then(r => r.json());
             const inpiPrice = health.oracle?.prices?.find(p => p.token === 'INPI');
@@ -877,7 +877,6 @@ const ERC721_ABI = [
         } catch (e) { console.warn('Auch Oracle-Fallback fehlgeschlagen', e); }
     }
 
-    // Event Listeners für Timeframe-Buttons
     document.querySelectorAll('.timeframe-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             document.querySelectorAll('.timeframe-btn').forEach(b => b.classList.remove('active'));
@@ -888,7 +887,6 @@ const ERC721_ABI = [
         });
     });
 
-    // Event Listeners für Pool-Switcher (ETH / USDC)
     document.querySelectorAll('.pool-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             document.querySelectorAll('.pool-btn').forEach(b => b.classList.remove('active'));
@@ -999,6 +997,21 @@ const ERC721_ABI = [
 ===================================================== */
 const readProvider = new ethers.JsonRpcProvider(CONFIG.RPC_URL);
 
+// ★ NEU: Wallet Bar Toggle Logik
+const walletBar = document.getElementById("walletBar");
+const walletCloseBtn = document.getElementById("walletCloseBtn");
+const walletMiniFab = document.getElementById("walletMiniFab");
+
+walletCloseBtn.addEventListener("click", () => {
+    walletBar.classList.add("wallet-closed");
+    walletMiniFab.classList.add("show");
+});
+
+walletMiniFab.addEventListener("click", () => {
+    walletBar.classList.remove("wallet-closed");
+    walletMiniFab.classList.remove("show");
+});
+
 function fmtINPI(wei, dp = 2) {
     return Number(ethers.formatUnits(wei, 18)).toLocaleString(undefined, { maximumFractionDigits: dp });
 }
@@ -1102,6 +1115,9 @@ async function refreshUserData() {
     try {
         const bal = await tokenContract.balanceOf(userAddress);
         document.getElementById("tokenBalance").textContent = fmtINPI(bal, 2);
+        // ★ NEU: Update Mini-Wallet Balance
+        document.getElementById("miniBalance").textContent = fmtINPI(bal, 2);
+        
         const staked = await oldStakingContract.balanceOf(userAddress);
         const earned = await oldStakingContract.earned(userAddress);
         const total = await oldStakingContract.totalSupply();
