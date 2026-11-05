@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Phircle V16 — Smart UI & Attacks</title>
+<title>Phircle V17 — Attack Fix & Resources</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin:0; padding:0; height:100%; overflow:hidden;
@@ -28,7 +28,6 @@
   #hud .legend span { display:inline-flex; align-items:center; gap:3px; }
   #hud .dot { width:7px; height:7px; border-radius:50%; display:inline-block; }
   
-  /* NEU: Attacker Selector im HUD */
   #attackerHud { margin-top: 10px; padding-top: 8px; border-top: 1px solid #333; }
   #attackerSelect { width: 100%; background: #111; color: #ffcc00; border: 1px solid #444;
     padding: 4px; font-family: inherit; font-size: 11px; margin-top: 4px; }
@@ -76,10 +75,13 @@
   #sidebar button.close { background:#222; color:#aaa; margin-top:16px; }
   #sidebar button.attack-btn { background:linear-gradient(135deg,#ff3333,#cc0000); color:#fff; }
   #sidebar button.execute-btn { background:linear-gradient(135deg,#00ff88,#00aa55); color:#000; }
+  #sidebar button:disabled { opacity:0.4; cursor:not-allowed; }
   
-  /* NEU: Angreifer Auswahl in Sidebar */
-  #sbAttackerSelect { width:100%; background:#111; color:#fff; border:1px solid #444;
-    padding:8px; font-family:inherit; font-size:12px; margin:10px 0; }
+  #sidebar select, #sidebar input { width:100%; background:#111; color:#fff; border:1px solid #444;
+    padding:8px; font-family:inherit; font-size:12px; margin:6px 0; border-radius:3px; }
+  #sidebar .label { font-size:11px; color:#888; margin-top:10px; text-transform:uppercase; letter-spacing:1px; }
+  #sidebar .note { font-size:11px; color:#888; padding:10px; background:rgba(255,51,51,0.1);
+    border-left:3px solid #ff3333; border-radius:3px; margin:10px 0; }
 
   #status { position:fixed; bottom:12px; right:12px; padding:9px 14px;
     background:rgba(8,8,16,0.85); border:1px solid #333; font-size:10px;
@@ -115,7 +117,7 @@
 
 <div id="hud">
   <h1>
-    <span>🌀 PHIRCLE V16</span>
+    <span>🌀 PHIRCLE V17</span>
     <button onclick="document.getElementById('hud').classList.toggle('collapsed')">HIDE</button>
   </h1>
   <div class="hud-content">
@@ -132,8 +134,6 @@
     <div class="row"><span>φ</span><strong>1.61803</strong></div>
     <div class="row"><span>Golden Angle</span><strong>137.5°</strong></div>
     <hr>
-    
-    <!-- NEU: Globaler Angreifer -->
     <div id="attackerHud" style="display:none;">
       <div class="row"><span>My Attacker</span><strong id="activeAttackerLabel" style="color:#ff3333;">None</strong></div>
       <select id="attackerSelect" onchange="changeGlobalAttacker(this.value)">
@@ -141,7 +141,6 @@
       </select>
     </div>
     <hr>
-
     <div class="legend">
       <span><i class="dot" style="background:#3a3a3a"></i>Unminted</span>
       <span><i class="dot" style="background:#cd7f32"></i>Bronze</span>
@@ -150,9 +149,7 @@
       <span><i class="dot" style="background:#e5e4e2"></i>Platinum</span>
       <span><i class="dot" style="background:#b9f2ff"></i>Diamond</span>
       <span><i class="dot" style="background:#00ff88"></i>Farm</span>
-      <span><i class="dot" style="background:#4488ff"></i>Shield</span>
       <span><i class="dot" style="background:#ff3333"></i>Attack</span>
-      <span><i class="dot" style="background:#c060ff"></i>Partner</span>
       <span><i class="dot" style="background:#00e5ff"></i>Mine</span>
     </div>
   </div>
@@ -180,7 +177,7 @@
 import { ethers } from 'https://cdn.jsdelivr.net/npm/ethers@6.13.4/+esm';
 
 // ============================================================
-// INLINE CONFIG & ABIS
+// CONFIG
 // ============================================================
 const WORKER_URL             = 'https://inpinity-worker-final.s-plat.workers.dev';
 const NFT_ADDRESS            = '0x277a0D5864293C78d7387C54B48c35D5E9578Ab1';
@@ -191,6 +188,16 @@ const PARTNERSHIP_V2_ADDRESS = '0xb18323efE4Cc8c36e10D664E287b4e2c82Fe3ad9';
 const PUBLIC_RPC             = 'https://mainnet.base.org';
 const MAX_ROW                = 99;
 const rarityNames            = ['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond'];
+const resourceNames          = ['Oil', 'Lemons', 'Iron', 'Gold', 'Platinum', 'Copper', 'Crystal', 'Obsidian', 'Mysterium', 'Aether'];
+
+// Ressourcen-Produktion pro Rarität
+const RARITY_PRODUCTION = {
+  0: [0, 1, 2],           // Bronze: Oil, Lemons, Iron
+  1: [0, 1, 2, 3],        // Silver: + Gold
+  2: [0, 1, 2, 3, 4],     // Gold: + Platinum
+  3: [0, 1, 2, 3, 4, 6],  // Platinum: + Crystal
+  4: [0, 1, 2, 3, 4, 6, 8] // Diamond: + Mysterium
+};
 
 const NFT_ABI = [
   "function mintWithINPI(uint256 row, uint256 col)",
@@ -210,17 +217,11 @@ const PIRATES_V6_ABI = [
   "function buyPirateBoost(uint256 tokenId, uint256 daysAmount)"
 ];
 const MERCENARY_V4_ABI = [
-  "function setProtection(uint256 slotIndex, uint256 tokenId, uint256 durationDays, bool payInINPI)",
-  "function extendProtection(uint256 slotIndex, uint256 additionalDays, bool payInINPI)",
-  "function cancelProtection(uint256 slotIndex)"
-];
-const PARTNERSHIP_V2_ABI = [
-  "function isPartnerBlock(uint256 tokenId) view returns (bool)",
-  "function getPartnerBlock(uint256 partnerId) view returns (uint256)"
+  "function setProtection(uint256 slotIndex, uint256 tokenId, uint256 durationDays, bool payInINPI)"
 ];
 
 // ============================================================
-// CONSTANTS — π & φ
+// CONSTANTS
 // ============================================================
 const PHI = (1 + Math.sqrt(5)) / 2;
 const PI  = Math.PI;
@@ -232,12 +233,7 @@ const CENTER_ANGLE = -PI / 2;
 const COLORS = {
   unminted:'#3a3a3a', bronze:'#cd7f32', silver:'#c0c0c0',
   gold:'#ffcc00', platinum:'#e5e4e2', diamond:'#b9f2ff',
-  farming:'#00ff88', protected:'#4488ff', attack:'#ff3333',
-  partner:'#c060ff', mine:'#00e5ff',
-  mirrorAxis:'rgba(255,204,0,.14)',
-  goldenSpiral:'rgba(255,204,0,.045)',
-  sector:'rgba(255,204,0,.035)',
-  radar:'rgba(255,204,0,.10)',
+  farming:'#00ff88', attack:'#ff3333', partner:'#c060ff', mine:'#00e5ff'
 };
 
 // ============================================================
@@ -247,8 +243,6 @@ const minted        = new Map();
 const farms         = new Set();
 const attacks       = new Map();
 const partnerships  = new Set();
-const justRevealed  = new Map();
-const piWaves       = [];
 
 let activeLayer = 'rarity';
 let userAddress = null;
@@ -257,21 +251,20 @@ let isPaused = false;
 let myBlocksCount = 0;
 let myFarmsCount = 0;
 let explosionFactor = 1.0;
-let selectedAttackerId = null; // NEU: Global ausgewählter Angreifer
-let hoveredBlock = null; // Für die gestrichelte Vorschau-Linie
+let selectedAttackerId = null;
+let hoveredBlock = null;
 
 // ============================================================
 // CONTRACTS
 // ============================================================
-let provider, nftContract, farmingContract, piratesContract, mercenaryContract, partnershipContract;
+let provider, nftContract, farmingContract, piratesContract, mercenaryContract;
 
 async function connectReadOnly() {
   provider = new ethers.JsonRpcProvider(PUBLIC_RPC);
-  nftContract         = new ethers.Contract(NFT_ADDRESS, NFT_ABI, provider);
-  farmingContract     = new ethers.Contract(FARMING_V6_ADDRESS, FARMING_V6_ABI, provider);
-  piratesContract     = new ethers.Contract(PIRATES_V6_ADDRESS, PIRATES_V6_ABI, provider);
-  mercenaryContract   = new ethers.Contract(MERCENARY_V4_ADDRESS, MERCENARY_V4_ABI, provider);
-  partnershipContract = new ethers.Contract(PARTNERSHIP_V2_ADDRESS, PARTNERSHIP_V2_ABI, provider);
+  nftContract       = new ethers.Contract(NFT_ADDRESS, NFT_ABI, provider);
+  farmingContract   = new ethers.Contract(FARMING_V6_ADDRESS, FARMING_V6_ABI, provider);
+  piratesContract   = new ethers.Contract(PIRATES_V6_ADDRESS, PIRATES_V6_ABI, provider);
+  mercenaryContract = new ethers.Contract(MERCENARY_V4_ADDRESS, MERCENARY_V4_ABI, provider);
 }
 
 window.connectWallet = async () => {
@@ -303,9 +296,9 @@ function countMyBlocks() {
   document.getElementById('myBlocksCount').textContent = `${myBlocksCount} (${myFarmsCount} farms)`;
 }
 
-// NEU: Dropdown im HUD befüllen
 function updateAttackerDropdown() {
   const sel = document.getElementById('attackerSelect');
+  if (!sel) return;
   if (!userAddress) {
     sel.innerHTML = '<option value="">Connect Wallet</option>';
     return;
@@ -327,8 +320,6 @@ function updateAttackerDropdown() {
 window.changeGlobalAttacker = (val) => {
   selectedAttackerId = val ? parseInt(val) : null;
   updateAttackerDropdown();
-  updateSidebarAttacker();
-  drawPyramid(); // Falls wir Vorschau-Linien zeichnen
 };
 
 // ============================================================
@@ -357,9 +348,6 @@ function resize() {
 }
 window.addEventListener('resize', resize); resize();
 
-// ============================================================
-// GEOMETRY — Linear (Exponent 1.0)
-// ============================================================
 function blockRadius(row) {
   if (row === 0) return 0;
   return MAX_R * (row / MAX_ROW) * explosionFactor;
@@ -379,7 +367,7 @@ const blockSize = row => {
 };
 
 // ============================================================
-// SUBGRAPH FETCH (FIXED)
+// SUBGRAPH FETCH
 // ============================================================
 async function fetchGraphQL(query, retries = 3) {
   for (let i = 0; i < retries; i++) {
@@ -407,6 +395,7 @@ async function loadLive() {
   document.getElementById('statusText').innerHTML = '<span class="live">● Loading Data...</span>';
   
   try {
+    // Tokens
     const dataTokens = await fetchGraphQL(`{ tokens(first: 1000) { id revealed owner { id } } }`);
     if (dataTokens?.tokens) {
       for (const t of dataTokens.tokens) {
@@ -415,6 +404,7 @@ async function loadLive() {
       }
     }
 
+    // Rarities
     const dataRevealed = await fetchGraphQL(`{ blockRevealeds(first: 1000) { tokenId rarity } }`);
     if (dataRevealed?.blockRevealeds) {
       for (const br of dataRevealed.blockRevealeds) {
@@ -423,6 +413,7 @@ async function loadLive() {
       }
     }
 
+    // Farms
     const dataFarms = await fetchGraphQL(`{ farmV6S(first: 1000) { id active } }`);
     if (dataFarms?.farmV6S) {
       for (const f of dataFarms.farmV6S) {
@@ -430,7 +421,8 @@ async function loadLive() {
       }
     }
 
-    const dataAttacks = await fetchGraphQL(`{ attackV6S(first: 1000) { attackerTokenId targetTokenId startTime endTime } }`);
+    // Attacks (mit attackIndex!)
+    const dataAttacks = await fetchGraphQL(`{ attackV6S(first: 1000) { attackerTokenId targetTokenId attackIndex resource startTime endTime } }`);
     if (dataAttacks?.attackV6S) {
       for (const a of dataAttacks.attackV6S) {
         const end = Number(a.endTime)*1000;
@@ -438,8 +430,10 @@ async function loadLive() {
         const rc = idToRC(parseInt(a.attackerTokenId)); 
         if (!rc) continue;
         attacks.set(parseInt(a.targetTokenId), {
-          attackerTokenId: parseInt(a.attackerTokenId), // NEU: ID speichern
+          attackerTokenId: parseInt(a.attackerTokenId),
           attackerRow: rc.row, attackerCol: rc.col,
+          attackIndex: parseInt(a.attackIndex),
+          resource: parseInt(a.resource),
           startTime: performance.now(),
           interval: Math.max(2, Number(a.endTime)-Number(a.startTime)),
           endTimestamp: end
@@ -447,6 +441,7 @@ async function loadLive() {
       }
     }
     
+    // Partnerships
     const dataPartners = await fetchGraphQL(`{ partnerships(first: 1000, where: {active: true}) { id } }`);
     if (dataPartners?.partnerships) {
       for (const p of dataPartners.partnerships) {
@@ -466,7 +461,7 @@ async function loadLive() {
 }
 
 // ============================================================
-// LAYER COLORS
+// COLORS
 // ============================================================
 function ownerColor(addr) {
   if (!addr) return '#444';
@@ -481,7 +476,6 @@ function getBlockColor(id, m) {
     if (farms.has(id)) return COLORS.farming;
     return '#202020';
   }
-
   if (activeLayer === 'rarity') {
     if (!m) return COLORS.unminted;
     if (!m.revealed) return '#2a2035';
@@ -510,33 +504,25 @@ function drawBackground(now) {
     const r=((Math.pow(PHI,t*turns)-1)/(Math.pow(PHI,turns)-1))*MAX_R;
     i===0?ctx.moveTo(Math.cos(a)*r,Math.sin(a)*r):ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r);
   }
-  ctx.strokeStyle=COLORS.goldenSpiral; ctx.lineWidth=1; ctx.stroke(); ctx.restore();
+  ctx.strokeStyle='rgba(255,204,0,.045)'; ctx.lineWidth=1; ctx.stroke(); ctx.restore();
 
   ctx.save(); ctx.translate(CX,CY);
   for (let s = 0; s < 12; s++) {
     const a = (s / 12) * TAU;
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.lineTo(Math.cos(a) * MAX_R, Math.sin(a) * MAX_R);
-    ctx.strokeStyle = COLORS.sector;
-    ctx.lineWidth = 1;
-    ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a) * MAX_R, Math.sin(a) * MAX_R);
+    ctx.strokeStyle = 'rgba(255,204,0,.035)'; ctx.lineWidth = 1; ctx.stroke();
   }
   ctx.restore();
 
   ctx.beginPath(); ctx.moveTo(CX,CY-MAX_R); ctx.lineTo(CX,CY+MAX_R);
-  ctx.strokeStyle=COLORS.mirrorAxis; ctx.stroke();
+  ctx.strokeStyle='rgba(255,204,0,.14)'; ctx.stroke();
 
   const radarAngle = (now / 1000) * 0.4;
   const grad = ctx.createRadialGradient(CX, CY, 0, CX, CY, Math.max(10, MAX_R));
-  grad.addColorStop(0, COLORS.radar);
+  grad.addColorStop(0, 'rgba(255,204,0,.10)');
   grad.addColorStop(1, 'rgba(255,204,0,0)');
-  ctx.beginPath();
-  ctx.moveTo(CX, CY);
-  ctx.arc(CX, CY, MAX_R, radarAngle, radarAngle + GOLDEN_ANGLE);
-  ctx.closePath();
-  ctx.fillStyle = grad;
-  ctx.fill();
+  ctx.beginPath(); ctx.moveTo(CX, CY); ctx.arc(CX, CY, MAX_R, radarAngle, radarAngle + GOLDEN_ANGLE);
+  ctx.closePath(); ctx.fillStyle = grad; ctx.fill();
 }
 
 function drawBlocks(now) {
@@ -553,7 +539,6 @@ function drawBlocks(now) {
         const dx=p.x-CX, dy=p.y-CY, c=Math.cos(ringRot), s=Math.sin(ringRot);
         p = { x:CX+dx*c-dy*s, y:CY+dx*s+dy*c };
       }
-      
       if (isPaused && Math.random() > 0.8) {
         p.x += (Math.random() - 0.5) * 3;
         p.y += (Math.random() - 0.5) * 3;
@@ -562,7 +547,6 @@ function drawBlocks(now) {
       const id = blockId(row,col), m = minted.get(id), atk = attacks.get(id);
       const fill = getBlockColor(id, m);
       const isMine = userAddress && m && m.owner === userAddress;
-
       if (isMine) myBlocksPos.push(p);
 
       // Stardust
@@ -572,7 +556,7 @@ function drawBlocks(now) {
         ctx.fillStyle=`rgba(140,100,255,${sp*.3})`; ctx.fill();
       }
       
-      // MY BLOCKS AURA
+      // My Aura
       if (isMine) {
         const pulse = .5 + .5*Math.sin(t*3 + id);
         ctx.beginPath(); ctx.arc(p.x,p.y,sz + 3 + pulse*2,0,TAU);
@@ -589,28 +573,21 @@ function drawBlocks(now) {
       ctx.beginPath(); ctx.arc(p.x,p.y,sz,0,TAU);
       ctx.fillStyle = fill; ctx.fill();
 
-      // NEU: Attack Target Pulsing Red Border
+      // Attack Target Pulsing Red Border
       if (atk) {
         const pulse = .5 + .5*Math.sin(t*6);
         ctx.beginPath(); ctx.arc(p.x,p.y,sz + 2 + pulse*3,0,TAU);
         ctx.strokeStyle=`rgba(255, 51, 51, ${0.6 + pulse*0.4})`;
-        ctx.lineWidth=2.5;
-        ctx.stroke();
-        
-        // Warnsymbol
-        ctx.fillStyle = '#ff3333';
-        ctx.font = 'bold 12px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText('⚠️', p.x, p.y - sz - 4);
+        ctx.lineWidth=2.5; ctx.stroke();
       }
 
-      // NEU: Attacker Badge (Weißer Ring)
+      // Attacker Badge (White Ring)
       if (selectedAttackerId === id) {
         ctx.beginPath(); ctx.arc(p.x,p.y,sz + 4,0,TAU);
         ctx.strokeStyle='rgba(255, 255, 255, 0.8)'; ctx.lineWidth=2; ctx.stroke();
       }
 
-      // Countdown Ring (inner circle)
+      // Countdown Ring
       if (atk) {
         const rem = Math.max(0, atk.endTimestamp - Date.now());
         const total = atk.interval*1000;
@@ -629,19 +606,16 @@ function drawBlocks(now) {
     for (let i = 1; i < myBlocksPos.length; i++) {
       ctx.lineTo(myBlocksPos[i].x, myBlocksPos[i].y);
     }
-    ctx.strokeStyle = 'rgba(0, 229, 255, 0.15)';
-    ctx.lineWidth = 1;
-    ctx.stroke();
+    ctx.strokeStyle = 'rgba(0, 229, 255, 0.15)'; ctx.lineWidth = 1; ctx.stroke();
   }
 
-  // NEU: Ghost Attacker Line (Idee 1)
+  // Ghost Attacker Line
   if (selectedAttackerId && hoveredBlock && hoveredBlock !== selectedAttackerId) {
     const rcA = idToRC(selectedAttackerId);
     const rcB = idToRC(hoveredBlock);
     if (rcA && rcB) {
       const pA = blockPosition(rcA.row, rcA.col);
       const pB = blockPosition(rcB.row, rcB.col);
-      
       ctx.beginPath();
       ctx.setLineDash([5, 5]);
       ctx.moveTo(pA.x, pA.y);
@@ -689,7 +663,6 @@ function drawAttackRays(now) {
       ctx.lineTo((1-t)*(1-t)*ap.x+2*(1-t)*t*cxp+t*t*tp.x,
                  (1-t)*(1-t)*ap.y+2*(1-t)*t*cyp+t*t*tp.y);
     }
-    // Dickerer, leuchtender Strahl
     ctx.strokeStyle=`rgba(255,51,51,${.85-prog*.55})`; 
     ctx.lineWidth=3; 
     ctx.shadowColor = '#ff3333';
@@ -701,30 +674,6 @@ function drawAttackRays(now) {
     const hx=(1-tt)*(1-tt)*ap.x+2*(1-tt)*tt*cxp+tt*tt*tp.x;
     const hy=(1-tt)*(1-tt)*ap.y+2*(1-tt)*tt*cyp+tt*tt*tp.y;
     ctx.beginPath(); ctx.arc(hx,hy,4,0,TAU); ctx.fillStyle='#fff'; ctx.fill();
-
-    if (prog > 0.95 && Math.random() < 0.1) {
-      piWaves.push({ x: tp.x, y: tp.y, startTime: now });
-    }
-  }
-}
-
-function drawPiWaves(now) {
-  for (let i = piWaves.length - 1; i >= 0; i--) {
-    const w = piWaves[i];
-    const el = (now - w.startTime) / 1000;
-    if (el > 2) { piWaves.splice(i, 1); continue; }
-    const r = el * 80;
-    const alpha = 1 - el / 2;
-    ctx.beginPath();
-    ctx.arc(w.x, w.y, r, 0, TAU);
-    ctx.strokeStyle = `rgba(255,51,51,${alpha * 0.6})`;
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(w.x, w.y, r * PHI, 0, TAU);
-    ctx.strokeStyle = `rgba(255,51,51,${alpha * 0.3})`;
-    ctx.lineWidth = 1;
-    ctx.stroke();
   }
 }
 
@@ -752,7 +701,7 @@ function drawCenter(now) {
 }
 
 // ============================================================
-// LOOP
+// MAIN LOOP
 // ============================================================
 let lastStats = 0;
 function loop(now) {
@@ -774,7 +723,6 @@ function loop(now) {
   drawBlocks(now);
   drawPartnerships(now);
   drawAttackRays(now);
-  drawPiWaves(now);
   drawCenter(now);
   ctx.restore();
 
@@ -793,7 +741,7 @@ function loop(now) {
 }
 
 // ============================================================
-// HIT TEST & TOOLTIP
+// HIT TEST
 // ============================================================
 function screenToWorld(sx,sy) {
   const bs = 1 + Math.sin(performance.now()/1000/PI)*.006;
@@ -819,7 +767,7 @@ function hitTest(sx,sy) {
 }
 
 // ============================================================
-// SIDEBAR LOGIK (ANGEPASST)
+// SIDEBAR (ANGEPASST)
 // ============================================================
 async function showBlockInfo(hit) {
   tooltip.style.display = 'none';
@@ -844,7 +792,6 @@ async function showBlockInfo(hit) {
       h += `<div class="rarity-bar" style="background:${COLORS[rName.toLowerCase()]||'#fff'}"></div>`;
     }
     h += `<div class="info-row"><span>Farming</span><strong style="color:${farms.has(id)?'#00ff88':'#666'}">${farms.has(id)?'● Active':'○ Inactive'}</strong></div>`;
-    h += `<div class="info-row"><span>Protection</span><strong style="color:${m.protected?'#4488ff':'#666'}">${m.protected?'● Active':'○ Inactive'}</strong></div>`;
   }
 
   if (atk) {
@@ -858,53 +805,64 @@ async function showBlockInfo(hit) {
   if (!m) {
     h += `<button onclick="mintBlock(${hit.row},${hit.col})">⛏ Mint with INPI</button>`;
   } else if (isMine) {
-    // EIGENE BLÖCKE (Farming, Protection, Claim)
+    // EIGENER BLOCK
     h += `
       <button onclick="toggleFarm(${id})">🌾 ${farms.has(id)?'Stop Farming':'Start Farming'}</button>
-      <button onclick="toggleProtect(${id})">🛡 ${m.protected?'Remove Protection':'Buy Protection'}</button>
       <button onclick="claimResources(${id})">💰 Claim</button>`;
-    
-    // Wenn mein Block gerade angegriffen wird
-    if (atk && atk.attackerTokenId === selectedAttackerId) {
-       // Das kann eigentlich nicht passieren (man greift sich nicht selbst an)
-    }
   } else {
-    // FREMDER BLOCK (Angriff starten oder ausführen)
+    // FREMDER BLOCK (Angriff)
     
-    // Wenn ein Angriff auf diesen Block läuft
+    // Wenn dieser Block bereits Ziel eines Angriffs ist
     if (atk) {
       const rem = Math.max(0, atk.endTimestamp - Date.now());
       if (rem <= 0) {
-        h += `<button class="execute-btn" onclick="executeAttack(${id})">⚔ Ausführen (Bereit!)</button>`;
+        h += `<div class="note">⚔️ Angriff ist bereit! Klicke Ausführen.</div>`;
+        h += `<button class="execute-btn" onclick="executeAttack(${id}, ${atk.attackIndex})">⚔ Ausführen (Bereit!)</button>`;
       } else {
-        h += `<button style="background:#333; color:#888; cursor:not-allowed;" disabled>⏳ Wartezeit: ${(rem/1000).toFixed(1)}s</button>`;
+        h += `<div class="note">⏳ Angriff läuft. Bereit in ${(rem/1000).toFixed(1)}s</div>`;
+        h += `<button disabled>⏳ Wartezeit</button>`;
       }
     } else {
       // Neuen Angriff starten
-      h += `<div style="font-size:11px; color:#888; margin-top:10px;">Wähle deinen Angreifer:</div>`;
-      h += `<select id="sbAttackerSelect" onchange="selectedAttackerId = parseInt(this.value) || null; drawPyramid();">`;
+      
+      // 1. Angreifer auswählen
+      h += `<div class="label">1. Wähle deinen Angreifer</div>`;
+      h += `<select id="sbAttackerSelect">`;
       if (userAddress) {
+        let found = false;
         for (const [tid, myM] of minted) {
           if (myM.owner === userAddress) {
+            found = true;
             h += `<option value="${tid}" ${selectedAttackerId === tid ? 'selected' : ''}>Block #${tid}</option>`;
           }
         }
+        if (!found) h += `<option value="">Keine eigenen Blöcke</option>`;
       } else {
         h += `<option value="">Connect Wallet</option>`;
       }
       h += `</select>`;
-      h += `<button class="attack-btn" onclick="startAttack(${id})">⚔ Angriff starten</button>`;
+      
+      // 2. Ressource auswählen (basierend auf Rarität des Ziels)
+      const prodIds = rIdx != null ? RARITY_PRODUCTION[rIdx] : [0, 1, 2];
+      h += `<div class="label">2. Wähle zu stehlende Ressource</div>`;
+      h += `<select id="sbResourceSelect">`;
+      for (const resId of prodIds) {
+        h += `<option value="${resId}">${resourceNames[resId]}</option>`;
+      }
+      h += `</select>`;
+      
+      // 3. Pirate Boost Option (falls Angreifer gewählt)
+      h += `<div class="label">3. Optional: Pirate Boost (+25% Steal)</div>`;
+      h += `<button style="background:#333; color:#ffb347; font-size:11px; padding:8px;" onclick="buyPirateBoost()">⚡ Pirate Boost kaufen (100 PIT/Tag)</button>`;
+      
+      // 4. Attack starten
+      h += `<button class="attack-btn" onclick="startAttackFromSidebar(${id})">⚔ Angriff starten</button>`;
     }
   }
 
   h += `<button class="close" onclick="document.getElementById('sidebar').classList.remove('active')">Close</button>`;
   document.getElementById('sbContent').innerHTML = h;
   document.getElementById('sidebar').classList.add('active');
-}
-
-function updateSidebarAttacker() {
-  const sel = document.getElementById('sbAttackerSelect');
-  if (sel && selectedAttackerId) sel.value = selectedAttackerId;
 }
 
 // ============================================================
@@ -944,50 +902,6 @@ window.toggleFarm = async (id) => {
   } catch(e) { alert('Farming failed: ' + (e.reason||e.message)); }
 };
 
-window.toggleProtect = async (id) => {
-  const signer = await getSignerOrWarn(); if (!signer) return;
-  const c = new ethers.Contract(MERCENARY_V4_ADDRESS, MERCENARY_V4_ABI, signer);
-  try {
-    const tx = await c.setProtection(0, id, 1, true);
-    await tx.wait(); alert('Protection OK');
-  } catch(e) { alert('Protection failed: ' + (e.reason||e.message)); }
-};
-
-window.startAttack = async (targetId) => {
-  if (!selectedAttackerId) return alert('Wähle zuerst einen Angreifer-Block aus!');
-  const signer = await getSignerOrWarn(); if (!signer) return;
-  const c = new ethers.Contract(PIRATES_V6_ADDRESS, PIRATES_V6_ABI, signer);
-  try {
-    const tx = await c.startAttack(selectedAttackerId, targetId, 0);
-    await tx.wait(); 
-    alert('Angriff gestartet!');
-    // Lokal hinzufügen für sofortiges Feedback
-    const rc = idToRC(selectedAttackerId);
-    attacks.set(targetId, {
-      attackerTokenId: selectedAttackerId,
-      attackerRow: rc.row, attackerCol: rc.col,
-      startTime: performance.now(),
-      interval: 60, // Dummy, wird beim nächsten Load überschrieben
-      endTimestamp: Date.now() + 60000
-    });
-    drawPyramid();
-  } catch(e) { alert('Attack failed: ' + (e.reason||e.message)); }
-};
-
-window.executeAttack = async (targetId) => {
-  const signer = await getSignerOrWarn(); if (!signer) return;
-  const c = new ethers.Contract(PIRATES_V6_ADDRESS, PIRATES_V6_ABI, signer);
-  try {
-    // Wir brauchen den attackIndex. Da wir ihn im UI nicht haben, raten wir 0.
-    // (Für ein perfektes System müsste man den Index beim Start mitspeichern).
-    const tx = await c.executeAttack(targetId, 0);
-    await tx.wait(); 
-    alert('Angriff ausgeführt!');
-    attacks.delete(targetId);
-    drawPyramid();
-  } catch(e) { alert('Execute failed: ' + (e.reason||e.message)); }
-};
-
 window.claimResources = async (id) => {
   const signer = await getSignerOrWarn(); if (!signer) return;
   const c = new ethers.Contract(FARMING_V6_ADDRESS, FARMING_V6_ABI, signer);
@@ -995,8 +909,68 @@ window.claimResources = async (id) => {
   catch(e) { alert('Claim failed: ' + (e.reason||e.message)); }
 };
 
+// Startet Angriff aus der Sidebar (liest Angreifer + Ressource aus den Selects)
+window.startAttackFromSidebar = async (targetId) => {
+  const attackerSel = document.getElementById('sbAttackerSelect');
+  const resourceSel = document.getElementById('sbResourceSelect');
+  if (!attackerSel || !attackerSel.value) return alert('Wähle zuerst einen Angreifer!');
+  if (!resourceSel) return alert('Wähle eine Ressource!');
+  
+  const attackerId = parseInt(attackerSel.value);
+  const resourceId = parseInt(resourceSel.value);
+  
+  // Globalen Angreifer sync
+  selectedAttackerId = attackerId;
+  updateAttackerDropdown();
+  
+  const signer = await getSignerOrWarn(); if (!signer) return;
+  const c = new ethers.Contract(PIRATES_V6_ADDRESS, PIRATES_V6_ABI, signer);
+  try {
+    const tx = await c.startAttack(attackerId, targetId, resourceId);
+    await tx.wait();
+    alert(`Angriff von Block #${attackerId} auf #${targetId} gestartet!\nRessource: ${resourceNames[resourceId]}`);
+    
+    // Lokal sofort hinzufügen
+    const rc = idToRC(attackerId);
+    attacks.set(targetId, {
+      attackerTokenId: attackerId,
+      attackerRow: rc.row, attackerCol: rc.col,
+      attackIndex: 0, // Fallback – echter Wert kommt beim Reload
+      resource: resourceId,
+      startTime: performance.now(),
+      interval: 60,
+      endTimestamp: Date.now() + 60000
+    });
+    // Neu laden für echten attackIndex
+    setTimeout(() => loadLive(), 2000);
+  } catch(e) { alert('Attack failed: ' + (e.reason||e.message)); }
+};
+
+window.executeAttack = async (targetId, attackIndex) => {
+  const signer = await getSignerOrWarn(); if (!signer) return;
+  const c = new ethers.Contract(PIRATES_V6_ADDRESS, PIRATES_V6_ABI, signer);
+  try {
+    const tx = await c.executeAttack(targetId, attackIndex);
+    await tx.wait(); 
+    alert('Angriff ausgeführt!');
+    attacks.delete(targetId);
+    loadLive();
+  } catch(e) { alert('Execute failed: ' + (e.reason||e.message)); }
+};
+
+window.buyPirateBoost = async () => {
+  if (!selectedAttackerId) return alert('Wähle zuerst einen Angreifer!');
+  const signer = await getSignerOrWarn(); if (!signer) return;
+  const c = new ethers.Contract(PIRATES_V6_ADDRESS, PIRATES_V6_ABI, signer);
+  try {
+    const tx = await c.buyPirateBoost(selectedAttackerId, 1);
+    await tx.wait();
+    alert('Pirate Boost aktiviert!');
+  } catch(e) { alert('Boost failed: ' + (e.reason||e.message)); }
+};
+
 // ============================================================
-// INTERACTION (Mouse + Touch)
+// INTERACTION
 // ============================================================
 let isDragging=false, wasDragging=false, dragStart={x:0,y:0}, dragOrig={x:0,y:0};
 
@@ -1006,7 +980,7 @@ canvas.addEventListener('mousemove', e => {
   const hit = hitTest(e.clientX - r.left, e.clientY - r.top);
   
   if (hit) {
-    hoveredBlock = hit.id; // Für Ghost Line
+    hoveredBlock = hit.id;
     const m = minted.get(hit.id);
     let html = `<strong>Block #${hit.id}</strong>`;
     if (m) {
@@ -1028,13 +1002,11 @@ canvas.addEventListener('mousemove', e => {
     tooltip.style.display = 'none';
     canvas.style.cursor = isDragging ? 'grabbing' : 'crosshair';
   }
-  drawPyramid();
 });
 
 canvas.addEventListener('mouseleave', () => {
   hoveredBlock = null;
   tooltip.style.display = 'none';
-  drawPyramid();
 });
 
 canvas.addEventListener('click', e => {
@@ -1086,9 +1058,7 @@ canvas.addEventListener('touchend', e => {
 
 window.addEventListener('dblclick', e => {
   if (e.target === canvas) {
-    view.tZoom = 1;
-    view.tOx = 0;
-    view.tOy = 0;
+    view.tZoom = 1; view.tOx = 0; view.tOy = 0;
     tooltip.style.display = 'none';
   }
 });
@@ -1099,7 +1069,7 @@ canvas.addEventListener('wheel', e => {
 }, {passive:false});
 
 // ============================================================
-// UI BUTTONS & KEYBOARD
+// UI BUTTONS
 // ============================================================
 document.querySelectorAll('#layers button').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -1114,23 +1084,19 @@ window.togglePause = () => {
   isPaused = !isPaused;
   const btn = document.getElementById('pauseBtn');
   const status = document.getElementById('statusText');
-  
   if (isPaused) {
     btn.innerHTML = "▶️ RESUME";
     btn.classList.add('active');
-    status.innerHTML = '<span style="color:#ff8800">● QUANTUM FREEZE</span> · Tap blocks';
+    status.innerHTML = '<span style="color:#ff8800">● QUANTUM FREEZE</span>';
   } else {
     btn.innerHTML = "⏸️ PAUSE / EXPLODE";
     btn.classList.remove('active');
-    status.innerHTML = '<span class="live">● LIVE</span> · Animation running';
+    status.innerHTML = '<span class="live">● LIVE</span>';
   }
 };
 
 window.addEventListener('keydown', e => {
-  if (e.code === 'Space') {
-    e.preventDefault();
-    togglePause();
-  }
+  if (e.code === 'Space') { e.preventDefault(); togglePause(); }
   if (e.key === 'Escape') document.getElementById('sidebar').classList.remove('active');
 });
 
