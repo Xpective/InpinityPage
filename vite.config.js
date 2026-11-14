@@ -1,5 +1,10 @@
 import { defineConfig } from "vite";
-import path from "path";
+import { fileURLToPath } from "node:url";
+import path from "node:path";
+
+// ESM-kompatibler __dirname-Polyfill
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export default defineConfig({
   root: ".",
@@ -23,6 +28,7 @@ export default defineConfig({
         game: path.resolve(__dirname, "game.html"),
         mint: path.resolve(__dirname, "mint.html"),
         map: path.resolve(__dirname, "map.html"),
+        phircle: path.resolve(__dirname, "phircle.html"),
         collaboration: path.resolve(__dirname, "collaboration.html"),
         about: path.resolve(__dirname, "about.html"),
         whitepaper: path.resolve(__dirname, "whitepaper.html"),
