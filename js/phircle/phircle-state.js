@@ -1,8 +1,15 @@
 import { ID_STRIDE, MAX_ROW, RARITY_DAILY_OUTPUT, RARITY_PRODUCTION } from './phircle-config.js';
 
+// ⚙️ BUSINESS RULES (on-chain Modell)
+export const MAX_FARM_PAYOUT_DAYS = 7;   // Farm zahlt max. 7 Tage aus
+export const MAX_ATTACKS_PER_WALLET = 3; // Max. 3 Angriffe pro Wallet
+
 export const minted = new Map();
 export const farms = new Set();
 export const farmStartTimes = new Map();
+export const farmLastClaimTimes = new Map();
+export const farmAttackedBy = new Map();   // tokenId → { attackerId, resource, timestamp, executed }
+export const attackedTokenIds = new Set();  // für schnelles Lookup
 export const attacks = new Map();
 export const executedAttacks = [];
 export const partnerships = new Set();
@@ -27,6 +34,11 @@ export const state = {
   radarMode: false,
   historyFilter: 'all',
   apiStatus: 'loading',
+  apiErrorCount: 0,
+  // NEU: Angriffe pro Wallet tracken
+  attacksUsedByWallet: new Map(), // wallet → count
+  // NEU: Farm-Attack-Modus
+  showAttackedFarms: false
 };
 
 export const view = { zoom:1, ox:0, oy:0, tZoom:1, tOx:0, tOy:0 };
@@ -78,20 +90,92 @@ export function getProfitPrediction(targetRarity, resourceId, protectionLevel = 
   };
 }
 
+// ============================================================
+// 🆕 FARM-PAYOUT LOGIC (7-TAGE-CAP)
+// ============================================================
 export function calculateFarmDurationDays(tokenId) {
   const start = farmStartTimes.get(tokenId);
   if (!start) return 0;
   return Math.max(0, (Date.now() - start) / (24 * 60 * 60 * 1000));
 }
 
-// Compound-Wachstum: tägliche Ration steigt um growthRate pro Tag
-// ⚠️ growthRate = 0.03 (3%/Tag) — muss an dein Contract-Modell angepasst werden!
+export function calculateEffectiveFarmDays(tokenId) {
+  const lastClaim = farmLastClaimTimes.get(tokenId);
+  const base = lastClaim || farmStartTimes.get(tokenId);
+  if (!base) return 0;
+  const days = Math.max(0, (Date.now() - base) / (24 * 60 * 60 * 1000));
+  return Math.min(days, MAX_FARM_PAYOUT_DAYS); // 🆕 Cap auf 7 Tage
+}
+
+// Compound-Wachstum, aber MIT 7-Tage-Limit
+// growthRate = 0.03 (3%/Tag) – an dein Contract-Modell anpassen!
 export function calculateDynamicReward(rarity, days, growthRate = 0.03) {
   const base = RARITY_DAILY_OUTPUT[rarity] || 0;
-  if (days <= 0) return 0;
-  if (growthRate === 0) return base * days;
+  const effDays = Math.min(days, MAX_FARM_PAYOUT_DAYS); // 🆕 Cap
+  if (effDays <= 0) return 0;
+  if (growthRate === 0) return base * effDays;
   const r = 1 + growthRate;
-  return base * (Math.pow(r, days) - 1) / (r - 1);
+  return base * (Math.pow(r, effDays) - 1) / (r - 1);
+}
+
+// 🆕 Kompletter Breakdown für UI – zeigt actual vs. effective
+export function getFarmRewardBreakdown(rarity, tokenId) {
+  const actualDays = calculateFarmDurationDays(tokenId);
+  const effectiveDays = calculateEffectiveFarmDays(tokenId);
+  const isCapped = actualDays > MAX_FARM_PAYOUT_DAYS;
+  const baseReward = (RARITY_DAILY_OUTPUT[rarity] || 0) * effectiveDays;
+  const dynamicReward = calculateDynamicReward(rarity, effectiveDays);
+  const bonus = dynamicReward - baseReward;
+  const lostDays = isCapped ? actualDays - MAX_FARM_PAYOUT_DAYS : 0;
+  return {
+    actualDays, effectiveDays, isCapped, lostDays,
+    baseReward, dynamicReward, bonus,
+    maxPayoutDays: MAX_FARM_PAYOUT_DAYS
+  };
+}
+
+// 🆕 Claim-Tracking
+export function markFarmClaimed(tokenId) {
+  farmLastClaimTimes.set(tokenId, Date.now());
+}
+export function isFarmClaimed(tokenId) {
+  return farmLastClaimTimes.has(tokenId);
+}
+export function clearFarmClaimed(tokenId) {
+  farmLastClaimTimes.delete(tokenId);
+}
+
+// 🆕 Farm-Attack-Tracking
+export function markFarmAttacked(tokenId, info) {
+  farmAttackedBy.set(tokenId, { ...info, timestamp: Date.now() });
+  attackedTokenIds.add(tokenId);
+}
+export function isFarmAttacked(tokenId) {
+  return attackedTokenIds.has(tokenId);
+}
+export function getFarmAttackedInfo(tokenId) {
+  return farmAttackedBy.get(tokenId) || null;
+}
+
+// 🆕 Attack-Limit pro Wallet
+export function getAttacksUsed(wallet) {
+  if (!wallet) return 0;
+  return state.attacksUsedByWallet.get(wallet.toLowerCase()) || 0;
+}
+export function canStartAttack(wallet) {
+  return getAttacksUsed(wallet) < MAX_ATTACKS_PER_WALLET;
+}
+export function incrementAttacksUsed(wallet) {
+  if (!wallet) return 0;
+  const w = wallet.toLowerCase();
+  const curr = state.attacksUsedByWallet.get(w) || 0;
+  const next = curr + 1;
+  state.attacksUsedByWallet.set(w, next);
+  return next;
+}
+export function resetAttacksUsed(wallet) {
+  if (!wallet) return;
+  state.attacksUsedByWallet.set(wallet.toLowerCase(), 0);
 }
 
 export function formatDuration(ms) {

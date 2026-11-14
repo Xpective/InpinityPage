@@ -1,8 +1,26 @@
+/* ============================================================
+   PHIRCLE CSS v21 — konsolidiert & optimiert
+   ============================================================ */
+
+/* ============================================
+   GLOBAL RESET & VARS
+   ============================================ */
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body { margin:0; padding:0; height:100%; overflow:hidden;
   background:#000; color:#e0e0e0; font-family:'Courier New',monospace; user-select: none; }
-canvas { display:block; cursor:crosshair; touch-action: none; }
+canvas { display:block; cursor:crosshair; touch-action: none; image-rendering: -webkit-optimize-contrast; }
+#canvas { will-change: transform; }
 
+/* ============================================
+   HUD
+   ============================================ */
 #hud { position:fixed; top:12px; left:12px; padding:14px 18px;
   background:rgba(8,8,16,0.92); border:1px solid #ffcc00; font-size:11px;
   line-height:1.55; min-width:280px; backdrop-filter:blur(6px);
@@ -23,6 +41,9 @@ canvas { display:block; cursor:crosshair; touch-action: none; }
 #hud .legend span { display:inline-flex; align-items:center; gap:3px; }
 #hud .dot { width:7px; height:7px; border-radius:50%; display:inline-block; }
 
+/* ============================================
+   LAYERS
+   ============================================ */
 #layers { position:fixed; top:12px; right:12px; display:flex; flex-direction:column;
   gap:4px; z-index:10; }
 #layers button { background:rgba(8,8,16,0.85); border:1px solid #333; color:#888;
@@ -37,6 +58,9 @@ canvas { display:block; cursor:crosshair; touch-action: none; }
 #layers button.history-layer { border-color: #ffaa00; color: #ffaa00; }
 #layers button.history-layer.active { background: #ffaa00; color: #000; }
 
+/* ============================================
+   WALLET
+   ============================================ */
 #wallet { position:fixed; top:12px; right:160px; padding:8px 14px;
   background:rgba(8,8,16,0.85); border:1px solid #333; color:#888;
   font-family:inherit; font-size:10px; cursor:pointer; border-radius:3px; z-index:10;
@@ -44,6 +68,9 @@ canvas { display:block; cursor:crosshair; touch-action: none; }
 #wallet:hover { border-color:#ffcc00; color:#fff; }
 #wallet.connected { border-color:#00ff88; color:#00ff88; }
 
+/* ============================================
+   PAUSE / EXPLODE
+   ============================================ */
 #pauseBtn { position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
   padding:12px 24px; background:rgba(8,8,16,0.95); border:2px solid #ff8800; color:#ff8800;
   font-family:inherit; font-size:14px; font-weight:bold; cursor:pointer; border-radius:30px;
@@ -52,10 +79,13 @@ canvas { display:block; cursor:crosshair; touch-action: none; }
 #pauseBtn:hover { background:#ff8800; color:#000; }
 #pauseBtn.active { border-color:#00e5ff; color:#00e5ff; background:rgba(0,229,255,0.1); }
 
+/* ============================================
+   SIDEBAR
+   ============================================ */
 #sidebar { position:fixed; top:0; right:-460px; width:100%; max-width:440px; height:100vh;
   background:rgba(8,8,16,0.98); border-left:1px solid #ffcc00; padding:22px;
   overflow-y:auto; transition:right .3s cubic-bezier(.4,0,.2,1); z-index:20;
-  backdrop-filter:blur(10px); }
+  backdrop-filter:blur(10px); will-change: transform; }
 #sidebar.active { right:0; }
 #sidebar h2 { color:#ffcc00; margin:0 0 14px; font-size:17px; display:flex; justify-content:space-between; align-items:center; }
 #sidebar .info-row { display:flex; justify-content:space-between;
@@ -69,7 +99,9 @@ canvas { display:block; cursor:crosshair; touch-action: none; }
   font-size:13px; border-radius:3px; }
 #sidebar button.close { background:#222; color:#aaa; margin-top:16px; }
 #sidebar button.attack-btn { background:linear-gradient(135deg,#ff3333,#cc0000); color:#fff; }
-#sidebar button.execute-btn { background:linear-gradient(135deg,#00ff88,#00aa55); color:#000; }
+#sidebar button.execute-btn { background:linear-gradient(135deg,#00ff88,#00aa55); color:#000;
+  font-weight: bold; box-shadow: 0 0 15px rgba(0,255,136,0.3); }
+#sidebar button.execute-btn:hover { box-shadow: 0 0 25px rgba(0,255,136,0.5); }
 #sidebar button.clear-btn { background:#333; color:#ff8800; font-size:11px; padding:8px; margin-top:10px; }
 #sidebar button.share-btn { background:#1a3a4a; color:#00e5ff; font-size:11px; padding:8px; }
 #sidebar button:disabled { opacity:0.4; cursor:not-allowed; }
@@ -79,25 +111,39 @@ canvas { display:block; cursor:crosshair; touch-action: none; }
 #sidebar .note { font-size:11px; color:#888; padding:10px; background:rgba(255,51,51,0.1);
   border-left:3px solid #ff3333; border-radius:3px; margin:10px 0; }
 
+/* ============================================
+   STATUS / CONTROLS
+   ============================================ */
 #status { position:fixed; bottom:12px; right:12px; padding:9px 14px;
   background:rgba(8,8,16,0.85); border:1px solid #333; font-size:10px;
   color:#888; border-radius:4px; z-index:10; }
-#status .live { color:#00ff88; } #status .demo { color:#ff8800; }
+#status .live { color:#00ff88; }
+#status .demo { color:#ff8800; }
 #controls { position:fixed; bottom:12px; left:12px; padding:9px 14px;
   background:rgba(8,8,16,0.85); border:1px solid #333; font-size:10px;
   color:#777; border-radius:4px; z-index:10; }
 #controls kbd { background:#222; color:#ffcc00; padding:1px 5px;
   border-radius:3px; font-family:inherit; font-size:9px; }
+
+/* ============================================
+   TOOLTIP
+   ============================================ */
 #tooltip { position:fixed; pointer-events:none; z-index:50;
   background:rgba(8,8,16,0.95); border:1px solid #ffcc00; padding:8px 12px;
   font-size:11px; border-radius:4px; display:none; line-height:1.4;
   box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
 
+/* ============================================
+   SEARCH BUTTON
+   ============================================ */
 #searchBtn { background: rgba(0,0,0,0.5); border: 1px solid #ffcc00; color: #ffcc00;
   cursor: pointer; font-family: inherit; font-size: 12px; padding: 3px 8px;
   border-radius: 3px; }
 #searchBtn:hover { background:#ffcc00; color:#000; }
 
+/* ============================================
+   SOUND / TUTORIAL BUTTONS
+   ============================================ */
 #soundBtn { position:fixed; bottom:20px; right:140px; width:44px; height:44px;
   background:rgba(8,8,16,0.85); border:1px solid #333; color:#888; border-radius:50%;
   cursor:pointer; font-size:18px; z-index:10; display:flex; align-items:center; justify-content:center; }
@@ -109,6 +155,9 @@ canvas { display:block; cursor:crosshair; touch-action: none; }
   cursor:pointer; font-size:18px; z-index:10; display:flex; align-items:center; justify-content:center; }
 #tutorialBtn:hover { border-color:#ffcc00; color:#ffcc00; }
 
+/* ============================================
+   TOASTS
+   ============================================ */
 #toasts { position:fixed; bottom:90px; left:50%; transform:translateX(-50%);
   z-index:100; display:flex; flex-direction:column; gap:8px; align-items:center;
   pointer-events:none; max-width:calc(100vw - 20px); }
@@ -120,11 +169,17 @@ canvas { display:block; cursor:crosshair; touch-action: none; }
 .toast.error { border-color:#ff3333; }
 .toast.info { border-color:#00e5ff; }
 .toast.out { animation:toastOut 0.3s ease forwards; }
+.toast button { transition: background 0.15s ease; }
+.toast button:hover { background: rgba(255,255,255,0.1) !important; }
 @keyframes toastIn { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
 @keyframes toastOut { to { opacity:0; transform:translateY(-20px); } }
 
+/* ============================================
+   TUTORIAL MODAL
+   ============================================ */
 #tutorial { position:fixed; inset:0; background:rgba(0,0,0,0.85);
-  z-index:200; display:none; align-items:center; justify-content:center; padding:20px; }
+  z-index:200; display:none; align-items:center; justify-content:center; padding:20px;
+  will-change: opacity; }
 #tutorial.active { display:flex; }
 .tutorial-card { background:linear-gradient(135deg,#0d0018,#0a0f16);
   border:2px solid #ffcc00; border-radius:12px; padding:32px;
@@ -135,6 +190,8 @@ canvas { display:block; cursor:crosshair; touch-action: none; }
 .tutorial-body { font-size:13px; line-height:1.7; color:#d0d0d0; margin-bottom:20px; min-height:100px; }
 .tutorial-body strong { color:#00e5ff; }
 .tutorial-body em { color:#ffcc00; font-style:normal; }
+.tutorial-body kbd { background:#222; color:#ffcc00; padding:1px 5px;
+  border-radius:3px; font-family:inherit; font-size:11px; }
 .tutorial-nav { display:flex; justify-content:space-between; align-items:center; }
 .tutorial-nav button { background:linear-gradient(135deg,#ffcc00,#ffaa00); color:#000;
   border:none; padding:10px 20px; cursor:pointer; font-family:inherit;
@@ -148,9 +205,12 @@ canvas { display:block; cursor:crosshair; touch-action: none; }
   border:1px solid #444; color:#888; width:30px; height:30px; border-radius:50%;
   cursor:pointer; font-size:16px; }
 
+/* ============================================
+   SEARCH MODAL (Command Palette)
+   ============================================ */
 #searchModal { position:fixed; inset:0; background:rgba(0,0,0,0.85);
   z-index:150; display:none; align-items:flex-start; justify-content:center;
-  padding-top:15vh; }
+  padding-top:15vh; will-change: opacity; }
 #searchModal.active { display:flex; }
 .search-box { background:rgba(8,8,16,0.98); border:2px solid #ffcc00;
   border-radius:8px; width:90%; max-width:560px; padding:20px;
@@ -168,6 +228,9 @@ canvas { display:block; cursor:crosshair; touch-action: none; }
 .search-result strong { color:#ffcc00; }
 .search-hint { font-size:10px; color:#666; margin-top:12px; letter-spacing:1px; }
 
+/* ============================================
+   FILTER CHIPS
+   ============================================ */
 #filterChips { position:fixed; bottom:90px; left:12px; display:flex;
   gap:6px; flex-wrap:wrap; z-index:10; max-width:300px; }
 .filter-chip { background:rgba(8,8,16,0.85); border:1px solid #333;
@@ -176,6 +239,9 @@ canvas { display:block; cursor:crosshair; touch-action: none; }
 .filter-chip:hover { border-color:#ffcc00; color:#fff; }
 .filter-chip.active { background:#ffcc00; color:#000; border-color:#ffcc00; }
 
+/* ============================================
+   BLOCK HISTORY CHIPS
+   ============================================ */
 #blockHistory { position:fixed; bottom:90px; right:12px; display:flex;
   gap:6px; flex-wrap:wrap-reverse; z-index:10; max-width:260px; justify-content:flex-end; }
 .history-chip { background:rgba(8,8,16,0.85); border:1px solid #00e5ff;
@@ -183,6 +249,9 @@ canvas { display:block; cursor:crosshair; touch-action: none; }
   cursor:pointer; transition:all 0.2s; }
 .history-chip:hover { background:#00e5ff; color:#000; }
 
+/* ============================================
+   LOADING OVERLAY
+   ============================================ */
 #loadingOverlay { position:fixed; inset:0; background:rgba(0,0,0,0.95);
   z-index:300; display:flex; flex-direction:column; align-items:center;
   justify-content:center; transition:opacity 0.5s; }
@@ -193,20 +262,33 @@ canvas { display:block; cursor:crosshair; touch-action: none; }
 @keyframes spin { to { transform:rotate(360deg); } }
 .loading-text { color:#ffcc00; font-size:14px; letter-spacing:3px; }
 
+/* ============================================
+   PROFIT BOX (Sidebar)
+   ============================================ */
 .profit-box { background:rgba(0,255,136,0.08); border:1px solid #00ff88;
   padding:12px; border-radius:4px; margin:10px 0; font-size:12px; }
 .profit-box .label { color:#888; font-size:10px; letter-spacing:1px; text-transform:uppercase; }
 .profit-box .value { color:#00ff88; font-size:18px; font-weight:bold; margin:4px 0; }
 .profit-box .sub { color:#888; font-size:11px; }
+.profit-box.warning { background: rgba(255,136,0,0.08); border-color: #ff8800; }
+.profit-box.warning .value { color: #ff8800; }
+.profit-box.danger { background: rgba(255,51,51,0.08); border-color: #ff3333; }
+.profit-box.danger .value { color: #ff3333; }
 
+/* ============================================
+   RADAR
+   ============================================ */
 #radar { position:fixed; bottom:90px; right:12px; width:120px; height:120px;
   background:rgba(8,8,16,0.9); border:1px solid #ffcc00; border-radius:50%;
   z-index:10; display:none; cursor:pointer; }
 #radar.active { display:block; }
 
-/* FEATURE: Attack History Modal */
+/* ============================================
+   ATTACK HISTORY MODAL
+   ============================================ */
 #attackHistoryModal { position:fixed; inset:0; background:rgba(0,0,0,0.9);
-  z-index:180; display:none; align-items:center; justify-content:center; padding:20px; }
+  z-index:180; display:none; align-items:center; justify-content:center; padding:20px;
+  will-change: opacity; }
 #attackHistoryModal.active { display:flex; }
 .history-card { background:rgba(8,8,16,0.98); border:2px solid #ffaa00;
   border-radius:12px; max-width:600px; width:100%; max-height:80vh;
@@ -219,6 +301,8 @@ canvas { display:block; cursor:crosshair; touch-action: none; }
   padding:6px 14px; cursor:pointer; border-radius:4px; font-size:11px;
   letter-spacing:1px; font-family:inherit; transition:all 0.2s; }
 .history-tab.active { background:#ffaa00; color:#000; border-color:#ffaa00; }
+.history-tab[data-tab="queue"].has-items { color: #00ff88 !important; border-color: rgba(0,255,136,0.4) !important; }
+.history-tab[data-tab="queue"].has-items.active { background: #00ff88 !important; color: #000 !important; border-color: #00ff88 !important; }
 .history-item { background:rgba(255,255,255,0.03); border-left:3px solid #555;
   padding:12px 16px; margin:8px 0; border-radius:4px; font-size:12px;
   display:flex; justify-content:space-between; align-items:center; }
@@ -230,7 +314,20 @@ canvas { display:block; cursor:crosshair; touch-action: none; }
 .history-item .hi-meta { color:#888; font-size:10px; }
 .history-item .hi-amount { color:#00ff88; font-weight:bold; font-size:14px; }
 
-/* FEATURE: Live Activity Feed */
+/* ============================================
+   HISTORY SEARCH (Input im Modal)
+   ============================================ */
+#historySearch { transition: border-color 0.15s ease; }
+#historySearch:focus { border-color: #ffcc00 !important; box-shadow: 0 0 0 2px rgba(255,204,0,0.15); }
+
+/* ============================================
+   WALLET-STATEMENT (History-Header)
+   ============================================ */
+.wallet-statement { content-visibility: auto; contain-intrinsic-size: 120px; }
+
+/* ============================================
+   LIVE ACTIVITY FEED
+   ============================================ */
 #activityFeed { position:fixed; bottom:90px; right:220px; width:260px;
   background:rgba(8,8,16,0.92); border:1px solid #00e5ff; border-radius:6px;
   z-index:10; overflow:hidden; transition:all 0.3s ease; max-height:280px; }
@@ -250,29 +347,219 @@ canvas { display:block; cursor:crosshair; touch-action: none; }
 .activity-item.info { border-left-color:#00e5ff; color:#88ddff; }
 @keyframes actIn { from { opacity:0; transform:translateX(20px); } to { opacity:1; transform:translateX(0); } }
 
+/* ============================================
+   ACCESSIBILITY: Focus-Visible
+   ============================================ */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid #ffcc00;
+  outline-offset: 2px;
+}
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  #wallet { animation: none !important; }
+}
+
+/* ============================================
+   PERFORMANCE DOWNGRADE (body.perf-*)
+   ============================================ */
+body.perf-low #activityFeed { display: none; }
+body.perf-low #radar { display: none; }
+
+body.perf-medium #activityFeed,
+body.perf-medium #radar { display: none; }
+body.perf-medium .toast { animation-duration: 0.1s !important; }
+
+body.perf-high #activityFeed,
+body.perf-high #radar,
+body.perf-high #filterChips,
+body.perf-high #blockHistory { display: none; }
+body.perf-high * {
+  box-shadow: none !important;
+  text-shadow: none !important;
+  animation: none !important;
+  transition: none !important;
+}
+
+/* ============================================
+   WALLET PULSE ANIMATION (Mobile-Only)
+   ============================================ */
+@keyframes walletPulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(0,229,255,0.35); transform: scale(1); }
+  50%      { box-shadow: 0 0 30px rgba(0,229,255,0.65); transform: scale(1.03); }
+}
+
+/* ============================================================
+   MOBILE (max-width: 768px) — KONSOLIDIERT
+   Alle vorherigen doppelten Mobile-Blöcke wurden entfernt.
+   ============================================================ */
 @media (max-width: 768px) {
+  /* --- HUD --- */
   #hud { min-width: auto; max-width: calc(100vw - 24px); font-size: 10px; padding: 10px; }
   #hud.collapsed { padding: 6px 10px; }
   #hud h1 { font-size: 12px; }
+
+  /* --- Layer --- */
   #layers { top: 12px; right: 12px; }
   #layers button { padding: 8px 10px; font-size: 9px; min-width: 110px; }
-  #wallet { top: auto; bottom: 70px; right: 12px; }
+
+  /* --- Radar (nach oben, damit Wallet darunter passt) --- */
+  #radar {
+    width: 80px;
+    height: 80px;
+    bottom: calc(210px + var(--safe-bottom));
+    right: 12px;
+  }
+
+  /* --- Wallet prominent unter Radar --- */
+  #wallet {
+    position: fixed;
+    top: auto;
+    bottom: calc(148px + var(--safe-bottom));
+    right: 12px;
+    left: auto;
+    min-width: 92px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 12px 14px;
+    background: rgba(0,229,255,0.15);
+    border: 1.5px solid #00e5ff;
+    color: #00e5ff;
+    box-shadow: 0 0 20px rgba(0,229,255,0.35);
+    animation: walletPulse 2.4s ease-in-out infinite;
+    z-index: 12;
+  }
+  #wallet.connected {
+    background: rgba(0,255,136,0.12);
+    border-color: #00ff88;
+    color: #00ff88;
+    box-shadow: 0 0 25px rgba(0,255,136,0.4);
+    animation: none;
+  }
+
+  /* --- Block-History (links, kollidiert nicht mit Wallet) --- */
+  #blockHistory {
+    bottom: calc(130px + var(--safe-bottom));
+    right: auto;
+    left: 12px;
+    max-width: 200px;
+  }
+  .history-chip { padding: 4px 8px; font-size: 9px; }
+
+  /* --- Filter-Chips --- */
+  #filterChips {
+    bottom: calc(200px + var(--safe-bottom));
+    left: 12px;
+    max-width: 200px;
+  }
+  #filterChips .filter-chip { padding: 5px 9px; font-size: 9px; }
+
+  /* --- Controls aus, Status sichtbar --- */
   #controls { display: none; }
-  #status { display: block; bottom: 70px; left: 12px; font-size: 9px; }
-  #pauseBtn { bottom: 15px; font-size: 12px; padding: 10px 20px; }
-  #sidebar { max-width: 100%; }
-  #soundBtn, #tutorialBtn { bottom: auto; top: 220px; width:38px; height:38px; font-size:14px; }
+  #status {
+    display: block;
+    bottom: calc(70px + var(--safe-bottom));
+    left: 12px;
+    font-size: 9px;
+  }
+
+  /* --- Pause / Sound / Tutorial --- */
+  #pauseBtn {
+    bottom: calc(15px + var(--safe-bottom));
+    font-size: 12px;
+    padding: 10px 20px;
+  }
+  #soundBtn, #tutorialBtn {
+    bottom: auto;
+    top: 220px;
+    width: 38px;
+    height: 38px;
+    font-size: 14px;
+  }
   #soundBtn { right: 12px; }
   #tutorialBtn { right: 58px; }
-  #filterChips { bottom: 130px; left: 12px; max-width: 200px; }
-  #filterChips .filter-chip { padding: 5px 9px; font-size: 9px; }
-  #blockHistory { bottom: 130px; right: 12px; max-width: 200px; }
-  .history-chip { padding: 4px 8px; font-size: 9px; }
+
+  /* --- Sidebar --- */
+  #sidebar { max-width: 100%; }
+
+  /* --- Tutorial --- */
   .tutorial-card { padding: 24px 20px; }
   .tutorial-title { font-size: 16px; }
   .tutorial-body { font-size: 12px; }
-  #radar { width: 90px; height: 90px; bottom: 130px; }
-  #activityFeed { width: 200px; right: 110px; max-height: 200px; }
-  .history-card { padding: 16px; }
+
+  /* --- History-Modal --- */
+  .history-card { padding: 16px; max-height: 90vh; }
   .history-card h2 { font-size: 14px; }
+  .history-tabs { flex-wrap: wrap; gap: 4px; }
+  .history-tab { padding: 5px 10px; font-size: 10px; }
+  .history-item { padding: 10px 12px; font-size: 11px; }
+  .history-item .hi-title { font-size: 11px; }
+  .history-item .hi-amount { font-size: 12px; }
+
+  /* --- Activity Feed --- */
+  #activityFeed {
+    width: 200px;
+    right: 110px;
+    max-height: 200px;
+    bottom: calc(200px + var(--safe-bottom));
+  }
+
+  /* --- Search --- */
+  .search-box { padding: 16px; }
+  .search-box h3 { font-size: 12px; }
+  .search-box input { font-size: 13px; padding: 10px 12px; }
+  .search-result { padding: 10px; font-size: 11px; }
+
+  /* --- Toasts --- */
+  #toasts {
+    bottom: calc(110px + var(--safe-bottom));
+    max-width: calc(100vw - 24px);
+  }
+  .toast { font-size: 11px; padding: 10px 14px; }
+}
+
+/* ============================================================
+   LANDSCAPE (Handy quer)
+   ============================================================ */
+@media (max-width: 900px) and (orientation: landscape) {
+  #hud { max-width: 220px; font-size: 9px; padding: 8px 10px; }
+  #layers { top: 8px; right: 8px; }
+  #layers button { padding: 4px 8px; font-size: 8px; min-width: 95px; }
+  #wallet { top: 8px; bottom: auto; right: 100px; font-size: 9px; padding: 6px 10px; animation: none; }
+  #pauseBtn { bottom: 8px; font-size: 10px; padding: 6px 14px; }
+  #soundBtn, #tutorialBtn { top: auto; bottom: 8px; width: 34px; height: 34px; }
+  #soundBtn { right: 8px; }
+  #tutorialBtn { right: 50px; }
+  #radar { bottom: 60px; width: 70px; height: 70px; }
+  #activityFeed, #filterChips, #blockHistory { display: none; }
+  .tutorial-card { padding: 20px 24px; max-height: 90vh; overflow-y: auto; }
+}
+
+/* ============================================================
+   SEHR KLEINE SCREENS (< 380px)
+   ============================================================ */
+@media (max-width: 380px) {
+  #radar {
+    width: 70px;
+    height: 70px;
+    bottom: calc(200px + var(--safe-bottom));
+  }
+  #wallet {
+    min-width: 80px;
+    font-size: 10px;
+    padding: 10px 10px;
+    bottom: calc(140px + var(--safe-bottom));
+  }
 }
