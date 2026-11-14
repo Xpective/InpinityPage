@@ -1,13 +1,43 @@
 {
   "name": "inpinity-home-swap",
-  "private": true,
   "version": "1.0.0",
+  "private": true,
+  "description": "Inpinity — Phircle, NFT pyramid, farming, pirates & partnership protocol on Base",
   "type": "module",
   "packageManager": "pnpm@10.32.1",
+  "homepage": "https://inpinity.online",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Xpective/InpinityPage.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Xpective/InpinityPage/issues"
+  },
+  "author": "Xpective <hello@inpinity.online> (https://inpinity.online)",
+  "license": "MIT",
+  "keywords": [
+    "inpinity",
+    "phircle",
+    "nft",
+    "base",
+    "ethereum",
+    "farming",
+    "defi",
+    "vite",
+    "web3"
+  ],
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
   "scripts": {
     "dev": "vite",
+    "dev:host": "vite --host 0.0.0.0",
     "build": "vite build",
-    "preview": "vite preview"
+    "build:analyze": "vite build --mode analyze",
+    "preview": "vite preview",
+    "clean": "rm -rf dist node_modules/.vite",
+    "rebuild": "pnpm run clean && pnpm run build"
   },
   "dependencies": {
     "ethers": "^6.13.5"
