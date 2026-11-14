@@ -1,6 +1,7 @@
-import { ethers } from 'https://cdn.jsdelivr.net/npm/ethers@6.13.4/+esm';
+import { ethers } from 'ethers';
 import { NFT_ADDRESS, FARMING_V6_ADDRESS, PIRATES_V6_ADDRESS, MERCENARY_V4_ADDRESS, PUBLIC_RPC, NFT_ABI, FARMING_V6_ABI, PIRATES_V6_ABI, MERCENARY_V4_ABI, ID_STRIDE, resourceNames } from './phircle-config.js';
-import { state, minted, farms, attacks, idToRC, updateMyBlockCounts, blockPosition } from './phircle-state.js';
+import { state, minted, farms, attacks, idToRC, updateMyBlockCounts } from './phircle-state.js';
+import { blockPosition } from './phircle-canvas.js';
 import { toast, playSound, haptic, logActivity, spawnConfetti } from './phircle-utils.js';
 import { loadLive } from './phircle-data.js';
 
@@ -126,7 +127,11 @@ window.executeAttack = async (targetId, attackIndex) => {
     if (atk) {
       const targetRc = idToRC(targetId);
       if (targetRc) {
-        window.__attackHistoryPush?.({ fromP: blockPosition(atk.attackerRow, atk.attackerCol), toP: blockPosition(targetRc.row, targetRc.col), startTime: performance.now() });
+        window.__attackHistoryPush?.({
+          fromP: blockPosition(atk.attackerRow, atk.attackerCol),
+          toP: blockPosition(targetRc.row, targetRc.col),
+          startTime: performance.now()
+        });
       }
     }
     attacks.delete(targetId);
