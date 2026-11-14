@@ -23,6 +23,7 @@ export default defineConfig({
         game: path.resolve(__dirname, "game.html"),
         mint: path.resolve(__dirname, "mint.html"),
         map: path.resolve(__dirname, "map.html"),
+        phircle: path.resolve(__dirname, "phircle.html"),
         collaboration: path.resolve(__dirname, "collaboration.html"),
         about: path.resolve(__dirname, "about.html"),
         whitepaper: path.resolve(__dirname, "whitepaper.html"),
